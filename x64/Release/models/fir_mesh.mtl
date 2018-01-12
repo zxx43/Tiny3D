@@ -1,0 +1,98 @@
+# Created on: Wed Nov 21 13:34:57 2007 0x062d6cb0
+
+newmtl NoName,2_Cylinder
+Ns 0
+Ka 0.430000 0.430000 0.430000
+Kd 0.700000 0.700000 0.700000
+Ks 0.100000 0.100000 0.100000
+d 0.996078
+map_Kd firtrunk_texture.bmp 
+
+newmtl NoName,2_NoName,1_Solid,2
+Ns 0
+Ka 0.310000 0.310000 0.310000
+Kd 1.000000 0.525490 0.196078
+Ks 0.110000 0.110000 0.110000
+d 0.996078
+map_Kd firneedle_texture.bmp
+
+newmtl NoName,2_NoName,1_Solid,8
+Ns 0
+Ka 0.310000 0.310000 0.310000
+Kd 1.000000 0.525490 0.196078
+Ks 0.110000 0.110000 0.110000
+d 0.996078
+map_Kd firneedle_texture.bmp
+
+newmtl NoName,2_NoName,1_Solid,9
+Ns 0
+Ka 0.310000 0.310000 0.310000
+Kd 1.000000 0.525490 0.196078
+Ks 0.110000 0.110000 0.110000
+d 0.996078
+map_Kd firneedle_texture.bmp
+
+newmtl NoName,2_NoName,1_Solid,1
+Ns 0
+Ka 0.310000 0.310000 0.310000
+Kd 1.000000 0.525490 0.196078
+Ks 0.110000 0.110000 0.110000
+d 0.996078
+map_Kd firneedle_texture.bmp 
+
+newmtl NoName,2_NoName,1_Solid,3
+Ns 0
+Ka 0.310000 0.310000 0.310000
+Kd 1.000000 0.525490 0.196078
+Ks 0.110000 0.110000 0.110000
+d 0.996078
+map_Kd firneedle_texture.bmp 
+
+newmtl NoName,2_NoName,1_Solid,10
+Ns 0
+Ka 0.310000 0.310000 0.310000
+Kd 1.000000 0.525490 0.196078
+Ks 0.110000 0.110000 0.110000
+d 0.996078
+map_Kd firneedle_texture.bmp
+
+newmtl NoName,2_NoName,1_Solid,7
+Ns 0
+Ka 0.310000 0.310000 0.310000
+Kd 1.000000 0.525490 0.196078
+Ks 0.110000 0.110000 0.110000
+d 0.996078
+map_Kd firneedle_texture.bmp
+
+newmtl NoName,2_NoName,1_Solid,6
+Ns 0
+Ka 0.310000 0.310000 0.310000
+Kd 1.000000 0.525490 0.196078
+Ks 0.110000 0.110000 0.110000
+d 0.996078
+map_Kd firneedle_texture.bmp
+
+newmtl NoName,2_NoName,1_Solid,5
+Ns 0
+Ka 0.310000 0.310000 0.310000
+Kd 1.000000 0.525490 0.196078
+Ks 0.110000 0.110000 0.110000
+d 0.996078
+map_Kd firneedle_texture.bmp
+
+newmtl NoName,2_NoName,1_Solid,12
+Ns 0
+Ka 0.310000 0.310000 0.310000
+Kd 1.000000 0.525490 0.196078
+Ks 0.110000 0.110000 0.110000
+d 0.996078
+map_Kd firneedle_texture.bmp
+
+newmtl NoName,2_NoName,1_Solid,11
+Ns 0
+Ka 0.310000 0.310000 0.310000
+Kd 1.000000 0.525490 0.196078
+Ks 0.110000 0.110000 0.110000
+d 0.996078
+map_Kd firneedle_texture.bmp
+# End
