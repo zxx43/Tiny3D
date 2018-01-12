@@ -138,9 +138,11 @@ void Render::draw(Camera* camera,Drawcall* drawcall,const RenderState* state) {
 	if (camera) {
 		shader->setMatrix4("projectMatrix", camera->projectMatrix);
 		shader->setMatrix4("viewMatrix", camera->viewMatrix);
-		shader->setInt("shadowPass", state->shadowPass ? 1 : 0);
-		if (!state->shadowPass)
-			shader->setVector3("light", state->light.x, state->light.y, state->light.z);
+		if (state->lightEffect) {
+			shader->setInt("shadowPass", state->shadowPass ? 1 : 0);
+			if (!state->shadowPass)
+				shader->setVector3("light", state->light.x, state->light.y, state->light.z);
+		}
 	}
 	if (state->shadow) {
 		shader->setMatrix4("lightViewProjNear", state->shadow->lightNearMat);

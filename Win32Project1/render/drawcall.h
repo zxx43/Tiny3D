@@ -51,6 +51,7 @@ struct RenderState {
 	bool drawLine;
 	bool enableDepthTest;
 	int depthTestMode;
+	bool lightEffect; 
 	bool shadowPass;
 	Shadow* shadow;
 	VECTOR3D light;
@@ -61,6 +62,7 @@ struct RenderState {
 		drawLine = false;
 		enableDepthTest = true;
 		depthTestMode = DEPTH_LEQUAL;
+		lightEffect = true;
 		shadowPass = false;
 		shadow = NULL;
 		light = VECTOR3D(0, 0, 0);
@@ -72,6 +74,7 @@ struct RenderState {
 		drawLine = false;
 		enableDepthTest = true;
 		depthTestMode = DEPTH_LEQUAL;
+		lightEffect = true;
 		shadowPass = false;
 		shadow = NULL;
 		light = VECTOR3D(0, 0, 0);
@@ -83,6 +86,7 @@ struct RenderState {
 		drawLine = src->drawLine;
 		enableDepthTest = src->enableDepthTest;
 		depthTestMode = src->depthTestMode;
+		lightEffect = src->lightEffect;
 		shadowPass = src->shadowPass;
 		shadow = src->shadow;
 		light = src->light;

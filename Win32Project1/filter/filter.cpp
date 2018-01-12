@@ -18,6 +18,7 @@ Filter::Filter(float width,float height,bool useFramebuffer) {
 
 	state = new RenderState();
 	state->enableCull = false;
+	state->lightEffect = false;
 }
 
 Filter::~Filter() {
