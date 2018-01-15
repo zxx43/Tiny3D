@@ -28,6 +28,30 @@ struct BoneInfo {
 	aiMatrix4x4 transformation;
 };
 
+struct Frame {
+	int boneCount;
+	float* data;
+	Frame(int bc) {
+		boneCount = bc;
+		data = new float[boneCount * 12];
+	}
+	~Frame() {
+		delete[] data;
+	}
+};
+
+struct AnimFrame {
+	std::vector<Frame*> frames;
+	AnimFrame() {
+		frames.clear();
+	}
+	~AnimFrame() {
+		for (unsigned int i = 0; i < frames.size(); i++)
+			delete frames[i];
+		frames.clear();
+	}
+};
+
 class Animation {
 private:
 	Assimp::Importer importer;
@@ -68,10 +92,14 @@ public:
 	std::map<int,int> materialMap;
 	float* boneTransformMats;
 
+	int animCount;
+	AnimFrame** animFrames;
+
 	Animation(const char* path);
 	~Animation();
 	void bonesTransform(int animIndex,float time);
-	void render();
+private:
+	void prepareFrameData(int animIndex);
 };
 
 #endif /* ANIMATION_H_ */

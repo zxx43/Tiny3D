@@ -21,6 +21,12 @@ Animation::Animation(const char* path) {
 	aWeights.clear();
 
 	loadModel();
+	animCount = scene->mNumAnimations;
+	animFrames = new AnimFrame*[animCount];
+	for (int ai = 0; ai < animCount; ai++) {
+		animFrames[ai] = new AnimFrame();
+		prepareFrameData(ai);
+	}
 }
 
 Animation::~Animation() {
@@ -41,16 +47,16 @@ Animation::~Animation() {
 	for(unsigned int i=0;i<boneInfos.size();i++)
 		free(boneInfos[i]);
 	boneInfos.clear();
-	if(boneTransformMats) {
-		delete[] boneTransformMats;
-		boneTransformMats=NULL;
-	}
 
 	for(unsigned int i=0;i<scene->mNumAnimations;i++)
 		channelMaps[i].clear();
 	delete[] channelMaps;
 
 	importer.FreeScene();
+
+	for (int i = 0; i < animCount; i++)
+		delete animFrames[i];
+	delete[] animFrames;
 }
 
 void Animation::loadModel() {
@@ -78,7 +84,6 @@ void Animation::loadModel() {
 		loadBones(mesh,i);
 	}
 
-	boneTransformMats=new float[boneCount*16];
 	rootToModelMat=scene->mRootNode->mTransformation;
 	rootToModelMat=rootToModelMat.Inverse();
 
@@ -332,29 +337,49 @@ void Animation::readNode(int animIndex,float animTime,aiNode* node,const aiMatri
 	}
 }
 
+void Animation::prepareFrameData(int animIndex) {
+	aiMatrix4x4 mat;
+	MATRIX4X4 mat4;
+	aiAnimation* animation = scene->mAnimations[animIndex];
+	AnimFrame* animFrame = animFrames[animIndex];
+	for (float tick = 0; tick < animation->mDuration; tick += 0.01) {
+		Frame* frame = new Frame(boneCount);
+		int currIndex = 0;
+		readNode(animIndex, tick, scene->mRootNode, mat);
+		for (int bi = 0; bi < boneCount; bi++) {
+			mat4.entries[0] = boneInfos[bi]->transformation.a1;
+			mat4.entries[1] = boneInfos[bi]->transformation.b1;
+			mat4.entries[2] = boneInfos[bi]->transformation.c1;
+			mat4.entries[3] = boneInfos[bi]->transformation.d1;
+			mat4.entries[4] = boneInfos[bi]->transformation.a2;
+			mat4.entries[5] = boneInfos[bi]->transformation.b2;
+			mat4.entries[6] = boneInfos[bi]->transformation.c2;
+			mat4.entries[7] = boneInfos[bi]->transformation.d2;
+			mat4.entries[8] = boneInfos[bi]->transformation.a3;
+			mat4.entries[9] = boneInfos[bi]->transformation.b3;
+			mat4.entries[10] = boneInfos[bi]->transformation.c3;
+			mat4.entries[11] = boneInfos[bi]->transformation.d3;
+			mat4.entries[12] = boneInfos[bi]->transformation.a4;
+			mat4.entries[13] = boneInfos[bi]->transformation.b4;
+			mat4.entries[14] = boneInfos[bi]->transformation.c4;
+			mat4.entries[15] = boneInfos[bi]->transformation.d4;
+			mat4.Transpose();
+			for (int m = 0; m < 12; m++) {
+				frame->data[currIndex] = mat4.entries[m];
+				currIndex++;
+			}
+		}
+		animFrame->frames.push_back(frame);
+	}
+}
+
 void Animation::bonesTransform(int animIndex,float time) {
 	aiAnimation* animation=scene->mAnimations[animIndex];
 	float ticksPerSecond=(float)animation->mTicksPerSecond;
 	float ticks=time*ticksPerSecond;
-	float animTime=fmodf(ticks,(float)animation->mDuration);
-	aiMatrix4x4 mat;
-	readNode(animIndex,animTime,scene->mRootNode,mat);
-	for(int i=0;i<boneCount;i++) {
-		boneTransformMats[i*16]=boneInfos[i]->transformation.a1;
-		boneTransformMats[i*16+1]=boneInfos[i]->transformation.b1;
-		boneTransformMats[i*16+2]=boneInfos[i]->transformation.c1;
-		boneTransformMats[i*16+3]=boneInfos[i]->transformation.d1;
-		boneTransformMats[i*16+4]=boneInfos[i]->transformation.a2;
-		boneTransformMats[i*16+5]=boneInfos[i]->transformation.b2;
-		boneTransformMats[i*16+6]=boneInfos[i]->transformation.c2;
-		boneTransformMats[i*16+7]=boneInfos[i]->transformation.d2;
-		boneTransformMats[i*16+8]=boneInfos[i]->transformation.a3;
-		boneTransformMats[i*16+9]=boneInfos[i]->transformation.b3;
-		boneTransformMats[i*16+10]=boneInfos[i]->transformation.c3;
-		boneTransformMats[i*16+11]=boneInfos[i]->transformation.d3;
-		boneTransformMats[i*16+12]=boneInfos[i]->transformation.a4;
-		boneTransformMats[i*16+13]=boneInfos[i]->transformation.b4;
-		boneTransformMats[i*16+14]=boneInfos[i]->transformation.c4;
-		boneTransformMats[i*16+15]=boneInfos[i]->transformation.d4;
-	}
+	float animTime=fmodf(ticks,animation->mDuration);
+
+	AnimFrame* animFrame = animFrames[animIndex];
+	Frame* frame = animFrame->frames[(int)(animTime*100)];
+	boneTransformMats = frame->data;
 }

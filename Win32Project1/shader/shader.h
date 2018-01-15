@@ -37,6 +37,7 @@ public:
 	void setVector4(const char* param,float x,float y,float z,float w);
 	void setMatrix4(const char* param,float* matrix);
 	void setMatrix4(const char* param,int count,float* matrices);
+	void setMatrix3x4(const char* param, int count, float* matrices);
 	void setMatrix3(const char* param, float* matrix);
 	void setMatrix3(const char* param, int count, float* matrices);
 };

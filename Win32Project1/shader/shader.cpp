@@ -117,6 +117,16 @@ void Shader::setMatrix4(const char* param,int count,float* matrices) {
 		glUniformMatrix4fv(location, count, GL_FALSE, matrices);
 }
 
+void Shader::setMatrix3x4(const char* param, int count, float* matrices) {
+	int location = findParamLocation(param);
+	if (location == INVALID_LOCATION) {
+		addParam(param);
+		location = findParamLocation(param);
+	}
+	if (location != INVALID_LOCATION)
+		glUniformMatrix3x4fv(location, count, GL_FALSE, matrices);
+}
+
 void Shader::setMatrix3(const char* param, float* matrix) {
 	int location = findParamLocation(param);
 	if (location == INVALID_LOCATION) {

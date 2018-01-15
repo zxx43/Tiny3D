@@ -26,11 +26,11 @@ private:
 	int indexCount;
 	int textureChannel;
 
+	Animation* animation;
 	int boneCount;
-	float* boneMatrices;
 public:
 	AnimationDrawcall();
-	AnimationDrawcall(Animation* animation);
+	AnimationDrawcall(Animation* anim);
 	virtual ~AnimationDrawcall();
 	virtual void draw(Shader* shader);
 };

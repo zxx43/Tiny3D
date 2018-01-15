@@ -6,6 +6,7 @@ AnimationDrawcall::AnimationDrawcall() {}
 AnimationDrawcall::AnimationDrawcall(Animation* anim) :Drawcall() {
 	vbos = new GLuint[8];
 
+	animation = anim;
 	vertices = new float[anim->aVertices.size() * 3];
 	normals = new float[anim->aNormals.size() * 3];
 	texcoords = new byte[anim->aTexcoords.size() * 2];
@@ -116,8 +117,6 @@ AnimationDrawcall::AnimationDrawcall(Animation* anim) :Drawcall() {
 	glBindVertexArray(0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	boneMatrices = anim->boneTransformMats;
 }
 
 AnimationDrawcall::~AnimationDrawcall() {
@@ -136,11 +135,12 @@ AnimationDrawcall::~AnimationDrawcall() {
 }
 
 void AnimationDrawcall::draw(Shader* shader) {
-	if(uModelMatrix)
+	if (uModelMatrix)
 		shader->setMatrix4("uModelMatrix", uModelMatrix);
 	if (uNormalMatrix) 
 		shader->setMatrix3("uNormalMatrix", uNormalMatrix);
-	shader->setMatrix4("boneMats",boneCount,boneMatrices);
+	if (animation->boneTransformMats)
+		shader->setMatrix3x4("boneMats", boneCount, animation->boneTransformMats);
 	glBindVertexArray(vao);
 	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
 }

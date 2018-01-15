@@ -18,7 +18,7 @@ bool dataPrepared = false;
 HANDLE mutex = NULL;
 void InitMutex();
 void DeleteMutex();
-DWORD currentTime = 0;
+DWORD currentTime = 0, startTime = 0;
 
 SimpleApplication* app = NULL;
 void CreateApplication();
@@ -65,7 +65,6 @@ DWORD WINAPI ActThreadRun(LPVOID param) {
 }
 
 DWORD WINAPI FrameThreadRun(LPVOID param) {
-	DWORD startTime = GetTickCount();
 	while (!app->willExit) {
 		Sleep(0);
 		if(!dataPrepared) {
@@ -130,6 +129,7 @@ void DeleteMutex() {
 
 void CreateApplication() {
 	app = new SimpleApplication();
+	startTime = GetTickCount();
 }
 
 void ReleaseApplication() {
