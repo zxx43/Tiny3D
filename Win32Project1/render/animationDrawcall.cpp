@@ -99,7 +99,7 @@ AnimationDrawcall::AnimationDrawcall(Animation* anim) :Drawcall() {
 	glEnableVertexAttribArray(COLOR_LOCATION);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbos[BONEID_VBO]);
-	glBufferData(GL_ARRAY_BUFFER, anim->aBoneids.size() * 4 * sizeof(unsigned short),
+	glBufferData(GL_ARRAY_BUFFER, anim->aBoneids.size() * 4 * sizeof(ushort),
 		boneids, GL_STATIC_DRAW);
 	glVertexAttribPointer(BONEIDS_LOCATION, 4, GL_UNSIGNED_SHORT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(BONEIDS_LOCATION);
@@ -114,12 +114,14 @@ AnimationDrawcall::AnimationDrawcall(Animation* anim) :Drawcall() {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, anim->aIndices.size()*sizeof(uint),
 		indices, GL_STATIC_DRAW);
 
+	createSimple();
 	glBindVertexArray(0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 AnimationDrawcall::~AnimationDrawcall() {
+	releaseSimple();
 	delete[] vertices; vertices=NULL;
 	delete[] normals; normals=NULL;
 	delete[] texcoords; texcoords=NULL;
@@ -129,18 +131,55 @@ AnimationDrawcall::~AnimationDrawcall() {
 	delete[] weights; weights=NULL;
 	delete[] indices; indices=NULL;
 	glDeleteBuffers(8,vbos);
-	delete[] vbos;
-	vbos=NULL;
+	delete[] vbos; vbos=NULL;
 	glDeleteVertexArrays(1,&vao);
 }
 
-void AnimationDrawcall::draw(Shader* shader) {
+void AnimationDrawcall::createSimple() {
+	vboSimple = new GLuint[4];
+	glGenVertexArrays(1, &vaoSimple);
+	glBindVertexArray(vaoSimple);
+	glGenBuffers(4, vboSimple);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vboSimple[0]);
+	glBufferData(GL_ARRAY_BUFFER, animation->aVertices.size() * 3 * sizeof(float),
+		vertices, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vboSimple[1]);
+	glBufferData(GL_ARRAY_BUFFER, animation->aBoneids.size() * 4 * sizeof(uint),
+		boneids, GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 4, GL_UNSIGNED_SHORT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(1);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vboSimple[2]);
+	glBufferData(GL_ARRAY_BUFFER, animation->aWeights.size() * 4 * sizeof(float),
+		weights, GL_STATIC_DRAW);
+	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(2);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboSimple[3]);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, animation->aIndices.size()*sizeof(uint),
+		indices, GL_STATIC_DRAW);
+}
+
+void AnimationDrawcall::releaseSimple() {
+	glDeleteBuffers(4, vboSimple);
+	delete[] vboSimple; vboSimple = NULL;
+	glDeleteVertexArrays(1, &vaoSimple);
+}
+
+void AnimationDrawcall::draw(Shader* shader,bool simple) {
 	if (uModelMatrix)
 		shader->setMatrix4("uModelMatrix", uModelMatrix);
-	if (uNormalMatrix) 
+	if (uNormalMatrix && !simple) 
 		shader->setMatrix3("uNormalMatrix", uNormalMatrix);
 	if (animation->boneTransformMats)
 		shader->setMatrix3x4("boneMats", boneCount, animation->boneTransformMats);
-	glBindVertexArray(vao);
+	if (!simple)
+		glBindVertexArray(vao);
+	else
+		glBindVertexArray(vaoSimple);
 	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
 }

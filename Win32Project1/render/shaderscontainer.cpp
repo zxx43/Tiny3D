@@ -4,6 +4,10 @@
 #define PHONG_FRAG "shader/phong.frag"
 #define BONE_VERT "shader/bone.vert"
 #define BONE_FRAG "shader/bone.frag"
+#define PHONG_SHADOW_VERT "shader/phong_shadow.vert"
+#define PHONG_SHADOW_FRAG "shader/phong_shadow.frag"
+#define BONE_SHADOW_VERT "shader/bone_shadow.vert"
+#define BONE_SHADOW_FRAG "shader/bone_shadow.frag"
 #define SKY_VERT "shader/sky.vert"
 #define SKY_FRAG "shader/sky.frag"
 #define BLUR_VERT "shader/blur.vert"
@@ -34,6 +38,9 @@ void SetupShaders(Render* render) {
 	bone->setSampler("depthBufferNear",1);
 	bone->setSampler("depthBufferMid",2);
 	bone->setSampler("depthBufferFar",3);
+
+	Shader* phongShadow = render->shaders->addShader("phong_s", PHONG_SHADOW_VERT, PHONG_SHADOW_FRAG);
+	Shader* boneShadow = render->shaders->addShader("bone_s", BONE_SHADOW_VERT, BONE_SHADOW_FRAG);
 
 	Shader* sky=render->shaders->addShader("sky",SKY_VERT,SKY_FRAG);
 	render->useShader(sky);

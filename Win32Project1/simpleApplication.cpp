@@ -77,7 +77,7 @@ void SimpleApplication::act(long startTime, long currentTime) {
 	animNode->rotateNodeObject(0, 45, 0);
 	animNode->translateNode(animNode->position.x + 0.02, animNode->position.y, animNode->position.z + 0.02);
 	standObjectsOnGround(animNode, scene->terrainNode);
-*/
+//*/
 }
 
 void SimpleApplication::initScene() {

@@ -98,15 +98,20 @@ class Drawcall {
 private:
 	bool singleSide;
 public:
-	GLuint* vbos;
-	GLuint vao;
 	float* uModelMatrix;
 	float* uNormalMatrix;
+	GLuint* vbos;
+	GLuint vao;
+	GLuint* vboSimple;
+	GLuint vaoSimple;
 
 	Drawcall();
 	virtual ~Drawcall();
 
-	virtual void draw(Shader* shader)=0;
+	virtual void createSimple() = 0;
+	virtual void releaseSimple() = 0;
+
+	virtual void draw(Shader* shader,bool simple)=0;
 	void setSide(bool single);
 	bool isSingleSide();
 };

@@ -3,7 +3,7 @@
 
 RenderManager::RenderManager(Camera* view, float distance1, float distance2, VECTOR3D light) {
 	shadow=new Shadow(view,distance1,distance2);
-	float nearSize=512;
+	float nearSize=1024;
 	float midSize=1024;
 	float farSize=2048;
 	nearBuffer=new FrameBuffer(nearSize,nearSize,false);
@@ -91,8 +91,10 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	state->reset();
 	state->cullMode = CULL_FRONT;
 	state->shadowPass = true;
-	Shader* phong = render->findShader("phong");
-	Shader* bone = render->findShader("bone");
+	Shader* phong = render->findShader("phong_s");
+	Shader* bone = render->findShader("bone_s");
+
+	assetManager->textures->use(0);
 
 	render->setFrameBuffer(nearBuffer);
 	Camera* cameraNear=shadow->lightCameraNear;

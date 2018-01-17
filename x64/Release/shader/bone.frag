@@ -3,7 +3,6 @@
 
 uniform sampler2DArray texture;
 uniform vec3 light;
-uniform int shadowPass;
 uniform float level1, level2;
 uniform sampler2D depthBufferNear, depthBufferMid, depthBufferFar;
 
@@ -20,34 +19,27 @@ layout (location = 1) out vec4 FragDepth;
 layout (location = 2) out vec4 FragNormal;
 
 void main() {
-	if(shadowPass == 0) {
-		vec3 normal = normalize(vNormal);
-		vec3 texcoord = vec3(vTexcoord, vTexid);
-		texcoord.y = 1.0 - texcoord.y;
+	vec3 normal = normalize(vNormal);
+	vec3 texcoord = vec3(vTexcoord, vTexid);
+	texcoord.y = 1.0 - texcoord.y;
 		
-		vec3 reverseLight = normalize(-light);
-		float ndotl = dot(reverseLight, normal);
+	vec3 reverseLight = normalize(-light);
+	float ndotl = dot(reverseLight, normal);
 		
-		float ambientFactor = 0.6; float diffuseFactor = 1.2;
-		vec3 ambientColor = vColor.xxx * ambientFactor;
-		vec3 diffuseColor = vColor.yyy * diffuseFactor;
-		vec3 textureColor = vec3(1.0);
+	float ambientFactor = 0.6; float diffuseFactor = 1.2;
+	vec3 ambientColor = vColor.xxx * ambientFactor;
+	vec3 diffuseColor = vColor.yyy * diffuseFactor;
+	vec3 textureColor = vec3(1.0);
 		
-		if(texcoord.p >= 0.0) 
-			textureColor = texture2DArray(texture, texcoord).rgb;
-		diffuseColor *= max(ndotl, 0.0);
+	if(texcoord.p >= 0.0) 
+		textureColor = texture2DArray(texture, texcoord).rgb;
+	diffuseColor *= max(ndotl, 0.0);
 		
-		FragColor.rgb = textureColor * (ambientColor + diffuseColor);
-		FragColor.a = 1.0;
-
-		float depth = projPosition.z / projPosition.w;
-		FragDepth = vec4(depth, depth, depth, depth);
-		vec3 outNormal = normal * 0.5 + 0.5;
-		FragNormal = vec4(outNormal, 0.0); 
-	} else {
-		float depth = projPosition.z / projPosition.w;
-		depth = depth * 0.5 + 0.5;
-		float depth2 = depth * depth;
-		FragColor = vec4(depth, depth2, 0.0, 0.0);
-	}
+	FragColor.rgb = textureColor * (ambientColor + diffuseColor);
+	FragColor.a = 1.0;
+	
+	float depth = projPosition.z / projPosition.w;
+	FragDepth = vec4(depth, depth, depth, depth);
+	vec3 outNormal = normal * 0.5 + 0.5;
+	FragNormal = vec4(outNormal, 0.0); 
 }

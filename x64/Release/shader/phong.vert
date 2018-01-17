@@ -2,7 +2,6 @@
 
 uniform mat4 viewMatrix;
 uniform mat4 projectMatrix;
-uniform int shadowPass;
 uniform mat4 lightViewProjNear, lightViewProjMid, lightViewProjFar;
 
 layout (location = 0) in vec3 vertex;
@@ -43,9 +42,8 @@ void main() {
 	viewPosition = viewMatrix * worldVertex;
 	gl_Position = projectMatrix * viewPosition;
 	projPosition = gl_Position;
-	if(shadowPass == 0) {
-		lightNearPosition = lightViewProjNear * worldVertex;
-		lightMidPosition = lightViewProjMid * worldVertex;
-		lightFarPosition = lightViewProjFar * worldVertex;
-	}
+
+	lightNearPosition = lightViewProjNear * worldVertex;
+	lightMidPosition = lightViewProjMid * worldVertex;
+	lightFarPosition = lightViewProjFar * worldVertex;
 }

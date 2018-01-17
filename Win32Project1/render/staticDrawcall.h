@@ -15,11 +15,14 @@ class StaticDrawcall: public Drawcall {
 private:
 	int vertexCount,indexCount;
 	bool indexed;
+	Batch* batch;
 public:
 	StaticDrawcall();
 	StaticDrawcall(Batch* batch);
 	virtual ~StaticDrawcall();
-	virtual void draw(Shader* shader);
+	virtual void createSimple();
+	virtual void releaseSimple();
+	virtual void draw(Shader* shader,bool simple);
 	void updateMatrices(Batch* batch, bool updateNormals);
 };
 

@@ -15,10 +15,13 @@ class InstanceDrawcall: public Drawcall {
 private:
 	int vertexCount,indexCount,instanceCount;
 	bool indexed;
+	Instance* instance;
 public:
 	InstanceDrawcall(Instance* instance);
 	virtual ~InstanceDrawcall();
-	virtual void draw(Shader* shader);
+	virtual void createSimple();
+	virtual void releaseSimple();
+	virtual void draw(Shader* shader,bool simple);
 	void updateMatrices(Instance* instance, bool updateNormals);
 };
 

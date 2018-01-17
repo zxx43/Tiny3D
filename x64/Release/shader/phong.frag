@@ -3,7 +3,7 @@
 
 uniform sampler2DArray texture;
 uniform vec3 light;
-uniform int shadowPass, useShadow;
+uniform int useShadow;
 uniform float level1, level2;
 uniform sampler2D depthBufferNear, depthBufferMid, depthBufferFar;
 
@@ -97,42 +97,34 @@ float genShadowFactor(float bias) {
 }
 
 void main() {
-	if(shadowPass == 0) {
-		vec4 textureColor = vec4(1.0);
-		vec3 texcoord = vec3(vTexcoord, vTexid);
-		if(texcoord.p >= 0.0) {
-			textureColor = texture2DArray(texture, texcoord);
-			if(textureColor.a < 0.1)
-				discard;
-		}
-
-		vec3 normal = normalize(vNormal);
-		
-		vec3 reverseLight = normalize(-light);
-		float ndotl = dot(reverseLight, normal);
-		float bias = tan(acos(abs(ndotl)));
-		
-		float ambientFactor = 0.6; float diffuseFactor = 1.2;
-		vec3 ambientColor = vColor.xxx * ambientFactor;
-		vec3 diffuseColor = vColor.yyy * diffuseFactor;
-		
-		diffuseColor *= max(ndotl, 0.0);
-
-		float shadowFactor = 1.0;
-		if(useShadow > 0)
-			shadowFactor = genShadowFactor(bias);
-		
-		FragColor.rgb = textureColor.rgb * (ambientColor + shadowFactor * diffuseColor);
-		FragColor.a = 1.0;
-
-		float depth = projPosition.z / projPosition.w;
-		FragDepth = vec4(depth, depth, depth, depth);
-		vec3 outNormal = normal * 0.5 + 0.5;
-		FragNormal = vec4(outNormal, 0.0); 
-	} else {
-		float depth = projPosition.z / projPosition.w;
-		depth = depth * 0.5 + 0.5;
-		float depth2 = depth * depth;
-		FragColor = vec4(depth, depth2, 0.0, 0.0);
+	vec4 textureColor = vec4(1.0);
+	vec3 texcoord = vec3(vTexcoord, vTexid);
+	if(texcoord.p >= 0.0) {
+		textureColor = texture2DArray(texture, texcoord);
+		if(textureColor.a < 0.1) discard;
 	}
+
+	vec3 normal = normalize(vNormal);
+		
+	vec3 reverseLight = normalize(-light);
+	float ndotl = dot(reverseLight, normal);
+	float bias = tan(acos(abs(ndotl)));
+		
+	float ambientFactor = 0.6; float diffuseFactor = 1.2;
+	vec3 ambientColor = vColor.xxx * ambientFactor;
+	vec3 diffuseColor = vColor.yyy * diffuseFactor;
+		
+	diffuseColor *= max(ndotl, 0.0);
+
+	float shadowFactor = 1.0;
+	if(useShadow > 0)
+		shadowFactor = genShadowFactor(bias);
+		
+	FragColor.rgb = textureColor.rgb * (ambientColor + shadowFactor * diffuseColor);
+	FragColor.a = textureColor.a;
+
+	float depth = projPosition.z / projPosition.w;
+	FragDepth = vec4(depth, depth, depth, depth);
+	vec3 outNormal = normal * 0.5 + 0.5;
+	FragNormal = vec4(outNormal, 0.0); 
 }

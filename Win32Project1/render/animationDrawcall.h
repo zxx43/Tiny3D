@@ -32,7 +32,9 @@ public:
 	AnimationDrawcall();
 	AnimationDrawcall(Animation* anim);
 	virtual ~AnimationDrawcall();
-	virtual void draw(Shader* shader);
+	virtual void createSimple();
+	virtual void releaseSimple();
+	virtual void draw(Shader* shader,bool simple);
 };
 
 #endif /* ANIMATIONDRAWCALL_H_ */
