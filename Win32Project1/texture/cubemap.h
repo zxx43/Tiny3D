@@ -26,8 +26,6 @@ public:
 			const char* ypos,const char* yneg,
 			const char* zpos,const char* zneg);
 	~CubeMap();
-
-	void use(int slot);
 };
 
 #endif /* CUBEMAP_H_ */

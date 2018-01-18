@@ -52,8 +52,3 @@ CubeMap::~CubeMap() {
 	delete znegImg; znegImg=NULL;
 }
 
-void CubeMap::use(int slot) {
-	glActiveTexture(GL_TEXTURE0+slot);
-	glBindTexture(GL_TEXTURE_CUBE_MAP,id);
-}
-

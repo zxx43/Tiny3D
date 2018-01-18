@@ -25,7 +25,6 @@ public:
 
 	ImageSet();
 	~ImageSet();
-	void use(int slot);
 	void addTexture(const char* name);
 	int findTexture(const char* name);
 	void initTextureArray(std::string dir);

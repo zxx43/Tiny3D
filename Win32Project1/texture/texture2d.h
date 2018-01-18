@@ -23,8 +23,6 @@ public:
 
 	Texture2D(float w,float h,int t);
 	~Texture2D();
-
-	void use(int slot);
 };
 
 #endif /* TEXTURE2D_H_ */

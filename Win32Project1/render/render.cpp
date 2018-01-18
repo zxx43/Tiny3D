@@ -10,6 +10,7 @@ Render::Render() {
 Render::~Render() {
 	delete shaders;
 	shaders=NULL;
+	textureInUse.clear();
 }
 
 void Render::initEnvironment() {
@@ -28,6 +29,7 @@ void Render::initEnvironment() {
 	setDrawLine(false);
 	setClearColor(1,1,1,1);
 	currentShader=NULL;
+	textureInUse.clear();
 }
 
 void Render::clearFrame(bool clearColor,bool clearDepth,bool clearStencil) {
@@ -162,6 +164,28 @@ void Render::setFrameBuffer(FrameBuffer* framebuffer) {
 		clearFrame(true,true,false);
 		glViewport(0,0,viewWidth,viewHeight);
 	}
+}
+
+void Render::useTexture(uint type, uint slot, uint texid) {
+	if (textureInUse.count(slot) > 0) {
+		if (textureInUse[slot] == texid) 
+			return;
+	}
+	GLenum textureType = GL_TEXTURE_2D;
+	switch (type) {
+		case TEXTURE_2D:
+			textureType = GL_TEXTURE_2D;
+			break;
+		case TEXTURE_2D_ARRAY:
+			textureType = GL_TEXTURE_2D_ARRAY;
+			break;
+		case TEXTURE_CUBE:
+			textureType = GL_TEXTURE_CUBE_MAP;
+			break;
+	}
+	glActiveTexture(GL_TEXTURE0 + slot);
+	glBindTexture(textureType, texid);
+	textureInUse[slot] = texid;
 }
 
 

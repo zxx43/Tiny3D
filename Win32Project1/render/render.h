@@ -13,6 +13,10 @@
 #include "../framebuffer/framebuffer.h"
 #include "drawcall.h"
 
+#define TEXTURE_2D 1
+#define TEXTURE_2D_ARRAY 2
+#define TEXTURE_CUBE 3
+
 class Render {
 private:
 	void initEnvironment();
@@ -27,6 +31,7 @@ public: // Global render state
 public:
 	int viewWidth,viewHeight;
 	ShaderManager* shaders;
+	std::map<uint, uint> textureInUse;
 public:
 	Render();
 	~Render();
@@ -44,6 +49,7 @@ public:
 	void draw(Camera* camera, Drawcall* drawcall, const RenderState* state);
 	void finishDraw();
 	void setFrameBuffer(FrameBuffer* framebuffer);
+	void useTexture(uint type, uint slot, uint texid);
 };
 
 

@@ -94,7 +94,7 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	Shader* phong = render->findShader("phong_s");
 	Shader* bone = render->findShader("bone_s");
 
-	assetManager->textures->use(0);
+	render->useTexture(TEXTURE_2D_ARRAY, 0, assetManager->textures->setId);
 
 	render->setFrameBuffer(nearBuffer);
 	Camera* cameraNear=shadow->lightCameraNear;
@@ -129,10 +129,10 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 
 	//Camera* camera=currentQueue->mainCamera; // Exchange camera will lead delay
 	Camera* camera = scene->mainCamera;
-	assetManager->textures->use(0);
-	nearBuffer->getColorBuffer(0)->use(1);
-	midBuffer->getColorBuffer(0)->use(2);
-	farBuffer->getColorBuffer(0)->use(3);
+	render->useTexture(TEXTURE_2D_ARRAY, 0, assetManager->textures->setId);
+	render->useTexture(TEXTURE_2D, 1, nearBuffer->getColorBuffer(0)->id);
+	render->useTexture(TEXTURE_2D, 2, midBuffer->getColorBuffer(0)->id);
+	render->useTexture(TEXTURE_2D, 3, farBuffer->getColorBuffer(0)->id);
 	state->shader = phong;
 	currentQueue->staticQueue->draw(camera, render, state);
 

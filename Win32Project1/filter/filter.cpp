@@ -36,7 +36,7 @@ void Filter::draw(Render* render, Shader* shader, const std::vector<Texture2D*>&
 	render->useShader(shader);
 	shader->setVector2("pixelSize",1.0/width,1.0/height);
 	for (unsigned int i = 0; i < inputTextures.size(); i++)
-		inputTextures[i]->use(i);
+		render->useTexture(TEXTURE_2D, i, inputTextures[i]->id);
 	render->draw(NULL,boardNode->drawcall,state);
 	render->finishDraw();
 }

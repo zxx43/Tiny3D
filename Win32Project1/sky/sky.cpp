@@ -32,7 +32,7 @@ Sky::~Sky() {
 void Sky::draw(Render* render,Shader* shader,Camera* camera) {
 	state->shader = shader;
 	render->useShader(shader);
-	texture->use(0);
+	render->useTexture(TEXTURE_CUBE, 0, texture->id);
 	render->draw(camera,skyNode->drawcall,state);
 }
 

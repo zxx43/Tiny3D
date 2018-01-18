@@ -29,8 +29,3 @@ Texture2D::~Texture2D() {
 	glDeleteTextures(1,&id);
 }
 
-void Texture2D::use(int slot) {
-	glActiveTexture(GL_TEXTURE0+slot);
-	glBindTexture(GL_TEXTURE_2D,id);
-}
-

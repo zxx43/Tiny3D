@@ -17,11 +17,6 @@ ImageSet::~ImageSet() {
 	imageNames.clear();
 }
 
-void ImageSet::use(int slot) {
-	glActiveTexture(GL_TEXTURE0+slot);
-	glBindTexture(GL_TEXTURE_2D_ARRAY,setId);
-}
-
 void ImageSet::addTexture(const char* name) {
 	set[name] = imageNames.size(); // Start at 0
 	imageNames.push_back(name);
