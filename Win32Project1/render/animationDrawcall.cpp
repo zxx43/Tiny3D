@@ -4,15 +4,14 @@
 AnimationDrawcall::AnimationDrawcall() {}
 
 AnimationDrawcall::AnimationDrawcall(Animation* anim) :Drawcall() {
-	vbos = new GLuint[8];
+	vbos = new GLuint[7];
 
 	animation = anim;
 	vertices = new float[anim->aVertices.size() * 3];
 	normals = new float[anim->aNormals.size() * 3];
-	texcoords = new byte[anim->aTexcoords.size() * 2];
-	textureids = new short[anim->aTextures.size() * 4];
+	texcoords = new float[anim->aTexcoords.size() * 4];
 	colors = new byte[anim->aAmbients.size() * 3];
-	boneids = new unsigned short[anim->aBoneids.size() * 4];
+	boneids = new ushort[anim->aBoneids.size() * 4];
 	weights = new float[anim->aWeights.size() * 4];
 	indices = new uint[anim->aIndices.size()];
 	indexCount = anim->aIndices.size();
@@ -30,19 +29,12 @@ AnimationDrawcall::AnimationDrawcall(Animation* anim) :Drawcall() {
 	}
 	for (uint i = 0; i<anim->aTexcoords.size(); i++) {
 		VECTOR2D texcoord = anim->aTexcoords[i];
-		if (texcoord.x>1) texcoord.x = texcoord.x - (int)texcoord.x;
-		if (texcoord.y>1) texcoord.y = texcoord.y - (int)texcoord.y;
-		texcoords[i * 2] = (byte)(texcoord.x * 255);
-		texcoords[i * 2 + 1] = (byte)(texcoord.y * 255);
-	}
-	for (uint i = 0; i < anim->aTextures.size(); i++) {
-		textureChannel = anim->aTextures[i].y >= 0 ? 4 : 1;
-		textureids[i * textureChannel] = (short)anim->aTextures[i].x;
-		if (textureChannel == 4) {
-			textureids[i * 4 + 1] = (short)anim->aTextures[i].y;
-			textureids[i * 4 + 2] = (short)anim->aTextures[i].z;
-			textureids[i * 4 + 3] = (short)anim->aTextures[i].w;
-		}
+		VECTOR4D texids = anim->aTextures[i];
+		texcoords[i * 4] = texcoord.x;
+		texcoords[i * 4 + 1] = texcoord.y;
+		texcoords[i * 4 + 2] = texids.x;
+		texcoords[i * 4 + 3] = texids.y;
+		textureChannel = texids.y >= 0 ? 2 : 1;
 	}
 	for (uint i = 0; i < anim->aAmbients.size(); i++) {
 		colors[i * 3] = (byte)(anim->aAmbients[i].x * 255);
@@ -50,10 +42,10 @@ AnimationDrawcall::AnimationDrawcall(Animation* anim) :Drawcall() {
 		colors[i * 3 + 2] = (byte)(anim->aSpeculars[i].x * 255);
 	}
 	for (uint i = 0; i < anim->aBoneids.size(); i++) {
-		boneids[i * 4] = (unsigned short)(anim->aBoneids[i].x);
-		boneids[i * 4 + 1] = (unsigned short)(anim->aBoneids[i].y);
-		boneids[i * 4 + 2] = (unsigned short)(anim->aBoneids[i].z);
-		boneids[i * 4 + 3] = (unsigned short)(anim->aBoneids[i].w);
+		boneids[i * 4] = (ushort)(anim->aBoneids[i].x);
+		boneids[i * 4 + 1] = (ushort)(anim->aBoneids[i].y);
+		boneids[i * 4 + 2] = (ushort)(anim->aBoneids[i].z);
+		boneids[i * 4 + 3] = (ushort)(anim->aBoneids[i].w);
 	}
 	for (uint i = 0; i < anim->aWeights.size(); i++) {
 		weights[i * 4] = anim->aWeights[i].x;
@@ -66,7 +58,7 @@ AnimationDrawcall::AnimationDrawcall(Animation* anim) :Drawcall() {
 
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
-	glGenBuffers(8, vbos);
+	glGenBuffers(7, vbos);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbos[VERTEX_VBO]);
 	glBufferData(GL_ARRAY_BUFFER, anim->aVertices.size() * 3 * sizeof(float),
@@ -81,16 +73,10 @@ AnimationDrawcall::AnimationDrawcall(Animation* anim) :Drawcall() {
 	glEnableVertexAttribArray(NORMAL_LOCATION);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbos[TEXCOORD_VBO]);
-	glBufferData(GL_ARRAY_BUFFER, anim->aTexcoords.size() * 2 * sizeof(byte),
+	glBufferData(GL_ARRAY_BUFFER, anim->aTexcoords.size() * 4 * sizeof(float),
 		texcoords, GL_STATIC_DRAW);
-	glVertexAttribPointer(TEXCOORD_LOCATION, 2, GL_UNSIGNED_BYTE, GL_TRUE, 0, 0);
+	glVertexAttribPointer(TEXCOORD_LOCATION, 4, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(TEXCOORD_LOCATION);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbos[TEXTUREID_VBO]);
-	glBufferData(GL_ARRAY_BUFFER, anim->aTextures.size()*textureChannel*sizeof(short),
-		textureids, GL_STATIC_DRAW);
-	glVertexAttribPointer(TEXTURE_LOCATION, textureChannel, GL_SHORT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(TEXTURE_LOCATION);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbos[COLOR_VBO]);
 	glBufferData(GL_ARRAY_BUFFER, anim->aAmbients.size() * 3 * sizeof(byte),
@@ -125,12 +111,11 @@ AnimationDrawcall::~AnimationDrawcall() {
 	delete[] vertices; vertices=NULL;
 	delete[] normals; normals=NULL;
 	delete[] texcoords; texcoords=NULL;
-	delete[] textureids; textureids = NULL;
 	delete[] colors; colors = NULL;
 	delete[] boneids; boneids=NULL;
 	delete[] weights; weights=NULL;
 	delete[] indices; indices=NULL;
-	glDeleteBuffers(8,vbos);
+	glDeleteBuffers(7,vbos);
 	delete[] vbos; vbos=NULL;
 	glDeleteVertexArrays(1,&vao);
 }

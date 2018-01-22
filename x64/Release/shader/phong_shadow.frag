@@ -4,8 +4,8 @@
 uniform sampler2DArray texture;
 
 in vec2 vTexcoord;
-in vec4 projPosition;
 flat in float vTexid;
+in vec4 projPosition;
 
 layout (location = 0) out vec4 FragColor;
 

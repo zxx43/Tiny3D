@@ -9,15 +9,13 @@ uniform mat4 lightViewProjNear, lightViewProjMid, lightViewProjFar;
 
 layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 normal;
-layout (location = 2) in vec2 texcoord;
+layout (location = 2) in vec4 texcoord;
 layout (location = 3) in vec3 color;
-layout (location = 4) in float texid;
-layout (location = 5) in vec4 boneids;
-layout (location = 6) in vec4 weights;
+layout (location = 4) in vec4 boneids;
+layout (location = 5) in vec4 weights;
 
-out vec2 vTexcoord;
+out vec4 vTexcoord;
 flat out vec3 vColor;
-flat out float vTexid;
 out vec3 vNormal;
 out vec4 projPosition;
 out vec4 viewPosition;
@@ -46,7 +44,6 @@ void main() {
 
 	vColor = color * 0.004;
 	vNormal = normal3;
-	vTexid = texid;
 	
 	vTexcoord = texcoord; 
 	vec4 modelPosition = uModelMatrix * position;

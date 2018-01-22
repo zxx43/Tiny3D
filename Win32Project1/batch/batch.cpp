@@ -10,7 +10,6 @@ Batch::Batch() {
 	vertexBuffer=NULL;
 	normalBuffer=NULL;
 	texcoordBuffer=NULL;
-	textureIdBuffer = NULL;
 	colorBuffer = NULL;
 	modelMatrices=NULL;
 	normalMatrices=NULL;
@@ -18,30 +17,20 @@ Batch::Batch() {
 }
 
 Batch::~Batch() {
-	if(vertexBuffer) delete[] vertexBuffer;
-	if(normalBuffer) delete[] normalBuffer;
-	if(texcoordBuffer) delete[] texcoordBuffer;
-	if (textureIdBuffer) delete[] textureIdBuffer;
-	if (colorBuffer) delete[] colorBuffer;
-	if(modelMatrices) delete[] modelMatrices;
-	if(normalMatrices) delete[] normalMatrices;
-	if(indexBuffer) delete[] indexBuffer;
-	vertexBuffer=NULL;
-	normalBuffer=NULL;
-	texcoordBuffer=NULL;
-	textureIdBuffer = NULL;
-	colorBuffer = NULL;
-	modelMatrices=NULL;
-	normalMatrices=NULL;
-	indexBuffer=NULL;
+	if (vertexBuffer) delete[] vertexBuffer; vertexBuffer = NULL;
+	if (normalBuffer) delete[] normalBuffer; normalBuffer = NULL;
+	if (texcoordBuffer) delete[] texcoordBuffer; texcoordBuffer = NULL;
+	if (colorBuffer) delete[] colorBuffer; colorBuffer = NULL;
+	if (modelMatrices) delete[] modelMatrices; modelMatrices = NULL;
+	if (normalMatrices) delete[] normalMatrices; normalMatrices = NULL;
+	if (indexBuffer) delete[] indexBuffer; indexBuffer = NULL;
 }
 
 void Batch::initBatchBuffers(int vertices,int indices) {
 	vertexCount=vertices;
 	vertexBuffer=new float[vertexCount*3];
 	normalBuffer=new float[vertexCount*3];
-	texcoordBuffer=new float[vertexCount*2];
-	textureIdBuffer = new short[vertexCount*4];
+	texcoordBuffer=new float[vertexCount*4];
 	colorBuffer = new byte[vertexCount * 3];
 	modelMatrices=new float[vertexCount*12];
 	normalMatrices=new float[vertexCount*9];
@@ -79,20 +68,15 @@ void Batch::pushMeshToBuffers(Mesh* mesh,int mid,const MATRIX4X4& transformMatri
 		normalBuffer[storeVertexCount*3+1]=normal.y;
 		normalBuffer[storeVertexCount*3+2]=normal.z;
 
-		texcoordBuffer[storeVertexCount*2]=texcoord.x;
-		texcoordBuffer[storeVertexCount*2+1]=texcoord.y;
+		texcoordBuffer[storeVertexCount * 4] = texcoord.x;
+		texcoordBuffer[storeVertexCount * 4 + 1] = texcoord.y;
+		texcoordBuffer[storeVertexCount * 4 + 2] = textures.x;
+		texcoordBuffer[storeVertexCount * 4 + 3] = textures.y;
+		textureChannel = textures.y >= 0 ? 2 : 1;
 
 		colorBuffer[storeVertexCount * 3] = (byte)(ambient.x * 255);
 		colorBuffer[storeVertexCount * 3 + 1] = (byte)(diffuse.x * 255);
 		colorBuffer[storeVertexCount * 3 + 2] = (byte)(specular.x * 255);
-
-		textureChannel = textures.y>=0?4:1;
-		textureIdBuffer[storeVertexCount * textureChannel] = (short)textures.x;
-		if(textureChannel==4) {
-			textureIdBuffer[storeVertexCount * 4 + 1] = (short)textures.y;
-			textureIdBuffer[storeVertexCount * 4 + 2] = (short)textures.z;
-			textureIdBuffer[storeVertexCount * 4 + 3] = (short)textures.w;
-		}
 
 		initMatrix(transformMatrix,normalMatrix);
 

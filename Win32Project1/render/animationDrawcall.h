@@ -17,8 +17,7 @@ class AnimationDrawcall: public Drawcall {
 private:
 	float* vertices;
 	float* normals;
-	unsigned char* texcoords;
-	short* textureids;
+	float* texcoords;
 	unsigned char* colors;
 	unsigned short* boneids;
 	float* weights;

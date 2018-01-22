@@ -9,7 +9,6 @@ Instance::Instance(Mesh* mesh) {
 	vertexBuffer=NULL;
 	normalBuffer=NULL;
 	texcoordBuffer=NULL;
-	textureIdBuffer = NULL;
 	colorBuffer = NULL;
 	indexBuffer=NULL;
 
@@ -21,22 +20,14 @@ Instance::Instance(Mesh* mesh) {
 }
 
 Instance::~Instance() {
-	if(vertexBuffer) delete[] vertexBuffer;
-	if(normalBuffer) delete[] normalBuffer;
-	if(texcoordBuffer) delete[] texcoordBuffer;
-	if (textureIdBuffer) delete[] textureIdBuffer;
-	if (colorBuffer) delete[] colorBuffer;
-	if(indexBuffer) delete[] indexBuffer;
-	if(modelMatrices) delete[] modelMatrices;
-	if(normalMatrices) delete[] normalMatrices;
-	vertexBuffer=NULL;
-	normalBuffer=NULL;
-	texcoordBuffer=NULL;
-	textureIdBuffer = NULL;
-	colorBuffer = NULL;
-	indexBuffer=NULL;
-	modelMatrices=NULL;
-	normalMatrices=NULL;
+	if (vertexBuffer) delete[] vertexBuffer; vertexBuffer = NULL;
+	if (normalBuffer) delete[] normalBuffer; normalBuffer = NULL;
+	if (texcoordBuffer) delete[] texcoordBuffer; texcoordBuffer = NULL;
+	if (colorBuffer) delete[] colorBuffer; colorBuffer = NULL;
+	if (indexBuffer) delete[] indexBuffer; indexBuffer = NULL;
+	if (modelMatrices) delete[] modelMatrices; modelMatrices = NULL;
+	if (normalMatrices) delete[] normalMatrices; normalMatrices = NULL;
+	
 	modelMatrixList.clear();
 	normalMatrixList.clear();
 }
@@ -45,8 +36,7 @@ void Instance::initInstanceBuffers(int mid,int vertices,int indices) {
 	vertexCount=vertices;
 	vertexBuffer=new float[vertexCount*3];
 	normalBuffer=new float[vertexCount*3];
-	texcoordBuffer=new float[vertexCount*2];
-	textureIdBuffer = new short[vertexCount*4];
+	texcoordBuffer=new float[vertexCount*4];
 	colorBuffer = new byte[vertexCount * 3];
 
 	indexCount=indices;
@@ -77,20 +67,15 @@ void Instance::initInstanceBuffers(int mid,int vertices,int indices) {
 		normalBuffer[i*3+1]=normal.y;
 		normalBuffer[i*3+2]=normal.z;
 
-		texcoordBuffer[i*2]=texcoord.x;
-		texcoordBuffer[i*2+1]=texcoord.y;
+		texcoordBuffer[i * 4] = texcoord.x;
+		texcoordBuffer[i * 4 + 1] = texcoord.y;
+		texcoordBuffer[i * 4 + 2] = textures.x;
+		texcoordBuffer[i * 4 + 3] = textures.y;
+		textureChannel = textures.y >= 0 ? 2 : 1;
 
 		colorBuffer[i * 3] = (byte)(ambient.x * 255);
 		colorBuffer[i * 3 + 1] = (byte)(diffuse.x * 255);
 		colorBuffer[i * 3 + 2] = (byte)(specular.x * 255);
-
-		textureChannel = textures.y>=0?4:1;
-		textureIdBuffer[i * textureChannel] = (short)textures.x;
-		if(textureChannel==4) {
-			textureIdBuffer[i * 4 + 1] = (short)textures.y;
-			textureIdBuffer[i * 4 + 2] = (short)textures.z;
-			textureIdBuffer[i * 4 + 3] = (short)textures.w;
-		}
 	}
 
 	if(instanceMesh->indices) {

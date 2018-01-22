@@ -4,13 +4,12 @@ uniform mat4 viewMatrix;
 uniform mat4 projectMatrix;
 
 layout (location = 0) in vec3 vertex;
-layout (location = 1) in vec2 texcoord;
-layout (location = 2) in float texid;
-layout (location = 3) in mat3x4 modelMatrix;
+layout (location = 1) in vec4 texcoord;
+layout (location = 2) in mat3x4 modelMatrix;
 
 out vec2 vTexcoord;
-out vec4 projPosition;
 flat out float vTexid;
+out vec4 projPosition;
 
 mat4 convertMat(mat3x4 srcMat) {
 	vec4 col1 = srcMat[0];
@@ -24,8 +23,8 @@ mat4 convertMat(mat3x4 srcMat) {
 }
 
 void main() {
-	vTexcoord = texcoord; 
-	vTexid = texid;
+	vTexcoord = texcoord.xy;
+	vTexid = texcoord.z; 
 	vec4 worldVertex = convertMat(modelMatrix) * vec4(vertex, 1.0);
 	gl_Position = projectMatrix * viewMatrix * worldVertex;
 	projPosition = gl_Position;

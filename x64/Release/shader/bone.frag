@@ -6,9 +6,8 @@ uniform vec3 light;
 uniform float level1, level2;
 uniform sampler2D depthBufferNear, depthBufferMid, depthBufferFar;
 
-in vec2 vTexcoord;
+in vec4 vTexcoord;
 flat in vec3 vColor;
-flat in float vTexid;
 in vec3 vNormal;
 in vec4 projPosition;
 in vec4 viewPosition;
@@ -20,7 +19,7 @@ layout (location = 2) out vec4 FragNormal;
 
 void main() {
 	vec3 normal = normalize(vNormal);
-	vec3 texcoord = vec3(vTexcoord, vTexid);
+	vec3 texcoord = vTexcoord.xyz;
 	texcoord.y = 1.0 - texcoord.y;
 		
 	vec3 reverseLight = normalize(-light);

@@ -12,12 +12,11 @@
 #define NORMAL_VBO 1
 #define TEXCOORD_VBO 2
 #define COLOR_VBO 3
-#define TEXTUREID_VBO 4
-#define BONEID_VBO 5
-#define WEIGHT_VBO 6
-#define MODEL_MATRIX_VBO 5
-#define NORMAL_MATRIX_VBO 6
-#define INDEX_VBO 7
+#define BONEID_VBO 4
+#define WEIGHT_VBO 5
+#define MODEL_MATRIX_VBO 4
+#define NORMAL_MATRIX_VBO 5
+#define INDEX_VBO 6
 
 #define ATTRIB_VERTEX "vertex"
 #define ATTRIB_NORMAL "normal"
@@ -25,7 +24,6 @@
 #define ATTRIB_AMBIENT "ambient"
 #define ATTRIB_DIFFUSE "diffuse"
 #define ATTRIB_SPECULAR "specular"
-#define ATTRIB_TEXTURE "texid"
 #define ATTRIB_BONEIDS "boneids"
 #define ATTRIB_WEIGHTS "weights"
 #define ATTRIB_MODEL_MATRIX "modelMatrix"
@@ -35,11 +33,10 @@
 #define NORMAL_LOCATION 1
 #define TEXCOORD_LOCATION 2
 #define COLOR_LOCATION 3
-#define TEXTURE_LOCATION 4
-#define BONEIDS_LOCATION 5
-#define WEIGHTS_LOCATION 6
-#define MODEL_MATRIX_LOCATION 5
-#define NORMAL_MATRIX_LOCATION 8
+#define BONEIDS_LOCATION 4
+#define WEIGHTS_LOCATION 5
+#define MODEL_MATRIX_LOCATION 4
+#define NORMAL_MATRIX_LOCATION 7
 
 #include "../shader/shader.h"
 #include "../maths/Maths.h"

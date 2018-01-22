@@ -8,8 +8,8 @@ uniform float level1, level2;
 uniform sampler2D depthBufferNear, depthBufferMid, depthBufferFar;
 
 in vec2 vTexcoord;
-flat in vec3 vColor;
 flat in float vTexid;
+flat in vec3 vColor;
 in vec3 vNormal;
 in vec4 projPosition;
 in vec4 viewPosition;

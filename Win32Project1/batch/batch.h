@@ -20,7 +20,6 @@ public:
 	float* normalBuffer;
 	float* texcoordBuffer;
 	unsigned char* colorBuffer;
-	short* textureIdBuffer;
 	float* modelMatrices;
 	float* normalMatrices;
 	unsigned int* indexBuffer;

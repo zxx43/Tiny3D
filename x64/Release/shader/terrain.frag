@@ -7,9 +7,8 @@ uniform int useShadow;
 uniform float level1, level2;
 uniform sampler2D depthBufferNear, depthBufferMid, depthBufferFar;
 
-in vec2 vTexcoord;
+in vec4 vTexcoord;
 flat in vec3 vColor;
-flat in vec4 vTexid;
 in vec3 vNormal;
 in vec4 worldPosition;
 in vec4 projPosition;
@@ -101,12 +100,12 @@ void main() {
 	vec4 textureColor = vec4(1.0);
 
 	vec4 textureColor1 = vec4(1.0);
-	vec3 texcoord1 = vec3(vTexcoord, vTexid.x);
+	vec3 texcoord1 = vec3(vTexcoord.xy, vTexcoord.z);
 	if(texcoord1.p >= 0.0) 
 		textureColor1 = texture2DArray(texture, texcoord1);
 	
 	vec4 textureColor2 = vec4(1.0);
-	vec3 texcoord2 = vec3(vTexcoord, vTexid.y);
+	vec3 texcoord2 = vec3(vTexcoord.xy, vTexcoord.w);
 	if(texcoord2.p >= 0.0) 
 		textureColor2 = texture2DArray(texture, texcoord2);
 		
