@@ -6,7 +6,7 @@ uniform mat4 lightViewProjNear, lightViewProjMid, lightViewProjFar;
 
 layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 normal;
-layout (location = 2) in vec4 texcoord;
+layout (location = 2) in vec3 texcoord;
 layout (location = 3) in vec3 color;
 layout (location = 4) in mat3x4 modelMatrix;
 layout (location = 7) in mat3 normalMatrix;

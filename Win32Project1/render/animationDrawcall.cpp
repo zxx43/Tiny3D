@@ -30,11 +30,12 @@ AnimationDrawcall::AnimationDrawcall(Animation* anim) :Drawcall() {
 	for (uint i = 0; i<anim->aTexcoords.size(); i++) {
 		VECTOR2D texcoord = anim->aTexcoords[i];
 		VECTOR4D texids = anim->aTextures[i];
-		texcoords[i * 4] = texcoord.x;
-		texcoords[i * 4 + 1] = texcoord.y;
-		texcoords[i * 4 + 2] = texids.x;
-		texcoords[i * 4 + 3] = texids.y;
-		textureChannel = texids.y >= 0 ? 2 : 1;
+		textureChannel = texids.y >= 0 ? 4 : 3;
+		texcoords[i * textureChannel] = texcoord.x;
+		texcoords[i * textureChannel + 1] = texcoord.y;
+		texcoords[i * textureChannel + 2] = texids.x;
+		if (textureChannel == 4)
+			texcoords[i * textureChannel + 3] = texids.y;
 	}
 	for (uint i = 0; i < anim->aAmbients.size(); i++) {
 		colors[i * 3] = (byte)(anim->aAmbients[i].x * 255);
@@ -73,9 +74,9 @@ AnimationDrawcall::AnimationDrawcall(Animation* anim) :Drawcall() {
 	glEnableVertexAttribArray(NORMAL_LOCATION);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbos[TEXCOORD_VBO]);
-	glBufferData(GL_ARRAY_BUFFER, anim->aTexcoords.size() * 4 * sizeof(float),
+	glBufferData(GL_ARRAY_BUFFER, anim->aTexcoords.size() * textureChannel * sizeof(float),
 		texcoords, GL_STATIC_DRAW);
-	glVertexAttribPointer(TEXCOORD_LOCATION, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(TEXCOORD_LOCATION, textureChannel, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(TEXCOORD_LOCATION);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbos[COLOR_VBO]);

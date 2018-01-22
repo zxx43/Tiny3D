@@ -67,11 +67,12 @@ void Instance::initInstanceBuffers(int mid,int vertices,int indices) {
 		normalBuffer[i*3+1]=normal.y;
 		normalBuffer[i*3+2]=normal.z;
 
-		texcoordBuffer[i * 4] = texcoord.x;
-		texcoordBuffer[i * 4 + 1] = texcoord.y;
-		texcoordBuffer[i * 4 + 2] = textures.x;
-		texcoordBuffer[i * 4 + 3] = textures.y;
-		textureChannel = textures.y >= 0 ? 2 : 1;
+		textureChannel = textures.y >= 0 ? 4 : 3;
+		texcoordBuffer[i * textureChannel] = texcoord.x;
+		texcoordBuffer[i * textureChannel + 1] = texcoord.y;
+		texcoordBuffer[i * textureChannel + 2] = textures.x;
+		if (textureChannel == 4)
+			texcoordBuffer[i * textureChannel + 3] = textures.y;
 
 		colorBuffer[i * 3] = (byte)(ambient.x * 255);
 		colorBuffer[i * 3 + 1] = (byte)(diffuse.x * 255);

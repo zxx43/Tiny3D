@@ -4,7 +4,7 @@ uniform mat4 viewMatrix;
 uniform mat4 projectMatrix;
 
 layout (location = 0) in vec3 vertex;
-layout (location = 1) in vec4 texcoord;
+layout (location = 1) in vec3 texcoord;
 layout (location = 2) in mat3x4 modelMatrix;
 
 out vec2 vTexcoord;

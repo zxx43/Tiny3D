@@ -68,11 +68,12 @@ void Batch::pushMeshToBuffers(Mesh* mesh,int mid,const MATRIX4X4& transformMatri
 		normalBuffer[storeVertexCount*3+1]=normal.y;
 		normalBuffer[storeVertexCount*3+2]=normal.z;
 
-		texcoordBuffer[storeVertexCount * 4] = texcoord.x;
-		texcoordBuffer[storeVertexCount * 4 + 1] = texcoord.y;
-		texcoordBuffer[storeVertexCount * 4 + 2] = textures.x;
-		texcoordBuffer[storeVertexCount * 4 + 3] = textures.y;
-		textureChannel = textures.y >= 0 ? 2 : 1;
+		textureChannel = textures.y >= 0 ? 4 : 3;
+		texcoordBuffer[storeVertexCount * textureChannel] = texcoord.x;
+		texcoordBuffer[storeVertexCount * textureChannel + 1] = texcoord.y;
+		texcoordBuffer[storeVertexCount * textureChannel + 2] = textures.x;
+		if (textureChannel == 4)
+			texcoordBuffer[storeVertexCount * textureChannel + 3] = textures.y;
 
 		colorBuffer[storeVertexCount * 3] = (byte)(ambient.x * 255);
 		colorBuffer[storeVertexCount * 3 + 1] = (byte)(diffuse.x * 255);

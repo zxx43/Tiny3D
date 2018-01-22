@@ -6,7 +6,7 @@ uniform vec3 light;
 uniform float level1, level2;
 uniform sampler2D depthBufferNear, depthBufferMid, depthBufferFar;
 
-in vec4 vTexcoord;
+in vec3 vTexcoord;
 flat in vec3 vColor;
 in vec3 vNormal;
 in vec4 projPosition;
