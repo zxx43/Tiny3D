@@ -1,7 +1,6 @@
 #version 330
 
-uniform mat4 viewMatrix;
-uniform mat4 projectMatrix;
+uniform mat4 viewProjectMatrix;
 
 layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 texcoord;
@@ -26,6 +25,6 @@ void main() {
 	vTexcoord = texcoord.xy;
 	vTexid = texcoord.z; 
 	vec4 worldVertex = convertMat(modelMatrix) * vec4(vertex, 1.0);
-	gl_Position = projectMatrix * viewMatrix * worldVertex;
+	gl_Position = viewProjectMatrix * worldVertex;
 	projPosition = gl_Position;
 }

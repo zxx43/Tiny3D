@@ -1,7 +1,6 @@
 #version 330
 
-uniform mat4 viewMatrix;
-uniform mat4 projectMatrix;
+uniform mat4 viewProjectMatrix;
 uniform mat4 uModelMatrix;
 uniform mat3x4 boneMats[100];
 
@@ -31,6 +30,6 @@ void main() {
     vec4 position = boneMat * vec4(vertex, 1.0);
 	
 	vec4 modelPosition = uModelMatrix * position;
-	gl_Position = projectMatrix * viewMatrix * modelPosition;
+	gl_Position = viewProjectMatrix * modelPosition;
 	projPosition = gl_Position;
 }

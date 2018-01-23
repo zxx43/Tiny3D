@@ -98,6 +98,6 @@ void Shadow::updateLightCamera(Camera* lightCamera, VECTOR4D center, float radiu
 	VECTOR3D centerW3(centerW.x,centerW.y,centerW.z);
 
 	lightCamera->setView(centerW3,lightDir);
-	lightCamera->initOrthoCamera(-radius, radius, -radius, radius, -radius, radius);
+	lightCamera->initOrthoCamera(-radius, radius, -radius, radius, -1.5 * radius, 1.5 * radius);
 	lightCamera->updateFrustum();
 }

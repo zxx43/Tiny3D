@@ -92,6 +92,7 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	state->cullMode = CULL_FRONT;
 	state->shadowPass = true;
 	Shader* phong = render->findShader("phong_s");
+	Shader* phongLow = render->findShader("phong_sl");
 	Shader* bone = render->findShader("bone_s");
 
 	render->useTexture(TEXTURE_2D_ARRAY, 0, assetManager->textures->setId);
@@ -112,7 +113,7 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 
 	render->setFrameBuffer(farBuffer);
 	Camera* cameraFar=shadow->lightCameraFar;
-	state->shader = phong;
+	state->shader = phongLow;
 	currentQueue->shadowFarStaticQueue->draw(cameraFar, render, state);
 	state->shader = bone;
 	currentQueue->shadowFarAnimateQueue->draw(cameraFar, render, state);

@@ -499,5 +499,23 @@
     <None Include="..\x64\Release\shader\terrain.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\x64\Release\shader\bone_shadow.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\bone_shadow.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\phong_shadow.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\phong_shadow.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\phong_shadow_low.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\phong_shadow_low.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
