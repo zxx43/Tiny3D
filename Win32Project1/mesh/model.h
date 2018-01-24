@@ -17,8 +17,7 @@ private:
 	void initFaces();
 	void initFacesWidthIndices();
 public:
-	Model();
-	Model(const char* obj, const char* mtl, int vt);
+	Model(const char* obj, const char* mtl, int vt, bool simple);
 	Model(const Model& rhs);
 	virtual ~Model();
 	void loadModel(const char* obj,const char* mtl,int vt);

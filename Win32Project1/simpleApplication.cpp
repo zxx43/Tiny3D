@@ -84,10 +84,10 @@ void SimpleApplication::initScene() {
 	scene->skyBox = new Sky();
 
 	// Load meshes
-	assetManager->meshes["tree"] = new Model("models/firC.obj", "models/firC.mtl", 2);
-	assetManager->meshes["treeA"] = new Model("models/treeA.obj", "models/treeA.mtl", 2);
-	assetManager->meshes["tank"] = new Model("models/tank.obj", "models/tank.mtl", 3);
-	assetManager->meshes["m1a2"] = new Model("models/m1a2.obj", "models/m1a2.mtl", 2);
+	assetManager->meshes["tree"] = new Model("models/firC.obj", "models/firC.mtl", 2, true);
+	assetManager->meshes["treeA"] = new Model("models/treeA.obj", "models/treeA.mtl", 2, true);
+	assetManager->meshes["tank"] = new Model("models/tank.obj", "models/tank.mtl", 3, true);
+	assetManager->meshes["m1a2"] = new Model("models/m1a2.obj", "models/m1a2.mtl", 2, true);
 	assetManager->meshes["terrain"] = new Terrain("terrain/Terrain.raw");
 	assetManager->animations["army"] = new Animation("models/ArmyPilot.dae");
 

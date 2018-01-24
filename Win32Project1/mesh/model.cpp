@@ -1,17 +1,7 @@
 #include "model.h"
 #include "../constants/constants.h"
 
-Model::Model():Mesh() {
-	vertexCount=0;
-	indexCount=0;
-	vertices=NULL;
-	normals=NULL;
-	texcoords=NULL;
-	materialids = NULL;
-	indices=NULL;
-}
-
-Model::Model(const char* obj, const char* mtl, int vt) :Mesh() {
+Model::Model(const char* obj, const char* mtl, int vt, bool simple) {
 	vertexCount = 0;
 	indexCount = 0;
 	vertices = NULL;
@@ -19,7 +9,8 @@ Model::Model(const char* obj, const char* mtl, int vt) :Mesh() {
 	texcoords = NULL;
 	materialids = NULL;
 	indices = NULL;
-	loadModelSimple(obj, mtl, vt);
+	if (simple) loadModelSimple(obj, mtl, vt);
+	else loadModel(obj, mtl, vt);
 }
 
 Model::Model(const Model& rhs) {
