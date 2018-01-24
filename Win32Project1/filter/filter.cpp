@@ -5,6 +5,8 @@
 Filter::Filter(float width,float height,bool useFramebuffer) {
 	this->width=width;
 	this->height=height;
+	pixWidth = 1.0 / width;
+	pixHeight = 1.0 / height;
 	framebuffer=NULL;
 	if(useFramebuffer)
 		framebuffer=new FrameBuffer(width,height,false);
@@ -34,8 +36,8 @@ void Filter::draw(Render* render, Shader* shader, const std::vector<Texture2D*>&
 	state->shader = shader;
 	render->setFrameBuffer(framebuffer);
 	render->useShader(shader);
-	shader->setVector2("pixelSize",1.0/width,1.0/height);
-	for (unsigned int i = 0; i < inputTextures.size(); i++)
+	shader->setVector2("pixelSize",pixWidth,pixHeight);
+	for (uint i = 0; i < inputTextures.size(); i++)
 		render->useTexture(TEXTURE_2D, i, inputTextures[i]->id);
 	render->draw(NULL,boardNode->drawcall,state);
 	render->finishDraw();

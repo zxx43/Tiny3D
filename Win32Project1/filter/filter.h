@@ -13,7 +13,7 @@
 
 class Filter {
 private:
-	float width,height;
+	float width,height,pixWidth,pixHeight;
 	FrameBuffer* framebuffer;
 	StaticNode* boardNode;
 	RenderState* state;
