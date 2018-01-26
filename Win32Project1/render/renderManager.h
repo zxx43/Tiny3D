@@ -85,6 +85,14 @@ private: // States
 	bool useShadow;
 	bool drawBounding;
 	RenderState* state;
+private: // Shaders
+	Shader* phongShadow;
+	Shader* phongShadowLow;
+	Shader* boneShadow;
+	Shader* phong;
+	Shader* bone;
+	Shader* mix;
+	Shader* skyCube;
 private:
 	void drawBoundings(Render* render, RenderState* state, Scene* scene, Camera* camera);
 public:

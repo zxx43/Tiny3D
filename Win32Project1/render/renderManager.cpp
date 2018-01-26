@@ -22,6 +22,14 @@ RenderManager::RenderManager(Camera* view, float distance1, float distance2, VEC
 	useShadow = false;
 	drawBounding = true;
 	state = new RenderState();
+
+	phongShadow = NULL;
+	phongShadowLow = NULL;
+	boneShadow = NULL;
+	phong = NULL;
+	bone = NULL;
+	mix = NULL;
+	skyCube = NULL;
 }
 
 RenderManager::~RenderManager() {
@@ -91,31 +99,32 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	state->reset();
 	state->cullMode = CULL_FRONT;
 	state->shadowPass = true;
-	Shader* phong = render->findShader("phong_s");
-	Shader* phongLow = render->findShader("phong_sl");
-	Shader* bone = render->findShader("bone_s");
+
+	if (!phongShadow) phongShadow = render->findShader("phong_s");
+	if (!phongShadowLow) phongShadowLow = render->findShader("phong_sl");
+	if (!boneShadow) boneShadow = render->findShader("bone_s");
 
 	render->useTexture(TEXTURE_2D_ARRAY, 0, assetManager->textures->setId);
 
 	render->setFrameBuffer(nearBuffer);
 	Camera* cameraNear=shadow->lightCameraNear;
-	state->shader = phong;
+	state->shader = phongShadow;
 	currentQueue->shadowNearStaticQueue->draw(cameraNear, render, state);
-	state->shader = bone;
+	state->shader = boneShadow;
 	currentQueue->shadowNearAnimateQueue->draw(cameraNear, render, state);
 
 	render->setFrameBuffer(midBuffer);
 	Camera* cameraMid=shadow->lightCameraMid;
-	state->shader = phong;
+	state->shader = phongShadow;
 	currentQueue->shadowMidStaticQueue->draw(cameraMid, render, state);
-	state->shader = bone;
+	state->shader = boneShadow;
 	currentQueue->shadowMidAnimateQueue->draw(cameraMid, render, state);
 
 	render->setFrameBuffer(farBuffer);
 	Camera* cameraFar=shadow->lightCameraFar;
-	state->shader = phongLow;
+	state->shader = phongShadowLow;
 	currentQueue->shadowFarStaticQueue->draw(cameraFar, render, state);
-	state->shader = bone;
+	state->shader = boneShadow;
 	currentQueue->shadowFarAnimateQueue->draw(cameraFar, render, state);
 }
 
@@ -124,9 +133,10 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	state->shadow = shadow;
 	state->light = lightDir;
 
-	Shader* phong = render->findShader("phong");
-	Shader* bone = render->findShader("bone");
-	Shader* terrain = render->findShader("terrain");
+	if (!phong) phong = render->findShader("phong");
+	if (!bone) bone = render->findShader("bone");
+	if (!mix) mix = render->findShader("terrain");
+	if (!skyCube) skyCube = render->findShader("sky");
 
 	//Camera* camera=currentQueue->mainCamera; // Exchange camera will lead delay
 	Camera* camera = scene->mainCamera;
@@ -139,7 +149,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 
 	// Draw terrain
 	if (scene->terrainNode) {
-		state->shader = terrain;
+		state->shader = mix;
 		render->draw(camera, scene->terrainNode->drawcall, state);
 	}
 
@@ -159,10 +169,8 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	}
 
 	// Draw sky
-	if (scene->skyBox) {
-		Shader* sky = render->findShader("sky");
-		scene->skyBox->draw(render, sky, camera);
-	}
+	if (scene->skyBox) 
+		scene->skyBox->draw(render, skyCube, camera);
 
 	render->finishDraw();
 }
