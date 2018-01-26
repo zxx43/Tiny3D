@@ -26,6 +26,9 @@ public: // Global render state
 	bool drawLine;
 	bool enableDepthTest;
 	int depthTestMode;
+	bool enableAlphaTest;
+	int alphaTestMode;
+	float alphaThreshold;
 	COLOR clearColor;
 	Shader* currentShader;
 public:
@@ -38,6 +41,7 @@ public:
 	void clearFrame(bool clearColor,bool clearDepth,bool clearStencil);
 	void setState(const RenderState* state);
 	void setDepthTest(bool enable,int testMode);
+	void setAlphaTest(bool enable, int testMode, float threshold);
 	void setCullState(bool enable);
 	void setCullMode(int mode);
 	void setDrawLine(bool line);

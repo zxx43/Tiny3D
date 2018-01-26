@@ -19,11 +19,15 @@ void Render::initEnvironment() {
 		printf("Error: %s\n",glewGetErrorString(err));
 	// Force to refresh states
 	enableDepthTest=false;
-	depthTestMode=DEPTH_GREATER;
+	depthTestMode=GREATER;
+	enableAlphaTest = true;
+	alphaTestMode = LESS;
+	alphaThreshold = 1.0;
 	enableCull=false;
 	cullMode=CULL_NONE;
 	drawLine=true;
-	setDepthTest(true,DEPTH_LEQUAL);
+	setDepthTest(true,LEQUAL);
+	setAlphaTest(false, GREATER, 0);
 	setCullState(true);
 	setCullMode(CULL_BACK);
 	setDrawLine(false);
@@ -42,6 +46,7 @@ void Render::clearFrame(bool clearColor,bool clearDepth,bool clearStencil) {
 
 void Render::setState(const RenderState* state) {
 	setDepthTest(state->enableDepthTest,state->depthTestMode);
+	setAlphaTest(state->enableAlphaTest, state->alphaTestMode, state->alphaThreshold);
 	setCullState(state->enableCull);
 	setCullMode(state->cullMode);
 	setDrawLine(state->drawLine);
@@ -56,17 +61,43 @@ void Render::setDepthTest(bool enable,int testMode) {
 	if(testMode!=depthTestMode) {
 		depthTestMode=testMode;
 		switch(testMode) {
-			case DEPTH_LESS:
+			case LESS:
 				glDepthFunc(GL_LESS);
 				break;
-			case DEPTH_LEQUAL:
+			case LEQUAL:
 				glDepthFunc(GL_LEQUAL);
 				break;
-			case DEPTH_GREATER:
+			case GREATER:
 				glDepthFunc(GL_GREATER);
 				break;
-			case DEPTH_GEQUAL:
+			case GEQUAL:
 				glDepthFunc(GL_GEQUAL);
+				break;
+		}
+	}
+}
+
+void Render::setAlphaTest(bool enable, int testMode, float threshold) {
+	if (enable != enableAlphaTest) {
+		enableAlphaTest = enable;
+		if (enable) glEnable(GL_ALPHA_TEST);
+		else glDisable(GL_ALPHA_TEST);
+	}
+	if (testMode != alphaTestMode || threshold != alphaThreshold) {
+		alphaTestMode = testMode;
+		alphaThreshold = threshold;
+		switch (testMode) {
+			case LESS:
+				glAlphaFunc(GL_LESS, alphaThreshold);
+				break;
+			case LEQUAL:
+				glAlphaFunc(GL_LEQUAL, alphaThreshold);
+				break;
+			case GREATER:
+				glAlphaFunc(GL_GREATER, alphaThreshold);
+				break;
+			case GEQUAL:
+				glAlphaFunc(GL_GEQUAL, alphaThreshold);
 				break;
 		}
 	}

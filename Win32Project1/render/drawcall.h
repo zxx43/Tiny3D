@@ -48,29 +48,26 @@ struct RenderState {
 	bool drawLine;
 	bool enableDepthTest;
 	int depthTestMode;
+	bool enableAlphaTest;
+	int alphaTestMode;
+	float alphaThreshold;
 	bool lightEffect; 
 	bool shadowPass;
 	Shadow* shadow;
 	VECTOR3D light;
 	Shader* shader;
 	RenderState() {
-		enableCull = true;
-		cullMode = CULL_BACK;
-		drawLine = false;
-		enableDepthTest = true;
-		depthTestMode = DEPTH_LEQUAL;
-		lightEffect = true;
-		shadowPass = false;
-		shadow = NULL;
-		light = VECTOR3D(0, 0, 0);
-		shader = NULL;
+		reset();
 	}
 	void reset() {
 		enableCull = true;
 		cullMode = CULL_BACK;
 		drawLine = false;
 		enableDepthTest = true;
-		depthTestMode = DEPTH_LEQUAL;
+		depthTestMode = LEQUAL;
+		enableAlphaTest = false;
+		alphaTestMode = GREATER;
+		alphaThreshold = 0;
 		lightEffect = true;
 		shadowPass = false;
 		shadow = NULL;
@@ -83,6 +80,9 @@ struct RenderState {
 		drawLine = src->drawLine;
 		enableDepthTest = src->enableDepthTest;
 		depthTestMode = src->depthTestMode;
+		enableAlphaTest = src->enableAlphaTest;
+		alphaTestMode = src->alphaTestMode;
+		alphaThreshold = src->alphaThreshold;
 		lightEffect = src->lightEffect;
 		shadowPass = src->shadowPass;
 		shadow = src->shadow;

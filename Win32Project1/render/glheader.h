@@ -16,9 +16,9 @@
 #define CULL_BACK 1
 #define CULL_FRONT 2
 
-#define DEPTH_LESS 0
-#define DEPTH_LEQUAL 1
-#define DEPTH_GREATER 2
-#define DEPTH_GEQUAL 3
+#define LESS 0
+#define LEQUAL 1
+#define GREATER 2
+#define GEQUAL 3
 
 #endif /* GLHEADER_H_ */
