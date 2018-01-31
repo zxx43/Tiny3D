@@ -10,6 +10,7 @@ Sky::Sky() {
 	skyObject->bindMaterial(materials->add(mat));
 	skyObject->setPosition(0,0,0);
 	skyNode=new StaticNode(VECTOR3D(0,0,0));
+	skyNode->fullStatic = true;
 	skyNode->addObject(skyObject);
 	skyNode->prepareDrawcall();
 

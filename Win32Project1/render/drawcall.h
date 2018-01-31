@@ -94,6 +94,7 @@ struct RenderState {
 class Drawcall {
 private:
 	bool singleSide;
+	bool fullStatic;
 public:
 	float* uModelMatrix;
 	float* uNormalMatrix;
@@ -111,6 +112,8 @@ public:
 	virtual void draw(Shader* shader,bool simple)=0;
 	void setSide(bool single);
 	bool isSingleSide();
+	void setFullStatic(bool stat);
+	bool isFullStatic();
 };
 
 #endif /* DRAWCALL_H_ */

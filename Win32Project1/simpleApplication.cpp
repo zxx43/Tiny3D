@@ -129,6 +129,7 @@ void SimpleApplication::initScene() {
 	BillboardObject* billboard = new BillboardObject(meshes["board"]);
 
 	scene->terrainNode = new TerrainNode(VECTOR3D(-1024, 0, -1024));
+	scene->terrainNode->fullStatic = true;
 	StaticObject* terrainObject = new StaticObject(meshes["terrain"]);
 	terrainObject->bindMaterial(materials->find("terrain_mat"));
 	terrainObject->setPosition(0, 0, 0);

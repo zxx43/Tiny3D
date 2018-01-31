@@ -6,6 +6,7 @@ StaticNode::StaticNode(const VECTOR3D& position):Node(position, VECTOR3D(0, 0, 0
 	batch = NULL;
 	batchVertexCount = 0;
 	batchIndexCount = 0;
+	fullStatic = false;
 }
 
 StaticNode::~StaticNode() {
@@ -48,7 +49,7 @@ void StaticNode::createBatch() {
 	for(unsigned int i=0;i<objects.size();i++) {
 		Object* object=objects[i];
 		MATRIX4X4 transformMatrix=nodeTransform*object->localTransformMatrix;
-		batch->pushMeshToBuffers(object->mesh,object->material,transformMatrix,object->normalMatrix);
+		batch->pushMeshToBuffers(object->mesh,object->material,fullStatic,transformMatrix,object->normalMatrix);
 	}
 
 	if (drawcall) delete drawcall;

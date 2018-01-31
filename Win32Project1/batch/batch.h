@@ -24,12 +24,13 @@ public:
 	float* normalMatrices;
 	unsigned int* indexBuffer;
 
+	bool fullStatic;
 	int textureChannel;
 
 	Batch();
 	~Batch();
 	void initBatchBuffers(int vertices,int indices);
-	void pushMeshToBuffers(Mesh* mesh,int mid,const MATRIX4X4& transformMatrix,const MATRIX4X4& normalMatrix);
+	void pushMeshToBuffers(Mesh* mesh,int mid,bool fullStatic,const MATRIX4X4& transformMatrix,const MATRIX4X4& normalMatrix);
 	void updateMatricesBuffer(int baseVertex, Mesh* mesh, const MATRIX4X4& transformMatrix, const MATRIX4X4* normalMatrix);
 };
 

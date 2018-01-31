@@ -13,6 +13,7 @@ Filter::Filter(float width,float height,bool useFramebuffer) {
 
 	Board* board=new Board();
 	boardNode=new StaticNode(VECTOR3D(0,0,0));
+	boardNode->fullStatic = true;
 	StaticObject* boardObject=new StaticObject(board);
 	boardNode->addObject(boardObject);
 	boardNode->prepareDrawcall();

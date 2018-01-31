@@ -17,6 +17,7 @@ private:
 public:
 	Batch* batch;
 	int batchVertexCount,batchIndexCount;
+	bool fullStatic;
 
 	StaticNode(const VECTOR3D& position);
 	virtual ~StaticNode();

@@ -14,6 +14,8 @@ Batch::Batch() {
 	modelMatrices=NULL;
 	normalMatrices=NULL;
 	indexBuffer=NULL;
+
+	fullStatic = false;
 }
 
 Batch::~Batch() {
@@ -42,8 +44,9 @@ void Batch::initBatchBuffers(int vertices,int indices) {
 	storeIndexCount=0;
 }
 
-void Batch::pushMeshToBuffers(Mesh* mesh,int mid,const MATRIX4X4& transformMatrix,const MATRIX4X4& normalMatrix) {
+void Batch::pushMeshToBuffers(Mesh* mesh,int mid,bool fullStatic,const MATRIX4X4& transformMatrix,const MATRIX4X4& normalMatrix) {
 	int baseVertex=storeVertexCount;
+	this->fullStatic = fullStatic;
 	for(int i=0;i<mesh->vertexCount;i++) {
 		VECTOR4D vertex=mesh->vertices[i];
 		VECTOR4D normal(mesh->normals[i].x,mesh->normals[i].y,mesh->normals[i].z,0);
@@ -60,13 +63,26 @@ void Batch::pushMeshToBuffers(Mesh* mesh,int mid,const MATRIX4X4& transformMatri
 		VECTOR3D specular = mat->specular;
 		VECTOR4D textures = mat->texture;
 
-		vertexBuffer[storeVertexCount*3]=vertex.x/vertex.w;
-		vertexBuffer[storeVertexCount*3+1]=vertex.y/vertex.w;
-		vertexBuffer[storeVertexCount*3+2]=vertex.z/vertex.w;
+		if (!fullStatic) {
+			vertexBuffer[storeVertexCount * 3] = vertex.x / vertex.w;
+			vertexBuffer[storeVertexCount * 3 + 1] = vertex.y / vertex.w;
+			vertexBuffer[storeVertexCount * 3 + 2] = vertex.z / vertex.w;
 
-		normalBuffer[storeVertexCount*3]=normal.x;
-		normalBuffer[storeVertexCount*3+1]=normal.y;
-		normalBuffer[storeVertexCount*3+2]=normal.z;
+			normalBuffer[storeVertexCount * 3] = normal.x;
+			normalBuffer[storeVertexCount * 3 + 1] = normal.y;
+			normalBuffer[storeVertexCount * 3 + 2] = normal.z;
+		} else {
+			vertex = transformMatrix * vertex;
+			vertexBuffer[storeVertexCount * 3] = vertex.x / vertex.w;
+			vertexBuffer[storeVertexCount * 3 + 1] = vertex.y / vertex.w;
+			vertexBuffer[storeVertexCount * 3 + 2] = vertex.z / vertex.w;
+
+			normal = normalMatrix * normal;
+			normalBuffer[storeVertexCount * 3] = normal.x;
+			normalBuffer[storeVertexCount * 3 + 1] = normal.y;
+			normalBuffer[storeVertexCount * 3 + 2] = normal.z;
+		}
+
 
 		textureChannel = textures.y >= 0 ? 4 : 3;
 		texcoordBuffer[storeVertexCount * textureChannel] = texcoord.x;

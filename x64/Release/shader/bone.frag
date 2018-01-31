@@ -3,7 +3,7 @@
 
 uniform sampler2DArray texture;
 uniform vec3 light;
-uniform float level1, level2;
+uniform vec2 levels;
 uniform sampler2D depthBufferNear, depthBufferMid, depthBufferFar;
 
 in vec3 vTexcoord;

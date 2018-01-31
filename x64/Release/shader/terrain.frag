@@ -4,7 +4,7 @@
 uniform sampler2DArray texture;
 uniform vec3 light;
 uniform int useShadow;
-uniform float level1, level2;
+uniform vec2 levels;
 uniform sampler2D depthBufferNear, depthBufferMid, depthBufferFar;
 
 in vec4 vTexcoord;
@@ -76,12 +76,12 @@ float genShadow(sampler2D shadowMap, vec3 shadowCoord, float bias) {
 float genShadowFactor(float bias) {
 	float depthView = -viewPosition.z / viewPosition.w;
 	
-	if(depthView <= level1) {
+	if(depthView <= levels.x) {
 		vec3 lightPosition = lightNearPosition.xyz / lightNearPosition.w;
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
 		float bs = bias * 0.0005;
 		return genPCF(depthBufferNear, shadowCoord, bs);
-	} else if(depthView <= level2) {
+	} else if(depthView <= levels.y) {
 		vec3 lightPosition = lightMidPosition.xyz / lightMidPosition.w;
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
 		float bs = bias * 0.00005;
@@ -99,15 +99,11 @@ float genShadowFactor(float bias) {
 void main() {
 	vec4 textureColor = vec4(1.0);
 
-	vec4 textureColor1 = vec4(1.0);
 	vec3 texcoord1 = vec3(vTexcoord.xy, vTexcoord.z);
-	if(texcoord1.p >= 0.0) 
-		textureColor1 = texture2DArray(texture, texcoord1);
+	vec4 textureColor1 = texture2DArray(texture, texcoord1);
 	
-	vec4 textureColor2 = vec4(1.0);
 	vec3 texcoord2 = vec3(vTexcoord.xy, vTexcoord.w);
-	if(texcoord2.p >= 0.0) 
-		textureColor2 = texture2DArray(texture, texcoord2);
+	vec4 textureColor2 = texture2DArray(texture, texcoord2);
 		
 	float height = worldPosition.y;
 	float blendPer = smoothstep(100.0, 200.0, height);

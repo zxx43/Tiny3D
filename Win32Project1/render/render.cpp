@@ -181,8 +181,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,const RenderState* state) {
 		shader->setMatrix4("lightViewProjNear", state->shadow->lightNearMat);
 		shader->setMatrix4("lightViewProjMid", state->shadow->lightMidMat);
 		shader->setMatrix4("lightViewProjFar", state->shadow->lightFarMat);
-		shader->setFloat("level1", state->shadow->level1);
-		shader->setFloat("level2", state->shadow->level2);
+		shader->setVector2("levels", state->shadow->level1, state->shadow->level2);
 	}
 	drawcall->draw(shader, state->shadowPass);
 }

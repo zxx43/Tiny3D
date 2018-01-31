@@ -8,6 +8,7 @@ StaticDrawcall::StaticDrawcall(Batch* batch) :Drawcall() {
 	indexCount = batch->indexCount;
 	indexed = indexCount > 0 ? true : false;
 	this->batch = batch;
+	setFullStatic(batch->fullStatic);
 
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
@@ -37,27 +38,31 @@ StaticDrawcall::StaticDrawcall(Batch* batch) :Drawcall() {
 	glVertexAttribPointer(COLOR_LOCATION, 3, GL_UNSIGNED_BYTE, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(COLOR_LOCATION);
 
+	int indexVBO = INDEX_VBO;
+	if (isFullStatic())
+		indexVBO -= 2;
+	else {
+		glBindBuffer(GL_ARRAY_BUFFER, vbos[MODEL_MATRIX_VBO]);
+		glBufferData(GL_ARRAY_BUFFER, vertexCount * 12 * sizeof(float),
+			batch->modelMatrices, GL_DYNAMIC_DRAW);
+		for (int i = 0; i < 3; i++) {
+			glVertexAttribPointer(MODEL_MATRIX_LOCATION + i, 4, GL_FLOAT, GL_FALSE, sizeof(float)* 12,
+				(void*)(sizeof(float)*i * 4));
+			glEnableVertexAttribArray(MODEL_MATRIX_LOCATION + i);
+		}
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbos[MODEL_MATRIX_VBO]);
-	glBufferData(GL_ARRAY_BUFFER, vertexCount * 12 * sizeof(float),
-		batch->modelMatrices, GL_DYNAMIC_DRAW);
-	for (int i = 0; i < 3; i++) {
-		glVertexAttribPointer(MODEL_MATRIX_LOCATION + i, 4, GL_FLOAT, GL_FALSE, sizeof(float)* 12,
-			(void*)(sizeof(float)*i * 4));
-		glEnableVertexAttribArray(MODEL_MATRIX_LOCATION + i);
-	}
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbos[NORMAL_MATRIX_VBO]);
-	glBufferData(GL_ARRAY_BUFFER, vertexCount * 9 * sizeof(float),
-		batch->normalMatrices, GL_DYNAMIC_DRAW);
-	for (int i = 0; i < 3; i++) {
-		glVertexAttribPointer(NORMAL_MATRIX_LOCATION + i, 3, GL_FLOAT, GL_FALSE, sizeof(float)* 9,
-			(void*)(sizeof(float)*i * 3));
-		glEnableVertexAttribArray(NORMAL_MATRIX_LOCATION + i);
+		glBindBuffer(GL_ARRAY_BUFFER, vbos[NORMAL_MATRIX_VBO]);
+		glBufferData(GL_ARRAY_BUFFER, vertexCount * 9 * sizeof(float),
+			batch->normalMatrices, GL_DYNAMIC_DRAW);
+		for (int i = 0; i < 3; i++) {
+			glVertexAttribPointer(NORMAL_MATRIX_LOCATION + i, 3, GL_FLOAT, GL_FALSE, sizeof(float)* 9,
+				(void*)(sizeof(float)*i * 3));
+			glEnableVertexAttribArray(NORMAL_MATRIX_LOCATION + i);
+		}
 	}
 
 	if (indexed) {
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbos[INDEX_VBO]);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbos[indexVBO]);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount*sizeof(uint),
 			batch->indexBuffer, GL_STATIC_DRAW);
 	}
@@ -94,17 +99,22 @@ void StaticDrawcall::createSimple() {
 	glVertexAttribPointer(1, batch->textureChannel, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(1);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vboSimple[2]);
-	glBufferData(GL_ARRAY_BUFFER, vertexCount * 12 * sizeof(float),
-		batch->modelMatrices, GL_DYNAMIC_DRAW);
-	for (int i = 0; i < 3; i++) {
-		glVertexAttribPointer(2 + i, 4, GL_FLOAT, GL_FALSE, sizeof(float)* 12,
-			(void*)(sizeof(float)*i * 4));
-		glEnableVertexAttribArray(2 + i);
+	int indexVBO = 3;
+	if (isFullStatic())
+		indexVBO = 2;
+	else {
+		glBindBuffer(GL_ARRAY_BUFFER, vboSimple[2]);
+		glBufferData(GL_ARRAY_BUFFER, vertexCount * 12 * sizeof(float),
+			batch->modelMatrices, GL_DYNAMIC_DRAW);
+		for (int i = 0; i < 3; i++) {
+			glVertexAttribPointer(2 + i, 4, GL_FLOAT, GL_FALSE, sizeof(float)* 12,
+				(void*)(sizeof(float)*i * 4));
+			glEnableVertexAttribArray(2 + i);
+		}
 	}
 
 	if (indexed) {
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboSimple[3]);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboSimple[indexVBO]);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount*sizeof(uint),
 			batch->indexBuffer, GL_STATIC_DRAW);
 	}
