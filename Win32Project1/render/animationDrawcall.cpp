@@ -4,16 +4,16 @@
 AnimationDrawcall::AnimationDrawcall() {}
 
 AnimationDrawcall::AnimationDrawcall(Animation* anim) :Drawcall() {
-	vbos = new GLuint[7];
+	objectCount = 1;
 
 	animation = anim;
 	vertices = new float[anim->aVertices.size() * 3];
 	normals = new float[anim->aNormals.size() * 3];
 	texcoords = new float[anim->aTexcoords.size() * 4];
 	colors = new byte[anim->aAmbients.size() * 3];
-	boneids = new ushort[anim->aBoneids.size() * 4];
+	boneids = new byte[anim->aBoneids.size() * 4];
 	weights = new float[anim->aWeights.size() * 4];
-	indices = new uint[anim->aIndices.size()];
+	indices = new ushort[anim->aIndices.size()];
 	indexCount = anim->aIndices.size();
 	boneCount = anim->boneCount;
 
@@ -43,10 +43,10 @@ AnimationDrawcall::AnimationDrawcall(Animation* anim) :Drawcall() {
 		colors[i * 3 + 2] = (byte)(anim->aSpeculars[i].x * 255);
 	}
 	for (uint i = 0; i < anim->aBoneids.size(); i++) {
-		boneids[i * 4] = (ushort)(anim->aBoneids[i].x);
-		boneids[i * 4 + 1] = (ushort)(anim->aBoneids[i].y);
-		boneids[i * 4 + 2] = (ushort)(anim->aBoneids[i].z);
-		boneids[i * 4 + 3] = (ushort)(anim->aBoneids[i].w);
+		boneids[i * 4] = (byte)(anim->aBoneids[i].x);
+		boneids[i * 4 + 1] = (byte)(anim->aBoneids[i].y);
+		boneids[i * 4 + 2] = (byte)(anim->aBoneids[i].z);
+		boneids[i * 4 + 3] = (byte)(anim->aBoneids[i].w);
 	}
 	for (uint i = 0; i < anim->aWeights.size(); i++) {
 		weights[i * 4] = anim->aWeights[i].x;
@@ -55,56 +55,30 @@ AnimationDrawcall::AnimationDrawcall(Animation* anim) :Drawcall() {
 		weights[i * 4 + 3] = anim->aWeights[i].w;
 	}
 	for (uint i = 0; i < anim->aIndices.size(); i++)
-		indices[i] = anim->aIndices[i];
+		indices[i] = (ushort)(anim->aIndices[i]);
 
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-	glGenBuffers(7, vbos);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbos[VERTEX_VBO]);
-	glBufferData(GL_ARRAY_BUFFER, anim->aVertices.size() * 3 * sizeof(float),
-		vertices, GL_STATIC_DRAW);
-	glVertexAttribPointer(VERTEX_LOCATION, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(VERTEX_LOCATION);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbos[NORMAL_VBO]);
-	glBufferData(GL_ARRAY_BUFFER, anim->aNormals.size() * 3 * sizeof(float),
-		normals, GL_STATIC_DRAW);
-	glVertexAttribPointer(NORMAL_LOCATION, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(NORMAL_LOCATION);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbos[TEXCOORD_VBO]);
-	glBufferData(GL_ARRAY_BUFFER, anim->aTexcoords.size() * textureChannel * sizeof(float),
-		texcoords, GL_STATIC_DRAW);
-	glVertexAttribPointer(TEXCOORD_LOCATION, textureChannel, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(TEXCOORD_LOCATION);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbos[COLOR_VBO]);
-	glBufferData(GL_ARRAY_BUFFER, anim->aAmbients.size() * 3 * sizeof(byte),
-		colors, GL_STATIC_DRAW);
-	glVertexAttribPointer(COLOR_LOCATION, 3, GL_UNSIGNED_BYTE, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(COLOR_LOCATION);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbos[BONEID_VBO]);
-	glBufferData(GL_ARRAY_BUFFER, anim->aBoneids.size() * 4 * sizeof(ushort),
-		boneids, GL_STATIC_DRAW);
-	glVertexAttribPointer(BONEIDS_LOCATION, 4, GL_UNSIGNED_SHORT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(BONEIDS_LOCATION);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbos[WEIGHT_VBO]);
-	glBufferData(GL_ARRAY_BUFFER, anim->aWeights.size() * 4 * sizeof(float),
-		weights, GL_STATIC_DRAW);
-	glVertexAttribPointer(WEIGHTS_LOCATION, 4, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(WEIGHTS_LOCATION);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbos[INDEX_VBO]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, anim->aIndices.size()*sizeof(uint),
-		indices, GL_STATIC_DRAW);
+	dataBuffer = new RenderBuffer(7);
+	dataBuffer->pushData(0, new RenderData(VERTEX_LOCATION, GL_FLOAT, anim->aVertices.size(), 3, 1,
+		dataBuffer->vbos[0], false, GL_STATIC_DRAW, -1, vertices));
+	dataBuffer->pushData(1, new RenderData(NORMAL_LOCATION, GL_FLOAT, anim->aNormals.size(), 3, 1,
+		dataBuffer->vbos[1], false, GL_STATIC_DRAW, -1, normals));
+	dataBuffer->pushData(2, new RenderData(TEXCOORD_LOCATION, GL_FLOAT, anim->aTexcoords.size(), textureChannel, 1,
+		dataBuffer->vbos[2], false, GL_STATIC_DRAW, -1, texcoords));
+	dataBuffer->pushData(3, new RenderData(COLOR_LOCATION, GL_UNSIGNED_BYTE, anim->aAmbients.size(), 3, 1,
+		dataBuffer->vbos[3], false, GL_STATIC_DRAW, -1, colors));
+	dataBuffer->pushData(4, new RenderData(BONEIDS_LOCATION, GL_UNSIGNED_BYTE, anim->aBoneids.size(), 4, 1,
+		dataBuffer->vbos[4], false, GL_STATIC_DRAW, -1, boneids));
+	dataBuffer->pushData(5, new RenderData(WEIGHTS_LOCATION, GL_FLOAT, anim->aWeights.size(), 4, 1,
+		dataBuffer->vbos[5], false, GL_STATIC_DRAW, -1, weights));
+	dataBuffer->pushData(6, new RenderData(GL_UNSIGNED_SHORT, anim->aIndices.size(),
+		dataBuffer->vbos[6], GL_STATIC_DRAW, indices));
 
 	createSimple();
 	glBindVertexArray(0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	setType(ANIMATE_DC);
 }
 
 AnimationDrawcall::~AnimationDrawcall() {
@@ -116,44 +90,23 @@ AnimationDrawcall::~AnimationDrawcall() {
 	delete[] boneids; boneids=NULL;
 	delete[] weights; weights=NULL;
 	delete[] indices; indices=NULL;
-	glDeleteBuffers(7,vbos);
-	delete[] vbos; vbos=NULL;
-	glDeleteVertexArrays(1,&vao);
+	delete dataBuffer;
 }
 
 void AnimationDrawcall::createSimple() {
-	vboSimple = new GLuint[4];
-	glGenVertexArrays(1, &vaoSimple);
-	glBindVertexArray(vaoSimple);
-	glGenBuffers(4, vboSimple);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vboSimple[0]);
-	glBufferData(GL_ARRAY_BUFFER, animation->aVertices.size() * 3 * sizeof(float),
-		vertices, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vboSimple[1]);
-	glBufferData(GL_ARRAY_BUFFER, animation->aBoneids.size() * 4 * sizeof(uint),
-		boneids, GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 4, GL_UNSIGNED_SHORT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(1);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vboSimple[2]);
-	glBufferData(GL_ARRAY_BUFFER, animation->aWeights.size() * 4 * sizeof(float),
-		weights, GL_STATIC_DRAW);
-	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(2);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboSimple[3]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, animation->aIndices.size()*sizeof(uint),
-		indices, GL_STATIC_DRAW);
+	simpleBuffer = new RenderBuffer(4);
+	simpleBuffer->pushData(0, new RenderData(0, GL_FLOAT, animation->aVertices.size(), 3, 1,
+		simpleBuffer->vbos[0], false, GL_STATIC_DRAW, -1, vertices));
+	simpleBuffer->pushData(1, new RenderData(1, GL_UNSIGNED_BYTE, animation->aBoneids.size(), 4, 1,
+		simpleBuffer->vbos[1], false, GL_STATIC_DRAW, -1, boneids));
+	simpleBuffer->pushData(2, new RenderData(2, GL_FLOAT, animation->aWeights.size(), 4, 1,
+		simpleBuffer->vbos[2], false, GL_STATIC_DRAW, -1, weights));
+	simpleBuffer->pushData(3, new RenderData(GL_UNSIGNED_SHORT, animation->aIndices.size(),
+		simpleBuffer->vbos[3], GL_STATIC_DRAW, indices));
 }
 
 void AnimationDrawcall::releaseSimple() {
-	glDeleteBuffers(4, vboSimple);
-	delete[] vboSimple; vboSimple = NULL;
-	glDeleteVertexArrays(1, &vaoSimple);
+	delete simpleBuffer;
 }
 
 void AnimationDrawcall::draw(Shader* shader,bool simple) {
@@ -164,8 +117,8 @@ void AnimationDrawcall::draw(Shader* shader,bool simple) {
 	if (animation->boneTransformMats)
 		shader->setMatrix3x4("boneMats", boneCount, animation->boneTransformMats);
 	if (!simple)
-		glBindVertexArray(vao);
+		dataBuffer->use();
 	else
-		glBindVertexArray(vaoSimple);
-	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+		simpleBuffer->use();
+	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, 0);
 }

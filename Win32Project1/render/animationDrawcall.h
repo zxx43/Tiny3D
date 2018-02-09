@@ -19,9 +19,9 @@ private:
 	float* normals;
 	float* texcoords;
 	unsigned char* colors;
-	unsigned short* boneids;
+	unsigned char* boneids;
 	float* weights;
-	unsigned int* indices;
+	unsigned short* indices;
 	int indexCount;
 	int textureChannel;
 

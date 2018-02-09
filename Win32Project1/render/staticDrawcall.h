@@ -15,8 +15,8 @@ class StaticDrawcall: public Drawcall {
 private:
 	int vertexCount,indexCount;
 	bool indexed;
-	Batch* batch;
 public:
+	Batch* batch;
 	StaticDrawcall();
 	StaticDrawcall(Batch* batch);
 	virtual ~StaticDrawcall();

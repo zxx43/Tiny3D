@@ -166,7 +166,11 @@ void Render::draw(Camera* camera,Drawcall* drawcall,const RenderState* state) {
 	setState(state);
 	if (drawcall->isSingleSide())
 		setCullState(false);
+
 	Shader* shader = state->shader;
+	if (drawcall->getType()==INSTANCE_DC)
+		shader = state->shaderIns;
+	
 	useShader(shader);
 	if (camera) {
 		if (!state->shadowPass) {
@@ -183,6 +187,9 @@ void Render::draw(Camera* camera,Drawcall* drawcall,const RenderState* state) {
 		shader->setMatrix4("lightViewProjFar", state->shadow->lightFarMat);
 		shader->setVector2("levels", state->shadow->level1, state->shadow->level2);
 	}
+
+	if (drawcall->getType() == STATIC_DC && !drawcall->isFullStatic() && state->lightEffect) 
+		shader->setMatrix3x4("modelMatrices", drawcall->objectCount, drawcall->uModelMatrix);
 	drawcall->draw(shader, state->shadowPass);
 }
 

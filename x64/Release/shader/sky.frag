@@ -13,5 +13,5 @@ void main() {
 	FragColor = vec4(texColor.rgb, 1.0);
 
 	FragDepth = vec4(1.0);
-	FragNormal = vec4(0.0, 0.0, 1.0, 0.0);
+	FragNormal = vec4(0.0, 0.0, 1.0, 1.0);
 }

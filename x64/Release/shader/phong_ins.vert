@@ -1,6 +1,5 @@
 #version 330
 
-uniform mat3x4 modelMatrices[100];
 uniform mat4 viewMatrix;
 uniform mat4 projectMatrix;
 uniform mat4 lightViewProjNear, lightViewProjMid, lightViewProjFar;
@@ -9,7 +8,7 @@ layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec3 texcoord;
 layout (location = 3) in vec3 color;
-layout (location = 4) in float objectid;
+layout (location = 4) in mat3x4 modelMatrix;
 
 out vec2 vTexcoord;
 flat out float vTexid;
@@ -33,7 +32,7 @@ mat4 convertMat(mat3x4 srcMat) {
 void main() {
 	vColor = color * 0.005;
 	
-	mat4 matModel = convertMat(modelMatrices[int(objectid)]);
+	mat4 matModel = convertMat(modelMatrix);
 	vec4 worldVertex = matModel * vec4(vertex, 1.0);
 	vNormal = (matModel * vec4(normal, 0.0)).xyz;
 	

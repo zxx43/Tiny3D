@@ -57,9 +57,9 @@ void Node::clearChildren() {
 	children.clear();
 }
 
-bool Node::checkInCamera(Camera* camera) {
-	if(boundingBox)
-		return boundingBox->checkWithCamera(camera);
+bool Node::checkInCamera(Camera* camera, bool simple) {
+	if (boundingBox)
+		return boundingBox->checkWithCamera(camera, simple);
 	return true;
 }
 

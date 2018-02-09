@@ -28,10 +28,8 @@ void main() {
 	float ambientFactor = 0.6; float diffuseFactor = 1.2;
 	vec3 ambientColor = vColor.xxx * ambientFactor;
 	vec3 diffuseColor = vColor.yyy * diffuseFactor;
-	vec3 textureColor = vec3(1.0);
-		
-	if(texcoord.p >= 0.0) 
-		textureColor = texture2DArray(texture, texcoord).rgb;
+	vec3 textureColor = texture2DArray(texture, texcoord).rgb;
+
 	diffuseColor *= max(ndotl, 0.0);
 		
 	FragColor.rgb = textureColor * (ambientColor + diffuseColor);

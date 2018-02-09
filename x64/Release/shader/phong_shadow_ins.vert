@@ -1,11 +1,10 @@
 #version 330
 
 uniform mat4 viewProjectMatrix;
-uniform mat3x4 modelMatrices[100];
 
 layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 texcoord;
-layout (location = 2) in float objectid;
+layout (location = 2) in mat3x4 modelMatrix;
 
 out vec2 vTexcoord;
 flat out float vTexid;
@@ -25,7 +24,7 @@ mat4 convertMat(mat3x4 srcMat) {
 void main() {
 	vTexcoord = texcoord.xy;
 	vTexid = texcoord.z; 
-	vec4 worldVertex = convertMat(modelMatrices[int(objectid)]) * vec4(vertex, 1.0);
+	vec4 worldVertex = convertMat(modelMatrix) * vec4(vertex, 1.0);
 	gl_Position = viewProjectMatrix * worldVertex;
 	projPosition = gl_Position;
 }

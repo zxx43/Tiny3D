@@ -20,7 +20,7 @@ public:
 	BoundingBox(const BoundingBox& rhs);
 	virtual ~BoundingBox();
 	virtual BoundingBox* clone()=0;
-	virtual bool checkWithCamera(Camera* camera)=0;
+	virtual bool checkWithCamera(Camera* camera, bool simple)=0;
 	virtual void update(const VECTOR3D& pos)=0;
 	virtual void merge(const std::vector<BoundingBox*>& others)=0;
 };

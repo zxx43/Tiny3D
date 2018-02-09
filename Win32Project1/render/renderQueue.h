@@ -18,6 +18,6 @@ public:
 	void animate(long startTime, long currentTime);
 };
 
-void pushNodeToQueue(RenderQueue* queue, Node* node, Camera* camera);
+void pushNodeToQueue(RenderQueue* queue, Node* node, Camera* camera, bool simple);
 
 #endif

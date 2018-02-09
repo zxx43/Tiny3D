@@ -5,7 +5,11 @@ Drawcall::Drawcall() {
 	uModelMatrix = NULL;
 	uNormalMatrix = NULL; 
 	setSide(false);
+	setType(NULL_DC);
 	setFullStatic(false);
+	objectCount = 0;
+	dataBuffer = NULL;
+	simpleBuffer = NULL;
 }
 
 Drawcall::~Drawcall() {
@@ -21,6 +25,14 @@ void Drawcall::setSide(bool single) {
 
 bool Drawcall::isSingleSide() {
 	return singleSide;
+}
+
+void Drawcall::setType(int typ) {
+	type = typ;
+}
+
+int Drawcall::getType() {
+	return type;
 }
 
 void Drawcall::setFullStatic(bool stat) {

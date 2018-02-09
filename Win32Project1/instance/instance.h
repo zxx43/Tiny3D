@@ -22,7 +22,7 @@ public:
 	float* normalBuffer;
 	float* texcoordBuffer;
 	unsigned char* colorBuffer;
-	unsigned int* indexBuffer;
+	unsigned short* indexBuffer;
 
 	int instanceCount;
 	int textureChannel;

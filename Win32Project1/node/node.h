@@ -44,7 +44,7 @@ public:
 
 	Node(const VECTOR3D& position,const VECTOR3D& size);
 	virtual ~Node();
-	bool checkInCamera(Camera* camera);
+	bool checkInCamera(Camera* camera,bool simple);
 	virtual void prepareDrawcall()=0;
 	virtual void updateDrawcall(bool updateNormal) = 0;
 

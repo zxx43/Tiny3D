@@ -41,7 +41,7 @@ void Instance::initInstanceBuffers(int mid,int vertices,int indices) {
 
 	indexCount=indices;
 	if(indexCount>0)
-		indexBuffer=new uint[indexCount];
+		indexBuffer=new ushort[indexCount];
 
 	for(int i=0;i<vertexCount;i++) {
 		VECTOR4D vertex=instanceMesh->vertices[i];
@@ -82,7 +82,7 @@ void Instance::initInstanceBuffers(int mid,int vertices,int indices) {
 	if(instanceMesh->indices) {
 		for(int i=0;i<indexCount;i++) {
 			int index=instanceMesh->indices[i];
-			indexBuffer[i]=(uint)index;
+			indexBuffer[i]=(ushort)index;
 		}
 	}
 }

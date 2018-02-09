@@ -73,9 +73,9 @@ void StaticNode::updateDrawcall(bool updateNormal) {
 			MATRIX4X4 transformMatrix = nodeTransform * object->localTransformMatrix;
 			if (updateNormal) {
 				MATRIX4X4 normalMatrix = object->normalMatrix;
-				batch->updateMatricesBuffer(baseVertex, object->mesh, transformMatrix, &normalMatrix);
+				batch->updateMatrices(i, transformMatrix, &normalMatrix);
 			} else
-				batch->updateMatricesBuffer(baseVertex, object->mesh, transformMatrix, NULL);
+				batch->updateMatrices(i, transformMatrix, NULL);
 
 			baseVertex += object->mesh->vertexCount;
 		}

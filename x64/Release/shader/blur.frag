@@ -20,27 +20,28 @@ void main() {
 		FragColor = texture2D(depthBuffer, vTexcoord);
 	else if(vTexcoord.x < 0.666666)
 		FragColor = texture2D(normalBuffer, vTexcoord);
-	else*/ 
+	else
+	//*/ 
 	//	FragColor = texture2D(colorBuffer, vTexcoord);
 	///*
 	vec4 tmp = texture2D(colorBuffer, vTexcoord + vec2(-pixW, -pixH));
-	sum += tmp * 1.0 / 16.0;
+	sum += tmp * 0.0625;
 	tmp = texture2D(colorBuffer, vTexcoord + vec2(0.0, -pixH));
-	sum += tmp * 2.0 / 16.0;
+	sum += tmp * 0.125;
 	tmp = texture2D(colorBuffer, vTexcoord + vec2(pixW, -pixH));
-	sum += tmp * 1.0 / 16.0;
+	sum += tmp * 0.0625;
 	tmp = texture2D(colorBuffer, vTexcoord + vec2(-pixW, 0.0));
-	sum += tmp * 2.0 / 16.0;
+	sum += tmp * 0.125;
 	tmp = texture2D(colorBuffer, vTexcoord);
-	sum += tmp * 4.0 / 16.0;
+	sum += tmp * 0.25;
 	tmp = texture2D(colorBuffer, vTexcoord + vec2(pixW, 0.0));
-	sum += tmp * 2.0 / 16.0;
+	sum += tmp * 0.125;
 	tmp = texture2D(colorBuffer, vTexcoord + vec2(-pixW, pixH));
-	sum += tmp * 1.0 / 16.0;
+	sum += tmp * 0.0625;
 	tmp = texture2D(colorBuffer, vTexcoord + vec2(0.0, pixH));
-	sum += tmp * 2.0 / 16.0;
+	sum += tmp * 0.125;
 	tmp = texture2D(colorBuffer, vTexcoord + vec2(pixW, pixH));
-	sum += tmp * 1.0 / 16.0;
+	sum += tmp * 0.0625;
 
 	FragColor = sum;	
 	//*/

@@ -97,12 +97,8 @@ float genShadowFactor(float bias) {
 }
 
 void main() {
-	vec4 textureColor = vec4(1.0);
 	vec3 texcoord = vec3(vTexcoord, vTexid);
-	if(texcoord.p >= 0.0) {
-		textureColor = texture2DArray(texture, texcoord);
-		if(textureColor.a < 0.1) discard;
-	}
+	vec4 textureColor = texcoord.p >= 0.0 ? texture2DArray(texture, texcoord) : vec4(1.0);
 
 	vec3 normal = normalize(vNormal);
 		
@@ -116,15 +112,13 @@ void main() {
 		
 	diffuseColor *= max(ndotl, 0.0);
 
-	float shadowFactor = 1.0;
-	if(useShadow > 0)
-		shadowFactor = genShadowFactor(bias);
+	float shadowFactor = useShadow > 0 ? genShadowFactor(bias) : 1.0;
 		
 	FragColor.rgb = textureColor.rgb * (ambientColor + shadowFactor * diffuseColor);
 	FragColor.a = textureColor.a;
 
 	float depth = projPosition.z / projPosition.w;
-	FragDepth = vec4(depth, depth, depth, depth);
+	FragDepth = vec4(depth, depth, depth, 1.0);
 	vec3 outNormal = normal * 0.5 + 0.5;
-	FragNormal = vec4(outNormal, 0.0); 
+	FragNormal = vec4(outNormal, 1.0); 
 }

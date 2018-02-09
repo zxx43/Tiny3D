@@ -12,6 +12,7 @@ ShaderManager::~ShaderManager() {
 
 Shader* ShaderManager::addShader(const char* name,const char* vs,const char* fs) {
 	Shader* shader=new Shader(vs,fs);
+	shader->name = name;
 	shaders.insert(pair<string,Shader*>(name,shader));
 	return shader;
 }

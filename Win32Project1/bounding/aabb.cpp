@@ -154,7 +154,7 @@ bool AABB::cameraVertexInside(const VECTOR3D& vertex) {
 	return true;
 }
 
-bool AABB::checkWithCamera(Camera* camera) {
+bool AABB::checkWithCamera(Camera* camera, bool simple) {
 	for(int i=0;i<8;i++) {
 		if(vertexInsideCamera(vertices[i],camera))
 			return true;
@@ -169,30 +169,32 @@ bool AABB::checkWithCamera(Camera* camera) {
 			return true;
 	}
 
-	if (camera->frustum->intersectsWidthRay(vertices[0], VECTOR3D(1, 0, 0), sizex))
-		return true;
-	if (camera->frustum->intersectsWidthRay(vertices[0], VECTOR3D(0, 1, 0), sizey))
-		return true;
-	if (camera->frustum->intersectsWidthRay(vertices[0], VECTOR3D(0, 0, 1), sizez))
-		return true;
-	if (camera->frustum->intersectsWidthRay(vertices[7], VECTOR3D(-1, 0, 0), sizex))
-		return true;
-	if (camera->frustum->intersectsWidthRay(vertices[7], VECTOR3D(0, -1, 0), sizey))
-		return true;
-	if (camera->frustum->intersectsWidthRay(vertices[7], VECTOR3D(0, 0, -1), sizez))
-		return true;
-	if (camera->frustum->intersectsWidthRay(vertices[4], VECTOR3D(1, 0, 0), sizex))
-		return true;
-	if (camera->frustum->intersectsWidthRay(vertices[3], VECTOR3D(-1, 0, 0), sizex))
-		return true;
-	if (camera->frustum->intersectsWidthRay(vertices[4], VECTOR3D(0, 1, 0), sizey))
-		return true;
-	if (camera->frustum->intersectsWidthRay(vertices[1], VECTOR3D(0, 1, 0), sizey))
-		return true;
-	if (camera->frustum->intersectsWidthRay(vertices[2], VECTOR3D(0, 0, 1), sizez))
-		return true;
-	if (camera->frustum->intersectsWidthRay(vertices[1], VECTOR3D(0, 0, 1), sizez))
-		return true;
+	if (!simple) {
+		if (camera->frustum->intersectsWidthRay(vertices[0], VECTOR3D(1, 0, 0), sizex))
+			return true;
+		if (camera->frustum->intersectsWidthRay(vertices[0], VECTOR3D(0, 1, 0), sizey))
+			return true;
+		if (camera->frustum->intersectsWidthRay(vertices[0], VECTOR3D(0, 0, 1), sizez))
+			return true;
+		if (camera->frustum->intersectsWidthRay(vertices[7], VECTOR3D(-1, 0, 0), sizex))
+			return true;
+		if (camera->frustum->intersectsWidthRay(vertices[7], VECTOR3D(0, -1, 0), sizey))
+			return true;
+		if (camera->frustum->intersectsWidthRay(vertices[7], VECTOR3D(0, 0, -1), sizez))
+			return true;
+		if (camera->frustum->intersectsWidthRay(vertices[4], VECTOR3D(1, 0, 0), sizex))
+			return true;
+		if (camera->frustum->intersectsWidthRay(vertices[3], VECTOR3D(-1, 0, 0), sizex))
+			return true;
+		if (camera->frustum->intersectsWidthRay(vertices[4], VECTOR3D(0, 1, 0), sizey))
+			return true;
+		if (camera->frustum->intersectsWidthRay(vertices[1], VECTOR3D(0, 1, 0), sizey))
+			return true;
+		if (camera->frustum->intersectsWidthRay(vertices[2], VECTOR3D(0, 0, 1), sizez))
+			return true;
+		if (camera->frustum->intersectsWidthRay(vertices[1], VECTOR3D(0, 0, 1), sizez))
+			return true;
+	}
 
 	return false;
 }

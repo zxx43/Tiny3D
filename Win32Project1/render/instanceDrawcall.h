@@ -13,7 +13,7 @@
 
 class InstanceDrawcall: public Drawcall {
 private:
-	int vertexCount,indexCount,instanceCount;
+	int vertexCount,indexCount;
 	bool indexed;
 	Instance* instance;
 public:

@@ -62,16 +62,16 @@ void RenderQueue::animate(long startTime, long currentTime) {
 	}
 }
 
-void pushNodeToQueue(RenderQueue* queue, Node* node, Camera* camera) {
-	if (node->checkInCamera(camera)) {
+void pushNodeToQueue(RenderQueue* queue, Node* node, Camera* camera, bool simple) {
+	if (node->checkInCamera(camera, simple)) {
 		for (unsigned int i = 0; i<node->children.size(); i++) {
 			Node* child = node->children[i];
 			if (child->objects.size()>0) {
-				if (child->checkInCamera(camera))
+				if (child->checkInCamera(camera, simple))
 					queue->push(child);
 			}
 			else
-				pushNodeToQueue(queue, child, camera);
+				pushNodeToQueue(queue, child, camera, simple);
 		}
 	}
 }

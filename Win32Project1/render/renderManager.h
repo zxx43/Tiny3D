@@ -88,8 +88,11 @@ private: // States
 private: // Shaders
 	Shader* phongShadow;
 	Shader* phongShadowLow;
-	Shader* boneShadow;
 	Shader* phong;
+	Shader* phongShadowIns;
+	Shader* phongShadowLowIns;
+	Shader* phongIns;
+	Shader* boneShadow;
 	Shader* bone;
 	Shader* mix;
 	Shader* skyCube;
