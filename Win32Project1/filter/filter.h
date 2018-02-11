@@ -18,7 +18,7 @@ private:
 	StaticNode* boardNode;
 	RenderState* state;
 public:
-	Filter(float width,float height,bool useFramebuffer);
+	Filter(float width, float height, bool useFramebuffer, int precision);
 	~Filter();
 
 	void draw(Render* render, Shader* shader, const std::vector<Texture2D*>& inputTextures);

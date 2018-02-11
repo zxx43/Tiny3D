@@ -6,12 +6,12 @@ RenderManager::RenderManager(Camera* view, float distance1, float distance2, VEC
 	float nearSize=1024;
 	float midSize=2048;
 	float farSize=2048;
-	nearBuffer=new FrameBuffer(nearSize,nearSize,false);
-	midBuffer=new FrameBuffer(midSize,midSize,false);
-	farBuffer=new FrameBuffer(farSize,farSize,false);
+	nearBuffer=new FrameBuffer(nearSize,nearSize,false,HIGH_PRE);
+	midBuffer=new FrameBuffer(midSize,midSize,false,HIGH_PRE);
+	farBuffer=new FrameBuffer(farSize,farSize,false,LOW_PRE);
 	lightDir=light;
 
-	filterNear=new Filter(nearSize,nearSize,true);
+	filterNear=new Filter(nearSize,nearSize,true,LOW_PRE);
 
 	renderData = new Renderable(); renderData->copyCamera(view);
 	queue1 = new Renderable(); queue1->copyCamera(view);

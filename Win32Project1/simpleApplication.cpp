@@ -23,12 +23,12 @@ void SimpleApplication::resize(int width, int height) {
 	Application::resize(width, height);
 
 	if (screen) delete screen;
-	screen = new FrameBuffer(width, height, true);
+	screen = new FrameBuffer(width, height, true, LOW_PRE);
 	screen->addColorBuffer();
 	screen->addColorBuffer();
 
 	if (screenFilter) delete screenFilter;
-	screenFilter = new Filter(width*0.8, height*0.8, false);
+	screenFilter = new Filter(width*0.8, height*0.8, false, LOW_PRE);
 }
 
 void SimpleApplication::keyDown(int key) {

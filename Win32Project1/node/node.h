@@ -8,6 +8,11 @@
 #ifndef NODE_H_
 #define NODE_H_
 
+#define TYPE_NULL 0
+#define TYPE_STATIC 1
+#define TYPE_INSTANCE 2
+#define TYPE_ANIMATE 3
+
 #include "../bounding/AABB.h"
 #include "../camera/camera.h"
 #include "../object/object.h"
@@ -27,6 +32,7 @@ public:
 public:
 	VECTOR4D position;
 	VECTOR3D size;
+	int type;
 	BoundingBox* boundingBox;
 
 	std::vector<Object*> objects;

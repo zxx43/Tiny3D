@@ -19,7 +19,7 @@ TerrainNode::~TerrainNode() {
 }
 
 void TerrainNode::prepareTriangles() {
-	StaticObject* object = dynamic_cast<StaticObject*>(objects[0]);
+	StaticObject* object = (StaticObject*)(objects[0]);
 	offsize.x = object->sizex;
 	offsize.y = object->sizey;
 	offsize.z = object->sizez;
@@ -27,7 +27,7 @@ void TerrainNode::prepareTriangles() {
 	offset.y = position.y + object->position.y;
 	offset.z = position.z + object->position.z;
 
-	Terrain* mesh = dynamic_cast<Terrain*>(objects[0]->mesh);
+	Terrain* mesh = (Terrain*)(objects[0]->mesh);
 	blockCount = mesh->blockCount;
 	lineSize = sqrt(blockCount);
 	VECTOR4D* vertices = mesh->vertices;
@@ -75,8 +75,8 @@ float TerrainNode::cauculateY(float x, float z) {
 
 void standObjectsOnGround(Node* node, TerrainNode* terrain) {
 	if (node->children.size() <= 0) {
-		AnimationNode* animNode = dynamic_cast<AnimationNode*>(node);
-		if (animNode) {
+		if (node->type == TYPE_ANIMATE) {
+			AnimationNode* animNode = (AnimationNode*)node;
 			VECTOR3D worldCenter = animNode->boundingBox->position;
 			worldCenter.y = terrain->cauculateY(worldCenter.x, worldCenter.z) + ((AABB*)animNode->boundingBox)->sizey * 0.5;
 			animNode->translateNodeCenterAtWorld(worldCenter.x, worldCenter.y, worldCenter.z);

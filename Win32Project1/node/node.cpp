@@ -23,6 +23,8 @@ Node::Node(const VECTOR3D& position,const VECTOR3D& size) {
 	parent=NULL;
 	children.clear();
 	nodeBBs.clear();
+
+	type = TYPE_NULL;
 }
 
 Node::~Node() {

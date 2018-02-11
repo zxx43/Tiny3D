@@ -4,6 +4,7 @@
 
 InstanceNode::InstanceNode(const VECTOR3D& position):Node(position, VECTOR3D(0, 0, 0)) {
 	instance = NULL;
+	type = TYPE_INSTANCE;
 }
 
 InstanceNode::~InstanceNode() {

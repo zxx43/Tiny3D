@@ -22,11 +22,12 @@ void RenderQueue::flush() {
 }
 
 void RenderQueue::draw(Camera* camera, Render* render, RenderState* state) {
-	for (unsigned int i = 0; i < queue.size(); i++) {
-		Node* node = queue[i];
-		if (!node->drawcall || node->needCreateDrawcall) 
+	std::vector<Node*>::iterator it = queue.begin();
+	while (it != queue.end()) {
+		Node* node = *it;
+		if (!node->drawcall || node->needCreateDrawcall)
 			node->prepareDrawcall();
-		else if (node->needUpdateDrawcall) 
+		else if (node->needUpdateDrawcall)
 			node->updateDrawcall(node->needUpdateNormal);
 
 		if (node->uTransformMatrix) {
@@ -50,15 +51,19 @@ void RenderQueue::draw(Camera* camera, Render* render, RenderState* state) {
 		}
 
 		render->draw(camera, node->drawcall, state);
+		it++;
 	}
 }
 
 void RenderQueue::animate(long startTime, long currentTime) {
-	for (unsigned int i = 0; i < queue.size(); i++) {
-		Node* node = queue[i];
-		AnimationNode* animateNode = dynamic_cast<AnimationNode*>(node);
-		if (animateNode)
+	std::vector<Node*>::iterator it = queue.begin();
+	while(it!=queue.end()) {
+		Node* node = *it;
+		if (node->type == TYPE_ANIMATE) {
+			AnimationNode* animateNode = (AnimationNode*)node;
 			animateNode->animate(0, startTime, currentTime);
+		}
+		it++;
 	}
 }
 

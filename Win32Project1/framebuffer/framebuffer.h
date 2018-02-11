@@ -21,12 +21,13 @@ private:
 	unsigned int fboId;
 	float width,height;
 	bool hasDepth;
+	int precision;
 	int colorBufferCount;
 	Texture2D* depthBuffer;
 public:
 	std::vector<Texture2D*> colorBuffers;
 public:
-	FrameBuffer(float width,float height,bool depth);
+	FrameBuffer(float width, float height, bool depth, int precision);
 	~FrameBuffer();
 public:
 	void addColorBuffer();

@@ -7,6 +7,7 @@ AnimationNode::AnimationNode(const VECTOR3D& boundingSize):
 	animation = NULL;
 	uTransformMatrix = new MATRIX4X4();
 	uNormalMatrix = new MATRIX4X4();
+	type = TYPE_ANIMATE;
 }
 
 AnimationNode::~AnimationNode() {}

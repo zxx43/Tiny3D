@@ -7,6 +7,7 @@ StaticNode::StaticNode(const VECTOR3D& position):Node(position, VECTOR3D(0, 0, 0
 	batchVertexCount = 0;
 	batchIndexCount = 0;
 	fullStatic = false;
+	type = TYPE_STATIC;
 }
 
 StaticNode::~StaticNode() {

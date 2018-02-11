@@ -1,4 +1,5 @@
 #include "staticDrawcall.h"
+#include <string.h>
 
 StaticDrawcall::StaticDrawcall() {}
 
