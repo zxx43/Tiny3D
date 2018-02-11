@@ -164,8 +164,12 @@ void Render::useShader(Shader* shader) {
 
 void Render::draw(Camera* camera,Drawcall* drawcall,const RenderState* state) {
 	setState(state);
-	if (drawcall->isSingleSide())
-		setCullState(false);
+	if (drawcall->isSingleSide()) { // Special case
+		if (!state->shadowPass)
+			setCullState(false);
+		else
+			setCullMode(CULL_BACK);
+	}
 
 	Shader* shader = state->shader;
 	if (drawcall->getType()==INSTANCE_DC)
