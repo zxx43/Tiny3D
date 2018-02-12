@@ -215,6 +215,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="animation\animation.h" />
+    <ClInclude Include="animation\animationData.h" />
     <ClInclude Include="application\application.h" />
     <ClInclude Include="assets\assetManager.h" />
     <ClInclude Include="batch\batch.h" />

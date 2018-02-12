@@ -473,6 +473,9 @@
     <ClInclude Include="render\renderBuffer.h">
       <Filter>Source Files\render</Filter>
     </ClInclude>
+    <ClInclude Include="animation\animationData.h">
+      <Filter>Source Files\animation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\x64\Release\shader\blur.frag">

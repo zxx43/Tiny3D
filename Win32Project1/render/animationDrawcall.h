@@ -9,24 +9,14 @@
 #define ANIMATIONDRAWCALL_H_
 
 #include "drawcall.h"
-#include "../animation/animation.h"
+#include "../animation/animationData.h"
 
 #define UNIFORM_BONEMATS "boneMats"
 
 class AnimationDrawcall: public Drawcall {
 private:
-	float* vertices;
-	float* normals;
-	float* texcoords;
-	unsigned char* colors;
-	unsigned char* boneids;
-	float* weights;
-	unsigned short* indices;
-	int indexCount;
-	int textureChannel;
-
-	Animation* animation;
-	int boneCount;
+	int vertexCount, indexCount;
+	AnimationData* animData;
 public:
 	AnimationDrawcall();
 	AnimationDrawcall(Animation* anim);
