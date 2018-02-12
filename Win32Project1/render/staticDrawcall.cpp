@@ -11,7 +11,10 @@ StaticDrawcall::StaticDrawcall(Batch* batch) :Drawcall() {
 	this->batch = batch;
 	setFullStatic(batch->fullStatic);
 
-	dataBuffer = new RenderBuffer(6);
+	int bufCount = 4; 
+	bufCount = !isFullStatic() ? bufCount + 1 : bufCount;
+	bufCount = indexed ? bufCount + 1 : bufCount;
+	dataBuffer = new RenderBuffer(bufCount);
 	dataBuffer->pushData(0, new RenderData(VERTEX_LOCATION, GL_FLOAT, vertexCount, 3, 1,
 		dataBuffer->vbos[0], false, GL_STATIC_DRAW, -1, batch->vertexBuffer));
 	dataBuffer->pushData(1, new RenderData(NORMAL_LOCATION, GL_FLOAT, vertexCount, 3, 1,
@@ -51,7 +54,10 @@ StaticDrawcall::~StaticDrawcall() {
 }
 
 void StaticDrawcall::createSimple() {
-	simpleBuffer = new RenderBuffer(4);
+	int bufCount = 2;
+	bufCount = !isFullStatic() ? bufCount + 1 : bufCount;
+	bufCount = indexed ? bufCount + 1 : bufCount;
+	simpleBuffer = new RenderBuffer(bufCount);
 	simpleBuffer->pushData(0, new RenderData(0, GL_FLOAT, vertexCount, 3, 1,
 		simpleBuffer->vbos[0], false, GL_STATIC_DRAW, -1, batch->vertexBuffer));
 	simpleBuffer->pushData(1, new RenderData(1, GL_FLOAT, vertexCount, batch->textureChannel, 1,

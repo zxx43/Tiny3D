@@ -7,7 +7,7 @@ InstanceDrawcall::InstanceDrawcall(Instance* instance) :Drawcall() {
 	objectCount = instance->instanceCount;
 	this->instance = instance;
 
-	dataBuffer = new RenderBuffer(6);
+	dataBuffer = new RenderBuffer(indexed ? 6 : 5);
 	dataBuffer->pushData(0, new RenderData(VERTEX_LOCATION, GL_FLOAT, vertexCount, 3, 1, 
 		dataBuffer->vbos[0], false, GL_STATIC_DRAW, 0, instance->vertexBuffer));
 	dataBuffer->pushData(1, new RenderData(NORMAL_LOCATION, GL_FLOAT, vertexCount, 3, 1,
@@ -36,7 +36,7 @@ InstanceDrawcall::~InstanceDrawcall() {
 }
 
 void InstanceDrawcall::createSimple() {
-	simpleBuffer = new RenderBuffer(4);
+	simpleBuffer = new RenderBuffer(indexed ? 4 : 3);
 	simpleBuffer->pushData(0, new RenderData(0, GL_FLOAT, vertexCount, 3, 1,
 		simpleBuffer->vbos[0], false, GL_STATIC_DRAW, 0, instance->vertexBuffer));
 	simpleBuffer->pushData(1, new RenderData(1, GL_FLOAT, vertexCount, instance->textureChannel, 1,

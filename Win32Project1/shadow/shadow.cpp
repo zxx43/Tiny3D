@@ -1,7 +1,4 @@
 #include "shadow.h"
-#include "../constants/constants.h"
-#include <algorithm>
-#include <stdio.h>
 
 Shadow::Shadow(Camera* view, float distance1, float distance2) {
 	viewCamera=view;

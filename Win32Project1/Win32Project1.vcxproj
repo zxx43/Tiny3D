@@ -258,8 +258,10 @@
     <ClInclude Include="render\glheader.h" />
     <ClInclude Include="render\instanceDrawcall.h" />
     <ClInclude Include="render\render.h" />
+    <ClInclude Include="render\renderBuffer.h" />
     <ClInclude Include="render\renderManager.h" />
     <ClInclude Include="render\renderQueue.h" />
+    <ClInclude Include="render\renderState.h" />
     <ClInclude Include="render\shaderscontainer.h" />
     <ClInclude Include="render\staticDrawcall.h" />
     <ClInclude Include="scene\scene.h" />

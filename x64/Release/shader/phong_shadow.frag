@@ -15,6 +15,6 @@ void main() {
 
 	float depth = projPosition.z / projPosition.w;
 	depth = depth * 0.5 + 0.5;
-	float depth2 = depth * depth;
-	FragColor = vec4(depth, depth2, 0.0, alpha);
+	//float depth2 = depth * depth;
+	FragColor = vec4(depth, depth, 0.0, alpha);
 }

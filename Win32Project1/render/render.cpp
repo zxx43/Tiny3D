@@ -171,10 +171,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,const RenderState* state) {
 			setCullMode(CULL_BACK);
 	}
 
-	Shader* shader = state->shader;
-	if (drawcall->getType()==INSTANCE_DC)
-		shader = state->shaderIns;
-	
+	Shader* shader = drawcall->getType() == INSTANCE_DC ? state->shaderIns : state->shader;
 	useShader(shader);
 	if (camera) {
 		if (!state->shadowPass) {
