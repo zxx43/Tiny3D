@@ -54,8 +54,8 @@ void DrawWindow() {
 DWORD WINAPI ActThreadRun(LPVOID param) {
 	DWORD last = 0;
 	while (!app->willExit) {
-		currentTime = GetTickCount();
-		if(currentTime - last >= 1) {
+		currentTime = timeGetTime();
+		if(currentTime - last > 10) {
 			app->moveCamera();
 			last = currentTime;
 		}
@@ -129,7 +129,7 @@ void DeleteMutex() {
 
 void CreateApplication() {
 	app = new SimpleApplication();
-	startTime = GetTickCount();
+	startTime = timeGetTime();
 }
 
 void ReleaseApplication() {
