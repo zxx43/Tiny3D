@@ -1,8 +1,7 @@
 #version 330
 
-uniform mat4 viewMatrix;
-uniform mat4 projectMatrix;
-uniform mat4 lightViewProjNear, lightViewProjMid, lightViewProjFar;
+uniform mat4 viewProjectMatrix;
+uniform vec3 light;
 
 layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 normal;
@@ -12,11 +11,9 @@ layout (location = 4) in mat3x4 modelMatrix;
 
 out vec2 vTexcoord;
 flat out float vTexid;
-flat out vec3 vColor;
+out vec3 vColor;
 out vec3 vNormal;
 out vec4 projPosition;
-out vec4 viewPosition;
-out vec4 lightNearPosition,lightMidPosition,lightFarPosition;
 
 mat4 convertMat(mat3x4 srcMat) {
 	vec4 col1 = srcMat[0];
@@ -30,19 +27,22 @@ mat4 convertMat(mat3x4 srcMat) {
 }
 
 void main() {
-	vColor = color * 0.005;
-	
 	mat4 matModel = convertMat(modelMatrix);
 	vec4 worldVertex = matModel * vec4(vertex, 1.0);
-	vNormal = (matModel * vec4(normal, 0.0)).xyz;
+	vec3 worldNormal = (matModel * vec4(normal, 0.0)).xyz;
+	vNormal = worldNormal;
+
+	vec3 matColor = color * 0.005;
+	float ambientFactor = 0.5; float diffuseFactor = 1.0;
+	vec3 ambientColor = matColor.xxx * ambientFactor;
+	vec3 diffuseColor = matColor.yyy * diffuseFactor;
+	vec3 invLight = normalize(-light);
+	float ndotl = dot(invLight, normalize(worldNormal));
+	diffuseColor *= max(ndotl, 0.0);
+	vColor = ambientColor + diffuseColor;
 	
 	vTexcoord = texcoord.xy; 
 	vTexid = texcoord.z;
-	viewPosition = viewMatrix * worldVertex;
-	gl_Position = projectMatrix * viewPosition;
+	gl_Position = viewProjectMatrix * worldVertex;;
 	projPosition = gl_Position;
-
-	lightNearPosition = lightViewProjNear * worldVertex;
-	lightMidPosition = lightViewProjMid * worldVertex;
-	lightFarPosition = lightViewProjFar * worldVertex;
 }

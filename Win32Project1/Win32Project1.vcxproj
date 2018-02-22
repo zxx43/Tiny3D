@@ -291,6 +291,7 @@
     <None Include="..\x64\Release\shader\bone_shadow.vert" />
     <None Include="..\x64\Release\shader\phong.frag" />
     <None Include="..\x64\Release\shader\phong.vert" />
+    <None Include="..\x64\Release\shader\phong_ins.frag" />
     <None Include="..\x64\Release\shader\phong_ins.vert" />
     <None Include="..\x64\Release\shader\phong_shadow.frag" />
     <None Include="..\x64\Release\shader\phong_shadow.vert" />

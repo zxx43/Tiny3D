@@ -80,17 +80,7 @@ float genShadowFactor(float bias) {
 		vec3 lightPosition = lightNearPosition.xyz / lightNearPosition.w;
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
 		float bs = bias * 0.0005;
-		return genPCF(depthBufferNear, shadowCoord, bs);
-	} else if(depthView <= levels.y) {
-		vec3 lightPosition = lightMidPosition.xyz / lightMidPosition.w;
-		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
-		float bs = bias * 0.00005;
-		return genShadow(depthBufferMid, shadowCoord, bs);
-	} else {
-		vec3 lightPosition = lightFarPosition.xyz / lightFarPosition.w;
-		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
-		float bs = bias * 0.000005;
-		return genShadow(depthBufferFar, shadowCoord, bs);
+		return genShadow(depthBufferNear, shadowCoord, bs);
 	}
 	
 	return 1.0;
@@ -99,6 +89,7 @@ float genShadowFactor(float bias) {
 void main() {
 	vec3 texcoord = vec3(vTexcoord, vTexid);
 	vec4 textureColor = texcoord.p >= 0.0 ? texture2DArray(texture, texcoord) : vec4(1.0);
+	if(textureColor.a < 0.1) discard;
 
 	vec3 normal = normalize(vNormal);
 		

@@ -162,36 +162,47 @@ void Render::useShader(Shader* shader) {
 	shader->use();
 }
 
-void Render::draw(Camera* camera,Drawcall* drawcall,const RenderState* state) {
-	setState(state);
+void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
+	bool beforeCullState = state->enableCull;
+	int beforeCullMode = state->cullMode;
 	if (drawcall->isSingleSide()) { // Special case
 		if (!state->shadowPass)
-			setCullState(false);
+			state->enableCull = false;
 		else
-			setCullMode(CULL_BACK);
+			state->cullMode = CULL_BACK;
 	}
+	setState(state);
 
 	Shader* shader = drawcall->getType() == INSTANCE_DC ? state->shaderIns : state->shader;
 	useShader(shader);
 	if (camera) {
 		if (!state->shadowPass) {
-			shader->setMatrix4("projectMatrix", camera->projectMatrix);
-			shader->setMatrix4("viewMatrix", camera->viewMatrix);
+			if (drawcall->getType() == INSTANCE_DC) 
+				shader->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
+			else {
+				shader->setMatrix4("projectMatrix", camera->projectMatrix);
+				shader->setMatrix4("viewMatrix", camera->viewMatrix);
+				if (state->shadow) {
+					shader->setMatrix4("lightViewProjNear", state->shadow->lightNearMat);
+					shader->setMatrix4("lightViewProjMid", state->shadow->lightMidMat);
+					shader->setMatrix4("lightViewProjFar", state->shadow->lightFarMat);
+					shader->setVector2("levels", state->shadow->level1, state->shadow->level2);
+				}
+			}
 			if (state->lightEffect)
 				shader->setVector3("light", state->light.x, state->light.y, state->light.z);
 		} else 
-			shader->setMatrix4("viewProjectMatrix", camera->projectMatrix * camera->viewMatrix);
-	}
-	if (state->shadow) {
-		shader->setMatrix4("lightViewProjNear", state->shadow->lightNearMat);
-		shader->setMatrix4("lightViewProjMid", state->shadow->lightMidMat);
-		shader->setMatrix4("lightViewProjFar", state->shadow->lightFarMat);
-		shader->setVector2("levels", state->shadow->level1, state->shadow->level2);
+			shader->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
 	}
 
 	if (drawcall->getType() == STATIC_DC && !drawcall->isFullStatic() && state->lightEffect) 
 		shader->setMatrix3x4("modelMatrices", drawcall->objectCount, drawcall->uModelMatrix);
 	drawcall->draw(shader, state->shadowPass);
+
+	if (drawcall->isSingleSide()) { // Reset state
+		state->enableCull = beforeCullState;
+		state->cullMode = beforeCullMode;
+	}
 }
 
 void Render::finishDraw() {

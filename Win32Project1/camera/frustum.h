@@ -24,7 +24,7 @@ public:
 
 	Frustum();
 	~Frustum();
-	void update(const MATRIX4X4& viewMatrix, const MATRIX4X4& projectMatrix, const VECTOR3D& lookDir);
+	void update(const MATRIX4X4& invViewProjectMatrix, const VECTOR3D& lookDir);
 	bool intersectsWidthRay(const VECTOR3D& origin, const VECTOR3D& dir, float maxDistance);
 };
 

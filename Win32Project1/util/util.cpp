@@ -24,7 +24,6 @@ MATRIX4X4 lookAt(float eyeX, float eyeY, float eyeZ,
 	u.Normalize();
 
 	MATRIX4X4 mat;
-	mat.LoadIdentity();
 	mat.entries[0]=s.x;
 	mat.entries[4]=s.y;
 	mat.entries[8]=s.z;
@@ -45,7 +44,6 @@ MATRIX4X4 perspective(float fovy,float aspect,float zNear,float zFar) {
 	float tanHalfFovy=tanf(rFovy/2);
 
 	MATRIX4X4 mat;
-	mat.LoadIdentity();
 	mat.entries[0]=1/(aspect * tanHalfFovy);
 	mat.entries[5]=1/tanHalfFovy;
 	mat.entries[10]=-(zFar + zNear)/(zFar - zNear);
@@ -57,7 +55,6 @@ MATRIX4X4 perspective(float fovy,float aspect,float zNear,float zFar) {
 
 MATRIX4X4 ortho(float left, float right, float bottom, float top, float n, float f) {
 	MATRIX4X4 mat;
-	mat.LoadIdentity();
 	mat.entries[0]=2.0f/(right-left);
 	mat.entries[5]=2.0f/(top-bottom);
 	mat.entries[10]=-2.0f/(f-n);
@@ -100,7 +97,6 @@ MATRIX4X4 rotateX(float angle) {
 	float sinA=sinf(radian);
 	float cosA=cosf(radian);
 	MATRIX4X4 mat;
-	mat.LoadIdentity();
 	mat.entries[5]=cosA;
 	mat.entries[6]=sinA;
 	mat.entries[9]=-sinA;
@@ -113,7 +109,6 @@ MATRIX4X4 rotateY(float angle) {
 	float sinA=sinf(radian);
 	float cosA=cosf(radian);
 	MATRIX4X4 mat;
-	mat.LoadIdentity();
 	mat.entries[0]=cosA;
 	mat.entries[2]=-sinA;
 	mat.entries[8]=sinA;
@@ -126,7 +121,6 @@ MATRIX4X4 rotateZ(float angle) {
 	float sinA=sinf(radian);
 	float cosA=cosf(radian);
 	MATRIX4X4 mat;
-	mat.LoadIdentity();
 	mat.entries[0]=cosA;
 	mat.entries[1]=sinA;
 	mat.entries[4]=-sinA;
@@ -136,7 +130,6 @@ MATRIX4X4 rotateZ(float angle) {
 
 MATRIX4X4 scale(float size) {
 	MATRIX4X4 mat;
-	mat.LoadIdentity();
 	mat.entries[0]=size;
 	mat.entries[5]=size;
 	mat.entries[10]=size;
@@ -145,28 +138,24 @@ MATRIX4X4 scale(float size) {
 
 MATRIX4X4 scaleX(float size) {
 	MATRIX4X4 mat;
-	mat.LoadIdentity();
 	mat.entries[0]=size;
 	return mat;
 }
 
 MATRIX4X4 scaleY(float size) {
 	MATRIX4X4 mat;
-	mat.LoadIdentity();
 	mat.entries[5]=size;
 	return mat;
 }
 
 MATRIX4X4 scaleZ(float size) {
 	MATRIX4X4 mat;
-	mat.LoadIdentity();
 	mat.entries[10]=size;
 	return mat;
 }
 
 MATRIX4X4 translate(float tx,float ty,float tz) {
 	MATRIX4X4 mat;
-	mat.LoadIdentity();
 	mat.entries[12]=tx;
 	mat.entries[13]=ty;
 	mat.entries[14]=tz;

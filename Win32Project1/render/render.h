@@ -50,7 +50,7 @@ public:
 	void resize(int width,int height,Camera* mainCamera);
 	Shader* findShader(const char* shader);
 	void useShader(Shader* shader);
-	void draw(Camera* camera, Drawcall* drawcall, const RenderState* state);
+	void draw(Camera* camera, Drawcall* drawcall, RenderState* state);
 	void finishDraw();
 	void setFrameBuffer(FrameBuffer* framebuffer);
 	void useTexture(uint type, uint slot, uint texid);

@@ -17,7 +17,7 @@ InstanceDrawcall::InstanceDrawcall(Instance* instance) :Drawcall() {
 	dataBuffer->pushData(3, new RenderData(COLOR_LOCATION, GL_UNSIGNED_BYTE, vertexCount, 3, 1, 
 		dataBuffer->vbos[3], false, GL_STATIC_DRAW, 0, instance->colorBuffer));
 	dataBuffer->pushData(4, new RenderData(MODEL_MATRIX_LOCATION, GL_FLOAT, objectCount, 4, 3,
-		dataBuffer->vbos[4], false, GL_DYNAMIC_DRAW, 1, instance->modelMatrices));
+		dataBuffer->vbos[4], false, GL_STATIC_DRAW, 1, instance->modelMatrices));
 	if (indexed)
 		dataBuffer->pushData(5, new RenderData(GL_UNSIGNED_SHORT, indexCount,
 			dataBuffer->vbos[5], GL_STATIC_DRAW, instance->indexBuffer));
@@ -42,7 +42,7 @@ void InstanceDrawcall::createSimple() {
 	simpleBuffer->pushData(1, new RenderData(1, GL_FLOAT, vertexCount, instance->textureChannel, 1,
 		simpleBuffer->vbos[1], false, GL_STATIC_DRAW, 0, instance->texcoordBuffer));
 	simpleBuffer->pushData(2, new RenderData(2, GL_FLOAT, objectCount, 4, 3,
-		simpleBuffer->vbos[2], false, GL_DYNAMIC_DRAW, 1, instance->modelMatrices));
+		simpleBuffer->vbos[2], false, GL_STATIC_DRAW, 1, instance->modelMatrices));
 	if (indexed)
 		simpleBuffer->pushData(3, new RenderData(GL_UNSIGNED_SHORT, indexCount,
 			simpleBuffer->vbos[3], GL_STATIC_DRAW, instance->indexBuffer));

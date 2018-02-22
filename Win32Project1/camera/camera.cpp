@@ -43,21 +43,25 @@ void Camera::updateLook(const VECTOR3D& pos, const VECTOR3D& dir) {
 	updateFrustum();
 }
 
-void Camera::updateMoveable() {
-	MATRIX4X4 trans,rotX,rotY;
-	rotX=rotateX(-yrot);
-	rotY=rotateY(-xrot);
-	trans=translate(-position.x,-position.y,-position.z);
-	viewMatrix=rotX*rotY*trans;
+void Camera::updateMoveable(uint transType) {
+	if (transType == TRANS_TRANSLATE)
+		transMat = translate(-position.x, -position.y, -position.z);
+	else if (transType == TRANS_ROTATE_Y) 
+		rotXMat = rotateX(-yrot);
+	else if (transType == TRANS_ROTATE_X)
+		rotYMat = rotateY(-xrot);
+	viewMatrix = rotXMat * rotYMat * transMat;
 
 	VECTOR4D worldLookDir(viewMatrix.GetInverse()*UNIT_NEG_Z);
-	lookDir.x=worldLookDir.x;
-	lookDir.y=worldLookDir.y;
-	lookDir.z=worldLookDir.z;
+	lookDir.x = worldLookDir.x;
+	lookDir.y = worldLookDir.y;
+	lookDir.z = worldLookDir.z;
 }
 
 void Camera::updateFrustum() {
-	frustum->update(viewMatrix, projectMatrix, lookDir);
+	viewProjectMatrix = projectMatrix * viewMatrix;
+	invViewProjectMatrix = viewProjectMatrix.GetInverse();
+	frustum->update(invViewProjectMatrix, lookDir);
 }
 
 void Camera::turnX(int lr) {
@@ -74,7 +78,7 @@ void Camera::turnX(int lr) {
 	else if(xrot<0)
 		xrot+=360.0;
 
-	updateMoveable();
+	updateMoveable(TRANS_ROTATE_X);
 }
 
 void Camera::turnY(int ud) {
@@ -91,15 +95,16 @@ void Camera::turnY(int ud) {
 	else if(yrot<0)
 		yrot+=360.0;
 
-	updateMoveable();
+	updateMoveable(TRANS_ROTATE_Y);
 }
 
 void Camera::move(int dist,float speed) {
 	float xz=angleToRadian(xrot);
 	float yz=angleToRadian(yrot);
-	float dx=speed*cosf(yz)*sinf(xz);
-	float dy=speed*sinf(yz);
-	float dz=speed*cosf(yz)*cosf(xz);
+	float cosYZ = speed * cosf(yz);
+	float dx = cosYZ * sinf(xz);
+	float dy = speed * sinf(yz);
+	float dz = cosYZ * cosf(xz);
 
 	switch(dist) {
 		case DOWN:
@@ -130,14 +135,14 @@ void Camera::move(int dist,float speed) {
 			break;
 	}
 
-	updateMoveable();
+	updateMoveable(TRANS_TRANSLATE);
 }
 
 void Camera::moveTo(const VECTOR3D& pos) {
 	position.x = pos.x; 
 	position.y = pos.y; 
 	position.z = pos.z;
-	updateMoveable();
+	updateMoveable(TRANS_TRANSLATE);
 }
 
 float Camera::getHeight() {

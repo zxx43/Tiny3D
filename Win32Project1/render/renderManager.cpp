@@ -149,9 +149,6 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	state->reset();
 	state->shadow = shadow;
 	state->light = lightDir;
-	state->enableAlphaTest = true;
-	state->alphaThreshold = 0.0;
-	state->alphaTestMode = GREATER;
 
 	if (!phong) phong = render->findShader("phong");
 	if (!phongIns) phongIns = render->findShader("phong_ins");

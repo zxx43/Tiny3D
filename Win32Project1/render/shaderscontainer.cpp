@@ -1,8 +1,9 @@
 #include "shaderscontainer.h"
 
 #define PHONG_VERT "shader/phong.vert"
-#define PHONG_INS_VERT "shader/phong_ins.vert"
 #define PHONG_FRAG "shader/phong.frag"
+#define PHONG_INS_VERT "shader/phong_ins.vert"
+#define PHONG_INS_FRAG "shader/phong_ins.frag"
 #define BONE_VERT "shader/bone.vert"
 #define BONE_FRAG "shader/bone.frag"
 #define PHONG_SHADOW_VERT "shader/phong_shadow.vert"
@@ -29,7 +30,7 @@ void SetupShaders(Render* render) {
 	phong->setSampler("depthBufferFar",3);
 	phong->setInt("useShadow", 0);
 
-	Shader* phongIns = render->shaders->addShader("phong_ins", PHONG_INS_VERT, PHONG_FRAG);
+	Shader* phongIns = render->shaders->addShader("phong_ins", PHONG_INS_VERT, PHONG_INS_FRAG);
 	render->useShader(phongIns);
 	phongIns->setSampler("texture", 0);
 	phongIns->setSampler("depthBufferNear", 1);

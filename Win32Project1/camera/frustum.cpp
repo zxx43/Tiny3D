@@ -20,10 +20,10 @@ Frustum::Frustum() {
 
 Frustum::~Frustum() {}
 
-void Frustum::update(const MATRIX4X4& viewMatrix, const MATRIX4X4& projectMatrix, const VECTOR3D& lookDir) {
-	VECTOR4D worldVert(0, 0, 0, 1);
+void Frustum::update(const MATRIX4X4& invViewProjectMatrix, const VECTOR3D& lookDir) {
+	static VECTOR4D worldVert(0, 0, 0, 1);
 	for (int i = 0; i<8; i++) {
-		worldVert = viewMatrix.GetInverse()*projectMatrix.GetInverse()*ndcVertex[i];
+		worldVert = invViewProjectMatrix * ndcVertex[i];
 		float invW = 1.0 / worldVert.w;
 		worldVertex[i].x = worldVert.x * invW;
 		worldVertex[i].y = worldVert.y * invW;

@@ -535,5 +535,8 @@
     <None Include="..\x64\Release\shader\phong_shadow_low_ins.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\x64\Release\shader\phong_ins.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

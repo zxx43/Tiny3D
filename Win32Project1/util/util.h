@@ -45,11 +45,11 @@ VECTOR4D mul(const VECTOR4D& a,const VECTOR4D& b);
 VECTOR3D mul(const VECTOR3D& a, const VECTOR3D& b);
 
 inline float angleToRadian(float angle) {
-	return angle*PI/180;
+	return angle*A2R;
 }
 
 inline float radianToAngle(float radian) {
-	return radian*180/PI;
+	return radian*R2A;
 }
 
 struct Line {
