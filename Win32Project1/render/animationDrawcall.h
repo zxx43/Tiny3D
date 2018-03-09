@@ -23,7 +23,7 @@ public:
 	virtual ~AnimationDrawcall();
 	virtual void createSimple();
 	virtual void releaseSimple();
-	virtual void draw(Shader* shader,bool simple);
+	virtual void draw(Shader* shader,int pass);
 };
 
 #endif /* ANIMATIONDRAWCALL_H_ */

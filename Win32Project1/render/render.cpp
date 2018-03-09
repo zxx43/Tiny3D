@@ -166,7 +166,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 	bool beforeCullState = state->enableCull;
 	int beforeCullMode = state->cullMode;
 	if (drawcall->isSingleSide()) { // Special case
-		if (!state->shadowPass)
+		if (state->pass == 4)
 			state->enableCull = false;
 		else
 			state->cullMode = CULL_BACK;
@@ -176,7 +176,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 	Shader* shader = drawcall->getType() == INSTANCE_DC ? state->shaderIns : state->shader;
 	useShader(shader);
 	if (camera) {
-		if (!state->shadowPass) {
+		if (state->pass == 4) {
 			if (drawcall->getType() == INSTANCE_DC) 
 				shader->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
 			else {
@@ -197,7 +197,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 
 	if (drawcall->getType() == STATIC_DC && !drawcall->isFullStatic() && state->lightEffect) 
 		shader->setMatrix3x4("modelMatrices", drawcall->objectCount, drawcall->uModelMatrix);
-	drawcall->draw(shader, state->shadowPass);
+	drawcall->draw(shader, state->pass);
 
 	if (drawcall->isSingleSide()) { // Reset state
 		state->enableCull = beforeCullState;

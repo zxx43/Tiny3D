@@ -12,11 +12,9 @@ Instance::Instance(Mesh* mesh) {
 	colorBuffer = NULL;
 	indexBuffer=NULL;
 
-	instanceCount=0;
-	modelMatrices=NULL;
-	normalMatrices=NULL;
-	modelMatrixList.clear();
-	normalMatrixList.clear();
+	instanceCount = 0;
+	drawcall = NULL;
+	singleSide = false;
 }
 
 Instance::~Instance() {
@@ -25,11 +23,9 @@ Instance::~Instance() {
 	if (texcoordBuffer) delete[] texcoordBuffer; texcoordBuffer = NULL;
 	if (colorBuffer) delete[] colorBuffer; colorBuffer = NULL;
 	if (indexBuffer) delete[] indexBuffer; indexBuffer = NULL;
-	if (modelMatrices) delete[] modelMatrices; modelMatrices = NULL;
-	if (normalMatrices) delete[] normalMatrices; normalMatrices = NULL;
-	
-	modelMatrixList.clear();
-	normalMatrixList.clear();
+
+	if (modelMatrices) free(modelMatrices); modelMatrices = NULL;
+	if (drawcall) delete drawcall;
 }
 
 void Instance::initInstanceBuffers(int mid,int vertices,int indices) {
@@ -85,42 +81,27 @@ void Instance::initInstanceBuffers(int mid,int vertices,int indices) {
 			indexBuffer[i]=(ushort)index;
 		}
 	}
+
+	initMatrices();
 }
 
-void Instance::pushObjectToInstances(const MATRIX4X4& transformMatrix,const MATRIX4X4& normalMatrix) {
-	instanceCount++;
-	modelMatrixList.push_back(transformMatrix);
-	normalMatrixList.push_back(normalMatrix);
+void Instance::setInstanceCount(int count) {
+	instanceCount = count;
+	if (drawcall)
+		drawcall->objectToDraw = instanceCount;
 }
 
-void Instance::updateMatricesBuffer(int baseInstance, const MATRIX4X4& transformMatrix, const MATRIX4X4* normalMatrix) {
-	MATRIX4X4 transform = transformMatrix;
-	transform.Transpose();
-	for (int m = 0; m < 12; m++)
-		modelMatrices[baseInstance * 12 + m] = transform.entries[m];
-	if (normalMatrix) {
-		for (int n = 0; n < 3; n++)
-			normalMatrices[baseInstance * 9 + n] = normalMatrix->entries[n];
-		for (int n = 3; n < 6; n++)
-			normalMatrices[baseInstance * 9 + n] = normalMatrix->entries[n + 1];
-		for (int n = 6; n < 9; n++)
-			normalMatrices[baseInstance * 9 + n] = normalMatrix->entries[n + 2];
-	}
+void Instance::updateMatricesBuffer(int i, const MATRIX4X4& transformMatrix) {
+	MATRIX4X4 transform = transformMatrix.GetTranspose();
+	memcpy(modelMatrices + (i * 12), transform.entries, 12 * sizeof(float));
 }
 
 void Instance::initMatrices() {
-	modelMatrices=new float[instanceCount*12];
-	normalMatrices=new float[instanceCount*9];
-	for(int i=0;i<instanceCount;i++) {
-		MATRIX4X4 transform = modelMatrixList[i];
-		transform.Transpose();
-		for (int m = 0; m < 12; m++) 
-			modelMatrices[i * 12 + m] = transform.entries[m];
-		for (int n = 0; n < 3; n++)
-			normalMatrices[i * 9 + n] = normalMatrixList[i].entries[n];
-		for (int n = 3; n < 6; n++)
-			normalMatrices[i * 9 + n] = normalMatrixList[i].entries[n + 1];
-		for (int n = 6; n < 9; n++)
-			normalMatrices[i * 9 + n] = normalMatrixList[i].entries[n + 2];
-	}
+	modelMatrices = (float*)malloc(MAX_INSTANCE_COUNT * 12 * sizeof(float));
+	memset(modelMatrices, 0, MAX_INSTANCE_COUNT * 12 * sizeof(float));
+}
+
+void Instance::createDrawcall(bool simple) {
+	drawcall = new InstanceDrawcall(this, simple);
+	drawcall->setSide(singleSide);
 }

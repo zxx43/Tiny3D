@@ -74,7 +74,6 @@ public:
 	VECTOR3D lightDir;
 private:
 	Shadow* shadow;
-	Filter* filterNear;
 public:
 	Renderable* renderData;
 	Renderable* queue1;
@@ -103,11 +102,11 @@ public:
 	FrameBuffer* midBuffer;
 	FrameBuffer* farBuffer;
 
-	RenderManager(Camera* view, float distance1, float distance2, VECTOR3D light);
+	RenderManager(Camera* view, float distance1, float distance2, const VECTOR3D& light);
 	~RenderManager();
 
 	void updateShadowCamera();
-	void updateMainLight(VECTOR3D light);
+	void updateMainLight();
 	void flushRenderQueues();
 	void updateRenderQueues(Scene* scene);
 	void animateQueues(long startTime, long currentTime);

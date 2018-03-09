@@ -54,16 +54,22 @@ void AnimationDrawcall::releaseSimple() {
 	delete simpleBuffer;
 }
 
-void AnimationDrawcall::draw(Shader* shader,bool simple) {
+void AnimationDrawcall::draw(Shader* shader,int pass) {
 	if (uModelMatrix)
 		shader->setMatrix4("uModelMatrix", uModelMatrix);
-	if (uNormalMatrix && !simple) 
+	if (uNormalMatrix && pass == 4) 
 		shader->setMatrix3("uNormalMatrix", uNormalMatrix);
 	if (animData->animation->boneTransformMats)
 		shader->setMatrix3x4("boneMats", animData->boneCount, animData->animation->boneTransformMats);
-	if (!simple)
-		dataBuffer->use();
-	else
-		simpleBuffer->use();
+	switch (pass) {
+		case 1:
+		case 2:
+		case 3:
+			simpleBuffer->use();
+			break;
+		case 4:
+			dataBuffer->use();
+			break;
+	}
 	glDrawElements(GL_TRIANGLES, animData->indexCount, GL_UNSIGNED_SHORT, 0);
 }

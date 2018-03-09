@@ -34,6 +34,7 @@ public:
 	VECTOR3D size;
 	int type;
 	BoundingBox* boundingBox;
+	MATRIX4X4 nodeTransform;
 
 	std::vector<Object*> objects;
 	std::vector<BoundingBox*> objectsBBs;
@@ -47,12 +48,16 @@ public:
 	bool needUpdateNormal;
 	bool needUpdateDrawcall;
 	bool needCreateDrawcall;
+	bool needUpdateNode;
 
 	Node(const VECTOR3D& position,const VECTOR3D& size);
 	virtual ~Node();
-	bool checkInCamera(Camera* camera,bool simple);
-	virtual void prepareDrawcall()=0;
-	virtual void updateDrawcall(bool updateNormal) = 0;
+	bool checkInCamera(Camera* camera);
+	virtual void prepareDrawcall() = 0;
+	virtual void updateRenderData(Camera* camera, int pass) = 0;
+	virtual void updateDrawcall(int pass) = 0;
+	void updateNode();
+	void pushToUpdate();
 
 	void updateBounding();
 	virtual void addObject(Object* object);
@@ -68,5 +73,7 @@ public:
 	void clearChildren();
 	void recursiveTransform(MATRIX4X4& finalNodeMatrix);
 };
+
+extern std::vector<Node*> nodesToUpdate;
 
 #endif /* NODE_H_ */

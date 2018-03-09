@@ -85,3 +85,8 @@ void Object::bindMaterial(int mid) {
 	material = mid;
 }
 
+bool Object::checkInCamera(Camera* camera) {
+	if (bounding)
+		return bounding->checkWithCamera(camera);
+	return true;
+}

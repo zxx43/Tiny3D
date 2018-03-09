@@ -23,6 +23,7 @@ private:
 	float xrot,yrot,height;
 	MATRIX4X4 rotXMat, rotYMat, transMat;
 public:
+	bool simpleCheck;
 	Frustum* frustum;
 	VECTOR3D position, lookDir, up;
 	float fovy,aspect,zNear,zFar;

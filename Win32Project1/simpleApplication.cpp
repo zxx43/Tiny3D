@@ -28,7 +28,7 @@ void SimpleApplication::resize(int width, int height) {
 	screen->addColorBuffer();
 
 	if (screenFilter) delete screenFilter;
-	screenFilter = new Filter(width*0.8, height*0.8, false, LOW_PRE);
+	screenFilter = new Filter(width, height, false, LOW_PRE);
 }
 
 void SimpleApplication::keyDown(int key) {
@@ -73,11 +73,11 @@ void SimpleApplication::act(long startTime, long currentTime) {
 /*
 	Node* node = scene->animationRoot->children[0];
 	AnimationNode* animNode = (AnimationNode*)node->children[0];
-	AnimationObject* object = (AnimationObject*)animNode->objects[0];
 	animNode->rotateNodeObject(0, 45, 0);
 	animNode->translateNode(animNode->position.x + 0.02, animNode->position.y, animNode->position.z + 0.02);
 	standObjectsOnGround(animNode, scene->terrainNode);
 //*/
+	scene->updateNodes();
 }
 
 void SimpleApplication::initScene() {
@@ -136,7 +136,6 @@ void SimpleApplication::initScene() {
 	terrainObject->setSize(2, 1, 2);
 	scene->terrainNode->addObject(terrainObject);
 	scene->terrainNode->prepareTriangles();
-	scene->terrainNode->prepareDrawcall();
 
 
 	StaticNode* node1 = new StaticNode(VECTOR3D(2, 2, 2));
@@ -190,7 +189,7 @@ void SimpleApplication::initScene() {
 	objectTree->setSize(0.5, 0.5, 0.5);
 	node1->addObject(objectTree);
 
-
+	
 	srand(100);
 	InstanceNode* instanceNode1 = new InstanceNode(VECTOR3D(-920, 0, -920));
 	instanceNode1->singleSide = true;
@@ -244,7 +243,7 @@ void SimpleApplication::initScene() {
 	scene->staticRoot->attachChild(instanceNode2);
 	scene->staticRoot->attachChild(instanceNode3);
 	scene->staticRoot->attachChild(instanceNode4);
-
+	
 	AnimationNode* animNode1 = new AnimationNode(VECTOR3D(5, 10, 5));
 	animNode1->setAnimation(animations.find("army")->second);
 	animNode1->getObject()->setSize(0.05, 0.05, 0.05);
@@ -279,7 +278,7 @@ void SimpleApplication::initScene() {
 
 	animNode->translateNode(0, 10, 0);
 	animNodeSub->translateNode(10, 0, 0);
-
+	
 	node1->translateNode(0, 0, 20);
 
 	delete box;

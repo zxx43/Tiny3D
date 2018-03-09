@@ -13,6 +13,7 @@ using namespace std;
 
 Scene::Scene() {
 	mainCamera = new Camera(4.0);
+	mainCamera->simpleCheck = true;
 	skyBox = NULL;
 	terrainNode = NULL;
 	screenNode = NULL;
@@ -22,6 +23,7 @@ Scene::Scene() {
 	animationRoot = NULL;
 	initNodes();
 	boundingNodes.clear();
+	nodesToUpdate.clear();
 }
 
 Scene::~Scene() {
@@ -40,6 +42,14 @@ void Scene::initNodes() {
 	staticRoot = new StaticNode(VECTOR3D(0, 0, 0));
 	billboardRoot = new StaticNode(VECTOR3D(0, 0, 0));
 	animationRoot = new StaticNode(VECTOR3D(0, 0, 0));
+}
+
+void Scene::updateNodes() {
+	uint size = nodesToUpdate.size();
+	if (size == 0) return;
+	for (uint i = 0; i < size; i++)
+		nodesToUpdate[i]->updateNode();
+	nodesToUpdate.clear();
 }
 
 void Scene::createNodeAABB(Node* node) {

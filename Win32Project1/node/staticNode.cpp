@@ -45,12 +45,10 @@ void StaticNode::createBatch() {
 	if (batch) delete batch;
 	batch = new Batch();
 	batch->initBatchBuffers(batchVertexCount,batchIndexCount);
-	MATRIX4X4 nodeTransform; nodeTransform.LoadIdentity();
-	recursiveTransform(nodeTransform);
+	
 	for(unsigned int i=0;i<objects.size();i++) {
 		Object* object=objects[i];
-		MATRIX4X4 transformMatrix=nodeTransform*object->localTransformMatrix;
-		batch->pushMeshToBuffers(object->mesh,object->material,fullStatic,transformMatrix,object->normalMatrix);
+		batch->pushMeshToBuffers(object->mesh,object->material,fullStatic,object->transformMatrix,object->normalMatrix);
 	}
 
 	if (drawcall) delete drawcall;
@@ -63,30 +61,24 @@ void StaticNode::prepareDrawcall() {
 	needCreateDrawcall = false;
 }
 
-void StaticNode::updateDrawcall(bool updateNormal) {
-	if (!batch) createBatch();
-	else {
-		MATRIX4X4 nodeTransform; nodeTransform.LoadIdentity();
-		recursiveTransform(nodeTransform);
-		int baseVertex = 0;
-		for (unsigned int i = 0; i < objects.size(); i++) {
-			Object* object = objects[i];
-			MATRIX4X4 transformMatrix = nodeTransform * object->localTransformMatrix;
-			if (updateNormal) {
-				MATRIX4X4 normalMatrix = object->normalMatrix;
-				batch->updateMatrices(i, transformMatrix, &normalMatrix);
-			} else
-				batch->updateMatrices(i, transformMatrix, NULL);
+void StaticNode::updateRenderData(Camera* camera, int pass) {
+	if (!batch) return;
 
-			baseVertex += object->mesh->vertexCount;
-		}
-
-		if (!drawcall) {
-			drawcall = new StaticDrawcall(batch);
-			drawcall->setSide(singleSide);
-		} else 
-			((StaticDrawcall*)drawcall)->updateMatrices(batch, updateNormal);
+	for (unsigned int i = 0; i < objects.size(); i++) {
+		Object* object = objects[i];
+		batch->updateMatrices(i, object->transformMatrix, NULL);
 	}
+}
+
+void StaticNode::updateDrawcall(int pass) {
+	if (!batch) return;
+
+	if (!drawcall) {
+		drawcall = new StaticDrawcall(batch);
+		drawcall->setSide(singleSide);
+	} else
+		((StaticDrawcall*)drawcall)->updateMatrices(batch);
+
 	needUpdateDrawcall = false;
 }
 

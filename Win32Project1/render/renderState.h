@@ -14,7 +14,8 @@ struct RenderState {
 	int alphaTestMode;
 	float alphaThreshold;
 	bool lightEffect;
-	bool shadowPass;
+	bool deferred;
+	int pass;
 	Shadow* shadow;
 	VECTOR3D light;
 	Shader* shader;
@@ -33,7 +34,8 @@ struct RenderState {
 		alphaTestMode = rhs.alphaTestMode;
 		alphaThreshold = rhs.alphaThreshold;
 		lightEffect = rhs.lightEffect;
-		shadowPass = rhs.shadowPass;
+		deferred = rhs.deferred;
+		pass = rhs.pass;
 		shadow = rhs.shadow;
 		light = rhs.light;
 		shader = rhs.shader;
@@ -49,7 +51,8 @@ struct RenderState {
 		alphaTestMode = GREATER;
 		alphaThreshold = 0;
 		lightEffect = true;
-		shadowPass = false;
+		deferred = false;
+		pass = 4;
 		shadow = NULL;
 		light = VECTOR3D(0, 0, 0);
 		shader = NULL;

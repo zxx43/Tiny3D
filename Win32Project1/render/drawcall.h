@@ -53,7 +53,7 @@ public:
 	virtual void createSimple() = 0;
 	virtual void releaseSimple() = 0;
 
-	virtual void draw(Shader* shader,bool simple)=0;
+	virtual void draw(Shader* shader,int pass)=0;
 	void setSide(bool single);
 	bool isSingleSide();
 	void setType(int typ);

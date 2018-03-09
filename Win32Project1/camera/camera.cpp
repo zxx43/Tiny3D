@@ -32,7 +32,6 @@ void Camera::initOrthoCamera(float left,float right,float bottom,float top,float
 void Camera::setView(const VECTOR3D& pos, const VECTOR3D& dir) {
 	position.x=pos.x; position.y=pos.y; position.z=pos.z;
 	lookDir.x=dir.x; lookDir.y=dir.y; lookDir.z=dir.z;
-	lookDir.Normalize();
 
 	VECTOR3D center(lookDir.x+position.x,lookDir.y+position.y,lookDir.z+position.z);
 	viewMatrix=lookAt(position.x,position.y,position.z,center.x,center.y,center.z,up.x,up.y,up.z);

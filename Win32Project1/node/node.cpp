@@ -1,6 +1,8 @@
 #include "node.h"
 #include "../util/util.h"
 
+std::vector<Node*> nodesToUpdate;
+
 Node::Node(const VECTOR3D& position,const VECTOR3D& size) {
 	this->position.x=position.x;
 	this->position.y=position.y;
@@ -17,6 +19,7 @@ Node::Node(const VECTOR3D& position,const VECTOR3D& size) {
 	needUpdateDrawcall = false;
 	needCreateDrawcall = false;
 	needUpdateNormal = false;
+	needUpdateNode = false;
 	uTransformMatrix = NULL;
 	uNormalMatrix = NULL;
 
@@ -59,9 +62,9 @@ void Node::clearChildren() {
 	children.clear();
 }
 
-bool Node::checkInCamera(Camera* camera, bool simple) {
+bool Node::checkInCamera(Camera* camera) {
 	if (boundingBox)
-		return boundingBox->checkWithCamera(camera, simple);
+		return boundingBox->checkWithCamera(camera);
 	return true;
 }
 
@@ -93,6 +96,7 @@ void Node::addObject(Object* object) {
 		}
 	}
 	needCreateDrawcall = true;
+	pushToUpdate();
 }
 
 Object* Node::removeObject(Object* object) {
@@ -116,6 +120,7 @@ Object* Node::removeObject(Object* object) {
 			}
 
 			needCreateDrawcall = true;
+			pushToUpdate();
 			return object;
 		}
 	}
@@ -193,6 +198,7 @@ void Node::updateSelfAndDownwardNodesDrawcall(bool updateNormal) {
 	if (objects.size() > 0) {
 		needUpdateNormal = updateNormal;
 		needUpdateDrawcall = true;
+		pushToUpdate();
 	}
 
 	for (unsigned int i = 0; i < children.size(); i++)
@@ -283,6 +289,7 @@ void Node::translateNodeObject(int i, float x, float y, float z) {
 	}
 	needUpdateNormal = false;
 	needUpdateDrawcall = true;
+	pushToUpdate();
 }
 
 void Node::translateNodeObjectCenterAtWorld(int i, float x, float y, float z) {
@@ -307,6 +314,7 @@ void Node::rotateNodeObject(int i, float ax, float ay, float az) {
 	}
 	needUpdateNormal = true;
 	needUpdateDrawcall = true;
+	pushToUpdate();
 }
 
 void Node::scaleNodeObject(int i, float sx, float sy, float sz) {
@@ -324,6 +332,25 @@ void Node::scaleNodeObject(int i, float sx, float sy, float sz) {
 	if (sx == sy && sy == sz) needUpdateNormal = false;
 	else needUpdateNormal = true;
 	needUpdateDrawcall = true;
+	pushToUpdate();
+}
+
+void Node::pushToUpdate() {
+	if (!needUpdateNode) {
+		nodesToUpdate.push_back(this);
+		needUpdateNode = true;
+	}
+}
+
+void Node::updateNode() {
+	if (type != TYPE_ANIMATE) {
+		recursiveTransform(nodeTransform);
+		for (unsigned int i = 0; i < objects.size(); i++) {
+			Object* object = objects[i];
+			object->transformMatrix = nodeTransform * object->localTransformMatrix;
+		}
+	}
+	needUpdateNode = false;
 }
 
 void Node::recursiveTransform(MATRIX4X4& finalNodeMatrix) {

@@ -8,21 +8,24 @@
 #ifndef INSTANCEDRAWCALL_H_
 #define INSTANCEDRAWCALL_H_
 
+class Instance;
+
 #include "drawcall.h"
-#include "../instance/instance.h"
 
 class InstanceDrawcall: public Drawcall {
 private:
 	int vertexCount,indexCount;
 	bool indexed;
-	Instance* instance;
 public:
-	InstanceDrawcall(Instance* instance);
+	bool isSimple;
+	int objectToDraw;
+public:
+	InstanceDrawcall(Instance* instance, bool simple);
 	virtual ~InstanceDrawcall();
 	virtual void createSimple();
 	virtual void releaseSimple();
-	virtual void draw(Shader* shader,bool simple);
-	void updateMatrices(Instance* instance, bool updateNormals);
+	virtual void draw(Shader* shader,int pass);
+	void updateMatrices(const float* modelMatrices);
 };
 
 #endif /* INSTANCEDRAWCALL_H_ */

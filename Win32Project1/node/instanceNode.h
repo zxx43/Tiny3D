@@ -12,16 +12,13 @@
 #include "../instance/instance.h"
 
 class InstanceNode: public Node {
-private:
-	void createInstance();
 public:
-	Instance* instance;
-
 	InstanceNode(const VECTOR3D& position);
 	virtual ~InstanceNode();
 	void addObjects(Object** objectArray,int count);
 	virtual void prepareDrawcall();
-	virtual void updateDrawcall(bool updateNormal);
+	virtual void updateRenderData(Camera* camera, int pass);
+	virtual void updateDrawcall(int pass);
 };
 
 

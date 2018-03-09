@@ -1,7 +1,7 @@
 #include "renderManager.h"
 #include "../assets/assetManager.h"
 
-RenderManager::RenderManager(Camera* view, float distance1, float distance2, VECTOR3D light) {
+RenderManager::RenderManager(Camera* view, float distance1, float distance2, const VECTOR3D& light) {
 	shadow=new Shadow(view,distance1,distance2);
 	float nearSize=1024;
 	float midSize=2048;
@@ -9,9 +9,7 @@ RenderManager::RenderManager(Camera* view, float distance1, float distance2, VEC
 	nearBuffer=new FrameBuffer(nearSize,nearSize,false,HIGH_PRE);
 	midBuffer=new FrameBuffer(midSize,midSize,false,HIGH_PRE);
 	farBuffer=new FrameBuffer(farSize,farSize,false,LOW_PRE);
-	lightDir=light;
-
-	filterNear=new Filter(nearSize,nearSize,true,LOW_PRE);
+	lightDir = light; lightDir.Normalize();
 
 	renderData = new Renderable(); renderData->copyCamera(view);
 	queue1 = new Renderable(); queue1->copyCamera(view);
@@ -40,7 +38,6 @@ RenderManager::~RenderManager() {
 	delete nearBuffer; nearBuffer=NULL;
 	delete midBuffer; midBuffer=NULL;
 	delete farBuffer; farBuffer=NULL;
-	delete filterNear; filterNear=NULL;
 
 	delete renderData; renderData = NULL;
 	delete queue1; queue1 = NULL;
@@ -53,9 +50,9 @@ void RenderManager::updateShadowCamera() {
 	shadow->prepareViewCamera();
 }
 
-void RenderManager::updateMainLight(VECTOR3D light) {
-	lightDir=light;
-	shadow->update(light.x,light.y,light.z);
+void RenderManager::updateMainLight() {
+	lightDir.Normalize();
+	shadow->update(lightDir);
 }
 
 void RenderManager::flushRenderQueues() {
@@ -68,14 +65,14 @@ void RenderManager::updateRenderQueues(Scene* scene) {
 	Camera* cameraFar = shadow->lightCameraFar;
 	Camera* cameraMain = scene->mainCamera;
 
-	pushNodeToQueue(renderData->shadowNearStaticQueue, scene->staticRoot, cameraNear, false);
-	pushNodeToQueue(renderData->shadowMidStaticQueue, scene->staticRoot, cameraMid, false);
-	pushNodeToQueue(renderData->shadowFarStaticQueue, scene->staticRoot, cameraFar, true);
-	pushNodeToQueue(renderData->staticQueue, scene->staticRoot, cameraMain, true);
-	pushNodeToQueue(renderData->shadowNearAnimateQueue, scene->animationRoot, cameraNear, false);
-	pushNodeToQueue(renderData->shadowMidAnimateQueue, scene->animationRoot, cameraMid, false);
-	pushNodeToQueue(renderData->shadowFarAnimateQueue, scene->animationRoot, cameraFar, true);
-	pushNodeToQueue(renderData->animateQueue, scene->animationRoot, cameraMain, true);
+	pushNodeToQueue(renderData->shadowNearStaticQueue, scene->staticRoot, cameraNear);
+	pushNodeToQueue(renderData->shadowMidStaticQueue, scene->staticRoot, cameraMid);
+	pushNodeToQueue(renderData->shadowFarStaticQueue, scene->staticRoot, cameraFar);
+	pushNodeToQueue(renderData->staticQueue, scene->staticRoot, cameraMain);
+	pushNodeToQueue(renderData->shadowNearAnimateQueue, scene->animationRoot, cameraNear);
+	pushNodeToQueue(renderData->shadowMidAnimateQueue, scene->animationRoot, cameraMid);
+	pushNodeToQueue(renderData->shadowFarAnimateQueue, scene->animationRoot, cameraFar);
+	pushNodeToQueue(renderData->animateQueue, scene->animationRoot, cameraMain);
 }
 
 void RenderManager::animateQueues(long startTime, long currentTime) {
@@ -101,7 +98,6 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 
 	state->reset();
 	state->cullMode = CULL_FRONT;
-	state->shadowPass = true;
 	state->enableAlphaTest = true;
 	state->alphaThreshold = 0.0;
 	state->alphaTestMode = GREATER;
@@ -116,6 +112,7 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 
 	render->setFrameBuffer(nearBuffer);
 	Camera* cameraNear=shadow->lightCameraNear;
+	state->pass = 1;
 	state->shader = phongShadow;
 	state->shaderIns = phongShadowIns;
 	currentQueue->shadowNearStaticQueue->draw(cameraNear, render, state);
@@ -124,6 +121,7 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 
 	render->setFrameBuffer(midBuffer);
 	Camera* cameraMid=shadow->lightCameraMid;
+	state->pass = 2;
 	state->shader = phongShadow;
 	currentQueue->shadowMidStaticQueue->draw(cameraMid, render, state);
 	state->shader = boneShadow;
@@ -135,6 +133,7 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	else {
 		render->setFrameBuffer(farBuffer);
 		Camera* cameraFar = shadow->lightCameraFar;
+		state->pass = 3;
 		state->shader = phongShadowLow;
 		state->shaderIns = phongShadowLowIns;
 		currentQueue->shadowFarStaticQueue->draw(cameraFar, render, state);
@@ -169,7 +168,12 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	// Draw terrain
 	if (scene->terrainNode) {
 		state->shader = mix;
-		render->draw(camera, scene->terrainNode->drawcall, state);
+		if (!scene->terrainNode->needUpdateNode) {
+			if (!scene->terrainNode->needCreateDrawcall) 
+				render->draw(camera, scene->terrainNode->drawcall, state);
+			else if (scene->terrainNode->needCreateDrawcall)
+				scene->terrainNode->prepareDrawcall();
+		}
 	}
 
 	state->shader = bone;

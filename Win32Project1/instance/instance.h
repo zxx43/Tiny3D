@@ -10,11 +10,11 @@
 
 #include "../mesh/mesh.h"
 #include "../maths/MATRIX4X4.h"
-#include <vector>
+#include "../render/instanceDrawcall.h"
+
+#define MAX_INSTANCE_COUNT 4096
 
 class Instance {
-private:
-	std::vector<MATRIX4X4> modelMatrixList,normalMatrixList;
 public:
 	Mesh* instanceMesh;
 	int vertexCount,indexCount;
@@ -24,16 +24,19 @@ public:
 	unsigned char* colorBuffer;
 	unsigned short* indexBuffer;
 
-	int instanceCount;
 	int textureChannel;
+	int instanceCount;
 	float* modelMatrices;
-	float* normalMatrices;
+	InstanceDrawcall* drawcall;
+	bool singleSide;
 
 	Instance(Mesh* mesh);
 	~Instance();
 	void initInstanceBuffers(int mid,int vertices,int indices);
-	void pushObjectToInstances(const MATRIX4X4& transformMatrix,const MATRIX4X4& normalMatrix);
-	void updateMatricesBuffer(int baseInstance, const MATRIX4X4& transformMatrix, const MATRIX4X4* normalMatrix);
+	void setInstanceCount(int count);
+	void updateMatricesBuffer(int i, const MATRIX4X4& transformMatrix);
+	void createDrawcall(bool simple);
+private:
 	void initMatrices();
 };
 

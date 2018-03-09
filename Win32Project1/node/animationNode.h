@@ -18,7 +18,8 @@ public:
 	AnimationNode(const VECTOR3D& boundingSize);
 	virtual ~AnimationNode();
 	virtual void prepareDrawcall();
-	virtual void updateDrawcall(bool updateNormal);
+	virtual void updateRenderData(Camera* camera, int pass);
+	virtual void updateDrawcall(int pass);
 	void setAnimation(Animation* anim);
 	AnimationObject* getObject();
 	void animate(int animIndex,long startTime,long currentTime);

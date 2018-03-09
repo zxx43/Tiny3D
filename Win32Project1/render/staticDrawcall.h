@@ -22,8 +22,8 @@ public:
 	virtual ~StaticDrawcall();
 	virtual void createSimple();
 	virtual void releaseSimple();
-	virtual void draw(Shader* shader,bool simple);
-	void updateMatrices(Batch* batch, bool updateNormals);
+	virtual void draw(Shader* shader,int pass);
+	void updateMatrices(Batch* batch);
 };
 
 

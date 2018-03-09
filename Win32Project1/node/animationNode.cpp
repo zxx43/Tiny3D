@@ -24,9 +24,11 @@ void AnimationNode::prepareDrawcall() {
 	needCreateDrawcall = false;
 }
 
-void AnimationNode::updateDrawcall(bool updateNormal) {
-	translateNode(position.x, position.y, position.z);
+void AnimationNode::updateDrawcall(int pass) {
 	needUpdateDrawcall = false;
+}
+
+void AnimationNode::updateRenderData(Camera* camera, int pass) {
 }
 
 void AnimationNode::animate(int animIndex,long startTime,long currentTime) {
@@ -40,13 +42,9 @@ AnimationObject* AnimationNode::getObject() {
 }
 
 void AnimationNode::translateNode(float x,float y,float z) {
-	position.x=x;
-	position.y=y;
-	position.z=z;
+	position.x=x; position.y=y; position.z=z;
 
-	MATRIX4X4 nodeTransform; nodeTransform.LoadIdentity();
 	recursiveTransform(nodeTransform);
-
 	MATRIX4X4 transform = nodeTransform * objects[0]->localTransformMatrix;
 	MATRIX4X4 nTransform = objects[0]->normalMatrix;
 	for (uint m = 0; m < 16; m++) {
@@ -55,7 +53,8 @@ void AnimationNode::translateNode(float x,float y,float z) {
 	}
 
 	VECTOR4D final4 = nodeTransform * VECTOR4D(0, 0, 0, 1);
-	VECTOR3D final3(final4.x / final4.w, final4.y / final4.w, final4.z / final4.w);
+	float invw = 1.0 / final4.w;
+	VECTOR3D final3(final4.x * invw, final4.y * invw, final4.z * invw);
 	boundingBox->update(final3);
 
 	Node* superior = parent;

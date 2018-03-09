@@ -154,7 +154,7 @@ bool AABB::cameraVertexInside(const VECTOR3D& vertex) {
 	return true;
 }
 
-bool AABB::checkWithCamera(Camera* camera, bool simple) {
+bool AABB::checkWithCamera(Camera* camera) {
 	for(int i=0;i<8;i++) {
 		if(vertexInsideCamera(vertices[i],camera))
 			return true;
@@ -169,7 +169,7 @@ bool AABB::checkWithCamera(Camera* camera, bool simple) {
 			return true;
 	}
 
-	if (!simple) {
+	if (!camera->simpleCheck) {
 		if (camera->frustum->intersectsWidthRay(vertices[0], VECTOR3D(1, 0, 0), sizex))
 			return true;
 		if (camera->frustum->intersectsWidthRay(vertices[0], VECTOR3D(0, 1, 0), sizey))

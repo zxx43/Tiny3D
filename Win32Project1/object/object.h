@@ -19,6 +19,7 @@ public:
 	Mesh* mesh;
 	int material;
 	MATRIX4X4 localTransformMatrix,normalMatrix;
+	MATRIX4X4 transformMatrix;
 	BoundingBox* bounding;
 	VECTOR3D localBoundPosition;
 
@@ -31,6 +32,7 @@ public:
 	virtual void vertexTransform()=0;
 	virtual void normalTransform()=0;
 	void bindMaterial(int mid);
+	bool checkInCamera(Camera* camera);
 	virtual void setPosition(float x, float y, float z) = 0;
 	virtual void setRotation(float ax, float ay, float az) = 0;
 	virtual void setSize(float sx, float sy, float sz) = 0;

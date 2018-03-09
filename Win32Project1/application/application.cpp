@@ -43,7 +43,7 @@ void Application::moveCamera() {
 
 void Application::prepare() {
 	scene->mainCamera->updateFrustum(); // Update main camera's frustum for cull
-	renderMgr->updateMainLight(renderMgr->lightDir); // Update shadow cameras' frustum for cull
+	renderMgr->updateMainLight(); // Update shadow cameras' frustum for cull
 	renderMgr->swapRenderQueues(scene); // Caculate cull result
 }
 

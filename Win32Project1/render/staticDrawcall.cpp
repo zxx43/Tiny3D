@@ -32,7 +32,7 @@ StaticDrawcall::StaticDrawcall(Batch* batch) :Drawcall() {
 		indexVBO = 4;
 
 	if (indexed)
-		dataBuffer->pushData(indexVBO, new RenderData(GL_UNSIGNED_INT, indexCount, 
+		dataBuffer->pushData(indexVBO, new RenderData(GL_UNSIGNED_INT, indexCount,
 			dataBuffer->vbos[indexVBO], GL_STATIC_DRAW, batch->indexBuffer));
 
 	createSimple();
@@ -64,34 +64,39 @@ void StaticDrawcall::createSimple() {
 		simpleBuffer->vbos[1], false, GL_STATIC_DRAW, -1, batch->texcoordBuffer));
 
 	int indexVBO = 3;
-	if (!isFullStatic())
+	if (!isFullStatic()) {
 		simpleBuffer->pushData(2, new RenderData(2, GL_UNSIGNED_BYTE, vertexCount, 1, 1,
 			simpleBuffer->vbos[2], false, GL_STATIC_DRAW, -1, batch->objectidBuffer));
-	else
+	} else
 		indexVBO = 2;
 
-	if (indexed) 
+	if (indexed) {
 		simpleBuffer->pushData(indexVBO, new RenderData(GL_UNSIGNED_INT, indexCount,
 			simpleBuffer->vbos[indexVBO], GL_STATIC_DRAW, batch->indexBuffer));
+	}
 }
 
 void StaticDrawcall::releaseSimple() {
 	delete simpleBuffer;
 }
 
-void StaticDrawcall::draw(Shader* shader,bool simple) {
-	if (!simple)
-		dataBuffer->use();
-	else
-		simpleBuffer->use();
+void StaticDrawcall::draw(Shader* shader,int pass) {
+	switch (pass) {
+		case 1:
+		case 2:
+		case 3:
+			simpleBuffer->use();
+			break;
+		case 4:
+			dataBuffer->use();
+			break;
+	}
 	if(!indexed)
 		glDrawArrays(GL_TRIANGLES,0,vertexCount);
 	else
 		glDrawElements(GL_TRIANGLES,indexCount,GL_UNSIGNED_INT,0);
 }
 
-void StaticDrawcall::updateMatrices(Batch* batch, bool updateNormals) {
+void StaticDrawcall::updateMatrices(Batch* batch) {
 	memcpy(uModelMatrix, batch->modelMatrices, batch->objectCount * 12 * sizeof(float));
-	if (updateNormals)
-		memcpy(uNormalMatrix, batch->normalMatrices, batch->objectCount * 9 * sizeof(float));
 }

@@ -37,7 +37,7 @@ struct RenderData {
 
 		glBindBuffer(GL_ARRAY_BUFFER, bufferid);
 		glBufferData(GL_ARRAY_BUFFER, dataSize * bitSize, streamData, drawType);
-		for (int i = 0; i < row; i++) {
+		for (uint i = 0; i < row; i++) {
 			uint attrloc = loc + i;
 			glVertexAttribPointer(attrloc, channel, type, normalize, bitSize * row * channel,
 				(void*)(bitSize * i * channel));
@@ -71,7 +71,8 @@ struct RenderData {
 		drawType = draw;
 		streamData = data;
 		glBindBuffer(GL_ARRAY_BUFFER, bufferid);
-		glBufferData(GL_ARRAY_BUFFER, dataSize * bitSize, streamData, drawType);
+		//glBufferData(GL_ARRAY_BUFFER, dataSize * bitSize, streamData, drawType);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, dataSize * bitSize, streamData);
 	}
 };
 

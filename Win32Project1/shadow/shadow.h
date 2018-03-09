@@ -36,7 +36,7 @@ public:
 	~Shadow();
 
 	void prepareViewCamera();
-	void update(float lx,float ly,float lz);
+	void update(const VECTOR3D& light);
 };
 
 
