@@ -23,7 +23,8 @@ Scene::Scene() {
 	animationRoot = NULL;
 	initNodes();
 	boundingNodes.clear();
-	nodesToUpdate.clear();
+	Node::nodesToUpdate.clear();
+	Instance::instanceTable.clear();
 }
 
 Scene::~Scene() {
@@ -45,19 +46,19 @@ void Scene::initNodes() {
 }
 
 void Scene::updateNodes() {
-	uint size = nodesToUpdate.size();
+	uint size = Node::nodesToUpdate.size();
 	if (size == 0) return;
 	for (uint i = 0; i < size; i++)
-		nodesToUpdate[i]->updateNode();
-	nodesToUpdate.clear();
+		Node::nodesToUpdate[i]->updateNode();
+	Node::nodesToUpdate.clear();
 }
 
 void Scene::createNodeAABB(Node* node) {
 	AABB* aabb = (AABB*)node->boundingBox;
 	if(aabb) {
 		StaticNode* aabbNode = new StaticNode(aabb->position);
-		StaticObject* aabbObject = new StaticObject(assetManager->meshes.find("box")->second);
-		aabbObject->bindMaterial(materials->find(BLACK_MAT));
+		StaticObject* aabbObject = new StaticObject(AssetManager::assetManager->meshes.find("box")->second);
+		aabbObject->bindMaterial(MaterialManager::materials->find(BLACK_MAT));
 		aabbObject->setSize(aabb->sizex, aabb->sizey, aabb->sizez);
 		aabbNode->addObject(aabbObject);
 		aabbNode->prepareDrawcall();

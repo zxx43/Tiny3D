@@ -7,7 +7,7 @@ Sky::Sky() {
 	StaticObject* skyObject=new StaticObject(mesh);
 	Material* mat = new Material("sky_mat");
 	mat->diffuse = VECTOR3D(0.5f, 0.7f, 0.8f);
-	skyObject->bindMaterial(materials->add(mat));
+	skyObject->bindMaterial(MaterialManager::materials->add(mat));
 	skyObject->setPosition(0,0,0);
 	skyNode=new StaticNode(VECTOR3D(0,0,0));
 	skyNode->fullStatic = true;

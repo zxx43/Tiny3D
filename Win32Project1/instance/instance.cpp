@@ -2,6 +2,8 @@
 #include "../constants/constants.h"
 #include "../material/materialManager.h"
 
+std::map<Mesh*, int> Instance::instanceTable;
+
 Instance::Instance(Mesh* mesh) {
 	instanceMesh=mesh;
 	vertexCount=0;
@@ -46,10 +48,10 @@ void Instance::initInstanceBuffers(int mid,int vertices,int indices) {
 
 		Material* mat = NULL;
 		if (!instanceMesh->materialids && mid >= 0)
-			mat = materials->find(mid);
+			mat = MaterialManager::materials->find(mid);
 		else if (instanceMesh->materialids)
-			mat = materials->find(instanceMesh->materialids[i]);
-		if (!mat) mat = materials->find(0);
+			mat = MaterialManager::materials->find(instanceMesh->materialids[i]);
+		if (!mat) mat = MaterialManager::materials->find(0);
 		VECTOR4D textures = mat->texture;
 		VECTOR3D ambient = mat->ambient;
 		VECTOR3D diffuse = mat->diffuse;

@@ -15,8 +15,8 @@ Application::Application() {
 void Application::init() {
 	render = new Render();
 	SetupShaders(render);
-	InitAssetManager();
-	InitMaterialManager();
+	AssetManager::Init();
+	MaterialManager::Init();
 	scene = new Scene();
 	input = new Input();
 	renderMgr = new RenderManager(scene->mainCamera, 100, 900, VECTOR3D(-1, -1, -1));
@@ -25,8 +25,8 @@ void Application::init() {
 }
 
 Application::~Application() {
-	ReleaseMaterialManager();
-	ReleaseAssetManager();
+	MaterialManager::Release();
+	AssetManager::Release();
 	delete scene; scene = NULL;
 	delete render; render = NULL;
 	delete input; input = NULL;

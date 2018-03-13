@@ -6,6 +6,8 @@
 #include "../constants/constants.h"
 using namespace std;
 
+AssetManager* AssetManager::assetManager = NULL;
+
 AssetManager::AssetManager() {
 	textures = new ImageSet();
 	meshes.clear();
@@ -29,20 +31,20 @@ void AssetManager::initTextureArray() {
 	textures->initTextureArray(COMMON_TEXTURE);
 }
 
+void AssetManager::Init() {
+	if (!AssetManager::assetManager) {
+		AssetManager::assetManager = new AssetManager();
 
-AssetManager* assetManager = NULL;
-
-void InitAssetManager() {
-	assetManager = new AssetManager();
-
-	// Load some basic meshes
-	assetManager->meshes["box"] = new Box();
-	assetManager->meshes["sphere"] = new Sphere(16, 16);
-	assetManager->meshes["board"] = new Board();
-	assetManager->meshes["quad"] = new Quad();
+		// Load some basic meshes
+		AssetManager::assetManager->meshes["box"] = new Box();
+		AssetManager::assetManager->meshes["sphere"] = new Sphere(16, 16);
+		AssetManager::assetManager->meshes["board"] = new Board();
+		AssetManager::assetManager->meshes["quad"] = new Quad();
+	}
 }
 
-void ReleaseAssetManager() {
-	if (assetManager) delete assetManager;
-	assetManager = NULL;
+void AssetManager::Release() {
+	if (AssetManager::assetManager) 
+		delete AssetManager::assetManager;
+	AssetManager::assetManager = NULL;
 }

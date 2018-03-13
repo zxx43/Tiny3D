@@ -16,6 +16,8 @@ public:
 	InstanceNode(const VECTOR3D& position);
 	virtual ~InstanceNode();
 	void addObjects(Object** objectArray,int count);
+	virtual void addObject(Object* object);
+	virtual Object* removeObject(Object* object);
 	virtual void prepareDrawcall();
 	virtual void updateRenderData(Camera* camera, int pass);
 	virtual void updateDrawcall(int pass);

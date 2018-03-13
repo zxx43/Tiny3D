@@ -28,21 +28,23 @@ struct Material
 }; 
 
 class MaterialManager {
+public:
+	static MaterialManager* materials;
+public:
+	static void Init();
+	static void Release();
 private:
 	std::vector<Material*> materialList;
 	std::map<std::string, Material*> materialMap;
-public:
+private:
 	MaterialManager();
 	~MaterialManager();
+public:
 	unsigned int add(Material* material);
 	void remove(unsigned int i);
 	Material* find(unsigned int i);
 	int find(std::string name);
 	unsigned int size();
 };
-
-extern MaterialManager* materials;
-void InitMaterialManager();
-void ReleaseMaterialManager();
 
 #endif

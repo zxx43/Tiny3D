@@ -104,7 +104,9 @@ void RenderQueue::draw(Camera* camera, Render* render, RenderState* state) {
 			instance->setInstanceCount(0);
 		}
 		itIns++;
-	}
+		if (Instance::instanceTable[instance->instanceMesh] == 0)
+			deleteInstance(instance->instanceMesh);
+	}	
 }
 
 void RenderQueue::animate(long startTime, long currentTime) {

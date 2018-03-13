@@ -28,7 +28,7 @@ void SimpleApplication::resize(int width, int height) {
 	screen->addColorBuffer();
 
 	if (screenFilter) delete screenFilter;
-	screenFilter = new Filter(width, height, false, LOW_PRE);
+	screenFilter = new Filter(0.8 * width, 0.8 * height, false, LOW_PRE);
 }
 
 void SimpleApplication::keyDown(int key) {
@@ -55,7 +55,7 @@ void SimpleApplication::init() {
 
 void SimpleApplication::initScreen() {
 	scene->screenNode = new StaticNode(VECTOR3D(0, 0, 0));
-	StaticObject* board = new StaticObject(assetManager->meshes["board"]);
+	StaticObject* board = new StaticObject(AssetManager::assetManager->meshes["board"]);
 	scene->screenNode->addObject(board);
 }
 
@@ -70,13 +70,20 @@ void SimpleApplication::moveCamera() {
 
 void SimpleApplication::act(long startTime, long currentTime) {
 	Application::act(startTime, currentTime);
-/*
-	Node* node = scene->animationRoot->children[0];
-	AnimationNode* animNode = (AnimationNode*)node->children[0];
-	animNode->rotateNodeObject(0, 45, 0);
-	animNode->translateNode(animNode->position.x + 0.02, animNode->position.y, animNode->position.z + 0.02);
-	standObjectsOnGround(animNode, scene->terrainNode);
-//*/
+	/*
+		Node* node = scene->animationRoot->children[0];
+		AnimationNode* animNode = (AnimationNode*)node->children[0];
+		animNode->rotateNodeObject(0, 45, 0);
+		animNode->translateNode(animNode->position.x + 0.02, animNode->position.y, animNode->position.z + 0.02);
+		standObjectsOnGround(animNode, scene->terrainNode);
+	//*/
+	/*
+	static int time = 1;
+	if (currentTime - startTime > 10000 * time && scene->staticRoot->children.size() > 1) {
+		scene->staticRoot->detachChild(scene->staticRoot->children[1]);
+		time++;
+	}
+	*/
 	scene->updateNodes();
 }
 
@@ -84,42 +91,44 @@ void SimpleApplication::initScene() {
 	scene->skyBox = new Sky();
 
 	// Load meshes
-	assetManager->meshes["tree"] = new Model("models/firC.obj", "models/firC.mtl", 2, true);
-	assetManager->meshes["treeA"] = new Model("models/treeA.obj", "models/treeA.mtl", 2, true);
-	assetManager->meshes["tank"] = new Model("models/tank.obj", "models/tank.mtl", 3, true);
-	assetManager->meshes["m1a2"] = new Model("models/m1a2.obj", "models/m1a2.mtl", 2, true);
-	assetManager->meshes["terrain"] = new Terrain("terrain/Terrain.raw");
-	assetManager->animations["army"] = new Animation("models/ArmyPilot.dae");
+	AssetManager::assetManager->meshes["tree"] = new Model("models/firC.obj", "models/firC.mtl", 2, true);
+	AssetManager::assetManager->meshes["treeA"] = new Model("models/treeA.obj", "models/treeA.mtl", 2, true);
+	AssetManager::assetManager->meshes["tank"] = new Model("models/tank.obj", "models/tank.mtl", 3, true);
+	AssetManager::assetManager->meshes["m1a2"] = new Model("models/m1a2.obj", "models/m1a2.mtl", 2, true);
+	AssetManager::assetManager->meshes["terrain"] = new Terrain("terrain/Terrain.raw");
+	AssetManager::assetManager->animations["army"] = new Animation("models/ArmyPilot.dae");
 
 	// Load textures
-	ImageSet* textures = assetManager->textures;
+	ImageSet* textures = AssetManager::assetManager->textures;
 	textures->addTexture("cube.bmp");
 	textures->addTexture("ground.bmp");
 	textures->addTexture("ground_r.bmp");
 	textures->addTexture("sand.bmp");
-	assetManager->initTextureArray();
+	AssetManager::assetManager->initTextureArray();
 
 	// Create materials
 	Material* boxMat = new Material("box_mat");
 	boxMat->texture.x = textures->findTexture("cube.bmp");
-	materials->add(boxMat);
+	MaterialManager::materials->add(boxMat);
 	Material* grassMat = new Material("grass_mat");
 	grassMat->texture.x = textures->findTexture("ground.bmp");
-	materials->add(grassMat);
+	MaterialManager::materials->add(grassMat);
 	Material* sandMat = new Material("sand_mat");
 	sandMat->texture.x = textures->findTexture("sand.bmp");
-	materials->add(sandMat);
+	MaterialManager::materials->add(sandMat);
 	Material* terrainMat = new Material("terrain_mat");
 	terrainMat->texture.x = textures->findTexture("ground.bmp");
 	terrainMat->texture.y = textures->findTexture("ground_r.bmp");
-	materials->add(terrainMat);
+	MaterialManager::materials->add(terrainMat);
 
 	// Create Nodes
-	map<string, Mesh*> meshes = assetManager->meshes;
-	map<string, Animation*> animations = assetManager->animations;
+	map<string, Mesh*> meshes = AssetManager::assetManager->meshes;
+	map<string, Animation*> animations = AssetManager::assetManager->animations;
 
-	StaticObject* box = new StaticObject(meshes["box"]); box->bindMaterial(materials->find("box_mat"));
-	StaticObject* sphere = new StaticObject(meshes["sphere"]); sphere->bindMaterial(materials->find("grass_mat"));
+	StaticObject* box = new StaticObject(meshes["box"]); 
+	box->bindMaterial(MaterialManager::materials->find("box_mat"));
+	StaticObject* sphere = new StaticObject(meshes["sphere"]); 
+	sphere->bindMaterial(MaterialManager::materials->find("grass_mat"));
 	StaticObject* board = new StaticObject(meshes["board"]);
 	StaticObject* quad = new StaticObject(meshes["quad"]);
 	StaticObject* model1 = new StaticObject(meshes["tree"]);
@@ -131,7 +140,7 @@ void SimpleApplication::initScene() {
 	scene->terrainNode = new TerrainNode(VECTOR3D(-1024, 0, -1024));
 	scene->terrainNode->fullStatic = true;
 	StaticObject* terrainObject = new StaticObject(meshes["terrain"]);
-	terrainObject->bindMaterial(materials->find("terrain_mat"));
+	terrainObject->bindMaterial(MaterialManager::materials->find("terrain_mat"));
 	terrainObject->setPosition(0, 0, 0);
 	terrainObject->setSize(2, 1, 2);
 	scene->terrainNode->addObject(terrainObject);
@@ -160,7 +169,7 @@ void SimpleApplication::initScene() {
 
 	StaticNode* node2 = new StaticNode(VECTOR3D(10, 2, 2));
 	StaticObject* object6 = box->clone();
-	object6->bindMaterial(materials->find(DEFAULT_MAT));
+	object6->bindMaterial(MaterialManager::materials->find(DEFAULT_MAT));
 	object6->setPosition(3, 3, 3);
 	object6->setRotation(0, 30, 0);
 	object6->setSize(1, 1, 1);
@@ -195,7 +204,8 @@ void SimpleApplication::initScene() {
 	instanceNode1->singleSide = true;
 	for (uint i = 0; i < 10; i++) {
 		for (uint j = 0; j < 10; j++) {
-			StaticObject* tree = model1->clone();
+			StaticObject* tree = (rand() % 100) > 40 ? model4->clone() : model1->clone();
+			//StaticObject* tree = model4->clone();
 			float size = (rand() % 100 * 0.01) * 2 + 1;
 			tree->setSize(size, size, size);
 			tree->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
@@ -207,7 +217,8 @@ void SimpleApplication::initScene() {
 	instanceNode2->singleSide = true;
 	for (uint i = 0; i < 10; i++) {
 		for (uint j = 0; j < 10; j++) {
-			StaticObject* tree = model1->clone();
+			StaticObject* tree = (rand() % 100) > 40 ? model4->clone() : model1->clone();
+			//StaticObject* tree = model4->clone();
 			float size = (rand() % 100 * 0.01) * 2 + 1;
 			tree->setSize(size, size, size);
 			tree->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
@@ -219,7 +230,8 @@ void SimpleApplication::initScene() {
 	instanceNode3->singleSide = true;
 	for (uint i = 0; i < 10; i++) {
 		for (uint j = 0; j < 10; j++) {
-			StaticObject* tree = model1->clone();
+			StaticObject* tree = (rand() % 100) > 40 ? model4->clone() : model1->clone();
+			//StaticObject* tree = model4->clone();
 			float size = (rand() % 100 * 0.01) * 2 + 1;
 			tree->setSize(size, size, size);
 			tree->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
@@ -231,7 +243,8 @@ void SimpleApplication::initScene() {
 	instanceNode4->singleSide = true;
 	for (uint i = 0; i < 10; i++) {
 		for (uint j = 0; j < 10; j++) {
-			StaticObject* tree = model1->clone();
+			StaticObject* tree = (rand() % 100) > 40 ? model4->clone() : model1->clone();
+			//StaticObject* tree = model4->clone();
 			float size = (rand() % 100 * 0.01) * 2 + 1;
 			tree->setSize(size, size, size);
 			tree->setRotation(0, 360 * (rand() % 100) * 0.01, 0);

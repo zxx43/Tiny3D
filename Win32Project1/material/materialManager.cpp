@@ -1,5 +1,7 @@
 #include "materialManager.h"
 
+MaterialManager* MaterialManager::materials = NULL;
+
 MaterialManager::MaterialManager() {
 	materialList.clear();
 	materialMap.clear();
@@ -51,14 +53,13 @@ unsigned int MaterialManager::size() {
 	return materialList.size();
 }
 
-
-MaterialManager* materials = NULL;
-
-void InitMaterialManager() {
-	materials = new MaterialManager();
+void MaterialManager::Init() {
+	if (!MaterialManager::materials)
+		MaterialManager::materials = new MaterialManager();
 }
 
-void ReleaseMaterialManager() {
-	if (materials) delete materials;
-	materials = NULL;
+void MaterialManager::Release() {
+	if (MaterialManager::materials)
+		delete MaterialManager::materials;
+	MaterialManager::materials = NULL;
 }

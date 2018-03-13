@@ -19,6 +19,8 @@
 #include "../render/drawcall.h"
 
 class Node {
+public:
+	static std::vector<Node*> nodesToUpdate;
 private:
 	void updateObjectBoundingInNode(Object* object);
 	void updateBaseNodeBounding();
@@ -73,7 +75,5 @@ public:
 	void clearChildren();
 	void recursiveTransform(MATRIX4X4& finalNodeMatrix);
 };
-
-extern std::vector<Node*> nodesToUpdate;
 
 #endif /* NODE_H_ */

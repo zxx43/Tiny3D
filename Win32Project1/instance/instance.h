@@ -16,6 +16,8 @@
 
 class Instance {
 public:
+	static std::map<Mesh*, int> instanceTable;
+public:
 	Mesh* instanceMesh;
 	int vertexCount,indexCount;
 	float* vertexBuffer;

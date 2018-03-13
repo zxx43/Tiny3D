@@ -9,17 +9,19 @@
 
 class AssetManager {
 public:
+	static AssetManager* assetManager;
+public:
+	static void Init();
+	static void Release();
+public:
 	std::map<std::string, Mesh*> meshes;
 	std::map<std::string, Animation*> animations;
 	ImageSet* textures;
-public:
+private:
 	AssetManager();
 	~AssetManager();
+public:
 	void initTextureArray();
 };
-
-extern AssetManager* assetManager;
-void InitAssetManager();
-void ReleaseAssetManager();
 
 #endif

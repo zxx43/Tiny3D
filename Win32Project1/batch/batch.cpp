@@ -61,10 +61,10 @@ void Batch::pushMeshToBuffers(Mesh* mesh,int mid,bool fullStatic,const MATRIX4X4
 		
 		Material* mat = NULL;
 		if (!mesh->materialids && mid >= 0)
-			mat = materials->find(mid);
+			mat = MaterialManager::materials->find(mid);
 		else if (mesh->materialids)
-			mat = materials->find(mesh->materialids[i]);
-		if (!mat) mat = materials->find(0);
+			mat = MaterialManager::materials->find(mesh->materialids[i]);
+		if (!mat) mat = MaterialManager::materials->find(0);
 		VECTOR3D ambient = mat->ambient;
 		VECTOR3D diffuse = mat->diffuse;
 		VECTOR3D specular = mat->specular;

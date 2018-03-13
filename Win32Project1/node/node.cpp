@@ -1,7 +1,8 @@
 #include "node.h"
 #include "../util/util.h"
+#include "../instance/instance.h"
 
-std::vector<Node*> nodesToUpdate;
+std::vector<Node*> Node::nodesToUpdate;
 
 Node::Node(const VECTOR3D& position,const VECTOR3D& size) {
 	this->position.x=position.x;
@@ -41,7 +42,7 @@ Node::~Node() {
 	boundingBox=NULL;
 
 	objectsBBs.clear();
-	for (unsigned int i = 0; i < objects.size(); i++) 
+	for (uint i = 0; i < objects.size(); i++) 
 		delete objects[i];
 	objects.clear();
 
@@ -102,11 +103,11 @@ void Node::addObject(Object* object) {
 Object* Node::removeObject(Object* object) {
 	std::vector<Object*>::iterator it;
 	std::vector<BoundingBox*>::iterator itbb;
-	for(it=objects.begin();it!=objects.end();it++) {
-		if((*it)==object) {
+	for (it = objects.begin(); it != objects.end(); it++) {
+		if ((*it) == object) {
 			objects.erase(it);
-			for(itbb=objectsBBs.begin();itbb!=objectsBBs.end();itbb++) {
-				if((*itbb)==object->bounding) {
+			for (itbb = objectsBBs.begin(); itbb != objectsBBs.end(); itbb++) {
+				if ((*itbb) == object->bounding) {
 					objectsBBs.erase(itbb);
 					break;
 				}
@@ -121,6 +122,7 @@ Object* Node::removeObject(Object* object) {
 
 			needCreateDrawcall = true;
 			pushToUpdate();
+
 			return object;
 		}
 	}
@@ -244,7 +246,11 @@ Node* Node::detachChild(Node* child) {
 				superior->updateBounding();
 				superior = superior->parent;
 			}
-
+			
+			if (child->type == TYPE_INSTANCE) {
+				for (uint i = 0; i < child->objects.size(); i++)
+					Instance::instanceTable[child->objects[i]->mesh]--;
+			}
 			return child;
 		}
 	}
@@ -337,7 +343,7 @@ void Node::scaleNodeObject(int i, float sx, float sy, float sz) {
 
 void Node::pushToUpdate() {
 	if (!needUpdateNode) {
-		nodesToUpdate.push_back(this);
+		Node::nodesToUpdate.push_back(this);
 		needUpdateNode = true;
 	}
 }

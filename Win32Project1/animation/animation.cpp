@@ -155,7 +155,7 @@ void Animation::loadMaterials() {
 		if(mat->Get(AI_MATKEY_NAME, name)!=AI_SUCCESS) name="animation_mat";
 		Material* mtl = new Material(name.data);
 		if (mat->GetTexture(aiTextureType_DIFFUSE, 0, &path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) {
-			ImageSet* textures = assetManager->textures;
+			ImageSet* textures = AssetManager::assetManager->textures;
 			if (textures->findTexture(path.data) < 0)
 				textures->addTexture(path.data);
 			int textureid = textures->findTexture(path.data);
@@ -167,7 +167,7 @@ void Animation::loadMaterials() {
 		mtl->ambient.x = ambent.r; mtl->ambient.y = ambent.g; mtl->ambient.z = ambent.b;
 		mtl->diffuse.x = diffuse.r; mtl->diffuse.y = diffuse.g; mtl->diffuse.z = diffuse.b;
 		mtl->specular.x = specular.r; mtl->specular.y = specular.g; mtl->specular.z = specular.b;
-		materialMap[i] = materials->add(mtl);
+		materialMap[i] = MaterialManager::materials->add(mtl);
 	}
 }
 
@@ -187,8 +187,8 @@ void Animation::loadMeshes(Entry* entry) {
 			aTexcoords.push_back(VECTOR2D(0,0));
 
 		int mid = materialMap[entry->materialIndex];
-		Material* mat = materials->find(mid);
-		if (!mat) mat = materials->find(0);
+		Material* mat = MaterialManager::materials->find(mid);
+		if (!mat) mat = MaterialManager::materials->find(0);
 		aTextures.push_back(mat->texture);
 		aAmbients.push_back(mat->ambient);
 		aDiffuses.push_back(mat->diffuse);
