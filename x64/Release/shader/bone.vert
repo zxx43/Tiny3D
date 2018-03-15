@@ -17,7 +17,6 @@ layout (location = 5) in vec4 weights;
 out vec3 vTexcoord;
 flat out vec3 vColor;
 out vec3 vNormal;
-out vec4 projPosition;
 out vec4 viewPosition;
 out vec4 lightNearPosition,lightMidPosition,lightFarPosition;
 
@@ -49,7 +48,6 @@ void main() {
 	vec4 modelPosition = uModelMatrix * position;
 	viewPosition = viewMatrix * modelPosition;
 	gl_Position = projectMatrix * viewPosition;
-	projPosition = gl_Position;
 
 	lightNearPosition = lightViewProjNear * modelPosition;
 	lightMidPosition = lightViewProjMid * modelPosition;

@@ -13,7 +13,6 @@ out vec2 vTexcoord;
 flat out float vTexid;
 out vec3 vColor;
 out vec3 vNormal;
-out vec4 projPosition;
 
 mat4 convertMat(mat3x4 srcMat) {
 	vec4 col1 = srcMat[0];
@@ -44,5 +43,4 @@ void main() {
 	vTexcoord = texcoord.xy; 
 	vTexid = texcoord.z;
 	gl_Position = viewProjectMatrix * worldVertex;
-	projPosition = gl_Position;
 }

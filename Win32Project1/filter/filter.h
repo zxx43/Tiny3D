@@ -21,7 +21,7 @@ public:
 	Filter(float width, float height, bool useFramebuffer, int precision);
 	~Filter();
 
-	void draw(Render* render, Shader* shader, const std::vector<Texture2D*>& inputTextures);
+	void draw(Render* render, Shader* shader, const std::vector<Texture2D*>& inputTextures, const Texture2D* depthTexture);
 	Texture2D* getOutput();
 };
 

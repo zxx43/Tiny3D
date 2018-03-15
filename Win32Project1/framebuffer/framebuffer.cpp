@@ -1,10 +1,9 @@
 #include "framebuffer.h"
 
-FrameBuffer::FrameBuffer(float width, float height, bool depth, int precision) {
+FrameBuffer::FrameBuffer(float width, float height, int precision) {
 	this->width=width;
 	this->height=height;
-	this->precision = precision;
-	hasDepth=depth;
+	hasDepth=false;
 
 	glGenFramebuffersEXT(1,&fboId);
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId);
@@ -16,12 +15,8 @@ FrameBuffer::FrameBuffer(float width, float height, bool depth, int precision) {
 			colorBuffers[0]->id,0);
 
 	depthBuffer=NULL;
-	if(hasDepth) {
-		depthBuffer=new Texture2D(width,height,TEXTURE_TYPE_DEPTH,precision);
-		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D,depthBuffer->id, 0);
-	}
 
-	glDrawBuffers(colorBufferCount,colorAttachments);
+	glDrawBuffers(colorBufferCount,ColorAttachments);
 
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
 }
@@ -38,14 +33,24 @@ FrameBuffer::~FrameBuffer() {
 	glDeleteFramebuffersEXT(1,&fboId);
 }
 
-void FrameBuffer::addColorBuffer() {
+void FrameBuffer::attachDepthBuffer(int precision) {
+	hasDepth = true;
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId);
+	
+	depthBuffer = new Texture2D(width, height, TEXTURE_TYPE_DEPTH, precision);
+	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, depthBuffer->id, 0);
+
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+}
+
+void FrameBuffer::addColorBuffer(int precision) {
 	colorBufferCount++;
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId);
 
 	colorBuffers.push_back(new Texture2D(width,height,TEXTURE_TYPE_COLOR,precision));
 	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT+(colorBufferCount-1),GL_TEXTURE_2D,
 			colorBuffers[colorBufferCount-1]->id,0);
-	glDrawBuffers(colorBufferCount,colorAttachments);
+	glDrawBuffers(colorBufferCount,ColorAttachments);
 
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
 }

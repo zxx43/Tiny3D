@@ -9,7 +9,7 @@ Filter::Filter(float width, float height, bool useFramebuffer, int precision) {
 	pixHeight = 1.0 / height;
 	framebuffer=NULL;
 	if(useFramebuffer)
-		framebuffer = new FrameBuffer(width, height, false, precision);
+		framebuffer = new FrameBuffer(width, height, precision);
 
 	Board* board=new Board();
 	boardNode=new StaticNode(VECTOR3D(0,0,0));
@@ -33,13 +33,16 @@ Filter::~Filter() {
 	delete state; state = NULL;
 }
 
-void Filter::draw(Render* render, Shader* shader, const std::vector<Texture2D*>& inputTextures) {
+void Filter::draw(Render* render, Shader* shader, const std::vector<Texture2D*>& inputTextures, const Texture2D* depthTexture) {
 	state->shader = shader;
 	render->setFrameBuffer(framebuffer);
 	render->useShader(shader);
 	shader->setVector2("pixelSize",pixWidth,pixHeight);
-	for (uint i = 0; i < inputTextures.size(); i++)
-		render->useTexture(TEXTURE_2D, i, inputTextures[i]->id);
+	uint bufferid;
+	for (bufferid = 0; bufferid < inputTextures.size(); bufferid++)
+		render->useTexture(TEXTURE_2D, bufferid, inputTextures[bufferid]->id);
+	if (depthTexture)
+		render->useTexture(TEXTURE_2D, bufferid, depthTexture->id);
 	render->draw(NULL,boardNode->drawcall,state);
 	render->finishDraw();
 }

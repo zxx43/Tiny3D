@@ -12,7 +12,7 @@
 #include "../texture/texture2d.h"
 #include <vector>
 
-const GLenum colorAttachments[] = { GL_COLOR_ATTACHMENT0_EXT, GL_COLOR_ATTACHMENT1_EXT , GL_COLOR_ATTACHMENT2_EXT,
+const GLenum ColorAttachments[] = { GL_COLOR_ATTACHMENT0_EXT, GL_COLOR_ATTACHMENT1_EXT , GL_COLOR_ATTACHMENT2_EXT,
 		GL_COLOR_ATTACHMENT3_EXT, GL_COLOR_ATTACHMENT4_EXT, GL_COLOR_ATTACHMENT5_EXT, GL_COLOR_ATTACHMENT6_EXT,
 		GL_COLOR_ATTACHMENT7_EXT};
 
@@ -21,16 +21,16 @@ private:
 	unsigned int fboId;
 	float width,height;
 	bool hasDepth;
-	int precision;
 	int colorBufferCount;
-	Texture2D* depthBuffer;
 public:
 	std::vector<Texture2D*> colorBuffers;
+	Texture2D* depthBuffer;
 public:
-	FrameBuffer(float width, float height, bool depth, int precision);
+	FrameBuffer(float width, float height, int precision);
 	~FrameBuffer();
 public:
-	void addColorBuffer();
+	void addColorBuffer(int precision);
+	void attachDepthBuffer(int precision);
 	Texture2D* getColorBuffer(int n);
 	void use();
 };

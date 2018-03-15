@@ -23,9 +23,9 @@ void SimpleApplication::resize(int width, int height) {
 	Application::resize(width, height);
 
 	if (screen) delete screen;
-	screen = new FrameBuffer(width, height, true, LOW_PRE);
-	screen->addColorBuffer();
-	screen->addColorBuffer();
+	screen = new FrameBuffer(width, height, LOW_PRE);
+	screen->addColorBuffer(LOW_PRE);
+	screen->attachDepthBuffer(LOW_PRE);
 
 	if (screenFilter) delete screenFilter;
 	screenFilter = new Filter(0.8 * width, 0.8 * height, false, LOW_PRE);
@@ -44,7 +44,7 @@ void SimpleApplication::draw() {
 	render->setFrameBuffer(screen);
 //	render->setFrameBuffer(NULL);
 	renderMgr->renderScene(render, scene);
-	screenFilter->draw(render, render->findShader("blur"), screen->colorBuffers);
+	screenFilter->draw(render, render->findShader("blur"), screen->colorBuffers, screen->depthBuffer);
 }
 
 void SimpleApplication::init() {

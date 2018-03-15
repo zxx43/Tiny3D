@@ -13,7 +13,6 @@ out vec4 vTexcoord;
 flat out vec3 vColor;
 out vec3 vNormal;
 out vec4 worldPosition;
-out vec4 projPosition;
 out vec4 viewPosition;
 out vec4 lightNearPosition,lightMidPosition,lightFarPosition;
 
@@ -28,7 +27,6 @@ void main() {
 	vTexcoord = texcoord; 
 	viewPosition = viewMatrix * worldVertex;
 	gl_Position = projectMatrix * viewPosition;
-	projPosition = gl_Position;
 
 	lightNearPosition = lightViewProjNear * worldVertex;
 	lightMidPosition = lightViewProjMid * worldVertex;

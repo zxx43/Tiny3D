@@ -6,9 +6,9 @@ RenderManager::RenderManager(Camera* view, float distance1, float distance2, con
 	float nearSize=1024;
 	float midSize=2048;
 	float farSize=2048;
-	nearBuffer=new FrameBuffer(nearSize,nearSize,false,HIGH_PRE);
-	midBuffer=new FrameBuffer(midSize,midSize,false,HIGH_PRE);
-	farBuffer=new FrameBuffer(farSize,farSize,false,LOW_PRE);
+	nearBuffer=new FrameBuffer(nearSize,nearSize,HIGH_PRE);
+	midBuffer=new FrameBuffer(midSize,midSize,HIGH_PRE);
+	farBuffer=new FrameBuffer(farSize,farSize,LOW_PRE);
 	lightDir = light; lightDir.Normalize();
 
 	renderData = new Renderable(); renderData->copyCamera(view);

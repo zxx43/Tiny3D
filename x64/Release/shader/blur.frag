@@ -1,8 +1,8 @@
 #version 330
 
 uniform sampler2D colorBuffer;
-uniform sampler2D depthBuffer;
 uniform sampler2D normalBuffer;
+uniform sampler2D depthBuffer;
 uniform vec2 pixelSize;
 
 in vec2 vTexcoord;

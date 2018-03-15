@@ -66,7 +66,7 @@ void SetupShaders(Render* render) {
 	Shader* blur=render->shaders->addShader("blur",BLUR_VERT,BLUR_FRAG);
 	render->useShader(blur);
 	blur->setSampler("colorBuffer", 0);
-	blur->setSampler("depthBuffer", 1);
-	blur->setSampler("normalBuffer", 2);
+	blur->setSampler("normalBuffer", 1);
+	blur->setSampler("depthBuffer", 2);
 }
 
