@@ -41,9 +41,6 @@ void ResizeWindow(int width,int height) {
 }
 
 void DrawWindow() {
-	WaitForSingleObject(mutex, INFINITE);
-	dataPrepared = true;
-	ReleaseMutex(mutex);
 	app->draw();
 	WaitForSingleObject(mutex, INFINITE);
 	dataPrepared = false;
@@ -54,11 +51,11 @@ void DrawWindow() {
 DWORD WINAPI ActThreadRun(LPVOID param) {
 	DWORD last = 0;
 	while (!app->willExit) {
-		currentTime = timeGetTime();
-		if(currentTime - last > 10) {
+		if (currentTime - last > 5) {
 			app->moveCamera();
 			last = currentTime;
 		}
+		Sleep(0);
 	}
 	thread1End = true;
 	return 1;
@@ -66,7 +63,7 @@ DWORD WINAPI ActThreadRun(LPVOID param) {
 
 DWORD WINAPI FrameThreadRun(LPVOID param) {
 	while (!app->willExit) {
-		Sleep(0);
+		currentTime = timeGetTime();
 		if(!dataPrepared) {
 			app->act(startTime, currentTime);
 			app->prepare();

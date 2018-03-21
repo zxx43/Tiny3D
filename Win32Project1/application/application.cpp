@@ -19,7 +19,7 @@ void Application::init() {
 	MaterialManager::Init();
 	scene = new Scene();
 	input = new Input();
-	renderMgr = new RenderManager(scene->mainCamera, 100, 900, VECTOR3D(-1, -1, -1));
+	renderMgr = new RenderManager(scene->mainCamera, 150, 700, VECTOR3D(-1, -1, -1));
 	renderMgr->enableShadow(render);
 	renderMgr->hideBounding();
 }

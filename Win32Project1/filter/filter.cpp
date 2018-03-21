@@ -18,10 +18,6 @@ Filter::Filter(float width, float height, bool useFramebuffer, int precision) {
 	boardNode->addObject(boardObject);
 	boardNode->prepareDrawcall();
 	delete board;
-
-	state = new RenderState();
-	state->enableCull = false;
-	state->lightEffect = false;
 }
 
 Filter::~Filter() {
@@ -30,21 +26,19 @@ Filter::~Filter() {
 		delete framebuffer;
 		framebuffer=NULL;
 	}
-	delete state; state = NULL;
 }
 
-void Filter::draw(Render* render, Shader* shader, const std::vector<Texture2D*>& inputTextures, const Texture2D* depthTexture) {
-	state->shader = shader;
+void Filter::draw(Camera* camera, Render* render, RenderState* state,
+		const std::vector<Texture2D*>& inputTextures, const Texture2D* depthTexture) {
 	render->setFrameBuffer(framebuffer);
-	render->useShader(shader);
-	shader->setVector2("pixelSize",pixWidth,pixHeight);
+	render->useShader(state->shader);
+	state->shader->setVector2("pixelSize",pixWidth,pixHeight);
 	uint bufferid;
 	for (bufferid = 0; bufferid < inputTextures.size(); bufferid++)
 		render->useTexture(TEXTURE_2D, bufferid, inputTextures[bufferid]->id);
 	if (depthTexture)
 		render->useTexture(TEXTURE_2D, bufferid, depthTexture->id);
-	render->draw(NULL,boardNode->drawcall,state);
-	render->finishDraw();
+	render->draw(camera, boardNode->drawcall, state);
 }
 
 Texture2D* Filter::getOutput() {

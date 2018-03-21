@@ -72,6 +72,7 @@ struct Renderable {
 class RenderManager {
 public:
 	VECTOR3D lightDir;
+	RenderState* state;
 private:
 	Shadow* shadow;
 public:
@@ -83,7 +84,6 @@ public:
 private: // States
 	bool useShadow;
 	bool drawBounding;
-	RenderState* state;
 private: // Shaders
 	Shader* phongShadow;
 	Shader* phongShadowLow;
@@ -95,6 +95,7 @@ private: // Shaders
 	Shader* bone;
 	Shader* mix;
 	Shader* skyCube;
+	Shader* deferred;
 private:
 	void drawBoundings(Render* render, RenderState* state, Scene* scene, Camera* camera);
 public:
@@ -117,6 +118,8 @@ public:
 	void disableShadow(Render* render);
 	void showBounding();
 	void hideBounding();
+
+	void drawDeferred(Render* render, Scene* scene, FrameBuffer* screenBuff, Filter* filter);
 };
 
 

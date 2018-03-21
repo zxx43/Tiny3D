@@ -1,7 +1,6 @@
 #version 330
 
 uniform mat4 viewProjectMatrix;
-uniform vec3 light;
 
 layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 normal;
@@ -26,19 +25,12 @@ mat4 convertMat(mat3x4 srcMat) {
 }
 
 void main() {
+	vColor = color * 0.005;
+
 	mat4 matModel = convertMat(modelMatrix);
 	vec4 worldVertex = matModel * vec4(vertex, 1.0);
 	vec3 worldNormal = (matModel * vec4(normal, 0.0)).xyz;
 	vNormal = worldNormal;
-
-	vec3 matColor = color * 0.005;
-	float ambientFactor = 0.5; float diffuseFactor = 1.0;
-	vec3 ambientColor = matColor.xxx * ambientFactor;
-	vec3 diffuseColor = matColor.yyy * diffuseFactor;
-	vec3 invLight = normalize(-light);
-	float ndotl = dot(invLight, normalize(worldNormal));
-	diffuseColor *= max(ndotl, 0.0);
-	vColor = ambientColor + diffuseColor;
 	
 	vTexcoord = texcoord.xy; 
 	vTexid = texcoord.z;

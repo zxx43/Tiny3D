@@ -85,6 +85,7 @@ void StaticDrawcall::draw(Shader* shader,int pass) {
 		case 1:
 		case 2:
 		case 3:
+		case 5:
 			simpleBuffer->use();
 			break;
 		case 4:

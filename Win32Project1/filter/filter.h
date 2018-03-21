@@ -16,12 +16,12 @@ private:
 	float width,height,pixWidth,pixHeight;
 	FrameBuffer* framebuffer;
 	StaticNode* boardNode;
-	RenderState* state;
 public:
 	Filter(float width, float height, bool useFramebuffer, int precision);
 	~Filter();
 
-	void draw(Render* render, Shader* shader, const std::vector<Texture2D*>& inputTextures, const Texture2D* depthTexture);
+	void draw(Camera* camera, Render* render, RenderState* state, 
+		const std::vector<Texture2D*>& inputTextures, const Texture2D* depthTexture);
 	Texture2D* getOutput();
 };
 

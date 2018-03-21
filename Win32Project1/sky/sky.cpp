@@ -21,6 +21,7 @@ Sky::Sky() {
 	state = new RenderState();
 	state->cullMode = CULL_FRONT;
 	state->lightEffect = false;
+	state->skyPass = true;
 }
 
 Sky::~Sky() {

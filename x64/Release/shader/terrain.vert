@@ -1,8 +1,6 @@
 #version 330
 
-uniform mat4 viewMatrix;
-uniform mat4 projectMatrix;
-uniform mat4 lightViewProjNear, lightViewProjMid, lightViewProjFar;
+uniform mat4 viewProjectMatrix;
 
 layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 normal;
@@ -13,8 +11,6 @@ out vec4 vTexcoord;
 flat out vec3 vColor;
 out vec3 vNormal;
 out vec4 worldPosition;
-out vec4 viewPosition;
-out vec4 lightNearPosition,lightMidPosition,lightFarPosition;
 
 void main() {
 	vColor = color * 0.004;
@@ -25,10 +21,5 @@ void main() {
 	worldPosition = worldVertex;
 	
 	vTexcoord = texcoord; 
-	viewPosition = viewMatrix * worldVertex;
-	gl_Position = projectMatrix * viewPosition;
-
-	lightNearPosition = lightViewProjNear * worldVertex;
-	lightMidPosition = lightViewProjMid * worldVertex;
-	lightFarPosition = lightViewProjFar * worldVertex;
+	gl_Position = viewProjectMatrix * worldVertex;
 }

@@ -8,8 +8,9 @@ flat in float vTexid;
 in vec3 vColor;
 in vec3 vNormal;
 
-layout (location = 0) out vec4 FragColor;
-layout (location = 1) out vec4 FragNormal;
+layout (location = 0) out vec4 FragTex;
+layout (location = 1) out vec4 FragColor;
+layout (location = 2) out vec4 FragNormal;
 
 void main() {
 	vec3 texcoord = vec3(vTexcoord, vTexid);
@@ -18,8 +19,12 @@ void main() {
 
 	vec3 normal = normalize(vNormal);
 
-	FragColor.rgb = textureColor.rgb * vColor;
-	FragColor.a = textureColor.a;
+	float ambientFactor = 0.6; float diffuseFactor = 1.2;
+	float ambientColor = vColor.x * ambientFactor;
+	float diffuseColor = vColor.y * diffuseFactor;
+
+	FragColor = vec4(ambientColor, diffuseColor, 0.0, 1.0);
+	FragTex = textureColor;
 
 	vec3 outNormal = normal * 0.5 + 0.5;
 	FragNormal = vec4(outNormal, 1.0); 

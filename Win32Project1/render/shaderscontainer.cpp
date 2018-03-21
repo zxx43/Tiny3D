@@ -25,33 +25,21 @@ void SetupShaders(Render* render) {
 	Shader* phong=render->shaders->addShader("phong",PHONG_VERT,PHONG_FRAG);
 	render->useShader(phong);
 	phong->setSampler("texture",0);
-	phong->setSampler("depthBufferNear",1);
-	phong->setSampler("depthBufferMid",2);
-	phong->setSampler("depthBufferFar",3);
 	phong->setInt("useShadow", 0);
 
 	Shader* phongIns = render->shaders->addShader("phong_ins", PHONG_INS_VERT, PHONG_INS_FRAG);
 	render->useShader(phongIns);
 	phongIns->setSampler("texture", 0);
-	phongIns->setSampler("depthBufferNear", 1);
-	phongIns->setSampler("depthBufferMid", 2);
-	phongIns->setSampler("depthBufferFar", 3);
 	phongIns->setInt("useShadow", 0);
 
 	Shader* terrain = render->shaders->addShader("terrain", TERRAIN_VERT, TERRAIN_FRAG);
 	render->useShader(terrain);
 	terrain->setSampler("texture", 0);
-	terrain->setSampler("depthBufferNear", 1);
-	terrain->setSampler("depthBufferMid", 2);
-	terrain->setSampler("depthBufferFar", 3);
 	terrain->setInt("useShadow", 0);
 
 	Shader* bone=render->shaders->addShader("bone",BONE_VERT,BONE_FRAG);
 	render->useShader(bone);
 	bone->setSampler("texture",0);
-	bone->setSampler("depthBufferNear",1);
-	bone->setSampler("depthBufferMid",2);
-	bone->setSampler("depthBufferFar",3);
 
 	render->shaders->addShader("phong_s", PHONG_SHADOW_VERT, PHONG_SHADOW_FRAG);
 	render->shaders->addShader("phong_sl", PHONG_SHADOW_LOW_VERT, PHONG_SHADOW_LOW_FRAG);
@@ -65,8 +53,12 @@ void SetupShaders(Render* render) {
 
 	Shader* blur=render->shaders->addShader("blur",BLUR_VERT,BLUR_FRAG);
 	render->useShader(blur);
-	blur->setSampler("colorBuffer", 0);
-	blur->setSampler("normalBuffer", 1);
-	blur->setSampler("depthBuffer", 2);
+	blur->setSampler("texBuffer", 0);
+	blur->setSampler("colorBuffer", 1);
+	blur->setSampler("normalBuffer", 2);
+	blur->setSampler("depthBuffer", 3);
+	blur->setSampler("depthBufferNear", 4);
+	blur->setSampler("depthBufferMid", 5);
+	blur->setSampler("depthBufferFar", 6);
 }
 

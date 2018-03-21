@@ -31,6 +31,7 @@ RenderManager::RenderManager(Camera* view, float distance1, float distance2, con
 	bone = NULL;
 	mix = NULL;
 	skyCube = NULL;
+	deferred = NULL;
 }
 
 RenderManager::~RenderManager() {
@@ -83,14 +84,13 @@ void RenderManager::animateQueues(long startTime, long currentTime) {
 }
 
 void RenderManager::swapRenderQueues(Scene* scene) {
-	currentQueue = (currentQueue == queue1) ? queue2 : queue1;
-	nextQueue = (nextQueue == queue1) ? queue2 : queue1;
-
-	//nextQueue->copyCamera(scene->mainCamera); // No exchange to avoid delay
 	flushRenderQueues();
 	updateRenderQueues(scene);
 	nextQueue->flush();
 	nextQueue->copyData(renderData);
+
+	currentQueue = (currentQueue == queue1) ? queue2 : queue1;
+	nextQueue = (nextQueue == queue1) ? queue2 : queue1;
 }
 
 void RenderManager::renderShadow(Render* render, Scene* scene) {
@@ -146,8 +146,6 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 
 void RenderManager::renderScene(Render* render, Scene* scene) {
 	state->reset();
-	state->shadow = shadow;
-	state->light = lightDir;
 
 	if (!phong) phong = render->findShader("phong");
 	if (!phongIns) phongIns = render->findShader("phong_ins");
@@ -158,9 +156,6 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	//Camera* camera=currentQueue->mainCamera; // Exchange camera will lead delay
 	Camera* camera = scene->mainCamera;
 	render->useTexture(TEXTURE_2D_ARRAY, 0, AssetManager::assetManager->textures->setId);
-	render->useTexture(TEXTURE_2D, 1, nearBuffer->getColorBuffer(0)->id);
-	render->useTexture(TEXTURE_2D, 2, midBuffer->getColorBuffer(0)->id);
-	render->useTexture(TEXTURE_2D, 3, farBuffer->getColorBuffer(0)->id);
 	state->shader = phong;
 	state->shaderIns = phongIns;
 	currentQueue->staticQueue->draw(camera, render, state);
@@ -194,7 +189,24 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	// Draw sky
 	if (scene->skyBox) 
 		scene->skyBox->draw(render, skyCube, camera);
+}
 
+void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* screenBuff, Filter* filter) {
+	state->reset();
+	if (!deferred) deferred = render->findShader("blur");
+
+	state->enableCull = false;
+	state->enableDepthTest = false;
+	state->enableAlphaTest = false;
+	state->pass = 5;
+	state->shader = deferred;
+	state->shadow = shadow;
+	state->light = lightDir;
+
+	render->useTexture(TEXTURE_2D, 4, nearBuffer->getColorBuffer(0)->id);
+	render->useTexture(TEXTURE_2D, 5, midBuffer->getColorBuffer(0)->id);
+	render->useTexture(TEXTURE_2D, 6, farBuffer->getColorBuffer(0)->id);
+	filter->draw(scene->mainCamera, render, state, screenBuff->colorBuffers, screenBuff->depthBuffer);
 	render->finishDraw();
 }
 
@@ -206,31 +218,17 @@ void RenderManager::drawBoundings(Render* render, RenderState* state, Scene* sce
 }
 
 void RenderManager::enableShadow(Render* render) {
-	if (!phong) phong = render->findShader("phong");
-	if (!phongIns) phongIns = render->findShader("phong_ins");
-	if (!mix) mix = render->findShader("terrain");
-
+	if (!deferred) deferred = render->findShader("blur");
 	useShadow = true;
-	render->useShader(phong);
-	phong->setInt("useShadow", 1);
-	render->useShader(phongIns);
-	phongIns->setInt("useShadow", 1);
-	render->useShader(mix);
-	mix->setInt("useShadow", 1);
+	render->useShader(deferred);
+	deferred->setInt("useShadow", 1);
 }
 
 void RenderManager::disableShadow(Render* render) {
-	if (!phong) phong = render->findShader("phong");
-	if (!phongIns) phongIns = render->findShader("phong_ins");
-	if (!mix) mix = render->findShader("terrain");
-
+	if (!deferred) deferred = render->findShader("blur");
 	useShadow = false;
-	render->useShader(phong);
-	phong->setInt("useShadow", 0);
-	render->useShader(phongIns);
-	phongIns->setInt("useShadow", 0);
-	render->useShader(mix);
-	mix->setInt("useShadow", 0);
+	render->useShader(deferred);
+	deferred->setInt("useShadow", 0);
 }
 
 void RenderManager::showBounding() {

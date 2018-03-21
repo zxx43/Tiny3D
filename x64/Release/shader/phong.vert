@@ -1,9 +1,7 @@
 #version 330
 
 uniform mat3x4 modelMatrices[100];
-uniform mat4 viewMatrix;
-uniform mat4 projectMatrix;
-uniform mat4 lightViewProjNear, lightViewProjMid, lightViewProjFar;
+uniform mat4 viewProjectMatrix;
 
 layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 normal;
@@ -15,8 +13,6 @@ out vec2 vTexcoord;
 flat out float vTexid;
 flat out vec3 vColor;
 out vec3 vNormal;
-out vec4 viewPosition;
-out vec4 lightNearPosition,lightMidPosition,lightFarPosition;
 
 mat4 convertMat(mat3x4 srcMat) {
 	vec4 col1 = srcMat[0];
@@ -38,10 +34,5 @@ void main() {
 	
 	vTexcoord = texcoord.xy; 
 	vTexid = texcoord.z;
-	viewPosition = viewMatrix * worldVertex;
-	gl_Position = projectMatrix * viewPosition;
-
-	lightNearPosition = lightViewProjNear * worldVertex;
-	lightMidPosition = lightViewProjMid * worldVertex;
-	lightFarPosition = lightViewProjFar * worldVertex;
+	gl_Position = viewProjectMatrix * worldVertex;
 }

@@ -25,10 +25,12 @@ void SimpleApplication::resize(int width, int height) {
 	if (screen) delete screen;
 	screen = new FrameBuffer(width, height, LOW_PRE);
 	screen->addColorBuffer(LOW_PRE);
+	screen->addColorBuffer(LOW_PRE);
 	screen->attachDepthBuffer(LOW_PRE);
 
 	if (screenFilter) delete screenFilter;
-	screenFilter = new Filter(0.8 * width, 0.8 * height, false, LOW_PRE);
+	screenFilter = new Filter(width, height, false, LOW_PRE);
+	render->textureInUse.clear();
 }
 
 void SimpleApplication::keyDown(int key) {
@@ -42,9 +44,8 @@ void SimpleApplication::keyUp(int key) {
 void SimpleApplication::draw() {
 	renderMgr->renderShadow(render, scene);
 	render->setFrameBuffer(screen);
-//	render->setFrameBuffer(NULL);
 	renderMgr->renderScene(render, scene);
-	screenFilter->draw(render, render->findShader("blur"), screen->colorBuffers, screen->depthBuffer);
+	renderMgr->drawDeferred(render, scene, screen, screenFilter);
 }
 
 void SimpleApplication::init() {

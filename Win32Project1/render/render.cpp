@@ -176,27 +176,29 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 	Shader* shader = drawcall->getType() == INSTANCE_DC ? state->shaderIns : state->shader;
 	useShader(shader);
 	if (camera) {
-		if (state->pass == 4) {
-			if (drawcall->getType() == INSTANCE_DC) 
+		if (state->pass <= 4) {
+			if (!state->skyPass)
 				shader->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
 			else {
-				shader->setMatrix4("projectMatrix", camera->projectMatrix);
 				shader->setMatrix4("viewMatrix", camera->viewMatrix);
-				if (state->shadow) {
-					shader->setMatrix4("lightViewProjNear", state->shadow->lightNearMat);
-					shader->setMatrix4("lightViewProjMid", state->shadow->lightMidMat);
-					shader->setMatrix4("lightViewProjFar", state->shadow->lightFarMat);
-					shader->setVector2("levels", state->shadow->level1, state->shadow->level2);
-				}
+				shader->setMatrix4("projectMatrix", camera->projectMatrix);
+			}
+			if (drawcall->getType() == STATIC_DC && !drawcall->isFullStatic())
+				shader->setMatrix3x4("modelMatrices", drawcall->objectCount, drawcall->uModelMatrix);
+		} else if (state->pass == 5) {
+			shader->setMatrix4("invViewProjMatrix", camera->invViewProjectMatrix);
+			shader->setMatrix4("viewMatrix", camera->viewMatrix);
+			if (state->shadow) {
+				shader->setMatrix4("lightViewProjNear", state->shadow->lightNearMat);
+				shader->setMatrix4("lightViewProjMid", state->shadow->lightMidMat);
+				shader->setMatrix4("lightViewProjFar", state->shadow->lightFarMat);
+				shader->setVector2("levels", state->shadow->level1, state->shadow->level2);
 			}
 			if (state->lightEffect)
 				shader->setVector3("light", state->light.x, state->light.y, state->light.z);
-		} else 
-			shader->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
+		}
 	}
 
-	if (drawcall->getType() == STATIC_DC && !drawcall->isFullStatic() && state->lightEffect) 
-		shader->setMatrix3x4("modelMatrices", drawcall->objectCount, drawcall->uModelMatrix);
 	drawcall->draw(shader, state->pass);
 
 	if (drawcall->isSingleSide()) { // Reset state
@@ -220,7 +222,7 @@ void Render::setFrameBuffer(FrameBuffer* framebuffer) {
 
 void Render::useTexture(uint type, uint slot, uint texid) {
 	if (textureInUse.count(slot) > 0) {
-		if (textureInUse[slot] == texid) 
+		if (textureInUse[slot] == texid)
 			return;
 	}
 	GLenum textureType = GL_TEXTURE_2D;
