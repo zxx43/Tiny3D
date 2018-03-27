@@ -16,8 +16,8 @@
 #define BONE_SHADOW_FRAG "shader/bone_shadow.frag"
 #define SKY_VERT "shader/sky.vert"
 #define SKY_FRAG "shader/sky.frag"
-#define BLUR_VERT "shader/blur.vert"
-#define BLUR_FRAG "shader/blur.frag"
+#define DEFERRED_VERT "shader/deferred.vert"
+#define DEFERRED_FRAG "shader/deferred.frag"
 #define TERRAIN_VERT "shader/terrain.vert"
 #define TERRAIN_FRAG "shader/terrain.frag"
 
@@ -51,14 +51,14 @@ void SetupShaders(Render* render) {
 	render->useShader(sky);
 	sky->setSampler("textureSky",0);
 
-	Shader* blur=render->shaders->addShader("blur",BLUR_VERT,BLUR_FRAG);
-	render->useShader(blur);
-	blur->setSampler("texBuffer", 0);
-	blur->setSampler("colorBuffer", 1);
-	blur->setSampler("normalBuffer", 2);
-	blur->setSampler("depthBuffer", 3);
-	blur->setSampler("depthBufferNear", 4);
-	blur->setSampler("depthBufferMid", 5);
-	blur->setSampler("depthBufferFar", 6);
+	Shader* deferred = render->shaders->addShader("deferred", DEFERRED_VERT, DEFERRED_FRAG);
+	render->useShader(deferred);
+	deferred->setSampler("texBuffer", 0);
+	deferred->setSampler("colorBuffer", 1);
+	deferred->setSampler("normalBuffer", 2);
+	deferred->setSampler("depthBuffer", 3);
+	deferred->setSampler("depthBufferNear", 4);
+	deferred->setSampler("depthBufferMid", 5);
+	deferred->setSampler("depthBufferFar", 6);
 }
 

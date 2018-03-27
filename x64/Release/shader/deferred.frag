@@ -43,9 +43,10 @@ float random(vec3 seed, int i){
 
 float genPCF(sampler2D shadowMap, vec3 shadowCoord, float bias) {
 	float shadowFactor = 1.0;
+	float inv = 1.0 / 700.0;
 	for (int i=0; i < 4; i++) {
 		int index = int(16.0 * random(gl_FragCoord.xyy, i)) % 16;
-		float factor = texture2D(shadowMap, shadowCoord.xy + poissonDisk[index]/700.0).r > (shadowCoord.z - bias) ? 1.0 : 0.0;
+		float factor = texture2D(shadowMap, shadowCoord.xy + poissonDisk[index] * inv).r > (shadowCoord.z - bias) ? 1.0 : 0.0;
 		shadowFactor -= 0.25 * (1.0 - factor);
 	}
 	return shadowFactor;

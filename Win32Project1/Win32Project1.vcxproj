@@ -284,8 +284,8 @@
     <ClInclude Include="util\util.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\x64\Release\shader\blur.frag" />
-    <None Include="..\x64\Release\shader\blur.vert" />
+    <None Include="..\x64\Release\shader\deferred.frag" />
+    <None Include="..\x64\Release\shader\deferred.vert" />
     <None Include="..\x64\Release\shader\bone.frag" />
     <None Include="..\x64\Release\shader\bone.vert" />
     <None Include="..\x64\Release\shader\bone_shadow.frag" />

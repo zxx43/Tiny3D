@@ -10,15 +10,16 @@ layout (location = 3) in vec3 color;
 out vec4 vTexcoord;
 flat out vec3 vColor;
 out vec3 vNormal;
-out vec4 worldPosition;
+out float worldHeight;
 
 void main() {
-	vColor = color * 0.004;
+	float af = 0.6; float df = 1.2;
+	vColor = vec3(color.r * af, color.g * df, color.b) * 0.004;
 	
 	vec4 worldVertex = vec4(vertex, 1.0);
 	vNormal = normal;
 
-	worldPosition = worldVertex;
+	worldHeight = worldVertex.y;
 	
 	vTexcoord = texcoord; 
 	gl_Position = viewProjectMatrix * worldVertex;

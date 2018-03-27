@@ -37,7 +37,8 @@ void main() {
     vec3 normal3 = (boneMat * vec4(normal, 0.0)).xyz;
     normal3 = uNormalMatrix * normal3;
 
-	vColor = color * 0.004;
+	float af = 0.6; float df = 1.2;
+	vColor = vec3(color.r * af, color.g * df, color.b) * 0.004;
 	vNormal = normal3;
 	
 	vTexcoord = texcoord; 

@@ -25,12 +25,12 @@ mat4 convertMat(mat3x4 srcMat) {
 }
 
 void main() {
-	vColor = color * 0.005;
+	float af = 0.6; float df = 1.2;
+	vColor = vec3(color.r * af, color.g * df, color.b) * 0.005;
 
 	mat4 matModel = convertMat(modelMatrix);
 	vec4 worldVertex = matModel * vec4(vertex, 1.0);
-	vec3 worldNormal = (matModel * vec4(normal, 0.0)).xyz;
-	vNormal = worldNormal;
+	vNormal = (matModel * vec4(normal, 0.0)).xyz;
 	
 	vTexcoord = texcoord.xy; 
 	vTexid = texcoord.z;

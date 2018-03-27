@@ -6,7 +6,7 @@ uniform mat3x4 modelMatrices[100];
 layout (location = 0) in vec3 vertex;
 layout (location = 2) in float objectid;
 
-out vec4 projPosition;
+out vec2 projDepth;
 
 mat4 convertMat(mat3x4 srcMat) {
 	vec4 col1 = srcMat[0];
@@ -22,5 +22,5 @@ mat4 convertMat(mat3x4 srcMat) {
 void main() {
 	vec4 worldVertex = convertMat(modelMatrices[int(objectid)]) * vec4(vertex, 1.0);
 	gl_Position = viewProjectMatrix * worldVertex;
-	projPosition = gl_Position;
+	projDepth = gl_Position.zw;
 }

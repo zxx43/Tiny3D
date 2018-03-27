@@ -8,7 +8,7 @@ layout (location = 2) in mat3x4 modelMatrix;
 
 out vec2 vTexcoord;
 flat out float vTexid;
-out vec4 projPosition;
+out vec2 projDepth;
 
 mat4 convertMat(mat3x4 srcMat) {
 	vec4 col1 = srcMat[0];
@@ -26,5 +26,5 @@ void main() {
 	vTexid = texcoord.z; 
 	vec4 worldVertex = convertMat(modelMatrix) * vec4(vertex, 1.0);
 	gl_Position = viewProjectMatrix * worldVertex;
-	projPosition = gl_Position;
+	projDepth = gl_Position.zw;
 }

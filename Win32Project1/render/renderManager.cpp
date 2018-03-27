@@ -193,7 +193,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 
 void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* screenBuff, Filter* filter) {
 	state->reset();
-	if (!deferred) deferred = render->findShader("blur");
+	if (!deferred) deferred = render->findShader("deferred");
 
 	state->enableCull = false;
 	state->enableDepthTest = false;
@@ -218,14 +218,14 @@ void RenderManager::drawBoundings(Render* render, RenderState* state, Scene* sce
 }
 
 void RenderManager::enableShadow(Render* render) {
-	if (!deferred) deferred = render->findShader("blur");
+	if (!deferred) deferred = render->findShader("deferred");
 	useShadow = true;
 	render->useShader(deferred);
 	deferred->setInt("useShadow", 1);
 }
 
 void RenderManager::disableShadow(Render* render) {
-	if (!deferred) deferred = render->findShader("blur");
+	if (!deferred) deferred = render->findShader("deferred");
 	useShadow = false;
 	render->useShader(deferred);
 	deferred->setInt("useShadow", 0);

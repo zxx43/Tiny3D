@@ -478,12 +478,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\x64\Release\shader\blur.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\blur.vert">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="..\x64\Release\shader\bone.frag">
       <Filter>Shaders</Filter>
     </None>
@@ -536,6 +530,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\x64\Release\shader\phong_ins.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\deferred.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\deferred.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

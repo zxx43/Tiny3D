@@ -19,12 +19,8 @@ void main() {
 
 	vec3 normal = normalize(vNormal);
 		
-	float ambientFactor = 0.6; float diffuseFactor = 1.2;
-	float ambientColor = vColor.x * ambientFactor;
-	float diffuseColor = vColor.y * diffuseFactor;
-		
 	FragTex = textureColor;
-	FragColor = vec4(ambientColor, diffuseColor, 0.0, 1.0);
+	FragColor = vec4(vColor.rg, 0.0, 1.0);
 
 	vec3 outNormal = normal * 0.5 + 0.5;
 	FragNormal = vec4(outNormal, 1.0); 
