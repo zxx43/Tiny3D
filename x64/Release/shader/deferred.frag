@@ -8,9 +8,9 @@ uniform mat4 viewMatrix;
 
 uniform mat4 lightViewProjNear, lightViewProjMid, lightViewProjFar;
 uniform sampler2D depthBufferNear, depthBufferMid, depthBufferFar;
-uniform vec3 light;
 uniform int useShadow;
 uniform vec2 levels;
+uniform vec3 light;
 
 in vec2 vTexcoord;
 
@@ -37,16 +37,16 @@ vec2 poissonDisk[16] = vec2[](
 
 float random(vec3 seed, int i){
 	vec4 seed4 = vec4(seed,i);
-	float dot_product = dot(seed4, vec4(12.9898,78.233,45.164,94.673));
+	float dot_product = dot(seed4, vec4(12.9898, 78.233, 45.164, 94.673));
 	return fract(sin(dot_product) * 43758.5453);
 }
 
 float genPCF(sampler2D shadowMap, vec3 shadowCoord, float bias) {
 	float shadowFactor = 1.0;
-	float inv = 1.0 / 700.0;
-	for (int i=0; i < 4; i++) {
+	float mag = 0.00143;
+	for (int i = 0; i < 4; i++) {
 		int index = int(16.0 * random(gl_FragCoord.xyy, i)) % 16;
-		float factor = texture2D(shadowMap, shadowCoord.xy + poissonDisk[index] * inv).r > (shadowCoord.z - bias) ? 1.0 : 0.0;
+		float factor = texture2D(shadowMap, shadowCoord.xy + poissonDisk[index] * mag).r > (shadowCoord.z - bias) ? 1.0 : 0.0;
 		shadowFactor -= 0.25 * (1.0 - factor);
 	}
 	return shadowFactor;
@@ -57,21 +57,28 @@ float genShadow(sampler2D shadowMap, vec3 shadowCoord, float bias) {
 	return shadowFactor;
 }
 
-float genShadowFactor(vec4 viewPosition, vec4 near, vec4 mid, vec4 far, float bias) {
+float genShadowFactor(vec4 worldPos, float bias) {
+	vec4 viewPosition = viewMatrix * worldPos;
 	float depthView = -viewPosition.z / viewPosition.w;
 	
 	if(depthView <= levels.x) {
-		vec3 lightPosition = near.xyz / near.w;
+		vec4 near = lightViewProjNear * worldPos;
+		float invW = 1.0 / near.w;
+		vec3 lightPosition = near.xyz * invW;
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
 		float bs = bias * 0.0005;
 		return genPCF(depthBufferNear, shadowCoord, bs);
 	} else if(depthView <= levels.y) {
-		vec3 lightPosition = mid.xyz / mid.w;
+		vec4 mid = lightViewProjMid * worldPos;
+		float invW = 1.0 / mid.w;
+		vec3 lightPosition = mid.xyz * invW;
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
 		float bs = bias * 0.00005;
 		return genPCF(depthBufferMid, shadowCoord, bs);
 	} else {
-		vec3 lightPosition = far.xyz / far.w;
+		vec4 far = lightViewProjFar * worldPos;
+		float invW = 1.0 / far.w;
+		vec3 lightPosition = far.xyz * invW;
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
 		float bs = bias * 0.000005;
 		return genShadow(depthBufferFar, shadowCoord, bs);
@@ -88,31 +95,19 @@ void main() {
 	
 	if(ndcPos.z < 1.0) {
 		vec4 worldPos = invViewProjMatrix * vec4(ndcPos, 1.0);
-		vec4 viewPos = viewMatrix * worldPos;
-		float invW = 1.0 / worldPos.w;
-		worldPos *= invW;
 		
 		vec3 normal = texture2D(normalBuffer, vTexcoord).xyz;
 		normal = normal * 2.0 - 1.0;
 		
 		vec4 color = texture2D(colorBuffer, vTexcoord);
-		float ambColor = color.x;
-		float difColor = color.y; 
 
-		vec3 reverseLight = normalize(-light);
-		float ndotl = dot(reverseLight, normal);
+		float ndotl = dot(light, normal);
 		float bias = tan(acos(abs(ndotl)));
+		ndotl = max(ndotl, 0.0);
 
-		difColor *= max(ndotl, 0.0);
-		float shadowFactor = 1.0;
-		if(useShadow != 0) {
-			vec4 near = lightViewProjNear * worldPos;
-			vec4 mid = lightViewProjMid * worldPos;
-			vec4 far = lightViewProjFar * worldPos;
-			shadowFactor = genShadowFactor(viewPos, near, mid, far, bias);
-		}
+		float shadowFactor = (useShadow != 0) ? genShadowFactor(worldPos, bias) : 1.0;
 
-		FragColor.rgb = tex.rgb * (ambColor + shadowFactor * difColor);
+		FragColor.rgb = tex.rgb * (color.r + shadowFactor * ndotl * color.g);
 		FragColor.a = tex.a;
 	}
 }

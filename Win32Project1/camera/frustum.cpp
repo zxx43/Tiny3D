@@ -40,8 +40,6 @@ void Frustum::update(const MATRIX4X4& invViewProjectMatrix, const VECTOR3D& look
 	normals[1].Normalize();
 	normals[2].Normalize();
 	normals[3].Normalize();
-	normals[4].Normalize();
-	normals[5].Normalize();
 
 	ds[0] = -normals[0].DotProduct(worldVertex[2]);
 	ds[1] = -normals[1].DotProduct(worldVertex[3]);
@@ -53,15 +51,15 @@ void Frustum::update(const MATRIX4X4& invViewProjectMatrix, const VECTOR3D& look
 	for (int i = 0; i<4; i++) {
 		edgeDir[i] = worldVertex[i] - worldVertex[i + 4];
 		edgeLength[i] = edgeDir[i].GetLength();
-		edgeDir[i] = edgeDir[i] / edgeLength[i];
+		edgeDir[i] /= edgeLength[i];
 	}
 
-	planes[0].update(normals[0], -normals[0].DotProduct(worldVertex[4]));
-	planes[1].update(normals[1], -normals[1].DotProduct(worldVertex[5]));
-	planes[2].update(normals[2], -normals[2].DotProduct(worldVertex[4]));
-	planes[3].update(normals[3], -normals[3].DotProduct(worldVertex[6]));
-	planes[4].update(normals[4], -normals[4].DotProduct(worldVertex[0]));
-	planes[5].update(normals[5], -normals[5].DotProduct(worldVertex[4]));
+	planes[0].update(normals[0], ds[0]);
+	planes[1].update(normals[1], ds[1]);
+	planes[2].update(normals[2], ds[2]);
+	planes[3].update(normals[3], ds[3]);
+	planes[4].update(normals[4], ds[4]);
+	planes[5].update(normals[5], ds[5]);
 }
 
 bool Frustum::intersectsWidthRay(const VECTOR3D& origin, const VECTOR3D& dir, float maxDistance) {

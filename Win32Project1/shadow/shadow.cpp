@@ -72,6 +72,10 @@ void Shadow::prepareViewCamera() {
 	radius0=(VECTOR3D(center0.x,center0.y,center0.z)-VECTOR3D(corners1[0].x,corners1[0].y,corners1[0].z)).GetLength();
 	radius1=(VECTOR3D(center1.x,center1.y,center1.z)-VECTOR3D(corners2[0].x,corners2[0].y,corners2[0].z)).GetLength();
 	radius2=(VECTOR3D(center2.x,center2.y,center2.z)-VECTOR3D(corners3[0].x,corners3[0].y,corners3[0].z)).GetLength();
+
+	lightCameraNear->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.5 * radius0, 1.5 * radius0);
+	lightCameraMid->initOrthoCamera(-radius1, radius1, -radius1, radius1, -1.5 * radius1, 1.5 * radius1);
+	lightCameraFar->initOrthoCamera(-radius2, radius2, -radius2, radius2, -1.5 * radius2, 1.5 * radius2);
 }
 
 void Shadow::update(const VECTOR3D& light) {
@@ -83,15 +87,16 @@ void Shadow::update(const VECTOR3D& light) {
 	updateLightCamera(lightCameraMid,center1,radius1);
 	updateLightCamera(lightCameraFar,center2,radius2);
 
-	lightNearMat = lightCameraNear->projectMatrix * lightCameraNear->viewMatrix;
-	lightMidMat = lightCameraMid->projectMatrix * lightCameraMid->viewMatrix;
-	lightFarMat = lightCameraFar->projectMatrix * lightCameraFar->viewMatrix;
+	lightNearMat = lightCameraNear->viewProjectMatrix;
+	lightMidMat = lightCameraMid->viewProjectMatrix;
+	lightFarMat = lightCameraFar->viewProjectMatrix;
 }
 
 void Shadow::updateLightCamera(Camera* lightCamera, VECTOR4D center, float radius) {
-	VECTOR4D centerW=invViewMatrix*center;
-	VECTOR3D centerW3(centerW.x,centerW.y,centerW.z);
+	static VECTOR4D centerW;
+	static VECTOR3D centerW3;
+	centerW = invViewMatrix * center;
+	centerW3.x = centerW.x; centerW3.y = centerW.y; centerW3.z = centerW.z;
 
-	lightCamera->initOrthoCamera(-radius, radius, -radius, radius, -1.5 * radius, 1.5 * radius);
 	lightCamera->updateLook(centerW3, lightDir);
 }

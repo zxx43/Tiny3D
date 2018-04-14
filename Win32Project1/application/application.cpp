@@ -34,11 +34,15 @@ Application::~Application() {
 }
 
 void Application::act(long startTime, long currentTime) {
-	input->update(renderMgr);
+	input->updateExtra(renderMgr);
 }
 
-void Application::moveCamera() {
-	input->updateCamera(scene->mainCamera);
+void Application::moveKey() {
+	input->updateCameraByKey(scene->mainCamera);
+}
+
+void Application::moveMouse(const float mx, const float my, const float cx, const float cy) {
+	input->updateCameraByMouse(scene->mainCamera, mx, my, cx, cy);
 }
 
 void Application::prepare() {

@@ -13,6 +13,8 @@
 #define TRANS_TRANSLATE 0
 #define TRANS_ROTATE_X 1
 #define TRANS_ROTATE_Y 2
+#define TRANS_ROTATE_XY 3
+#define TRANS_ALL 4
 
 const VECTOR3D ZERO_VEC3(0,0,0);
 const VECTOR3D UNIT_VEC3(1,1,1);
@@ -22,8 +24,9 @@ class Camera {
 private:
 	float xrot,yrot,height;
 	MATRIX4X4 rotXMat, rotYMat, transMat;
+	VECTOR4D lookDir4;
 public:
-	bool simpleCheck;
+	bool simpleCheck, isMain;
 	Frustum* frustum;
 	VECTOR3D position, lookDir, up;
 	float fovy,aspect,zNear,zFar;
@@ -41,6 +44,8 @@ public:
 
 	void turnY(int ud);
 	void turnX(int lr);
+	void turnDX(float dx);
+	void turnDY(float dy);
 	void move(int dist,float speed);
 	void moveTo(const VECTOR3D& pos);
 	float getHeight();

@@ -1,6 +1,7 @@
 #include "renderQueue.h"
 #include "../node/animationNode.h"
 #include "../node/instanceNode.h"
+#include <string.h>
 using namespace std;
 
 RenderQueue::RenderQueue() {
@@ -74,19 +75,27 @@ void RenderQueue::draw(Camera* camera, Render* render, RenderState* state) {
 			if (node->type == TYPE_ANIMATE) {
 				if (!node->drawcall->uModelMatrix)
 					node->drawcall->uModelMatrix = new float[16];
+				memcpy(node->drawcall->uModelMatrix, node->uTransformMatrix->entries, 16 * sizeof(float));
+				/*
 				for (int m = 0; m < 4; m++) {
 					node->drawcall->uModelMatrix[m] = node->uTransformMatrix->entries[m];
 					node->drawcall->uModelMatrix[m + 4] = node->uTransformMatrix->entries[m + 4];
 					node->drawcall->uModelMatrix[m + 8] = node->uTransformMatrix->entries[m + 8];
 					node->drawcall->uModelMatrix[m + 12] = node->uTransformMatrix->entries[m + 12];
 				}
+				*/
 				if (!node->drawcall->uNormalMatrix)
 					node->drawcall->uNormalMatrix = new float[9];
+				memcpy(node->drawcall->uNormalMatrix, node->uNormalMatrix->entries, 3 * sizeof(float));
+				memcpy(node->drawcall->uNormalMatrix + 3, node->uNormalMatrix->entries + 4, 3 * sizeof(float));
+				memcpy(node->drawcall->uNormalMatrix + 6, node->uNormalMatrix->entries + 8, 3 * sizeof(float));
+				/*
 				for (int m = 0; m < 3; m++) {
 					node->drawcall->uNormalMatrix[m] = node->uNormalMatrix->entries[m];
 					node->drawcall->uNormalMatrix[m + 3] = node->uNormalMatrix->entries[m + 4];
 					node->drawcall->uNormalMatrix[m + 6] = node->uNormalMatrix->entries[m + 8];
 				}
+				*/
 			}
 			render->draw(camera, node->drawcall, state);
 		}

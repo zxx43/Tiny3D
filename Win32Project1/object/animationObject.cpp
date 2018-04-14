@@ -4,8 +4,6 @@
 AnimationObject::AnimationObject(Animation* anim):Object() {
 	animation=anim; // no mesh!
 	anglex=0; angley=0; anglez=0;
-	localTransformMatrix.LoadIdentity();
-	normalMatrix.LoadIdentity();
 }
 
 AnimationObject::AnimationObject(const AnimationObject& rhs) {
@@ -17,8 +15,6 @@ AnimationObject::AnimationObject(const AnimationObject& rhs) {
 	position.x=rhs.position.x; position.y=rhs.position.y; position.z=rhs.position.z;
 	anglex=rhs.anglex; angley=rhs.angley; anglez=rhs.anglez;
 	sizex=rhs.sizex; sizey=rhs.sizey; sizez=rhs.sizez;
-	localTransformMatrix=rhs.localTransformMatrix;
-	normalMatrix=rhs.normalMatrix;
 }
 
 AnimationObject::~AnimationObject() {}

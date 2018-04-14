@@ -3,22 +3,14 @@
 FrameBuffer::FrameBuffer(float width, float height, int precision) {
 	this->width=width;
 	this->height=height;
-	hasDepth=false;
 
 	glGenFramebuffersEXT(1,&fboId);
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId);
 
 	colorBuffers.clear();
-	colorBuffers.push_back(new Texture2D(width,height,TEXTURE_TYPE_COLOR,precision));
-	colorBufferCount=1;
-	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT,GL_TEXTURE_2D,
-			colorBuffers[0]->id,0);
+	colorBufferCount = 0;
+	addColorBuffer(precision);
 
 	depthBuffer=NULL;
-
-	glDrawBuffers(colorBufferCount,ColorAttachments);
-
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
 }
 
 FrameBuffer::~FrameBuffer() {
@@ -34,7 +26,6 @@ FrameBuffer::~FrameBuffer() {
 }
 
 void FrameBuffer::attachDepthBuffer(int precision) {
-	hasDepth = true;
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId);
 	
 	depthBuffer = new Texture2D(width, height, TEXTURE_TYPE_DEPTH, precision);
@@ -64,7 +55,7 @@ Texture2D* FrameBuffer::getColorBuffer(int n) {
 void FrameBuffer::use() {
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId);
 	GLbitfield clearMask=GL_COLOR_BUFFER_BIT;
-	if(hasDepth)
+	if(depthBuffer)
 		clearMask|=GL_DEPTH_BUFFER_BIT;
 	glClear(clearMask);
 	glViewport(0,0,width,height);

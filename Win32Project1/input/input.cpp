@@ -81,7 +81,7 @@ void Input::keyUp(int key) {
 		extra[3] = false;
 }
 
-void Input::updateCamera(Camera* camera) {
+void Input::updateCameraByKey(Camera* camera) {
 	if(move[0])
 		camera->move(MNEAR,D_DISTANCE);
 	if(move[1])
@@ -105,7 +105,7 @@ void Input::updateCamera(Camera* camera) {
 		camera->turnX(RIGHT);
 }
 
-void Input::update(RenderManager* renderMgr) {
+void Input::updateExtra(RenderManager* renderMgr) {
 	if (extra[0])
 		renderMgr->lightDir.x -= L_DISTANCE;
 	if (extra[1])
@@ -116,3 +116,17 @@ void Input::update(RenderManager* renderMgr) {
 		renderMgr->lightDir.z += L_DISTANCE;
 }
 
+void Input::updateCameraByMouse(Camera* camera, const float mouseX,
+		const float mouseY, const float centerX, const float centerY) {
+	if (mouseX == centerX && mouseY == centerY) return;
+	const static float cosdr = cos(A2R);
+	const static float sindr = sin(A2R);
+	const static float mag = 0.5 * 0.001f * R2A;
+	float dxr = (centerX - mouseX) * mag;
+	float dyr = (centerY - mouseY) * mag;
+	camera->turnDX(dxr*cosdr);
+	camera->turnDX(-dyr*sindr);
+	camera->turnDY(dxr*sindr);
+	camera->turnDY(dyr*cosdr);
+	camera->updateMoveable(TRANS_ROTATE_XY);
+}

@@ -40,8 +40,8 @@ MATRIX4X4 lookAt(float eyeX, float eyeY, float eyeZ,
 }
 
 MATRIX4X4 perspective(float fovy,float aspect,float zNear,float zFar) {
-	float rFovy=fovy*PI/180;
-	float tanHalfFovy=tanf(rFovy/2);
+	float rFovy=fovy*A2R;
+	float tanHalfFovy=tanf(rFovy*0.5);
 
 	MATRIX4X4 mat;
 	mat.entries[0]=1/(aspect * tanHalfFovy);

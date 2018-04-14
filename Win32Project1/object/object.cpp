@@ -4,6 +4,8 @@
 Object::Object() {
 	position = VECTOR3D(0, 0, 0);
 	sizex = 1.0; sizey = 1.0; sizez = 1.0;
+	localTransformMatrix.LoadIdentity();
+	normalMatrix.LoadIdentity();
 	mesh=NULL;
 	bounding=NULL;
 	material = -1;
@@ -87,6 +89,6 @@ void Object::bindMaterial(int mid) {
 
 bool Object::checkInCamera(Camera* camera) {
 	if (bounding)
-		return bounding->checkWithCamera(camera);
+		return bounding->checkWithCamera(camera, true);
 	return true;
 }

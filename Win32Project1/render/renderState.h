@@ -23,6 +23,7 @@ struct RenderState {
 
 	RenderState() {
 		reset();
+		light = VECTOR3D(0, 0, 0);
 	}
 	RenderState(const RenderState& rhs) {
 		enableCull = rhs.enableCull;
@@ -54,7 +55,6 @@ struct RenderState {
 		skyPass = false;
 		pass = 4;
 		shadow = NULL;
-		light = VECTOR3D(0, 0, 0);
 		shader = NULL;
 		shaderIns = NULL;
 	}

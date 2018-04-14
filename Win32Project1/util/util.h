@@ -77,4 +77,9 @@ struct Plane {
 
 bool CaculateIntersect(const Line& line, const Plane& plane, const float lineDistance, VECTOR3D& result);
 
+inline void RestrictAngle(float& angle) {
+	if (angle > 360.0) angle -= 360.0;
+	else if (angle < 0.0) angle += 360.0;
+}
+
 #endif /* UTIL_H_ */

@@ -4,8 +4,6 @@
 #include "object/staticObject.h"
 #include "object/billboardObject.h"
 #include "constants/constants.h"
-#include <map>
-#include <string>
 using namespace std;
 
 SimpleApplication::SimpleApplication() {
@@ -30,7 +28,7 @@ void SimpleApplication::resize(int width, int height) {
 
 	if (screenFilter) delete screenFilter;
 	screenFilter = new Filter(width, height, false, LOW_PRE);
-	render->textureInUse.clear();
+	render->clearTextureSlots();
 }
 
 void SimpleApplication::keyDown(int key) {
@@ -43,6 +41,7 @@ void SimpleApplication::keyUp(int key) {
 
 void SimpleApplication::draw() {
 	renderMgr->renderShadow(render, scene);
+	//render->setFrameBuffer(NULL);
 	render->setFrameBuffer(screen);
 	renderMgr->renderScene(render, scene);
 	renderMgr->drawDeferred(render, scene, screen, screenFilter);
@@ -60,8 +59,8 @@ void SimpleApplication::initScreen() {
 	scene->screenNode->addObject(board);
 }
 
-void SimpleApplication::moveCamera() {
-	Application::moveCamera();
+void SimpleApplication::moveKey() {
+	Application::moveKey();
 	if (scene->terrainNode) {
 		VECTOR3D cp = scene->mainCamera->position;
 		cp.y = scene->terrainNode->cauculateY(cp.x, cp.z) + scene->mainCamera->getHeight();
@@ -84,7 +83,7 @@ void SimpleApplication::act(long startTime, long currentTime) {
 		scene->staticRoot->detachChild(scene->staticRoot->children[1]);
 		time++;
 	}
-	*/
+	//*/
 	scene->updateNodes();
 }
 

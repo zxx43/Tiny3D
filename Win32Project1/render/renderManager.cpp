@@ -6,9 +6,9 @@ RenderManager::RenderManager(Camera* view, float distance1, float distance2, con
 	float nearSize=1024;
 	float midSize=2048;
 	float farSize=2048;
-	nearBuffer=new FrameBuffer(nearSize,nearSize,HIGH_PRE);
-	midBuffer=new FrameBuffer(midSize,midSize,HIGH_PRE);
-	farBuffer=new FrameBuffer(farSize,farSize,LOW_PRE);
+	nearBuffer = new FrameBuffer(nearSize, nearSize, HIGH_PRE);
+	midBuffer = new FrameBuffer(midSize, midSize, HIGH_PRE);
+	farBuffer = new FrameBuffer(farSize, farSize, HIGH_PRE);
 	lightDir = light; lightDir.Normalize();
 
 	renderData = new Renderable(); renderData->copyCamera(view);
@@ -166,7 +166,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 		if (!scene->terrainNode->needUpdateNode) {
 			if (!scene->terrainNode->needCreateDrawcall) 
 				render->draw(camera, scene->terrainNode->drawcall, state);
-			else if (scene->terrainNode->needCreateDrawcall)
+			else
 				scene->terrainNode->prepareDrawcall();
 		}
 	}
@@ -203,9 +203,10 @@ void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* scre
 	state->shadow = shadow;
 	state->light = lightDir;
 
-	render->useTexture(TEXTURE_2D, 4, nearBuffer->getColorBuffer(0)->id);
-	render->useTexture(TEXTURE_2D, 5, midBuffer->getColorBuffer(0)->id);
-	render->useTexture(TEXTURE_2D, 6, farBuffer->getColorBuffer(0)->id);
+	uint baseSlot = screenBuff->colorBuffers.size() + 1; // Color buffers + Depth buffer
+	render->useTexture(TEXTURE_2D, baseSlot, nearBuffer->getColorBuffer(0)->id);
+	render->useTexture(TEXTURE_2D, baseSlot + 1, midBuffer->getColorBuffer(0)->id);
+	render->useTexture(TEXTURE_2D, baseSlot + 2, farBuffer->getColorBuffer(0)->id);
 	filter->draw(scene->mainCamera, render, state, screenBuff->colorBuffers, screenBuff->depthBuffer);
 	render->finishDraw();
 }

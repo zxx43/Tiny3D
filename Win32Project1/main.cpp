@@ -1,4 +1,5 @@
 #include <windows.h>
+#include <windowsx.h>
 #include "simpleApplication.h"
 
 LRESULT CALLBACK WndProc(HWND,UINT,WPARAM,LPARAM);
@@ -19,6 +20,9 @@ HANDLE mutex = NULL;
 void InitMutex();
 void DeleteMutex();
 DWORD currentTime = 0, startTime = 0;
+DWORD screenLeft, screenTop;
+int screenHalfX, screenHalfY;
+POINT mPoint;
 
 SimpleApplication* app = NULL;
 void CreateApplication();
@@ -41,18 +45,20 @@ void ResizeWindow(int width,int height) {
 }
 
 void DrawWindow() {
+	WaitForSingleObject(mutex, INFINITE);
+	dataPrepared = true;
+	ReleaseMutex(mutex);
 	app->draw();
 	WaitForSingleObject(mutex, INFINITE);
 	dataPrepared = false;
 	ReleaseMutex(mutex);
-	Sleep(0);
 }
 
 DWORD WINAPI ActThreadRun(LPVOID param) {
 	DWORD last = 0;
 	while (!app->willExit) {
 		if (currentTime - last > 5) {
-			app->moveCamera();
+			app->moveKey();
 			last = currentTime;
 		}
 		Sleep(0);
@@ -165,12 +171,14 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hPrevInstance,PSTR szCmdLine,int iC
 	winRect.right=(LONG)app->windowWidth;
 	winRect.top=(LONG)0;
 	winRect.bottom=(LONG)app->windowHeight;
-	int left=(GetSystemMetrics(SM_CXSCREEN)>>1)-(app->windowWidth>>1);
-	int top=(GetSystemMetrics(SM_CYSCREEN)>>1)-(app->windowHeight>>1);
+	screenLeft=(GetSystemMetrics(SM_CXSCREEN)>>1)-(app->windowWidth>>1);
+	screenTop=(GetSystemMetrics(SM_CYSCREEN)>>1)-(app->windowHeight>>1);
+	screenHalfX = (int)GetSystemMetrics(SM_CXSCREEN) >> 1;
+	screenHalfY = (int)GetSystemMetrics(SM_CYSCREEN) >> 1;
 
 	AdjustWindowRectEx(&winRect,style,false,styleEX);
 	hWnd=CreateWindowEx(styleEX,szName,TEXT("Tiny"),WS_CLIPSIBLINGS|WS_CLIPCHILDREN|style,
-			left,top,(winRect.right-winRect.left),(winRect.bottom-winRect.top),
+			screenLeft,screenTop,(winRect.right-winRect.left),(winRect.bottom-winRect.top),
 			NULL,NULL,hInstance,NULL);
 
 	InitGLWin();
@@ -215,9 +223,14 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam) {
 			app->keyUp(wParam);
 			break;
 		case WM_MOUSEMOVE:
+			if (app) {
+				GetCursorPos(&mPoint);
+				app->moveMouse(mPoint.x, mPoint.y, screenHalfX, screenHalfY);
+				SetCursorPos(screenHalfX, screenHalfY);
+			}
 			break;
 		case WM_SIZE:
-			ResizeWindow(LOWORD(lParam),HIWORD(lParam));
+			ResizeWindow(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 			break;
 		case WM_DESTROY:
 			PostQuitMessage(0);

@@ -54,6 +54,7 @@ public:
 	void finishDraw();
 	void setFrameBuffer(FrameBuffer* framebuffer);
 	void useTexture(uint type, uint slot, uint texid);
+	void clearTextureSlots();
 };
 
 

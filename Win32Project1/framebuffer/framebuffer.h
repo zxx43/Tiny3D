@@ -20,7 +20,6 @@ class FrameBuffer {
 private:
 	unsigned int fboId;
 	float width,height;
-	bool hasDepth;
 	int colorBufferCount;
 public:
 	std::vector<Texture2D*> colorBuffers;

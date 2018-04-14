@@ -22,7 +22,8 @@ public:
 	virtual void init();
 	virtual void draw() = 0;
 	virtual void act(long startTime, long currentTime);
-	virtual void moveCamera();
+	virtual void moveKey();
+	void moveMouse(const float mx, const float my, const float cx, const float cy);
 	void prepare();
 	void animate(long startTime, long currentTime);
 	virtual void resize(int width, int height);

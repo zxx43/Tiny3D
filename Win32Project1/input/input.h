@@ -31,8 +31,10 @@ public:
 	~Input();
 	void keyDown(int key);
 	void keyUp(int key);
-	void updateCamera(Camera* camera);
-	void update(RenderManager* renderMgr);
+	void updateCameraByKey(Camera* camera);
+	void updateExtra(RenderManager* renderMgr);
+	void updateCameraByMouse(Camera* camera, const float mouseX, 
+		const float mouseY, const float centerX, const float centerY);
 };
 
 #endif /* INPUT_H_ */

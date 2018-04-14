@@ -15,7 +15,7 @@ public:
 	virtual void init();
 	virtual void draw();
 	virtual void act(long startTime, long currentTime);
-	virtual void moveCamera();
+	virtual void moveKey();
 	virtual void resize(int width, int height);
 	virtual void keyDown(int key);
 	virtual void keyUp(int key);

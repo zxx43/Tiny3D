@@ -28,7 +28,7 @@ public:
 	AABB(const AABB& rhs);
 	virtual ~AABB();
 	virtual AABB* clone();
-	virtual bool checkWithCamera(Camera* camera);
+	virtual bool checkWithCamera(Camera* camera, bool forceSimple = false);
 	void update(const VECTOR3D& newMinVertex,const VECTOR3D& newMaxVertex);
 	void update(float sx, float sy, float sz);
 	virtual void update(const VECTOR3D& pos);

@@ -1,6 +1,8 @@
 #include "instance.h"
 #include "../constants/constants.h"
 #include "../material/materialManager.h"
+#include <stdlib.h>
+#include <string.h>
 
 std::map<Mesh*, int> Instance::instanceTable;
 
@@ -89,13 +91,11 @@ void Instance::initInstanceBuffers(int mid,int vertices,int indices) {
 
 void Instance::setInstanceCount(int count) {
 	instanceCount = count;
-	if (drawcall)
-		drawcall->objectToDraw = instanceCount;
+	if (drawcall) drawcall->objectToDraw = instanceCount;
 }
 
 void Instance::updateMatricesBuffer(int i, const MATRIX4X4& transformMatrix) {
-	MATRIX4X4 transform = transformMatrix.GetTranspose();
-	memcpy(modelMatrices + (i * 12), transform.entries, 12 * sizeof(float));
+	memcpy(modelMatrices + (i * 12), transformMatrix.GetTranspose().entries, 12 * sizeof(float));
 }
 
 void Instance::initMatrices() {

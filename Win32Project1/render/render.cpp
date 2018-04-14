@@ -194,8 +194,8 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 				shader->setMatrix4("lightViewProjFar", state->shadow->lightFarMat);
 				shader->setVector2("levels", state->shadow->level1, state->shadow->level2);
 			}
-			if (state->lightEffect)
-				shader->setVector3("light", state->light.x, state->light.y, state->light.z);
+			if (state->lightEffect) 
+				shader->setVector3("light", -state->light.x, -state->light.y, -state->light.z);
 		}
 	}
 
@@ -221,10 +221,9 @@ void Render::setFrameBuffer(FrameBuffer* framebuffer) {
 }
 
 void Render::useTexture(uint type, uint slot, uint texid) {
-	if (textureInUse.count(slot) > 0) {
-		if (textureInUse[slot] == texid)
-			return;
-	}
+	std::map<uint, uint>::iterator texItor = textureInUse.find(slot);
+	if (texItor != textureInUse.end() && texItor->second == texid) 
+		return;
 	GLenum textureType = GL_TEXTURE_2D;
 	switch (type) {
 		case TEXTURE_2D:
@@ -242,4 +241,8 @@ void Render::useTexture(uint type, uint slot, uint texid) {
 	textureInUse[slot] = texid;
 }
 
+
+void Render::clearTextureSlots() {
+	textureInUse.clear();
+}
 

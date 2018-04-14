@@ -4,9 +4,6 @@
 StaticObject::StaticObject(Mesh* mesh):Object() {
 	this->mesh=mesh;
 	anglex=0; angley=0; anglez=0;
-
-	localTransformMatrix.LoadIdentity();
-	normalMatrix.LoadIdentity();
 }
 
 StaticObject::StaticObject(const StaticObject& rhs) {
@@ -19,8 +16,6 @@ StaticObject::StaticObject(const StaticObject& rhs) {
 	position = rhs.position;
 	anglex=rhs.anglex; angley=rhs.angley; anglez=rhs.anglez;
 	sizex=rhs.sizex; sizey=rhs.sizey; sizez=rhs.sizez;
-	localTransformMatrix=rhs.localTransformMatrix;
-	normalMatrix=rhs.normalMatrix;
 }
 
 StaticObject::~StaticObject() {}

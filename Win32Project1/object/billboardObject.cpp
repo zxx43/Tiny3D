@@ -3,8 +3,6 @@
 
 BillboardObject::BillboardObject(Mesh* mesh):Object() {
 	this->mesh=mesh;
-	localTransformMatrix.LoadIdentity();
-	normalMatrix.LoadIdentity();
 }
 
 BillboardObject::BillboardObject(const BillboardObject& rhs) {
@@ -16,8 +14,6 @@ BillboardObject::BillboardObject(const BillboardObject& rhs) {
 		bounding=NULL;
 	position=rhs.position;
 	sizex=rhs.sizex; sizey=rhs.sizey; sizez=rhs.sizez;
-	localTransformMatrix=rhs.localTransformMatrix;
-	normalMatrix.LoadIdentity();
 }
 
 BillboardObject::~BillboardObject() {}

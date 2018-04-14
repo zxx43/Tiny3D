@@ -3,13 +3,17 @@
 
 Camera::Camera(float height) {
 	position.x=0; position.y=0; position.z=0;
-	lookDir.x=0; lookDir.y=0; lookDir.z=1;
+	lookDir = VECTOR3D();
+	lookDir4 = VECTOR4D();
 	up.x=0; up.y=1; up.z=0;
 
 	xrot=0; yrot=0;
 	this->height = height;
 
 	frustum=new Frustum();
+
+	simpleCheck = false;
+	isMain = false;
 }
 
 Camera::~Camera() {
@@ -49,52 +53,61 @@ void Camera::updateMoveable(uint transType) {
 		rotXMat = rotateX(-yrot);
 	else if (transType == TRANS_ROTATE_X)
 		rotYMat = rotateY(-xrot);
+	else if (transType == TRANS_ROTATE_XY) {
+		rotXMat = rotateX(-yrot);
+		rotYMat = rotateY(-xrot);
+	} else if (transType == TRANS_ALL) {
+		transMat = translate(-position.x, -position.y, -position.z);
+		rotXMat = rotateX(-yrot);
+		rotYMat = rotateY(-xrot);
+	}
 	viewMatrix = rotXMat * rotYMat * transMat;
 
-	VECTOR4D worldLookDir(viewMatrix.GetInverse()*UNIT_NEG_Z);
-	lookDir.x = worldLookDir.x;
-	lookDir.y = worldLookDir.y;
-	lookDir.z = worldLookDir.z;
+	lookDir4 = viewMatrix.GetInverse() * UNIT_NEG_Z;
+	lookDir.x = lookDir4.x;
+	lookDir.y = lookDir4.y;
+	lookDir.z = lookDir4.z;
 }
 
 void Camera::updateFrustum() {
 	viewProjectMatrix = projectMatrix * viewMatrix;
 	invViewProjectMatrix = viewProjectMatrix.GetInverse();
+	lookDir.Normalize();
 	frustum->update(invViewProjectMatrix, lookDir);
 }
 
 void Camera::turnX(int lr) {
 	switch(lr) {
 		case LEFT:
-			xrot+=D_ROTATION;
+			turnDX(D_ROTATION);
 			break;
 		case RIGHT:
-			xrot-=D_ROTATION;
+			turnDX(-D_ROTATION);
 			break;
 	}
-	if(xrot>360.0)
-		xrot-=360.0;
-	else if(xrot<0)
-		xrot+=360.0;
-
 	updateMoveable(TRANS_ROTATE_X);
 }
 
 void Camera::turnY(int ud) {
 	switch(ud) {
 		case UP:
-			yrot+=D_ROTATION;
+			turnDY(D_ROTATION);
 			break;
 		case DOWN:
-			yrot-=D_ROTATION;
+			turnDY(-D_ROTATION);
 			break;
 	}
-	if(yrot>360.0)
-		yrot-=360.0;
-	else if(yrot<0)
-		yrot+=360.0;
-
 	updateMoveable(TRANS_ROTATE_Y);
+}
+
+void Camera::turnDX(float dx) {
+	xrot += dx;
+	RestrictAngle(xrot);
+}
+
+void Camera::turnDY(float dy) {
+	yrot += dy;
+	RestrictAngle(yrot);
 }
 
 void Camera::move(int dist,float speed) {
@@ -133,7 +146,6 @@ void Camera::move(int dist,float speed) {
 			position.z-=dz;
 			break;
 	}
-
 	updateMoveable(TRANS_TRANSLATE);
 }
 
@@ -151,5 +163,7 @@ float Camera::getHeight() {
 void Camera::copy(Camera* src) {
 	viewMatrix = src->viewMatrix;
 	projectMatrix = src->projectMatrix;
+	viewProjectMatrix = src->viewProjectMatrix;
+	invViewProjectMatrix = src->invViewProjectMatrix;
 	position = src->position;
 }

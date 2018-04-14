@@ -28,17 +28,17 @@ struct AnimationData {
 		weights = new float[vertexCount * 4];
 		indices = new ushort[indexCount];
 
-		for (uint i = 0; i < vertexCount; i++) {
+		for (uint i = 0; i < (uint)vertexCount; i++) {
 			vertices[i * 3] = anim->aVertices[i].x;
 			vertices[i * 3 + 1] = anim->aVertices[i].y;
 			vertices[i * 3 + 2] = anim->aVertices[i].z;
 		}
-		for (uint i = 0; i<vertexCount; i++) {
+		for (uint i = 0; i < (uint)vertexCount; i++) {
 			normals[i * 3] = anim->aNormals[i].x;
 			normals[i * 3 + 1] = anim->aNormals[i].y;
 			normals[i * 3 + 2] = anim->aNormals[i].z;
 		}
-		for (uint i = 0; i<vertexCount; i++) {
+		for (uint i = 0; i < (uint)vertexCount; i++) {
 			VECTOR2D texcoord = anim->aTexcoords[i];
 			VECTOR4D texids = anim->aTextures[i];
 			textureChannel = texids.y >= 0 ? 4 : 3;
@@ -48,24 +48,24 @@ struct AnimationData {
 			if (textureChannel == 4)
 				texcoords[i * textureChannel + 3] = texids.y;
 		}
-		for (uint i = 0; i < vertexCount; i++) {
+		for (uint i = 0; i < (uint)vertexCount; i++) {
 			colors[i * 3] = (byte)(anim->aAmbients[i].x * 255);
 			colors[i * 3 + 1] = (byte)(anim->aDiffuses[i].x * 255);
 			colors[i * 3 + 2] = (byte)(anim->aSpeculars[i].x * 255);
 		}
-		for (uint i = 0; i < vertexCount; i++) {
+		for (uint i = 0; i < (uint)vertexCount; i++) {
 			boneids[i * 4] = (byte)(anim->aBoneids[i].x);
 			boneids[i * 4 + 1] = (byte)(anim->aBoneids[i].y);
 			boneids[i * 4 + 2] = (byte)(anim->aBoneids[i].z);
 			boneids[i * 4 + 3] = (byte)(anim->aBoneids[i].w);
 		}
-		for (uint i = 0; i < vertexCount; i++) {
+		for (uint i = 0; i < (uint)vertexCount; i++) {
 			weights[i * 4] = anim->aWeights[i].x;
 			weights[i * 4 + 1] = anim->aWeights[i].y;
 			weights[i * 4 + 2] = anim->aWeights[i].z;
 			weights[i * 4 + 3] = anim->aWeights[i].w;
 		}
-		for (uint i = 0; i < indexCount; i++)
+		for (uint i = 0; i < (uint)indexCount; i++)
 			indices[i] = (ushort)(anim->aIndices[i]);
 
 		animation = anim;

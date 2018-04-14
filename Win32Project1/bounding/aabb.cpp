@@ -6,9 +6,9 @@ AABB::AABB(const VECTOR3D& min,const VECTOR3D& max) {
 	sizex=maxVertex.x-minVertex.x;
 	sizey=maxVertex.y-minVertex.y;
 	sizez=maxVertex.z-minVertex.z;
-	position.x=minVertex.x+sizex/2.0;
-	position.y=minVertex.y+sizey/2.0;
-	position.z=minVertex.z+sizez/2.0;
+	position.x=minVertex.x+sizex*0.5;
+	position.y=minVertex.y+sizey*0.5;
+	position.z=minVertex.z+sizez*0.5;
 
 	vertices[0]=VECTOR3D(min.x,min.y,min.z);
 	vertices[1]=VECTOR3D(max.x,min.y,min.z);
@@ -21,8 +21,8 @@ AABB::AABB(const VECTOR3D& min,const VECTOR3D& max) {
 }
 
 AABB::AABB(const VECTOR3D& pos,float sx,float sy,float sz) {
-	minVertex.x=pos.x-sx/2.0; minVertex.y=pos.y-sy/2.0; minVertex.z=pos.z-sz/2.0;
-	maxVertex.x=pos.x+sx/2.0; maxVertex.y=pos.y+sy/2.0; maxVertex.z=pos.z+sz/2.0;
+	minVertex.x=pos.x-sx*0.5; minVertex.y=pos.y-sy*0.5; minVertex.z=pos.z-sz*0.5;
+	maxVertex.x=pos.x+sx*0.5; maxVertex.y=pos.y+sy*0.5; maxVertex.z=pos.z+sz*0.5;
 	sizex=sx; sizey=sy; sizez=sz;
 	position.x=pos.x; position.y=pos.y; position.z=pos.z;
 
@@ -59,9 +59,9 @@ void AABB::update(const VECTOR3D& newMinVertex,const VECTOR3D& newMaxVertex) {
 	sizex=maxVertex.x-minVertex.x;
 	sizey=maxVertex.y-minVertex.y;
 	sizez=maxVertex.z-minVertex.z;
-	position.x=minVertex.x+sizex/2.0;
-	position.y=minVertex.y+sizey/2.0;
-	position.z=minVertex.z+sizez/2.0;
+	position.x=minVertex.x+sizex*0.5;
+	position.y=minVertex.y+sizey*0.5;
+	position.z=minVertex.z+sizez*0.5;
 
 	vertices[0].x=newMinVertex.x; vertices[0].y=newMinVertex.y; vertices[0].z=newMinVertex.z;
 	vertices[1].x=newMaxVertex.x; vertices[1].y=newMinVertex.y; vertices[1].z=newMinVertex.z;
@@ -101,8 +101,9 @@ bool AABB::intersectsWidthRay(const VECTOR3D& origin,const VECTOR3D& dir,float m
 
 	if(dir.x!=0) {
 		float d[2]={vertices[0].x,vertices[7].x};
+		float invDirX = 1.0 / dir.x;
 		for(int i=0;i<2;i++) {
-			distance=(d[i]-origin.x)/dir.x;
+			distance=(d[i]-origin.x)*invDirX;
 			if(distance>=0&&distance<=maxDistance) {
 				vertex=dir*distance+origin;
 				if(vertex.y>=vertices[0].y&&vertex.y<=vertices[7].y&&vertex.z>=vertices[0].z&&vertex.z<=vertices[7].z)
@@ -113,8 +114,9 @@ bool AABB::intersectsWidthRay(const VECTOR3D& origin,const VECTOR3D& dir,float m
 
 	if(dir.y!=0) {
 		float d[2]={vertices[0].y,vertices[7].y};
+		float invDirY = 1.0 / dir.y;
 		for(int i=0;i<2;i++) {
-			distance=(d[i]-origin.y)/dir.y;
+			distance=(d[i]-origin.y)*invDirY;
 			if(distance>=0&&distance<=maxDistance) {
 				vertex=dir*distance+origin;
 				if(vertex.x>=vertices[0].x&&vertex.x<=vertices[7].x&&vertex.z>=vertices[0].z&&vertex.z<=vertices[7].z)
@@ -125,8 +127,9 @@ bool AABB::intersectsWidthRay(const VECTOR3D& origin,const VECTOR3D& dir,float m
 
 	if(dir.z!=0) {
 		float d[2]={vertices[0].z,vertices[7].z};
+		float invDirZ = 1.0 / dir.z;
 		for(int i=0;i<2;i++) {
-			distance=(d[i]-origin.z)/dir.z;
+			distance=(d[i]-origin.z)*invDirZ;
 			if(distance>=0&&distance<=maxDistance) {
 				vertex=dir*distance+origin;
 				if(vertex.x>=vertices[0].x&&vertex.x<=vertices[7].x&&vertex.y>=vertices[0].y&&vertex.y<=vertices[7].y)
@@ -154,22 +157,25 @@ bool AABB::cameraVertexInside(const VECTOR3D& vertex) {
 	return true;
 }
 
-bool AABB::checkWithCamera(Camera* camera) {
+bool AABB::checkWithCamera(Camera* camera, bool forceSimple) {
 	for(int i=0;i<8;i++) {
 		if(vertexInsideCamera(vertices[i],camera))
 			return true;
 	}
-	for(int i=0;i<4;i++) {
-		if(intersectsWidthRay(camera->frustum->worldVertex[i+4],
-				camera->frustum->edgeDir[i],camera->frustum->edgeLength[i]))
-			return true;
-	}
-	for(int i=0;i<8;i++) {
-		if(cameraVertexInside(camera->frustum->worldVertex[i]))
+	for (int i = 0; i<8; i++) {
+		if (cameraVertexInside(camera->frustum->worldVertex[i]))
 			return true;
 	}
 
-	if (!camera->simpleCheck) {
+	if (camera->isMain) {
+		for (int i = 0; i<4; i++) {
+			if (intersectsWidthRay(camera->frustum->worldVertex[i + 4],
+				camera->frustum->edgeDir[i], camera->frustum->edgeLength[i]))
+				return true;
+		}
+	}
+
+	if (!forceSimple && !camera->simpleCheck) {
 		if (camera->frustum->intersectsWidthRay(vertices[0], VECTOR3D(1, 0, 0), sizex))
 			return true;
 		if (camera->frustum->intersectsWidthRay(vertices[0], VECTOR3D(0, 1, 0), sizey))

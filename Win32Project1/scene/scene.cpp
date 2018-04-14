@@ -14,6 +14,7 @@ using namespace std;
 Scene::Scene() {
 	mainCamera = new Camera(4.0);
 	mainCamera->simpleCheck = true;
+	mainCamera->isMain = true;
 	skyBox = NULL;
 	terrainNode = NULL;
 	screenNode = NULL;
@@ -60,7 +61,9 @@ void Scene::createNodeAABB(Node* node) {
 		StaticObject* aabbObject = new StaticObject(AssetManager::assetManager->meshes.find("box")->second);
 		aabbObject->bindMaterial(MaterialManager::materials->find(BLACK_MAT));
 		aabbObject->setSize(aabb->sizex, aabb->sizey, aabb->sizez);
+		aabbNode->needUpdateNode = true;
 		aabbNode->addObject(aabbObject);
+		aabbNode->updateNode();
 		aabbNode->prepareDrawcall();
 		boundingNodes.push_back(aabbNode);
 	}
