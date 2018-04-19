@@ -246,11 +246,16 @@ Node* Node::detachChild(Node* child) {
 				superior->updateBounding();
 				superior = superior->parent;
 			}
-			
+
 			if (child->type == TYPE_INSTANCE) {
-				for (uint i = 0; i < child->objects.size(); i++)
-					Instance::instanceTable[child->objects[i]->mesh]--;
+				for (uint i = 0; i < child->objects.size(); i++) {
+					Object* object = child->objects[i];
+					Instance::instanceTable[object->mesh]--;
+					if (object->meshLow)
+						Instance::instanceTable[object->meshLow]--;
+				}
 			}
+
 			return child;
 		}
 	}

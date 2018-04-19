@@ -1,21 +1,28 @@
 #include "staticObject.h"
 #include "../util/util.h"
 
-StaticObject::StaticObject(Mesh* mesh):Object() {
-	this->mesh=mesh;
-	anglex=0; angley=0; anglez=0;
+StaticObject::StaticObject(Mesh* mesh) :Object() {
+	this->mesh = mesh;
+	anglex = 0; angley = 0; anglez = 0;
+}
+
+StaticObject::StaticObject(Mesh* mesh, Mesh* meshLow) : Object() {
+	this->mesh = mesh;
+	this->meshLow = meshLow;
+	anglex = 0; angley = 0; anglez = 0;
 }
 
 StaticObject::StaticObject(const StaticObject& rhs) {
-	mesh=rhs.mesh;
+	mesh = rhs.mesh;
+	meshLow = rhs.meshLow;
 	material = rhs.material;
-	if(rhs.bounding)
-		bounding=rhs.bounding->clone();
+	if (rhs.bounding)
+		bounding = rhs.bounding->clone();
 	else
-		bounding=NULL;
+		bounding = NULL;
 	position = rhs.position;
-	anglex=rhs.anglex; angley=rhs.angley; anglez=rhs.anglez;
-	sizex=rhs.sizex; sizey=rhs.sizey; sizez=rhs.sizez;
+	anglex = rhs.anglex; angley = rhs.angley; anglez = rhs.anglez;
+	sizex = rhs.sizex; sizey = rhs.sizey; sizez = rhs.sizez;
 }
 
 StaticObject::~StaticObject() {}

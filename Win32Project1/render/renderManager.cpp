@@ -108,6 +108,8 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	if (!phongShadowLowIns) phongShadowLowIns = render->findShader("phong_sl_ins");
 	if (!boneShadow) boneShadow = render->findShader("bone_s");
 
+	Camera* mainCamera = scene->mainCamera;
+
 	render->useTexture(TEXTURE_2D_ARRAY, 0, AssetManager::assetManager->textures->setId);
 
 	render->setFrameBuffer(nearBuffer);
@@ -115,17 +117,17 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	state->pass = 1;
 	state->shader = phongShadow;
 	state->shaderIns = phongShadowIns;
-	currentQueue->shadowNearStaticQueue->draw(cameraNear, render, state);
+	currentQueue->shadowNearStaticQueue->draw(cameraNear, mainCamera->position, render, state);
 	state->shader = boneShadow;
-	currentQueue->shadowNearAnimateQueue->draw(cameraNear, render, state);
+	currentQueue->shadowNearAnimateQueue->draw(cameraNear, mainCamera->position, render, state);
 
 	render->setFrameBuffer(midBuffer);
 	Camera* cameraMid=shadow->lightCameraMid;
 	state->pass = 2;
 	state->shader = phongShadow;
-	currentQueue->shadowMidStaticQueue->draw(cameraMid, render, state);
+	currentQueue->shadowMidStaticQueue->draw(cameraMid, mainCamera->position, render, state);
 	state->shader = boneShadow;
-	currentQueue->shadowMidAnimateQueue->draw(cameraMid, render, state);
+	currentQueue->shadowMidAnimateQueue->draw(cameraMid, mainCamera->position, render, state);
 
 	static ushort flushCount = 1;
 	if (flushCount % 2 == 0) 
@@ -136,9 +138,9 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 		state->pass = 3;
 		state->shader = phongShadowLow;
 		state->shaderIns = phongShadowLowIns;
-		currentQueue->shadowFarStaticQueue->draw(cameraFar, render, state);
+		currentQueue->shadowFarStaticQueue->draw(cameraFar, mainCamera->position, render, state);
 		state->shader = boneShadow;
-		currentQueue->shadowFarAnimateQueue->draw(cameraFar, render, state);
+		currentQueue->shadowFarAnimateQueue->draw(cameraFar, mainCamera->position, render, state);
 		
 		flushCount++;
 	}
@@ -158,7 +160,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	render->useTexture(TEXTURE_2D_ARRAY, 0, AssetManager::assetManager->textures->setId);
 	state->shader = phong;
 	state->shaderIns = phongIns;
-	currentQueue->staticQueue->draw(camera, render, state);
+	currentQueue->staticQueue->draw(camera, camera->position, render, state);
 
 	// Draw terrain
 	if (scene->terrainNode) {
@@ -172,7 +174,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	}
 
 	state->shader = bone;
-	currentQueue->animateQueue->draw(camera, render, state);
+	currentQueue->animateQueue->draw(camera, camera->position, render, state);
 
 	// Debug mode
 	if (drawBounding) {

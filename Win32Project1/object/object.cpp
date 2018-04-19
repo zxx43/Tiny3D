@@ -6,8 +6,9 @@ Object::Object() {
 	sizex = 1.0; sizey = 1.0; sizez = 1.0;
 	localTransformMatrix.LoadIdentity();
 	normalMatrix.LoadIdentity();
-	mesh=NULL;
-	bounding=NULL;
+	mesh = NULL;
+	meshLow = NULL;
+	bounding = NULL;
 	material = -1;
 	localBoundPosition.x=0;
 	localBoundPosition.y=0;
@@ -17,7 +18,8 @@ Object::Object() {
 Object::Object(const Object& rhs) {
 	position = rhs.position;
 	sizex = rhs.sizex; sizey = rhs.sizey; sizez = rhs.sizez;
-	mesh=rhs.mesh;
+	mesh = rhs.mesh;
+	meshLow = rhs.meshLow;
 	material = rhs.material;
 	localTransformMatrix=rhs.localTransformMatrix;
 	normalMatrix=rhs.normalMatrix;

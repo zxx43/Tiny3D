@@ -1,6 +1,7 @@
 #include "animationNode.h"
 #include "../render/animationDrawcall.h"
 #include "../util/util.h"
+#include <string.h>
 
 AnimationNode::AnimationNode(const VECTOR3D& boundingSize):
 		Node(VECTOR3D(0, 0, 0), boundingSize) {
@@ -47,10 +48,8 @@ void AnimationNode::translateNode(float x,float y,float z) {
 	recursiveTransform(nodeTransform);
 	MATRIX4X4 transform = nodeTransform * objects[0]->localTransformMatrix;
 	MATRIX4X4 nTransform = objects[0]->normalMatrix;
-	for (uint m = 0; m < 16; m++) {
-		uTransformMatrix->entries[m] = transform.entries[m];
-		uNormalMatrix->entries[m] = nTransform.entries[m];
-	}
+	memcpy(uTransformMatrix->entries, transform.entries, 16 * sizeof(float));
+	memcpy(uNormalMatrix->entries, nTransform.entries, 16 * sizeof(float));
 
 	VECTOR4D final4 = nodeTransform * VECTOR4D(0, 0, 0, 1);
 	float invw = 1.0 / final4.w;
@@ -73,9 +72,6 @@ void AnimationNode::translateNodeCenterAtWorld(float x, float y, float z) {
 void AnimationNode::rotateNodeObject(float ax, float ay, float az) {
 	AnimationObject* object = (AnimationObject*)objects[0];
 	object->setRotation(ax, ay, az);
-
-	MATRIX4X4 nTransform = object->normalMatrix;
-	for (uint n = 0; n < 16; n++)
-		uNormalMatrix->entries[n] = nTransform.entries[n];
+	memcpy(uNormalMatrix->entries, object->normalMatrix.entries, 16 * sizeof(float));
 }
 

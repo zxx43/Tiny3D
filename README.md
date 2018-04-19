@@ -12,7 +12,8 @@ A Small OpenGL Based Renderer
 - Cascaded shadow map
 - Sky dome  
 - Multi-thread support  
-- Deferred shading
+- Deferred shading  
+- Dynamic Level of Detail
 
 
 ### Screenshot:  

@@ -92,7 +92,9 @@ void SimpleApplication::initScene() {
 
 	// Load meshes
 	AssetManager::assetManager->meshes["tree"] = new Model("models/firC.obj", "models/firC.mtl", 2, true);
+	AssetManager::assetManager->meshes["treeLow"] = new Model("models/fir_mesh.obj", "models/fir_mesh.mtl", 3, true);
 	AssetManager::assetManager->meshes["treeA"] = new Model("models/treeA.obj", "models/treeA.mtl", 2, true);
+	AssetManager::assetManager->meshes["treeALow"] = new Model("models/treeA_low.obj", "models/treeA_low.mtl", 2, true);
 	AssetManager::assetManager->meshes["tank"] = new Model("models/tank.obj", "models/tank.mtl", 3, true);
 	AssetManager::assetManager->meshes["m1a2"] = new Model("models/m1a2.obj", "models/m1a2.mtl", 2, true);
 	AssetManager::assetManager->meshes["terrain"] = new Terrain("terrain/Terrain.raw");
@@ -131,10 +133,10 @@ void SimpleApplication::initScene() {
 	sphere->bindMaterial(MaterialManager::materials->find("grass_mat"));
 	StaticObject* board = new StaticObject(meshes["board"]);
 	StaticObject* quad = new StaticObject(meshes["quad"]);
-	StaticObject* model1 = new StaticObject(meshes["tree"]);
+	StaticObject* model1 = new StaticObject(meshes["tree"], meshes["treeLow"]);
 	StaticObject* model2 = new StaticObject(meshes["tank"]);
 	StaticObject* model3 = new StaticObject(meshes["m1a2"]);
-	StaticObject* model4 = new StaticObject(meshes["treeA"]);
+	StaticObject* model4 = new StaticObject(meshes["treeA"], meshes["treeALow"]);
 	BillboardObject* billboard = new BillboardObject(meshes["board"]);
 
 	scene->terrainNode = new TerrainNode(VECTOR3D(-1024, 0, -1024));
@@ -202,11 +204,15 @@ void SimpleApplication::initScene() {
 	srand(100);
 	InstanceNode* instanceNode1 = new InstanceNode(VECTOR3D(-920, 0, -920));
 	instanceNode1->singleSide = true;
-	for (uint i = 0; i < 10; i++) {
-		for (uint j = 0; j < 10; j++) {
-			StaticObject* tree = (rand() % 100) > 40 ? model4->clone() : model1->clone();
+	for (uint i = 0; i < 15; i++) {
+		for (uint j = 0; j < 15; j++) {
 			//StaticObject* tree = model4->clone();
-			float size = (rand() % 100 * 0.01) * 2 + 1;
+			//float baseSize = 1;
+			bool changeTree = (rand() % 100) > 40;
+			StaticObject* tree = changeTree ? model4->clone() : model1->clone();
+			float baseSize = changeTree ? 1 : 2;
+			float size = (rand() % 100 * 0.01) * 2 + baseSize;
+
 			tree->setSize(size, size, size);
 			tree->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
 			tree->setPosition(j * 80 + 80 * (rand() % 100) * 0.01, 0, 200 + i * 40 + 40 * (rand() % 100) * 0.01);
@@ -215,11 +221,15 @@ void SimpleApplication::initScene() {
 	}
 	InstanceNode* instanceNode2 = new InstanceNode(VECTOR3D(20, 0, -20));
 	instanceNode2->singleSide = true;
-	for (uint i = 0; i < 10; i++) {
-		for (uint j = 0; j < 10; j++) {
-			StaticObject* tree = (rand() % 100) > 40 ? model4->clone() : model1->clone();
+	for (uint i = 0; i < 15; i++) {
+		for (uint j = 0; j < 15; j++) {
 			//StaticObject* tree = model4->clone();
-			float size = (rand() % 100 * 0.01) * 2 + 1;
+			//float baseSize = 1;
+			bool changeTree = (rand() % 100) > 40;
+			StaticObject* tree = changeTree ? model4->clone() : model1->clone();
+			float baseSize = changeTree ? 1 : 2;
+			float size = (rand() % 100 * 0.01) * 2 + baseSize;
+
 			tree->setSize(size, size, size);
 			tree->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
 			tree->setPosition(j * 80 + 80 * (rand() % 100) * 0.01, 0, -(200 + i * 40 + 40 * (rand() % 100) * 0.01));
@@ -228,11 +238,15 @@ void SimpleApplication::initScene() {
 	}
 	InstanceNode* instanceNode3 = new InstanceNode(VECTOR3D(-20, 0, -20));
 	instanceNode3->singleSide = true;
-	for (uint i = 0; i < 10; i++) {
-		for (uint j = 0; j < 10; j++) {
-			StaticObject* tree = (rand() % 100) > 40 ? model4->clone() : model1->clone();
+	for (uint i = 0; i < 15; i++) {
+		for (uint j = 0; j < 15; j++) {
 			//StaticObject* tree = model4->clone();
-			float size = (rand() % 100 * 0.01) * 2 + 1;
+			//float baseSize = 1;
+			bool changeTree = (rand() % 100) > 40;
+			StaticObject* tree = changeTree ? model4->clone() : model1->clone();
+			float baseSize = changeTree ? 1 : 2;
+			float size = (rand() % 100 * 0.01) * 2 + baseSize;
+
 			tree->setSize(size, size, size);
 			tree->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
 			tree->setPosition(200 + j * 80 + 80 * (rand() % 100) * 0.01, 0, i * 80 + 80 * (rand() % 100) * 0.01);
@@ -243,9 +257,13 @@ void SimpleApplication::initScene() {
 	instanceNode4->singleSide = true;
 	for (uint i = 0; i < 10; i++) {
 		for (uint j = 0; j < 10; j++) {
-			StaticObject* tree = (rand() % 100) > 40 ? model4->clone() : model1->clone();
 			//StaticObject* tree = model4->clone();
-			float size = (rand() % 100 * 0.01) * 2 + 1;
+			//float baseSize = 1;
+			bool changeTree = (rand() % 100) > 40;
+			StaticObject* tree = changeTree ? model4->clone() : model1->clone();
+			float baseSize = changeTree ? 1 : 2;
+			float size = (rand() % 100 * 0.01) * 2 + baseSize;
+
 			tree->setSize(size, size, size);
 			tree->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
 			tree->setPosition(-(200 + j * 80 + 80 * (rand() % 100) * 0.01), 0, i * 80 + 80 * (rand() % 100) * 0.01);

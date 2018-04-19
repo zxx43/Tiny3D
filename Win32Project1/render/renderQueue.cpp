@@ -38,9 +38,11 @@ void RenderQueue::deleteInstance(Mesh* mesh) {
 	}
 }
 
-void RenderQueue::pushObjectToInstance(Object* object, Camera* camera, bool singleSide) {
+void RenderQueue::pushObjectToInstance(Object* object, Camera* camera, const VECTOR3D& eye, bool singleSide) {
 	if (object->checkInCamera(camera)) {
 		Mesh* mesh = object->mesh;
+		if (object->meshLow && (eye - object->bounding->position).GetSquaredLength() > 250000)
+			mesh = object->meshLow;
 		if (instanceQueue.find(mesh) == instanceQueue.end()) {
 			instanceQueue[mesh] = new Instance(mesh);
 			instanceQueue[mesh]->initInstanceBuffers(object->material, mesh->vertexCount, mesh->indexCount);
@@ -53,7 +55,7 @@ void RenderQueue::pushObjectToInstance(Object* object, Camera* camera, bool sing
 	}
 }
 
-void RenderQueue::draw(Camera* camera, Render* render, RenderState* state) {
+void RenderQueue::draw(Camera* camera, const VECTOR3D& eye, Render* render, RenderState* state) {
 	vector<Node*>::iterator it = queue.begin();
 	while (it != queue.end()) {
 		Node* node = *it;
@@ -69,7 +71,7 @@ void RenderQueue::draw(Camera* camera, Render* render, RenderState* state) {
 		if (node->type == TYPE_INSTANCE) {
 			for (uint i = 0; i < node->objects.size(); i++) {
 				Object* object = node->objects[i];
-				pushObjectToInstance(object, camera, node->singleSide);
+				pushObjectToInstance(object, camera, eye, node->singleSide);
 			}
 		} else if (node->drawcall) {
 			if (node->type == TYPE_ANIMATE) {
@@ -113,7 +115,7 @@ void RenderQueue::draw(Camera* camera, Render* render, RenderState* state) {
 			instance->setInstanceCount(0);
 		}
 		itIns++;
-		if (Instance::instanceTable[instance->instanceMesh] == 0)
+		if (Instance::instanceTable[instance->instanceMesh] == 0) 
 			deleteInstance(instance->instanceMesh);
 	}	
 }

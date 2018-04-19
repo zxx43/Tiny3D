@@ -27,7 +27,7 @@ mat4 convertMat(mat3x4 srcMat) {
 
 void main() {
 	float af = 0.6; float df = 1.2;
-	vColor = vec3(color.r * af, color.g * df, color.b) * 0.005;
+	vColor = vec3(af, df, 1.0) * color * 0.005;
 	
 	mat4 matModel = convertMat(modelMatrices[int(objectid)]);
 	vec4 worldVertex = matModel * vec4(vertex, 1.0);

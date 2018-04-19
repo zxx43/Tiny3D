@@ -38,7 +38,7 @@ void main() {
     normal3 = uNormalMatrix * normal3;
 
 	float af = 0.6; float df = 1.2;
-	vColor = vec3(color.r * af, color.g * df, color.b) * 0.004;
+	vColor = vec3(af, df, 1.0) * color * 0.005;
 	vNormal = normal3;
 	
 	vTexcoord = texcoord; 

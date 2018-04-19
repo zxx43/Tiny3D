@@ -1,6 +1,7 @@
 #include "batch.h"
 #include "../constants/constants.h"
 #include "../material/materialManager.h"
+#include <string.h>
 
 Batch::Batch() {
 	vertexCount=0;
@@ -119,6 +120,13 @@ void Batch::pushMeshToBuffers(Mesh* mesh,int mid,bool fullStatic,const MATRIX4X4
 }
 
 void Batch::updateMatrices(unsigned short objectId, const MATRIX4X4& transformMatrix, const MATRIX4X4* normalMatrix) {
+	memcpy(modelMatrices + (objectId * 12), transformMatrix.GetTranspose().entries, 12 * sizeof(float));
+	if (normalMatrix) {
+		memcpy(normalMatrices + (objectId * 9), normalMatrix->entries, 3 * sizeof(float));
+		memcpy(normalMatrices + (objectId * 9 + 3), normalMatrix->entries + 4, 3 * sizeof(float));
+		memcpy(normalMatrices + (objectId * 9 + 6), normalMatrix->entries + 8, 3 * sizeof(float));
+	}
+	/*
 	MATRIX4X4 transform = transformMatrix;
 	transform.Transpose();
 	for (int m = 0; m < 12; m++)
@@ -130,19 +138,13 @@ void Batch::updateMatrices(unsigned short objectId, const MATRIX4X4& transformMa
 			normalMatrices[objectId * 9 + n] = normalMatrix->entries[n + 1];
 		for (int n = 6; n < 9; n++)
 			normalMatrices[objectId * 9 + n] = normalMatrix->entries[n + 2];
-	}
+	}*/
 }
 
 void Batch::initMatrix(unsigned short currentObject, const MATRIX4X4& transformMatrix, const MATRIX4X4& normalMatrix) {
-	MATRIX4X4 transform = transformMatrix;
-	transform.Transpose();
-	for (int m = 0; m < 12; m++)
-		modelMatrices[currentObject * 12 + m] = transform.entries[m];
-	for (int n = 0; n < 3; n++)
-		normalMatrices[currentObject * 9 + n] = normalMatrix.entries[n];
-	for (int n = 3; n < 6; n++)
-		normalMatrices[currentObject * 9 + n] = normalMatrix.entries[n + 1];
-	for (int n = 6; n < 9; n++)
-		normalMatrices[currentObject * 9 + n] = normalMatrix.entries[n + 2];
+	memcpy(modelMatrices + (currentObject * 12), transformMatrix.GetTranspose().entries, 12 * sizeof(float));
+	memcpy(normalMatrices + (currentObject * 9), normalMatrix.entries, 3 * sizeof(float));
+	memcpy(normalMatrices + (currentObject * 9 + 3), normalMatrix.entries + 4, 3 * sizeof(float));
+	memcpy(normalMatrices + (currentObject * 9 + 6), normalMatrix.entries + 8, 3 * sizeof(float));
 }
 

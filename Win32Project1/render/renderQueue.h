@@ -11,7 +11,7 @@ private:
 	std::vector<Node*> queue;
 	std::map<Mesh*, Instance*> instanceQueue;
 private:
-	void pushObjectToInstance(Object* object, Camera* camera, bool singleSide);
+	void pushObjectToInstance(Object* object, Camera* camera, const VECTOR3D& eye, bool singleSide);
 public:
 	RenderQueue();
 	~RenderQueue();
@@ -19,7 +19,7 @@ public:
 	void push(Node* node);
 	void flush();
 	void deleteInstance(Mesh* mesh);
-	void draw(Camera* camera,Render* render, RenderState* state);
+	void draw(Camera* camera,const VECTOR3D& eye,Render* render, RenderState* state);
 	void animate(long startTime, long currentTime);
 };
 

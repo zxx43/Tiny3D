@@ -147,8 +147,7 @@ void Render::setViewPort(int width,int height) {
 void Render::resize(int width,int height,Camera* mainCamera) {
 	if(height==0) height=1;
 	setViewPort(width,height);
-	float fAspect=1;
-	fAspect=(float)width/(float)height;
+	float fAspect=(float)width/height;
 	mainCamera->initPerspectCamera(60.0,fAspect,1.0,2000.0);
 }
 
