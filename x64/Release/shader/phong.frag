@@ -3,25 +3,18 @@
 
 uniform sampler2DArray texture;
 
-in vec2 vTexcoord;
-flat in float vTexid;
+in vec3 vTexcoord;
 flat in vec3 vColor;
 in vec3 vNormal;
 
 layout (location = 0) out vec4 FragTex;
-layout (location = 1) out vec4 FragColor;
-layout (location = 2) out vec4 FragNormal;
+layout (location = 1) out vec3 FragColor;
+layout (location = 2) out vec3 FragNormal;
 
 void main() {
-	vec3 texcoord = vec3(vTexcoord, vTexid);
-	vec4 textureColor = texcoord.p >= 0.0 ? texture2DArray(texture, texcoord) : vec4(1.0);
-	if(textureColor.a < 0.1) discard;
-
-	vec3 normal = normalize(vNormal);
+	vec4 textureColor = vTexcoord.p >= 0.0 ? texture2DArray(texture, vTexcoord) : vec4(1.0);
 		
 	FragTex = textureColor;
-	FragColor = vec4(vColor.rg, 0.0, 1.0);
-
-	vec3 outNormal = normal * 0.5 + 0.5;
-	FragNormal = vec4(outNormal, 1.0); 
+	FragColor = vColor;
+	FragNormal = normalize(vNormal) * 0.5 + 0.5;
 }

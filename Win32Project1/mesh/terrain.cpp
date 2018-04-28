@@ -1,6 +1,7 @@
 #include "terrain.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 Terrain::Terrain(const char* fileName):Mesh() {
 	heightMap=(unsigned char*)malloc(MAP_SIZE*MAP_SIZE*sizeof(unsigned char));
@@ -13,7 +14,7 @@ Terrain::Terrain(const char* fileName):Mesh() {
 	normals=new VECTOR3D[vertexCount];
 	texcoords=new VECTOR2D[vertexCount];
 	materialids = NULL;
-	indices=new int[indexCount];
+	indices = (int*)malloc(indexCount*sizeof(int));
 
 	initFaces();
 }

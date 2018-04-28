@@ -9,8 +9,7 @@ layout (location = 2) in vec3 texcoord;
 layout (location = 3) in vec3 color;
 layout (location = 4) in float objectid;
 
-out vec2 vTexcoord;
-flat out float vTexid;
+out vec3 vTexcoord;
 flat out vec3 vColor;
 out vec3 vNormal;
 
@@ -33,7 +32,6 @@ void main() {
 	vec4 worldVertex = matModel * vec4(vertex, 1.0);
 	vNormal = (matModel * vec4(normal, 0.0)).xyz;
 	
-	vTexcoord = texcoord.xy; 
-	vTexid = texcoord.z;
+	vTexcoord = texcoord;
 	gl_Position = viewProjectMatrix * worldVertex;
 }

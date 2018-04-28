@@ -25,10 +25,10 @@ public:
 	std::vector<Texture2D*> colorBuffers;
 	Texture2D* depthBuffer;
 public:
-	FrameBuffer(float width, float height, int precision);
+	FrameBuffer(float width, float height, int precision, int component);
 	~FrameBuffer();
 public:
-	void addColorBuffer(int precision);
+	void addColorBuffer(int precision, int component);
 	void attachDepthBuffer(int precision);
 	Texture2D* getColorBuffer(int n);
 	void use();

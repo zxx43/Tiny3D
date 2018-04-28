@@ -1,5 +1,7 @@
 #include "model.h"
 #include "../constants/constants.h"
+#include <stdlib.h>
+#include <string.h>
 
 Model::Model(const char* obj, const char* mtl, int vt, bool simple) {
 	vertexCount = 0;
@@ -29,10 +31,9 @@ Model::Model(const Model& rhs) {
 	}
 
 	if(rhs.indexCount>0) {
-		indexCount=rhs.indexCount;
-		indices=new int[indexCount];
-		for(int i=0;i<indexCount;i++)
-			indices[i]=rhs.indices[i];
+		indexCount = rhs.indexCount;
+		indices = (int*)malloc(indexCount*sizeof(int));
+		memcpy(indices, rhs.indices, indexCount*sizeof(int));
 	}
 }
 
@@ -109,8 +110,9 @@ void Model::initFaces() {
 }
 
 void Model::initFacesWidthIndices() {
-	vertexCount=loader->vCount;
-	vertices=new VECTOR4D[vertexCount];
+	vertexCount = loader->vCount;
+	indexCount = loader->faceCount * 3;
+	vertices = new VECTOR4D[indexCount];
 	for(int i=0;i<vertexCount;i++) {
 		vertices[i].x=loader->vArr[i][0];
 		vertices[i].y=loader->vArr[i][1];
@@ -118,12 +120,14 @@ void Model::initFacesWidthIndices() {
 		vertices[i].w=1.0;
 	}
 
-	normals=new VECTOR3D[vertexCount];
-	texcoords=new VECTOR2D[vertexCount];
-	materialids = new int[vertexCount];
-	indexCount=loader->faceCount*3;
-	indices=new int[indexCount];
+	normals = new VECTOR3D[indexCount];
+	texcoords = new VECTOR2D[indexCount];
+	materialids = new int[indexCount];
+	indices = (int*)malloc(indexCount*sizeof(int));
 
+	std::map<int, bool> texcoordMap; texcoordMap.clear();
+
+	int dupIndex = vertexCount;
 	for (int i=0;i<loader->faceCount;i++) {
 		int index1=loader->fvArr[i][0]-1;
 		int index2=loader->fvArr[i][1]-1;
@@ -145,14 +149,27 @@ void Model::initFacesWidthIndices() {
 				loader->vtArr[loader->ftArr[i][1]-1][1]);
 		VECTOR2D c3(loader->vtArr[loader->ftArr[i][2]-1][0],
 				loader->vtArr[loader->ftArr[i][2]-1][1]);
-
-		normals[index1].x=n1.x; normals[index1].y=n1.y; normals[index1].z=n1.z;
-		normals[index2].x=n2.x; normals[index2].y=n2.y; normals[index2].z=n2.z;
-		normals[index3].x=n3.x; normals[index3].y=n3.y; normals[index3].z=n3.z;
-
-		texcoords[index1].x=c1.x; texcoords[index1].y=c1.y;
-		texcoords[index2].x=c2.x; texcoords[index2].y=c2.y;
-		texcoords[index3].x=c3.x; texcoords[index3].y=c3.y;
+		
+		// Duplicate vertex if texcoord not the same
+		if (texcoordMap.find(index1) != texcoordMap.end() && texcoords[index1] != c1) {
+			int newIndex = dupIndex++;
+			vertices[newIndex] = vertices[index1];
+			index1 = newIndex;
+		}
+		if (texcoordMap.find(index2) != texcoordMap.end() && texcoords[index2] != c2) {
+			int newIndex = dupIndex++;
+			vertices[newIndex] = vertices[index2];
+			index2 = newIndex;
+		}
+		if (texcoordMap.find(index3) != texcoordMap.end() && texcoords[index3] != c3) {
+			int newIndex = dupIndex++;
+			vertices[newIndex] = vertices[index3];
+			index3 = newIndex;
+		}
+		
+		normals[index1] = n1; normals[index2] = n2; normals[index3] = n3;
+		texcoords[index1] = c1; texcoords[index2] = c2; texcoords[index3] = c3;
+		texcoordMap[index1] = true; texcoordMap[index2] = true; texcoordMap[index3] = true;
 
 		indices[i * 3] = index1;
 		indices[i * 3 + 1] = index2;
@@ -163,4 +180,5 @@ void Model::initFacesWidthIndices() {
 		materialids[index2] = mid;
 		materialids[index3] = mid;
 	}
+	vertexCount = dupIndex;
 }

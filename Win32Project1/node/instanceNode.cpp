@@ -18,6 +18,13 @@ void InstanceNode::addObject(Object* object) {
 	else
 		Instance::instanceTable[object->mesh]++;
 
+	if (object->meshMid) {
+		if (Instance::instanceTable.find(object->meshMid) == Instance::instanceTable.end())
+			Instance::instanceTable[object->meshMid] = 1;
+		else
+			Instance::instanceTable[object->meshMid]++;
+	}
+
 	if (object->meshLow) {
 		if (Instance::instanceTable.find(object->meshLow) == Instance::instanceTable.end())
 			Instance::instanceTable[object->meshLow] = 1;
@@ -30,6 +37,8 @@ Object* InstanceNode::removeObject(Object* object) {
 	Object* object2Remove = Node::removeObject(object);
 	if (object2Remove) {
 		Instance::instanceTable[object2Remove->mesh]--;
+		if (object2Remove->meshMid)
+			Instance::instanceTable[object2Remove->meshMid]--;
 		if (object2Remove->meshLow)
 			Instance::instanceTable[object2Remove->meshLow]--;
 	}

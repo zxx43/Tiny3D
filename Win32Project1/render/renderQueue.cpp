@@ -2,11 +2,14 @@
 #include "../node/animationNode.h"
 #include "../node/instanceNode.h"
 #include <string.h>
+#include <stdlib.h>
 using namespace std;
 
-RenderQueue::RenderQueue() {
+RenderQueue::RenderQueue(float midDis, float lowDis) {
 	queue.clear();
 	instanceQueue.clear();
+	midDistance = midDis;
+	lowDistance = lowDis;
 }
 
 RenderQueue::~RenderQueue() {
@@ -19,6 +22,8 @@ RenderQueue::~RenderQueue() {
 }
 
 void RenderQueue::copyData(RenderQueue* src) {
+	midDistance = src->midDistance;
+	lowDistance = src->lowDistance;
 	queue.assign(src->queue.begin(), src->queue.end());
 }
 
@@ -41,8 +46,12 @@ void RenderQueue::deleteInstance(Mesh* mesh) {
 void RenderQueue::pushObjectToInstance(Object* object, Camera* camera, const VECTOR3D& eye, bool singleSide) {
 	if (object->checkInCamera(camera)) {
 		Mesh* mesh = object->mesh;
-		if (object->meshLow && (eye - object->bounding->position).GetSquaredLength() > 250000)
-			mesh = object->meshLow;
+		if ((eye - object->bounding->position).GetSquaredLength() > lowDistance * lowDistance) {
+			if (object->meshLow) mesh = object->meshLow;
+			else if (object->meshMid) mesh = object->meshMid;
+		} else if ((eye - object->bounding->position).GetSquaredLength() > midDistance * midDistance) {
+			if (object->meshMid) mesh = object->meshMid;
+		}
 		if (instanceQueue.find(mesh) == instanceQueue.end()) {
 			instanceQueue[mesh] = new Instance(mesh);
 			instanceQueue[mesh]->initInstanceBuffers(object->material, mesh->vertexCount, mesh->indexCount);
@@ -76,7 +85,7 @@ void RenderQueue::draw(Camera* camera, const VECTOR3D& eye, Render* render, Rend
 		} else if (node->drawcall) {
 			if (node->type == TYPE_ANIMATE) {
 				if (!node->drawcall->uModelMatrix)
-					node->drawcall->uModelMatrix = new float[16];
+					node->drawcall->uModelMatrix = (float*)malloc(16 * sizeof(float));
 				memcpy(node->drawcall->uModelMatrix, node->uTransformMatrix->entries, 16 * sizeof(float));
 				/*
 				for (int m = 0; m < 4; m++) {
@@ -87,7 +96,7 @@ void RenderQueue::draw(Camera* camera, const VECTOR3D& eye, Render* render, Rend
 				}
 				*/
 				if (!node->drawcall->uNormalMatrix)
-					node->drawcall->uNormalMatrix = new float[9];
+					node->drawcall->uNormalMatrix = (float*)malloc(9 * sizeof(float));
 				memcpy(node->drawcall->uNormalMatrix, node->uNormalMatrix->entries, 3 * sizeof(float));
 				memcpy(node->drawcall->uNormalMatrix + 3, node->uNormalMatrix->entries + 4, 3 * sizeof(float));
 				memcpy(node->drawcall->uNormalMatrix + 6, node->uNormalMatrix->entries + 8, 3 * sizeof(float));

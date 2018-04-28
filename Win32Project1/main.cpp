@@ -52,17 +52,24 @@ void DrawWindow() {
 	WaitForSingleObject(mutex, INFINITE);
 	dataPrepared = false;
 	ReleaseMutex(mutex);
+
+	GetCursorPos(&mPoint);
+	app->moveMouse(mPoint.x, mPoint.y, screenHalfX, screenHalfY);
+	SetCursorPos(screenHalfX, screenHalfY);
+	app->moveKey();
 }
 
 DWORD WINAPI ActThreadRun(LPVOID param) {
+	/*
 	DWORD last = 0;
 	while (!app->willExit) {
 		if (currentTime - last > 5) {
-			app->moveKey();
+
 			last = currentTime;
 		}
 		Sleep(0);
 	}
+	//*/
 	thread1End = true;
 	return 1;
 }
@@ -189,6 +196,8 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hPrevInstance,PSTR szCmdLine,int iC
 	SetFocus(hWnd);
 	UpdateWindow(hWnd);
 
+	SendMessage(hWnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
+
 	while(!app->willExit) {
 		if(PeekMessage(&msg,NULL,0,0,PM_REMOVE)) {
 			if(msg.message==WM_QUIT) {
@@ -223,11 +232,13 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam) {
 			app->keyUp(wParam);
 			break;
 		case WM_MOUSEMOVE:
+			/*
 			if (app) {
 				GetCursorPos(&mPoint);
 				app->moveMouse(mPoint.x, mPoint.y, screenHalfX, screenHalfY);
 				SetCursorPos(screenHalfX, screenHalfY);
 			}
+			//*/
 			break;
 		case WM_SIZE:
 			ResizeWindow(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));

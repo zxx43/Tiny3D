@@ -14,7 +14,7 @@ uniform vec3 light;
 
 in vec2 vTexcoord;
 
-out vec4 FragColor;
+out vec3 FragColor;
 
 vec2 poissonDisk[16] = vec2[]( 
    vec2( -0.94201624, -0.39906216 ), 
@@ -91,7 +91,7 @@ void main() {
 	float depth = texture2D(depthBuffer, vTexcoord).r;
 	vec3 ndcPos = vec3(vTexcoord, depth)  * 2.0 - 1.0;
 	vec4 tex = texture2D(texBuffer, vTexcoord);
-	FragColor = tex;
+	FragColor = tex.rgb;
 	
 	if(ndcPos.z < 1.0) {
 		vec4 worldPos = invViewProjMatrix * vec4(ndcPos, 1.0);
@@ -107,7 +107,6 @@ void main() {
 
 		float shadowFactor = (useShadow != 0) ? genShadowFactor(worldPos, bias) : 1.0;
 
-		FragColor.rgb = tex.rgb * (color.r + shadowFactor * ndotl * color.g);
-		FragColor.a = tex.a;
+		FragColor = tex.rgb * (color.r + shadowFactor * ndotl * color.g);
 	}
 }

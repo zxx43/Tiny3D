@@ -7,6 +7,7 @@ Object::Object() {
 	localTransformMatrix.LoadIdentity();
 	normalMatrix.LoadIdentity();
 	mesh = NULL;
+	meshMid = NULL;
 	meshLow = NULL;
 	bounding = NULL;
 	material = -1;
@@ -19,6 +20,7 @@ Object::Object(const Object& rhs) {
 	position = rhs.position;
 	sizex = rhs.sizex; sizey = rhs.sizey; sizez = rhs.sizez;
 	mesh = rhs.mesh;
+	meshMid = rhs.meshMid;
 	meshLow = rhs.meshLow;
 	material = rhs.material;
 	localTransformMatrix=rhs.localTransformMatrix;

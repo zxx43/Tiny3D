@@ -15,7 +15,7 @@ public:
 	float anglex,angley,anglez;
 
 	StaticObject(Mesh* mesh);
-	StaticObject(Mesh* mesh, Mesh* meshLow);
+	StaticObject(Mesh* mesh, Mesh* meshMid, Mesh* meshLow);
 	StaticObject(const StaticObject& rhs);
 	virtual ~StaticObject();
 	virtual StaticObject* clone();

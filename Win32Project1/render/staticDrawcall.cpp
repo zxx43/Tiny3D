@@ -1,5 +1,6 @@
 #include "staticDrawcall.h"
 #include <string.h>
+#include <stdlib.h>
 
 StaticDrawcall::StaticDrawcall() {}
 
@@ -40,8 +41,8 @@ StaticDrawcall::StaticDrawcall(Batch* batch) :Drawcall() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	uModelMatrix = new float[MAX_OBJECT_COUNT * 12];
-	uNormalMatrix = new float[MAX_OBJECT_COUNT * 9];
+	uModelMatrix = (float*)malloc(MAX_OBJECT_COUNT * 12 * sizeof(float));
+	uNormalMatrix = (float*)malloc(MAX_OBJECT_COUNT * 9 * sizeof(float));
 	memcpy(uModelMatrix, batch->modelMatrices, batch->objectCount * 12 * sizeof(float));
 	memcpy(uNormalMatrix, batch->normalMatrices, batch->objectCount * 9 * sizeof(float));
 	

@@ -6,14 +6,14 @@ RenderManager::RenderManager(Camera* view, float distance1, float distance2, con
 	float nearSize=1024;
 	float midSize=2048;
 	float farSize=2048;
-	nearBuffer = new FrameBuffer(nearSize, nearSize, HIGH_PRE);
-	midBuffer = new FrameBuffer(midSize, midSize, HIGH_PRE);
-	farBuffer = new FrameBuffer(farSize, farSize, HIGH_PRE);
+	nearBuffer = new FrameBuffer(nearSize, nearSize, HIGH_PRE, 4);
+	midBuffer = new FrameBuffer(midSize, midSize, HIGH_PRE, 4);
+	farBuffer = new FrameBuffer(farSize, farSize, HIGH_PRE, 4);
 	lightDir = light; lightDir.Normalize();
 
-	renderData = new Renderable(); renderData->copyCamera(view);
-	queue1 = new Renderable(); queue1->copyCamera(view);
-	queue2 = new Renderable(); queue2->copyCamera(view);
+	renderData = new Renderable(distance1, distance2); renderData->copyCamera(view);
+	queue1 = new Renderable(distance1, distance2); queue1->copyCamera(view);
+	queue2 = new Renderable(distance1, distance2); queue2->copyCamera(view);
 	currentQueue = queue1;
 	nextQueue = queue2;
 
@@ -148,6 +148,9 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 
 void RenderManager::renderScene(Render* render, Scene* scene) {
 	state->reset();
+	state->enableAlphaTest = true;
+	state->alphaThreshold = 0.0;
+	state->alphaTestMode = GREATER;
 
 	if (!phong) phong = render->findShader("phong");
 	if (!phongIns) phongIns = render->findShader("phong_ins");
@@ -191,6 +194,8 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	// Draw sky
 	if (scene->skyBox) 
 		scene->skyBox->draw(render, skyCube, camera);
+
+	scene->flushNodes();
 }
 
 void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* screenBuff, Filter* filter) {

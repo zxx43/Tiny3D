@@ -7,8 +7,7 @@ layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 texcoord;
 layout (location = 2) in float objectid;
 
-out vec2 vTexcoord;
-flat out float vTexid;
+out vec3 vTexcoord;
 out vec2 projDepth;
 
 mat4 convertMat(mat3x4 srcMat) {
@@ -23,8 +22,7 @@ mat4 convertMat(mat3x4 srcMat) {
 }
 
 void main() {
-	vTexcoord = texcoord.xy;
-	vTexid = texcoord.z; 
+	vTexcoord = texcoord;
 	vec4 worldVertex = convertMat(modelMatrices[int(objectid)]) * vec4(vertex, 1.0);
 	gl_Position = viewProjectMatrix * worldVertex;
 	projDepth = gl_Position.zw;

@@ -6,14 +6,16 @@ StaticObject::StaticObject(Mesh* mesh) :Object() {
 	anglex = 0; angley = 0; anglez = 0;
 }
 
-StaticObject::StaticObject(Mesh* mesh, Mesh* meshLow) : Object() {
+StaticObject::StaticObject(Mesh* mesh, Mesh* meshMid, Mesh* meshLow) : Object() {
 	this->mesh = mesh;
+	this->meshMid = meshMid;
 	this->meshLow = meshLow;
 	anglex = 0; angley = 0; anglez = 0;
 }
 
 StaticObject::StaticObject(const StaticObject& rhs) {
 	mesh = rhs.mesh;
+	meshMid = rhs.meshMid;
 	meshLow = rhs.meshLow;
 	material = rhs.material;
 	if (rhs.bounding)

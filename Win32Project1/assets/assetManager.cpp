@@ -27,8 +27,24 @@ AssetManager::~AssetManager() {
 	textures = NULL;
 }
 
+void AssetManager::addTexture(const char* name) {
+	textures->addTexture(name);
+}
+
 void AssetManager::initTextureArray() {
 	textures->initTextureArray(COMMON_TEXTURE);
+}
+
+int AssetManager::findTexture(const char* name) {
+	return textures->findTexture(name);
+}
+
+void AssetManager::addMesh(const char* name, Mesh* mesh) {
+	meshes[name] = mesh;
+}
+
+void AssetManager::addAnimation(const char* name, Animation* animation) {
+	animations[name] = animation;
 }
 
 void AssetManager::Init() {
@@ -36,10 +52,10 @@ void AssetManager::Init() {
 		AssetManager::assetManager = new AssetManager();
 
 		// Load some basic meshes
-		AssetManager::assetManager->meshes["box"] = new Box();
-		AssetManager::assetManager->meshes["sphere"] = new Sphere(16, 16);
-		AssetManager::assetManager->meshes["board"] = new Board();
-		AssetManager::assetManager->meshes["quad"] = new Quad();
+		AssetManager::assetManager->addMesh("box", new Box());
+		AssetManager::assetManager->addMesh("sphere", new Sphere(16, 16));
+		AssetManager::assetManager->addMesh("board", new Board());
+		AssetManager::assetManager->addMesh("quad", new Quad());
 	}
 }
 

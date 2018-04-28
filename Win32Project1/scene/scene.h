@@ -30,6 +30,7 @@ public:
 	Scene();
 	~Scene();
 	void updateNodes();
+	void flushNodes();
 public: // Just for debugging
 	void createNodeAABB(Node* node);
 	void clearAllAABB();

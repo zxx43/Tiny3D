@@ -1,5 +1,7 @@
 #include "board.h"
 #include "../constants/constants.h"
+#include <stdlib.h>
+#include <string.h>
 
 Board::Board():Mesh() {
 	vertexCount=4;
@@ -9,7 +11,7 @@ Board::Board():Mesh() {
 	materialids = NULL;
 
 	indexCount=6;
-	indices=new int[indexCount];
+	indices = (int*)malloc(indexCount*sizeof(int));
 
 	initFaces();
 }
@@ -30,9 +32,8 @@ Board::Board(const Board& rhs) {
 	}
 
 	indexCount=rhs.indexCount;
-	indices=new int[indexCount];
-	for(int i=0;i<indexCount;i++)
-		indices[i]=rhs.indices[i];
+	indices = (int*)malloc(indexCount*sizeof(int));
+	memcpy(indices, rhs.indices, indexCount*sizeof(int));
 }
 
 Board::~Board() {

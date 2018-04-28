@@ -17,7 +17,7 @@ private:
 	FrameBuffer* framebuffer;
 	StaticNode* boardNode;
 public:
-	Filter(float width, float height, bool useFramebuffer, int precision);
+	Filter(float width, float height, bool useFramebuffer, int precision, int component);
 	~Filter();
 
 	void draw(Camera* camera, Render* render, RenderState* state, 

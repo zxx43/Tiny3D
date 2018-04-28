@@ -22,26 +22,26 @@ Instance::Instance(Mesh* mesh) {
 }
 
 Instance::~Instance() {
-	if (vertexBuffer) delete[] vertexBuffer; vertexBuffer = NULL;
-	if (normalBuffer) delete[] normalBuffer; normalBuffer = NULL;
-	if (texcoordBuffer) delete[] texcoordBuffer; texcoordBuffer = NULL;
-	if (colorBuffer) delete[] colorBuffer; colorBuffer = NULL;
-	if (indexBuffer) delete[] indexBuffer; indexBuffer = NULL;
+	if (vertexBuffer) free(vertexBuffer); vertexBuffer = NULL;
+	if (normalBuffer) free(normalBuffer); normalBuffer = NULL;
+	if (texcoordBuffer) free(texcoordBuffer); texcoordBuffer = NULL;
+	if (colorBuffer) free(colorBuffer); colorBuffer = NULL;
+	if (indexBuffer) free(indexBuffer); indexBuffer = NULL;
 
 	if (modelMatrices) free(modelMatrices); modelMatrices = NULL;
 	if (drawcall) delete drawcall;
 }
 
 void Instance::initInstanceBuffers(int mid,int vertices,int indices) {
-	vertexCount=vertices;
-	vertexBuffer=new float[vertexCount*3];
-	normalBuffer=new float[vertexCount*3];
-	texcoordBuffer=new float[vertexCount*4];
-	colorBuffer = new byte[vertexCount * 3];
+	vertexCount = vertices;
+	vertexBuffer = (float*)malloc(vertexCount * 3 * sizeof(float));
+	normalBuffer = (float*)malloc(vertexCount * 3 * sizeof(float));
+	texcoordBuffer = (float*)malloc(vertexCount * 4 * sizeof(float));
+	colorBuffer = (byte*)malloc(vertexCount * 3 * sizeof(byte));
 
 	indexCount=indices;
-	if(indexCount>0)
-		indexBuffer=new ushort[indexCount];
+	if (indexCount > 0)
+		indexBuffer = (ushort*)malloc(indexCount*sizeof(ushort));
 
 	for(int i=0;i<vertexCount;i++) {
 		VECTOR4D vertex=instanceMesh->vertices[i];

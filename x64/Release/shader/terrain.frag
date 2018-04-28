@@ -9,25 +9,16 @@ in vec3 vNormal;
 in float worldHeight;
 
 layout (location = 0) out vec4 FragTex;
-layout (location = 1) out vec4 FragColor;
-layout (location = 2) out vec4 FragNormal;
+layout (location = 1) out vec3 FragColor;
+layout (location = 2) out vec3 FragNormal;
 
 void main() {
-	vec3 texcoord1 = vec3(vTexcoord.xy, vTexcoord.z);
-	vec4 textureColor1 = texture2DArray(texture, texcoord1);
-	
-	vec3 texcoord2 = vec3(vTexcoord.xy, vTexcoord.w);
-	vec4 textureColor2 = texture2DArray(texture, texcoord2);
+	vec4 tex1 = texture2DArray(texture, vTexcoord.xyz);
+	vec4 tex2 = texture2DArray(texture, vTexcoord.xyw);
+	float blendPer = smoothstep(100.0, 200.0, worldHeight);
+	vec4 textureColor = mix(tex1, tex2, blendPer);
 		
-	float height = worldHeight;
-	float blendPer = smoothstep(100.0, 200.0, height);
-	vec4 textureColor = (1.0 - blendPer) * textureColor1 + blendPer * textureColor2;
-
-	vec3 normal = normalize(vNormal);
-		
-	FragColor = vec4(vColor.rg, 0.0, 1.0);
 	FragTex = textureColor;
-
-	vec3 outNormal = normal * 0.5 + 0.5;
-	FragNormal = vec4(outNormal, 1.0); 
+	FragColor = vColor;
+	FragNormal = normalize(vNormal) * 0.5 + 0.5;
 }

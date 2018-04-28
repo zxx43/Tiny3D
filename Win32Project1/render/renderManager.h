@@ -22,15 +22,15 @@ struct Renderable {
 	RenderQueue* staticQueue;
 	RenderQueue* animateQueue;
 	Camera* mainCamera;
-	Renderable() {
-		shadowNearStaticQueue = new RenderQueue();
-		shadowMidStaticQueue = new RenderQueue();
-		shadowFarStaticQueue = new RenderQueue();
-		shadowNearAnimateQueue = new RenderQueue();
-		shadowMidAnimateQueue = new RenderQueue();
-		shadowFarAnimateQueue = new RenderQueue();
-		staticQueue = new RenderQueue();
-		animateQueue = new RenderQueue();
+	Renderable(float midDis, float lowDis) {
+		shadowNearStaticQueue = new RenderQueue(midDis, lowDis);
+		shadowMidStaticQueue = new RenderQueue(midDis, lowDis);
+		shadowFarStaticQueue = new RenderQueue(midDis, lowDis);
+		shadowNearAnimateQueue = new RenderQueue(midDis, lowDis);
+		shadowMidAnimateQueue = new RenderQueue(midDis, lowDis);
+		shadowFarAnimateQueue = new RenderQueue(midDis, lowDis);
+		staticQueue = new RenderQueue(midDis, lowDis);
+		animateQueue = new RenderQueue(midDis, lowDis);
 		mainCamera = new Camera(0);
 	}
 	~Renderable() {

@@ -2,14 +2,12 @@
 #include "../object/staticObject.h"
 #include "../mesh/board.h"
 
-Filter::Filter(float width, float height, bool useFramebuffer, int precision) {
+Filter::Filter(float width, float height, bool useFramebuffer, int precision, int component) {
 	this->width=width;
 	this->height=height;
 	pixWidth = 1.0 / width;
 	pixHeight = 1.0 / height;
-	framebuffer=NULL;
-	if(useFramebuffer)
-		framebuffer = new FrameBuffer(width, height, precision);
+	framebuffer = useFramebuffer ? new FrameBuffer(width, height, precision, component) : NULL;
 
 	Board* board=new Board();
 	boardNode=new StaticNode(VECTOR3D(0,0,0));

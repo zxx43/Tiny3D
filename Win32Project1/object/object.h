@@ -17,6 +17,7 @@ public:
 	VECTOR3D position;
 	float sizex, sizey, sizez;
 	Mesh* mesh;
+	Mesh* meshMid;
 	Mesh* meshLow;
 	int material;
 	MATRIX4X4 localTransformMatrix,normalMatrix;

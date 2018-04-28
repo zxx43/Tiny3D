@@ -13,7 +13,7 @@ using namespace std;
 
 Scene::Scene() {
 	mainCamera = new Camera(4.0);
-	mainCamera->simpleCheck = true;
+	mainCamera->simpleCheck = false;
 	mainCamera->isMain = true;
 	skyBox = NULL;
 	terrainNode = NULL;
@@ -25,6 +25,7 @@ Scene::Scene() {
 	initNodes();
 	boundingNodes.clear();
 	Node::nodesToUpdate.clear();
+	Node::nodesToRemove.clear();
 	Instance::instanceTable.clear();
 }
 
@@ -52,6 +53,14 @@ void Scene::updateNodes() {
 	for (uint i = 0; i < size; i++)
 		Node::nodesToUpdate[i]->updateNode();
 	Node::nodesToUpdate.clear();
+}
+
+void Scene::flushNodes() {
+	uint size = Node::nodesToRemove.size();
+	if (size == 0) return;
+	for (uint i = 0; i < size; i++)
+		delete Node::nodesToRemove[i];
+	Node::nodesToRemove.clear();
 }
 
 void Scene::createNodeAABB(Node* node) {

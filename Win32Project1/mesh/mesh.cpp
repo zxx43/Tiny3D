@@ -1,5 +1,6 @@
 #include "mesh.h"
 #include "../constants/constants.h"
+#include <stdlib.h>
 
 Mesh::Mesh() {
 	vertexCount=0;
@@ -20,7 +21,7 @@ Mesh::~Mesh() {
 	if (normals) delete[] normals;
 	if (texcoords) delete[] texcoords;
 	if (materialids) delete[] materialids;
-	if (indices) delete[] indices;
+	if (indices) free(indices);
 	vertices = NULL;
 	normals = NULL;
 	texcoords = NULL;

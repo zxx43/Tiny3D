@@ -1,5 +1,7 @@
 #include "sphere.h"
 #include "../constants/constants.h"
+#include <stdlib.h>
+#include <string.h>
 
 Sphere::Sphere(int m,int n):Mesh() {
 	longitude=m;
@@ -9,7 +11,7 @@ Sphere::Sphere(int m,int n):Mesh() {
 	normals=new VECTOR3D[vertexCount];
 	texcoords=new VECTOR2D[vertexCount];
 	indexCount = (m - 2) * n * 6 + 2 * n * 3;
-	indices = new int[indexCount];
+	indices = (int*)malloc(indexCount*sizeof(int));
 	materialids = NULL;
 	initFaces();
 }
@@ -29,9 +31,8 @@ Sphere::Sphere(const Sphere& rhs) {
 			materialids[i] = rhs.materialids[i];
 	}
 	indexCount = rhs.indexCount;
-	indices = new int[indexCount];
-	for (int i = 0; i < indexCount; i++)
-		indices[i] = rhs.indices[i];
+	indices = (int*)malloc(indexCount*sizeof(int));
+	memcpy(indices, rhs.indices, indexCount*sizeof(int));
 }
 
 Sphere::~Sphere() {

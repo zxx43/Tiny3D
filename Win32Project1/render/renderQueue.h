@@ -13,7 +13,9 @@ private:
 private:
 	void pushObjectToInstance(Object* object, Camera* camera, const VECTOR3D& eye, bool singleSide);
 public:
-	RenderQueue();
+	float midDistance, lowDistance;
+public:
+	RenderQueue(float midDis, float lowDis);
 	~RenderQueue();
 	void copyData(RenderQueue* src);
 	void push(Node* node);

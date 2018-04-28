@@ -21,7 +21,11 @@ private:
 	AssetManager();
 	~AssetManager();
 public:
+	void addMesh(const char* name, Mesh* mesh);
+	void addAnimation(const char* name, Animation* animation);
+	void addTexture(const char* name);
 	void initTextureArray();
+	int findTexture(const char* name);
 };
 
 #endif

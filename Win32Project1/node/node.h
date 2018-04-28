@@ -21,6 +21,7 @@
 class Node {
 public:
 	static std::vector<Node*> nodesToUpdate;
+	static std::vector<Node*> nodesToRemove;
 private:
 	void updateObjectBoundingInNode(Object* object);
 	void updateBaseNodeBounding();
@@ -73,6 +74,7 @@ public:
 	void scaleNodeObject(int i, float sx, float sy, float sz);
 	Node* getAncestor();
 	void clearChildren();
+	void pushToRemove();
 	void recursiveTransform(MATRIX4X4& finalNodeMatrix);
 };
 

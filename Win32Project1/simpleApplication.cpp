@@ -21,13 +21,13 @@ void SimpleApplication::resize(int width, int height) {
 	Application::resize(width, height);
 
 	if (screen) delete screen;
-	screen = new FrameBuffer(width, height, LOW_PRE);
-	screen->addColorBuffer(LOW_PRE);
-	screen->addColorBuffer(LOW_PRE);
+	screen = new FrameBuffer(width, height, LOW_PRE, 4);
+	screen->addColorBuffer(LOW_PRE, 3);
+	screen->addColorBuffer(LOW_PRE, 3);
 	screen->attachDepthBuffer(LOW_PRE);
 
 	if (screenFilter) delete screenFilter;
-	screenFilter = new Filter(width, height, false, LOW_PRE);
+	screenFilter = new Filter(width, height, false, LOW_PRE, 3);
 	render->clearTextureSlots();
 }
 
@@ -80,7 +80,7 @@ void SimpleApplication::act(long startTime, long currentTime) {
 	/*
 	static int time = 1;
 	if (currentTime - startTime > 10000 * time && scene->staticRoot->children.size() > 1) {
-		scene->staticRoot->detachChild(scene->staticRoot->children[1]);
+		scene->staticRoot->detachChild(scene->staticRoot->children[1])->pushToRemove();
 		time++;
 	}
 	//*/
@@ -90,88 +90,91 @@ void SimpleApplication::act(long startTime, long currentTime) {
 void SimpleApplication::initScene() {
 	scene->skyBox = new Sky();
 
+	AssetManager* assetMgr = AssetManager::assetManager;
+	MaterialManager* mtlMgr = MaterialManager::materials;
+
 	// Load meshes
-	AssetManager::assetManager->meshes["tree"] = new Model("models/firC.obj", "models/firC.mtl", 2, true);
-	AssetManager::assetManager->meshes["treeLow"] = new Model("models/fir_mesh.obj", "models/fir_mesh.mtl", 3, true);
-	AssetManager::assetManager->meshes["treeA"] = new Model("models/treeA.obj", "models/treeA.mtl", 2, true);
-	AssetManager::assetManager->meshes["treeALow"] = new Model("models/treeA_low.obj", "models/treeA_low.mtl", 2, true);
-	AssetManager::assetManager->meshes["tank"] = new Model("models/tank.obj", "models/tank.mtl", 3, true);
-	AssetManager::assetManager->meshes["m1a2"] = new Model("models/m1a2.obj", "models/m1a2.mtl", 2, true);
-	AssetManager::assetManager->meshes["terrain"] = new Terrain("terrain/Terrain.raw");
-	AssetManager::assetManager->animations["army"] = new Animation("models/ArmyPilot.dae");
+	assetMgr->addMesh("tree", new Model("models/firC.obj", "models/firC.mtl", 2, true));
+	assetMgr->addMesh("treeLow", new Model("models/fir_mesh.obj", "models/fir_mesh.mtl", 3, true));
+	assetMgr->addMesh("treeA", new Model("models/treeA.obj", "models/treeA.mtl", 2, true));
+	assetMgr->addMesh("treeAMid", new Model("models/treeA_mid.obj", "models/treeA_mid.mtl", 2, true));
+	assetMgr->addMesh("treeALow", new Model("models/treeA_low.obj", "models/treeA_low.mtl", 2, true));
+	assetMgr->addMesh("tank", new Model("models/tank.obj", "models/tank.mtl", 3, true));
+	assetMgr->addMesh("m1a2", new Model("models/m1a2.obj", "models/m1a2.mtl", 2, true));
+	assetMgr->addMesh("terrain", new Terrain("terrain/Terrain.raw"));
+	assetMgr->addAnimation("army", new Animation("models/ArmyPilot.dae"));
 
 	// Load textures
-	ImageSet* textures = AssetManager::assetManager->textures;
-	textures->addTexture("cube.bmp");
-	textures->addTexture("ground.bmp");
-	textures->addTexture("ground_r.bmp");
-	textures->addTexture("sand.bmp");
-	AssetManager::assetManager->initTextureArray();
+	assetMgr->addTexture("cube.bmp");
+	assetMgr->addTexture("ground.bmp");
+	assetMgr->addTexture("ground_r.bmp");
+	assetMgr->addTexture("sand.bmp");
+	assetMgr->initTextureArray();
 
 	// Create materials
 	Material* boxMat = new Material("box_mat");
-	boxMat->texture.x = textures->findTexture("cube.bmp");
-	MaterialManager::materials->add(boxMat);
+	boxMat->texture.x = assetMgr->findTexture("cube.bmp");
+	mtlMgr->add(boxMat);
 	Material* grassMat = new Material("grass_mat");
-	grassMat->texture.x = textures->findTexture("ground.bmp");
-	MaterialManager::materials->add(grassMat);
+	grassMat->texture.x = assetMgr->findTexture("ground.bmp");
+	mtlMgr->add(grassMat);
 	Material* sandMat = new Material("sand_mat");
-	sandMat->texture.x = textures->findTexture("sand.bmp");
-	MaterialManager::materials->add(sandMat);
+	sandMat->texture.x = assetMgr->findTexture("sand.bmp");
+	mtlMgr->add(sandMat);
 	Material* terrainMat = new Material("terrain_mat");
-	terrainMat->texture.x = textures->findTexture("ground.bmp");
-	terrainMat->texture.y = textures->findTexture("ground_r.bmp");
-	MaterialManager::materials->add(terrainMat);
+	terrainMat->texture.x = assetMgr->findTexture("ground.bmp");
+	terrainMat->texture.y = assetMgr->findTexture("ground_r.bmp");
+	mtlMgr->add(terrainMat);
 
 	// Create Nodes
-	map<string, Mesh*> meshes = AssetManager::assetManager->meshes;
-	map<string, Animation*> animations = AssetManager::assetManager->animations;
+	map<string, Mesh*> meshes = assetMgr->meshes;
+	map<string, Animation*> animations = assetMgr->animations;
 
 	StaticObject* box = new StaticObject(meshes["box"]); 
-	box->bindMaterial(MaterialManager::materials->find("box_mat"));
+	box->bindMaterial(mtlMgr->find("box_mat"));
 	StaticObject* sphere = new StaticObject(meshes["sphere"]); 
-	sphere->bindMaterial(MaterialManager::materials->find("grass_mat"));
+	sphere->bindMaterial(mtlMgr->find("grass_mat"));
 	StaticObject* board = new StaticObject(meshes["board"]);
 	StaticObject* quad = new StaticObject(meshes["quad"]);
-	StaticObject* model1 = new StaticObject(meshes["tree"], meshes["treeLow"]);
+	StaticObject* model1 = new StaticObject(meshes["tree"], meshes["treeLow"], NULL);
 	StaticObject* model2 = new StaticObject(meshes["tank"]);
 	StaticObject* model3 = new StaticObject(meshes["m1a2"]);
-	StaticObject* model4 = new StaticObject(meshes["treeA"], meshes["treeALow"]);
+	StaticObject* model4 = new StaticObject(meshes["treeA"], meshes["treeAMid"], meshes["treeALow"]);
 	BillboardObject* billboard = new BillboardObject(meshes["board"]);
 
 	scene->terrainNode = new TerrainNode(VECTOR3D(-1024, 0, -1024));
 	scene->terrainNode->fullStatic = true;
 	StaticObject* terrainObject = new StaticObject(meshes["terrain"]);
-	terrainObject->bindMaterial(MaterialManager::materials->find("terrain_mat"));
+	terrainObject->bindMaterial(mtlMgr->find("terrain_mat"));
 	terrainObject->setPosition(0, 0, 0);
-	terrainObject->setSize(2, 1, 2);
+	terrainObject->setSize(3, 1, 3);
 	scene->terrainNode->addObject(terrainObject);
 	scene->terrainNode->prepareTriangles();
 
 
 	StaticNode* node1 = new StaticNode(VECTOR3D(2, 2, 2));
 	StaticObject* object11 = model2->clone();
-	object11->setPosition(-5, -7, 5);
+	object11->setPosition(-15, -7, 10);
 	object11->setRotation(0, 90, 0);
-	object11->setSize(0.05, 0.05, 0.05);
+	object11->setSize(0.3, 0.3, 0.3);
 	node1->addObject(object11);
 	StaticObject* object12 = model2->clone();
-	object12->setPosition(-1, -7, 5);
+	object12->setPosition(15, -7, 10);
 	object12->setRotation(0, 90, 0);
-	object12->setSize(0.05, 0.05, 0.05);
+	object12->setSize(0.3, 0.3, 0.3);
 	node1->addObject(object12);
 	StaticObject* object13 = model3->clone();
-	object13->setPosition(-2, -7, 0);
-	object13->setSize(0.02, 0.02, 0.02);
+	object13->setPosition(-15, -7, 30);
+	object13->setSize(0.05, 0.05, 0.05);
 	node1->addObject(object13);
 	StaticObject* object14 = model3->clone();
-	object14->setPosition(2, -7, 0);
-	object14->setSize(0.02, 0.02, 0.02);
+	object14->setPosition(15, -7, 30);
+	object14->setSize(0.05, 0.05, 0.05);
 	node1->addObject(object14);
 
 	StaticNode* node2 = new StaticNode(VECTOR3D(10, 2, 2));
 	StaticObject* object6 = box->clone();
-	object6->bindMaterial(MaterialManager::materials->find(DEFAULT_MAT));
+	object6->bindMaterial(mtlMgr->find(DEFAULT_MAT));
 	object6->setPosition(3, 3, 3);
 	object6->setRotation(0, 30, 0);
 	object6->setSize(1, 1, 1);
@@ -204,8 +207,8 @@ void SimpleApplication::initScene() {
 	srand(100);
 	InstanceNode* instanceNode1 = new InstanceNode(VECTOR3D(-920, 0, -920));
 	instanceNode1->singleSide = true;
-	for (uint i = 0; i < 15; i++) {
-		for (uint j = 0; j < 15; j++) {
+	for (uint i = 0; i < 20; i++) {
+		for (uint j = 0; j < 20; j++) {
 			//StaticObject* tree = model4->clone();
 			//float baseSize = 1;
 			bool changeTree = (rand() % 100) > 40;
@@ -221,8 +224,8 @@ void SimpleApplication::initScene() {
 	}
 	InstanceNode* instanceNode2 = new InstanceNode(VECTOR3D(20, 0, -20));
 	instanceNode2->singleSide = true;
-	for (uint i = 0; i < 15; i++) {
-		for (uint j = 0; j < 15; j++) {
+	for (uint i = 0; i < 20; i++) {
+		for (uint j = 0; j < 20; j++) {
 			//StaticObject* tree = model4->clone();
 			//float baseSize = 1;
 			bool changeTree = (rand() % 100) > 40;
@@ -238,8 +241,8 @@ void SimpleApplication::initScene() {
 	}
 	InstanceNode* instanceNode3 = new InstanceNode(VECTOR3D(-20, 0, -20));
 	instanceNode3->singleSide = true;
-	for (uint i = 0; i < 15; i++) {
-		for (uint j = 0; j < 15; j++) {
+	for (uint i = 0; i < 25; i++) {
+		for (uint j = 0; j < 25; j++) {
 			//StaticObject* tree = model4->clone();
 			//float baseSize = 1;
 			bool changeTree = (rand() % 100) > 40;
@@ -276,23 +279,23 @@ void SimpleApplication::initScene() {
 	scene->staticRoot->attachChild(instanceNode4);
 	
 	AnimationNode* animNode1 = new AnimationNode(VECTOR3D(5, 10, 5));
-	animNode1->setAnimation(animations.find("army")->second);
+	animNode1->setAnimation(animations["army"]);
 	animNode1->getObject()->setSize(0.05, 0.05, 0.05);
 	animNode1->getObject()->setPosition(0, -5, -1);
 	animNode1->translateNode(5, 0, 15);
 	AnimationNode* animNode2 = new AnimationNode(VECTOR3D(5, 10, 5));
-	animNode2->setAnimation(animations.find("army")->second);
+	animNode2->setAnimation(animations["army"]);
 	animNode2->getObject()->setSize(0.05, 0.05, 0.05);
 	animNode2->getObject()->setPosition(0, -5, -1);
 	animNode2->translateNode(40, 0, 40);
 	animNode2->rotateNodeObject(0, 45, 0);
 	AnimationNode* animNode3 = new AnimationNode(VECTOR3D(5, 10, 5));
-	animNode3->setAnimation(animations.find("army")->second);
+	animNode3->setAnimation(animations["army"]);
 	animNode3->getObject()->setSize(0.05, 0.05, 0.05);
 	animNode3->getObject()->setPosition(0, -5, -1);
 	animNode3->translateNode(5, 0, 15);
 	AnimationNode* animNode4 = new AnimationNode(VECTOR3D(5, 10, 5));
-	animNode4->setAnimation(animations.find("army")->second);
+	animNode4->setAnimation(animations["army"]);
 	animNode4->getObject()->setSize(0.05, 0.05, 0.05);
 	animNode4->getObject()->setPosition(0, -5, -1);
 	animNode4->translateNode(40, 0, 40);

@@ -1,5 +1,7 @@
 #include "box.h"
 #include "../constants/constants.h"
+#include <stdlib.h>
+#include <string.h>
 
 Box::Box():Mesh() {
 	vertexCount=24;
@@ -7,7 +9,7 @@ Box::Box():Mesh() {
 	normals=new VECTOR3D[vertexCount];
 	texcoords=new VECTOR2D[vertexCount];
 	indexCount = 36;
-	indices = new int[indexCount];
+	indices = (int*)malloc(indexCount*sizeof(int));
 	materialids = NULL;
 	initFaces();
 }
@@ -27,9 +29,8 @@ Box::Box(const Box& rhs) {
 			materialids[i] = rhs.materialids[i];
 	}
 	indexCount = rhs.indexCount;
-	indices = new int[indexCount];
-	for (int i = 0; i < indexCount; i++)
-		indices[i] = rhs.indices[i];
+	indices = (int*)malloc(indexCount*sizeof(int));
+	memcpy(indices, rhs.indices, indexCount*sizeof(int));
 }
 
 Box::~Box() {

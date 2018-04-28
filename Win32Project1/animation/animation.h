@@ -16,6 +16,8 @@
 #include <string>
 #include "../maths/Maths.h"
 #include "../material/materialManager.h"
+#include <stdlib.h>
+#include <string.h>
 
 struct Entry {
 	aiMesh* mesh;
@@ -33,10 +35,10 @@ struct Frame {
 	float* data;
 	Frame(int bc) {
 		boneCount = bc;
-		data = new float[boneCount * 12];
+		data = (float*)malloc(boneCount * 12 * sizeof(float));
 	}
 	~Frame() {
-		delete[] data;
+		free(data);
 	}
 };
 

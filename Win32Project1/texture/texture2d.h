@@ -23,7 +23,7 @@ public:
 	float width,height;
 	int type, precision;
 
-	Texture2D(float w,float h,int t,int p);
+	Texture2D(float w,float h,int t,int p,int c);
 	~Texture2D();
 };
 

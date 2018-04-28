@@ -1,5 +1,6 @@
 #include "drawcall.h"
 #include "../constants/constants.h"
+#include <stdlib.h>
 
 Drawcall::Drawcall() {
 	uModelMatrix = NULL;
@@ -13,9 +14,9 @@ Drawcall::Drawcall() {
 }
 
 Drawcall::~Drawcall() {
-	if (uModelMatrix) delete[] uModelMatrix;
+	if (uModelMatrix) free(uModelMatrix);
 	uModelMatrix = NULL;
-	if (uNormalMatrix) delete[] uNormalMatrix;
+	if (uNormalMatrix) free(uNormalMatrix);
 	uNormalMatrix = NULL;
 }
 

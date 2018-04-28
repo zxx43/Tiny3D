@@ -3,6 +3,7 @@
 #include "../instance/instance.h"
 
 std::vector<Node*> Node::nodesToUpdate;
+std::vector<Node*> Node::nodesToRemove;
 
 Node::Node(const VECTOR3D& position,const VECTOR3D& size) {
 	this->position.x=position.x;
@@ -251,6 +252,8 @@ Node* Node::detachChild(Node* child) {
 				for (uint i = 0; i < child->objects.size(); i++) {
 					Object* object = child->objects[i];
 					Instance::instanceTable[object->mesh]--;
+					if (object->meshMid)
+						Instance::instanceTable[object->meshMid]--;
 					if (object->meshLow)
 						Instance::instanceTable[object->meshLow]--;
 				}
@@ -362,6 +365,10 @@ void Node::updateNode() {
 		}
 	}
 	needUpdateNode = false;
+}
+
+void Node::pushToRemove() {
+	Node::nodesToRemove.push_back(this);
 }
 
 void Node::recursiveTransform(MATRIX4X4& finalNodeMatrix) {

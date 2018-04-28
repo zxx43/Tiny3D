@@ -62,6 +62,12 @@ float TerrainNode::cauculateY(float x, float z) {
 	if (ix < lineSize && iz < lineSize) {
 		int ib = iz*lineSize + ix;
 		int ita = ib * 2, itb = ib * 2 + 1;
+
+		if (ita < 0 || itb < 0 || 
+			(uint)ita >= triangles.size() ||
+			(uint)itb >= triangles.size()) 
+				return 0.0;
+
 		Triangle* ta = triangles[ita];
 		Triangle* tb = triangles[itb];
 		VECTOR2D p2d = VECTOR2D(x, z);
