@@ -14,6 +14,7 @@ Sphere::Sphere(int m,int n):Mesh() {
 	indices = (int*)malloc(indexCount*sizeof(int));
 	materialids = NULL;
 	initFaces();
+	caculateExData();
 }
 
 Sphere::Sphere(const Sphere& rhs) {
@@ -33,6 +34,7 @@ Sphere::Sphere(const Sphere& rhs) {
 	indexCount = rhs.indexCount;
 	indices = (int*)malloc(indexCount*sizeof(int));
 	memcpy(indices, rhs.indices, indexCount*sizeof(int));
+	caculateExData();
 }
 
 Sphere::~Sphere() {

@@ -11,6 +11,7 @@
 #include "../mesh/mesh.h"
 #include "../bounding/aabb.h"
 #include "../material/materialManager.h"
+#include "../billboard/billboard.h"
 
 class Object {
 public:
@@ -20,6 +21,7 @@ public:
 	Mesh* meshMid;
 	Mesh* meshLow;
 	int material;
+	Billboard* billboard;
 	MATRIX4X4 localTransformMatrix,normalMatrix;
 	MATRIX4X4 transformMatrix;
 	BoundingBox* bounding;
@@ -38,6 +40,7 @@ public:
 	virtual void setPosition(float x, float y, float z) = 0;
 	virtual void setRotation(float ax, float ay, float az) = 0;
 	virtual void setSize(float sx, float sy, float sz) = 0;
+	void setBillboard(float sx, float sy, int tex);
 };
 
 

@@ -16,14 +16,19 @@ private:
 public:
 	int vertexCount,indexCount;
 	VECTOR4D* vertices;
+	VECTOR3D* vertices3;
 	VECTOR3D* normals;
+	VECTOR4D* normals4;
 	VECTOR2D* texcoords;
 	int* materialids;
 	int* indices;
+	bool isBillboard;
 
 	Mesh();
 	Mesh(const Mesh& rhs);
 	virtual ~Mesh();
+	void caculateExData();
+	void setIsBillboard(bool billboard);
 };
 
 

@@ -17,15 +17,12 @@ private:
 	int vertexCount,indexCount;
 	bool indexed;
 public:
-	bool isSimple;
 	int objectToDraw;
 public:
-	InstanceDrawcall(Instance* instance, bool simple);
+	InstanceDrawcall(Instance* instance);
 	virtual ~InstanceDrawcall();
-	virtual void createSimple();
-	virtual void releaseSimple();
 	virtual void draw(Shader* shader,int pass);
-	void updateMatrices(const float* modelMatrices);
+	void updateInstances(Instance* instance, int pass);
 };
 
 #endif /* INSTANCEDRAWCALL_H_ */

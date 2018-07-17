@@ -12,60 +12,37 @@
 #include "../filter/filter.h"
 #include "../render/renderQueue.h"
 
+#ifndef QUEUE_STATIC
+#define QUEUE_STATIC_SN 0
+#define QUEUE_STATIC_SM 1
+#define QUEUE_STATIC_SF 2
+#define QUEUE_ANIMATE_SN 3
+#define QUEUE_ANIMATE_SM 4
+#define QUEUE_ANIMATE_SF 5
+#define QUEUE_STATIC 6
+#define QUEUE_ANIMATE 7
+#endif
+
 struct Renderable {
-	RenderQueue* shadowNearStaticQueue;
-	RenderQueue* shadowMidStaticQueue;
-	RenderQueue* shadowFarStaticQueue;
-	RenderQueue* shadowNearAnimateQueue;
-	RenderQueue* shadowMidAnimateQueue;
-	RenderQueue* shadowFarAnimateQueue;
-	RenderQueue* staticQueue;
-	RenderQueue* animateQueue;
+	std::vector<RenderQueue*> queues;
 	Camera* mainCamera;
 	Renderable(float midDis, float lowDis) {
-		shadowNearStaticQueue = new RenderQueue(midDis, lowDis);
-		shadowMidStaticQueue = new RenderQueue(midDis, lowDis);
-		shadowFarStaticQueue = new RenderQueue(midDis, lowDis);
-		shadowNearAnimateQueue = new RenderQueue(midDis, lowDis);
-		shadowMidAnimateQueue = new RenderQueue(midDis, lowDis);
-		shadowFarAnimateQueue = new RenderQueue(midDis, lowDis);
-		staticQueue = new RenderQueue(midDis, lowDis);
-		animateQueue = new RenderQueue(midDis, lowDis);
+		queues.clear();
+		for (uint i = 0; i < 8; i++)
+			queues.push_back(new RenderQueue(midDis, lowDis));
 		mainCamera = new Camera(0);
 	}
 	~Renderable() {
-		delete shadowNearStaticQueue; shadowNearStaticQueue = NULL;
-		delete shadowMidStaticQueue; shadowMidStaticQueue = NULL;
-		delete shadowFarStaticQueue; shadowFarStaticQueue = NULL;
-		delete shadowNearAnimateQueue; shadowNearAnimateQueue = NULL;
-		delete shadowMidAnimateQueue; shadowMidAnimateQueue = NULL;
-		delete shadowFarAnimateQueue; shadowFarAnimateQueue = NULL;
-		delete staticQueue; staticQueue = NULL;
-		delete animateQueue; animateQueue = NULL;
+		for (uint i = 0; i < queues.size(); i++)
+			delete queues[i];
 		delete mainCamera; mainCamera = NULL;
-	}
-	void copyData(Renderable* src) {
-		shadowNearStaticQueue->copyData(src->shadowNearStaticQueue);
-		shadowMidStaticQueue->copyData(src->shadowMidStaticQueue);
-		shadowFarStaticQueue->copyData(src->shadowFarStaticQueue);
-		shadowNearAnimateQueue->copyData(src->shadowNearAnimateQueue);
-		shadowMidAnimateQueue->copyData(src->shadowMidAnimateQueue);
-		shadowFarAnimateQueue->copyData(src->shadowFarAnimateQueue);
-		staticQueue->copyData(src->staticQueue);
-		animateQueue->copyData(src->animateQueue);
 	}
 	void copyCamera(Camera* srcCam) {
 		mainCamera->copy(srcCam);
 	}
 	void flush() {
-		shadowNearStaticQueue->flush();
-		shadowMidStaticQueue->flush();
-		shadowFarStaticQueue->flush();
-		shadowNearAnimateQueue->flush();
-		shadowMidAnimateQueue->flush();
-		shadowFarAnimateQueue->flush();
-		staticQueue->flush();
-		animateQueue->flush();
+		for (uint i = 0; i < queues.size(); i++)
+			queues[i]->flush();
 	}
 };
 
@@ -75,6 +52,7 @@ public:
 	RenderState* state;
 private:
 	Shadow* shadow;
+	float time;
 public:
 	Renderable* renderData;
 	Renderable* queue1;
@@ -84,18 +62,7 @@ public:
 private: // States
 	bool useShadow;
 	bool drawBounding;
-private: // Shaders
-	Shader* phongShadow;
-	Shader* phongShadowLow;
-	Shader* phong;
-	Shader* phongShadowIns;
-	Shader* phongShadowLowIns;
-	Shader* phongIns;
-	Shader* boneShadow;
-	Shader* bone;
-	Shader* mix;
-	Shader* skyCube;
-	Shader* deferred;
+	int graphicQuality;
 private:
 	void drawBoundings(Render* render, RenderState* state, Scene* scene, Camera* camera);
 public:
@@ -103,9 +70,10 @@ public:
 	FrameBuffer* midBuffer;
 	FrameBuffer* farBuffer;
 
-	RenderManager(Camera* view, float distance1, float distance2, const VECTOR3D& light);
+	RenderManager(int quality, Camera* view, float distance1, float distance2, const VECTOR3D& light);
 	~RenderManager();
 
+	void act();
 	void updateShadowCamera();
 	void updateMainLight();
 	void flushRenderQueues();

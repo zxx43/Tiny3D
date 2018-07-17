@@ -1,24 +1,27 @@
 #include "instance.h"
 #include "../constants/constants.h"
 #include "../material/materialManager.h"
-#include <stdlib.h>
-#include <string.h>
 
 std::map<Mesh*, int> Instance::instanceTable;
 
 Instance::Instance(Mesh* mesh) {
-	instanceMesh=mesh;
-	vertexCount=0;
-	indexCount=0;
-	vertexBuffer=NULL;
-	normalBuffer=NULL;
-	texcoordBuffer=NULL;
+	instanceMesh = mesh;
+	vertexCount = 0;
+	indexCount = 0;
+	vertexBuffer = NULL;
+	normalBuffer = NULL;
+	texcoordBuffer = NULL;
 	colorBuffer = NULL;
-	indexBuffer=NULL;
+	indexBuffer = NULL;
 
 	instanceCount = 0;
 	drawcall = NULL;
 	singleSide = false;
+	isBillboard = instanceMesh->isBillboard;
+
+	modelMatrices = NULL;
+	positions = NULL;
+	billboards = NULL;
 }
 
 Instance::~Instance() {
@@ -29,10 +32,12 @@ Instance::~Instance() {
 	if (indexBuffer) free(indexBuffer); indexBuffer = NULL;
 
 	if (modelMatrices) free(modelMatrices); modelMatrices = NULL;
+	if (positions) free(positions); positions = NULL;
+	if (billboards) free(billboards); billboards = NULL;
 	if (drawcall) delete drawcall;
 }
 
-void Instance::initInstanceBuffers(int mid,int vertices,int indices) {
+void Instance::initInstanceBuffers(Object* object,int vertices,int indices) {
 	vertexCount = vertices;
 	vertexBuffer = (float*)malloc(vertexCount * 3 * sizeof(float));
 	normalBuffer = (float*)malloc(vertexCount * 3 * sizeof(float));
@@ -43,6 +48,7 @@ void Instance::initInstanceBuffers(int mid,int vertices,int indices) {
 	if (indexCount > 0)
 		indexBuffer = (ushort*)malloc(indexCount*sizeof(ushort));
 
+	int mid = object->material;
 	for(int i=0;i<vertexCount;i++) {
 		VECTOR4D vertex=instanceMesh->vertices[i];
 		VECTOR3D normal=instanceMesh->normals[i];
@@ -70,9 +76,12 @@ void Instance::initInstanceBuffers(int mid,int vertices,int indices) {
 		textureChannel = textures.y >= 0 ? 4 : 3;
 		texcoordBuffer[i * textureChannel] = texcoord.x;
 		texcoordBuffer[i * textureChannel + 1] = texcoord.y;
-		texcoordBuffer[i * textureChannel + 2] = textures.x;
-		if (textureChannel == 4)
-			texcoordBuffer[i * textureChannel + 3] = textures.y;
+		if (!isBillboard) {
+			texcoordBuffer[i * textureChannel + 2] = textures.x;
+			if (textureChannel == 4)
+				texcoordBuffer[i * textureChannel + 3] = textures.y;
+		} else
+			texcoordBuffer[i * textureChannel + 2] = (float)object->billboard->texid;
 
 		colorBuffer[i * 3] = (byte)(ambient.x * 255);
 		colorBuffer[i * 3 + 1] = (byte)(diffuse.x * 255);
@@ -86,7 +95,10 @@ void Instance::initInstanceBuffers(int mid,int vertices,int indices) {
 		}
 	}
 
-	initMatrices();
+	if (isBillboard)
+		initBillboards();
+	else
+		initMatrices();
 }
 
 void Instance::setInstanceCount(int count) {
@@ -94,16 +106,32 @@ void Instance::setInstanceCount(int count) {
 	if (drawcall) drawcall->objectToDraw = instanceCount;
 }
 
-void Instance::updateMatricesBuffer(int i, const MATRIX4X4& transformMatrix) {
-	memcpy(modelMatrices + (i * 12), transformMatrix.GetTranspose().entries, 12 * sizeof(float));
-}
-
 void Instance::initMatrices() {
 	modelMatrices = (float*)malloc(MAX_INSTANCE_COUNT * 12 * sizeof(float));
 	memset(modelMatrices, 0, MAX_INSTANCE_COUNT * 12 * sizeof(float));
 }
 
-void Instance::createDrawcall(bool simple) {
-	drawcall = new InstanceDrawcall(this, simple);
+void Instance::initBillboards() {
+	positions = (float*)malloc(MAX_INSTANCE_COUNT * 3 * sizeof(float));
+	memset(positions, 0, MAX_INSTANCE_COUNT * 3 * sizeof(float));
+	billboards = (float*)malloc(MAX_INSTANCE_COUNT * 2 * sizeof(float));
+	memset(billboards, 0, MAX_INSTANCE_COUNT * 2 * sizeof(float));
+}
+
+void Instance::setRenderData(float* matrices, float* billboards, float* positions) {
+	//modelMatrices = matrices;
+	//this->billboards = billboards;
+	//this->positions = positions;
+
+	if (matrices)
+		memcpy(modelMatrices, matrices, instanceCount * 12 * sizeof(float));
+	else {
+		memcpy(this->billboards, billboards, instanceCount * 2 * sizeof(float));
+		memcpy(this->positions, positions, instanceCount * 3 * sizeof(float));
+	}
+}
+
+void Instance::createDrawcall() {
+	drawcall = new InstanceDrawcall(this);
 	drawcall->setSide(singleSide);
 }

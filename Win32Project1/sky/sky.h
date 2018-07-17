@@ -12,12 +12,10 @@
 #include "../node/staticNode.h"
 #include "../render/render.h"
 #include "../camera/camera.h"
-#include "../texture/cubemap.h"
 
 class Sky {
 private:
 	Sphere* mesh;
-	CubeMap* texture;
 	RenderState* state;
 public:
 	StaticNode* skyNode;

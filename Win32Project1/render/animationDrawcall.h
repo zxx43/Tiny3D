@@ -21,8 +21,6 @@ public:
 	AnimationDrawcall();
 	AnimationDrawcall(Animation* anim);
 	virtual ~AnimationDrawcall();
-	virtual void createSimple();
-	virtual void releaseSimple();
 	virtual void draw(Shader* shader,int pass);
 };
 

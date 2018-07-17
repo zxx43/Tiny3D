@@ -63,7 +63,9 @@ ShaderProgram::ShaderProgram(const char* vert,const char* frag) {
 	glCompileShader(vertShader);
 	glCompileShader(fragShader);
 
+	printf("%s: ", vert);
 	printShaderInfoLog(vertShader);
+	printf("%s: ", frag);
 	printShaderInfoLog(fragShader);
 
 	shaderProg = glCreateProgram();

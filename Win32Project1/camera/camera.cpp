@@ -120,8 +120,10 @@ void Camera::move(int dist,float speed) {
 
 	switch(dist) {
 		case DOWN:
-			height -= speed;
-			position.y -= speed;
+			if (height - speed >  2.0) {
+				height -= speed;
+				position.y -= speed;
+			}
 			break;
 		case UP:
 			height += speed;

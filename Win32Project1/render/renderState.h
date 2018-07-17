@@ -15,11 +15,15 @@ struct RenderState {
 	float alphaThreshold;
 	bool lightEffect;
 	bool skyPass;
+	bool waterPass;
+	bool blend;
 	int pass;
+	float time;
 	Shadow* shadow;
 	VECTOR3D light;
 	Shader* shader;
 	Shader* shaderIns;
+	Shader* shaderBillboard;
 
 	RenderState() {
 		reset();
@@ -36,11 +40,15 @@ struct RenderState {
 		alphaThreshold = rhs.alphaThreshold;
 		lightEffect = rhs.lightEffect;
 		skyPass = rhs.skyPass;
+		waterPass = rhs.waterPass;
+		blend = rhs.blend;
 		pass = rhs.pass;
+		time = rhs.time;
 		shadow = rhs.shadow;
 		light = rhs.light;
 		shader = rhs.shader;
 		shaderIns = rhs.shaderIns;
+		shaderBillboard = rhs.shaderBillboard;
 	}
 	void reset() {
 		enableCull = true;
@@ -53,10 +61,14 @@ struct RenderState {
 		alphaThreshold = 0;
 		lightEffect = true;
 		skyPass = false;
+		waterPass = false;
+		blend = false;
 		pass = 4;
+		time = 0.0;
 		shadow = NULL;
 		shader = NULL;
 		shaderIns = NULL;
+		shaderBillboard = NULL;
 	}
 };
 

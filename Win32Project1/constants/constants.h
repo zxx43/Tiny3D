@@ -22,8 +22,8 @@
 #define A2R 0.01745329222
 #define R2A 57.2957804905
 
-#define SCR_WIDTH 1280
-#define SCR_HEIGHT 800
+#define SCR_WIDTH 640
+#define SCR_HEIGHT 480
 
 #define D_ROTATION 1.0
 #define D_DISTANCE 1.0
@@ -32,11 +32,6 @@
 
 #ifndef NULL
 #define NULL 0
-#endif
-
-#ifndef VERY_MAX
-#define VERY_MAX 10000000000
-#define VERY_MIN -10000000000
 #endif
 
 typedef unsigned int uint;

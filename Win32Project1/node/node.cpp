@@ -104,10 +104,10 @@ void Node::addObject(Object* object) {
 Object* Node::removeObject(Object* object) {
 	std::vector<Object*>::iterator it;
 	std::vector<BoundingBox*>::iterator itbb;
-	for (it = objects.begin(); it != objects.end(); it++) {
+	for (it = objects.begin(); it != objects.end(); ++it) {
 		if ((*it) == object) {
 			objects.erase(it);
-			for (itbb = objectsBBs.begin(); itbb != objectsBBs.end(); itbb++) {
+			for (itbb = objectsBBs.begin(); itbb != objectsBBs.end(); ++itbb) {
 				if ((*itbb) == object->bounding) {
 					objectsBBs.erase(itbb);
 					break;
@@ -237,7 +237,7 @@ void Node::attachChild(Node* child) {
 
 Node* Node::detachChild(Node* child) {
 	std::vector<Node*>::iterator it;
-	for(it=children.begin();it!=children.end();it++) {
+	for(it=children.begin();it!=children.end();++it) {
 		if((*it)==child) {
 			child->parent=NULL;
 			children.erase(it);

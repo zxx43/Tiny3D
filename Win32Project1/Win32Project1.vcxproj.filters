@@ -88,6 +88,15 @@
     <Filter Include="Source Files\application">
       <UniqueIdentifier>{1c812cb4-0706-459d-995c-f60b474bd11b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\billboard">
+      <UniqueIdentifier>{358a6b6d-4125-4fd9-b7e0-77a5f6b34fe1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\config">
+      <UniqueIdentifier>{0e23dd1c-1c7d-4e82-bce0-f446fee06b7a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="config">
+      <UniqueIdentifier>{4c8bf68f-c859-4112-901a-1d6ae67fc83f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="animation\animation.cpp">
@@ -219,9 +228,6 @@
     <ClCompile Include="object\animationObject.cpp">
       <Filter>Source Files\object</Filter>
     </ClCompile>
-    <ClCompile Include="object\billboardObject.cpp">
-      <Filter>Source Files\object</Filter>
-    </ClCompile>
     <ClCompile Include="object\object.cpp">
       <Filter>Source Files\object</Filter>
     </ClCompile>
@@ -272,6 +278,15 @@
     </ClCompile>
     <ClCompile Include="simpleApplication.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mesh\water.cpp">
+      <Filter>Source Files\mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="node\waterNode.cpp">
+      <Filter>Source Files\node</Filter>
+    </ClCompile>
+    <ClCompile Include="config\config.cpp">
+      <Filter>Source Files\config</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -419,9 +434,6 @@
     <ClInclude Include="object\animationObject.h">
       <Filter>Source Files\object</Filter>
     </ClInclude>
-    <ClInclude Include="object\billboardObject.h">
-      <Filter>Source Files\object</Filter>
-    </ClInclude>
     <ClInclude Include="object\object.h">
       <Filter>Source Files\object</Filter>
     </ClInclude>
@@ -475,6 +487,18 @@
     </ClInclude>
     <ClInclude Include="animation\animationData.h">
       <Filter>Source Files\animation</Filter>
+    </ClInclude>
+    <ClInclude Include="billboard\billboard.h">
+      <Filter>Source Files\billboard</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh\water.h">
+      <Filter>Source Files\mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="node\waterNode.h">
+      <Filter>Source Files\node</Filter>
+    </ClInclude>
+    <ClInclude Include="config\config.h">
+      <Filter>Source Files\config</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -538,5 +562,28 @@
     <None Include="..\x64\Release\shader\deferred.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\x64\Release\shader\billboard.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\billboard.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\billboard_shadow.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\billboard_shadow.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\water.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\water.vert">
+      <Filter>Shaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\x64\Release\config\config.txt">
+      <Filter>config</Filter>
+    </Text>
   </ItemGroup>
 </Project>

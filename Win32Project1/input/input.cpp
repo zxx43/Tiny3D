@@ -106,14 +106,25 @@ void Input::updateCameraByKey(Camera* camera) {
 }
 
 void Input::updateExtra(RenderManager* renderMgr) {
-	if (extra[0])
+	bool triggered = false;
+	if (extra[0]) {
 		renderMgr->lightDir.x -= L_DISTANCE;
-	if (extra[1])
+		triggered = true;
+	}
+	if (extra[1]) {
 		renderMgr->lightDir.x += L_DISTANCE;
-	if (extra[2])
+		triggered = true;
+	}
+	if (extra[2]) {
 		renderMgr->lightDir.z -= L_DISTANCE;
-	if (extra[3])
+		triggered = true;
+	}
+	if (extra[3]) {
 		renderMgr->lightDir.z += L_DISTANCE;
+		triggered = true;
+	}
+	if (triggered)
+		renderMgr->lightDir.Normalize();
 }
 
 void Input::updateCameraByMouse(Camera* camera, const float mouseX,

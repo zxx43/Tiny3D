@@ -13,6 +13,7 @@ Model::Model(const char* obj, const char* mtl, int vt, bool simple) {
 	indices = NULL;
 	if (simple) loadModelSimple(obj, mtl, vt);
 	else loadModel(obj, mtl, vt);
+	caculateExData();
 }
 
 Model::Model(const Model& rhs) {
@@ -35,6 +36,8 @@ Model::Model(const Model& rhs) {
 		indices = (int*)malloc(indexCount*sizeof(int));
 		memcpy(indices, rhs.indices, indexCount*sizeof(int));
 	}
+
+	caculateExData();
 }
 
 Model::~Model() {

@@ -40,18 +40,16 @@ private:
 	bool singleSide;
 	int type;
 	bool fullStatic;
+	bool billboardDC;
 public:
 	float* uModelMatrix;
 	float* uNormalMatrix;
 	int objectCount;
-	RenderBuffer* dataBuffer;
-	RenderBuffer* simpleBuffer;
+	RenderBuffer** dataBuffers;
+	int bufferCount;
 
 	Drawcall();
 	virtual ~Drawcall();
-
-	virtual void createSimple() = 0;
-	virtual void releaseSimple() = 0;
 
 	virtual void draw(Shader* shader,int pass)=0;
 	void setSide(bool single);
@@ -60,6 +58,8 @@ public:
 	int getType();
 	void setFullStatic(bool stat);
 	bool isFullStatic();
+	void setBillboard(bool billboard);
+	bool isBillboard();
 };
 
 #endif /* DRAWCALL_H_ */

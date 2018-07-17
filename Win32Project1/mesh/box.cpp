@@ -12,6 +12,7 @@ Box::Box():Mesh() {
 	indices = (int*)malloc(indexCount*sizeof(int));
 	materialids = NULL;
 	initFaces();
+	caculateExData();
 }
 
 Box::Box(const Box& rhs) {
@@ -31,6 +32,7 @@ Box::Box(const Box& rhs) {
 	indexCount = rhs.indexCount;
 	indices = (int*)malloc(indexCount*sizeof(int));
 	memcpy(indices, rhs.indices, indexCount*sizeof(int));
+	caculateExData();
 }
 
 Box::~Box() {

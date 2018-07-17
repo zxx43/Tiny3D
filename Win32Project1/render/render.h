@@ -9,7 +9,6 @@
 #define RENDER_H_
 
 #include "../shader/shadermanager.h"
-#include "../camera/camera.h"
 #include "../framebuffer/framebuffer.h"
 #include "drawcall.h"
 
@@ -29,6 +28,7 @@ public: // Global render state
 	bool enableAlphaTest;
 	int alphaTestMode;
 	float alphaThreshold;
+	bool enableBlend;
 	COLOR clearColor;
 	Shader* currentShader;
 public:
@@ -45,6 +45,7 @@ public:
 	void setCullState(bool enable);
 	void setCullMode(int mode);
 	void setDrawLine(bool line);
+	void setBlend(bool enable);
 	void setClearColor(float r,float g,float b,float a);
 	void setViewPort(int width,int height);
 	void resize(int width,int height,Camera* mainCamera);

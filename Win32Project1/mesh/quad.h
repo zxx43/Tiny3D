@@ -12,9 +12,12 @@
 
 class Quad: public Mesh {
 private:
+	float baseX, baseY, baseZ;
+private:
 	virtual void initFaces();
 public:
 	Quad();
+	Quad(float sizex, float sizey, float sizez);
 	Quad(const Quad& rhs);
 	virtual ~Quad();
 };

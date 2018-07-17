@@ -12,7 +12,8 @@ layout (location = 1) out vec3 FragColor;
 layout (location = 2) out vec3 FragNormal;
 
 void main() {
-	vec4 textureColor = vTexcoord.p >= 0.0 ? texture2DArray(texture, vTexcoord) : vec4(1.0);
+	//vec4 textureColor = vTexcoord.p >= 0.0 ? texture2DArray(texture, vTexcoord) : vec4(1.0);
+	vec4 textureColor = texture2DArray(texture, vTexcoord);
 		
 	FragTex = textureColor;
 	FragColor = vColor;

@@ -6,6 +6,7 @@
 #include "../mesh/mesh.h"
 #include "../animation/animation.h"
 #include "../texture/imageset.h"
+#include "../texture/cubemap.h"
 
 class AssetManager {
 public:
@@ -17,6 +18,7 @@ public:
 	std::map<std::string, Mesh*> meshes;
 	std::map<std::string, Animation*> animations;
 	ImageSet* textures;
+	CubeMap* skyTexture;
 private:
 	AssetManager();
 	~AssetManager();
@@ -26,6 +28,8 @@ public:
 	void addTexture(const char* name);
 	void initTextureArray();
 	int findTexture(const char* name);
+	void setSkyTexture(CubeMap* tex);
+	CubeMap* getSkyTexture();
 };
 
 #endif

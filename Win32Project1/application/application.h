@@ -1,6 +1,7 @@
 #ifndef APPLICATION_H_
 #define APPLICATION_H_
 
+#include "../config/config.h"
 #include "../input/input.h"
 #include "../render/renderManager.h"
 #include "../material/materialManager.h"
@@ -8,6 +9,7 @@
 
 class Application {
 public:
+	Config* config;
 	Scene* scene;
 	Render* render;
 	Input* input;

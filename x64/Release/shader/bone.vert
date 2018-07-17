@@ -17,14 +17,11 @@ flat out vec3 vColor;
 out vec3 vNormal;
 
 mat4 convertMat(mat3x4 srcMat) {
-	vec4 col1 = srcMat[0];
-	vec4 col2 = srcMat[1];
-	vec4 col3 = srcMat[2];
-	vec4 row1 = vec4(col1.x, col2.x, col3.x, 0.0);
-	vec4 row2 = vec4(col1.y, col2.y, col3.y, 0.0);
-	vec4 row3 = vec4(col1.z, col2.z, col3.z, 0.0);
-	vec4 row4 = vec4(col1.w, col2.w, col3.w, 1.0);
-	return mat4(row1, row2, row3, row4);
+	mat4x3 transMat = transpose(srcMat);
+	return mat4(transMat[0], 0.0, 
+				transMat[1], 0.0, 
+				transMat[2], 0.0, 
+				transMat[3], 1.0);
 }
 
 void main() {	
@@ -34,11 +31,9 @@ void main() {
     boneMat += convertMat(boneMats[int(boneids.w)]) * weights.w;
     
     vec4 position = boneMat * vec4(vertex, 1.0);
-    vec3 normal3 = (boneMat * vec4(normal, 0.0)).xyz;
-    normal3 = uNormalMatrix * normal3;
+    vec3 normal3 = uNormalMatrix * mat3(boneMat) * normal;
 
-	float af = 0.6; float df = 1.2;
-	vColor = vec3(af, df, 1.0) * color * 0.005;
+	vColor = vec3(0.6, 1.2, 1.0) * color * 0.005;
 	vNormal = normal3;
 	
 	vTexcoord = texcoord; 

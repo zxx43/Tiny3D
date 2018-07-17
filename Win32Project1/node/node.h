@@ -10,11 +10,12 @@
 
 #define TYPE_NULL 0
 #define TYPE_STATIC 1
-#define TYPE_INSTANCE 2
-#define TYPE_ANIMATE 3
+#define TYPE_TERRAIN 2
+#define TYPE_WATER 3
+#define TYPE_INSTANCE 4
+#define TYPE_ANIMATE 5
 
 #include "../bounding/AABB.h"
-#include "../camera/camera.h"
 #include "../object/object.h"
 #include "../render/drawcall.h"
 
@@ -57,8 +58,8 @@ public:
 	virtual ~Node();
 	bool checkInCamera(Camera* camera);
 	virtual void prepareDrawcall() = 0;
-	virtual void updateRenderData(Camera* camera, int pass) = 0;
-	virtual void updateDrawcall(int pass) = 0;
+	virtual void updateRenderData() = 0;
+	virtual void updateDrawcall() = 0;
 	void updateNode();
 	void pushToUpdate();
 

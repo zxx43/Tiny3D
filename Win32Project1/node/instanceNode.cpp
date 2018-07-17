@@ -54,10 +54,9 @@ void InstanceNode::prepareDrawcall() {
 	needCreateDrawcall = false;
 }
 
-void InstanceNode::updateRenderData(Camera* camera, int pass) {
-
+void InstanceNode::updateRenderData() {
 }
 
-void InstanceNode::updateDrawcall(int pass) {
+void InstanceNode::updateDrawcall() {
 	needUpdateDrawcall = false;
 }

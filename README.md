@@ -4,16 +4,19 @@ A Small OpenGL Based Renderer
 ### Features:    
 
 - OpenGL3.3 based  
-- Instanced rendering supported  
-- Post processing supported  
-- .obj model file supported  
-- .bmp texture file supported  
-- Skeleton animation supported  
+- Instanced rendering  
+- Post processing  
+- .obj model file    
+- .bmp texture file  
+- Skeleton animation  
 - Cascaded shadow map
 - Sky dome  
 - Multi-thread support  
 - Deferred shading  
-- Dynamic Level of Detail
+- Dynamic Level of Detail  
+- Billboard  
+- Water  
+- Fog  
 
 
 ### Screenshot:  

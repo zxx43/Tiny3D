@@ -17,6 +17,7 @@ Terrain::Terrain(const char* fileName):Mesh() {
 	indices = (int*)malloc(indexCount*sizeof(int));
 
 	initFaces();
+	caculateExData();
 }
 
 void Terrain::loadHeightMap(const char* fileName) {

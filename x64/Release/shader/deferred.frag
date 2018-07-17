@@ -41,13 +41,14 @@ float random(vec3 seed, int i){
 	return fract(sin(dot_product) * 43758.5453);
 }
 
-float genPCF(sampler2D shadowMap, vec3 shadowCoord, float bias) {
+float genPCF(sampler2D shadowMap, vec3 shadowCoord, float bias, int randround) {
 	float shadowFactor = 1.0;
 	float mag = 0.00143;
-	for (int i = 0; i < 4; i++) {
+	float roundmag = 1.0 / float(randround);
+	for (int i = 0; i < randround; i++) {
 		int index = int(16.0 * random(gl_FragCoord.xyy, i)) % 16;
 		float factor = texture2D(shadowMap, shadowCoord.xy + poissonDisk[index] * mag).r > (shadowCoord.z - bias) ? 1.0 : 0.0;
-		shadowFactor -= 0.25 * (1.0 - factor);
+		shadowFactor -= roundmag * (1.0 - factor);
 	}
 	return shadowFactor;
 }
@@ -57,25 +58,41 @@ float genShadow(sampler2D shadowMap, vec3 shadowCoord, float bias) {
 	return shadowFactor;
 }
 
-float genShadowFactor(vec4 worldPos, float bias) {
-	vec4 viewPosition = viewMatrix * worldPos;
-	float depthView = -viewPosition.z / viewPosition.w;
-	
-	if(depthView <= levels.x) {
+float genShadowFactor(vec4 worldPos, float depthView, float bias) {
+	float gap = 30.0;
+	if(depthView <= levels.x - gap) {
 		vec4 near = lightViewProjNear * worldPos;
 		float invW = 1.0 / near.w;
 		vec3 lightPosition = near.xyz * invW;
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
 		float bs = bias * 0.0005;
-		return genPCF(depthBufferNear, shadowCoord, bs);
+		return genPCF(depthBufferNear, shadowCoord, bs, 4);
+	} else if(depthView > levels.x - gap && depthView < levels.x + gap) {
+		vec4 near = lightViewProjNear * worldPos;
+		float invWNear = 1.0 / near.w;
+		vec3 lightPositionNear = near.xyz * invWNear;
+		vec3 shadowCoordNear = lightPositionNear * 0.5 + 0.5;
+		float bsNear = bias * 0.0005;
+
+		vec4 mid = lightViewProjMid * worldPos;
+		float invWMid = 1.0 / mid.w;
+		vec3 lightPositionMid = mid.xyz * invWMid;
+		vec3 shadowCoordMid = lightPositionMid * 0.5 + 0.5;
+		float bsMid = bias * 0.00005;
+
+		float factorNear = genPCF(depthBufferNear, shadowCoordNear, bsNear, 4);
+		float factorMid = genPCF(depthBufferMid, shadowCoordMid, bsMid, 1);
+		return mix(factorNear, factorMid, (depthView - (levels.x - gap)) / (gap * 2.0));
 	} else if(depthView <= levels.y) {
 		vec4 mid = lightViewProjMid * worldPos;
 		float invW = 1.0 / mid.w;
 		vec3 lightPosition = mid.xyz * invW;
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
 		float bs = bias * 0.00005;
-		return genPCF(depthBufferMid, shadowCoord, bs);
-	} else {
+		return genPCF(depthBufferMid, shadowCoord, bs, 1);
+	} 
+	///*
+	else {
 		vec4 far = lightViewProjFar * worldPos;
 		float invW = 1.0 / far.w;
 		vec3 lightPosition = far.xyz * invW;
@@ -83,19 +100,35 @@ float genShadowFactor(vec4 worldPos, float bias) {
 		float bs = bias * 0.000005;
 		return genShadow(depthBufferFar, shadowCoord, bs);
 	}
-
+	//*/
 	return 1.0;
+}
+
+vec3 genFogColor(vec4 worldPos, float depthView, vec3 sceneColor) {
+	float fogStart = 0.0;
+	float fogEnd = 1800.0;
+	float startH = 200.0;
+	float endH = 1600.0;
+	vec3 fogColor = vec3(0.9);
+	float worldH = worldPos.y / worldPos.w;
+	float heightFactor = smoothstep(startH, endH, worldH);
+	float fogFactor = (fogEnd - depthView) / (fogEnd - fogStart);
+	fogFactor = mix(fogFactor, 1.0, heightFactor);
+	fogFactor = clamp(fogFactor, 0.0, 1.0);
+	return mix(fogColor, sceneColor, fogFactor);
 }
 
 void main() {
 	float depth = texture2D(depthBuffer, vTexcoord).r;
 	vec3 ndcPos = vec3(vTexcoord, depth)  * 2.0 - 1.0;
 	vec4 tex = texture2D(texBuffer, vTexcoord);
-	FragColor = tex.rgb;
+	vec3 sceneColor = tex.rgb;
 	
+	vec4 worldPos = invViewProjMatrix * vec4(ndcPos, 1.0);
+	vec4 viewPosition = viewMatrix * worldPos;
+	float depthView = -viewPosition.z / viewPosition.w;
+
 	if(ndcPos.z < 1.0) {
-		vec4 worldPos = invViewProjMatrix * vec4(ndcPos, 1.0);
-		
 		vec3 normal = texture2D(normalBuffer, vTexcoord).xyz;
 		normal = normal * 2.0 - 1.0;
 		
@@ -105,8 +138,12 @@ void main() {
 		float bias = tan(acos(abs(ndotl)));
 		ndotl = max(ndotl, 0.0);
 
-		float shadowFactor = (useShadow != 0) ? genShadowFactor(worldPos, bias) : 1.0;
+		float shadowFactor = 1.0;
+		if (tex.a > 0.9)
+			shadowFactor = (useShadow != 0) ? genShadowFactor(worldPos, depthView, bias) : 1.0;
 
-		FragColor = tex.rgb * (color.r + shadowFactor * ndotl * color.g);
+		sceneColor = tex.rgb * (color.r + shadowFactor * ndotl * color.g);
 	}
+
+	FragColor = genFogColor(worldPos, depthView, sceneColor);
 }

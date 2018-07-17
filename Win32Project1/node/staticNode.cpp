@@ -4,8 +4,7 @@
 
 StaticNode::StaticNode(const VECTOR3D& position):Node(position, VECTOR3D(0, 0, 0)) {
 	batch = NULL;
-	batchVertexCount = 0;
-	batchIndexCount = 0;
+	dynamicBatch = true;
 	fullStatic = false;
 	type = TYPE_STATIC;
 }
@@ -16,26 +15,6 @@ StaticNode::~StaticNode() {
 	batch=NULL;
 }
 
-void StaticNode::addObject(Object* object) {
-	batchVertexCount+=object->mesh->vertexCount;
-	batchIndexCount+=object->mesh->indexCount;
-	Node::addObject(object);
-}
-
-Object* StaticNode::removeObject(Object* object) {
-	if(!object) return NULL;
-	int beforeVertexCount=batchVertexCount;
-	int beforeIndexCount=batchIndexCount;
-	batchVertexCount-=object->mesh->vertexCount;
-	batchIndexCount-=object->mesh->indexCount;
-	Object* objectDel=Node::removeObject(object);
-	if(!objectDel) { // Rollback
-		batchVertexCount=beforeVertexCount;
-		batchIndexCount=beforeIndexCount;
-	}
-	return objectDel;
-}
-
 void StaticNode::addObjects(Object** objectArray,int count) {
 	for(int i=0;i<count;i++)
 		addObject(objectArray[i]);
@@ -44,9 +23,16 @@ void StaticNode::addObjects(Object** objectArray,int count) {
 void StaticNode::createBatch() {
 	if (batch) delete batch;
 	batch = new Batch();
-	batch->initBatchBuffers(batchVertexCount,batchIndexCount);
+
+	int vertCount = 0, indCount = 0;
+	for (uint i = 0; i < objects.size(); i++) {
+		vertCount += objects[i]->mesh->vertexCount;
+		indCount += objects[i]->mesh->indexCount;
+	}
+	batch->initBatchBuffers(vertCount, indCount);
+	batch->setDynamic(false);
 	
-	for(unsigned int i=0;i<objects.size();i++) {
+	for(uint i=0;i<objects.size();i++) {
 		Object* object=objects[i];
 		batch->pushMeshToBuffers(object->mesh,object->material,fullStatic,object->transformMatrix,object->normalMatrix);
 	}
@@ -57,12 +43,12 @@ void StaticNode::createBatch() {
 }
 
 void StaticNode::prepareDrawcall() {
-	createBatch();
+	if (!dynamicBatch) createBatch();
 	needCreateDrawcall = false;
 }
 
-void StaticNode::updateRenderData(Camera* camera, int pass) {
-	if (!batch) return;
+void StaticNode::updateRenderData() {
+	if (dynamicBatch) return;
 
 	for (unsigned int i = 0; i < objects.size(); i++) {
 		Object* object = objects[i];
@@ -70,15 +56,25 @@ void StaticNode::updateRenderData(Camera* camera, int pass) {
 	}
 }
 
-void StaticNode::updateDrawcall(int pass) {
-	if (!batch) return;
-
-	if (!drawcall) {
-		drawcall = new StaticDrawcall(batch);
-		drawcall->setSide(singleSide);
-	} else
-		((StaticDrawcall*)drawcall)->updateMatrices(batch);
-
+void StaticNode::updateDrawcall() {
+	if (!dynamicBatch && drawcall) 
+		((StaticDrawcall*)drawcall)->updateMatrices();
 	needUpdateDrawcall = false;
 }
 
+bool StaticNode::isFullStatic() {
+	return fullStatic;
+}
+
+void StaticNode::setFullStatic(bool fullStatic) {
+	this->fullStatic = fullStatic;
+	if(fullStatic) setDynamicBatch(false);
+}
+
+bool StaticNode::isDynamicBatch() {
+	return dynamicBatch;
+}
+
+void StaticNode::setDynamicBatch(bool dynamic) {
+	dynamicBatch = dynamic;
+}

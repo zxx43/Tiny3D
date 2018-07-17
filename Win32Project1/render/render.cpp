@@ -1,5 +1,6 @@
 #include "render.h"
 #include "../constants/constants.h"
+#include "../assets/assetManager.h"
 #include <stdio.h>
 
 Render::Render() {
@@ -26,11 +27,14 @@ void Render::initEnvironment() {
 	enableCull=false;
 	cullMode=CULL_NONE;
 	drawLine=true;
+	enableBlend = true;
 	setDepthTest(true,LEQUAL);
 	setAlphaTest(false, GREATER, 0);
 	setCullState(true);
 	setCullMode(CULL_BACK);
 	setDrawLine(false);
+	setBlend(false);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	setClearColor(1,1,1,1);
 	currentShader=NULL;
 	textureInUse.clear();
@@ -50,6 +54,7 @@ void Render::setState(const RenderState* state) {
 	setCullState(state->enableCull);
 	setCullMode(state->cullMode);
 	setDrawLine(state->drawLine);
+	setBlend(state->blend);
 }
 
 void Render::setDepthTest(bool enable,int testMode) {
@@ -133,6 +138,13 @@ void Render::setDrawLine(bool line) {
 	else glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
 }
 
+void Render::setBlend(bool enable) {
+	if (enable == enableBlend) return;
+	enableBlend = enable;
+	if (enable) glEnable(GL_BLEND);
+	else glDisable(GL_BLEND);
+}
+
 void Render::setClearColor(float r,float g,float b,float a) {
 	clearColor.r=r; clearColor.g=g;
 	clearColor.b=b; clearColor.a=a;
@@ -161,6 +173,11 @@ void Render::useShader(Shader* shader) {
 	shader->use();
 }
 
+// Pass 1 draw near shadow
+// Pass 2 draw mid shadow
+// Pass 3 draw far shadow (use simple buffer)
+// Pass 4 draw scene with color
+// Pass 5 deferred process
 void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 	bool beforeCullState = state->enableCull;
 	int beforeCullMode = state->cullMode;
@@ -170,19 +187,35 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 		else
 			state->cullMode = CULL_BACK;
 	}
+	if (drawcall->isBillboard())
+		state->enableCull = false;
 	setState(state);
 
-	Shader* shader = drawcall->getType() == INSTANCE_DC ? state->shaderIns : state->shader;
+	Shader* shader = NULL;
+	if (drawcall->isBillboard() && state->shaderBillboard) shader = state->shaderBillboard; 
+	else shader = drawcall->getType() == INSTANCE_DC ? state->shaderIns : state->shader;
 	useShader(shader);
 	if (camera) {
-		if (state->pass <= 4) {
-			if (!state->skyPass)
+		if (state->pass < 5) {
+			if (!state->skyPass) {
 				shader->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
-			else {
+				if (drawcall->isBillboard()) {
+					if (state->pass == 4)
+						shader->setMatrix4("viewMatrix", camera->viewMatrix);
+					else 
+						shader->setVector3("light", -state->light.x, -state->light.y, -state->light.z);
+				}
+				if (state->waterPass) {
+					shader->setFloat("time", state->time);
+					shader->setVector3("eyePos", camera->position.x, camera->position.y, camera->position.z);
+					shader->setVector3("light", -state->light.x, -state->light.y, -state->light.z);
+					useTexture(TEXTURE_CUBE, 0, AssetManager::assetManager->getSkyTexture()->id);
+				}
+			} else {
 				shader->setMatrix4("viewMatrix", camera->viewMatrix);
 				shader->setMatrix4("projectMatrix", camera->projectMatrix);
 			}
-			if (drawcall->getType() == STATIC_DC && !drawcall->isFullStatic())
+			if (drawcall->getType() == STATIC_DC && !drawcall->isFullStatic() && drawcall->uModelMatrix) 
 				shader->setMatrix3x4("modelMatrices", drawcall->objectCount, drawcall->uModelMatrix);
 		} else if (state->pass == 5) {
 			shader->setMatrix4("invViewProjMatrix", camera->invViewProjectMatrix);
@@ -198,9 +231,12 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 		}
 	}
 
-	drawcall->draw(shader, state->pass);
+	if (!state->skyPass)
+		drawcall->draw(shader, state->pass);
+	else
+		drawcall->draw(shader, 3);
 
-	if (drawcall->isSingleSide()) { // Reset state
+	if (drawcall->isSingleSide() || drawcall->isBillboard()) { // Reset state
 		state->enableCull = beforeCullState;
 		state->cullMode = beforeCullMode;
 	}

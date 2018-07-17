@@ -9,12 +9,20 @@
 #define BATCH_H_
 
 #include "../mesh/mesh.h"
+#include "../render/staticDrawcall.h"
 
+#ifndef MAX_OBJECT_COUNT
 #define MAX_OBJECT_COUNT 100
+#define MAX_VERTEX_COUNT 16000
+#define MAX_INDEX_COUNT 16000
+#define BATCH_TYPE_DYNAMIC 0
+#define BATCH_TYPE_STATIC 1
+#endif
 
 class Batch {
 private:
-	int storeVertexCount,storeIndexCount;
+	uint type;
+private:
 	void initMatrix(unsigned short currentObject,const MATRIX4X4& transformMatrix,const MATRIX4X4& normalMatrix);
 public:
 	int vertexCount,indexCount;
@@ -31,12 +39,17 @@ public:
 	float* normalMatrices;
 
 	int textureChannel;
+	StaticDrawcall* drawcall;
 
 	Batch();
 	~Batch();
-	void initBatchBuffers(int vertices,int indices);
+	void flushBatchBuffers();
+	void initBatchBuffers(int vertCount, int indCount);
 	void pushMeshToBuffers(Mesh* mesh,int mid,bool fullStatic,const MATRIX4X4& transformMatrix,const MATRIX4X4& normalMatrix);
 	void updateMatrices(unsigned short objectId, const MATRIX4X4& transformMatrix, const MATRIX4X4* normalMatrix);
+	void createDrawcall();
+	bool isDynamic();
+	void setDynamic(bool dynamic);
 };
 
 #endif /* BATCH_H_ */

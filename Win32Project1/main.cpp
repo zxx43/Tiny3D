@@ -28,11 +28,15 @@ SimpleApplication* app = NULL;
 void CreateApplication();
 void ReleaseApplication();
 
+float fullscreen = 0.0;
+
 void KillWindow() {
 	DeleteMutex();
 	ReleaseThreads();
 	ReleaseApplication();
 	ShowCursor(true);
+	if (fullscreen)
+		ChangeDisplaySettings(NULL, 0);
 	wglMakeCurrent(NULL,NULL);
 	wglDeleteContext(hrc);
 	ReleaseDC(hWnd,hdc);
@@ -52,18 +56,23 @@ void DrawWindow() {
 	WaitForSingleObject(mutex, INFINITE);
 	dataPrepared = false;
 	ReleaseMutex(mutex);
-
+	/*
 	GetCursorPos(&mPoint);
 	app->moveMouse(mPoint.x, mPoint.y, screenHalfX, screenHalfY);
 	SetCursorPos(screenHalfX, screenHalfY);
 	app->moveKey();
+	//*/
 }
 
 DWORD WINAPI ActThreadRun(LPVOID param) {
-	/*
+	///*
 	DWORD last = 0;
 	while (!app->willExit) {
-		if (currentTime - last > 5) {
+		if (currentTime - last > 1) {
+			GetCursorPos(&mPoint);
+			app->moveMouse(mPoint.x, mPoint.y, screenHalfX, screenHalfY);
+			SetCursorPos(screenHalfX, screenHalfY);
+			app->moveKey();
 
 			last = currentTime;
 		}
@@ -139,6 +148,7 @@ void DeleteMutex() {
 
 void CreateApplication() {
 	app = new SimpleApplication();
+	app->config->get("fullscreen", fullscreen);
 	startTime = timeGetTime();
 }
 
@@ -168,10 +178,27 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hPrevInstance,PSTR szCmdLine,int iC
 		return 0;
 	}
 
+	CreateApplication();
+
 	DWORD style=WS_OVERLAPPEDWINDOW;
 	DWORD styleEX=WS_EX_APPWINDOW|WS_EX_WINDOWEDGE;
 
-	CreateApplication();
+	if (fullscreen) {
+		DEVMODE dmScreenSettings;
+		memset(&dmScreenSettings, 0, sizeof(DEVMODE));
+		dmScreenSettings.dmSize = sizeof(DEVMODE);
+		dmScreenSettings.dmPelsWidth = app->windowWidth;
+		dmScreenSettings.dmPelsHeight = app->windowHeight;
+		dmScreenSettings.dmBitsPerPel = 32;
+		dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
+		if (ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL) {
+			MessageBox(NULL, TEXT("Can not full screen!"), szName, MB_ICONERROR);
+			fullscreen = 0.0;
+		} else {
+			style = WS_POPUP;
+			styleEX = WS_EX_APPWINDOW;
+		}
+	}
 
 	RECT winRect;
 	winRect.left=(LONG)0;
@@ -196,7 +223,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hPrevInstance,PSTR szCmdLine,int iC
 	SetFocus(hWnd);
 	UpdateWindow(hWnd);
 
-	SendMessage(hWnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
+	//SendMessage(hWnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
 
 	while(!app->willExit) {
 		if(PeekMessage(&msg,NULL,0,0,PM_REMOVE)) {

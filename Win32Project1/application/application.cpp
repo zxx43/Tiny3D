@@ -4,7 +4,14 @@
 #include "../render/shaderscontainer.h"
 
 Application::Application() {
-	windowWidth = SCR_WIDTH, windowHeight = SCR_HEIGHT;
+	config = new Config("config/config.txt");
+
+	float width = SCR_WIDTH, height = SCR_HEIGHT;
+	config->get("width", width);
+	config->get("height", height);
+	windowWidth = width;
+	windowHeight = height;
+
 	willExit = false;
 	scene = NULL;
 	render = NULL;
@@ -19,8 +26,14 @@ void Application::init() {
 	MaterialManager::Init();
 	scene = new Scene();
 	input = new Input();
-	renderMgr = new RenderManager(scene->mainCamera, 150, 700, VECTOR3D(-1, -1, -1));
-	renderMgr->enableShadow(render);
+
+	float quality = 0; 
+	config->get("quality", quality);
+	renderMgr = new RenderManager(quality, scene->mainCamera, 200, 800, VECTOR3D(-1, -1, -1));
+	if (quality > 0)
+		renderMgr->enableShadow(render);
+	else
+		renderMgr->disableShadow(render);
 	renderMgr->hideBounding();
 }
 
@@ -31,10 +44,14 @@ Application::~Application() {
 	delete render; render = NULL;
 	delete input; input = NULL;
 	delete renderMgr; renderMgr = NULL;
+	delete config;
 }
 
 void Application::act(long startTime, long currentTime) {
-	input->updateExtra(renderMgr);
+	if (renderMgr) {
+		input->updateExtra(renderMgr);
+		renderMgr->act();
+	}
 }
 
 void Application::moveKey() {

@@ -11,8 +11,9 @@
 #include "../mesh/mesh.h"
 #include "../maths/MATRIX4X4.h"
 #include "../render/instanceDrawcall.h"
+#include "../object/object.h"
 
-#define MAX_INSTANCE_COUNT 4096
+#define MAX_INSTANCE_COUNT 8192
 
 class Instance {
 public:
@@ -29,17 +30,21 @@ public:
 	int textureChannel;
 	int instanceCount;
 	float* modelMatrices;
+	float* positions;
+	float* billboards;
 	InstanceDrawcall* drawcall;
 	bool singleSide;
+	bool isBillboard;
 
 	Instance(Mesh* mesh);
 	~Instance();
-	void initInstanceBuffers(int mid,int vertices,int indices);
+	void initInstanceBuffers(Object* object,int vertices,int indices);
 	void setInstanceCount(int count);
-	void updateMatricesBuffer(int i, const MATRIX4X4& transformMatrix);
-	void createDrawcall(bool simple);
+	void setRenderData(float* matrices, float* billboards, float* positions);
+	void createDrawcall();
 private:
 	void initMatrices();
+	void initBillboards();
 };
 
 #endif /* INSTANCE_H_ */

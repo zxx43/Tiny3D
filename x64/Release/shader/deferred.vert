@@ -7,5 +7,5 @@ out vec2 vTexcoord;
 
 void main() {
 	vTexcoord = texcoord;
-	gl_Position = vec4(vertex * 2.0, 1.0);
+	gl_Position = vec4(vertex, 1.0);
 }

@@ -25,11 +25,11 @@ void AnimationNode::prepareDrawcall() {
 	needCreateDrawcall = false;
 }
 
-void AnimationNode::updateDrawcall(int pass) {
+void AnimationNode::updateDrawcall() {
 	needUpdateDrawcall = false;
 }
 
-void AnimationNode::updateRenderData(Camera* camera, int pass) {
+void AnimationNode::updateRenderData() {
 }
 
 void AnimationNode::animate(int animIndex,long startTime,long currentTime) {

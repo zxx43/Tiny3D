@@ -12,9 +12,16 @@ AnimationObject::AnimationObject(const AnimationObject& rhs) {
 		bounding=rhs.bounding->clone();
 	else
 		bounding=NULL;
-	position.x=rhs.position.x; position.y=rhs.position.y; position.z=rhs.position.z;
 	anglex=rhs.anglex; angley=rhs.angley; anglez=rhs.anglez;
-	sizex=rhs.sizex; sizey=rhs.sizey; sizez=rhs.sizez;
+
+	position = rhs.position;
+	sizex = rhs.sizex; sizey = rhs.sizey; sizez = rhs.sizez;
+	localTransformMatrix = rhs.localTransformMatrix;
+	normalMatrix = rhs.normalMatrix;
+	localBoundPosition = rhs.localBoundPosition;
+
+	if (rhs.billboard)
+		setBillboard(rhs.billboard->data[0], rhs.billboard->data[1], rhs.billboard->texid);
 }
 
 AnimationObject::~AnimationObject() {}
@@ -53,4 +60,8 @@ void AnimationObject::setRotation(float ax,float ay,float az) {
 void AnimationObject::setSize(float sx,float sy,float sz) {
 	sizex=sx; sizey=sy; sizez=sz;
 	updateLocalMatrices();
+	if (billboard) {
+		billboard->data[0] *= sizex;
+		billboard->data[1] *= sizey;
+	}
 }

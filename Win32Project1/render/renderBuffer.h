@@ -71,8 +71,14 @@ struct RenderData {
 		drawType = draw;
 		streamData = data;
 		glBindBuffer(GL_ARRAY_BUFFER, bufferid);
-		//glBufferData(GL_ARRAY_BUFFER, dataSize * bitSize, streamData, drawType);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, dataSize * bitSize, streamData);
+	}
+	void updateIndexBuf(uint count, void* data, GLenum draw) {
+		dataSize = count;
+		drawType = draw;
+		streamData = data;
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferid);
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, dataSize * bitSize, streamData);
 	}
 };
 
@@ -104,8 +110,14 @@ struct RenderBuffer {
 	void pushData(uint i, RenderData* data) {
 		streamDatas[i] = data;
 	}
+	void unuseAttr() {
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
 	void use() {
 		glBindVertexArray(vao);
+	}
+	void unuse() {
+		glBindVertexArray(0);
 	}
 };
 

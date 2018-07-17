@@ -14,24 +14,19 @@ Object::Object() {
 	localBoundPosition.x=0;
 	localBoundPosition.y=0;
 	localBoundPosition.z=0;
+
+	billboard = NULL;
 }
 
 Object::Object(const Object& rhs) {
-	position = rhs.position;
-	sizex = rhs.sizex; sizey = rhs.sizey; sizez = rhs.sizez;
-	mesh = rhs.mesh;
-	meshMid = rhs.meshMid;
-	meshLow = rhs.meshLow;
-	material = rhs.material;
-	localTransformMatrix=rhs.localTransformMatrix;
-	normalMatrix=rhs.normalMatrix;
-	localBoundPosition=rhs.localBoundPosition;
+
 }
 
 Object::~Object() {
-	if (bounding)
-		delete bounding;
+	if (bounding) delete bounding;
 	bounding = NULL;
+	if (billboard) delete billboard;
+	billboard = NULL;
 }
 
 void Object::caculateLocalAABB(bool looseWidth, bool looseAll) {
@@ -95,4 +90,9 @@ bool Object::checkInCamera(Camera* camera) {
 	if (bounding)
 		return bounding->checkWithCamera(camera, true);
 	return true;
+}
+
+void Object::setBillboard(float sx, float sy, int tex) {
+	if (billboard) delete billboard;
+	billboard = new Billboard(sx, sy, tex);
 }

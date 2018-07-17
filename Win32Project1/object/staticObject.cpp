@@ -6,7 +6,7 @@ StaticObject::StaticObject(Mesh* mesh) :Object() {
 	anglex = 0; angley = 0; anglez = 0;
 }
 
-StaticObject::StaticObject(Mesh* mesh, Mesh* meshMid, Mesh* meshLow) : Object() {
+StaticObject::StaticObject(Mesh* mesh, Mesh* meshMid, Mesh* meshLow) :Object() {
 	this->mesh = mesh;
 	this->meshMid = meshMid;
 	this->meshLow = meshLow;
@@ -22,9 +22,16 @@ StaticObject::StaticObject(const StaticObject& rhs) {
 		bounding = rhs.bounding->clone();
 	else
 		bounding = NULL;
-	position = rhs.position;
 	anglex = rhs.anglex; angley = rhs.angley; anglez = rhs.anglez;
+
+	position = rhs.position;
 	sizex = rhs.sizex; sizey = rhs.sizey; sizez = rhs.sizez;
+	localTransformMatrix = rhs.localTransformMatrix;
+	normalMatrix = rhs.normalMatrix;
+	localBoundPosition = rhs.localBoundPosition;
+
+	if (rhs.billboard)
+		setBillboard(rhs.billboard->data[0], rhs.billboard->data[1], rhs.billboard->texid);
 }
 
 StaticObject::~StaticObject() {}
@@ -63,6 +70,10 @@ void StaticObject::setRotation(float ax, float ay, float az) {
 void StaticObject::setSize(float sx, float sy, float sz) {
 	sizex = sx; sizey = sy; sizez = sz;
 	updateLocalMatrices();
+	if (billboard) {
+		billboard->data[0] *= sizex;
+		billboard->data[1] *= sizey;
+	}
 }
 
 

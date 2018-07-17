@@ -13,7 +13,7 @@ public:
 	TerrainNode(const VECTOR3D& position);
 	virtual ~TerrainNode();
 	void prepareTriangles();
-	float cauculateY(float x, float z);
+	bool cauculateY(float x, float z, float& y);
 };
 
 void standObjectsOnGround(Node* node, TerrainNode* terrain);

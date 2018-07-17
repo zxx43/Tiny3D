@@ -8,8 +8,9 @@
 #ifndef INDEXEDDRAWCALL_H_
 #define INDEXEDDRAWCALL_H_
 
+class Batch;
+
 #include "drawcall.h"
-#include "../batch/batch.h"
 
 class StaticDrawcall: public Drawcall {
 private:
@@ -17,13 +18,11 @@ private:
 	bool indexed;
 public:
 	Batch* batch;
-	StaticDrawcall();
 	StaticDrawcall(Batch* batch);
 	virtual ~StaticDrawcall();
-	virtual void createSimple();
-	virtual void releaseSimple();
 	virtual void draw(Shader* shader,int pass);
-	void updateMatrices(Batch* batch);
+	void updateMatrices();
+	void updateBuffers(int pass);
 };
 
 

@@ -7,8 +7,6 @@
 Batch::Batch() {
 	vertexCount=0;
 	indexCount=0;
-	storeVertexCount=0;
-	storeIndexCount=0;
 	vertexBuffer=NULL;
 	normalBuffer=NULL;
 	texcoordBuffer=NULL;
@@ -17,9 +15,11 @@ Batch::Batch() {
 	indexBuffer=NULL;
 
 	fullStatic = false;
+	type = BATCH_TYPE_DYNAMIC;
 	objectCount = 0;
 	modelMatrices = NULL;
 	normalMatrices = NULL;
+	drawcall = NULL;
 }
 
 Batch::~Batch() {
@@ -32,91 +32,90 @@ Batch::~Batch() {
 
 	if (modelMatrices) free(modelMatrices); modelMatrices = NULL;
 	if (normalMatrices) free(normalMatrices); normalMatrices = NULL;
+
+	if (drawcall) delete drawcall; drawcall = NULL;
 }
 
-void Batch::initBatchBuffers(int vertices,int indices) {
-	vertexCount=vertices;
-	vertexBuffer = (float*)malloc(vertexCount * 3 * sizeof(float));
-	normalBuffer = (float*)malloc(vertexCount * 3 * sizeof(float));
-	texcoordBuffer = (float*)malloc(vertexCount * 4 * sizeof(float));
-	colorBuffer = (byte*)malloc(vertexCount * 3 * sizeof(byte));
-	objectidBuffer = (byte*)malloc(vertexCount * sizeof(byte));
-	storeVertexCount=0;
+void Batch::flushBatchBuffers() {
+	vertexCount = 0;
+	indexCount = 0;
+	objectCount = 0;
+}
 
-	indexCount=indices;
-	if (indexCount > 0)
-		indexBuffer = (uint*)malloc(indexCount * sizeof(uint));
-	storeIndexCount=0;
+void Batch::initBatchBuffers(int vertCount, int indCount) {
+	vertexCount = vertCount, indexCount = indCount;
+	if (!vertexBuffer) vertexBuffer = (float*)malloc(vertexCount * 3 * sizeof(float));
+	if (!normalBuffer) normalBuffer = (float*)malloc(vertexCount * 3 * sizeof(float));
+	if (!texcoordBuffer) texcoordBuffer = (float*)malloc(vertexCount * 4 * sizeof(float));
+	if (!colorBuffer) colorBuffer = (byte*)malloc(vertexCount * 3 * sizeof(byte));
+	if (!objectidBuffer) objectidBuffer = (byte*)malloc(vertexCount * sizeof(byte));
+	if (!indexBuffer) indexBuffer = (uint*)malloc(indexCount * sizeof(uint));
 
-	modelMatrices = (float*)malloc(MAX_OBJECT_COUNT * 12 * sizeof(float));
-	normalMatrices = (float*)malloc(MAX_OBJECT_COUNT * 9 * sizeof(float));
+	if (!modelMatrices) modelMatrices = (float*)malloc(MAX_OBJECT_COUNT * 12 * sizeof(float));
+	if (!normalMatrices) normalMatrices = (float*)malloc(MAX_OBJECT_COUNT * 9 * sizeof(float));
+
+	flushBatchBuffers();
 }
 
 void Batch::pushMeshToBuffers(Mesh* mesh,int mid,bool fullStatic,const MATRIX4X4& transformMatrix,const MATRIX4X4& normalMatrix) {
 	this->fullStatic = fullStatic;
-	int baseVertex=storeVertexCount;
+	int baseVertex = vertexCount;
 	int currentObject = objectCount;
-	for(int i=0;i<mesh->vertexCount;i++) {
-		VECTOR4D vertex=mesh->vertices[i];
-		VECTOR4D normal(mesh->normals[i].x,mesh->normals[i].y,mesh->normals[i].z,0);
-		VECTOR2D texcoord=mesh->texcoords[i];
-		
-		Material* mat = NULL;
-		if (!mesh->materialids && mid >= 0)
-			mat = MaterialManager::materials->find(mid);
-		else if (mesh->materialids)
+
+	Material* mat = NULL;
+	if (mid >= 0)
+		mat = MaterialManager::materials->find(mid);
+	if (!mat) mat = MaterialManager::materials->find(0);
+
+	for (int i = 0; i < mesh->vertexCount; i++) {
+		VECTOR4D normal = mesh->normals4[i];
+		VECTOR2D texcoord = mesh->texcoords[i];
+
+		if (mesh->materialids)
 			mat = MaterialManager::materials->find(mesh->materialids[i]);
-		if (!mat) mat = MaterialManager::materials->find(0);
-		VECTOR3D ambient = mat->ambient;
-		VECTOR3D diffuse = mat->diffuse;
-		VECTOR3D specular = mat->specular;
-		VECTOR4D textures = mat->texture;
 
 		if (!fullStatic) {
-			vertexBuffer[storeVertexCount * 3] = vertex.x / vertex.w;
-			vertexBuffer[storeVertexCount * 3 + 1] = vertex.y / vertex.w;
-			vertexBuffer[storeVertexCount * 3 + 2] = vertex.z / vertex.w;
+			VECTOR3D vertex3 = mesh->vertices3[i];
+			vertexBuffer[vertexCount * 3] = vertex3.x;
+			vertexBuffer[vertexCount * 3 + 1] = vertex3.y;
+			vertexBuffer[vertexCount * 3 + 2] = vertex3.z;
 
-			normalBuffer[storeVertexCount * 3] = normal.x;
-			normalBuffer[storeVertexCount * 3 + 1] = normal.y;
-			normalBuffer[storeVertexCount * 3 + 2] = normal.z;
+			normalBuffer[vertexCount * 3] = normal.x;
+			normalBuffer[vertexCount * 3 + 1] = normal.y;
+			normalBuffer[vertexCount * 3 + 2] = normal.z;
 		} else {
-			vertex = transformMatrix * vertex;
-			vertexBuffer[storeVertexCount * 3] = vertex.x / vertex.w;
-			vertexBuffer[storeVertexCount * 3 + 1] = vertex.y / vertex.w;
-			vertexBuffer[storeVertexCount * 3 + 2] = vertex.z / vertex.w;
+			VECTOR4D vertex = transformMatrix * mesh->vertices[i];
+			float invW = 1.0 / vertex.w;
+			vertexBuffer[vertexCount * 3] = vertex.x * invW;
+			vertexBuffer[vertexCount * 3 + 1] = vertex.y * invW;
+			vertexBuffer[vertexCount * 3 + 2] = vertex.z * invW;
 
 			normal = normalMatrix * normal;
-			normalBuffer[storeVertexCount * 3] = normal.x;
-			normalBuffer[storeVertexCount * 3 + 1] = normal.y;
-			normalBuffer[storeVertexCount * 3 + 2] = normal.z;
+			normalBuffer[vertexCount * 3] = normal.x;
+			normalBuffer[vertexCount * 3 + 1] = normal.y;
+			normalBuffer[vertexCount * 3 + 2] = normal.z;
 		}
 
-		textureChannel = textures.y >= 0 ? 4 : 3;
-		texcoordBuffer[storeVertexCount * textureChannel] = texcoord.x;
-		texcoordBuffer[storeVertexCount * textureChannel + 1] = texcoord.y;
-		texcoordBuffer[storeVertexCount * textureChannel + 2] = textures.x;
+		textureChannel = mat->texture.y >= 0 ? 4 : 3;
+		texcoordBuffer[vertexCount * textureChannel] = texcoord.x;
+		texcoordBuffer[vertexCount * textureChannel + 1] = texcoord.y;
+		texcoordBuffer[vertexCount * textureChannel + 2] = mat->texture.x;
 		if (textureChannel == 4)
-			texcoordBuffer[storeVertexCount * textureChannel + 3] = textures.y;
+			texcoordBuffer[vertexCount * textureChannel + 3] = mat->texture.y;
 
-		colorBuffer[storeVertexCount * 3] = (byte)(ambient.x * 255);
-		colorBuffer[storeVertexCount * 3 + 1] = (byte)(diffuse.x * 255);
-		colorBuffer[storeVertexCount * 3 + 2] = (byte)(specular.x * 255);
+		colorBuffer[vertexCount * 3] = (byte)(mat->ambient.x * 255);
+		colorBuffer[vertexCount * 3 + 1] = (byte)(mat->diffuse.x * 255);
+		colorBuffer[vertexCount * 3 + 2] = (byte)(mat->specular.x * 255);
 
-		objectidBuffer[storeVertexCount] = currentObject;
-
-		storeVertexCount++;
+		objectidBuffer[vertexCount++] = currentObject;
 	}
 
-	if(mesh->indices) {
-		for(int i=0;i<mesh->indexCount;i++) {
-			int index=baseVertex+mesh->indices[i];
-			indexBuffer[storeIndexCount]=(uint)index;
-			storeIndexCount++;
-		}
-	}
+	for (int i = 0; i < mesh->indexCount; i++) 
+		indexBuffer[indexCount++] = (uint)(baseVertex + mesh->indices[i]);
 
-	initMatrix(currentObject, transformMatrix, normalMatrix);
+	if (!fullStatic && type == BATCH_TYPE_STATIC)
+		initMatrix(currentObject, transformMatrix, normalMatrix);
+
 	objectCount++;
 }
 
@@ -127,19 +126,6 @@ void Batch::updateMatrices(unsigned short objectId, const MATRIX4X4& transformMa
 		memcpy(normalMatrices + (objectId * 9 + 3), normalMatrix->entries + 4, 3 * sizeof(float));
 		memcpy(normalMatrices + (objectId * 9 + 6), normalMatrix->entries + 8, 3 * sizeof(float));
 	}
-	/*
-	MATRIX4X4 transform = transformMatrix;
-	transform.Transpose();
-	for (int m = 0; m < 12; m++)
-		modelMatrices[objectId * 12 + m] = transform.entries[m];
-	if (normalMatrix) {
-		for (int n = 0; n < 3; n++)
-			normalMatrices[objectId * 9 + n] = normalMatrix->entries[n];
-		for (int n = 3; n < 6; n++)
-			normalMatrices[objectId * 9 + n] = normalMatrix->entries[n + 1];
-		for (int n = 6; n < 9; n++)
-			normalMatrices[objectId * 9 + n] = normalMatrix->entries[n + 2];
-	}*/
 }
 
 void Batch::initMatrix(unsigned short currentObject, const MATRIX4X4& transformMatrix, const MATRIX4X4& normalMatrix) {
@@ -149,3 +135,14 @@ void Batch::initMatrix(unsigned short currentObject, const MATRIX4X4& transformM
 	memcpy(normalMatrices + (currentObject * 9 + 6), normalMatrix.entries + 8, 3 * sizeof(float));
 }
 
+void Batch::createDrawcall() {
+	drawcall = new StaticDrawcall(this);
+}
+
+bool Batch::isDynamic() {
+	return type == BATCH_TYPE_DYNAMIC;
+}
+
+void Batch::setDynamic(bool dynamic) {
+	type = dynamic ? BATCH_TYPE_DYNAMIC : BATCH_TYPE_STATIC;
+}

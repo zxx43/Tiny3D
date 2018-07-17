@@ -143,6 +143,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -163,6 +164,7 @@
     <ClCompile Include="bounding\boundingBox.cpp" />
     <ClCompile Include="camera\camera.cpp" />
     <ClCompile Include="camera\frustum.cpp" />
+    <ClCompile Include="config\config.cpp" />
     <ClCompile Include="filter\filter.cpp" />
     <ClCompile Include="framebuffer\framebuffer.cpp" />
     <ClCompile Include="input\input.cpp" />
@@ -182,6 +184,7 @@
     <ClCompile Include="mesh\quad.cpp" />
     <ClCompile Include="mesh\sphere.cpp" />
     <ClCompile Include="mesh\terrain.cpp" />
+    <ClCompile Include="mesh\water.cpp" />
     <ClCompile Include="model\mtlloader.cpp" />
     <ClCompile Include="model\objloader.cpp" />
     <ClCompile Include="node\animationNode.cpp" />
@@ -189,8 +192,8 @@
     <ClCompile Include="node\node.cpp" />
     <ClCompile Include="node\staticNode.cpp" />
     <ClCompile Include="node\terrainNode.cpp" />
+    <ClCompile Include="node\waterNode.cpp" />
     <ClCompile Include="object\animationObject.cpp" />
-    <ClCompile Include="object\billboardObject.cpp" />
     <ClCompile Include="object\object.cpp" />
     <ClCompile Include="object\staticObject.cpp" />
     <ClCompile Include="render\animationDrawcall.cpp" />
@@ -223,10 +226,12 @@
     <ClInclude Include="application\application.h" />
     <ClInclude Include="assets\assetManager.h" />
     <ClInclude Include="batch\batch.h" />
+    <ClInclude Include="billboard\billboard.h" />
     <ClInclude Include="bounding\aabb.h" />
     <ClInclude Include="bounding\boundingBox.h" />
     <ClInclude Include="camera\camera.h" />
     <ClInclude Include="camera\frustum.h" />
+    <ClInclude Include="config\config.h" />
     <ClInclude Include="constants\constants.h" />
     <ClInclude Include="filter\filter.h" />
     <ClInclude Include="framebuffer\framebuffer.h" />
@@ -247,6 +252,7 @@
     <ClInclude Include="mesh\quad.h" />
     <ClInclude Include="mesh\sphere.h" />
     <ClInclude Include="mesh\terrain.h" />
+    <ClInclude Include="mesh\water.h" />
     <ClInclude Include="model\mtlloader.h" />
     <ClInclude Include="model\objloader.h" />
     <ClInclude Include="node\animationNode.h" />
@@ -254,8 +260,8 @@
     <ClInclude Include="node\node.h" />
     <ClInclude Include="node\staticNode.h" />
     <ClInclude Include="node\terrainNode.h" />
+    <ClInclude Include="node\waterNode.h" />
     <ClInclude Include="object\animationObject.h" />
-    <ClInclude Include="object\billboardObject.h" />
     <ClInclude Include="object\object.h" />
     <ClInclude Include="object\staticObject.h" />
     <ClInclude Include="render\animationDrawcall.h" />
@@ -287,6 +293,10 @@
     <ClInclude Include="util\util.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\x64\Release\shader\billboard.frag" />
+    <None Include="..\x64\Release\shader\billboard.vert" />
+    <None Include="..\x64\Release\shader\billboard_shadow.frag" />
+    <None Include="..\x64\Release\shader\billboard_shadow.vert" />
     <None Include="..\x64\Release\shader\deferred.frag" />
     <None Include="..\x64\Release\shader\deferred.vert" />
     <None Include="..\x64\Release\shader\bone.frag" />
@@ -307,6 +317,11 @@
     <None Include="..\x64\Release\shader\sky.vert" />
     <None Include="..\x64\Release\shader\terrain.frag" />
     <None Include="..\x64\Release\shader\terrain.vert" />
+    <None Include="..\x64\Release\shader\water.frag" />
+    <None Include="..\x64\Release\shader\water.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\x64\Release\config\config.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

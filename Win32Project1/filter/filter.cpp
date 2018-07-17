@@ -9,9 +9,9 @@ Filter::Filter(float width, float height, bool useFramebuffer, int precision, in
 	pixHeight = 1.0 / height;
 	framebuffer = useFramebuffer ? new FrameBuffer(width, height, precision, component) : NULL;
 
-	Board* board=new Board();
+	Board* board=new Board(2,2,2);
 	boardNode=new StaticNode(VECTOR3D(0,0,0));
-	boardNode->fullStatic = true;
+	boardNode->setFullStatic(true);
 	StaticObject* boardObject=new StaticObject(board);
 	boardNode->addObject(boardObject);
 	boardNode->prepareDrawcall();

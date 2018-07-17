@@ -13,20 +13,23 @@
 
 class StaticNode: public Node {
 private:
+	bool fullStatic;
+	bool dynamicBatch;
+private:
 	void createBatch();
 public:
 	Batch* batch;
-	int batchVertexCount,batchIndexCount;
-	bool fullStatic;
 
 	StaticNode(const VECTOR3D& position);
 	virtual ~StaticNode();
-	virtual void addObject(Object* object);
-	virtual Object* removeObject(Object* object);
 	void addObjects(Object** objectArray,int count);
 	virtual void prepareDrawcall();
-	virtual void updateRenderData(Camera* camera, int pass);
-	virtual void updateDrawcall(int pass);
+	virtual void updateRenderData();
+	virtual void updateDrawcall();
+	bool isFullStatic();
+	void setFullStatic(bool fullStatic);
+	bool isDynamicBatch();
+	void setDynamicBatch(bool dynamic);
 };
 
 

@@ -10,6 +10,8 @@ TerrainNode::TerrainNode(const VECTOR3D& position) : StaticNode(position) {
 	lineSize = 0;
 	offset = VECTOR3D(0, 0, 0);
 	offsize = VECTOR3D(1, 1, 1);
+
+	type = TYPE_TERRAIN;
 }
 
 TerrainNode::~TerrainNode() {
@@ -51,7 +53,7 @@ void TerrainNode::prepareTriangles() {
 	}
 }
 
-float TerrainNode::cauculateY(float x, float z) {
+bool TerrainNode::cauculateY(float x, float z, float& y) {
 	float offx = x - offset.x;
 	float offz = z - offset.z;
 	offx /= offsize.x;
@@ -59,38 +61,42 @@ float TerrainNode::cauculateY(float x, float z) {
 	float invStepSize = 1.0 / STEP_SIZE;
 	int ix = (int)(offx*invStepSize);
 	int iz = (int)(offz*invStepSize);
+	if (ix < 0 || iz < 0) return false;
 	if (ix < lineSize && iz < lineSize) {
 		int ib = iz*lineSize + ix;
 		int ita = ib * 2, itb = ib * 2 + 1;
 
-		if (ita < 0 || itb < 0 || 
-			(uint)ita >= triangles.size() ||
+		if ((uint)ita >= triangles.size() ||
 			(uint)itb >= triangles.size()) 
-				return 0.0;
+				return false;
 
 		Triangle* ta = triangles[ita];
 		Triangle* tb = triangles[itb];
 		VECTOR2D p2d = VECTOR2D(x, z);
 		if (ta->pointIsIn(p2d))
-			return ta->caculateY(x, z);
+			y = ta->caculateY(x, z);
 		else
-			return tb->caculateY(x, z);
+			y = tb->caculateY(x, z);
+		return true;
 	}
-	return 0.0;
+	return false;
 }
 
 void standObjectsOnGround(Node* node, TerrainNode* terrain) {
+	if (node->type == TYPE_TERRAIN) return;
 	if (node->children.size() <= 0) {
 		if (node->type == TYPE_ANIMATE) {
 			AnimationNode* animNode = (AnimationNode*)node;
 			VECTOR3D worldCenter = animNode->boundingBox->position;
-			worldCenter.y = terrain->cauculateY(worldCenter.x, worldCenter.z) + ((AABB*)animNode->boundingBox)->sizey * 0.5;
+			terrain->cauculateY(worldCenter.x, worldCenter.z, worldCenter.y);
+			worldCenter.y += ((AABB*)animNode->boundingBox)->sizey * 0.5;
 			animNode->translateNodeCenterAtWorld(worldCenter.x, worldCenter.y, worldCenter.z);
 		} else {
 			for (uint i = 0; i < node->objects.size(); i++) {
 				StaticObject* obj = (StaticObject*)node->objects[i];
 				VECTOR3D worldCenter = obj->bounding->position;
-				worldCenter.y = terrain->cauculateY(worldCenter.x, worldCenter.z) + ((AABB*)obj->bounding)->sizey * 0.499;
+				terrain->cauculateY(worldCenter.x, worldCenter.z, worldCenter.y);
+				worldCenter.y += ((AABB*)obj->bounding)->sizey * 0.499;
 				node->translateNodeObjectCenterAtWorld(i, worldCenter.x, worldCenter.y, worldCenter.z);
 			}
 		}

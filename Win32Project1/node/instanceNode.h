@@ -19,8 +19,8 @@ public:
 	virtual void addObject(Object* object);
 	virtual Object* removeObject(Object* object);
 	virtual void prepareDrawcall();
-	virtual void updateRenderData(Camera* camera, int pass);
-	virtual void updateDrawcall(int pass);
+	virtual void updateRenderData();
+	virtual void updateDrawcall();
 };
 
 

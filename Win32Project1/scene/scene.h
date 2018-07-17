@@ -9,9 +9,9 @@
 #define SCENE_H_
 
 #include "../node/terrainNode.h"
+#include "../node/waterNode.h"
 #include "../node/animationNode.h"
 #include "../node/instanceNode.h"
-#include "../camera/camera.h"
 #include "../sky/sky.h"
 
 class Scene {
@@ -20,6 +20,7 @@ private:
 public:
 	Camera* mainCamera;
 	Sky* skyBox;
+	WaterNode* water;
 	TerrainNode* terrainNode;
 	Node* staticRoot;
 	Node* billboardRoot;

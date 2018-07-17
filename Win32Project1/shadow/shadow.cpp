@@ -12,7 +12,7 @@ Shadow::Shadow(Camera* view, float distance1, float distance2) {
 
 	lightCameraNear = new Camera(0); lightCameraNear->simpleCheck = false;
 	lightCameraMid = new Camera(0); lightCameraMid->simpleCheck = false;
-	lightCameraFar = new Camera(0); lightCameraFar->simpleCheck = true;
+	lightCameraFar = new Camera(0); lightCameraFar->simpleCheck = false;
 }
 
 Shadow::~Shadow() {

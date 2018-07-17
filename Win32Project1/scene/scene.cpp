@@ -8,7 +8,6 @@
 #include "../mesh/model.h"
 #include "../mesh/terrain.h"
 #include "../object/staticObject.h"
-#include "../object/billboardObject.h"
 using namespace std;
 
 Scene::Scene() {
@@ -16,6 +15,7 @@ Scene::Scene() {
 	mainCamera->simpleCheck = false;
 	mainCamera->isMain = true;
 	skyBox = NULL;
+	water = NULL;
 	terrainNode = NULL;
 	screenNode = NULL;
 	
@@ -31,8 +31,8 @@ Scene::Scene() {
 
 Scene::~Scene() {
 	if (mainCamera) delete mainCamera; mainCamera = NULL;
-	if (terrainNode) delete terrainNode; terrainNode = NULL;
 	if (skyBox) delete skyBox; skyBox = NULL;
+	if (water) delete water; water = NULL;
 	if (screenNode) delete screenNode; screenNode = NULL;
 
 	if (staticRoot) delete staticRoot; staticRoot = NULL;
@@ -68,12 +68,14 @@ void Scene::createNodeAABB(Node* node) {
 	if(aabb) {
 		StaticNode* aabbNode = new StaticNode(aabb->position);
 		StaticObject* aabbObject = new StaticObject(AssetManager::assetManager->meshes.find("box")->second);
+		aabbNode->setDynamicBatch(false);
 		aabbObject->bindMaterial(MaterialManager::materials->find(BLACK_MAT));
 		aabbObject->setSize(aabb->sizex, aabb->sizey, aabb->sizez);
-		aabbNode->needUpdateNode = true;
 		aabbNode->addObject(aabbObject);
 		aabbNode->updateNode();
 		aabbNode->prepareDrawcall();
+		aabbNode->updateRenderData();
+		aabbNode->updateDrawcall();
 		boundingNodes.push_back(aabbNode);
 	}
 	for (uint i = 0; i < node->children.size(); i++)

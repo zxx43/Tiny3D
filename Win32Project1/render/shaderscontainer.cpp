@@ -20,6 +20,12 @@
 #define DEFERRED_FRAG "shader/deferred.frag"
 #define TERRAIN_VERT "shader/terrain.vert"
 #define TERRAIN_FRAG "shader/terrain.frag"
+#define BILLBOARD_VERT "shader/billboard.vert"
+#define BILLBOARD_FRAG "shader/billboard.frag"
+#define BILLBOARD_SHADOW_VERT "shader/billboard_shadow.vert"
+#define BILLBOARD_SHADOW_FRAG "shader/billboard_shadow.frag"
+#define WATER_VERT "shader/water.vert"
+#define WATER_FRAG "shader/water.frag"
 
 void SetupShaders(Render* render) {
 	Shader* phong=render->shaders->addShader("phong",PHONG_VERT,PHONG_FRAG);
@@ -41,15 +47,33 @@ void SetupShaders(Render* render) {
 	render->useShader(bone);
 	bone->setSampler("texture",0);
 
-	render->shaders->addShader("phong_s", PHONG_SHADOW_VERT, PHONG_SHADOW_FRAG);
+	Shader* phongShadow = render->shaders->addShader("phong_s", PHONG_SHADOW_VERT, PHONG_SHADOW_FRAG);
+	render->useShader(phongShadow);
+	phongShadow->setSampler("texture", 0);
+
+	Shader* phongShadowIns = render->shaders->addShader("phong_s_ins", PHONG_SHADOW_INS_VERT, PHONG_SHADOW_FRAG);
+	render->useShader(phongShadowIns);
+	phongShadowIns->setSampler("texture", 0);
+
 	render->shaders->addShader("phong_sl", PHONG_SHADOW_LOW_VERT, PHONG_SHADOW_LOW_FRAG);
-	render->shaders->addShader("phong_s_ins", PHONG_SHADOW_INS_VERT, PHONG_SHADOW_FRAG);
 	render->shaders->addShader("phong_sl_ins", PHONG_SHADOW_LOW_INS_VERT, PHONG_SHADOW_LOW_FRAG);
 	render->shaders->addShader("bone_s", BONE_SHADOW_VERT, BONE_SHADOW_FRAG);
 
 	Shader* sky=render->shaders->addShader("sky",SKY_VERT,SKY_FRAG);
 	render->useShader(sky);
 	sky->setSampler("textureSky",0);
+
+	Shader* billboard = render->shaders->addShader("billboard", BILLBOARD_VERT, BILLBOARD_FRAG);
+	render->useShader(billboard);
+	billboard->setSampler("texture", 0);
+
+	Shader* billboardShadow = render->shaders->addShader("billboard_s", BILLBOARD_SHADOW_VERT, BILLBOARD_SHADOW_FRAG);
+	render->useShader(billboardShadow);
+	billboardShadow->setSampler("texture", 0);
+
+	Shader* water = render->shaders->addShader("water", WATER_VERT, WATER_FRAG);
+	render->useShader(water);
+	sky->setSampler("textureEnv", 0);
 
 	Shader* deferred = render->shaders->addShader("deferred", DEFERRED_VERT, DEFERRED_FRAG);
 	render->useShader(deferred);

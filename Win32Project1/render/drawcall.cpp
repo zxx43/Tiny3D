@@ -9,13 +9,12 @@ Drawcall::Drawcall() {
 	setType(NULL_DC);
 	setFullStatic(false);
 	objectCount = 0;
-	dataBuffer = NULL;
-	simpleBuffer = NULL;
+	dataBuffers = NULL;
+	bufferCount = 3;
+	billboardDC = false;
 }
 
 Drawcall::~Drawcall() {
-	if (uModelMatrix) free(uModelMatrix);
-	uModelMatrix = NULL;
 	if (uNormalMatrix) free(uNormalMatrix);
 	uNormalMatrix = NULL;
 }
@@ -42,4 +41,12 @@ void Drawcall::setFullStatic(bool stat) {
 
 bool Drawcall::isFullStatic() {
 	return fullStatic;
+}
+
+void Drawcall::setBillboard(bool billboard) {
+	billboardDC = billboard;
+}
+
+bool Drawcall::isBillboard() {
+	return billboardDC;
 }
