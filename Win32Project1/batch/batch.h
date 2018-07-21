@@ -13,8 +13,8 @@
 
 #ifndef MAX_OBJECT_COUNT
 #define MAX_OBJECT_COUNT 100
-#define MAX_VERTEX_COUNT 16000
-#define MAX_INDEX_COUNT 16000
+#define MAX_VERTEX_COUNT 131072
+#define MAX_INDEX_COUNT 131072
 #define BATCH_TYPE_DYNAMIC 0
 #define BATCH_TYPE_STATIC 1
 #endif
@@ -47,6 +47,9 @@ public:
 	void initBatchBuffers(int vertCount, int indCount);
 	void pushMeshToBuffers(Mesh* mesh,int mid,bool fullStatic,const MATRIX4X4& transformMatrix,const MATRIX4X4& normalMatrix);
 	void updateMatrices(unsigned short objectId, const MATRIX4X4& transformMatrix, const MATRIX4X4* normalMatrix);
+	void setRenderData(int vertCnt, int indCnt, int objCnt, 
+		float* vertices, float* normals, float* texcoords,
+		byte* colors, byte* objectids, uint* indices, float* matrices);
 	void createDrawcall();
 	bool isDynamic();
 	void setDynamic(bool dynamic);

@@ -55,16 +55,95 @@ struct InstanceData {
 	}
 };
 
+struct BatchData {
+	float* vertices;
+	float* normals;
+	float* texcoords;
+	byte* colors;
+	byte* objectids;
+	uint* indices;
+	float* matrices;
+	int vertexCount, indexCount, objectCount;
+	Batch* batch;
+	BatchData() {
+		vertices = (float*)malloc(MAX_VERTEX_COUNT * 3 * sizeof(float));
+		normals = (float*)malloc(MAX_VERTEX_COUNT * 3 * sizeof(float));
+		texcoords = (float*)malloc(MAX_VERTEX_COUNT * 3 * sizeof(float));
+		colors = (byte*)malloc(MAX_VERTEX_COUNT * 3 * sizeof(byte));
+		objectids = (byte*)malloc(MAX_VERTEX_COUNT * sizeof(byte));
+		indices = (uint*)malloc(MAX_INDEX_COUNT * sizeof(uint));
+		matrices = (float*)malloc(MAX_OBJECT_COUNT * 12 * sizeof(float));
+
+		vertexCount = 0;
+		indexCount = 0;
+		objectCount = 0;
+		batch = NULL;
+	}
+	~BatchData() {
+		free(vertices);
+		free(normals);
+		free(texcoords);
+		free(colors);
+		free(objectids);
+		free(indices);
+		free(matrices);
+		if (batch) delete batch;
+	}
+	void resetBatch() {
+		vertexCount = 0;
+		indexCount = 0;
+		objectCount = 0;
+	}
+	void addObject(Object* object, Mesh* mesh) {
+		int baseVertex = vertexCount;
+		int currentObject = objectCount++;
+
+		Material* mat = NULL;
+		if (object->material >= 0)
+			mat = MaterialManager::materials->find(object->material);
+		if (!mat) mat = MaterialManager::materials->find(0);
+
+		for (int i = 0; i < mesh->vertexCount; i++) {
+			if (mesh->materialids)
+				mat = MaterialManager::materials->find(mesh->materialids[i]);
+
+			VECTOR3D vertex3 = mesh->vertices3[i];
+			vertices[vertexCount * 3] = vertex3.x;
+			vertices[vertexCount * 3 + 1] = vertex3.y;
+			vertices[vertexCount * 3 + 2] = vertex3.z;
+
+			normals[vertexCount * 3] = mesh->normals4[i].x;
+			normals[vertexCount * 3 + 1] = mesh->normals4[i].y;
+			normals[vertexCount * 3 + 2] = mesh->normals4[i].z;
+
+			texcoords[vertexCount * 3] = mesh->texcoords[i].x;
+			texcoords[vertexCount * 3 + 1] = mesh->texcoords[i].y;
+			texcoords[vertexCount * 3 + 2] = mat->texture.x;
+
+			colors[vertexCount * 3] = (byte)(mat->ambient.x * 255);
+			colors[vertexCount * 3 + 1] = (byte)(mat->diffuse.x * 255);
+			colors[vertexCount * 3 + 2] = (byte)(mat->specular.x * 255);
+
+			objectids[vertexCount++] = currentObject;
+		}
+
+		for (int i = 0; i < mesh->indexCount; i++)
+			indices[indexCount++] = (uint)(baseVertex + mesh->indices[i]);
+
+		memcpy(matrices + (currentObject * 12), object->transformMatrix.GetTranspose().entries, 12 * sizeof(float));
+	}
+};
+
 class RenderQueue {
 private:
 	std::vector<Node*> queue;
-	std::vector<Batch*> batchQueue;
 private:
 	void pushDatasToInstance(InstanceData* data);
-	void pushObjectToBatch(Object* object, Camera* camera, const VECTOR3D& eye);
+	void pushDatasToBatch(BatchData* data);
 public:
 	float midDistSqr, lowDistSqr, midDistZ, lowDistZ;
 	std::map<Mesh*, InstanceData*> instanceQueue;
+	BatchData* batchData;
 public:
 	RenderQueue(float midDis, float lowDis);
 	~RenderQueue();

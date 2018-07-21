@@ -110,7 +110,7 @@ void Camera::turnDY(float dy) {
 	RestrictAngle(yrot);
 }
 
-void Camera::move(int dist,float speed) {
+void Camera::move(int dir,float speed) {
 	float xz=angleToRadian(xrot);
 	float yz=angleToRadian(yrot);
 	float cosYZ = speed * cosf(yz);
@@ -118,7 +118,7 @@ void Camera::move(int dist,float speed) {
 	float dy = speed * sinf(yz);
 	float dz = cosYZ * cosf(xz);
 
-	switch(dist) {
+	switch(dir) {
 		case DOWN:
 			if (height - speed >  2.0) {
 				height -= speed;

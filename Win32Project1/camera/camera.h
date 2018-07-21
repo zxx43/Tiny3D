@@ -46,7 +46,7 @@ public:
 	void turnX(int lr);
 	void turnDX(float dx);
 	void turnDY(float dy);
-	void move(int dist,float speed);
+	void move(int dir,float speed);
 	void moveTo(const VECTOR3D& pos);
 	float getHeight();
 	void copy(Camera* src);

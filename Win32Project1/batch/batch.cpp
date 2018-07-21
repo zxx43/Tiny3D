@@ -15,6 +15,7 @@ Batch::Batch() {
 	indexBuffer=NULL;
 
 	fullStatic = false;
+	textureChannel = 3;
 	type = BATCH_TYPE_DYNAMIC;
 	objectCount = 0;
 	modelMatrices = NULL;
@@ -60,7 +61,7 @@ void Batch::initBatchBuffers(int vertCount, int indCount) {
 void Batch::pushMeshToBuffers(Mesh* mesh,int mid,bool fullStatic,const MATRIX4X4& transformMatrix,const MATRIX4X4& normalMatrix) {
 	this->fullStatic = fullStatic;
 	int baseVertex = vertexCount;
-	int currentObject = objectCount;
+	int currentObject = objectCount++;
 
 	Material* mat = NULL;
 	if (mid >= 0)
@@ -115,8 +116,6 @@ void Batch::pushMeshToBuffers(Mesh* mesh,int mid,bool fullStatic,const MATRIX4X4
 
 	if (!fullStatic && type == BATCH_TYPE_STATIC)
 		initMatrix(currentObject, transformMatrix, normalMatrix);
-
-	objectCount++;
 }
 
 void Batch::updateMatrices(unsigned short objectId, const MATRIX4X4& transformMatrix, const MATRIX4X4* normalMatrix) {
@@ -133,6 +132,22 @@ void Batch::initMatrix(unsigned short currentObject, const MATRIX4X4& transformM
 	memcpy(normalMatrices + (currentObject * 9), normalMatrix.entries, 3 * sizeof(float));
 	memcpy(normalMatrices + (currentObject * 9 + 3), normalMatrix.entries + 4, 3 * sizeof(float));
 	memcpy(normalMatrices + (currentObject * 9 + 6), normalMatrix.entries + 8, 3 * sizeof(float));
+}
+
+void Batch::setRenderData(int vertCnt, int indCnt, int objCnt,
+	float* vertices, float* normals, float* texcoords,
+	byte* colors, byte* objectids, uint* indices, float* matrices) {
+		vertexCount = vertCnt;
+		indexCount = indCnt;
+		objectCount = objCnt;
+
+		memcpy(vertexBuffer, vertices, vertexCount * 3 * sizeof(float));
+		memcpy(normalBuffer, normals, vertexCount * 3 * sizeof(float));
+		memcpy(texcoordBuffer, texcoords, vertexCount * 3 * sizeof(float));
+		memcpy(colorBuffer, colors, vertexCount * 3 * sizeof(byte));
+		memcpy(objectidBuffer, objectids, vertexCount * sizeof(byte));
+		memcpy(indexBuffer, indices, indexCount * sizeof(uint));
+		memcpy(modelMatrices, matrices, objectCount * 12 * sizeof(float));
 }
 
 void Batch::createDrawcall() {

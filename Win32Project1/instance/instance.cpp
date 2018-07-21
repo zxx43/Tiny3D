@@ -101,10 +101,6 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices) {
 		initMatrices();
 }
 
-void Instance::setInstanceCount(int count) {
-	instanceCount = count;
-	if (drawcall) drawcall->objectToDraw = instanceCount;
-}
 
 void Instance::initMatrices() {
 	modelMatrices = (float*)malloc(MAX_INSTANCE_COUNT * 12 * sizeof(float));
@@ -118,10 +114,9 @@ void Instance::initBillboards() {
 	memset(billboards, 0, MAX_INSTANCE_COUNT * 2 * sizeof(float));
 }
 
-void Instance::setRenderData(float* matrices, float* billboards, float* positions) {
-	//modelMatrices = matrices;
-	//this->billboards = billboards;
-	//this->positions = positions;
+void Instance::setRenderData(int count, float* matrices, float* billboards, float* positions) {
+	instanceCount = count;
+	if (drawcall) drawcall->objectToDraw = instanceCount;
 
 	if (matrices)
 		memcpy(modelMatrices, matrices, instanceCount * 12 * sizeof(float));

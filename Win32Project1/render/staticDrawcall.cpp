@@ -104,7 +104,7 @@ void StaticDrawcall::draw(Shader* shader,int pass) {
 
 void StaticDrawcall::updateMatrices() {
 	objectCount = batch->objectCount;
-	if (!uModelMatrix && batch->modelMatrices)
+	if (batch->modelMatrices)
 		uModelMatrix = batch->modelMatrices;
 }
 

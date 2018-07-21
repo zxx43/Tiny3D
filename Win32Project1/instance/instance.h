@@ -39,8 +39,7 @@ public:
 	Instance(Mesh* mesh);
 	~Instance();
 	void initInstanceBuffers(Object* object,int vertices,int indices);
-	void setInstanceCount(int count);
-	void setRenderData(float* matrices, float* billboards, float* positions);
+	void setRenderData(int count, float* matrices, float* billboards, float* positions);
 	void createDrawcall();
 private:
 	void initMatrices();
