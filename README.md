@@ -17,6 +17,8 @@ A Small OpenGL Based Renderer
 - Billboard  
 - Water  
 - Fog  
+- Depth of Field  
+- Antialiasing  
 
 
 ### Screenshot:  
