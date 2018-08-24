@@ -27,14 +27,24 @@ void Application::init() {
 	scene = new Scene();
 	input = new Input();
 
-	float quality = 0; 
-	config->get("quality", quality);
-	renderMgr = new RenderManager(quality, scene->mainCamera, 200, 800, VECTOR3D(-1, -1, -1));
-	if (quality > 0)
+	config->get("quality", graphQuality);
+	float lowDist = graphQuality > 4.0 ? 500 : 200;
+	float farDist = graphQuality > 4.0 ? 1200 : 800;
+	renderMgr = new RenderManager(graphQuality, scene->mainCamera, lowDist, farDist, VECTOR3D(-1, -1, -1));
+	if (graphQuality > 1)
 		renderMgr->enableShadow(render);
 	else
 		renderMgr->disableShadow(render);
-	renderMgr->hideBounding();
+
+	config->get("dof", useDof);
+	config->get("fxaa", useFxaa);
+
+	float debug = 0.0;
+	config->get("debug", debug);
+	if (debug > 0.5)
+		renderMgr->showBounding();
+	else
+		renderMgr->hideBounding();
 }
 
 Application::~Application() {

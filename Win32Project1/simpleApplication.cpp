@@ -9,25 +9,54 @@ using namespace std;
 SimpleApplication::SimpleApplication() {
 	screen = NULL;
 	screenFilter = NULL;
+	aaFilter = NULL;
+	blurFilter = NULL;
+	dofFilter = NULL;
+	dofInput.clear();
 }
 
 SimpleApplication::~SimpleApplication() {
-	delete screen; screen = NULL;
-	delete screenFilter; screenFilter = NULL;
+	dofInput.clear();
+	if (screen) delete screen; screen = NULL;
+	if (screenFilter) delete screenFilter; screenFilter = NULL;
+	if (blurFilter) delete blurFilter; blurFilter = NULL;
+	if (dofFilter) delete dofFilter; dofFilter = NULL;
+	if (aaFilter) delete aaFilter; aaFilter = NULL;
 }
 
 void SimpleApplication::resize(int width, int height) {
 	if (!render) return;
 	Application::resize(width, height);
 
+	int precision = graphQuality > 4.0 ? HIGH_PRE : LOW_PRE;
+
 	if (screen) delete screen;
-	screen = new FrameBuffer(width, height, LOW_PRE, 4);
-	screen->addColorBuffer(LOW_PRE, 3);
-	screen->addColorBuffer(LOW_PRE, 3);
-	screen->attachDepthBuffer(LOW_PRE);
+	screen = new FrameBuffer(width, height, precision, 4);
+	screen->addColorBuffer(precision, 3);
+	screen->addColorBuffer(precision, 3);
+	screen->attachDepthBuffer(precision);
 
 	if (screenFilter) delete screenFilter;
-	screenFilter = new Filter(width, height, false, LOW_PRE, 3);
+	if (!useFxaa && !useDof)
+		screenFilter = new Filter(width, height, false, precision, 4);
+	else {
+		screenFilter = new Filter(width, height, true, precision, 4);
+		if (useFxaa) {
+			if (aaFilter) delete aaFilter;
+			aaFilter = new Filter(width, height, false, precision, 4);
+		}
+		if (useDof) {
+			if (blurFilter) delete blurFilter;
+			blurFilter = new Filter(width * 0.4, height * 0.4, true, precision, 4);
+			if (dofFilter) delete dofFilter;
+			dofFilter = new Filter(width, height, useFxaa, precision, 4);
+
+			dofInput.clear();
+			dofInput.push_back(blurFilter->getFrameBuffer()->getColorBuffer(0));
+			dofInput.push_back(screenFilter->getFrameBuffer()->getColorBuffer(0));
+		}
+	}
+
 	render->clearTextureSlots();
 }
 
@@ -43,10 +72,20 @@ void SimpleApplication::keyUp(int key) {
 
 void SimpleApplication::draw() {
 	renderMgr->renderShadow(render, scene);
-	//render->setFrameBuffer(NULL);
 	render->setFrameBuffer(screen);
 	renderMgr->renderScene(render, scene);
 	renderMgr->drawDeferred(render, scene, screen, screenFilter);
+
+	Filter* lastFilter = screenFilter;
+	if (useDof) {
+		renderMgr->drawScreenFilter(render, scene, "blur", screenFilter->getFrameBuffer(), blurFilter);
+		renderMgr->drawScreenFilter(render, scene, "dof", dofInput, dofFilter);
+		lastFilter = dofFilter;
+	}
+	if (useFxaa)
+		renderMgr->drawScreenFilter(render, scene, "fxaa", lastFilter->getFrameBuffer(), aaFilter);
+
+	render->finishDraw();
 }
 
 void SimpleApplication::init() {
@@ -72,6 +111,10 @@ void SimpleApplication::moveKey() {
 				float waterHeight = scene->water->position.y;
 				cp.y = cp.y < waterHeight ? waterHeight : cp.y;
 			}
+			cp.y += scene->mainCamera->getHeight();
+		} else if(scene->water) {
+			float waterHeight = scene->water->position.y;
+			cp.y = waterHeight;
 			cp.y += scene->mainCamera->getHeight();
 		}
 		scene->mainCamera->moveTo(cp);
@@ -152,11 +195,9 @@ void SimpleApplication::initScene() {
 	sphere->bindMaterial(mtlMgr->find("grass_mat"));
 	StaticObject* board = new StaticObject(meshes["board"]);
 	StaticObject* quad = new StaticObject(meshes["quad"]);
-	//StaticObject* model1 = new StaticObject(meshes["tree"], meshes["treeMid"], meshes["treeLow"]);
 
 	StaticObject* model1 = new StaticObject(meshes["tree"], meshes["treeMid"], meshes["billboard"]);
 	model1->setBillboard(5, 10, assetMgr->findTexture("tree2.bmp"));
-	
 	StaticObject* model2 = new StaticObject(meshes["tank"]);
 	StaticObject* model3 = new StaticObject(meshes["m1a2"]);
 	StaticObject* model4 = new StaticObject(meshes["treeA"], meshes["treeAMid"], meshes["treeALow"]);
@@ -211,7 +252,7 @@ void SimpleApplication::initScene() {
 	StaticNode* node2 = new StaticNode(VECTOR3D(10, 2, 2));
 	node2->setDynamicBatch(true);
 	StaticObject* object6 = box->clone();
-	object6->bindMaterial(mtlMgr->find(DEFAULT_MAT));
+	//object6->bindMaterial(mtlMgr->find(DEFAULT_MAT));
 	object6->setPosition(3, 3, 3);
 	object6->setRotation(0, 30, 0);
 	object6->setSize(1, 1, 1);

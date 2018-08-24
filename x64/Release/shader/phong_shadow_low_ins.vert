@@ -3,7 +3,7 @@
 uniform mat4 viewProjectMatrix;
 
 layout (location = 0) in vec3 vertex;
-layout (location = 1) in mat3x4 modelMatrix;
+layout (location = 4) in mat3x4 modelMatrix;
 
 out vec2 projDepth;
 

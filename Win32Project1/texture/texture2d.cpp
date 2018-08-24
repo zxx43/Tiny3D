@@ -1,8 +1,7 @@
 #include "texture2d.h"
 
 Texture2D::Texture2D(float w,float h,int t,int p,int c) {
-	width=w;
-	height=h;
+	width=w, height=h;
 	type=t;
 	precision=p;
 
@@ -19,7 +18,13 @@ Texture2D::Texture2D(float w,float h,int t,int p,int c) {
 	GLint preDepth = precision == HIGH_PRE ? GL_DEPTH_COMPONENT32 : GL_DEPTH_COMPONENT24;
 	GLint preColor = precision == HIGH_PRE ? GL_RGBA16 : GL_RGBA8;
 	GLenum format = GL_RGBA;
-	if (c == 3) {
+	if (c == 1) {
+		format = GL_RED;
+		preColor = precision == HIGH_PRE ? GL_R16 : GL_R8;
+	} else if (c == 2) {
+		format = GL_RG;
+		preColor = precision == HIGH_PRE ? GL_RG16 : GL_RG8;
+	} else if (c == 3) {
 		format = GL_RGB;
 		preColor = precision == HIGH_PRE ? GL_RGB16 : GL_RGB8;
 	}

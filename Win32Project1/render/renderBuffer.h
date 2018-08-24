@@ -110,6 +110,20 @@ struct RenderBuffer {
 	void pushData(uint i, RenderData* data) {
 		streamDatas[i] = data;
 	}
+	void setAttribData(uint loc, GLenum type, uint count, uint channel, uint row, bool normalize, GLenum draw, int divisor, void* data) {
+		if (streamDatas[loc]) delete streamDatas[loc];
+		streamDatas[loc] = new RenderData(loc, type, count, channel, row, vbos[loc], normalize, draw, divisor, data);
+	}
+	void setIndexData(uint loc, GLenum type, uint size, GLenum draw, void* data) {
+		if (streamDatas[loc]) delete streamDatas[loc];
+		streamDatas[loc] = new RenderData(type, size, vbos[loc], draw, data);
+	}
+	void updateAttribData(uint loc, uint count, void* data, GLenum draw) {
+		streamDatas[loc]->updateAttrBuf(count, data, draw);
+	}
+	void updateIndexData(uint loc, uint count, void* data, GLenum draw) {
+		streamDatas[loc]->updateIndexBuf(count, data, draw);
+	}
 	void unuseAttr() {
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}

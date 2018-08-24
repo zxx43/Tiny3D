@@ -9,12 +9,13 @@ Drawcall::Drawcall() {
 	setType(NULL_DC);
 	setFullStatic(false);
 	objectCount = 0;
-	dataBuffers = NULL;
-	bufferCount = 3;
+	dataBuffer = NULL;
 	billboardDC = false;
 }
 
 Drawcall::~Drawcall() {
+	if (dataBuffer) delete dataBuffer;
+	dataBuffer = NULL;
 	if (uNormalMatrix) free(uNormalMatrix);
 	uNormalMatrix = NULL;
 }

@@ -303,6 +303,10 @@
     <None Include="..\x64\Release\shader\bone.vert" />
     <None Include="..\x64\Release\shader\bone_shadow.frag" />
     <None Include="..\x64\Release\shader\bone_shadow.vert" />
+    <None Include="..\x64\Release\shader\dof.frag" />
+    <None Include="..\x64\Release\shader\dof.vert" />
+    <None Include="..\x64\Release\shader\fxaa.frag" />
+    <None Include="..\x64\Release\shader\fxaa.vert" />
     <None Include="..\x64\Release\shader\phong.frag" />
     <None Include="..\x64\Release\shader\phong.vert" />
     <None Include="..\x64\Release\shader\phong_ins.frag" />
@@ -313,6 +317,8 @@
     <None Include="..\x64\Release\shader\phong_shadow_low.frag" />
     <None Include="..\x64\Release\shader\phong_shadow_low.vert" />
     <None Include="..\x64\Release\shader\phong_shadow_low_ins.vert" />
+    <None Include="..\x64\Release\shader\blur.frag" />
+    <None Include="..\x64\Release\shader\blur.vert" />
     <None Include="..\x64\Release\shader\sky.frag" />
     <None Include="..\x64\Release\shader\sky.vert" />
     <None Include="..\x64\Release\shader\terrain.frag" />

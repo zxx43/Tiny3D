@@ -2,13 +2,14 @@
 
 Shadow::Shadow(Camera* view, float distance1, float distance2) {
 	viewCamera=view;
-	this->distance1=distance1;
-	this->distance2=distance2;
+	this->distance1 = distance1;
+	this->distance2 = distance2;
+	shadowMapSize = 0, shadowPixSize = 0;
 
-	corners0=new VECTOR4D[4];
-	corners1=new VECTOR4D[4];
-	corners2=new VECTOR4D[4];
-	corners3=new VECTOR4D[4];
+	corners0 = new VECTOR4D[4];
+	corners1 = new VECTOR4D[4];
+	corners2 = new VECTOR4D[4];
+	corners3 = new VECTOR4D[4];
 
 	lightCameraNear = new Camera(0); lightCameraNear->simpleCheck = false;
 	lightCameraMid = new Camera(0); lightCameraMid->simpleCheck = false;
@@ -73,9 +74,9 @@ void Shadow::prepareViewCamera() {
 	radius1=(VECTOR3D(center1.x,center1.y,center1.z)-VECTOR3D(corners2[0].x,corners2[0].y,corners2[0].z)).GetLength();
 	radius2=(VECTOR3D(center2.x,center2.y,center2.z)-VECTOR3D(corners3[0].x,corners3[0].y,corners3[0].z)).GetLength();
 
-	lightCameraNear->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.5 * radius0, 1.5 * radius0);
-	lightCameraMid->initOrthoCamera(-radius1, radius1, -radius1, radius1, -1.5 * radius1, 1.5 * radius1);
-	lightCameraFar->initOrthoCamera(-radius2, radius2, -radius2, radius2, -1.5 * radius2, 1.5 * radius2);
+	lightCameraNear->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.0001 * radius0, 1.0001 * radius0);
+	lightCameraMid->initOrthoCamera(-radius1, radius1, -radius1, radius1, -1.0001 * radius1, 1.0001 * radius1);
+	lightCameraFar->initOrthoCamera(-radius2, radius2, -radius2, radius2, -1.0001 * radius2, 1.0001 * radius2);
 }
 
 void Shadow::update(const VECTOR3D& light) {

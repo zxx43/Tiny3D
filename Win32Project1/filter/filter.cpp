@@ -31,6 +31,10 @@ void Filter::draw(Camera* camera, Render* render, RenderState* state,
 	render->setFrameBuffer(framebuffer);
 	render->useShader(state->shader);
 	state->shader->setVector2("pixelSize",pixWidth,pixHeight);
+	if (state->shadow) {
+		float shadowPixSize = state->shadow->shadowPixSize;
+		state->shader->setVector2("shadowPixSize", shadowPixSize, shadowPixSize);
+	}
 	uint bufferid;
 	for (bufferid = 0; bufferid < inputTextures.size(); bufferid++)
 		render->useTexture(TEXTURE_2D, bufferid, inputTextures[bufferid]->id);
@@ -39,9 +43,23 @@ void Filter::draw(Camera* camera, Render* render, RenderState* state,
 	render->draw(camera, boardNode->drawcall, state);
 }
 
-Texture2D* Filter::getOutput() {
+void Filter::addOutput(int precision, int component) {
+	if (framebuffer)
+		framebuffer->addColorBuffer(precision, component);
+}
+
+void Filter::addDepthBuffer(int precision) {
+	if (framebuffer)
+		framebuffer->attachDepthBuffer(precision);
+}
+
+Texture2D* Filter::getOutput(int i) {
 	if(framebuffer)
-		return framebuffer->getColorBuffer(0);
+		return framebuffer->getColorBuffer(i);
 	return NULL;
+}
+
+FrameBuffer* Filter::getFrameBuffer() {
+	return framebuffer;
 }
 

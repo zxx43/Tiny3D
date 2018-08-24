@@ -47,7 +47,7 @@ public:
 	void initBatchBuffers(int vertCount, int indCount);
 	void pushMeshToBuffers(Mesh* mesh,int mid,bool fullStatic,const MATRIX4X4& transformMatrix,const MATRIX4X4& normalMatrix);
 	void updateMatrices(unsigned short objectId, const MATRIX4X4& transformMatrix, const MATRIX4X4* normalMatrix);
-	void setRenderData(int vertCnt, int indCnt, int objCnt, 
+	void setRenderData(int pass, int vertCnt, int indCnt, int objCnt, 
 		float* vertices, float* normals, float* texcoords,
 		byte* colors, byte* objectids, uint* indices, float* matrices);
 	void createDrawcall();

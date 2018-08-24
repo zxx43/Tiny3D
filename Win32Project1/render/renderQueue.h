@@ -139,7 +139,7 @@ private:
 	std::vector<Node*> queue;
 private:
 	void pushDatasToInstance(InstanceData* data);
-	void pushDatasToBatch(BatchData* data);
+	void pushDatasToBatch(BatchData* data, int pass);
 public:
 	float midDistSqr, lowDistSqr, midDistZ, lowDistZ;
 	std::map<Mesh*, InstanceData*> instanceQueue;

@@ -3,8 +3,8 @@
 uniform mat4 viewProjectMatrix;
 
 layout (location = 0) in vec3 vertex;
-layout (location = 1) in vec3 texcoord;
-layout (location = 2) in mat3x4 modelMatrix;
+layout (location = 2) in vec3 texcoord;
+layout (location = 4) in mat3x4 modelMatrix;
 
 out vec3 vTexcoord;
 out vec2 projDepth;
@@ -19,7 +19,12 @@ mat4 convertMat(mat3x4 srcMat) {
 
 void main() {
 	vTexcoord = texcoord;
-	vec4 worldVertex = convertMat(modelMatrix) * vec4(vertex, 1.0);
+	
+	///*
+	mat4x3 tranMat = transpose(modelMatrix);
+	vec4 worldVertex = vec4(mat3(tranMat) * vertex + tranMat[3], 1.0);
+	//*/
+	//vec4 worldVertex = convertMat(modelMatrix) * vec4(vertex, 1.0);
 	gl_Position = viewProjectMatrix * worldVertex;
 	projDepth = gl_Position.zw;
 }

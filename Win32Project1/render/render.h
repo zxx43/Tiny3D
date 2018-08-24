@@ -34,7 +34,7 @@ public: // Global render state
 public:
 	int viewWidth,viewHeight;
 	ShaderManager* shaders;
-	std::map<uint, uint> textureInUse;
+	std::map<uint, std::map<uint, uint>*> textureTypeSlots;
 public:
 	Render();
 	~Render();
@@ -54,6 +54,7 @@ public:
 	void draw(Camera* camera, Drawcall* drawcall, RenderState* state);
 	void finishDraw();
 	void setFrameBuffer(FrameBuffer* framebuffer);
+	void setColorMask(bool r, bool g, bool b, bool a);
 	void useTexture(uint type, uint slot, uint texid);
 	void clearTextureSlots();
 };

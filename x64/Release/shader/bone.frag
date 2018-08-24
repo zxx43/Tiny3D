@@ -8,14 +8,11 @@ flat in vec3 vColor;
 in vec3 vNormal;
 
 layout (location = 0) out vec4 FragTex;
-layout (location = 1) out vec3 FragColor;
-layout (location = 2) out vec3 FragNormal;
+layout (location = 1) out vec4 FragColor;
+layout (location = 2) out vec4 FragNormal;
 
 void main() {
-	vec3 texcoord = vTexcoord;
-	texcoord.y = 1.0 - texcoord.y;
-		
-	FragTex = texture2DArray(texture, texcoord);
-	FragColor = vColor;
-	FragNormal = normalize(vNormal) * 0.5 + 0.5;
+	FragTex = texture2DArray(texture, vTexcoord);
+	FragColor = vec4(vColor, 1.0);
+	FragNormal = vec4(normalize(vNormal) * 0.5 + 0.5, 1.0);
 }

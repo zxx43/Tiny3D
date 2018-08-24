@@ -5,8 +5,8 @@ uniform mat4 uModelMatrix;
 uniform mat3x4 boneMats[100];
 
 layout (location = 0) in vec3 vertex;
-layout (location = 1) in vec4 boneids;
-layout (location = 2) in vec4 weights;
+layout (location = 4) in vec4 boneids;
+layout (location = 5) in vec4 weights;
 
 out vec2 projDepth;
 

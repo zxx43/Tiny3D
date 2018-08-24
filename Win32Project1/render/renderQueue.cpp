@@ -62,14 +62,14 @@ void RenderQueue::pushDatasToInstance(InstanceData* data) {
 	data->instance->setRenderData(data->count, data->matrices, data->billboards, data->positions);
 }
 
-void RenderQueue::pushDatasToBatch(BatchData* data) {
+void RenderQueue::pushDatasToBatch(BatchData* data, int pass) {
 	if (data->objectCount <= 0) return;
 	if (!data->batch) {
 		data->batch = new Batch(); 
 		data->batch->initBatchBuffers(MAX_VERTEX_COUNT, MAX_INDEX_COUNT);
 		data->batch->setDynamic(true);
 	}
-	data->batch->setRenderData(data->vertexCount, data->indexCount, data->objectCount,
+	data->batch->setRenderData(pass, data->vertexCount, data->indexCount, data->objectCount,
 		data->vertices, data->normals, data->texcoords, data->colors, data->objectids,
 		data->indices, data->matrices);
 }
@@ -116,7 +116,6 @@ void RenderQueue::draw(Camera* camera, const VECTOR3D& eye, Render* render, Rend
 	while (itData != instanceQueue.end()) {
 		InstanceData* data = itData->second;
 		pushDatasToInstance(data);
-
 		Instance* instance = data->instance;
 		if (instance) {
 			if (!instance->drawcall) instance->createDrawcall();
@@ -126,12 +125,12 @@ void RenderQueue::draw(Camera* camera, const VECTOR3D& eye, Render* render, Rend
 			}
 		}
 		++itData;
-		if (Instance::instanceTable[instance->instanceMesh] == 0)
+		if (instance && Instance::instanceTable[instance->instanceMesh] == 0)
 			deleteInstance(data);
 	}
 	
 	if (batchData) {
-		pushDatasToBatch(batchData);
+		pushDatasToBatch(batchData, state->pass);
 		Batch* batch = batchData->batch;
 		if (batch) {
 			if (!batch->drawcall) batch->createDrawcall();

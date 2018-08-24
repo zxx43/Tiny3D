@@ -2,13 +2,22 @@
 #include "../assets/assetManager.h"
 
 RenderManager::RenderManager(int quality, Camera* view, float distance1, float distance2, const VECTOR3D& light) {
+	graphicQuality = quality;
 	shadow=new Shadow(view,distance1,distance2);
-	float nearSize=1024;
-	float midSize=1024;
-	float farSize=1024;
-	nearBuffer = new FrameBuffer(nearSize, nearSize, HIGH_PRE, 4);
-	midBuffer = new FrameBuffer(midSize, midSize, HIGH_PRE, 4);
-	farBuffer = new FrameBuffer(farSize, farSize, HIGH_PRE, 4);
+	float nearSize = 1024;
+	float midSize = 1024;
+	float farSize = 1024;
+	if (graphicQuality > 4.0) {
+		nearSize = 2048;
+		midSize = 2048;
+		farSize = 2048;
+	}
+	shadow->shadowMapSize = nearSize;
+	shadow->shadowPixSize = 0.4 / nearSize;
+
+	nearBuffer = new FrameBuffer(nearSize, nearSize, HIGH_PRE, 3);
+	midBuffer = new FrameBuffer(midSize, midSize, HIGH_PRE, 3);
+	farBuffer = new FrameBuffer(farSize, farSize, HIGH_PRE, 3);
 	lightDir = light; lightDir.Normalize();
 
 	queue1 = new Renderable(distance1, distance2); queue1->copyCamera(view);
@@ -21,7 +30,6 @@ RenderManager::RenderManager(int quality, Camera* view, float distance1, float d
 	state = new RenderState();
 
 	time = 0.0;
-	graphicQuality = quality;
 }
 
 RenderManager::~RenderManager() {
@@ -37,7 +45,7 @@ RenderManager::~RenderManager() {
 }
 
 void RenderManager::act() {
-	time += 0.01;
+	time += 0.1;
 }
 
 void RenderManager::updateShadowCamera() {
@@ -87,6 +95,8 @@ void RenderManager::swapRenderQueues(Scene* scene) {
 void RenderManager::renderShadow(Render* render, Scene* scene) {
 	if (!useShadow) return;
 
+	//render->setColorMask(true, false, false, false);
+
 	static Shader* phongShadowShader = render->findShader("phong_s");
 	static Shader* phongShadowInsShader = render->findShader("phong_s_ins");
 	static Shader* billboardShadowShader = render->findShader("billboard_s");
@@ -96,9 +106,6 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 
 	state->reset();
 	state->cullMode = CULL_FRONT;
-	state->enableAlphaTest = true;
-	state->alphaThreshold = 0.0;
-	state->alphaTestMode = GREATER;
 	state->light = lightDir;
 	state->time = time;
 
@@ -125,7 +132,6 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	state->shader = boneShadowShader;
 	currentQueue->queues[QUEUE_ANIMATE_SM]->draw(cameraMid, eye, render, state);
 
-
 	///*
 	//static ushort flushCount = 1;
 	//if (flushCount % 2 == 0) 
@@ -146,6 +152,8 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	//	flushCount++;
 	//}
 	//*/
+
+	//render->setColorMask(true, true, true, true);
 }
 
 void RenderManager::renderScene(Render* render, Scene* scene) {
@@ -155,9 +163,6 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	static Shader* boneShader = render->findShader("bone");
 
 	state->reset();
-	state->enableAlphaTest = true;
-	state->alphaThreshold = 0.0;
-	state->alphaTestMode = GREATER;
 	state->light = lightDir;
 	state->time = time;
 
@@ -198,7 +203,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 			Shader* shader = state->shader;
 			state->shader = waterShader;
 			state->waterPass = true;
-			state->blend = true;
+			//state->blend = true;
 			render->draw(camera, scene->water->drawcall, state);
 		}
 	}
@@ -211,7 +216,6 @@ void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* scre
 	state->reset();
 	state->enableCull = false;
 	state->enableDepthTest = false;
-	state->enableAlphaTest = false;
 	state->pass = 5;
 	state->shader = deferredShader;
 	state->shadow = shadow;
@@ -223,7 +227,28 @@ void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* scre
 	render->useTexture(TEXTURE_2D, baseSlot + 1, midBuffer->getColorBuffer(0)->id);
 	render->useTexture(TEXTURE_2D, baseSlot + 2, farBuffer->getColorBuffer(0)->id);
 	filter->draw(scene->mainCamera, render, state, screenBuff->colorBuffers, screenBuff->depthBuffer);
-	render->finishDraw();
+}
+
+void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, FrameBuffer* inputBuff, Filter* filter) {
+	static Shader* shader = render->findShader(shaderStr);
+	state->reset();
+	state->enableCull = false;
+	state->enableDepthTest = false;
+	state->pass = 6;
+	state->shader = shader;
+
+	filter->draw(scene->mainCamera, render, state, inputBuff->colorBuffers, NULL);
+}
+
+void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter) {
+	static Shader* shader = render->findShader(shaderStr);
+	state->reset();
+	state->enableCull = false;
+	state->enableDepthTest = false;
+	state->pass = 6;
+	state->shader = shader;
+
+	filter->draw(scene->mainCamera, render, state, inputTextures, NULL);
 }
 
 void RenderManager::drawBoundings(Render* render, RenderState* state, Scene* scene, Camera* camera) {

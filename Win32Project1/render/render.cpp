@@ -11,7 +11,7 @@ Render::Render() {
 Render::~Render() {
 	delete shaders;
 	shaders=NULL;
-	textureInUse.clear();
+	clearTextureSlots();
 }
 
 void Render::initEnvironment() {
@@ -37,7 +37,7 @@ void Render::initEnvironment() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	setClearColor(1,1,1,1);
 	currentShader=NULL;
-	textureInUse.clear();
+	clearTextureSlots();
 }
 
 void Render::clearFrame(bool clearColor,bool clearDepth,bool clearStencil) {
@@ -178,6 +178,7 @@ void Render::useShader(Shader* shader) {
 // Pass 3 draw far shadow (use simple buffer)
 // Pass 4 draw scene with color
 // Pass 5 deferred process
+// Pass 6 fxaa
 void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 	bool beforeCullState = state->enableCull;
 	int beforeCullMode = state->cullMode;
@@ -244,6 +245,8 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 
 void Render::finishDraw() {
 	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void Render::setFrameBuffer(FrameBuffer* framebuffer) {
@@ -255,9 +258,24 @@ void Render::setFrameBuffer(FrameBuffer* framebuffer) {
 	}
 }
 
+void Render::setColorMask(bool r, bool g, bool b, bool a) {
+	glColorMask(r, g, b, a);
+}
+
 void Render::useTexture(uint type, uint slot, uint texid) {
-	std::map<uint, uint>::iterator texItor = textureInUse.find(slot);
-	if (texItor != textureInUse.end() && texItor->second == texid) 
+	std::map<uint, std::map<uint, uint>*>::iterator typeItor = textureTypeSlots.find(type);
+	std::map<uint, uint>* textureInUse = NULL;
+	if (typeItor != textureTypeSlots.end())
+		textureInUse = typeItor->second;
+	else {
+		std::map<uint, uint>* slotMap = new std::map<uint, uint>();
+		textureTypeSlots[type] = slotMap;
+		slotMap->clear();
+		textureInUse = slotMap;
+	}
+
+	std::map<uint, uint>::iterator texItor = textureInUse->find(slot);
+	if (texItor != textureInUse->end() && texItor->second == texid) 
 		return;
 	GLenum textureType = GL_TEXTURE_2D;
 	switch (type) {
@@ -273,11 +291,16 @@ void Render::useTexture(uint type, uint slot, uint texid) {
 	}
 	glActiveTexture(GL_TEXTURE0 + slot);
 	glBindTexture(textureType, texid);
-	textureInUse[slot] = texid;
+	(*textureInUse)[slot] = texid;
 }
 
 
 void Render::clearTextureSlots() {
-	textureInUse.clear();
+	std::map<uint, std::map<uint, uint>*>::iterator itor = textureTypeSlots.begin();
+	while (itor != textureTypeSlots.end()) {
+		delete itor->second;
+		++itor;
+	}
+	textureTypeSlots.clear();
 }
 

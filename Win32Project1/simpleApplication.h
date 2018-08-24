@@ -8,6 +8,10 @@ class SimpleApplication : public Application {
 private:
 	FrameBuffer* screen;
 	Filter* screenFilter;
+	Filter* aaFilter;
+	Filter* blurFilter;
+	Filter* dofFilter;
+	std::vector<Texture2D*> dofInput;
 public:
 	SimpleApplication();
 	virtual ~SimpleApplication();

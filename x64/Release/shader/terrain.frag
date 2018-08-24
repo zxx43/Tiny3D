@@ -9,8 +9,8 @@ in vec3 vNormal;
 in float worldHeight;
 
 layout (location = 0) out vec4 FragTex;
-layout (location = 1) out vec3 FragColor;
-layout (location = 2) out vec3 FragNormal;
+layout (location = 1) out vec4 FragColor;
+layout (location = 2) out vec4 FragNormal;
 
 void main() {
 	vec4 tex1 = texture2DArray(texture, vTexcoord.xyz);
@@ -19,6 +19,6 @@ void main() {
 	vec4 textureColor = mix(tex1, tex2, blendPer);
 		
 	FragTex = textureColor;
-	FragColor = vColor;
-	FragNormal = normalize(vNormal) * 0.5 + 0.5;
+	FragColor = vec4(vColor, 1.0);
+	FragNormal = vec4(normalize(vNormal) * 0.5 + 0.5, 1.0);
 }

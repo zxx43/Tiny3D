@@ -134,7 +134,7 @@ void Batch::initMatrix(unsigned short currentObject, const MATRIX4X4& transformM
 	memcpy(normalMatrices + (currentObject * 9 + 6), normalMatrix.entries + 8, 3 * sizeof(float));
 }
 
-void Batch::setRenderData(int vertCnt, int indCnt, int objCnt,
+void Batch::setRenderData(int pass, int vertCnt, int indCnt, int objCnt,
 	float* vertices, float* normals, float* texcoords,
 	byte* colors, byte* objectids, uint* indices, float* matrices) {
 		vertexCount = vertCnt;
@@ -142,9 +142,13 @@ void Batch::setRenderData(int vertCnt, int indCnt, int objCnt,
 		objectCount = objCnt;
 
 		memcpy(vertexBuffer, vertices, vertexCount * 3 * sizeof(float));
-		memcpy(normalBuffer, normals, vertexCount * 3 * sizeof(float));
-		memcpy(texcoordBuffer, texcoords, vertexCount * 3 * sizeof(float));
-		memcpy(colorBuffer, colors, vertexCount * 3 * sizeof(byte));
+		if (pass == 1 || pass == 2 || pass == 4) {
+			memcpy(texcoordBuffer, texcoords, vertexCount * 3 * sizeof(float));
+			if (pass == 4) {
+				memcpy(normalBuffer, normals, vertexCount * 3 * sizeof(float));
+				memcpy(colorBuffer, colors, vertexCount * 3 * sizeof(byte));
+			}
+		}
 		memcpy(objectidBuffer, objectids, vertexCount * sizeof(byte));
 		memcpy(indexBuffer, indices, indexCount * sizeof(uint));
 		memcpy(modelMatrices, matrices, objectCount * 12 * sizeof(float));

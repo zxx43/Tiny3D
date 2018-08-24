@@ -26,6 +26,12 @@
 #define BILLBOARD_SHADOW_FRAG "shader/billboard_shadow.frag"
 #define WATER_VERT "shader/water.vert"
 #define WATER_FRAG "shader/water.frag"
+#define AA_VERT "shader/fxaa.vert"
+#define AA_FRAG "shader/fxaa.frag"
+#define BLUR_VERT "shader/blur.vert"
+#define BLUR_FRAG "shader/blur.frag"
+#define DOF_VERT "shader/dof.vert"
+#define DOF_FRAG "shader/dof.frag"
 
 void SetupShaders(Render* render) {
 	Shader* phong=render->shaders->addShader("phong",PHONG_VERT,PHONG_FRAG);
@@ -84,5 +90,18 @@ void SetupShaders(Render* render) {
 	deferred->setSampler("depthBufferNear", 4);
 	deferred->setSampler("depthBufferMid", 5);
 	deferred->setSampler("depthBufferFar", 6);
+
+	Shader* fxaa = render->shaders->addShader("fxaa", AA_VERT, AA_FRAG);
+	render->useShader(fxaa);
+	fxaa->setSampler("colorBuffer", 0);
+
+	Shader* blur = render->shaders->addShader("blur", BLUR_VERT, BLUR_FRAG);
+	render->useShader(blur);
+	blur->setSampler("colorBuffer", 0);
+
+	Shader* dof = render->shaders->addShader("dof", DOF_VERT, DOF_FRAG);
+	render->useShader(dof);
+	dof->setSampler("colorBufferLow", 0);
+	dof->setSampler("colorBufferHigh", 1);
 }
 

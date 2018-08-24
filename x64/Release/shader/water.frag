@@ -8,8 +8,8 @@ in vec3 vEye2Water;
 in vec3 vWater;
 
 layout (location = 0) out vec4 FragTex;
-layout (location = 1) out vec3 FragColor;
-layout (location = 2) out vec3 FragNormal;
+layout (location = 1) out vec4 FragColor;
+layout (location = 2) out vec4 FragNormal;
 
 void main() {
 	vec3 normal = normalize(vNormal);
@@ -29,6 +29,6 @@ void main() {
 	vec3 color = vec3(1.0, 0.0, 0.0);
 		
 	FragTex = surfaceColor;
-	FragColor = color;
-	FragNormal = normal * 0.5 + 0.5;
+	FragColor = vec4(color, 1.0);
+	FragNormal = vec4(normal * 0.5 + 0.5, 1.0);
 }

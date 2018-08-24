@@ -4,7 +4,7 @@ uniform mat4 viewProjectMatrix;
 uniform mat3x4 modelMatrices[100];
 
 layout (location = 0) in vec3 vertex;
-layout (location = 1) in float objectid;
+layout (location = 4) in float objectid;
 
 out vec2 projDepth;
 

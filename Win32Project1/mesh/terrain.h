@@ -11,7 +11,7 @@
 #include "mesh.h"
 
 #define MAP_SIZE 1024
-#define	STEP_SIZE 8
+#define	STEP_SIZE 4
 
 class Terrain: public Mesh {
 private:

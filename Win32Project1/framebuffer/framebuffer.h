@@ -18,8 +18,8 @@ const GLenum ColorAttachments[] = { GL_COLOR_ATTACHMENT0_EXT, GL_COLOR_ATTACHMEN
 
 class FrameBuffer {
 private:
+	float width, height;
 	unsigned int fboId;
-	float width,height;
 	int colorBufferCount;
 public:
 	std::vector<Texture2D*> colorBuffers;

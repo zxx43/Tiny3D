@@ -22,7 +22,10 @@ public:
 
 	void draw(Camera* camera, Render* render, RenderState* state, 
 		const std::vector<Texture2D*>& inputTextures, const Texture2D* depthTexture);
-	Texture2D* getOutput();
+	void addOutput(int precision, int component);
+	void addDepthBuffer(int precision);
+	FrameBuffer* getFrameBuffer();
+	Texture2D* getOutput(int i);
 };
 
 

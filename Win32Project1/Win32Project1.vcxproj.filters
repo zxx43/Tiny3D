@@ -580,6 +580,24 @@
     <None Include="..\x64\Release\shader\water.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\x64\Release\shader\fxaa.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\fxaa.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\dof.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\dof.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\blur.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\blur.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\x64\Release\config\config.txt">

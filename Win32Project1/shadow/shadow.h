@@ -30,6 +30,7 @@ public:
 	Camera* lightCameraFar;
 	MATRIX4X4 lightNearMat, lightMidMat, lightFarMat;
 	float level1,level2;
+	float shadowMapSize,shadowPixSize;
 	VECTOR3D lightDir;
 
 	Shadow(Camera* view,float distance1,float distance2);

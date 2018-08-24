@@ -45,8 +45,7 @@ public:
 	float* uModelMatrix;
 	float* uNormalMatrix;
 	int objectCount;
-	RenderBuffer** dataBuffers;
-	int bufferCount;
+	RenderBuffer* dataBuffer;
 
 	Drawcall();
 	virtual ~Drawcall();

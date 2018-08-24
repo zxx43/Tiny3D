@@ -17,6 +17,7 @@ public:
 public:
 	int windowWidth, windowHeight;
 	bool willExit;
+	float graphQuality, useDof, useFxaa;
 public:
 	Application();
 	virtual ~Application();
