@@ -181,11 +181,12 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 		scene->clearAllAABB();
 		scene->createNodeAABB(scene->staticRoot);
 		scene->createNodeAABB(scene->animationRoot);
+		static Shader* debugShader = render->findShader("debug");
 
 		state->enableCull = false;
 		state->drawLine = true;
 		state->enableAlphaTest = false;
-		state->shader = phongShader;
+		state->shader = debugShader;
 		drawBoundings(render, state, scene, camera);
 	}
 

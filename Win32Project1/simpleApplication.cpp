@@ -71,6 +71,8 @@ void SimpleApplication::keyUp(int key) {
 }
 
 void SimpleApplication::draw() {
+	if (!screenFilter) return;
+
 	renderMgr->renderShadow(render, scene);
 	render->setFrameBuffer(screen);
 	renderMgr->renderScene(render, scene);

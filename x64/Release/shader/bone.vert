@@ -35,7 +35,7 @@ void main() {
 
 	vColor = vec3(0.6, 1.2, 1.0) * color * 0.005;
 	vNormal = normal3;
-	vTexcoord = vec3(texcoord.x, 1.0 - texcoord.y, texcoord.z); 
+	vTexcoord = texcoord; 
 
 	vec4 modelPosition = uModelMatrix * position;
 	gl_Position = viewProjectMatrix * modelPosition;

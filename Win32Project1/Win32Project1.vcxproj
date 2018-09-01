@@ -297,6 +297,8 @@
     <None Include="..\x64\Release\shader\billboard.vert" />
     <None Include="..\x64\Release\shader\billboard_shadow.frag" />
     <None Include="..\x64\Release\shader\billboard_shadow.vert" />
+    <None Include="..\x64\Release\shader\debug.frag" />
+    <None Include="..\x64\Release\shader\debug.vert" />
     <None Include="..\x64\Release\shader\deferred.frag" />
     <None Include="..\x64\Release\shader\deferred.vert" />
     <None Include="..\x64\Release\shader\bone.frag" />

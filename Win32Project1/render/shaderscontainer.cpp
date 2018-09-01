@@ -32,22 +32,21 @@
 #define BLUR_FRAG "shader/blur.frag"
 #define DOF_VERT "shader/dof.vert"
 #define DOF_FRAG "shader/dof.frag"
+#define DEBUG_VERT "shader/debug.vert"
+#define DEBUG_FRAG "shader/debug.frag"
 
 void SetupShaders(Render* render) {
 	Shader* phong=render->shaders->addShader("phong",PHONG_VERT,PHONG_FRAG);
 	render->useShader(phong);
 	phong->setSampler("texture",0);
-	phong->setInt("useShadow", 0);
 
 	Shader* phongIns = render->shaders->addShader("phong_ins", PHONG_INS_VERT, PHONG_INS_FRAG);
 	render->useShader(phongIns);
 	phongIns->setSampler("texture", 0);
-	phongIns->setInt("useShadow", 0);
 
 	Shader* terrain = render->shaders->addShader("terrain", TERRAIN_VERT, TERRAIN_FRAG);
 	render->useShader(terrain);
 	terrain->setSampler("texture", 0);
-	terrain->setInt("useShadow", 0);
 
 	Shader* bone=render->shaders->addShader("bone",BONE_VERT,BONE_FRAG);
 	render->useShader(bone);
@@ -103,5 +102,7 @@ void SetupShaders(Render* render) {
 	render->useShader(dof);
 	dof->setSampler("colorBufferLow", 0);
 	dof->setSampler("colorBufferHigh", 1);
+
+	Shader* debug = render->shaders->addShader("debug", DEBUG_VERT, DEBUG_FRAG);
 }
 

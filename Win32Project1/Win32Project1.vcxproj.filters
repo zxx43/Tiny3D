@@ -598,6 +598,12 @@
     <None Include="..\x64\Release\shader\blur.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\x64\Release\shader\debug.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\debug.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\x64\Release\config\config.txt">
