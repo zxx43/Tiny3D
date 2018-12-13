@@ -118,7 +118,7 @@ float genShadowFactor(vec4 worldPos, float depthView, float bias) {
 }
 
 vec3 genFogColor(vec4 worldPos, float depthView, vec3 sceneColor) {
-	float fogStart = 0.0, fogEnd = 1800.0;
+	float fogStart = 0.0, fogEnd = 1500.0;
 	float startH = 200.0, endH = 1600.0;
 	vec3 fogColor = vec3(0.9);
 	float worldH = worldPos.y / worldPos.w;

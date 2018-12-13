@@ -1,9 +1,9 @@
 #version 330
-#extension GL_EXT_gpu_shader4 : enable 
 
-uniform sampler2DArray texture;
+uniform sampler2D texture;
+uniform vec4 texPixel;
 
-in vec3 vTexcoord;
+in vec4 vTexcoord;
 flat in vec3 vColor;
 in vec3 vNormal;
 
@@ -12,8 +12,8 @@ layout (location = 1) out vec4 FragColor;
 layout (location = 2) out vec4 FragNormal;
 
 void main() {
-	vec4 textureColor = texture2DArray(texture, vTexcoord);
-	if(textureColor.a < 0.1) discard;
+	vec4 textureColor = texture2D(texture, vTexcoord.zw);
+	if(textureColor.a < 0.3) discard;
 
 	FragTex = textureColor;
 	FragColor = vec4(vColor, 1.0);

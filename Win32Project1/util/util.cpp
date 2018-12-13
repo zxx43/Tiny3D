@@ -3,15 +3,13 @@
 MATRIX4X4 lookAt(float eyeX, float eyeY, float eyeZ,
 		float centerX, float centerY, float centerZ,
 		float upX, float upY, float upZ) {
-	VECTOR3D eye;
+	static VECTOR3D eye, center, up;
 	eye.x=eyeX;
 	eye.y=eyeY;
 	eye.z=eyeZ;
-	VECTOR3D center;
 	center.x=centerX;
 	center.y=centerY;
 	center.z=centerZ;
-	VECTOR3D up;
 	up.x=upX;
 	up.y=upY;
 	up.z=upZ;
@@ -36,6 +34,30 @@ MATRIX4X4 lookAt(float eyeX, float eyeY, float eyeZ,
 	mat.entries[12]=-(s.DotProduct(eye));
 	mat.entries[13]=-(u.DotProduct(eye));
 	mat.entries[14]=f.DotProduct(eye);
+	return mat;
+}
+
+MATRIX4X4 lookAt(const VECTOR3D& eye, const VECTOR3D& center, const VECTOR3D& up) {
+	VECTOR3D f = center - eye;
+	f.Normalize();
+	VECTOR3D s = f.CrossProduct(up);
+	s.Normalize();
+	VECTOR3D u = s.CrossProduct(f);
+	u.Normalize();
+
+	MATRIX4X4 mat;
+	mat.entries[0] = s.x;
+	mat.entries[4] = s.y;
+	mat.entries[8] = s.z;
+	mat.entries[1] = u.x;
+	mat.entries[5] = u.y;
+	mat.entries[9] = u.z;
+	mat.entries[2] = -f.x;
+	mat.entries[6] = -f.y;
+	mat.entries[10] = -f.z;
+	mat.entries[12] = -(s.DotProduct(eye));
+	mat.entries[13] = -(u.DotProduct(eye));
+	mat.entries[14] = f.DotProduct(eye);
 	return mat;
 }
 
@@ -159,6 +181,14 @@ MATRIX4X4 translate(float tx,float ty,float tz) {
 	mat.entries[12]=tx;
 	mat.entries[13]=ty;
 	mat.entries[14]=tz;
+	return mat;
+}
+
+MATRIX4X4 translate(const VECTOR3D& t) {
+	MATRIX4X4 mat;
+	mat.entries[12] = t.x;
+	mat.entries[13] = t.y;
+	mat.entries[14] = t.z;
 	return mat;
 }
 

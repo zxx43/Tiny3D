@@ -8,28 +8,17 @@
 #ifndef DRAWCALL_H_
 #define DRAWCALL_H_
 
-#define VERTEX_VBO 0
-#define NORMAL_VBO 1
-#define TEXCOORD_VBO 2
-#define COLOR_VBO 3
-#define OBJECTID_VBO 4
-#define BONEID_VBO 4
-#define WEIGHT_VBO 5
-#define MODEL_MATRIX_VBO 4
-
-#define VERTEX_LOCATION 0
-#define NORMAL_LOCATION 1
-#define TEXCOORD_LOCATION 2
-#define COLOR_LOCATION 3
-#define OBJECTID_LOCATION 4
-#define BONEIDS_LOCATION 4
-#define WEIGHTS_LOCATION 5
-#define MODEL_MATRIX_LOCATION 4
-
 #define NULL_DC 0
 #define STATIC_DC 1
 #define INSTANCE_DC 2
 #define ANIMATE_DC 3
+
+#define NEAR_SHADOW_PASS 1
+#define MID_SHADOW_PASS 2
+#define FAR_SHADOW_PASS 3
+#define COLOR_PASS 4
+#define DEFERRED_PASS 5
+#define POST_PASS 6
 
 #include "../maths/Maths.h"
 #include "renderState.h"

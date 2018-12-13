@@ -1,17 +1,11 @@
 #version 330
-#extension GL_EXT_gpu_shader4 : enable 
 
-uniform sampler2DArray texture;
+uniform sampler2D texture;
+uniform vec4 texPixel;
 
-in vec3 vTexcoord;
-in vec2 vProjDepth;
-
-layout (location = 0) out vec4 FragColor;
+in vec2 vTexcoord;
 
 void main() {
-	float alpha = texture2DArray(texture, vTexcoord).r;
-	if(alpha < 0.1) discard;
-
-	float depth = (vProjDepth.x / vProjDepth.y) * 0.5 + 0.5;
-	FragColor = vec4(depth);
+	float alpha = texture2D(texture, vTexcoord).a;
+	if(alpha < 0.25) discard;
 }

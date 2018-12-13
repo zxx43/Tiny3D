@@ -17,7 +17,7 @@ BmpLoader::~BmpLoader() {
 bool BmpLoader::loadBitmap(const char* fileName) {
 	FILE* file = fopen(fileName,"rb");
 	if (!file) {
-		printf("Image could not be opened\n");
+		printf("Image could not be opened %s\n", fileName);
 		return false;
 	}
 	if (fread(header, 1, 54, file)!=54) {//文件头并非54字节 读取失败

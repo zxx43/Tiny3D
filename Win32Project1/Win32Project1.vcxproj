@@ -217,6 +217,7 @@
     <ClCompile Include="texture\cubemap.cpp" />
     <ClCompile Include="texture\imageset.cpp" />
     <ClCompile Include="texture\texture2d.cpp" />
+    <ClCompile Include="texture\textureatlas.cpp" />
     <ClCompile Include="util\triangle.cpp" />
     <ClCompile Include="util\util.cpp" />
   </ItemGroup>
@@ -288,6 +289,7 @@
     <ClInclude Include="texture\cubemap.h" />
     <ClInclude Include="texture\imageset.h" />
     <ClInclude Include="texture\texture2d.h" />
+    <ClInclude Include="texture\textureatlas.h" />
     <ClInclude Include="util\dirent.h" />
     <ClInclude Include="util\triangle.h" />
     <ClInclude Include="util\util.h" />
@@ -309,20 +311,27 @@
     <None Include="..\x64\Release\shader\dof.vert" />
     <None Include="..\x64\Release\shader\fxaa.frag" />
     <None Include="..\x64\Release\shader\fxaa.vert" />
+    <None Include="..\x64\Release\shader\mean.frag" />
+    <None Include="..\x64\Release\shader\mean.vert" />
     <None Include="..\x64\Release\shader\phong.frag" />
     <None Include="..\x64\Release\shader\phong.vert" />
     <None Include="..\x64\Release\shader\phong_ins.frag" />
     <None Include="..\x64\Release\shader\phong_ins.vert" />
     <None Include="..\x64\Release\shader\phong_shadow.frag" />
     <None Include="..\x64\Release\shader\phong_shadow.vert" />
+    <None Include="..\x64\Release\shader\phong_shadow_ins.frag" />
     <None Include="..\x64\Release\shader\phong_shadow_ins.vert" />
     <None Include="..\x64\Release\shader\phong_shadow_low.frag" />
     <None Include="..\x64\Release\shader\phong_shadow_low.vert" />
     <None Include="..\x64\Release\shader\phong_shadow_low_ins.vert" />
     <None Include="..\x64\Release\shader\blur.frag" />
     <None Include="..\x64\Release\shader\blur.vert" />
+    <None Include="..\x64\Release\shader\screen.frag" />
+    <None Include="..\x64\Release\shader\screen.vert" />
     <None Include="..\x64\Release\shader\sky.frag" />
     <None Include="..\x64\Release\shader\sky.vert" />
+    <None Include="..\x64\Release\shader\ssr.frag" />
+    <None Include="..\x64\Release\shader\ssr.vert" />
     <None Include="..\x64\Release\shader\terrain.frag" />
     <None Include="..\x64\Release\shader\terrain.vert" />
     <None Include="..\x64\Release\shader\water.frag" />

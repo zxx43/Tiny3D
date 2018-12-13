@@ -16,11 +16,18 @@ struct Material
 	VECTOR3D ambient;
 	VECTOR3D diffuse;
 	VECTOR3D specular;
-	VECTOR4D texture;
+	bool useArray;
+	std::string tex1, tex2, tex3;
+	VECTOR4D texOfs1, texOfs2;
+	VECTOR4D texSize;
 	Material(const char* mtlName) {
 		id = -1;
 		name = mtlName;
-		texture = VECTOR4D(-1,-1,-1,-1);
+		useArray = false;
+		tex1 = "", tex2 = "", tex3 = "";
+		texOfs1 = VECTOR4D(-1, -1, -1, -1);
+		texOfs2 = VECTOR4D(-1, -1, -1, -1);
+		texSize = VECTOR4D(-1, -1, -1, -1);
 		ambient = VECTOR3D(0.4, 0.4, 0.4);
 		diffuse = VECTOR3D(0.6, 0.6, 0.6);
 		specular = VECTOR3D(0, 0, 0);

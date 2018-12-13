@@ -31,7 +31,7 @@ StaticObject::StaticObject(const StaticObject& rhs) {
 	localBoundPosition = rhs.localBoundPosition;
 
 	if (rhs.billboard)
-		setBillboard(rhs.billboard->data[0], rhs.billboard->data[1], rhs.billboard->texid);
+		setBillboard(rhs.billboard->data[0], rhs.billboard->data[1], rhs.billboard->material);
 }
 
 StaticObject::~StaticObject() {}

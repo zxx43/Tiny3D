@@ -21,16 +21,18 @@ Camera::~Camera() {
 	frustum=NULL;
 }
 
-void Camera::initPerspectCamera(float fovy,float aspect,float zNear,float zFar) {
-	this->fovy=fovy;
-	this->aspect=aspect;
-	this->zNear=zNear;
-	this->zFar=zFar;
-	projectMatrix=perspective(fovy,aspect,zNear,zFar);
+void Camera::initPerspectCamera(float fovy, float aspect, float zNear, float zFar) {
+	this->fovy = fovy;
+	this->aspect = aspect;
+	this->zNear = zNear;
+	this->zFar = zFar;
+	projectMatrix = perspective(fovy, aspect, zNear, zFar);
+	invProjMatrix = projectMatrix.GetInverse();
 }
 
-void Camera::initOrthoCamera(float left,float right,float bottom,float top,float near,float far) {
-	projectMatrix=ortho(left,right,bottom,top,near,far);
+void Camera::initOrthoCamera(float left, float right, float bottom, float top, float near, float far) {
+	projectMatrix = ortho(left, right, bottom, top, near, far);
+	invProjMatrix = projectMatrix.GetInverse();
 }
 
 void Camera::setView(const VECTOR3D& pos, const VECTOR3D& dir) {
@@ -38,7 +40,7 @@ void Camera::setView(const VECTOR3D& pos, const VECTOR3D& dir) {
 	lookDir.x=dir.x; lookDir.y=dir.y; lookDir.z=dir.z;
 
 	VECTOR3D center(lookDir.x+position.x,lookDir.y+position.y,lookDir.z+position.z);
-	viewMatrix=lookAt(position.x,position.y,position.z,center.x,center.y,center.z,up.x,up.y,up.z);
+	viewMatrix=lookAt(position,center,up);
 }
 
 void Camera::updateLook(const VECTOR3D& pos, const VECTOR3D& dir) {
@@ -47,20 +49,13 @@ void Camera::updateLook(const VECTOR3D& pos, const VECTOR3D& dir) {
 }
 
 void Camera::updateMoveable(uint transType) {
-	if (transType == TRANS_TRANSLATE)
-		transMat = translate(-position.x, -position.y, -position.z);
-	else if (transType == TRANS_ROTATE_Y) 
+	if (transType & TRANS_TRANSLATE)
+		transMat = translate(-position);
+	if (transType & TRANS_ROTATE_Y) 
 		rotXMat = rotateX(-yrot);
-	else if (transType == TRANS_ROTATE_X)
+	if (transType & TRANS_ROTATE_X)
 		rotYMat = rotateY(-xrot);
-	else if (transType == TRANS_ROTATE_XY) {
-		rotXMat = rotateX(-yrot);
-		rotYMat = rotateY(-xrot);
-	} else if (transType == TRANS_ALL) {
-		transMat = translate(-position.x, -position.y, -position.z);
-		rotXMat = rotateX(-yrot);
-		rotYMat = rotateY(-xrot);
-	}
+
 	viewMatrix = rotXMat * rotYMat * transMat;
 
 	lookDir4 = viewMatrix.GetInverse() * UNIT_NEG_Z;
@@ -167,5 +162,6 @@ void Camera::copy(Camera* src) {
 	projectMatrix = src->projectMatrix;
 	viewProjectMatrix = src->viewProjectMatrix;
 	invViewProjectMatrix = src->invViewProjectMatrix;
+	invProjMatrix = src->invProjMatrix;
 	position = src->position;
 }

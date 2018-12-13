@@ -40,15 +40,16 @@ CubeMap::CubeMap(const char* xpos,const char* xneg,const char* ypos,
 			0,GL_RGBA,GL_UNSIGNED_BYTE,znegImg->data);
 
 	glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+
+	delete xposImg; xposImg = NULL;
+	delete xnegImg; xnegImg = NULL;
+	delete yposImg; yposImg = NULL;
+	delete ynegImg; ynegImg = NULL;
+	delete zposImg; zposImg = NULL;
+	delete znegImg; znegImg = NULL;
 }
 
 CubeMap::~CubeMap() {
 	glDeleteTextures(1,&id);
-	delete xposImg; xposImg=NULL;
-	delete xnegImg; xnegImg=NULL;
-	delete yposImg; yposImg=NULL;
-	delete ynegImg; ynegImg=NULL;
-	delete zposImg; zposImg=NULL;
-	delete znegImg; znegImg=NULL;
 }
 

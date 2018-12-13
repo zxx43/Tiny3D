@@ -10,11 +10,9 @@
 
 #include "frustum.h"
 
-#define TRANS_TRANSLATE 0
-#define TRANS_ROTATE_X 1
-#define TRANS_ROTATE_Y 2
-#define TRANS_ROTATE_XY 3
-#define TRANS_ALL 4
+#define TRANS_TRANSLATE 1
+#define TRANS_ROTATE_X 1<<1
+#define TRANS_ROTATE_Y 1<<2
 
 const VECTOR3D ZERO_VEC3(0,0,0);
 const VECTOR3D UNIT_VEC3(1,1,1);
@@ -31,7 +29,7 @@ public:
 	VECTOR3D position, lookDir, up;
 	float fovy,aspect,zNear,zFar;
 	MATRIX4X4 viewMatrix, projectMatrix, viewProjectMatrix;
-	MATRIX4X4 invViewProjectMatrix;
+	MATRIX4X4 invViewProjectMatrix, invProjMatrix;
 
 	Camera(float height);
 	~Camera();

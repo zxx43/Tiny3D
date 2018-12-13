@@ -29,9 +29,9 @@ struct InstanceData {
 			matrices = (float*)malloc(MAX_INSTANCE_COUNT * 12 * sizeof(float));
 			memset(matrices, 0, MAX_INSTANCE_COUNT * 12 * sizeof(float));
 		} else {
-			billboards = (float*)malloc(MAX_INSTANCE_COUNT * 2 * sizeof(float));
+			billboards = (float*)malloc(MAX_INSTANCE_COUNT * 4 * sizeof(float));
 			positions = (float*)malloc(MAX_INSTANCE_COUNT * 3 * sizeof(float));
-			memset(billboards, 0, MAX_INSTANCE_COUNT * 2 * sizeof(float));
+			memset(billboards, 0, MAX_INSTANCE_COUNT * 4 * sizeof(float));
 			memset(positions, 0, MAX_INSTANCE_COUNT * 3 * sizeof(float));
 		}
 	}
@@ -48,7 +48,17 @@ struct InstanceData {
 		if (matrices)
 			memcpy(matrices + (count * 12), object->transformMatrix.GetTranspose().entries, 12 * sizeof(float));
 		else {
-			memcpy(billboards + (count * 2), object->billboard->data, 2 * sizeof(float));
+			Material* mat = NULL;
+			if (MaterialManager::materials)
+				mat = MaterialManager::materials->find(object->billboard->material);
+
+			billboards[count * 4 + 0] = object->billboard->data[0];
+			billboards[count * 4 + 1] = object->billboard->data[1];
+			if (mat) {
+				billboards[count * 4 + 2] = mat->texOfs1.x;
+				billboards[count * 4 + 3] = mat->texOfs1.y;
+			}
+
 			memcpy(positions + (count * 3), object->transformMatrix.entries + 12, 3 * sizeof(float));
 		}
 		count++;
@@ -68,7 +78,7 @@ struct BatchData {
 	BatchData() {
 		vertices = (float*)malloc(MAX_VERTEX_COUNT * 3 * sizeof(float));
 		normals = (float*)malloc(MAX_VERTEX_COUNT * 3 * sizeof(float));
-		texcoords = (float*)malloc(MAX_VERTEX_COUNT * 3 * sizeof(float));
+		texcoords = (float*)malloc(MAX_VERTEX_COUNT * 4 * sizeof(float));
 		colors = (byte*)malloc(MAX_VERTEX_COUNT * 3 * sizeof(byte));
 		objectids = (byte*)malloc(MAX_VERTEX_COUNT * sizeof(byte));
 		indices = (uint*)malloc(MAX_INDEX_COUNT * sizeof(uint));
@@ -116,9 +126,10 @@ struct BatchData {
 			normals[vertexCount * 3 + 1] = mesh->normals4[i].y;
 			normals[vertexCount * 3 + 2] = mesh->normals4[i].z;
 
-			texcoords[vertexCount * 3] = mesh->texcoords[i].x;
-			texcoords[vertexCount * 3 + 1] = mesh->texcoords[i].y;
-			texcoords[vertexCount * 3 + 2] = mat->texture.x;
+			texcoords[vertexCount * 4] = mesh->texcoords[i].x;
+			texcoords[vertexCount * 4 + 1] = mesh->texcoords[i].y;
+			texcoords[vertexCount * 4 + 2] = mat->texOfs1.x;
+			texcoords[vertexCount * 4 + 3] = mat->texOfs1.y;
 
 			colors[vertexCount * 3] = (byte)(mat->ambient.x * 255);
 			colors[vertexCount * 3 + 1] = (byte)(mat->diffuse.x * 255);

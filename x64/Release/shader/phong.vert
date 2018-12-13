@@ -2,14 +2,15 @@
 
 uniform mat3x4 modelMatrices[100];
 uniform mat4 viewProjectMatrix;
+uniform vec4 texPixel;
 
 layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 normal;
-layout (location = 2) in vec3 texcoord;
-layout (location = 3) in vec3 color;
-layout (location = 4) in float objectid;
+layout (location = 2) in vec4 texcoord;
+layout (location = 4) in vec3 color;
+layout (location = 5) in float objectid;
 
-out vec3 vTexcoord;
+out vec2 vTexcoord;
 flat out vec3 vColor;
 out vec3 vNormal;
 
@@ -28,6 +29,9 @@ void main() {
 	vec4 worldVertex = matModel * vec4(vertex, 1.0);
 	vNormal = mat3(matModel) * normal;
 	
-	vTexcoord = texcoord;
+	float tx = (texcoord.x * texPixel.z + texcoord.z) * texPixel.x;
+	float ty = (texcoord.y * texPixel.w + texcoord.w) * texPixel.y;
+
+	vTexcoord = vec2(tx, ty);
 	gl_Position = viewProjectMatrix * worldVertex;
 }

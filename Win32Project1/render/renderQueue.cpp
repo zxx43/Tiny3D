@@ -2,7 +2,7 @@
 #include "../node/staticNode.h"
 #include "../node/animationNode.h"
 #include "../node/instanceNode.h"
-#include "../node/waterNode.h"
+#include "../assets/assetManager.h"
 #include <string.h>
 #include <stdlib.h>
 using namespace std;
@@ -100,11 +100,13 @@ void RenderQueue::draw(Camera* camera, const VECTOR3D& eye, Render* render, Rend
 
 			render->draw(camera, node->drawcall, state);
 		} else if (node->type == TYPE_TERRAIN) {
-			if (state->pass == 4) {
+			if (state->pass == COLOR_PASS) {
 				static Shader* terrainShader = render->findShader("terrain");
 				Shader* shader = state->shader;
 				state->shader = terrainShader;
+				render->useTexture(TEXTURE_2D_ARRAY, 0, AssetManager::assetManager->texArray->setId);
 				render->draw(camera, node->drawcall, state);
+				render->useTexture(TEXTURE_2D, 0, AssetManager::assetManager->texAlt->texId);
 				state->shader = shader;
 			}
 		}

@@ -43,16 +43,14 @@ void MtlLoader::readMtlFile() {
 			if(value=="newmtl") {
 				ins>>name;
 				mtl = new Material(name.c_str());
-				mtl->texture=VECTOR4D(-1,-1,-1,-1);
 				objMtls[name] = MaterialManager::materials->add(mtl);
 				n++;
 			} else if(value=="map_Kd") {
 				ins>>texture;
 				if (mtl) {
-					ImageSet* textures = AssetManager::assetManager->textures;
-					if (textures->findTexture(texture.c_str()) < 0)
-						textures->addTexture(texture.c_str());
-					mtl->texture.x = textures->findTexture(texture.c_str());
+					if (!AssetManager::assetManager->findTextureAtlasOfs(texture.c_str()))
+						AssetManager::assetManager->addTexture2Alt(texture.c_str());
+					mtl->tex1 = texture;
 				}
 				t++;
 			} else if(value=="Kd") {

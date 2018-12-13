@@ -29,11 +29,11 @@ Filter::~Filter() {
 void Filter::draw(Camera* camera, Render* render, RenderState* state,
 		const std::vector<Texture2D*>& inputTextures, const Texture2D* depthTexture) {
 	render->setFrameBuffer(framebuffer);
-	render->useShader(state->shader);
-	state->shader->setVector2("pixelSize",pixWidth,pixHeight);
+	render->setShaderVec2(state->shader, "pixelSize", pixWidth, pixHeight);
+
 	if (state->shadow) {
 		float shadowPixSize = state->shadow->shadowPixSize;
-		state->shader->setVector2("shadowPixSize", shadowPixSize, shadowPixSize);
+		render->setShaderVec2(state->shader, "shadowPixSize", shadowPixSize, shadowPixSize);
 	}
 	uint bufferid;
 	for (bufferid = 0; bufferid < inputTextures.size(); bufferid++)

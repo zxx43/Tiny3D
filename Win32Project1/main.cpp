@@ -23,6 +23,7 @@ DWORD currentTime = 0, startTime = 0;
 DWORD screenLeft, screenTop;
 int screenHalfX, screenHalfY;
 POINT mPoint;
+bool pressed = false;
 
 SimpleApplication* app = NULL;
 void CreateApplication();
@@ -57,9 +58,11 @@ void DrawWindow() {
 	dataPrepared = false;
 	ReleaseMutex(mutex);
 	/*
-	GetCursorPos(&mPoint);
-	app->moveMouse(mPoint.x, mPoint.y, screenHalfX, screenHalfY);
-	SetCursorPos(screenHalfX, screenHalfY);
+	if (pressed) {
+		GetCursorPos(&mPoint);
+		app->moveMouse(mPoint.x, mPoint.y, screenHalfX, screenHalfY);
+		SetCursorPos(screenHalfX, screenHalfY);
+	}
 	app->moveKey();
 	//*/
 }
@@ -69,9 +72,11 @@ DWORD WINAPI ActThreadRun(LPVOID param) {
 	DWORD last = 0;
 	while (!app->willExit) {
 		if (currentTime - last > 1) {
-			GetCursorPos(&mPoint);
-			app->moveMouse(mPoint.x, mPoint.y, screenHalfX, screenHalfY);
-			SetCursorPos(screenHalfX, screenHalfY);
+			if (pressed) {
+				GetCursorPos(&mPoint);
+				app->moveMouse(mPoint.x, mPoint.y, screenHalfX, screenHalfY);
+				SetCursorPos(screenHalfX, screenHalfY);
+			}
 			app->moveKey();
 
 			last = currentTime;
@@ -119,7 +124,7 @@ void InitGLWin() {
 }
 
 void InitGL() {
-	ShowCursor(false);
+	//ShowCursor(false);
 	app->init();
 	InitMutex();
 	CreateThreads();
@@ -260,15 +265,32 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam) {
 			break;
 		case WM_MOUSEMOVE:
 			/*
-			if (app) {
+			if (app && pressed) {
 				GetCursorPos(&mPoint);
 				app->moveMouse(mPoint.x, mPoint.y, screenHalfX, screenHalfY);
 				SetCursorPos(screenHalfX, screenHalfY);
 			}
 			//*/
 			break;
+		case WM_LBUTTONDOWN:
+			pressed = true;
+			ShowCursor(false);
+			break;
+		case WM_LBUTTONUP:
+			pressed = false;
+			ShowCursor(true);
+			break;
 		case WM_SIZE:
 			ResizeWindow(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+			break;
+		case WM_MOUSEWHEEL:
+			{	
+				short dWheel = GET_WHEEL_DELTA_WPARAM(wParam);
+				if (dWheel > 0)
+					app->moveByDir(MNEAR);
+				else if (dWheel < 0)
+					app->moveByDir(MFAR);
+			}
 			break;
 		case WM_DESTROY:
 			PostQuitMessage(0);

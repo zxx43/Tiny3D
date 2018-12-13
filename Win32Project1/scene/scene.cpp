@@ -11,13 +11,16 @@
 using namespace std;
 
 Scene::Scene() {
+	inited = false;
 	mainCamera = new Camera(4.0);
 	mainCamera->simpleCheck = false;
 	mainCamera->isMain = true;
+	reflectCamera = new Camera(0.0);
+	reflectCamera->simpleCheck = false;
 	skyBox = NULL;
 	water = NULL;
 	terrainNode = NULL;
-	screenNode = NULL;
+	textureNode = NULL;
 	
 	staticRoot = NULL;
 	billboardRoot = NULL;
@@ -31,9 +34,10 @@ Scene::Scene() {
 
 Scene::~Scene() {
 	if (mainCamera) delete mainCamera; mainCamera = NULL;
+	if (reflectCamera) delete reflectCamera; reflectCamera = NULL;
 	if (skyBox) delete skyBox; skyBox = NULL;
 	if (water) delete water; water = NULL;
-	if (screenNode) delete screenNode; screenNode = NULL;
+	if (textureNode) delete textureNode; textureNode = NULL;
 
 	if (staticRoot) delete staticRoot; staticRoot = NULL;
 	if (billboardRoot) delete billboardRoot; billboardRoot = NULL;
@@ -63,6 +67,17 @@ void Scene::flushNodes() {
 	Node::nodesToRemove.clear();
 }
 
+void Scene::updateReflectCamera() {
+	if (water) {
+		static MATRIX4X4 transMat = scaleY(-1) * translate(0, water->position.y, 0);
+		reflectCamera->viewMatrix = mainCamera->viewMatrix * transMat;
+		reflectCamera->lookDir.x = mainCamera->lookDir.x;
+		reflectCamera->lookDir.y = -mainCamera->lookDir.y;
+		reflectCamera->lookDir.z = mainCamera->lookDir.z;
+		reflectCamera->updateFrustum();
+	}
+}
+
 void Scene::createNodeAABB(Node* node) {
 	AABB* aabb = (AABB*)node->boundingBox;
 	if(aabb) {
@@ -80,6 +95,26 @@ void Scene::createNodeAABB(Node* node) {
 	}
 	for (uint i = 0; i < node->children.size(); i++)
 		createNodeAABB(node->children[i]);
+	
+	if (node->children.size() == 0) {
+		for (uint i = 0; i < node->objects.size(); i++) {
+			AABB* aabb = (AABB*)node->objects[i]->bounding;
+			if (aabb) {
+				StaticNode* aabbNode = new StaticNode(aabb->position);
+				StaticObject* aabbObject = new StaticObject(AssetManager::assetManager->meshes.find("box")->second);
+				aabbNode->setDynamicBatch(false);
+				aabbObject->bindMaterial(MaterialManager::materials->find(BLACK_MAT));
+				aabbObject->setSize(aabb->sizex, aabb->sizey, aabb->sizez);
+				aabbNode->addObject(aabbObject);
+				aabbNode->updateNode();
+				aabbNode->prepareDrawcall();
+				aabbNode->updateRenderData();
+				aabbNode->updateDrawcall();
+				boundingNodes.push_back(aabbNode);
+			}
+		}
+	}
+	
 }
 
 void Scene::clearAllAABB() {

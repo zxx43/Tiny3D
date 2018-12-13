@@ -29,6 +29,7 @@ public:
 	float* vertexBuffer;
 	float* normalBuffer;
 	float* texcoordBuffer;
+	float* texOfsBuffer;
 	unsigned char* colorBuffer;
 	unsigned char* objectidBuffer;
 	unsigned int* indexBuffer;
@@ -38,7 +39,7 @@ public:
 	float* modelMatrices;
 	float* normalMatrices;
 
-	int textureChannel;
+	int textureCount;
 	StaticDrawcall* drawcall;
 
 	Batch();

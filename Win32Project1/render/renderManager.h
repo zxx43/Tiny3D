@@ -50,6 +50,7 @@ class RenderManager {
 public:
 	VECTOR3D lightDir;
 	RenderState* state;
+	bool enableSsr;
 private:
 	Shadow* shadow;
 	float time;
@@ -69,11 +70,13 @@ public:
 	FrameBuffer* nearBuffer;
 	FrameBuffer* midBuffer;
 	FrameBuffer* farBuffer;
+	FrameBuffer* reflectBuffer;
 
 	RenderManager(int quality, Camera* view, float distance1, float distance2, const VECTOR3D& light);
 	~RenderManager();
 
 	void act();
+	void resize(float width, float height);
 	void updateShadowCamera();
 	void updateMainLight();
 	void flushRenderQueues();
@@ -82,6 +85,7 @@ public:
 	void swapRenderQueues(Scene* scene);
 	void renderShadow(Render* render,Scene* scene);
 	void renderScene(Render* render,Scene* scene);
+	void renderReflect(Render* render, Scene* scene);
 	void enableShadow(Render* render);
 	void disableShadow(Render* render);
 	void showBounding();
@@ -90,6 +94,8 @@ public:
 	void drawDeferred(Render* render, Scene* scene, FrameBuffer* screenBuff, Filter* filter);
 	void drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, FrameBuffer* inputBuff, Filter* filter);
 	void drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter);
+	void drawSSRFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter);
+	void drawTexture2Screen(Render* render, Scene* scene, uint texid);
 };
 
 

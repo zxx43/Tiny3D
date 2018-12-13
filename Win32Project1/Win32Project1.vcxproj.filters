@@ -288,6 +288,9 @@
     <ClCompile Include="config\config.cpp">
       <Filter>Source Files\config</Filter>
     </ClCompile>
+    <ClCompile Include="texture\textureatlas.cpp">
+      <Filter>Source Files\texture</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="animation\animation.h">
@@ -500,6 +503,9 @@
     <ClInclude Include="config\config.h">
       <Filter>Source Files\config</Filter>
     </ClInclude>
+    <ClInclude Include="texture\textureatlas.h">
+      <Filter>Source Files\texture</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\x64\Release\shader\bone.frag">
@@ -602,6 +608,27 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\x64\Release\shader\debug.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\screen.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\screen.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\phong_shadow_ins.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\ssr.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\ssr.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\mean.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\mean.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

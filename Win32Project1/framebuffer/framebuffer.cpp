@@ -1,16 +1,31 @@
 #include "framebuffer.h"
 
 FrameBuffer::FrameBuffer(float width, float height, int precision, int component) {
-	this->width=width;
-	this->height=height;
+	this->width = width;
+	this->height = height;
 
-	glGenFramebuffersEXT(1,&fboId);
+	glGenFramebuffersEXT(1, &fboId);
 
 	colorBuffers.clear();
 	colorBufferCount = 0;
-	addColorBuffer(precision, component);
 
-	depthBuffer=NULL;
+	depthBuffer = NULL;
+	depthOnly = false;
+	addColorBuffer(precision, component);
+}
+
+FrameBuffer::FrameBuffer(float width, float height, int precision) {
+	this->width = width;
+	this->height = height;
+
+	glGenFramebuffersEXT(1, &fboId);
+
+	colorBuffers.clear();
+	colorBufferCount = 0;
+
+	depthBuffer = NULL;
+	depthOnly = true;
+	attachDepthBuffer(precision);
 }
 
 FrameBuffer::~FrameBuffer() {
@@ -30,6 +45,11 @@ void FrameBuffer::attachDepthBuffer(int precision) {
 	
 	depthBuffer = new Texture2D(width, height, TEXTURE_TYPE_DEPTH, precision, 4);
 	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, depthBuffer->id, 0);
+
+	if (depthOnly) {
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+	}
 
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 }
@@ -52,11 +72,17 @@ Texture2D* FrameBuffer::getColorBuffer(int n) {
 	return colorBuffers[n];
 }
 
+Texture2D* FrameBuffer::getDepthBuffer() {
+	return depthBuffer;
+}
+
 void FrameBuffer::use() {
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId);
-	GLbitfield clearMask=GL_COLOR_BUFFER_BIT;
-	if(depthBuffer)
-		clearMask|=GL_DEPTH_BUFFER_BIT;
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId);
+	GLbitfield clearMask = GL_COLOR_BUFFER_BIT;
+	if (depthOnly)
+		clearMask = GL_DEPTH_BUFFER_BIT;
+	else if (depthBuffer)
+		clearMask |= GL_DEPTH_BUFFER_BIT;
 	glClear(clearMask);
-	glViewport(0,0,width,height);
+	glViewport(0, 0, width, height);
 }

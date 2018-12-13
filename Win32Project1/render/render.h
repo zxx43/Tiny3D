@@ -17,6 +17,8 @@
 #define TEXTURE_CUBE 3
 
 class Render {
+public:
+	static float MaxAniso;
 private:
 	void initEnvironment();
 public: // Global render state
@@ -48,7 +50,7 @@ public:
 	void setBlend(bool enable);
 	void setClearColor(float r,float g,float b,float a);
 	void setViewPort(int width,int height);
-	void resize(int width,int height,Camera* mainCamera);
+	void resize(int width, int height, Camera* mainCamera, Camera* reflectCamera);
 	Shader* findShader(const char* shader);
 	void useShader(Shader* shader);
 	void draw(Camera* camera, Drawcall* drawcall, RenderState* state);
@@ -57,6 +59,18 @@ public:
 	void setColorMask(bool r, bool g, bool b, bool a);
 	void useTexture(uint type, uint slot, uint texid);
 	void clearTextureSlots();
+
+	void setShaderInt(Shader* shader, const char* param, int value) { useShader(shader); shader->setInt(param, value); }
+	void setShaderSampler(Shader* shader, const char* param, int value) { useShader(shader); shader->setSampler(param, value); }
+	void setShaderFloat(Shader* shader, const char* param, float value) { useShader(shader); shader->setFloat(param, value); }
+	void setShaderVec2(Shader* shader, const char* param, float x, float y) { useShader(shader); shader->setVector2(param, x, y); }
+	void setShaderVec3(Shader* shader, const char* param, float x, float y, float z) { useShader(shader); shader->setVector3(param, x, y, z); }
+	void setShaderVec4(Shader* shader, const char* param, float x, float y, float z, float w) { useShader(shader); shader->setVector4(param, x, y, z, w); }
+	void setShaderMat4(Shader* shader, const char* param, float* matrix) { useShader(shader); shader->setMatrix4(param, matrix); }
+	void setShaderMat4(Shader* shader, const char* param, int count, float* matrices) { useShader(shader); shader->setMatrix4(param, count, matrices); }
+	void setShaderMat3x4(Shader* shader, const char* param, int count, float* matrices) { useShader(shader); shader->setMatrix3x4(param, count, matrices); }
+	void setShaderMat3(Shader* shader, const char* param, float* matrix) { useShader(shader); shader->setMatrix3(param, matrix); }
+	void setShaderMat3(Shader* shader, const char* param, int count, float* matrices) { useShader(shader); shader->setMatrix3(param, count, matrices); }
 };
 
 

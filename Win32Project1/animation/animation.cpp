@@ -155,11 +155,9 @@ void Animation::loadMaterials() {
 		if(mat->Get(AI_MATKEY_NAME, name)!=AI_SUCCESS) name="animation_mat";
 		Material* mtl = new Material(name.data);
 		if (mat->GetTexture(aiTextureType_DIFFUSE, 0, &path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) {
-			ImageSet* textures = AssetManager::assetManager->textures;
-			if (textures->findTexture(path.data) < 0)
-				textures->addTexture(path.data);
-			int textureid = textures->findTexture(path.data);
-			mtl->texture.x = textureid;
+			if (!AssetManager::assetManager->findTextureAtlasOfs(path.data))
+				AssetManager::assetManager->addTexture2Alt(path.data);
+			mtl->tex1 = path.data;
 		}
 		aiGetMaterialColor(mat, AI_MATKEY_COLOR_AMBIENT, &ambent);
 		aiGetMaterialColor(mat, AI_MATKEY_COLOR_DIFFUSE, &diffuse);
@@ -189,7 +187,7 @@ void Animation::loadMeshes(Entry* entry) {
 		int mid = materialMap[entry->materialIndex];
 		Material* mat = MaterialManager::materials->find(mid);
 		if (!mat) mat = MaterialManager::materials->find(0);
-		aTextures.push_back(mat->texture);
+		aTextures.push_back(mat);
 		aAmbients.push_back(mat->ambient);
 		aDiffuses.push_back(mat->diffuse);
 		aSpeculars.push_back(mat->specular);

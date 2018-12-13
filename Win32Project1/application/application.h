@@ -17,7 +17,7 @@ public:
 public:
 	int windowWidth, windowHeight;
 	bool willExit;
-	float graphQuality, useDof, useFxaa;
+	float graphQuality, useDof, useFxaa, useSsr;
 public:
 	Application();
 	virtual ~Application();
@@ -26,6 +26,7 @@ public:
 	virtual void draw() = 0;
 	virtual void act(long startTime, long currentTime);
 	virtual void moveKey();
+	virtual void moveByDir(int dir);
 	void moveMouse(const float mx, const float my, const float cx, const float cy);
 	void prepare();
 	void animate(long startTime, long currentTime);

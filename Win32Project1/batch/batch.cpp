@@ -10,12 +10,13 @@ Batch::Batch() {
 	vertexBuffer=NULL;
 	normalBuffer=NULL;
 	texcoordBuffer=NULL;
+	texOfsBuffer = NULL;
 	colorBuffer = NULL;
 	objectidBuffer = NULL;
 	indexBuffer=NULL;
 
 	fullStatic = false;
-	textureChannel = 3;
+	textureCount = 1;
 	type = BATCH_TYPE_DYNAMIC;
 	objectCount = 0;
 	modelMatrices = NULL;
@@ -27,6 +28,7 @@ Batch::~Batch() {
 	if (vertexBuffer) free(vertexBuffer); vertexBuffer = NULL;
 	if (normalBuffer) free(normalBuffer); normalBuffer = NULL;
 	if (texcoordBuffer) free(texcoordBuffer); texcoordBuffer = NULL;
+	if (texOfsBuffer) free(texOfsBuffer); texOfsBuffer = NULL;
 	if (colorBuffer) free(colorBuffer); colorBuffer = NULL;
 	if (objectidBuffer) free(objectidBuffer); objectidBuffer = NULL;
 	if (indexBuffer) free(indexBuffer); indexBuffer = NULL;
@@ -48,6 +50,7 @@ void Batch::initBatchBuffers(int vertCount, int indCount) {
 	if (!vertexBuffer) vertexBuffer = (float*)malloc(vertexCount * 3 * sizeof(float));
 	if (!normalBuffer) normalBuffer = (float*)malloc(vertexCount * 3 * sizeof(float));
 	if (!texcoordBuffer) texcoordBuffer = (float*)malloc(vertexCount * 4 * sizeof(float));
+	if (!texOfsBuffer) texOfsBuffer = (float*)malloc(vertexCount * 4 * sizeof(float));
 	if (!colorBuffer) colorBuffer = (byte*)malloc(vertexCount * 3 * sizeof(byte));
 	if (!objectidBuffer) objectidBuffer = (byte*)malloc(vertexCount * sizeof(byte));
 	if (!indexBuffer) indexBuffer = (uint*)malloc(indexCount * sizeof(uint));
@@ -97,12 +100,18 @@ void Batch::pushMeshToBuffers(Mesh* mesh,int mid,bool fullStatic,const MATRIX4X4
 			normalBuffer[vertexCount * 3 + 2] = normal.z;
 		}
 
-		textureChannel = mat->texture.y >= 0 ? 4 : 3;
-		texcoordBuffer[vertexCount * textureChannel] = texcoord.x;
-		texcoordBuffer[vertexCount * textureChannel + 1] = texcoord.y;
-		texcoordBuffer[vertexCount * textureChannel + 2] = mat->texture.x;
-		if (textureChannel == 4)
-			texcoordBuffer[vertexCount * textureChannel + 3] = mat->texture.y;
+		textureCount = mat->texOfs1.z >= 0 ? 3 : 1;
+		texcoordBuffer[vertexCount * 4] = texcoord.x;
+		texcoordBuffer[vertexCount * 4 + 1] = texcoord.y;
+		texcoordBuffer[vertexCount * 4 + 2] = mat->texOfs1.x;
+		texcoordBuffer[vertexCount * 4 + 3] = mat->texOfs1.y;
+
+		if (textureCount > 1) {
+			texOfsBuffer[vertexCount * 4] = (float)(mat->texOfs1.z);
+			texOfsBuffer[vertexCount * 4 + 1] = (float)(mat->texOfs1.w);
+			texOfsBuffer[vertexCount * 4 + 2] = (float)(mat->texOfs2.x);
+			texOfsBuffer[vertexCount * 4 + 3] = (float)(mat->texOfs2.y);
+		}
 
 		colorBuffer[vertexCount * 3] = (byte)(mat->ambient.x * 255);
 		colorBuffer[vertexCount * 3 + 1] = (byte)(mat->diffuse.x * 255);
@@ -142,9 +151,9 @@ void Batch::setRenderData(int pass, int vertCnt, int indCnt, int objCnt,
 		objectCount = objCnt;
 
 		memcpy(vertexBuffer, vertices, vertexCount * 3 * sizeof(float));
-		if (pass == 1 || pass == 2 || pass == 4) {
-			memcpy(texcoordBuffer, texcoords, vertexCount * 3 * sizeof(float));
-			if (pass == 4) {
+		if (pass == NEAR_SHADOW_PASS || pass == MID_SHADOW_PASS || pass == COLOR_PASS) {
+			memcpy(texcoordBuffer, texcoords, vertexCount * 4 * sizeof(float));
+			if (pass == COLOR_PASS) {
 				memcpy(normalBuffer, normals, vertexCount * 3 * sizeof(float));
 				memcpy(colorBuffer, colors, vertexCount * 3 * sizeof(byte));
 			}

@@ -7,8 +7,9 @@
 #define BONE_VERT "shader/bone.vert"
 #define BONE_FRAG "shader/bone.frag"
 #define PHONG_SHADOW_VERT "shader/phong_shadow.vert"
-#define PHONG_SHADOW_INS_VERT "shader/phong_shadow_ins.vert"
 #define PHONG_SHADOW_FRAG "shader/phong_shadow.frag"
+#define PHONG_SHADOW_INS_VERT "shader/phong_shadow_ins.vert"
+#define PHONG_SHADOW_INS_FRAG "shader/phong_shadow_ins.frag"
 #define PHONG_SHADOW_LOW_VERT "shader/phong_shadow_low.vert"
 #define PHONG_SHADOW_LOW_INS_VERT "shader/phong_shadow_low_ins.vert"
 #define PHONG_SHADOW_LOW_FRAG "shader/phong_shadow_low.frag"
@@ -30,79 +31,84 @@
 #define AA_FRAG "shader/fxaa.frag"
 #define BLUR_VERT "shader/blur.vert"
 #define BLUR_FRAG "shader/blur.frag"
+#define MEAN_VERT "shader/mean.vert"
+#define MEAN_FRAG "shader/mean.frag"
 #define DOF_VERT "shader/dof.vert"
 #define DOF_FRAG "shader/dof.frag"
 #define DEBUG_VERT "shader/debug.vert"
 #define DEBUG_FRAG "shader/debug.frag"
+#define SCREEN_VERT "shader/screen.vert"
+#define SCREEN_FRAG "shader/screen.frag"
+#define SSR_VERT "shader/ssr.vert"
+#define SSR_FRAG "shader/ssr.frag"
 
 void SetupShaders(Render* render) {
 	Shader* phong=render->shaders->addShader("phong",PHONG_VERT,PHONG_FRAG);
-	render->useShader(phong);
-	phong->setSampler("texture",0);
+	render->setShaderSampler(phong, "texture", 0);
 
 	Shader* phongIns = render->shaders->addShader("phong_ins", PHONG_INS_VERT, PHONG_INS_FRAG);
-	render->useShader(phongIns);
-	phongIns->setSampler("texture", 0);
+	render->setShaderSampler(phongIns, "texture", 0);
 
 	Shader* terrain = render->shaders->addShader("terrain", TERRAIN_VERT, TERRAIN_FRAG);
-	render->useShader(terrain);
-	terrain->setSampler("texture", 0);
+	render->setShaderSampler(terrain, "texArray", 0);
 
 	Shader* bone=render->shaders->addShader("bone",BONE_VERT,BONE_FRAG);
-	render->useShader(bone);
-	bone->setSampler("texture",0);
+	render->setShaderSampler(bone, "texture", 0);
 
 	Shader* phongShadow = render->shaders->addShader("phong_s", PHONG_SHADOW_VERT, PHONG_SHADOW_FRAG);
-	render->useShader(phongShadow);
-	phongShadow->setSampler("texture", 0);
+	render->setShaderSampler(phongShadow, "texture", 0);
 
-	Shader* phongShadowIns = render->shaders->addShader("phong_s_ins", PHONG_SHADOW_INS_VERT, PHONG_SHADOW_FRAG);
-	render->useShader(phongShadowIns);
-	phongShadowIns->setSampler("texture", 0);
+	Shader* phongShadowIns = render->shaders->addShader("phong_s_ins", PHONG_SHADOW_INS_VERT, PHONG_SHADOW_INS_FRAG);
+	render->setShaderSampler(phongShadowIns, "texture", 0);
 
 	render->shaders->addShader("phong_sl", PHONG_SHADOW_LOW_VERT, PHONG_SHADOW_LOW_FRAG);
 	render->shaders->addShader("phong_sl_ins", PHONG_SHADOW_LOW_INS_VERT, PHONG_SHADOW_LOW_FRAG);
 	render->shaders->addShader("bone_s", BONE_SHADOW_VERT, BONE_SHADOW_FRAG);
 
 	Shader* sky=render->shaders->addShader("sky",SKY_VERT,SKY_FRAG);
-	render->useShader(sky);
-	sky->setSampler("textureSky",0);
+	render->setShaderSampler(sky, "textureSky", 0);
 
 	Shader* billboard = render->shaders->addShader("billboard", BILLBOARD_VERT, BILLBOARD_FRAG);
-	render->useShader(billboard);
-	billboard->setSampler("texture", 0);
+	render->setShaderSampler(billboard, "texture", 0);
 
 	Shader* billboardShadow = render->shaders->addShader("billboard_s", BILLBOARD_SHADOW_VERT, BILLBOARD_SHADOW_FRAG);
-	render->useShader(billboardShadow);
-	billboardShadow->setSampler("texture", 0);
+	render->setShaderSampler(billboardShadow, "texture", 0);
 
 	Shader* water = render->shaders->addShader("water", WATER_VERT, WATER_FRAG);
-	render->useShader(water);
-	sky->setSampler("textureEnv", 0);
+	render->setShaderSampler(water, "textureEnv", 1);
+	render->setShaderSampler(water, "reflectBuffer", 2);
 
 	Shader* deferred = render->shaders->addShader("deferred", DEFERRED_VERT, DEFERRED_FRAG);
-	render->useShader(deferred);
-	deferred->setSampler("texBuffer", 0);
-	deferred->setSampler("colorBuffer", 1);
-	deferred->setSampler("normalBuffer", 2);
-	deferred->setSampler("depthBuffer", 3);
-	deferred->setSampler("depthBufferNear", 4);
-	deferred->setSampler("depthBufferMid", 5);
-	deferred->setSampler("depthBufferFar", 6);
+	render->setShaderSampler(deferred, "texBuffer", 0);
+	render->setShaderSampler(deferred, "colorBuffer", 1);
+	render->setShaderSampler(deferred, "normalBuffer", 2);
+	render->setShaderSampler(deferred, "depthBuffer", 3);
+	render->setShaderSampler(deferred, "depthBufferNear", 4);
+	render->setShaderSampler(deferred, "depthBufferMid", 5);
+	render->setShaderSampler(deferred, "depthBufferFar", 6);
 
 	Shader* fxaa = render->shaders->addShader("fxaa", AA_VERT, AA_FRAG);
-	render->useShader(fxaa);
-	fxaa->setSampler("colorBuffer", 0);
+	render->setShaderSampler(fxaa, "colorBuffer", 0);
 
 	Shader* blur = render->shaders->addShader("blur", BLUR_VERT, BLUR_FRAG);
-	render->useShader(blur);
-	blur->setSampler("colorBuffer", 0);
+	render->setShaderSampler(blur, "colorBuffer", 0);
+
+	Shader* mean = render->shaders->addShader("mean", MEAN_VERT, MEAN_FRAG);
+	render->setShaderSampler(mean, "colorBuffer", 0);
 
 	Shader* dof = render->shaders->addShader("dof", DOF_VERT, DOF_FRAG);
-	render->useShader(dof);
-	dof->setSampler("colorBufferLow", 0);
-	dof->setSampler("colorBufferHigh", 1);
+	render->setShaderSampler(dof, "colorBufferLow", 0);
+	render->setShaderSampler(dof, "colorBufferHigh", 1);
 
 	Shader* debug = render->shaders->addShader("debug", DEBUG_VERT, DEBUG_FRAG);
+
+	Shader* screen = render->shaders->addShader("screen", SCREEN_VERT, SCREEN_FRAG);
+	render->setShaderSampler(screen, "colorBuffer", 0);
+
+	Shader* ssr = render->shaders->addShader("ssr", SSR_VERT, SSR_FRAG);
+	render->setShaderSampler(ssr, "lightBuffer", 0);
+	render->setShaderSampler(ssr, "colorBuffer", 1);
+	render->setShaderSampler(ssr, "normalBuffer", 2);
+	render->setShaderSampler(ssr, "depthBuffer", 3);
 }
 

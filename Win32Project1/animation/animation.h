@@ -84,7 +84,7 @@ public:
 	std::vector<VECTOR3D> aVertices;
 	std::vector<VECTOR3D> aNormals;
 	std::vector<VECTOR2D> aTexcoords;
-	std::vector<VECTOR4D> aTextures;
+	std::vector<Material*> aTextures;
 	std::vector<VECTOR3D> aAmbients;
 	std::vector<VECTOR3D> aDiffuses;
 	std::vector<VECTOR3D> aSpeculars;

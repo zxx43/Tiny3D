@@ -16,6 +16,8 @@ struct RenderState {
 	bool lightEffect;
 	bool skyPass;
 	bool waterPass;
+	bool ssrPass;
+	bool enableSsr;
 	bool blend;
 	int pass;
 	float time;
@@ -41,6 +43,8 @@ struct RenderState {
 		lightEffect = rhs.lightEffect;
 		skyPass = rhs.skyPass;
 		waterPass = rhs.waterPass;
+		ssrPass = rhs.ssrPass;
+		enableSsr = rhs.enableSsr;
 		blend = rhs.blend;
 		pass = rhs.pass;
 		time = rhs.time;
@@ -62,8 +66,10 @@ struct RenderState {
 		lightEffect = true;
 		skyPass = false;
 		waterPass = false;
+		ssrPass = false;
+		enableSsr = false;
 		blend = false;
-		pass = 4;
+		pass = COLOR_PASS;
 		time = 0.0;
 		shadow = NULL;
 		shader = NULL;

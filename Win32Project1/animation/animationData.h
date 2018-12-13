@@ -12,7 +12,6 @@ struct AnimationData {
 	byte* boneids;
 	float* weights;
 	ushort* indices;
-	int textureChannel;
 	int indexCount, vertexCount, boneCount;
 	Animation* animation;
 
@@ -40,13 +39,12 @@ struct AnimationData {
 		}
 		for (uint i = 0; i < (uint)vertexCount; i++) {
 			VECTOR2D texcoord = anim->aTexcoords[i];
-			VECTOR4D texids = anim->aTextures[i];
-			textureChannel = texids.y >= 0 ? 4 : 3;
-			texcoords[i * textureChannel] = texcoord.x;
-			texcoords[i * textureChannel + 1] = texcoord.y;
-			texcoords[i * textureChannel + 2] = texids.x;
-			if (textureChannel == 4)
-				texcoords[i * textureChannel + 3] = texids.y;
+			Material* mat = anim->aTextures[i];
+			
+			texcoords[i * 4] = texcoord.x;
+			texcoords[i * 4 + 1] = texcoord.y;
+			texcoords[i * 4 + 2] = mat->texOfs1.x;
+			texcoords[i * 4 + 3] = mat->texOfs1.y;
 		}
 		for (uint i = 0; i < (uint)vertexCount; i++) {
 			colors[i * 3] = (byte)(anim->aAmbients[i].x * 255);

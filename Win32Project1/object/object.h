@@ -40,7 +40,7 @@ public:
 	virtual void setPosition(float x, float y, float z) = 0;
 	virtual void setRotation(float ax, float ay, float az) = 0;
 	virtual void setSize(float sx, float sy, float sz) = 0;
-	void setBillboard(float sx, float sy, int tex);
+	void setBillboard(float sx, float sy, int mid);
 };
 
 

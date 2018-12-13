@@ -1,4 +1,5 @@
 #include "imageset.h"
+#include "../render/render.h"
 using namespace std;
 
 ImageSet::ImageSet() {
@@ -36,8 +37,10 @@ void ImageSet::initTextureArray(string dir) {
 	glGenTextures(1,&setId);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D_ARRAY,setId);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, Render::MaxAniso);
 
 	string path=dir.append("/");
 	string name("");
@@ -55,6 +58,7 @@ void ImageSet::initTextureArray(string dir) {
 			1, GL_RGBA, GL_UNSIGNED_BYTE, images[i]->data);
 	}
 
+	glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 	glBindTexture(GL_TEXTURE_2D_ARRAY,0);
 }
 

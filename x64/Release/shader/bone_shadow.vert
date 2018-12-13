@@ -8,8 +8,6 @@ layout (location = 0) in vec3 vertex;
 layout (location = 4) in vec4 boneids;
 layout (location = 5) in vec4 weights;
 
-out vec2 projDepth;
-
 mat4 convertMat(mat3x4 srcMat) {
 	mat4x3 transMat = transpose(srcMat);
 	return mat4(transMat[0], 0.0, 
@@ -28,5 +26,4 @@ void main() {
 	
 	vec4 modelPosition = uModelMatrix * position;
 	gl_Position = viewProjectMatrix * modelPosition;
-	projDepth = gl_Position.zw;
 }

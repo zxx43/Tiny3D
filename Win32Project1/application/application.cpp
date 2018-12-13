@@ -38,6 +38,7 @@ void Application::init() {
 
 	config->get("dof", useDof);
 	config->get("fxaa", useFxaa);
+	config->get("ssr", useSsr);
 
 	float debug = 0.0;
 	config->get("debug", debug);
@@ -68,6 +69,10 @@ void Application::moveKey() {
 	input->updateCameraByKey(scene->mainCamera);
 }
 
+void Application::moveByDir(int dir) {
+	input->moveCamera(scene->mainCamera, dir);
+}
+
 void Application::moveMouse(const float mx, const float my, const float cx, const float cy) {
 	input->updateCameraByMouse(scene->mainCamera, mx, my, cx, cy);
 }
@@ -84,7 +89,8 @@ void Application::animate(long startTime, long currentTime) {
 
 void Application::resize(int width, int height) {
 	windowWidth = width; windowHeight = height;
-	render->resize(width, height, scene->mainCamera);
+	render->resize(width, height, scene->mainCamera, scene->reflectCamera);
+	renderMgr->resize(width, height);
 	renderMgr->updateShadowCamera();
 }
 

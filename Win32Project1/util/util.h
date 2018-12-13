@@ -16,6 +16,8 @@ MATRIX4X4 lookAt(float eyeX, float eyeY, float eyeZ,
 		float centerX, float centerY, float centerZ,
 		float upX, float upY, float upZ);
 
+MATRIX4X4 lookAt(const VECTOR3D& eye, const VECTOR3D& center, const VECTOR3D& up);
+
 MATRIX4X4 perspective(float fovy,float aspect,float zNear,float zFar);
 
 MATRIX4X4 ortho(float left, float right, float bottom, float top, float n, float f);
@@ -39,6 +41,8 @@ MATRIX4X4 scaleY(float size);
 MATRIX4X4 scaleZ(float size);
 
 MATRIX4X4 translate(float tx,float ty,float tz);
+
+MATRIX4X4 translate(const VECTOR3D& t);
 
 VECTOR4D mul(const VECTOR4D& a,const VECTOR4D& b);
 

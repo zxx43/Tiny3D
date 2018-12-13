@@ -1,8 +1,11 @@
 #include "renderManager.h"
 #include "../assets/assetManager.h"
+#include "../mesh/board.h"
+#include "../object/staticObject.h"
 
 RenderManager::RenderManager(int quality, Camera* view, float distance1, float distance2, const VECTOR3D& light) {
 	graphicQuality = quality;
+	int precision = LOW_PRE;
 	shadow=new Shadow(view,distance1,distance2);
 	float nearSize = 1024;
 	float midSize = 1024;
@@ -11,13 +14,14 @@ RenderManager::RenderManager(int quality, Camera* view, float distance1, float d
 		nearSize = 2048;
 		midSize = 2048;
 		farSize = 2048;
+		precision = HIGH_PRE;
 	}
 	shadow->shadowMapSize = nearSize;
 	shadow->shadowPixSize = 0.4 / nearSize;
 
-	nearBuffer = new FrameBuffer(nearSize, nearSize, HIGH_PRE, 3);
-	midBuffer = new FrameBuffer(midSize, midSize, HIGH_PRE, 3);
-	farBuffer = new FrameBuffer(farSize, farSize, HIGH_PRE, 3);
+	nearBuffer = new FrameBuffer(nearSize, nearSize, precision);
+	midBuffer = new FrameBuffer(midSize, midSize, precision);
+	farBuffer = new FrameBuffer(farSize, farSize, precision);
 	lightDir = light; lightDir.Normalize();
 
 	queue1 = new Renderable(distance1, distance2); queue1->copyCamera(view);
@@ -30,22 +34,33 @@ RenderManager::RenderManager(int quality, Camera* view, float distance1, float d
 	state = new RenderState();
 
 	time = 0.0;
+	enableSsr = false;
+	reflectBuffer = NULL;
 }
 
 RenderManager::~RenderManager() {
-	delete shadow; shadow=NULL;
-	delete nearBuffer; nearBuffer=NULL;
-	delete midBuffer; midBuffer=NULL;
-	delete farBuffer; farBuffer=NULL;
+	delete shadow; shadow = NULL;
+	delete nearBuffer; nearBuffer = NULL;
+	delete midBuffer; midBuffer = NULL;
+	delete farBuffer; farBuffer = NULL;
 
 	delete queue1; queue1 = NULL;
 	delete queue2; queue2 = NULL;
 
 	delete state; state = NULL;
+	if (reflectBuffer) delete reflectBuffer; reflectBuffer = NULL;
 }
 
 void RenderManager::act() {
 	time += 0.1;
+}
+
+void RenderManager::resize(float width, float height) {
+	if (reflectBuffer) delete reflectBuffer;
+	reflectBuffer = new FrameBuffer(width, height, LOW_PRE, 4);
+	reflectBuffer->addColorBuffer(LOW_PRE, 4);
+	reflectBuffer->addColorBuffer(LOW_PRE, 3);
+	reflectBuffer->attachDepthBuffer(LOW_PRE);
 }
 
 void RenderManager::updateShadowCamera() {
@@ -112,11 +127,11 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	Camera* mainCamera = scene->mainCamera;
 	VECTOR3D eye = mainCamera->position;
 
-	render->useTexture(TEXTURE_2D_ARRAY, 0, AssetManager::assetManager->textures->setId);
+	render->useTexture(TEXTURE_2D, 0, AssetManager::assetManager->texAlt->texId);
 
 	render->setFrameBuffer(nearBuffer);
 	Camera* cameraNear=shadow->lightCameraNear;
-	state->pass = 1;
+	state->pass = NEAR_SHADOW_PASS;
 	state->shader = phongShadowShader;
 	state->shaderIns = phongShadowInsShader;
 	state->shaderBillboard = billboardShadowShader;
@@ -126,7 +141,7 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 
 	render->setFrameBuffer(midBuffer);
 	Camera* cameraMid=shadow->lightCameraMid;
-	state->pass = 2;
+	state->pass = MID_SHADOW_PASS;
 	state->shader = phongShadowShader;
 	currentQueue->queues[QUEUE_STATIC_SM]->draw(cameraMid, eye, render, state);
 	state->shader = boneShadowShader;
@@ -141,7 +156,7 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 			render->setFrameBuffer(farBuffer);
 			if (graphicQuality > 2) {
 				Camera* cameraFar = shadow->lightCameraFar;
-				state->pass = 3;
+				state->pass = FAR_SHADOW_PASS;
 				state->shader = phongShadowLowShader;
 				state->shaderIns = phongShadowLowInsShader;
 				currentQueue->queues[QUEUE_STATIC_SF]->draw(cameraFar, eye, render, state);
@@ -167,7 +182,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	state->time = time;
 
 	Camera* camera = scene->mainCamera;
-	render->useTexture(TEXTURE_2D_ARRAY, 0, AssetManager::assetManager->textures->setId);
+	render->useTexture(TEXTURE_2D, 0, AssetManager::assetManager->texAlt->texId);
 	state->shader = phongShader;
 	state->shaderIns = phongInsShader;
 	state->shaderBillboard = billboardShader;
@@ -178,16 +193,22 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 
 	// Debug mode
 	if (drawBounding) {
-		scene->clearAllAABB();
-		scene->createNodeAABB(scene->staticRoot);
-		scene->createNodeAABB(scene->animationRoot);
-		static Shader* debugShader = render->findShader("debug");
+		static bool boxInit = false;
+		if (!boxInit && scene->inited) {
+			scene->clearAllAABB();
+			scene->createNodeAABB(scene->staticRoot);
+			scene->createNodeAABB(scene->animationRoot);
+			boxInit = true;
+		}
 
-		state->enableCull = false;
-		state->drawLine = true;
-		state->enableAlphaTest = false;
-		state->shader = debugShader;
-		drawBoundings(render, state, scene, camera);
+		if (boxInit) {
+			static Shader* debugShader = render->findShader("debug");
+			state->enableCull = false;
+			state->drawLine = true;
+			state->enableAlphaTest = false;
+			state->shader = debugShader;
+			drawBoundings(render, state, scene, camera);
+		}
 	}
 
 	// Draw sky
@@ -204,7 +225,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 			Shader* shader = state->shader;
 			state->shader = waterShader;
 			state->waterPass = true;
-			//state->blend = true;
+			state->enableSsr = enableSsr;
 			render->draw(camera, scene->water->drawcall, state);
 		}
 	}
@@ -212,44 +233,101 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	scene->flushNodes();
 }
 
+void RenderManager::renderReflect(Render* render, Scene* scene) {
+	if (!scene->water || !scene->reflectCamera || !reflectBuffer) return;
+	render->setFrameBuffer(reflectBuffer);
+	if (scene->terrainNode) {
+		if (scene->terrainNode->checkInCamera(scene->reflectCamera)) {
+			if (scene->terrainNode->drawcall) {
+				static Shader* terrainShader = render->findShader("terrain");
+				state->reset();
+				state->cullMode = CULL_FRONT;
+				state->light = lightDir;
+				state->shader = terrainShader;
+				
+				render->setShaderFloat(terrainShader, "isReflect", 1.0);
+				render->setShaderFloat(terrainShader, "waterHeight", scene->water->position.y);
+				render->useTexture(TEXTURE_2D_ARRAY, 0, AssetManager::assetManager->texArray->setId);
+				render->draw(scene->reflectCamera, scene->terrainNode->drawcall, state);
+				render->setShaderFloat(terrainShader, "isReflect", 0.0);
+			}
+		}
+	}
+}
+
 void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* screenBuff, Filter* filter) {
 	static Shader* deferredShader = render->findShader("deferred");
 	state->reset();
 	state->enableCull = false;
 	state->enableDepthTest = false;
-	state->pass = 5;
+	state->pass = DEFERRED_PASS;
 	state->shader = deferredShader;
 	state->shadow = shadow;
 	state->light = lightDir;
 	state->time = time;
 
 	uint baseSlot = screenBuff->colorBuffers.size() + 1; // Color buffers + Depth buffer
-	render->useTexture(TEXTURE_2D, baseSlot, nearBuffer->getColorBuffer(0)->id);
-	render->useTexture(TEXTURE_2D, baseSlot + 1, midBuffer->getColorBuffer(0)->id);
-	render->useTexture(TEXTURE_2D, baseSlot + 2, farBuffer->getColorBuffer(0)->id);
+	render->useTexture(TEXTURE_2D, baseSlot, nearBuffer->getDepthBuffer()->id);
+	render->useTexture(TEXTURE_2D, baseSlot + 1, midBuffer->getDepthBuffer()->id);
+	render->useTexture(TEXTURE_2D, baseSlot + 2, farBuffer->getDepthBuffer()->id);
 	filter->draw(scene->mainCamera, render, state, screenBuff->colorBuffers, screenBuff->depthBuffer);
 }
 
 void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, FrameBuffer* inputBuff, Filter* filter) {
-	static Shader* shader = render->findShader(shaderStr);
+	Shader* shader = render->findShader(shaderStr);
 	state->reset();
 	state->enableCull = false;
 	state->enableDepthTest = false;
-	state->pass = 6;
+	state->pass = POST_PASS;
 	state->shader = shader;
 
 	filter->draw(scene->mainCamera, render, state, inputBuff->colorBuffers, NULL);
 }
 
 void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter) {
-	static Shader* shader = render->findShader(shaderStr);
+	Shader* shader = render->findShader(shaderStr);
 	state->reset();
 	state->enableCull = false;
 	state->enableDepthTest = false;
-	state->pass = 6;
+	state->pass = POST_PASS;
 	state->shader = shader;
 
 	filter->draw(scene->mainCamera, render, state, inputTextures, NULL);
+}
+
+void RenderManager::drawSSRFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter) {
+	Shader* shader = render->findShader(shaderStr);
+	state->reset();
+	state->enableCull = false;
+	state->enableDepthTest = false;
+	state->pass = POST_PASS;
+	state->shader = shader;
+	state->ssrPass = true;
+
+	filter->draw(scene->mainCamera, render, state, inputTextures, NULL);
+}
+
+void RenderManager::drawTexture2Screen(Render* render, Scene* scene, uint texid) {
+	static Shader* screenShader = render->findShader("screen");
+	state->reset();
+	state->enableCull = false;
+	state->enableDepthTest = false;
+	state->pass = POST_PASS;
+	state->shader = screenShader;
+
+	if (!scene->textureNode) {
+		Board* board = new Board(2, 2, 2);
+		scene->textureNode = new StaticNode(VECTOR3D(0, 0, 0));
+		scene->textureNode->setFullStatic(true);
+		StaticObject* boardObject = new StaticObject(board);
+		scene->textureNode->addObject(boardObject);
+		scene->textureNode->prepareDrawcall();
+		delete board;
+	}
+
+	render->setFrameBuffer(NULL);
+	render->useTexture(TEXTURE_2D, 0, texid);
+	render->draw(scene->mainCamera, scene->textureNode->drawcall, state);
 }
 
 void RenderManager::drawBoundings(Render* render, RenderState* state, Scene* scene, Camera* camera) {
@@ -260,17 +338,15 @@ void RenderManager::drawBoundings(Render* render, RenderState* state, Scene* sce
 }
 
 void RenderManager::enableShadow(Render* render) {
-	Shader* shader = render->findShader("deferred");
+	static Shader* deferredShader = render->findShader("deferred");
 	useShadow = true;
-	render->useShader(shader);
-	shader->setInt("useShadow", 1);
+	render->setShaderInt(deferredShader, "useShadow", 1);
 }
 
 void RenderManager::disableShadow(Render* render) {
-	Shader* shader = render->findShader("deferred");
+	static Shader* deferredShader = render->findShader("deferred");
 	useShadow = false;
-	render->useShader(shader);
-	shader->setInt("useShadow", 0);
+	render->setShaderInt(deferredShader, "useShadow", 0);
 }
 
 void RenderManager::showBounding() {

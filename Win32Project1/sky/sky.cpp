@@ -42,7 +42,6 @@ Sky::~Sky() {
 
 void Sky::draw(Render* render,Shader* shader,Camera* camera) {
 	state->shader = shader;
-	render->useShader(shader);
 	render->useTexture(TEXTURE_CUBE, 0, AssetManager::assetManager->getSkyTexture()->id);
 	render->draw(camera,skyNode->drawcall,state);
 }

@@ -1,5 +1,4 @@
 #version 330
-#extension GL_EXT_gpu_shader4 : enable 
 
 flat in vec3 vColor;
 in vec3 vNormal;

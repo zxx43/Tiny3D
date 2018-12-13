@@ -1,14 +1,17 @@
 #version 330
 
 uniform mat4 viewProjectMatrix;
+uniform mat4 viewMatrix;
 uniform float time;
 uniform vec3 eyePos;
 
 layout (location = 0) in vec3 vertex;
 
 out vec3 vNormal;
+out vec3 vViewNormal;
 out vec3 vEye2Water;
 out vec3 vWater;
+out vec4 vProjPos;
 
 vec3 calculateWavePosition(float q, float a, float w, vec3 dir, vec3 meshVert, float ph, float t) {
 	float qa = q * a;
@@ -93,10 +96,15 @@ void main() {
 	normal.x = -normal.x;
 	normal.y = 1.0 - normal.y;
 	normal.z = -normal.z;
+
+	//normal = vec3(0.0,1.0,0.0);
+	//position = worldVertex;
 	
 	vNormal = normal;
+	vViewNormal = mat3(viewMatrix) * normal;
 	vEye2Water = (position - eyePos);
 	vWater = position;
 
-	gl_Position = viewProjectMatrix * vec4(position, 1.0);
+	vProjPos = viewProjectMatrix * vec4(position, 1.0);
+	gl_Position = vProjPos;
 }

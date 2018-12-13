@@ -139,5 +139,9 @@ void Input::updateCameraByMouse(Camera* camera, const float mouseX,
 	camera->turnDX(-dyr*sindr);
 	camera->turnDY(dxr*sindr);
 	camera->turnDY(dyr*cosdr);
-	camera->updateMoveable(TRANS_ROTATE_XY);
+	camera->updateMoveable(TRANS_ROTATE_X | TRANS_ROTATE_Y);
+}
+
+void Input::moveCamera(Camera* camera, int direction) {
+	camera->move(direction, D_DISTANCE * 10.0);
 }

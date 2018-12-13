@@ -1,4 +1,5 @@
 #include "materialManager.h"
+#include "../constants/constants.h"
 
 MaterialManager* MaterialManager::materials = NULL;
 

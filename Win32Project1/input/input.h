@@ -35,6 +35,7 @@ public:
 	void updateExtra(RenderManager* renderMgr);
 	void updateCameraByMouse(Camera* camera, const float mouseX, 
 		const float mouseY, const float centerX, const float centerY);
+	void moveCamera(Camera* camera, int direction);
 };
 
 #endif /* INPUT_H_ */

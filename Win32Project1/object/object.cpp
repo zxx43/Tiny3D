@@ -92,7 +92,7 @@ bool Object::checkInCamera(Camera* camera) {
 	return true;
 }
 
-void Object::setBillboard(float sx, float sy, int tex) {
+void Object::setBillboard(float sx, float sy, int mid) {
 	if (billboard) delete billboard;
-	billboard = new Billboard(sx, sy, tex);
+	billboard = new Billboard(sx, sy, mid);
 }

@@ -27,7 +27,6 @@ public:
 	unsigned char* colorBuffer;
 	unsigned short* indexBuffer;
 
-	int textureChannel;
 	int instanceCount;
 	float* modelMatrices;
 	float* positions;

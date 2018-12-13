@@ -1,5 +1,6 @@
 #include "simpleApplication.h"
 #include "mesh/model.h"
+#include "mesh/board.h"
 #include "mesh/terrain.h"
 #include "mesh/water.h"
 #include "object/staticObject.h"
@@ -10,18 +11,26 @@ SimpleApplication::SimpleApplication() {
 	screen = NULL;
 	screenFilter = NULL;
 	aaFilter = NULL;
-	blurFilter = NULL;
+	dofBlurFilter = NULL;
 	dofFilter = NULL;
+	ssrFilter = NULL;
+	ssrBlurFilter = NULL;
+	rawScreenFilter = NULL;
 	dofInput.clear();
+	ssrInput.clear();
 }
 
 SimpleApplication::~SimpleApplication() {
 	dofInput.clear();
+	ssrInput.clear();
 	if (screen) delete screen; screen = NULL;
 	if (screenFilter) delete screenFilter; screenFilter = NULL;
-	if (blurFilter) delete blurFilter; blurFilter = NULL;
+	if (dofBlurFilter) delete dofBlurFilter; dofBlurFilter = NULL;
 	if (dofFilter) delete dofFilter; dofFilter = NULL;
 	if (aaFilter) delete aaFilter; aaFilter = NULL;
+	if (ssrFilter) delete ssrFilter; ssrFilter = NULL;
+	if (ssrBlurFilter) delete ssrBlurFilter; ssrBlurFilter = NULL;
+	if (rawScreenFilter) delete rawScreenFilter; rawScreenFilter = NULL;
 }
 
 void SimpleApplication::resize(int width, int height) {
@@ -29,15 +38,16 @@ void SimpleApplication::resize(int width, int height) {
 	Application::resize(width, height);
 
 	int precision = graphQuality > 4.0 ? HIGH_PRE : LOW_PRE;
+	int scrPre = (graphQuality > 4.0 || useSsr) ? HIGH_PRE : LOW_PRE;
 
 	if (screen) delete screen;
 	screen = new FrameBuffer(width, height, precision, 4);
-	screen->addColorBuffer(precision, 3);
-	screen->addColorBuffer(precision, 3);
-	screen->attachDepthBuffer(precision);
+	screen->addColorBuffer(precision, 4);
+	screen->addColorBuffer(scrPre, 3);
+	screen->attachDepthBuffer(scrPre);
 
 	if (screenFilter) delete screenFilter;
-	if (!useFxaa && !useDof)
+	if (!useFxaa && !useDof && !useSsr) 
 		screenFilter = new Filter(width, height, false, precision, 4);
 	else {
 		screenFilter = new Filter(width, height, true, precision, 4);
@@ -46,14 +56,32 @@ void SimpleApplication::resize(int width, int height) {
 			aaFilter = new Filter(width, height, false, precision, 4);
 		}
 		if (useDof) {
-			if (blurFilter) delete blurFilter;
-			blurFilter = new Filter(width * 0.4, height * 0.4, true, precision, 4);
+			if (dofBlurFilter) delete dofBlurFilter;
+			dofBlurFilter = new Filter(width * 0.5, height * 0.5, true, precision, 4);
 			if (dofFilter) delete dofFilter;
 			dofFilter = new Filter(width, height, useFxaa, precision, 4);
 
 			dofInput.clear();
-			dofInput.push_back(blurFilter->getFrameBuffer()->getColorBuffer(0));
-			dofInput.push_back(screenFilter->getFrameBuffer()->getColorBuffer(0));
+			dofInput.push_back(dofBlurFilter->getOutput(0));
+			dofInput.push_back(screenFilter->getOutput(0));
+		}
+		if (useSsr) {
+			if (ssrFilter) delete ssrFilter;
+			ssrFilter = new Filter(width, height, true, LOW_PRE, 4);
+
+			if (!useFxaa && !useDof) {
+				if (rawScreenFilter) delete rawScreenFilter;
+				rawScreenFilter = new Filter(width, height, false, precision, 4);
+			}
+
+			ssrInput.clear();
+			ssrInput.push_back(screenFilter->getOutput(0));
+			ssrInput.push_back(screen->getColorBuffer(1));
+			ssrInput.push_back(screen->getColorBuffer(2));
+			ssrInput.push_back(screen->getDepthBuffer());
+
+			if (ssrBlurFilter) delete ssrBlurFilter;
+			ssrBlurFilter = new Filter(width * 0.5, height * 0.5, true, LOW_PRE, 4);
 		}
 	}
 
@@ -71,21 +99,43 @@ void SimpleApplication::keyUp(int key) {
 }
 
 void SimpleApplication::draw() {
-	if (!screenFilter) return;
+	if (!screenFilter || !renderMgr || !AssetManager::assetManager) return;
 
+	///*
+	if (ssrFilter) {
+		AssetManager::assetManager->setReflectTexture(ssrBlurFilter->getOutput(0));
+		renderMgr->enableSsr = true;
+	} else {
+		if (renderMgr->reflectBuffer) {
+			renderMgr->renderReflect(render, scene);
+			AssetManager::assetManager->setReflectTexture(renderMgr->reflectBuffer->getColorBuffer(0));
+		}
+	}
+	//*/
+	///*
 	renderMgr->renderShadow(render, scene);
 	render->setFrameBuffer(screen);
 	renderMgr->renderScene(render, scene);
 	renderMgr->drawDeferred(render, scene, screen, screenFilter);
 
+	if (ssrFilter) {
+		if (rawScreenFilter)
+			renderMgr->drawScreenFilter(render, scene, "screen", screenFilter->getFrameBuffer(), rawScreenFilter);
+		renderMgr->drawSSRFilter(render, scene, "ssr", ssrInput, ssrFilter);
+		renderMgr->drawScreenFilter(render, scene, "mean", ssrFilter->getFrameBuffer(), ssrBlurFilter);
+	}
+
 	Filter* lastFilter = screenFilter;
 	if (useDof) {
-		renderMgr->drawScreenFilter(render, scene, "blur", screenFilter->getFrameBuffer(), blurFilter);
+		renderMgr->drawScreenFilter(render, scene, "blur", screenFilter->getFrameBuffer(), dofBlurFilter);
 		renderMgr->drawScreenFilter(render, scene, "dof", dofInput, dofFilter);
 		lastFilter = dofFilter;
 	}
 	if (useFxaa)
 		renderMgr->drawScreenFilter(render, scene, "fxaa", lastFilter->getFrameBuffer(), aaFilter);
+	//*/
+	//if (AssetManager::assetManager->texAlt)
+	//	renderMgr->drawTexture2Screen(render, scene, AssetManager::assetManager->texAlt->texId);
 
 	render->finishDraw();
 }
@@ -93,17 +143,19 @@ void SimpleApplication::draw() {
 void SimpleApplication::init() {
 	Application::init();
 	initScene();
-	initScreen();
-}
-
-void SimpleApplication::initScreen() {
-	scene->screenNode = new StaticNode(VECTOR3D(0, 0, 0));
-	StaticObject* board = new StaticObject(AssetManager::assetManager->meshes["board"]);
-	scene->screenNode->addObject(board);
 }
 
 void SimpleApplication::moveKey() {
 	Application::moveKey();
+	updateMovement();
+}
+
+void SimpleApplication::moveByDir(int dir) {
+	Application::moveByDir(dir);
+	updateMovement();
+}
+
+void SimpleApplication::updateMovement() {
 	if (scene->water)
 		scene->water->moveWaterWithCamera(scene->mainCamera);
 	if (scene->terrainNode) {
@@ -114,7 +166,8 @@ void SimpleApplication::moveKey() {
 				cp.y = cp.y < waterHeight ? waterHeight : cp.y;
 			}
 			cp.y += scene->mainCamera->getHeight();
-		} else if(scene->water) {
+		}
+		else if (scene->water) {
 			float waterHeight = scene->water->position.y;
 			cp.y = waterHeight;
 			cp.y += scene->mainCamera->getHeight();
@@ -140,6 +193,8 @@ void SimpleApplication::act(long startTime, long currentTime) {
 	}
 	//*/
 	scene->updateNodes();
+	if (!useSsr)
+		scene->updateReflectCamera();
 }
 
 void SimpleApplication::initScene() {
@@ -164,28 +219,48 @@ void SimpleApplication::initScene() {
 	assetMgr->addAnimation("army", new Animation("models/ArmyPilot.dae"));
 
 	// Load textures
-	assetMgr->addTexture("cube.bmp");
-	assetMgr->addTexture("ground.bmp");
-	assetMgr->addTexture("ground_r.bmp");
-	assetMgr->addTexture("sand.bmp");
-	assetMgr->addTexture("tree2.bmp");
+	assetMgr->addTexture2Alt("cube.bmp");
+	assetMgr->addTexture2Alt("ground.bmp");
+	assetMgr->addTexture2Array("ground.bmp");
+	assetMgr->addTexture2Array("ground_r.bmp");
+	assetMgr->addTexture2Array("sand.bmp");
+	assetMgr->addTexture2Alt("sand.bmp");
+	assetMgr->addTexture2Alt("tree.bmp");
+	assetMgr->addTexture2Alt("treeA.bmp");
+	assetMgr->initTextureAtlas();
 	assetMgr->initTextureArray();
 
 	// Create materials
 	Material* boxMat = new Material("box_mat");
-	boxMat->texture.x = assetMgr->findTexture("cube.bmp");
-	boxMat->ambient = VECTOR3D(0.4, 0.4, 0.4); boxMat->diffuse = VECTOR3D(0.6, 0.6, 0.6);
+	boxMat->tex1 = "cube.bmp";
+	boxMat->ambient = VECTOR3D(0.4, 0.4, 0.4); 
+	boxMat->diffuse = VECTOR3D(0.6, 0.6, 0.6);
 	mtlMgr->add(boxMat);
+
 	Material* grassMat = new Material("grass_mat");
-	grassMat->texture.x = assetMgr->findTexture("ground.bmp");
+	grassMat->tex1 = "ground.bmp";
 	mtlMgr->add(grassMat);
+
 	Material* sandMat = new Material("sand_mat");
-	sandMat->texture.x = assetMgr->findTexture("sand.bmp");
+	sandMat->tex1 = "sand.bmp";
 	mtlMgr->add(sandMat);
+	
 	Material* terrainMat = new Material("terrain_mat");
-	terrainMat->texture.x = assetMgr->findTexture("ground.bmp");
-	terrainMat->texture.y = assetMgr->findTexture("ground_r.bmp");
+	terrainMat->useArray = true;
+	terrainMat->texOfs1.x = assetMgr->findTextureInArray("ground.bmp");
+	terrainMat->texOfs1.y = assetMgr->findTextureInArray("ground_r.bmp");
+	terrainMat->texOfs1.z = assetMgr->findTextureInArray("sand.bmp");
 	mtlMgr->add(terrainMat);
+	
+	Material* billboardTreeMat = new Material("billboard_tree_mat");
+	billboardTreeMat->tex1 = "tree.bmp";
+	mtlMgr->add(billboardTreeMat);
+
+	Material* billboardTreeAMat = new Material("billboard_treeA_mat");
+	billboardTreeAMat->tex1 = "treeA.bmp";
+	mtlMgr->add(billboardTreeAMat);
+
+	assetMgr->createMaterialTextureAtlas(mtlMgr);
 
 	// Create Nodes
 	map<string, Mesh*> meshes = assetMgr->meshes;
@@ -199,10 +274,11 @@ void SimpleApplication::initScene() {
 	StaticObject* quad = new StaticObject(meshes["quad"]);
 
 	StaticObject* model1 = new StaticObject(meshes["tree"], meshes["treeMid"], meshes["billboard"]);
-	model1->setBillboard(5, 10, assetMgr->findTexture("tree2.bmp"));
+	model1->setBillboard(5, 10, mtlMgr->find("billboard_tree_mat"));
 	StaticObject* model2 = new StaticObject(meshes["tank"]);
 	StaticObject* model3 = new StaticObject(meshes["m1a2"]);
-	StaticObject* model4 = new StaticObject(meshes["treeA"], meshes["treeAMid"], meshes["treeALow"]);
+	StaticObject* model4 = new StaticObject(meshes["treeA"], meshes["treeAMid"], meshes["billboard"]);
+	model4->setBillboard(10, 20, mtlMgr->find("billboard_treeA_mat"));
 	StaticObject* model5 = new StaticObject(meshes["house"]);
 	StaticObject* model6 = new StaticObject(meshes["oildrum"]);
 	
@@ -223,7 +299,7 @@ void SimpleApplication::initScene() {
 	StaticObject* terrainObject = new StaticObject(meshes["terrain"]);
 	terrainObject->bindMaterial(mtlMgr->find("terrain_mat"));
 	terrainObject->setPosition(0, -200, 0);
-	terrainObject->setSize(6, 2, 6);
+	terrainObject->setSize(6, 3, 6);
 	terrainNode->addObject(terrainObject);
 	terrainNode->prepareTriangles();
 	scene->staticRoot->attachChild(terrainNode);
@@ -486,5 +562,6 @@ void SimpleApplication::initScene() {
 
 	standObjectsOnGround(scene->staticRoot, terrainNode);
 	standObjectsOnGround(scene->animationRoot, terrainNode);
+	scene->inited = true;
 }
 

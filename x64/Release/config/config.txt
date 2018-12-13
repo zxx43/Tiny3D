@@ -1,7 +1,8 @@
-width 1920
-height 1080
-fullscreen 1
-quality 3
+width 1280
+height 800
+fullscreen 0
+quality 6
+ssr 1
 dof 1
 fxaa 1
 debug 0

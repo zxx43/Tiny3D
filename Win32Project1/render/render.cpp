@@ -14,6 +14,8 @@ Render::~Render() {
 	clearTextureSlots();
 }
 
+float Render::MaxAniso = 0.0;
+
 void Render::initEnvironment() {
 	GLenum err=glewInit();
 	if(GLEW_OK!=err)
@@ -35,9 +37,11 @@ void Render::initEnvironment() {
 	setDrawLine(false);
 	setBlend(false);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	setClearColor(1,1,1,1);
+	setClearColor(1,1,1,0);
 	currentShader=NULL;
 	clearTextureSlots();
+
+	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &MaxAniso);
 }
 
 void Render::clearFrame(bool clearColor,bool clearDepth,bool clearStencil) {
@@ -156,11 +160,12 @@ void Render::setViewPort(int width,int height) {
 	glViewport(0,0,width,height);
 }
 
-void Render::resize(int width,int height,Camera* mainCamera) {
-	if(height==0) height=1;
-	setViewPort(width,height);
-	float fAspect=(float)width/height;
-	mainCamera->initPerspectCamera(60.0,fAspect,1.0,2000.0);
+void Render::resize(int width, int height, Camera* mainCamera, Camera* reflectCamera) {
+	if (height == 0) height = 1;
+	setViewPort(width, height);
+	float fAspect = (float)width / height;
+	mainCamera->initPerspectCamera(60.0, fAspect, 1.0, 2000.0);
+	reflectCamera->initPerspectCamera(60.0, fAspect, 0.1, 2000.0);
 }
 
 Shader* Render::findShader(const char* shader) {
@@ -183,7 +188,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 	bool beforeCullState = state->enableCull;
 	int beforeCullMode = state->cullMode;
 	if (drawcall->isSingleSide()) { // Special case
-		if (state->pass == 4)
+		if (state->pass == COLOR_PASS)
 			state->enableCull = false;
 		else
 			state->cullMode = CULL_BACK;
@@ -197,11 +202,12 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 	else shader = drawcall->getType() == INSTANCE_DC ? state->shaderIns : state->shader;
 	useShader(shader);
 	if (camera) {
-		if (state->pass < 5) {
+		if (state->pass < DEFERRED_PASS) {
 			if (!state->skyPass) {
 				shader->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
+
 				if (drawcall->isBillboard()) {
-					if (state->pass == 4)
+					if (state->pass == COLOR_PASS)
 						shader->setMatrix4("viewMatrix", camera->viewMatrix);
 					else 
 						shader->setVector3("light", -state->light.x, -state->light.y, -state->light.z);
@@ -210,7 +216,21 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 					shader->setFloat("time", state->time);
 					shader->setVector3("eyePos", camera->position.x, camera->position.y, camera->position.z);
 					shader->setVector3("light", -state->light.x, -state->light.y, -state->light.z);
-					useTexture(TEXTURE_CUBE, 0, AssetManager::assetManager->getSkyTexture()->id);
+					shader->setMatrix4("viewMatrix", camera->viewMatrix);
+					if (state->enableSsr)
+						shader->setVector2("waterBias", 0.0, 0.0);
+					else
+						shader->setVector2("waterBias", 0.05, -0.05);
+					if (AssetManager::assetManager->getSkyTexture())
+						useTexture(TEXTURE_CUBE, 1, AssetManager::assetManager->getSkyTexture()->id);
+					if (AssetManager::assetManager->getReflectTexture())
+						useTexture(TEXTURE_2D, 2, AssetManager::assetManager->getReflectTexture()->id);
+				} else if (state->pass != FAR_SHADOW_PASS || drawcall->isBillboard()) { // use texture atlas
+					float pcw = AssetManager::assetManager->texAlt->pixW;
+					float pch = AssetManager::assetManager->texAlt->pixH;
+					float piw = AssetManager::assetManager->texAlt->perImgWidth;
+					float pih = AssetManager::assetManager->texAlt->perImgHeight;
+					shader->setVector4("texPixel", pcw, pch, piw, pih);
 				}
 			} else {
 				shader->setMatrix4("viewMatrix", camera->viewMatrix);
@@ -218,9 +238,10 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 			}
 			if (drawcall->getType() == STATIC_DC && !drawcall->isFullStatic() && drawcall->uModelMatrix) 
 				shader->setMatrix3x4("modelMatrices", drawcall->objectCount, drawcall->uModelMatrix);
-		} else if (state->pass == 5) {
+		} else if (state->pass == DEFERRED_PASS) {
 			shader->setMatrix4("invViewProjMatrix", camera->invViewProjectMatrix);
 			shader->setMatrix4("viewMatrix", camera->viewMatrix);
+
 			if (state->shadow) {
 				shader->setMatrix4("lightViewProjNear", state->shadow->lightNearMat);
 				shader->setMatrix4("lightViewProjMid", state->shadow->lightMidMat);
@@ -229,13 +250,16 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 			}
 			if (state->lightEffect) 
 				shader->setVector3("light", -state->light.x, -state->light.y, -state->light.z);
+		} 
+		if (state->ssrPass) {
+			shader->setMatrix4("viewMatrix", camera->viewMatrix);
+			shader->setMatrix4("projectMatrix", camera->projectMatrix);
+			shader->setMatrix4("invProjMatrix", camera->invProjMatrix);
+			shader->setVector2("screenSize", viewWidth, viewHeight);
 		}
 	}
 
-	if (!state->skyPass)
-		drawcall->draw(shader, state->pass);
-	else
-		drawcall->draw(shader, 3);
+	drawcall->draw(shader, state->pass);
 
 	if (drawcall->isSingleSide() || drawcall->isBillboard()) { // Reset state
 		state->enableCull = beforeCullState;
@@ -277,6 +301,7 @@ void Render::useTexture(uint type, uint slot, uint texid) {
 	std::map<uint, uint>::iterator texItor = textureInUse->find(slot);
 	if (texItor != textureInUse->end() && texItor->second == texid) 
 		return;
+
 	GLenum textureType = GL_TEXTURE_2D;
 	switch (type) {
 		case TEXTURE_2D:
