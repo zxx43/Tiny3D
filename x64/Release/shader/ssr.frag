@@ -46,13 +46,13 @@ vec2 BinarySearch(float start, float end, vec2 projUV, vec3 refDir, vec3 refPos,
 
 vec4 RayCast(vec3 refDir, vec3 refPos) {
 	float stepLen = 100.0;
-	float lenStart = 0.001;
+	float lenStart = 0.0;
 	float lenBefore = lenStart;
 	float lenCurrent = lenStart;
 
-	float border = 0.25;
-	float oneMinBorder = 0.75;
-	float invBorder = 4.0;
+	float border = 0.1;
+	float oneMinBorder = 0.9;
+	float invBorder = 10.0;
 	
 	vec4 projRef = projectMatrix * vec4(refPos, 1.0);
 	projRef /= projRef.w;
@@ -73,7 +73,7 @@ vec4 RayCast(vec3 refDir, vec3 refPos) {
 
 		if(storedDepth >= 1.0)
 			return FAIL_COLOR;
-		else if(curPos.z <= storedView.z + 0.01 && refFlag > 0.9 && refPos.z > storedView.z) {
+		else if(curPos.z <= storedView.z + 0.01 && refFlag > 0.9 && refPos.z >= storedView.z) {
 			vec2 searchData = BinarySearch(lenBefore, lenCurrent, projCoord.xy, refDir, refPos, projRef);
 			vec4 storedData = texture2D(lightBuffer, searchData);
 
@@ -99,7 +99,7 @@ void main() {
 	float refFlag = texture2D(colorBuffer, vTexcoord).a;
 
 	if(refFlag > 0.9)
-		ReflectColor = FAIL_COLOR;
+		ReflectColor = texture2D(lightBuffer, vTexcoord);
 	else {
 		float depth = texture2D(depthBuffer, vTexcoord).r;
 		vec3 ndcPos = vec3(vTexcoord, depth) * 2.0 - 1.0;
