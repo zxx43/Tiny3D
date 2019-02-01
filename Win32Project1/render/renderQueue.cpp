@@ -183,7 +183,23 @@ void PushNodeToQueue(RenderQueue* queue, Node* node, Camera* camera, Camera* mai
 				PushNodeToQueue(queue, child, camera, mainCamera);
 			else {
 				if (child->shadowLevel < queue->shadowLevel) continue;
-				else if (child->checkInCamera(camera)) {
+
+				InstanceNode* insChild = NULL;
+				if (child->type == TYPE_INSTANCE) {
+					insChild = (InstanceNode*)child;
+					if (insChild->getGroup()) {
+						if (queue->shadowLevel == 0) {
+							if (mainCamera->frustumSub && !insChild->checkInFrustum(mainCamera->frustumSub))
+								continue;
+						}
+						else {
+							if (mainCamera->frustumNear && !insChild->checkInFrustum(mainCamera->frustumNear))
+								continue;
+						}
+					}
+				}
+
+				if (child->checkInCamera(camera)) {
 					if (child->type != TYPE_INSTANCE && child->type != TYPE_STATIC)
 						queue->push(child);
 					else if (child->type == TYPE_STATIC) {
@@ -204,18 +220,7 @@ void PushNodeToQueue(RenderQueue* queue, Node* node, Camera* camera, Camera* mai
 								}
 							}
 						}
-					} else if (child->type == TYPE_INSTANCE) {
-						InstanceNode* insChild = (InstanceNode*)child;
-						if (insChild->getGroup()) {
-							if (queue->shadowLevel == 0) {
-								if (mainCamera->frustumSub && !insChild->checkInFrustum(mainCamera->frustumSub))
-									continue;
-							} else {
-								if (mainCamera->frustumNear && !insChild->checkInFrustum(mainCamera->frustumNear))
-									continue;
-							}
-						}
-
+					} else if (child->type == TYPE_INSTANCE && insChild) {
 						if (!insChild->dynamic) {
 							queue->push(insChild);
 							continue;
