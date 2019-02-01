@@ -73,7 +73,7 @@ vec4 RayCast(vec3 refDir, vec3 refPos) {
 
 		if(storedDepth >= 1.0)
 			return FAIL_COLOR;
-		else if(curPos.z <= storedView.z + 0.01 && refFlag > 0.9 && refPos.z >= storedView.z) {
+		else if(curPos.z <= storedView.z + 0.01 && refFlag > 0.9 && refPos.z >= storedView.z - 15.0) {
 			vec2 searchData = BinarySearch(lenBefore, lenCurrent, projCoord.xy, refDir, refPos, projRef);
 			vec4 storedData = texture2D(lightBuffer, searchData);
 

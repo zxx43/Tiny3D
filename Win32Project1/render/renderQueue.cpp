@@ -8,11 +8,11 @@
 using namespace std;
 
 RenderQueue::RenderQueue(float midDis, float lowDis) {
-	queue = new Queue(128);
+	queue = new Queue(1);
 	instanceQueue.clear();
 	batchData = NULL;
-	midDistSqr = midDis * midDis;
-	lowDistSqr = lowDis * lowDis;
+	midDistSqr = powf(midDis, 2);
+	lowDistSqr = powf(lowDis, 2);
 	dual = true;
 	shadowLevel = 0;
 }
