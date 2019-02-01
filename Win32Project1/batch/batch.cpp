@@ -1,5 +1,4 @@
 #include "batch.h"
-#include "../constants/constants.h"
 #include "../material/materialManager.h"
 #include <string.h>
 #include <stdlib.h>
@@ -20,6 +19,7 @@ Batch::Batch() {
 	type = BATCH_TYPE_DYNAMIC;
 	objectCount = 0;
 	modelMatrices = NULL;
+	matrixDataPtr = NULL;
 	normalMatrices = NULL;
 	drawcall = NULL;
 }
@@ -33,10 +33,23 @@ Batch::~Batch() {
 	if (objectidBuffer) free(objectidBuffer); objectidBuffer = NULL;
 	if (indexBuffer) free(indexBuffer); indexBuffer = NULL;
 
+	matrixDataPtr = NULL;
 	if (modelMatrices) free(modelMatrices); modelMatrices = NULL;
 	if (normalMatrices) free(normalMatrices); normalMatrices = NULL;
 
 	if (drawcall) delete drawcall; drawcall = NULL;
+}
+
+void Batch::releaseBatchData() {
+	if (fullStatic || !isDynamic()) {
+		if (vertexBuffer) free(vertexBuffer); vertexBuffer = NULL;
+		if (normalBuffer) free(normalBuffer); normalBuffer = NULL;
+		if (texcoordBuffer) free(texcoordBuffer); texcoordBuffer = NULL;
+		if (texOfsBuffer) free(texOfsBuffer); texOfsBuffer = NULL;
+		if (colorBuffer) free(colorBuffer); colorBuffer = NULL;
+		if (objectidBuffer) free(objectidBuffer); objectidBuffer = NULL;
+		if (indexBuffer) free(indexBuffer); indexBuffer = NULL;
+	}
 }
 
 void Batch::flushBatchBuffers() {
@@ -80,24 +93,18 @@ void Batch::pushMeshToBuffers(Mesh* mesh,int mid,bool fullStatic,const MATRIX4X4
 
 		if (!fullStatic) {
 			VECTOR3D vertex3 = mesh->vertices3[i];
-			vertexBuffer[vertexCount * 3] = vertex3.x;
-			vertexBuffer[vertexCount * 3 + 1] = vertex3.y;
-			vertexBuffer[vertexCount * 3 + 2] = vertex3.z;
-
-			normalBuffer[vertexCount * 3] = normal.x;
-			normalBuffer[vertexCount * 3 + 1] = normal.y;
-			normalBuffer[vertexCount * 3 + 2] = normal.z;
+			for (int v = 0; v < 3; v++) {
+				vertexBuffer[vertexCount * 3 + v] = GetVec3(&vertex3, v);
+				normalBuffer[vertexCount * 3 + v] = GetVec4(&normal, v);
+			}
 		} else {
 			VECTOR4D vertex = transformMatrix * mesh->vertices[i];
 			float invW = 1.0 / vertex.w;
-			vertexBuffer[vertexCount * 3] = vertex.x * invW;
-			vertexBuffer[vertexCount * 3 + 1] = vertex.y * invW;
-			vertexBuffer[vertexCount * 3 + 2] = vertex.z * invW;
-
 			normal = normalMatrix * normal;
-			normalBuffer[vertexCount * 3] = normal.x;
-			normalBuffer[vertexCount * 3 + 1] = normal.y;
-			normalBuffer[vertexCount * 3 + 2] = normal.z;
+			for (int v = 0; v < 3; v++) {
+				vertexBuffer[vertexCount * 3 + v] = GetVec4(&vertex, v) * invW;
+				normalBuffer[vertexCount * 3 + v] = GetVec4(&normal, v);
+			}
 		}
 
 		textureCount = mat->texOfs1.z >= 0 ? 3 : 1;
@@ -143,24 +150,28 @@ void Batch::initMatrix(unsigned short currentObject, const MATRIX4X4& transformM
 	memcpy(normalMatrices + (currentObject * 9 + 6), normalMatrix.entries + 8, 3 * sizeof(float));
 }
 
-void Batch::setRenderData(int pass, int vertCnt, int indCnt, int objCnt,
-	float* vertices, float* normals, float* texcoords,
-	byte* colors, byte* objectids, uint* indices, float* matrices) {
-		vertexCount = vertCnt;
-		indexCount = indCnt;
-		objectCount = objCnt;
+void Batch::setRenderData(int pass, BatchData* data) {
+	vertexCount = data->vertexCount;
+	indexCount = data->indexCount;
+	objectCount = data->objectCount;
+	if (drawcall) {
+		drawcall->vertexCntToPrepare = vertexCount;
+		drawcall->indexCntToPrepare = indexCount;
+		drawcall->objectCntToPrepare = objectCount;
+	}
 
-		memcpy(vertexBuffer, vertices, vertexCount * 3 * sizeof(float));
-		if (pass == NEAR_SHADOW_PASS || pass == MID_SHADOW_PASS || pass == COLOR_PASS) {
-			memcpy(texcoordBuffer, texcoords, vertexCount * 4 * sizeof(float));
-			if (pass == COLOR_PASS) {
-				memcpy(normalBuffer, normals, vertexCount * 3 * sizeof(float));
-				memcpy(colorBuffer, colors, vertexCount * 3 * sizeof(byte));
-			}
+	memcpy(vertexBuffer, data->vertices, vertexCount * 3 * sizeof(float));
+	if (pass == NEAR_SHADOW_PASS || pass == MID_SHADOW_PASS || pass == COLOR_PASS) {
+		memcpy(texcoordBuffer, data->texcoords, vertexCount * 4 * sizeof(float));
+		if (pass == COLOR_PASS) {
+			memcpy(normalBuffer, data->normals, vertexCount * 3 * sizeof(float));
+			memcpy(colorBuffer, data->colors, vertexCount * 3 * sizeof(byte));
 		}
-		memcpy(objectidBuffer, objectids, vertexCount * sizeof(byte));
-		memcpy(indexBuffer, indices, indexCount * sizeof(uint));
-		memcpy(modelMatrices, matrices, objectCount * 12 * sizeof(float));
+	}
+	memcpy(objectidBuffer, data->objectids, vertexCount * sizeof(byte));
+	memcpy(indexBuffer, data->indices, indexCount * sizeof(uint));
+	//memcpy(modelMatrices, data->matrices, objectCount * 12 * sizeof(float));
+	matrixDataPtr = data->matrices;
 }
 
 void Batch::createDrawcall() {

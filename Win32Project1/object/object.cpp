@@ -16,6 +16,10 @@ Object::Object() {
 	localBoundPosition.z=0;
 
 	billboard = NULL;
+	genShadow = true;
+	detailLevel = 2;
+
+	transforms = NULL;
 }
 
 Object::Object(const Object& rhs) {
@@ -88,7 +92,7 @@ void Object::bindMaterial(int mid) {
 
 bool Object::checkInCamera(Camera* camera) {
 	if (bounding)
-		return bounding->checkWithCamera(camera, true);
+		return bounding->checkWithCamera(camera->frustum, detailLevel);
 	return true;
 }
 

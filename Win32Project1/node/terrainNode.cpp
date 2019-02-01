@@ -20,7 +20,7 @@ TerrainNode::~TerrainNode() {
 	triangles.clear();
 }
 
-void TerrainNode::prepareTriangles() {
+void TerrainNode::prepareCollisionData() {
 	StaticObject* object = (StaticObject*)(objects[0]);
 	offsize.x = object->sizex;
 	offsize.y = object->sizey;
@@ -82,26 +82,26 @@ bool TerrainNode::cauculateY(float x, float z, float& y) {
 	return false;
 }
 
-void standObjectsOnGround(Node* node, TerrainNode* terrain) {
+void TerrainNode::standObjectsOnGround(Node* node) {
 	if (node->type == TYPE_TERRAIN) return;
 	if (node->children.size() <= 0) {
 		if (node->type == TYPE_ANIMATE) {
 			AnimationNode* animNode = (AnimationNode*)node;
 			VECTOR3D worldCenter = animNode->boundingBox->position;
-			terrain->cauculateY(worldCenter.x, worldCenter.z, worldCenter.y);
+			this->cauculateY(worldCenter.x, worldCenter.z, worldCenter.y);
 			worldCenter.y += ((AABB*)animNode->boundingBox)->sizey * 0.5;
 			animNode->translateNodeCenterAtWorld(worldCenter.x, worldCenter.y, worldCenter.z);
 		} else {
 			for (uint i = 0; i < node->objects.size(); i++) {
 				StaticObject* obj = (StaticObject*)node->objects[i];
 				VECTOR3D worldCenter = obj->bounding->position;
-				terrain->cauculateY(worldCenter.x, worldCenter.z, worldCenter.y);
+				this->cauculateY(worldCenter.x, worldCenter.z, worldCenter.y);
 				worldCenter.y += ((AABB*)obj->bounding)->sizey * 0.499;
 				node->translateNodeObjectCenterAtWorld(i, worldCenter.x, worldCenter.y, worldCenter.z);
 			}
 		}
 	} else if (node->children.size() > 0) {
 		for (uint c = 0; c < node->children.size(); c++)
-			standObjectsOnGround(node->children[c], terrain);
+			standObjectsOnGround(node->children[c]);
 	}
 }

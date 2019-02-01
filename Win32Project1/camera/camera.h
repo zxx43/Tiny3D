@@ -23,17 +23,21 @@ private:
 	float xrot,yrot,height;
 	MATRIX4X4 rotXMat, rotYMat, transMat;
 	VECTOR4D lookDir4;
+	MATRIX4X4 projectMatrixSub, projectMatrixNear;
 public:
-	bool simpleCheck, isMain;
 	Frustum* frustum;
+	Frustum* frustumSub;
+	Frustum* frustumNear;
 	VECTOR3D position, lookDir, up;
 	float fovy,aspect,zNear,zFar;
 	MATRIX4X4 viewMatrix, projectMatrix, viewProjectMatrix;
-	MATRIX4X4 invViewProjectMatrix, invProjMatrix;
+	MATRIX4X4 invViewProjectMatrix, invProjMatrix, invViewMatrix;
 
 	Camera(float height);
 	~Camera();
 	void initPerspectCamera(float fovy,float aspect,float zNear,float zFar);
+	void initPerspectSub(float far);
+	void initPerspectNear(float far);
 	void initOrthoCamera(float left,float right,float bottom,float top,float near,float far);
 	void setView(const VECTOR3D& pos, const VECTOR3D& dir);
 	void updateLook(const VECTOR3D& pos, const VECTOR3D& dir);

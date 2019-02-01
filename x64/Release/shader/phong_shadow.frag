@@ -9,6 +9,5 @@ void main() {
 	float tx = (vTexcoord.x * texPixel.z + vTexcoord.z) * texPixel.x;
 	float ty = (vTexcoord.y * texPixel.w + vTexcoord.w) * texPixel.y;
 
-	float alpha = texture2D(texture, vec2(tx, ty)).a;
-	if(alpha < 0.25) discard;
+	if(texture2D(texture, vec2(tx, ty)).a < 0.25) discard;
 }

@@ -160,6 +160,7 @@
     <ClCompile Include="application\application.cpp" />
     <ClCompile Include="assets\assetManager.cpp" />
     <ClCompile Include="batch\batch.cpp" />
+    <ClCompile Include="batch\batchData.cpp" />
     <ClCompile Include="bounding\aabb.cpp" />
     <ClCompile Include="bounding\boundingBox.cpp" />
     <ClCompile Include="camera\camera.cpp" />
@@ -169,6 +170,7 @@
     <ClCompile Include="framebuffer\framebuffer.cpp" />
     <ClCompile Include="input\input.cpp" />
     <ClCompile Include="instance\instance.cpp" />
+    <ClCompile Include="instance\instanceData.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="material\materialManager.cpp" />
     <ClCompile Include="maths\COLOR.cpp" />
@@ -227,6 +229,7 @@
     <ClInclude Include="application\application.h" />
     <ClInclude Include="assets\assetManager.h" />
     <ClInclude Include="batch\batch.h" />
+    <ClInclude Include="batch\batchData.h" />
     <ClInclude Include="billboard\billboard.h" />
     <ClInclude Include="bounding\aabb.h" />
     <ClInclude Include="bounding\boundingBox.h" />
@@ -238,6 +241,7 @@
     <ClInclude Include="framebuffer\framebuffer.h" />
     <ClInclude Include="input\input.h" />
     <ClInclude Include="instance\instance.h" />
+    <ClInclude Include="instance\instanceData.h" />
     <ClInclude Include="material\materialManager.h" />
     <ClInclude Include="maths\COLOR.h" />
     <ClInclude Include="maths\Maths.h" />
@@ -299,6 +303,8 @@
     <None Include="..\x64\Release\shader\billboard.vert" />
     <None Include="..\x64\Release\shader\billboard_shadow.frag" />
     <None Include="..\x64\Release\shader\billboard_shadow.vert" />
+    <None Include="..\x64\Release\shader\combined.frag" />
+    <None Include="..\x64\Release\shader\combined.vert" />
     <None Include="..\x64\Release\shader\debug.frag" />
     <None Include="..\x64\Release\shader\debug.vert" />
     <None Include="..\x64\Release\shader\deferred.frag" />
@@ -317,10 +323,14 @@
     <None Include="..\x64\Release\shader\phong.vert" />
     <None Include="..\x64\Release\shader\phong_ins.frag" />
     <None Include="..\x64\Release\shader\phong_ins.vert" />
+    <None Include="..\x64\Release\shader\phong_ins_simp.frag" />
+    <None Include="..\x64\Release\shader\phong_ins_simp.vert" />
     <None Include="..\x64\Release\shader\phong_shadow.frag" />
     <None Include="..\x64\Release\shader\phong_shadow.vert" />
     <None Include="..\x64\Release\shader\phong_shadow_ins.frag" />
     <None Include="..\x64\Release\shader\phong_shadow_ins.vert" />
+    <None Include="..\x64\Release\shader\phong_shadow_ins_simp.frag" />
+    <None Include="..\x64\Release\shader\phong_shadow_ins_simp.vert" />
     <None Include="..\x64\Release\shader\phong_shadow_low.frag" />
     <None Include="..\x64\Release\shader\phong_shadow_low.vert" />
     <None Include="..\x64\Release\shader\phong_shadow_low_ins.vert" />

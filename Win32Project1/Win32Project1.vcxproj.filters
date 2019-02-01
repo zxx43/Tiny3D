@@ -291,6 +291,12 @@
     <ClCompile Include="texture\textureatlas.cpp">
       <Filter>Source Files\texture</Filter>
     </ClCompile>
+    <ClCompile Include="instance\instanceData.cpp">
+      <Filter>Source Files\instance</Filter>
+    </ClCompile>
+    <ClCompile Include="batch\batchData.cpp">
+      <Filter>Source Files\batch</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="animation\animation.h">
@@ -506,6 +512,12 @@
     <ClInclude Include="texture\textureatlas.h">
       <Filter>Source Files\texture</Filter>
     </ClInclude>
+    <ClInclude Include="instance\instanceData.h">
+      <Filter>Source Files\instance</Filter>
+    </ClInclude>
+    <ClInclude Include="batch\batchData.h">
+      <Filter>Source Files\batch</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\x64\Release\shader\bone.frag">
@@ -629,6 +641,24 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\x64\Release\shader\mean.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\combined.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\combined.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\phong_shadow_ins_simp.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\phong_ins_simp.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\phong_ins_simp.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\phong_shadow_ins_simp.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

@@ -19,7 +19,7 @@ public:
 	VECTOR3D minVertex, maxVertex;
 
 private:
-	bool vertexInsideCamera(const VECTOR3D& vertex,const Camera* camera);
+	bool vertexInsideCamera(const VECTOR3D& vertex, const Frustum* frustum);
 	bool intersectsWidthRay(const VECTOR3D& origin,const VECTOR3D& dir,float maxDistance);
 	bool cameraVertexInside(const VECTOR3D& vertex);
 public:
@@ -28,7 +28,7 @@ public:
 	AABB(const AABB& rhs);
 	virtual ~AABB();
 	virtual AABB* clone();
-	virtual bool checkWithCamera(Camera* camera, bool forceSimple = false);
+	virtual bool checkWithCamera(Frustum* frustum, int checkLevel);
 	void update(const VECTOR3D& newMinVertex,const VECTOR3D& newMaxVertex);
 	void update(float sx, float sy, float sz);
 	virtual void update(const VECTOR3D& pos);

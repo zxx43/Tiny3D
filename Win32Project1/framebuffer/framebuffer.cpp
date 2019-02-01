@@ -1,8 +1,9 @@
 #include "framebuffer.h"
 
-FrameBuffer::FrameBuffer(float width, float height, int precision, int component) {
+FrameBuffer::FrameBuffer(float width, float height, int precision, int component, bool clampBorder) {
 	this->width = width;
 	this->height = height;
+	this->clampBorder = clampBorder;
 
 	glGenFramebuffersEXT(1, &fboId);
 
@@ -58,7 +59,7 @@ void FrameBuffer::addColorBuffer(int precision, int component) {
 	colorBufferCount++;
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId);
 
-	colorBuffers.push_back(new Texture2D(width,height,TEXTURE_TYPE_COLOR,precision,component));
+	colorBuffers.push_back(new Texture2D(width,height,TEXTURE_TYPE_COLOR,precision,component,clampBorder));
 	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT+(colorBufferCount-1),GL_TEXTURE_2D,
 			colorBuffers[colorBufferCount-1]->id,0);
 	glDrawBuffers(colorBufferCount,ColorAttachments);

@@ -30,6 +30,8 @@ Node::Node(const VECTOR3D& position,const VECTOR3D& size) {
 	nodeBBs.clear();
 
 	type = TYPE_NULL;
+	shadowLevel = 3;
+	detailLevel = 3;
 }
 
 Node::~Node() {
@@ -65,8 +67,12 @@ void Node::clearChildren() {
 }
 
 bool Node::checkInCamera(Camera* camera) {
+	return checkInFrustum(camera->frustum);
+}
+
+bool Node::checkInFrustum(Frustum* frustum) {
 	if (boundingBox)
-		return boundingBox->checkWithCamera(camera);
+		return boundingBox->checkWithCamera(frustum, detailLevel);
 	return true;
 }
 
@@ -362,6 +368,13 @@ void Node::updateNode() {
 		for (unsigned int i = 0; i < objects.size(); i++) {
 			Object* object = objects[i];
 			object->transformMatrix = nodeTransform * object->localTransformMatrix;
+			object->transformTransposed = object->transformMatrix.GetTranspose();
+			if (object->transforms) {
+				object->transforms[0] = object->transformMatrix.entries[12];
+				object->transforms[1] = object->transformMatrix.entries[13];
+				object->transforms[2] = object->transformMatrix.entries[14];
+				object->transforms[3] = object->sizex;
+			}
 		}
 	}
 	needUpdateNode = false;

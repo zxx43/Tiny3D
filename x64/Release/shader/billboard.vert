@@ -12,19 +12,20 @@ layout (location = 3) in vec4 board;
 out vec2 vTexcoord;
 out vec3 vNormal;
 
+#define TOP_VEC vec3(0.0, 1.0, 0.0)
+
 void main() {
 	vec3 viewRight = vec3(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
-	vec3 viewTop = vec3(0.0, 1.0, 0.0);
 	
 	vec2 size = vertex.xy * board.xy;
 	vec3 right = size.x * viewRight;
-	vec3 top = size.y * viewTop;
+	vec3 top = size.y * TOP_VEC;
 	vec3 worldVertex = position + right + top;
 
 	float tx = (texcoord.x * texPixel.z + board.z) * texPixel.x;
 	float ty = (texcoord.y * texPixel.w + board.w) * texPixel.y;
 
 	vTexcoord = vec2(tx, ty);
-	vNormal = cross(viewRight, viewTop);
+	vNormal = cross(viewRight, TOP_VEC);
 	gl_Position = viewProjectMatrix * vec4(worldVertex, 1.0);
 }

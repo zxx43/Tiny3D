@@ -13,10 +13,7 @@ using namespace std;
 Scene::Scene() {
 	inited = false;
 	mainCamera = new Camera(4.0);
-	mainCamera->simpleCheck = false;
-	mainCamera->isMain = true;
 	reflectCamera = new Camera(0.0);
-	reflectCamera->simpleCheck = false;
 	skyBox = NULL;
 	water = NULL;
 	terrainNode = NULL;
@@ -38,7 +35,6 @@ Scene::~Scene() {
 	if (skyBox) delete skyBox; skyBox = NULL;
 	if (water) delete water; water = NULL;
 	if (textureNode) delete textureNode; textureNode = NULL;
-
 	if (staticRoot) delete staticRoot; staticRoot = NULL;
 	if (billboardRoot) delete billboardRoot; billboardRoot = NULL;
 	if (animationRoot) delete animationRoot; animationRoot = NULL;
@@ -78,11 +74,37 @@ void Scene::updateReflectCamera() {
 	}
 }
 
+void Scene::createSky() {
+	skyBox = new Sky();
+}
+
+void Scene::createWater(const VECTOR3D& position, const VECTOR3D& size) {
+	water = new WaterNode(VECTOR3D(0, 0, 0));
+	water->setFullStatic(true);
+	StaticObject* waterObject = new StaticObject(AssetManager::assetManager->meshes["water"]);
+	waterObject->setPosition(position.x, position.y, position.z);
+	waterObject->setSize(size.x, size.y, size.z);
+	water->addObject(waterObject);
+	water->updateNode();
+	water->prepareDrawcall();
+}
+
+void Scene::createTerrain(const VECTOR3D& position, const VECTOR3D& size) {
+	terrainNode = new TerrainNode(position);
+	terrainNode->setFullStatic(true);
+	StaticObject* terrainObject = new StaticObject(AssetManager::assetManager->meshes["terrain"]);
+	terrainObject->bindMaterial(MaterialManager::materials->find("terrain_mat"));
+	terrainObject->setSize(size.x, size.y, size.z);
+	terrainNode->addObject(terrainObject);
+	terrainNode->prepareCollisionData();
+	staticRoot->attachChild(terrainNode);
+}
+
 void Scene::createNodeAABB(Node* node) {
 	AABB* aabb = (AABB*)node->boundingBox;
 	if(aabb) {
 		StaticNode* aabbNode = new StaticNode(aabb->position);
-		StaticObject* aabbObject = new StaticObject(AssetManager::assetManager->meshes.find("box")->second);
+		StaticObject* aabbObject = new StaticObject(AssetManager::assetManager->meshes["box"]);
 		aabbNode->setDynamicBatch(false);
 		aabbObject->bindMaterial(MaterialManager::materials->find(BLACK_MAT));
 		aabbObject->setSize(aabb->sizex, aabb->sizey, aabb->sizez);
@@ -114,7 +136,6 @@ void Scene::createNodeAABB(Node* node) {
 			}
 		}
 	}
-	
 }
 
 void Scene::clearAllAABB() {

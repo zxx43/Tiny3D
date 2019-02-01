@@ -6,14 +6,14 @@ Shadow::Shadow(Camera* view, float distance1, float distance2) {
 	this->distance2 = distance2;
 	shadowMapSize = 0, shadowPixSize = 0;
 
-	corners0 = new VECTOR4D[4];
-	corners1 = new VECTOR4D[4];
-	corners2 = new VECTOR4D[4];
-	corners3 = new VECTOR4D[4];
+	corners0 = new VECTOR3D[4];
+	corners1 = new VECTOR3D[4];
+	corners2 = new VECTOR3D[4];
+	corners3 = new VECTOR3D[4];
 
-	lightCameraNear = new Camera(0); lightCameraNear->simpleCheck = false;
-	lightCameraMid = new Camera(0); lightCameraMid->simpleCheck = false;
-	lightCameraFar = new Camera(0); lightCameraFar->simpleCheck = false;
+	lightCameraNear = new Camera(0); 
+	lightCameraMid = new Camera(0);
+	lightCameraFar = new Camera(0);
 }
 
 Shadow::~Shadow() {
@@ -70,9 +70,9 @@ void Shadow::prepareViewCamera() {
 	center1 = VECTOR4D(0,0,-(level1+(level2-level1)*0.5),1);
 	center2 = VECTOR4D(0, 0, -(level2 + (farDist - level2)*0.5), 1);
 
-	radius0=(VECTOR3D(center0.x,center0.y,center0.z)-VECTOR3D(corners1[0].x,corners1[0].y,corners1[0].z)).GetLength();
-	radius1=(VECTOR3D(center1.x,center1.y,center1.z)-VECTOR3D(corners2[0].x,corners2[0].y,corners2[0].z)).GetLength();
-	radius2=(VECTOR3D(center2.x,center2.y,center2.z)-VECTOR3D(corners3[0].x,corners3[0].y,corners3[0].z)).GetLength();
+	radius0 = (((VECTOR3D)center0) - corners1[0]).GetLength();
+	radius1=(((VECTOR3D)center1) - corners2[0]).GetLength();
+	radius2=(((VECTOR3D)center2) - corners3[0]).GetLength();
 
 	lightCameraNear->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.0001 * radius0, 1.0001 * radius0);
 	lightCameraMid->initOrthoCamera(-radius1, radius1, -radius1, radius1, -1.0001 * radius1, 1.0001 * radius1);
@@ -82,22 +82,15 @@ void Shadow::prepareViewCamera() {
 void Shadow::update(const VECTOR3D& light) {
 	lightDir = light;
 
-	invViewMatrix=viewCamera->viewMatrix.GetInverse();
-
-	updateLightCamera(lightCameraNear,center0,radius0);
-	updateLightCamera(lightCameraMid,center1,radius1);
-	updateLightCamera(lightCameraFar,center2,radius2);
+	updateLightCamera(lightCameraNear, &center0, radius0);
+	updateLightCamera(lightCameraMid, &center1, radius1);
+	updateLightCamera(lightCameraFar, &center2, radius2);
 
 	lightNearMat = lightCameraNear->viewProjectMatrix;
 	lightMidMat = lightCameraMid->viewProjectMatrix;
 	lightFarMat = lightCameraFar->viewProjectMatrix;
 }
 
-void Shadow::updateLightCamera(Camera* lightCamera, VECTOR4D center, float radius) {
-	static VECTOR4D centerW;
-	static VECTOR3D centerW3;
-	centerW = invViewMatrix * center;
-	centerW3.x = centerW.x; centerW3.y = centerW.y; centerW3.z = centerW.z;
-
-	lightCamera->updateLook(centerW3, lightDir);
+void Shadow::updateLightCamera(Camera* lightCamera, const VECTOR4D* center, float radius) {
+	lightCamera->updateLook((VECTOR3D)(viewCamera->invViewMatrix * (*center)), lightDir);
 }

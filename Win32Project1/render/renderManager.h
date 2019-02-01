@@ -26,10 +26,19 @@
 struct Renderable {
 	std::vector<RenderQueue*> queues;
 	Camera* mainCamera;
-	Renderable(float midDis, float lowDis) {
+	Renderable(float midDis, float lowDis, bool dual) {
 		queues.clear();
-		for (uint i = 0; i < 8; i++)
+		for (uint i = 0; i < 8; i++) {
 			queues.push_back(new RenderQueue(midDis, lowDis));
+			queues[i]->setDual(dual);
+		}
+		queues[QUEUE_STATIC_SN]->shadowLevel = 1;
+		queues[QUEUE_STATIC_SM]->shadowLevel = 2;
+		queues[QUEUE_STATIC_SF]->shadowLevel = 3;
+		queues[QUEUE_ANIMATE_SN]->shadowLevel = 1;
+		queues[QUEUE_ANIMATE_SM]->shadowLevel = 2;
+		queues[QUEUE_ANIMATE_SF]->shadowLevel = 3;
+
 		mainCamera = new Camera(0);
 	}
 	~Renderable() {
@@ -72,26 +81,26 @@ public:
 	FrameBuffer* farBuffer;
 	FrameBuffer* reflectBuffer;
 
-	RenderManager(int quality, Camera* view, float distance1, float distance2, const VECTOR3D& light);
+	RenderManager(int quality, Camera* view, float distance1, float distance2, bool copyData, const VECTOR3D& light);
 	~RenderManager();
 
-	void act();
+	void act(float dTime);
 	void resize(float width, float height);
-	void updateShadowCamera();
+	void updateShadowCamera(Camera* mainCamera);
 	void updateMainLight();
 	void flushRenderQueues();
 	void updateRenderQueues(Scene* scene);
 	void animateQueues(long startTime, long currentTime);
-	void swapRenderQueues(Scene* scene);
+	void swapRenderQueues(Scene* scene, bool swapQueue);
 	void renderShadow(Render* render,Scene* scene);
 	void renderScene(Render* render,Scene* scene);
+	void renderWater(Render* render, Scene* scene);
 	void renderReflect(Render* render, Scene* scene);
-	void enableShadow(Render* render);
-	void disableShadow(Render* render);
-	void showBounding();
-	void hideBounding();
+	void showShadow(bool enable);
+	void showBounding(bool enable);
 
 	void drawDeferred(Render* render, Scene* scene, FrameBuffer* screenBuff, Filter* filter);
+	void drawCombined(Render* render, Scene* scene, const std::vector<Texture2D*>& inputTextures, Filter* filter);
 	void drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, FrameBuffer* inputBuff, Filter* filter);
 	void drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter);
 	void drawSSRFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter);

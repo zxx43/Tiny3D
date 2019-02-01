@@ -4,7 +4,7 @@
 
 std::map<Mesh*, int> Instance::instanceTable;
 
-Instance::Instance(Mesh* mesh) {
+Instance::Instance(Mesh* mesh, bool dyn, bool simp) {
 	instanceMesh = mesh;
 	vertexCount = 0;
 	indexCount = 0;
@@ -18,10 +18,13 @@ Instance::Instance(Mesh* mesh) {
 	drawcall = NULL;
 	singleSide = false;
 	isBillboard = instanceMesh->isBillboard;
+	isDynamic = dyn;
+	isSimple = simp;
 
 	modelMatrices = NULL;
 	positions = NULL;
 	billboards = NULL;
+	copyData = true;
 }
 
 Instance::~Instance() {
@@ -31,13 +34,29 @@ Instance::~Instance() {
 	if (colorBuffer) free(colorBuffer); colorBuffer = NULL;
 	if (indexBuffer) free(indexBuffer); indexBuffer = NULL;
 
-	if (modelMatrices) free(modelMatrices); modelMatrices = NULL;
-	if (positions) free(positions); positions = NULL;
-	if (billboards) free(billboards); billboards = NULL;
+	if (copyData) {
+		if (modelMatrices) free(modelMatrices); modelMatrices = NULL;
+		if (positions) free(positions); positions = NULL;
+		if (billboards) free(billboards); billboards = NULL;
+	}
 	if (drawcall) delete drawcall;
 }
 
-void Instance::initInstanceBuffers(Object* object,int vertices,int indices) {
+void Instance::releaseInstanceData() {
+	if (vertexBuffer) free(vertexBuffer); vertexBuffer = NULL;
+	if (normalBuffer) free(normalBuffer); normalBuffer = NULL;
+	if (texcoordBuffer) free(texcoordBuffer); texcoordBuffer = NULL;
+	if (colorBuffer) free(colorBuffer); colorBuffer = NULL;
+	if (indexBuffer) free(indexBuffer); indexBuffer = NULL;
+
+	if (!isDynamic && copyData) {
+		if (modelMatrices) free(modelMatrices); modelMatrices = NULL;
+		if (positions) free(positions); positions = NULL;
+		if (billboards) free(billboards); billboards = NULL;
+	}
+}
+
+void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int cnt,bool copy) {
 	vertexCount = vertices;
 	vertexBuffer = (float*)malloc(vertexCount * 3 * sizeof(float));
 	normalBuffer = (float*)malloc(vertexCount * 3 * sizeof(float));
@@ -70,13 +89,10 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices) {
 		float pixWidth = mat->texSize.z;
 		float pixHeight = mat->texSize.w;
 
-		vertexBuffer[i*3]=vertex.x;
-		vertexBuffer[i*3+1]=vertex.y;
-		vertexBuffer[i*3+2]=vertex.z;
-
-		normalBuffer[i*3]=normal.x;
-		normalBuffer[i*3+1]=normal.y;
-		normalBuffer[i*3+2]=normal.z;
+		for (int v = 0; v < 3; v++) {
+			vertexBuffer[i * 3 + v] = GetVec4(&vertex, v);
+			normalBuffer[i * 3 + v] = GetVec3(&normal, v);
+		}
 
 		if (texcoord.x < 0) 
 			texcoord.x = 1 + texcoord.x - (int)texcoord.x;
@@ -104,38 +120,80 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices) {
 		}
 	}
 
-	if (isBillboard)
-		initBillboards();
-	else
-		initMatrices();
+	copyData = copy;
+	if (copyData) {
+		if (isBillboard)
+			initBillboards(cnt);
+		else
+			initMatrices(cnt);
+	}
 }
 
 
-void Instance::initMatrices() {
-	modelMatrices = (float*)malloc(MAX_INSTANCE_COUNT * 12 * sizeof(float));
-	memset(modelMatrices, 0, MAX_INSTANCE_COUNT * 12 * sizeof(float));
+void Instance::initMatrices(int cnt) {
+	if (!isSimple) {
+		modelMatrices = (float*)malloc(cnt * 12 * sizeof(float));
+		memset(modelMatrices, 0, cnt * 12 * sizeof(float));
+	} else {
+		modelMatrices = (float*)malloc(cnt * 4 * sizeof(float));
+		memset(modelMatrices, 0, cnt * 4 * sizeof(float));
+	}
 }
 
-void Instance::initBillboards() {
-	positions = (float*)malloc(MAX_INSTANCE_COUNT * 3 * sizeof(float));
-	memset(positions, 0, MAX_INSTANCE_COUNT * 3 * sizeof(float));
-	billboards = (float*)malloc(MAX_INSTANCE_COUNT * 4 * sizeof(float));
-	memset(billboards, 0, MAX_INSTANCE_COUNT * 4 * sizeof(float));
+void Instance::initBillboards(int cnt) {
+	positions = (float*)malloc(cnt * 3 * sizeof(float));
+	memset(positions, 0, cnt * 3 * sizeof(float));
+	billboards = (float*)malloc(cnt * 4 * sizeof(float));
+	memset(billboards, 0, cnt * 4 * sizeof(float));
 }
 
-void Instance::setRenderData(int count, float* matrices, float* billboards, float* positions) {
-	instanceCount = count;
-	if (drawcall) drawcall->objectToDraw = instanceCount;
+void Instance::setRenderData(InstanceData* data) {
+	instanceCount = data->count;
+	if (drawcall) drawcall->objectToPrepare = instanceCount;
 
-	if (matrices)
-		memcpy(modelMatrices, matrices, instanceCount * 12 * sizeof(float));
-	else {
-		memcpy(this->billboards, billboards, instanceCount * 4 * sizeof(float));
-		memcpy(this->positions, positions, instanceCount * 3 * sizeof(float));
+	if (copyData) {
+		if (isSimple && data->matrices)
+			memcpy(modelMatrices, data->matrices, instanceCount * 4 * sizeof(float));
+		else if (!isSimple && data->matrices)
+			memcpy(modelMatrices, data->matrices, instanceCount * 12 * sizeof(float));
+		else {
+			memcpy(billboards, data->billboards, instanceCount * 4 * sizeof(float));
+			memcpy(positions, data->positions, instanceCount * 3 * sizeof(float));
+		}
+	} else {
+		if (data->matrices)
+			modelMatrices = data->matrices;
+		else {
+			billboards = data->billboards;
+			positions = data->positions;
+		}
 	}
 }
 
 void Instance::createDrawcall() {
 	drawcall = new InstanceDrawcall(this);
 	drawcall->setSide(singleSide);
+}
+
+void Instance::addObject(Object* object, int index) {
+	instanceCount++;
+
+	if (isSimple && !billboards) 
+		memcpy(modelMatrices + (index * 4), object->transforms, 4 * sizeof(float));
+	else if (!isSimple && !billboards)
+		memcpy(modelMatrices + (index * 12), object->transformTransposed.entries, 12 * sizeof(float));
+	else if (billboards) {
+		Material* mat = NULL;
+		if (MaterialManager::materials)
+			mat = MaterialManager::materials->find(object->billboard->material);
+
+		billboards[index * 4 + 0] = object->billboard->data[0];
+		billboards[index * 4 + 1] = object->billboard->data[1];
+		if (mat) {
+			billboards[index * 4 + 2] = mat->texOfs1.x;
+			billboards[index * 4 + 3] = mat->texOfs1.y;
+		}
+
+		memcpy(positions + (index * 3), object->transformMatrix.entries + 12, 3 * sizeof(float));
+	}
 }

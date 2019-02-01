@@ -20,9 +20,13 @@ void main() {
 
 	vec4 tex1 = texture2DArray(texArray, vTexcoord.xyz);
 	vec4 tex2 = texture2DArray(texArray, vTexcoord.xyw);
+	vec4 tex3 = texture2DArray(texArray, vec3(vTexcoord.xy, vTexOffset.x));
 
-	float blendPer = smoothstep(250.0, 350.0, worldHeight);
+	float blendPer = smoothstep(150.0, 250.0, worldHeight);
 	vec4 texColor = mix(tex1, tex2, blendPer);
+
+	blendPer = smoothstep(0.0, 70.0, worldHeight);
+	texColor = mix(tex3, texColor, blendPer);
 		
 	FragTex = texColor;
 	FragColor = vec4(vColor, 1.0);

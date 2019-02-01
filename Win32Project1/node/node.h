@@ -37,6 +37,7 @@ public:
 	VECTOR4D position;
 	VECTOR3D size;
 	int type;
+	int shadowLevel, detailLevel;
 	BoundingBox* boundingBox;
 	MATRIX4X4 nodeTransform;
 
@@ -57,6 +58,7 @@ public:
 	Node(const VECTOR3D& position,const VECTOR3D& size);
 	virtual ~Node();
 	bool checkInCamera(Camera* camera);
+	bool checkInFrustum(Frustum* frustum);
 	virtual void prepareDrawcall() = 0;
 	virtual void updateRenderData() = 0;
 	virtual void updateDrawcall() = 0;

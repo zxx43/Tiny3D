@@ -9,26 +9,26 @@ using namespace std;
 
 SimpleApplication::SimpleApplication() {
 	screen = NULL;
-	screenFilter = NULL;
+	waterFrame = NULL;
+	sceneFilter = NULL;
+	combinedChain = NULL;
 	aaFilter = NULL;
 	dofBlurFilter = NULL;
-	dofFilter = NULL;
-	ssrFilter = NULL;
+	dofChain = NULL;
+	ssrChain = NULL;
 	ssrBlurFilter = NULL;
 	rawScreenFilter = NULL;
-	dofInput.clear();
-	ssrInput.clear();
 }
 
 SimpleApplication::~SimpleApplication() {
-	dofInput.clear();
-	ssrInput.clear();
 	if (screen) delete screen; screen = NULL;
-	if (screenFilter) delete screenFilter; screenFilter = NULL;
+	if (waterFrame) delete waterFrame; waterFrame = NULL;
+	if (sceneFilter) delete sceneFilter; sceneFilter = NULL;
+	if (combinedChain) delete combinedChain; combinedChain = NULL;
 	if (dofBlurFilter) delete dofBlurFilter; dofBlurFilter = NULL;
-	if (dofFilter) delete dofFilter; dofFilter = NULL;
+	if (dofChain) delete dofChain; dofChain = NULL;
 	if (aaFilter) delete aaFilter; aaFilter = NULL;
-	if (ssrFilter) delete ssrFilter; ssrFilter = NULL;
+	if (ssrChain) delete ssrChain; ssrChain = NULL;
 	if (ssrBlurFilter) delete ssrBlurFilter; ssrBlurFilter = NULL;
 	if (rawScreenFilter) delete rawScreenFilter; rawScreenFilter = NULL;
 }
@@ -39,18 +39,28 @@ void SimpleApplication::resize(int width, int height) {
 
 	int precision = graphQuality > 4.0 ? HIGH_PRE : LOW_PRE;
 	int scrPre = (graphQuality > 4.0 || useSsr) ? HIGH_PRE : LOW_PRE;
+	int hdrPre = graphQuality > 3.0 ? FLOAT_PRE : precision;
 
 	if (screen) delete screen;
-	screen = new FrameBuffer(width, height, precision, 4);
+	screen = new FrameBuffer(width, height, hdrPre, 4, false);
 	screen->addColorBuffer(precision, 4);
 	screen->addColorBuffer(scrPre, 3);
 	screen->attachDepthBuffer(scrPre);
 
-	if (screenFilter) delete screenFilter;
+	if (waterFrame) delete waterFrame;
+	waterFrame = new FrameBuffer(width, height, hdrPre, 4, false);
+	waterFrame->addColorBuffer(precision, 4);
+	waterFrame->addColorBuffer(scrPre, 3);
+	waterFrame->attachDepthBuffer(scrPre);
+
+	if (sceneFilter) delete sceneFilter;
+	sceneFilter = new Filter(width, height, true, precision, 4, false);
+
+	if (combinedChain) delete combinedChain;
 	if (!useFxaa && !useDof && !useSsr) 
-		screenFilter = new Filter(width, height, false, precision, 4);
+		combinedChain = new FilterChain(width, height, false, precision, 4);
 	else {
-		screenFilter = new Filter(width, height, true, precision, 4);
+		combinedChain = new FilterChain(width, height, true, precision, 4);
 		if (useFxaa) {
 			if (aaFilter) delete aaFilter;
 			aaFilter = new Filter(width, height, false, precision, 4);
@@ -58,31 +68,36 @@ void SimpleApplication::resize(int width, int height) {
 		if (useDof) {
 			if (dofBlurFilter) delete dofBlurFilter;
 			dofBlurFilter = new Filter(width * 0.5, height * 0.5, true, precision, 4);
-			if (dofFilter) delete dofFilter;
-			dofFilter = new Filter(width, height, useFxaa, precision, 4);
-
-			dofInput.clear();
-			dofInput.push_back(dofBlurFilter->getOutput(0));
-			dofInput.push_back(screenFilter->getOutput(0));
+			if (dofChain) delete dofChain;
+			dofChain = new FilterChain(width, height, useFxaa, precision, 4);
+			dofChain->addInputTex(dofBlurFilter->getOutput(0));
+			dofChain->addInputTex(combinedChain->getOutputTex(0));
 		}
 		if (useSsr) {
-			if (ssrFilter) delete ssrFilter;
-			ssrFilter = new Filter(width, height, true, LOW_PRE, 4);
+			if (ssrChain) delete ssrChain;
+			ssrChain = new FilterChain(width, height, true, LOW_PRE, 4, false);
+			ssrChain->addInputTex(combinedChain->getOutputTex(0));
+			ssrChain->addInputTex(waterFrame->getColorBuffer(1));
+			ssrChain->addInputTex(waterFrame->getColorBuffer(2));
+			ssrChain->addInputTex(waterFrame->getDepthBuffer());
 
 			if (!useFxaa && !useDof) {
 				if (rawScreenFilter) delete rawScreenFilter;
 				rawScreenFilter = new Filter(width, height, false, precision, 4);
 			}
 
-			ssrInput.clear();
-			ssrInput.push_back(screenFilter->getOutput(0));
-			ssrInput.push_back(screen->getColorBuffer(1));
-			ssrInput.push_back(screen->getColorBuffer(2));
-			ssrInput.push_back(screen->getDepthBuffer());
-
 			if (ssrBlurFilter) delete ssrBlurFilter;
 			ssrBlurFilter = new Filter(width * 0.5, height * 0.5, true, LOW_PRE, 4);
 		}
+	}
+
+	if (combinedChain) {
+		combinedChain->addInputTex(sceneFilter->getOutput(0));
+		combinedChain->addInputTex(screen->getDepthBuffer());
+		combinedChain->addInputTex(waterFrame->getColorBuffer(0));
+		combinedChain->addInputTex(waterFrame->getDepthBuffer());
+		combinedChain->addInputTex(waterFrame->getColorBuffer(1));
+		combinedChain->addInputTex(waterFrame->getColorBuffer(2));
 	}
 
 	render->clearTextureSlots();
@@ -99,11 +114,11 @@ void SimpleApplication::keyUp(int key) {
 }
 
 void SimpleApplication::draw() {
-	if (!screenFilter || !renderMgr || !AssetManager::assetManager) return;
+	if (!sceneFilter || !renderMgr || !AssetManager::assetManager) return;
 
-	///*
-	if (ssrFilter) {
+	if (ssrChain) {
 		AssetManager::assetManager->setReflectTexture(ssrBlurFilter->getOutput(0));
+		//AssetManager::assetManager->setReflectTexture(ssrChain->getOutputTex(0));
 		renderMgr->enableSsr = true;
 	} else {
 		if (renderMgr->reflectBuffer) {
@@ -111,25 +126,31 @@ void SimpleApplication::draw() {
 			AssetManager::assetManager->setReflectTexture(renderMgr->reflectBuffer->getColorBuffer(0));
 		}
 	}
-	//*/
+	
 	///*
 	renderMgr->renderShadow(render, scene);
 	render->setFrameBuffer(screen);
 	renderMgr->renderScene(render, scene);
-	renderMgr->drawDeferred(render, scene, screen, screenFilter);
+	renderMgr->drawDeferred(render, scene, screen, sceneFilter);
 
-	if (ssrFilter) {
+	render->setFrameBuffer(waterFrame);
+	waterFrame->getDepthBuffer()->copyDataFrom(screen->getDepthBuffer());
+	renderMgr->renderWater(render, scene);
+
+	renderMgr->drawCombined(render, scene, combinedChain->input, combinedChain->output);
+
+	if (ssrChain) {
 		if (rawScreenFilter)
-			renderMgr->drawScreenFilter(render, scene, "screen", screenFilter->getFrameBuffer(), rawScreenFilter);
-		renderMgr->drawSSRFilter(render, scene, "ssr", ssrInput, ssrFilter);
-		renderMgr->drawScreenFilter(render, scene, "mean", ssrFilter->getFrameBuffer(), ssrBlurFilter);
+			renderMgr->drawScreenFilter(render, scene, "screen", combinedChain->getOutFrameBuffer(), rawScreenFilter);
+		renderMgr->drawSSRFilter(render, scene, "ssr", ssrChain->input, ssrChain->output);
+		renderMgr->drawScreenFilter(render, scene, "mean", ssrChain->getOutFrameBuffer(), ssrBlurFilter);
 	}
 
-	Filter* lastFilter = screenFilter;
+	Filter* lastFilter = combinedChain->output;
 	if (useDof) {
-		renderMgr->drawScreenFilter(render, scene, "blur", screenFilter->getFrameBuffer(), dofBlurFilter);
-		renderMgr->drawScreenFilter(render, scene, "dof", dofInput, dofFilter);
-		lastFilter = dofFilter;
+		renderMgr->drawScreenFilter(render, scene, "blur", combinedChain->getOutFrameBuffer(), dofBlurFilter);
+		renderMgr->drawScreenFilter(render, scene, "dof", dofChain->input, dofChain->output);
+		lastFilter = dofChain->output;
 	}
 	if (useFxaa)
 		renderMgr->drawScreenFilter(render, scene, "fxaa", lastFilter->getFrameBuffer(), aaFilter);
@@ -183,7 +204,7 @@ void SimpleApplication::act(long startTime, long currentTime) {
 		AnimationNode* animNode = (AnimationNode*)node->children[0];
 		animNode->rotateNodeObject(0, 45, 0);
 		animNode->translateNode(animNode->position.x + 0.01, animNode->position.y, animNode->position.z + 0.01);
-		standObjectsOnGround(animNode, scene->terrainNode);
+		scene->terrainNode->standObjectsOnGround(animNode);
 	//*/
 	/*
 	static int time = 1;
@@ -198,8 +219,6 @@ void SimpleApplication::act(long startTime, long currentTime) {
 }
 
 void SimpleApplication::initScene() {
-	scene->skyBox = new Sky();
-
 	AssetManager* assetMgr = AssetManager::assetManager;
 	MaterialManager* mtlMgr = MaterialManager::materials;
 
@@ -210,6 +229,8 @@ void SimpleApplication::initScene() {
 	assetMgr->addMesh("treeA", new Model("models/treeA.obj", "models/treeA.mtl", 2, true));
 	assetMgr->addMesh("treeAMid", new Model("models/treeA_mid.obj", "models/treeA_mid.mtl", 2, true));
 	assetMgr->addMesh("treeALow", new Model("models/treeA_low.obj", "models/treeA_low.mtl", 2, true));
+	assetMgr->addMesh("grass1", new Model("models/grass1.obj", "models/grass1.mtl", 2, true));
+	assetMgr->addMesh("grass2", new Model("models/grass2.obj", "models/grass2.mtl", 2, true));
 	assetMgr->addMesh("tank", new Model("models/tank.obj", "models/tank.mtl", 3, true));
 	assetMgr->addMesh("m1a2", new Model("models/m1a2.obj", "models/m1a2.mtl", 2, true));
 	assetMgr->addMesh("house", new Model("models/house.obj", "models/house.mtl", 2, true));
@@ -278,33 +299,20 @@ void SimpleApplication::initScene() {
 	StaticObject* model2 = new StaticObject(meshes["tank"]);
 	StaticObject* model3 = new StaticObject(meshes["m1a2"]);
 	StaticObject* model4 = new StaticObject(meshes["treeA"], meshes["treeAMid"], meshes["billboard"]);
-	model4->setBillboard(10, 20, mtlMgr->find("billboard_treeA_mat"));
+	model4->setBillboard(13, 14, mtlMgr->find("billboard_treeA_mat"));
 	StaticObject* model5 = new StaticObject(meshes["house"]);
 	StaticObject* model6 = new StaticObject(meshes["oildrum"]);
-	
-
-	WaterNode* waterNode = new WaterNode(VECTOR3D(0, 0, 0));
-	waterNode->setFullStatic(true);
-	StaticObject* waterObject = new StaticObject(meshes["water"]);
-	waterObject->setPosition(-2048, 0, -2048);
-	waterObject->setSize(6, 1, 6);
-	waterNode->addObject(waterObject);
-	waterNode->putCenter();
-	scene->water = waterNode;
+	StaticObject* model7 = new StaticObject(meshes["grass1"], meshes["grass1"], NULL);
+	model7->detailLevel = 1;
+	StaticObject* model8 = new StaticObject(meshes["grass2"], meshes["grass2"], NULL);
+	model8->detailLevel = 1;
+	int grassShadowLevel = graphQuality > 4 ? 1 : 0;
+	bool grassDynamic = true;
 
 	//return;
-
-	TerrainNode* terrainNode = new TerrainNode(VECTOR3D(-2048, 0, -2048));
-	terrainNode->setFullStatic(true);
-	StaticObject* terrainObject = new StaticObject(meshes["terrain"]);
-	terrainObject->bindMaterial(mtlMgr->find("terrain_mat"));
-	terrainObject->setPosition(0, -200, 0);
-	terrainObject->setSize(6, 3, 6);
-	terrainNode->addObject(terrainObject);
-	terrainNode->prepareTriangles();
-	scene->staticRoot->attachChild(terrainNode);
-	scene->terrainNode = terrainNode;
-
+	scene->createSky();
+	scene->createWater(VECTOR3D(-2048, 0, -2048), VECTOR3D(6, 1, 6));
+	scene->createTerrain(VECTOR3D(-2048, -200, -2048), VECTOR3D(6, 1.5, 6));
 
 	StaticNode* node1 = new StaticNode(VECTOR3D(2, 2, 2));
 	node1->setDynamicBatch(false);
@@ -351,7 +359,7 @@ void SimpleApplication::initScene() {
 	objectSphere->setSize(2, 2, 2);
 	node3->addObject(objectSphere);
 
-	Node* node = new StaticNode(VECTOR3D(1900, 0, 2400));
+	Node* node = new StaticNode(VECTOR3D(-1200, 0, 3300));
 	Node* modelNode = new StaticNode(VECTOR3D(0, 0, 0));
 	modelNode->attachChild(node1);
 	modelNode->attachChild(node2);
@@ -366,111 +374,277 @@ void SimpleApplication::initScene() {
 
 	
 	srand(100);
-	InstanceNode* instanceNode1 = new InstanceNode(VECTOR3D(-120, 0, -1520));
+	InstanceNode* instanceNode1 = new InstanceNode(VECTOR3D(900, 0, 600));
 	instanceNode1->singleSide = true;
-	for (uint i = 0; i < 25; i++) {
-		for (uint j = 0; j < 25; j++) {
+	instanceNode1->setSimple(true);
+	instanceNode1->detailLevel = 4;
+	for (int i = -12; i < 12; i++) {
+		for (int j = -12; j < 12; j++) {
 			//StaticObject* tree = model1->clone();
 			//float baseSize = 2;
-			bool changeTree = (rand() % 100) > 80;
+			bool changeTree = (rand() % 100) > 95;
 			StaticObject* tree = changeTree ? model4->clone() : model1->clone();
-			float baseSize = changeTree ? 1 : 2;
+			float baseSize = changeTree ? 3 : 5;
 			float size = (rand() % 100 * 0.01) * 2 + baseSize;
 
 			tree->setSize(size, size, size);
 			tree->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
-			tree->setPosition(j * 100 + 100 * (rand() % 100) * 0.01, 0, 200 + i * 100 + 100 * (rand() % 100) * 0.01);
+			tree->setPosition(j * 200 + 200 * (rand() % 100) * 0.01, 0, i * 200 + 200 * (rand() % 100) * 0.01);
 			instanceNode1->addObject(tree);
 		}
 	}
-	InstanceNode* instanceNode2 = new InstanceNode(VECTOR3D(1200, 0, 2000));
+	InstanceNode* instanceNode2 = new InstanceNode(VECTOR3D(2746, 0, 2565));
 	instanceNode2->singleSide = true;
-	for (uint i = 0; i < 25; i++) {
-		for (uint j = 0; j < 25; j++) {
+	instanceNode2->setSimple(true);
+	instanceNode2->detailLevel = 4;
+	for (int i = -12; i < 12; i++) {
+		for (int j = -12; j < 12; j++) {
 			//StaticObject* tree = model1->clone();
 			//float baseSize = 2;
-			bool changeTree = (rand() % 100) > 80;
+			bool changeTree = (rand() % 100) > 95;
 			StaticObject* tree = changeTree ? model4->clone() : model1->clone();
-			float baseSize = changeTree ? 1 : 2;
+			float baseSize = changeTree ? 3 : 5;
 			float size = (rand() % 100 * 0.01) * 2 + baseSize;
 
 			tree->setSize(size, size, size);
 			tree->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
-			tree->setPosition(j * 100 + 100 * (rand() % 100) * 0.01, 0, -(200 + i * 50 + 50 * (rand() % 100) * 0.01));
+			tree->setPosition(j * 100 + 100 * (rand() % 100) * 0.01, 0, i * 100 + 100 * (rand() % 100) * 0.01);
 			instanceNode2->addObject(tree);
 		}
 	}
-	InstanceNode* instanceNode3 = new InstanceNode(VECTOR3D(720, 0, -20));
+	InstanceNode* instanceNode3 = new InstanceNode(VECTOR3D(-700, 0, 1320));
 	instanceNode3->singleSide = true;
-	for (uint i = 0; i < 25; i++) {
-		for (uint j = 0; j < 25; j++) {
+	instanceNode3->setSimple(true);
+	instanceNode3->detailLevel = 4;
+	for (int i = -12; i < 12; i++) {
+		for (int j = -12; j < 12; j++) {
 			//StaticObject* tree = model1->clone();
 			//float baseSize = 2;
-			bool changeTree = (rand() % 100) > 80;
+			bool changeTree = (rand() % 100) > 95;
 			StaticObject* tree = changeTree ? model4->clone() : model1->clone();
-			float baseSize = changeTree ? 1 : 2;
+			float baseSize = changeTree ? 3 : 5;
 			float size = (rand() % 100 * 0.01) * 2 + baseSize;
 
 			tree->setSize(size, size, size);
 			tree->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
-			tree->setPosition(200 + j * 100 + 100 * (rand() % 100) * 0.01, 0, i * 100 + 100 * (rand() % 100) * 0.01);
+			tree->setPosition(j * 100 + 100 * (rand() % 100) * 0.01, 0, i * 100 + 100 * (rand() % 100) * 0.01);
 			instanceNode3->addObject(tree);
 		}
 	}
-	InstanceNode* instanceNode4 = new InstanceNode(VECTOR3D(1920, 0, 1220));
+	InstanceNode* instanceNode4 = new InstanceNode(VECTOR3D(-750, 0, -500));
 	instanceNode4->singleSide = true;
-	for (uint i = 0; i < 25; i++) {
-		for (uint j = 0; j < 25; j++) {
+	instanceNode4->setSimple(true);
+	instanceNode4->detailLevel = 4;
+	for (int i = -12; i < 12; i++) {
+		for (int j = -12; j < 12; j++) {
 			//StaticObject* tree = model1->clone();
 			//float baseSize = 2;
-			bool changeTree = (rand() % 100) > 80;
+			bool changeTree = (rand() % 100) > 95;
 			StaticObject* tree = changeTree ? model4->clone() : model1->clone();
-			float baseSize = changeTree ? 1 : 2;
+			float baseSize = changeTree ? 3 : 5;
 			float size = (rand() % 100 * 0.01) * 2 + baseSize;
 
 			tree->setSize(size, size, size);
 			tree->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
-			tree->setPosition(-(200 + j * 100 + 100 * (rand() % 100) * 0.01), 0, i * 100 + 100 * (rand() % 100) * 0.01);
+			tree->setPosition(j * 100 + 100 * (rand() % 100) * 0.01, 0, i * 100 + 100 * (rand() % 100) * 0.01);
 			instanceNode4->addObject(tree);
 		}
 	}
-	InstanceNode* instanceNode5 = new InstanceNode(VECTOR3D(-1920, 0, 220));
+	InstanceNode* instanceNode5 = new InstanceNode(VECTOR3D(2100, 0, -600));
 	instanceNode5->singleSide = true;
-	for (uint i = 0; i < 25; i++) {
-		for (uint j = 0; j < 25; j++) {
+	instanceNode5->setSimple(true);
+	instanceNode5->detailLevel = 4;
+	for (int i = -12; i < 12; i++) {
+		for (int j = -12; j < 12; j++) {
 			//StaticObject* tree = model1->clone();
 			//float baseSize = 2;
-			bool changeTree = (rand() % 100) > 80;
+			bool changeTree = (rand() % 100) > 95;
 			StaticObject* tree = changeTree ? model4->clone() : model1->clone();
-			float baseSize = changeTree ? 1 : 2;
+			float baseSize = changeTree ? 3 : 5;
 			float size = (rand() % 100 * 0.01) * 2 + baseSize;
 
 			tree->setSize(size, size, size);
 			tree->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
-			tree->setPosition(j * 100 + 100 * (rand() % 100) * 0.01, 0, 200 + i * 100 + 100 * (rand() % 100) * 0.01);
+			tree->setPosition(j * 110 + 110 * (rand() % 100) * 0.01, 0, i * 110 + 110 * (rand() % 100) * 0.01);
 			instanceNode5->addObject(tree);
 		}
 	}
-	InstanceNode* instanceNode6 = new InstanceNode(VECTOR3D(-1320, 0, -620));
+	InstanceNode* instanceNode6 = new InstanceNode(VECTOR3D(800, 0, 2000));
 	instanceNode6->singleSide = true;
-	for (uint i = 0; i < 25; i++) {
-		for (uint j = 0; j < 25; j++) {
+	instanceNode6->setSimple(true);
+	instanceNode6->detailLevel = 4;
+	for (int i = -12; i < 12; i++) {
+		for (int j = -12; j < 12; j++) {
 			StaticObject* tree = model1->clone();
-			float baseSize = 2;
-			//bool changeTree = (rand() % 100) > 80;
+			float baseSize = 5;
+			//bool changeTree = (rand() % 100) > 90;
 			//StaticObject* tree = changeTree ? model4->clone() : model1->clone();
-			//float baseSize = changeTree ? 1 : 2;
+			//float baseSize = changeTree ? 2 : 5;
 			float size = (rand() % 100 * 0.01) * 2 + baseSize;
 
 			tree->setSize(size, size, size);
 			tree->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
-			tree->setPosition(j * 120 + 120 * (rand() % 100) * 0.01, 0, 200 + i * 100 + 100 * (rand() % 100) * 0.01);
+			tree->setPosition(j * 150 + 150 * (rand() % 100) * 0.01, 0, i * 150 + 150 * (rand() % 100) * 0.01);
 			instanceNode6->addObject(tree);
 		}
 	}
 
+	InstanceNode* instanceNode8 = new InstanceNode(VECTOR3D(2500, 0, 860));
+	instanceNode8->singleSide = true;
+	instanceNode8->shadowLevel = grassShadowLevel;
+	instanceNode8->dynamic = grassDynamic;
+	instanceNode8->setGroup(true);
+	instanceNode8->setSimple(true);
+	int grassSize = 50;
+	for (int i = -grassSize; i < grassSize; i++) {
+		for (int j = -grassSize; j < grassSize; j++) {
+			StaticObject* grass = model7->clone();
+			float baseSize = 5;
+			float size = (rand() % 100 * 0.01) * 4 + baseSize;
+			float spread = 30;
 
-	InstanceNode* instanceNode7 = new InstanceNode(VECTOR3D(2000, 0, 2500));
+			grass->setSize(size, size, size);
+			grass->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
+			grass->setPosition(j * spread + spread * (rand() % 100) * 0.01, 0, i * spread + spread * (rand() % 100) * 0.01);
+			instanceNode8->addObject(grass);
+		}
+	}
+	InstanceNode* instanceNode9 = new InstanceNode(VECTOR3D(1300, 0, 2400));
+	instanceNode9->singleSide = true;
+	instanceNode9->shadowLevel = grassShadowLevel;
+	instanceNode9->dynamic = grassDynamic;
+	instanceNode9->setGroup(true);
+	instanceNode9->setSimple(true);
+	for (int i = -grassSize; i < grassSize; i++) {
+		for (int j = -grassSize; j < grassSize; j++) {
+			StaticObject* grass = model7->clone();
+			float baseSize = 5;
+			float size = (rand() % 100 * 0.01) * 4 + baseSize;
+			float spread = 30;
+
+			grass->setSize(size, size, size);
+			grass->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
+			grass->setPosition(j * spread + spread * (rand() % 100) * 0.01, 0, i * spread + spread * (rand() % 100) * 0.01);
+			instanceNode9->addObject(grass);
+		}
+	}
+	InstanceNode* instanceNode10 = new InstanceNode(VECTOR3D(500, 0, -300));
+	instanceNode10->singleSide = true;
+	instanceNode10->shadowLevel = grassShadowLevel;
+	instanceNode10->dynamic = grassDynamic;
+	instanceNode10->setGroup(true);
+	instanceNode10->setSimple(true);
+	for (int i = -grassSize; i < grassSize; i++) {
+		for (int j = -grassSize; j < grassSize; j++) {
+			StaticObject* grass = model7->clone();
+			float baseSize = 5;
+			float size = (rand() % 100 * 0.01) * 4 + baseSize;
+			float spread = 30;
+
+			grass->setSize(size, size, size);
+			grass->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
+			grass->setPosition(j * spread + spread * (rand() % 100) * 0.01, 0, i * spread + spread * (rand() % 100) * 0.01);
+			instanceNode10->addObject(grass);
+		}
+	}
+	InstanceNode* instanceNode11 = new InstanceNode(VECTOR3D(1300, 0, 1360));
+	instanceNode11->singleSide = true;
+	instanceNode11->shadowLevel = grassShadowLevel;
+	instanceNode11->dynamic = grassDynamic;
+	instanceNode11->setGroup(true);
+	instanceNode11->setSimple(true);
+	for (int i = -grassSize; i < grassSize; i++) {
+		for (int j = -grassSize; j < grassSize; j++) {
+			StaticObject* grass = model7->clone();
+			float baseSize = 5;
+			float size = (rand() % 100 * 0.01) * 4 + baseSize;
+			float spread = 30;
+
+			grass->setSize(size, size, size);
+			grass->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
+			grass->setPosition(j * spread + spread * (rand() % 100) * 0.01, 0, i * spread + spread * (rand() % 100) * 0.01);
+			instanceNode11->addObject(grass);
+		}
+	}
+	InstanceNode* instanceNode12 = new InstanceNode(VECTOR3D(-500, 0, 2500));
+	instanceNode12->singleSide = true;
+	instanceNode12->shadowLevel = grassShadowLevel;
+	instanceNode12->dynamic = grassDynamic;
+	instanceNode12->setGroup(true);
+	instanceNode12->setSimple(true);
+	for (int i = -grassSize; i < grassSize; i++) {
+		for (int j = -grassSize; j < grassSize; j++) {
+			StaticObject* grass = model7->clone();
+			float baseSize = 5;
+			float size = (rand() % 100 * 0.01) * 4 + baseSize;
+			float spread = 30;
+
+			grass->setSize(size, size, size);
+			grass->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
+			grass->setPosition(j * spread + spread * (rand() % 100) * 0.01, 0, i * spread + spread * (rand() % 100) * 0.01);
+			instanceNode12->addObject(grass);
+		}
+	}
+	InstanceNode* instanceNode13 = new InstanceNode(VECTOR3D(2500, 0, 2500));
+	instanceNode13->singleSide = true;
+	instanceNode13->shadowLevel = grassShadowLevel;
+	instanceNode13->dynamic = grassDynamic;
+	instanceNode13->setGroup(true);
+	instanceNode13->setSimple(true);
+	for (int i = -grassSize; i < grassSize; i++) {
+		for (int j = -grassSize; j < grassSize; j++) {
+			StaticObject* grass = model7->clone();
+			float baseSize = 5;
+			float size = (rand() % 100 * 0.01) * 4 + baseSize;
+			float spread = 30;
+
+			grass->setSize(size, size, size);
+			grass->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
+			grass->setPosition(j * spread + spread * (rand() % 100) * 0.01, 0, i * spread + spread * (rand() % 100) * 0.01);
+			instanceNode13->addObject(grass);
+		}
+	}
+	InstanceNode* instanceNode14 = new InstanceNode(VECTOR3D(2500, 0, -450));
+	instanceNode14->singleSide = true;
+	instanceNode14->shadowLevel = grassShadowLevel;
+	instanceNode14->dynamic = grassDynamic;
+	instanceNode14->setGroup(true);
+	instanceNode14->setSimple(true);
+	for (int i = -grassSize; i < grassSize; i++) {
+		for (int j = -grassSize; j < grassSize; j++) {
+			StaticObject* grass = model7->clone();
+			float baseSize = 5;
+			float size = (rand() % 100 * 0.01) * 4 + baseSize;
+			float spread = 30;
+
+			grass->setSize(size, size, size);
+			grass->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
+			grass->setPosition(j * spread + spread * (rand() % 100) * 0.01, 0, i * spread + spread * (rand() % 100) * 0.01);
+			instanceNode14->addObject(grass);
+		}
+	}
+	InstanceNode* instanceNode15 = new InstanceNode(VECTOR3D(-520, 0, -530));
+	instanceNode15->singleSide = true;
+	instanceNode15->shadowLevel = grassShadowLevel;
+	instanceNode15->dynamic = grassDynamic;
+	instanceNode15->setGroup(true);
+	instanceNode15->setSimple(true);
+	for (int i = -grassSize; i < grassSize; i++) {
+		for (int j = -grassSize; j < grassSize; j++) {
+			StaticObject* grass = model7->clone();
+			float baseSize = 5;
+			float size = (rand() % 100 * 0.01) * 4 + baseSize;
+			float spread = 30;
+
+			grass->setSize(size, size, size);
+			grass->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
+			grass->setPosition(j * spread + spread * (rand() % 100) * 0.01, 0, i * spread + spread * (rand() % 100) * 0.01);
+			instanceNode15->addObject(grass);
+		}
+	}
+
+
+	InstanceNode* instanceNode7 = new InstanceNode(VECTOR3D(3500, 0, 200));
 	StaticObject* oil1 = model6->clone();
 	oil1->setPosition(15, 0, 15);
 	oil1->setSize(5, 5, 5);
@@ -511,6 +685,14 @@ void SimpleApplication::initScene() {
 	scene->staticRoot->attachChild(instanceNode5);
 	scene->staticRoot->attachChild(instanceNode6);
 	scene->staticRoot->attachChild(instanceNode7);
+	scene->staticRoot->attachChild(instanceNode8);
+	scene->staticRoot->attachChild(instanceNode9);
+	scene->staticRoot->attachChild(instanceNode10);
+	scene->staticRoot->attachChild(instanceNode11);
+	scene->staticRoot->attachChild(instanceNode12);
+	scene->staticRoot->attachChild(instanceNode13);
+	scene->staticRoot->attachChild(instanceNode14);
+	scene->staticRoot->attachChild(instanceNode15);
 	
 	AnimationNode* animNode1 = new AnimationNode(VECTOR3D(5, 10, 5));
 	animNode1->setAnimation(animations["army"]);
@@ -559,9 +741,11 @@ void SimpleApplication::initScene() {
 	delete model4;
 	delete model5;
 	delete model6;
+	delete model7;
+	delete model8;
 
-	standObjectsOnGround(scene->staticRoot, terrainNode);
-	standObjectsOnGround(scene->animationRoot, terrainNode);
+	scene->terrainNode->standObjectsOnGround(scene->staticRoot);
+	scene->terrainNode->standObjectsOnGround(scene->animationRoot);
 	scene->inited = true;
 }
 

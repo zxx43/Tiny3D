@@ -65,8 +65,8 @@ void Frustum::update(const MATRIX4X4& invViewProjectMatrix, const VECTOR3D& look
 bool Frustum::intersectsWidthRay(const VECTOR3D& origin, const VECTOR3D& dir, float maxDistance) {
 	Line line(dir, origin);
 	static VECTOR3D interPoint(0, 0, 0);
-	for (uint i = 0; i < 6; i++) {
-		bool isInter = CaculateIntersect(line, planes[i], maxDistance, interPoint);
+	for (uint i = 0; i < 5; i++) {
+		bool isInter = CaculateIntersect(&line, &planes[i], maxDistance, interPoint);
 		if (!isInter) continue;
 		uint pi0 = planeVertexIndex[i * 4];
 		uint pi1 = planeVertexIndex[i * 4 + 1];

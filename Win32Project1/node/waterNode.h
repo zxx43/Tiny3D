@@ -6,10 +6,12 @@
 class WaterNode :public StaticNode {
 private:
 	float centerX, centerZ;
+private:
+	void putCenter();
 public:
 	WaterNode(const VECTOR3D& position);
 	virtual ~WaterNode();
-	void putCenter();
+	virtual void addObject(Object* object);
 	void moveWaterWithCamera(Camera* camera);
 };
 

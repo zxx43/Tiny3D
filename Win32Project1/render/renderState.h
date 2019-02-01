@@ -19,17 +19,22 @@ struct RenderState {
 	bool ssrPass;
 	bool enableSsr;
 	bool blend;
+	bool simpleIns;
 	int pass;
 	float time;
+	float quality;
 	Shadow* shadow;
 	VECTOR3D light;
+	VECTOR3D* eyePos;
 	Shader* shader;
 	Shader* shaderIns;
 	Shader* shaderBillboard;
+	Shader* shaderSimple;
 
 	RenderState() {
 		reset();
 		light = VECTOR3D(0, 0, 0);
+		eyePos = NULL;
 	}
 	RenderState(const RenderState& rhs) {
 		enableCull = rhs.enableCull;
@@ -46,13 +51,17 @@ struct RenderState {
 		ssrPass = rhs.ssrPass;
 		enableSsr = rhs.enableSsr;
 		blend = rhs.blend;
+		simpleIns = rhs.simpleIns;
 		pass = rhs.pass;
 		time = rhs.time;
+		quality = rhs.quality;
 		shadow = rhs.shadow;
 		light = rhs.light;
+		eyePos = rhs.eyePos;
 		shader = rhs.shader;
 		shaderIns = rhs.shaderIns;
 		shaderBillboard = rhs.shaderBillboard;
+		shaderSimple = rhs.shaderSimple;
 	}
 	void reset() {
 		enableCull = true;
@@ -69,12 +78,15 @@ struct RenderState {
 		ssrPass = false;
 		enableSsr = false;
 		blend = false;
+		simpleIns = false;
 		pass = COLOR_PASS;
 		time = 0.0;
+		quality = 1.0;
 		shadow = NULL;
 		shader = NULL;
 		shaderIns = NULL;
 		shaderBillboard = NULL;
+		shaderSimple = NULL;
 	}
 };
 

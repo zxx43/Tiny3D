@@ -1,54 +1,41 @@
-# Blender MTL File: 'None'
-# Material Count: 4
+#
+# Wavefront material file
+# Converted by Meshlab Group
+#
 
-newmtl 03___Default
-Ns 9.803922
-Ka 0.588235 0.588235 0.588235
-Kd 0.588235 0.588235 0.588235
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
+newmtl material_0
+Ka 0.200000 0.200000 0.200000
+Kd 0.584314 0.584314 0.584314
+Ks 1.000000 1.000000 1.000000
+Tr 1.000000
 illum 2
+Ns 0.000000
 map_Kd Leaves.bmp
-map_Ka Leaves.bmp
-map_d Leaves.bmp
 
-newmtl 07___Default
-Ns 9.803922
-Ka 0.588235 0.588235 0.588235
-Kd 0.588235 0.588235 0.588235
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
+newmtl material_1
+Ka 0.200000 0.200000 0.200000
+Kd 0.584314 0.584314 0.584314
+Ks 1.000000 1.000000 1.000000
+Tr 1.000000
 illum 2
-map_Kd Treebark.bmp
-map_Bump Treebark_normal.tga
-map_Ka Treebark.bmp
-
-newmtl 08___Default
-Ns 9.803922
-Ka 0.588235 0.588235 0.588235
-Kd 0.588235 0.588235 0.588235
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
+Ns 0.000000
 map_Kd Treebranch01.bmp
-map_Ka Treebranch01.bmp
-map_d Treebranch01.bmp
 
-newmtl Tree
-Ns 9.803922
-Ka 0.007843 0.007843 0.007843
-Kd 0.007843 0.007843 0.007843
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
+newmtl material_2
+Ka 0.200000 0.200000 0.200000
+Kd 0.584314 0.584314 0.584314
+Ks 1.000000 1.000000 1.000000
+Tr 1.000000
 illum 2
+Ns 0.000000
+map_Kd Treebark.bmp
+
+newmtl material_3
+Ka 0.200000 0.200000 0.200000
+Kd 0.003922 0.003922 0.003922
+Ks 1.000000 1.000000 1.000000
+Tr 1.000000
+illum 2
+Ns 0.000000
 map_Kd Grass.bmp
-map_Ka Grass.bmp
-map_d Grass.bmp
+

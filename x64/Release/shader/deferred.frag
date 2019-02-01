@@ -17,7 +17,8 @@ in vec2 vTexcoord;
 
 out vec4 FragColor;
 
-float gap = 30.0;
+#define GAP float(30.0)
+#define INV2GAP float(0.01667)
 
 /*
 vec2 poissonDisk[16] = vec2[]( 
@@ -81,13 +82,13 @@ float genShadow(sampler2D shadowMap, vec3 shadowCoord, float bias) {
 //*/
 
 float genShadowFactor(vec4 worldPos, float depthView, float bias) {
-	if(depthView <= levels.x - gap) {
+	if(depthView <= levels.x - GAP) {
 		vec4 near = lightViewProjNear * worldPos;
 		vec3 lightPosition = near.xyz / near.w;
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
 		float bs = bias * 0.00005;
 		return genPCF(depthBufferNear, shadowCoord, bs, 2.0, 0.04);
-	} else if(depthView > levels.x - gap && depthView < levels.x + gap) {
+	} else if(depthView > levels.x - GAP && depthView < levels.x + GAP) {
 		vec4 near = lightViewProjNear * worldPos;
 		vec3 lightPositionNear = near.xyz / near.w;
 		vec3 shadowCoordNear = lightPositionNear * 0.5 + 0.5;
@@ -100,7 +101,7 @@ float genShadowFactor(vec4 worldPos, float depthView, float bias) {
 
 		float factorNear = genPCF(depthBufferNear, shadowCoordNear, bsNear, 2.0, 0.04);
 		float factorMid = genPCF(depthBufferMid, shadowCoordMid, bsMid, 1.0, 0.111);
-		return mix(factorNear, factorMid, (depthView - (levels.x - gap)) / (gap * 2.0));
+		return mix(factorNear, factorMid, (depthView - (levels.x - GAP)) * INV2GAP);
 	} else if(depthView <= levels.y) {
 		vec4 mid = lightViewProjMid * worldPos;
 		vec3 lightPosition = mid.xyz / mid.w;
@@ -117,25 +118,15 @@ float genShadowFactor(vec4 worldPos, float depthView, float bias) {
 	return 1.0;
 }
 
-vec3 genFogColor(vec4 worldPos, float depthView, vec3 sceneColor) {
-	float fogStart = 0.0, fogEnd = 1500.0;
-	float startH = 200.0, endH = 1600.0;
-	vec3 fogColor = vec3(0.9);
-	float worldH = worldPos.y / worldPos.w;
-	float heightFactor = smoothstep(startH, endH, worldH);
-	float fogFactor = (fogEnd - depthView) / (fogEnd - fogStart);
-	fogFactor = mix(fogFactor, 1.0, heightFactor);
-	fogFactor = clamp(fogFactor, 0.0, 1.0);
-	return mix(fogColor, sceneColor, fogFactor);
-}
-
 void main() {
 	float depth = texture2D(depthBuffer, vTexcoord).r;
 	vec3 ndcPos = vec3(vTexcoord, depth) * 2.0 - 1.0;
 	vec4 tex = texture2D(texBuffer, vTexcoord);
+
 	vec3 sceneColor = tex.rgb;
 	
 	vec4 worldPos = invViewProjMatrix * vec4(ndcPos, 1.0);
+	worldPos /= worldPos.w;
 	vec4 viewPosition = viewMatrix * worldPos;
 	float depthView = -viewPosition.z / viewPosition.w;
 
@@ -151,5 +142,5 @@ void main() {
 		sceneColor *= dot(color, vec3(1.0, shadowFactor * ndotl, 0.0));
 	}
 
-	FragColor = vec4(genFogColor(worldPos, depthView, sceneColor), depth);
+	FragColor = vec4(sceneColor, depth);
 }

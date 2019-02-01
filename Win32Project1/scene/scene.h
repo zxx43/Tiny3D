@@ -32,6 +32,9 @@ public:
 public:
 	Scene();
 	~Scene();
+	void createSky();
+	void createWater(const VECTOR3D& position, const VECTOR3D& size);
+	void createTerrain(const VECTOR3D& position, const VECTOR3D& size);
 	void updateNodes();
 	void flushNodes();
 	void updateReflectCamera();

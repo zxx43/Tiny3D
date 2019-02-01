@@ -13,18 +13,17 @@
 class Shadow {
 private:
 	Camera* viewCamera;
-	MATRIX4X4 invViewMatrix;
-	float distance1,distance2;
 	float nearDist, farDist;
-	VECTOR4D* corners0;
-	VECTOR4D* corners1;
-	VECTOR4D* corners2;
-	VECTOR4D* corners3;
+	VECTOR3D* corners0;
+	VECTOR3D* corners1;
+	VECTOR3D* corners2;
+	VECTOR3D* corners3;
 	VECTOR4D center0,center1,center2;
 	float radius0,radius1,radius2;
 
-	void updateLightCamera(Camera* lightCamera,VECTOR4D center,float radius);
+	void updateLightCamera(Camera* lightCamera,const VECTOR4D* center,float radius);
 public:
+	float distance1, distance2;
 	Camera* lightCameraNear;
 	Camera* lightCameraMid;
 	Camera* lightCameraFar;

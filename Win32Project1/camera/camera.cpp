@@ -2,23 +2,25 @@
 #include "../util/util.h"
 
 Camera::Camera(float height) {
-	position.x=0; position.y=0; position.z=0;
+	position.x = 0; position.y = 0; position.z = 0;
 	lookDir = VECTOR3D();
 	lookDir4 = VECTOR4D();
-	up.x=0; up.y=1; up.z=0;
+	up.x = 0; up.y = 1; up.z = 0;
 
-	xrot=0; yrot=0;
+	xrot = 0; yrot = 0;
 	this->height = height;
 
-	frustum=new Frustum();
-
-	simpleCheck = false;
-	isMain = false;
+	frustum = new Frustum();
+	frustumSub = NULL;
+	frustumNear = NULL; 
 }
 
 Camera::~Camera() {
-	delete frustum;
-	frustum=NULL;
+	delete frustum; frustum = NULL;
+	if (frustumSub) delete frustumSub;
+	frustumSub = NULL;
+	if (frustumNear) delete frustumNear;
+	frustumNear = NULL;
 }
 
 void Camera::initPerspectCamera(float fovy, float aspect, float zNear, float zFar) {
@@ -30,17 +32,27 @@ void Camera::initPerspectCamera(float fovy, float aspect, float zNear, float zFa
 	invProjMatrix = projectMatrix.GetInverse();
 }
 
+void Camera::initPerspectSub(float far) {
+	projectMatrixSub = perspective(fovy, aspect, zNear, far);
+	frustumSub = new Frustum();
+}
+
+void Camera::initPerspectNear(float far) {
+	projectMatrixNear = perspective(fovy, aspect, zNear, far);
+	frustumNear = new Frustum();
+}
+
 void Camera::initOrthoCamera(float left, float right, float bottom, float top, float near, float far) {
 	projectMatrix = ortho(left, right, bottom, top, near, far);
 	invProjMatrix = projectMatrix.GetInverse();
 }
 
 void Camera::setView(const VECTOR3D& pos, const VECTOR3D& dir) {
-	position.x=pos.x; position.y=pos.y; position.z=pos.z;
-	lookDir.x=dir.x; lookDir.y=dir.y; lookDir.z=dir.z;
+	position.x = pos.x; position.y = pos.y; position.z = pos.z;
+	lookDir.x = dir.x; lookDir.y = dir.y; lookDir.z = dir.z;
 
-	VECTOR3D center(lookDir.x+position.x,lookDir.y+position.y,lookDir.z+position.z);
-	viewMatrix=lookAt(position,center,up);
+	VECTOR3D center(lookDir.x + position.x, lookDir.y + position.y, lookDir.z + position.z);
+	viewMatrix = lookAt(position, center, up);
 }
 
 void Camera::updateLook(const VECTOR3D& pos, const VECTOR3D& dir) {
@@ -57,8 +69,9 @@ void Camera::updateMoveable(uint transType) {
 		rotYMat = rotateY(-xrot);
 
 	viewMatrix = rotXMat * rotYMat * transMat;
+	invViewMatrix = viewMatrix.GetInverse();
 
-	lookDir4 = viewMatrix.GetInverse() * UNIT_NEG_Z;
+	lookDir4 = invViewMatrix * UNIT_NEG_Z;
 	lookDir.x = lookDir4.x;
 	lookDir.y = lookDir4.y;
 	lookDir.z = lookDir4.z;
@@ -69,6 +82,9 @@ void Camera::updateFrustum() {
 	invViewProjectMatrix = viewProjectMatrix.GetInverse();
 	lookDir.Normalize();
 	frustum->update(invViewProjectMatrix, lookDir);
+
+	if (frustumSub) frustumSub->update((projectMatrixSub * viewMatrix).GetInverse(), lookDir);
+	if (frustumNear) frustumNear->update((projectMatrixNear * viewMatrix).GetInverse(), lookDir);
 }
 
 void Camera::turnX(int lr) {

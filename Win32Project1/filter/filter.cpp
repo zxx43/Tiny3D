@@ -2,12 +2,12 @@
 #include "../object/staticObject.h"
 #include "../mesh/board.h"
 
-Filter::Filter(float width, float height, bool useFramebuffer, int precision, int component) {
+Filter::Filter(float width, float height, bool useFramebuffer, int precision, int component, bool clampBorder) {
 	this->width=width;
 	this->height=height;
 	pixWidth = 1.0 / width;
 	pixHeight = 1.0 / height;
-	framebuffer = useFramebuffer ? new FrameBuffer(width, height, precision, component) : NULL;
+	framebuffer = useFramebuffer ? new FrameBuffer(width, height, precision, component, clampBorder) : NULL;
 
 	Board* board=new Board(2,2,2);
 	boardNode=new StaticNode(VECTOR3D(0,0,0));
@@ -30,6 +30,7 @@ void Filter::draw(Camera* camera, Render* render, RenderState* state,
 		const std::vector<Texture2D*>& inputTextures, const Texture2D* depthTexture) {
 	render->setFrameBuffer(framebuffer);
 	render->setShaderVec2(state->shader, "pixelSize", pixWidth, pixHeight);
+	render->setShaderFloat(state->shader, "quality", state->quality);
 
 	if (state->shadow) {
 		float shadowPixSize = state->shadow->shadowPixSize;

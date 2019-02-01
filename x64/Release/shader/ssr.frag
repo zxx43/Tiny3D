@@ -113,4 +113,5 @@ void main() {
 		vec3 reflectDir = normalize(reflect(viewPos.xyz, viewNormal));
 		ReflectColor = RayCast(reflectDir, viewPos.xyz);
 	}
+	ReflectColor.rgb = pow(ReflectColor.rgb, vec3(2.2));
 }

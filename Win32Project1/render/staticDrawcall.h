@@ -14,10 +14,23 @@ class Batch;
 
 class StaticDrawcall: public Drawcall {
 private:
-	int vertexCount,indexCount;
+	int vertexCount, indexCount;
 	bool indexed;
+	Batch* batchRef;
+
+	RenderBuffer* dataBuffer2;
+	RenderBuffer* bufferToDraw;
+	RenderBuffer* bufferToPrepare;
+
+	int vertexCntToDraw, indexCntToDraw, objectCntToDraw;
+	float* modelMatricesToPrepare;
+	bool dynDC, doubleBuffer;
 public:
-	Batch* batch;
+	int vertexCntToPrepare, indexCntToPrepare, objectCntToPrepare;
+private:
+	RenderBuffer* createBuffers(Batch* batch, int bufCount, int vertCount, int indCount, GLenum drawType);
+	void flushMatricesToPrepare();
+public:
 	StaticDrawcall(Batch* batch);
 	virtual ~StaticDrawcall();
 	virtual void draw(Shader* shader,int pass);

@@ -4,12 +4,16 @@
 #define PHONG_FRAG "shader/phong.frag"
 #define PHONG_INS_VERT "shader/phong_ins.vert"
 #define PHONG_INS_FRAG "shader/phong_ins.frag"
+#define PHONG_INS_SIMPLE_VERT "shader/phong_ins_simp.vert"
+#define PHONG_INS_SIMPLE_FRAG "shader/phong_ins_simp.frag"
 #define BONE_VERT "shader/bone.vert"
 #define BONE_FRAG "shader/bone.frag"
 #define PHONG_SHADOW_VERT "shader/phong_shadow.vert"
 #define PHONG_SHADOW_FRAG "shader/phong_shadow.frag"
 #define PHONG_SHADOW_INS_VERT "shader/phong_shadow_ins.vert"
 #define PHONG_SHADOW_INS_FRAG "shader/phong_shadow_ins.frag"
+#define PHONG_SHADOW_INS_SIMPLE_VERT "shader/phong_shadow_ins_simp.vert"
+#define PHONG_SHADOW_INS_SIMPLE_FRAG "shader/phong_shadow_ins_simp.frag"
 #define PHONG_SHADOW_LOW_VERT "shader/phong_shadow_low.vert"
 #define PHONG_SHADOW_LOW_INS_VERT "shader/phong_shadow_low_ins.vert"
 #define PHONG_SHADOW_LOW_FRAG "shader/phong_shadow_low.frag"
@@ -41,6 +45,8 @@
 #define SCREEN_FRAG "shader/screen.frag"
 #define SSR_VERT "shader/ssr.vert"
 #define SSR_FRAG "shader/ssr.frag"
+#define COMBINE_VERT "shader/combined.vert"
+#define COMBINE_FRAG "shader/combined.frag"
 
 void SetupShaders(Render* render) {
 	Shader* phong=render->shaders->addShader("phong",PHONG_VERT,PHONG_FRAG);
@@ -48,6 +54,9 @@ void SetupShaders(Render* render) {
 
 	Shader* phongIns = render->shaders->addShader("phong_ins", PHONG_INS_VERT, PHONG_INS_FRAG);
 	render->setShaderSampler(phongIns, "texture", 0);
+
+	Shader* phongInsSimp = render->shaders->addShader("phong_ins_simp", PHONG_INS_SIMPLE_VERT, PHONG_INS_SIMPLE_FRAG);
+	render->setShaderSampler(phongInsSimp, "texture", 0);
 
 	Shader* terrain = render->shaders->addShader("terrain", TERRAIN_VERT, TERRAIN_FRAG);
 	render->setShaderSampler(terrain, "texArray", 0);
@@ -60,6 +69,9 @@ void SetupShaders(Render* render) {
 
 	Shader* phongShadowIns = render->shaders->addShader("phong_s_ins", PHONG_SHADOW_INS_VERT, PHONG_SHADOW_INS_FRAG);
 	render->setShaderSampler(phongShadowIns, "texture", 0);
+
+	Shader* phongShadowInsSimp = render->shaders->addShader("phong_s_ins_simp", PHONG_SHADOW_INS_SIMPLE_VERT, PHONG_SHADOW_INS_SIMPLE_FRAG);
+	render->setShaderSampler(phongShadowInsSimp, "texture", 0);
 
 	render->shaders->addShader("phong_sl", PHONG_SHADOW_LOW_VERT, PHONG_SHADOW_LOW_FRAG);
 	render->shaders->addShader("phong_sl_ins", PHONG_SHADOW_LOW_INS_VERT, PHONG_SHADOW_LOW_FRAG);
@@ -110,5 +122,13 @@ void SetupShaders(Render* render) {
 	render->setShaderSampler(ssr, "colorBuffer", 1);
 	render->setShaderSampler(ssr, "normalBuffer", 2);
 	render->setShaderSampler(ssr, "depthBuffer", 3);
+
+	Shader* combined = render->shaders->addShader("combined", COMBINE_VERT, COMBINE_FRAG);
+	render->setShaderSampler(combined, "sceneBuffer", 0);
+	render->setShaderSampler(combined, "sceneDepthBuffer", 1);
+	render->setShaderSampler(combined, "waterBuffer", 2);
+	render->setShaderSampler(combined, "waterDepthBuffer", 3);
+	render->setShaderSampler(combined, "colorBuffer", 4);
+	render->setShaderSampler(combined, "waterNormalBuffer", 5);
 }
 

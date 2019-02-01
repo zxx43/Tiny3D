@@ -69,13 +69,16 @@ struct AnimationData {
 		animation = anim;
 	}
 	~AnimationData() {
-		delete[] vertices; vertices = NULL;
-		delete[] normals; normals = NULL;
-		delete[] texcoords; texcoords = NULL;
-		delete[] colors; colors = NULL;
-		delete[] boneids; boneids = NULL;
-		delete[] weights; weights = NULL;
-		delete[] indices; indices = NULL;
+		releaseAnimData();
+	}
+	void releaseAnimData() {
+		if (vertices) delete[] vertices; vertices = NULL;
+		if (normals) delete[] normals; normals = NULL;
+		if (texcoords) delete[] texcoords; texcoords = NULL;
+		if (colors) delete[] colors; colors = NULL;
+		if (boneids) delete[] boneids; boneids = NULL;
+		if (weights) delete[] weights; weights = NULL;
+		if (indices) delete[] indices; indices = NULL;
 	}
 };
 

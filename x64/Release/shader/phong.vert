@@ -14,6 +14,8 @@ out vec2 vTexcoord;
 flat out vec3 vColor;
 out vec3 vNormal;
 
+#define COLOR_SCALE vec3(0.003, 0.006, 0.005)
+
 mat4 convertMat(mat3x4 srcMat) {
 	mat4x3 transMat = transpose(srcMat);
 	return mat4(transMat[0], 0.0, 
@@ -23,7 +25,7 @@ mat4 convertMat(mat3x4 srcMat) {
 }
 
 void main() {
-	vColor = vec3(0.6, 1.2, 1.0) * color * 0.005;
+	vColor = COLOR_SCALE * color;
 	
 	mat4 matModel = convertMat(modelMatrices[int(objectid)]);
 	vec4 worldVertex = matModel * vec4(vertex, 1.0);

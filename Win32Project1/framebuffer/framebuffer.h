@@ -22,11 +22,12 @@ private:
 	unsigned int fboId;
 	int colorBufferCount;
 	bool depthOnly;
+	bool clampBorder;
 public:
 	std::vector<Texture2D*> colorBuffers;
 	Texture2D* depthBuffer;
 public:
-	FrameBuffer(float width, float height, int precision, int component);
+	FrameBuffer(float width, float height, int precision, int component, bool clampBorder);
 	FrameBuffer(float width, float height, int precision);
 	~FrameBuffer();
 public:

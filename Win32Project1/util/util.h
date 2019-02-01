@@ -34,6 +34,8 @@ MATRIX4X4 rotateZ(float angle);
 
 MATRIX4X4 scale(float size);
 
+MATRIX4X4 scale(float sx, float sy, float sz);
+
 MATRIX4X4 scaleX(float size);
 
 MATRIX4X4 scaleY(float size);
@@ -79,11 +81,59 @@ struct Plane {
 	}
 };
 
-bool CaculateIntersect(const Line& line, const Plane& plane, const float lineDistance, VECTOR3D& result);
+bool CaculateIntersect(const Line* line, const Plane* plane, const float lineDistance, VECTOR3D& result);
 
 inline void RestrictAngle(float& angle) {
 	if (angle > 360.0) angle -= 360.0;
 	else if (angle < 0.0) angle += 360.0;
+}
+
+inline float GetVec2(const VECTOR2D* vec2, int i) {
+	float ret;
+	switch (i) {
+		case 0:
+			ret = vec2->GetX();
+			break;
+		case 1:
+			ret = vec2->GetY();
+			break;
+	}
+	return ret;
+}
+
+inline float GetVec3(const VECTOR3D* vec3, int i) {
+	float ret;
+	switch (i) {
+		case 0:
+			ret = vec3->GetX();
+			break;
+		case 1:
+			ret = vec3->GetY();
+			break;
+		case 2:
+			ret = vec3->GetZ();
+			break;
+	}
+	return ret;
+}
+
+inline float GetVec4(const VECTOR4D* vec4, int i) {
+	float ret;
+	switch (i) {
+		case 0:
+			ret = vec4->GetX();
+			break;
+		case 1:
+			ret = vec4->GetY();
+			break;
+		case 2:
+			ret = vec4->GetZ();
+			break;
+		case 3:
+			ret = vec4->GetW();
+			break;
+	}
+	return ret;
 }
 
 #endif /* UTIL_H_ */

@@ -14,6 +14,7 @@ Sky::Sky() {
 	skyNode=new StaticNode(VECTOR3D(0,0,0));
 	skyNode->setFullStatic(true);
 	skyNode->addObject(skyObject);
+	skyNode->updateNode();
 	skyNode->prepareDrawcall();
 
 	/*

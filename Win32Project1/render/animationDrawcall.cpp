@@ -19,6 +19,8 @@ AnimationDrawcall::AnimationDrawcall(Animation* anim) :Drawcall() {
 	dataBuffer->unuse();
 
 	setType(ANIMATE_DC);
+
+	animData->releaseAnimData();
 }
 
 AnimationDrawcall::~AnimationDrawcall() {

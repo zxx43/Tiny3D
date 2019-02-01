@@ -1,7 +1,8 @@
 width 1280
 height 800
 fullscreen 0
-quality 6
+dualthread 1
+quality 8
 ssr 1
 dof 1
 fxaa 1

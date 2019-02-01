@@ -8,8 +8,8 @@
 #ifndef BATCH_H_
 #define BATCH_H_
 
-#include "../mesh/mesh.h"
 #include "../render/staticDrawcall.h"
+#include "batchData.h"
 
 #ifndef MAX_OBJECT_COUNT
 #define MAX_OBJECT_COUNT 100
@@ -38,19 +38,19 @@ public:
 	unsigned short objectCount;
 	float* modelMatrices;
 	float* normalMatrices;
+	float* matrixDataPtr;
 
 	int textureCount;
 	StaticDrawcall* drawcall;
 
 	Batch();
 	~Batch();
+	void releaseBatchData();
 	void flushBatchBuffers();
 	void initBatchBuffers(int vertCount, int indCount);
 	void pushMeshToBuffers(Mesh* mesh,int mid,bool fullStatic,const MATRIX4X4& transformMatrix,const MATRIX4X4& normalMatrix);
 	void updateMatrices(unsigned short objectId, const MATRIX4X4& transformMatrix, const MATRIX4X4* normalMatrix);
-	void setRenderData(int pass, int vertCnt, int indCnt, int objCnt, 
-		float* vertices, float* normals, float* texcoords,
-		byte* colors, byte* objectids, uint* indices, float* matrices);
+	void setRenderData(int pass, BatchData* data);
 	void createDrawcall();
 	bool isDynamic();
 	void setDynamic(bool dynamic);

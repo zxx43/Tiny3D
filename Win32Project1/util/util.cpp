@@ -158,6 +158,14 @@ MATRIX4X4 scale(float size) {
 	return mat;
 }
 
+MATRIX4X4 scale(float sx, float sy, float sz) {
+	MATRIX4X4 mat;
+	mat.entries[0] = sx;
+	mat.entries[5] = sy;
+	mat.entries[10] = sz;
+	return mat;
+}
+
 MATRIX4X4 scaleX(float size) {
 	MATRIX4X4 mat;
 	mat.entries[0]=size;
@@ -209,13 +217,13 @@ VECTOR3D mul(const VECTOR3D& a, const VECTOR3D& b) {
 	return vec;
 }
 
-bool CaculateIntersect(const Line& line, const Plane& plane, const float lineDistance, VECTOR3D& result) {
-	VECTOR3D p = line.origin;// (x1, y1, z1)
-	VECTOR3D v = line.dir;// (Vx, Vy, Vz)   
+bool CaculateIntersect(const Line* line, const Plane* plane, const float lineDistance, VECTOR3D& result) {
+	VECTOR3D p = line->origin;// (x1, y1, z1)
+	VECTOR3D v = line->dir;// (Vx, Vy, Vz)   
 
 	// from plane: ax + by + cz + d = 0
-	VECTOR3D n = plane.normal;// (a, b, c)
-	float d = plane.d;// constant term of plane
+	VECTOR3D n = plane->normal;// (a, b, c)
+	float d = plane->d;// constant term of plane
 
 	// dot products
 	float dot1 = n.DotProduct(v);// a*Vx + b*Vy + c*Vz

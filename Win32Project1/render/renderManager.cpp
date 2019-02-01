@@ -3,17 +3,17 @@
 #include "../mesh/board.h"
 #include "../object/staticObject.h"
 
-RenderManager::RenderManager(int quality, Camera* view, float distance1, float distance2, const VECTOR3D& light) {
+RenderManager::RenderManager(int quality, Camera* view, float distance1, float distance2, bool copyData, const VECTOR3D& light) {
 	graphicQuality = quality;
 	int precision = LOW_PRE;
-	shadow=new Shadow(view,distance1,distance2);
+	shadow = new Shadow(view, 0.0, 0.0);
 	float nearSize = 1024;
 	float midSize = 1024;
 	float farSize = 1024;
 	if (graphicQuality > 4.0) {
 		nearSize = 2048;
-		midSize = 2048;
-		farSize = 2048;
+		midSize = 1024;
+		farSize = 1024;
 		precision = HIGH_PRE;
 	}
 	shadow->shadowMapSize = nearSize;
@@ -24,8 +24,8 @@ RenderManager::RenderManager(int quality, Camera* view, float distance1, float d
 	farBuffer = new FrameBuffer(farSize, farSize, precision);
 	lightDir = light; lightDir.Normalize();
 
-	queue1 = new Renderable(distance1, distance2); queue1->copyCamera(view);
-	queue2 = new Renderable(distance1, distance2); queue2->copyCamera(view);
+	queue1 = new Renderable(distance1, distance2, copyData); queue1->copyCamera(view);
+	queue2 = new Renderable(distance1, distance2, copyData); queue2->copyCamera(view);
 	currentQueue = queue1;
 	nextQueue = queue2;
 
@@ -51,19 +51,21 @@ RenderManager::~RenderManager() {
 	if (reflectBuffer) delete reflectBuffer; reflectBuffer = NULL;
 }
 
-void RenderManager::act() {
-	time += 0.1;
+void RenderManager::act(float dTime) {
+	time = dTime * 0.025;
 }
 
 void RenderManager::resize(float width, float height) {
 	if (reflectBuffer) delete reflectBuffer;
-	reflectBuffer = new FrameBuffer(width, height, LOW_PRE, 4);
+	reflectBuffer = new FrameBuffer(width, height, LOW_PRE, 4, false);
 	reflectBuffer->addColorBuffer(LOW_PRE, 4);
 	reflectBuffer->addColorBuffer(LOW_PRE, 3);
 	reflectBuffer->attachDepthBuffer(LOW_PRE);
 }
 
-void RenderManager::updateShadowCamera() {
+void RenderManager::updateShadowCamera(Camera* mainCamera) {
+	shadow->distance1 = mainCamera->zFar / 3.0;
+	shadow->distance2 = mainCamera->zFar * 2.0 / 3.0;
 	shadow->prepareViewCamera();
 }
 
@@ -81,14 +83,14 @@ void RenderManager::updateRenderQueues(Scene* scene) {
 	Camera* cameraFar = shadow->lightCameraFar;
 	Camera* cameraMain = scene->mainCamera;
 
-	pushNodeToQueue(renderData->queues[QUEUE_STATIC_SN], scene->staticRoot, cameraNear, cameraMain->position);
-	pushNodeToQueue(renderData->queues[QUEUE_STATIC_SM], scene->staticRoot, cameraMid, cameraMain->position);
-	pushNodeToQueue(renderData->queues[QUEUE_STATIC_SF], scene->staticRoot, cameraFar, cameraMain->position);
-	pushNodeToQueue(renderData->queues[QUEUE_STATIC], scene->staticRoot, cameraMain, cameraMain->position);
-	pushNodeToQueue(renderData->queues[QUEUE_ANIMATE_SN], scene->animationRoot, cameraNear, cameraMain->position);
-	pushNodeToQueue(renderData->queues[QUEUE_ANIMATE_SM], scene->animationRoot, cameraMid, cameraMain->position);
-	pushNodeToQueue(renderData->queues[QUEUE_ANIMATE_SF], scene->animationRoot, cameraFar, cameraMain->position);
-	pushNodeToQueue(renderData->queues[QUEUE_ANIMATE], scene->animationRoot, cameraMain, cameraMain->position);
+	PushNodeToQueue(renderData->queues[QUEUE_STATIC_SN], scene->staticRoot, cameraNear, cameraMain);
+	PushNodeToQueue(renderData->queues[QUEUE_STATIC_SM], scene->staticRoot, cameraMid, cameraMain);
+	PushNodeToQueue(renderData->queues[QUEUE_STATIC_SF], scene->staticRoot, cameraFar, cameraMain);
+	PushNodeToQueue(renderData->queues[QUEUE_STATIC], scene->staticRoot, cameraMain, cameraMain);
+	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE_SN], scene->animationRoot, cameraNear, cameraMain);
+	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE_SM], scene->animationRoot, cameraMid, cameraMain);
+	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE_SF], scene->animationRoot, cameraFar, cameraMain);
+	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE], scene->animationRoot, cameraMain, cameraMain);
 }
 
 void RenderManager::animateQueues(long startTime, long currentTime) {
@@ -98,11 +100,17 @@ void RenderManager::animateQueues(long startTime, long currentTime) {
 	currentQueue->queues[QUEUE_ANIMATE]->animate(startTime, currentTime);
 }
 
-void RenderManager::swapRenderQueues(Scene* scene) {
-	currentQueue = (currentQueue == queue1) ? queue2 : queue1;
-	nextQueue = (nextQueue == queue1) ? queue2 : queue1;
+void RenderManager::swapRenderQueues(Scene* scene, bool swapQueue) {
+	if (swapQueue) {
+		currentQueue = (currentQueue == queue1) ? queue2 : queue1;
+		nextQueue = (nextQueue == queue1) ? queue2 : queue1;
 
-	renderData = nextQueue;
+		renderData = nextQueue;
+	} else {
+		currentQueue = queue1;
+		renderData = currentQueue;
+	}
+
 	flushRenderQueues();
 	updateRenderQueues(scene);
 }
@@ -110,22 +118,21 @@ void RenderManager::swapRenderQueues(Scene* scene) {
 void RenderManager::renderShadow(Render* render, Scene* scene) {
 	if (!useShadow) return;
 
-	//render->setColorMask(true, false, false, false);
-
 	static Shader* phongShadowShader = render->findShader("phong_s");
 	static Shader* phongShadowInsShader = render->findShader("phong_s_ins");
+	static Shader* phongShadowInsSimpShader = render->findShader("phong_s_ins_simp");
 	static Shader* billboardShadowShader = render->findShader("billboard_s");
 	static Shader* boneShadowShader = render->findShader("bone_s");
 	static Shader* phongShadowLowShader = render->findShader("phong_sl");
 	static Shader* phongShadowLowInsShader = render->findShader("phong_sl_ins");
 
 	state->reset();
+	state->eyePos = &(scene->mainCamera->position);
 	state->cullMode = CULL_FRONT;
 	state->light = lightDir;
 	state->time = time;
 
 	Camera* mainCamera = scene->mainCamera;
-	VECTOR3D eye = mainCamera->position;
 
 	render->useTexture(TEXTURE_2D, 0, AssetManager::assetManager->texAlt->texId);
 
@@ -135,17 +142,18 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	state->shader = phongShadowShader;
 	state->shaderIns = phongShadowInsShader;
 	state->shaderBillboard = billboardShadowShader;
-	currentQueue->queues[QUEUE_STATIC_SN]->draw(cameraNear, eye, render, state);
+	state->shaderSimple = phongShadowInsSimpShader;
+	currentQueue->queues[QUEUE_STATIC_SN]->draw(cameraNear, render, state);
 	state->shader = boneShadowShader;
-	currentQueue->queues[QUEUE_ANIMATE_SN]->draw(cameraNear, eye, render, state);
+	currentQueue->queues[QUEUE_ANIMATE_SN]->draw(cameraNear, render, state);
 
 	render->setFrameBuffer(midBuffer);
 	Camera* cameraMid=shadow->lightCameraMid;
 	state->pass = MID_SHADOW_PASS;
 	state->shader = phongShadowShader;
-	currentQueue->queues[QUEUE_STATIC_SM]->draw(cameraMid, eye, render, state);
+	currentQueue->queues[QUEUE_STATIC_SM]->draw(cameraMid, render, state);
 	state->shader = boneShadowShader;
-	currentQueue->queues[QUEUE_ANIMATE_SM]->draw(cameraMid, eye, render, state);
+	currentQueue->queues[QUEUE_ANIMATE_SM]->draw(cameraMid, render, state);
 
 	///*
 	//static ushort flushCount = 1;
@@ -159,37 +167,44 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 				state->pass = FAR_SHADOW_PASS;
 				state->shader = phongShadowLowShader;
 				state->shaderIns = phongShadowLowInsShader;
-				currentQueue->queues[QUEUE_STATIC_SF]->draw(cameraFar, eye, render, state);
+				currentQueue->queues[QUEUE_STATIC_SF]->draw(cameraFar, render, state);
 				state->shader = boneShadowShader;
-				currentQueue->queues[QUEUE_ANIMATE_SF]->draw(cameraFar, eye, render, state);
+				currentQueue->queues[QUEUE_ANIMATE_SF]->draw(cameraFar, render, state);
 			}
 	//	}
 	//	flushCount++;
 	//}
 	//*/
-
-	//render->setColorMask(true, true, true, true);
 }
 
 void RenderManager::renderScene(Render* render, Scene* scene) {
 	static Shader* phongShader = render->findShader("phong");
 	static Shader* phongInsShader = render->findShader("phong_ins");
+	static Shader* phongInsSimpShader = render->findShader("phong_ins_simp");
 	static Shader* billboardShader = render->findShader("billboard");
 	static Shader* boneShader = render->findShader("bone");
+	static Shader* skyShader = render->findShader("sky");
 
 	state->reset();
+	state->eyePos = &(scene->mainCamera->position);
 	state->light = lightDir;
 	state->time = time;
+	state->enableSsr = enableSsr;
 
 	Camera* camera = scene->mainCamera;
 	render->useTexture(TEXTURE_2D, 0, AssetManager::assetManager->texAlt->texId);
 	state->shader = phongShader;
 	state->shaderIns = phongInsShader;
 	state->shaderBillboard = billboardShader;
-	currentQueue->queues[QUEUE_STATIC]->draw(camera, camera->position, render, state);
+	state->shaderSimple = phongInsSimpShader;
+	currentQueue->queues[QUEUE_STATIC]->draw(camera, render, state);
 
 	state->shader = boneShader;
-	currentQueue->queues[QUEUE_ANIMATE]->draw(camera, camera->position, render, state);
+	currentQueue->queues[QUEUE_ANIMATE]->draw(camera, render, state);
+
+	// Draw sky
+	if (scene->skyBox)
+		scene->skyBox->draw(render, skyShader, camera);
 
 	// Debug mode
 	if (drawBounding) {
@@ -211,26 +226,23 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 		}
 	}
 
-	// Draw sky
-	if (scene->skyBox) {
-		static Shader* skyShader = render->findShader("sky");
-		scene->skyBox->draw(render, skyShader, camera);
-	}
-
-	// Draw water
-	if (scene->water && scene->water->checkInCamera(scene->mainCamera)) {
-		if (scene->water->needCreateDrawcall) scene->water->prepareDrawcall();
-		else {
-			static Shader* waterShader = render->findShader("water");
-			Shader* shader = state->shader;
-			state->shader = waterShader;
-			state->waterPass = true;
-			state->enableSsr = enableSsr;
-			render->draw(camera, scene->water->drawcall, state);
-		}
-	}
-
 	scene->flushNodes();
+}
+
+void RenderManager::renderWater(Render* render, Scene* scene) {
+	static Shader* waterShader = render->findShader("water");
+	Camera* camera = scene->mainCamera;
+	if (scene->water && scene->water->checkInCamera(camera)) {
+		state->reset();
+		state->eyePos = &(scene->mainCamera->position);
+		state->light = lightDir;
+		state->time = time;
+		state->enableSsr = enableSsr;
+		state->waterPass = true;
+		state->shader = waterShader;
+
+		render->draw(camera, scene->water->drawcall, state);
+	}
 }
 
 void RenderManager::renderReflect(Render* render, Scene* scene) {
@@ -241,6 +253,7 @@ void RenderManager::renderReflect(Render* render, Scene* scene) {
 			if (scene->terrainNode->drawcall) {
 				static Shader* terrainShader = render->findShader("terrain");
 				state->reset();
+				state->eyePos = &(scene->mainCamera->position);
 				state->cullMode = CULL_FRONT;
 				state->light = lightDir;
 				state->shader = terrainShader;
@@ -258,6 +271,7 @@ void RenderManager::renderReflect(Render* render, Scene* scene) {
 void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* screenBuff, Filter* filter) {
 	static Shader* deferredShader = render->findShader("deferred");
 	state->reset();
+	state->eyePos = &(scene->mainCamera->position);
 	state->enableCull = false;
 	state->enableDepthTest = false;
 	state->pass = DEFERRED_PASS;
@@ -265,17 +279,33 @@ void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* scre
 	state->shadow = shadow;
 	state->light = lightDir;
 	state->time = time;
+	state->quality = graphicQuality;
 
 	uint baseSlot = screenBuff->colorBuffers.size() + 1; // Color buffers + Depth buffer
-	render->useTexture(TEXTURE_2D, baseSlot, nearBuffer->getDepthBuffer()->id);
+	render->useTexture(TEXTURE_2D, baseSlot + 0, nearBuffer->getDepthBuffer()->id);
 	render->useTexture(TEXTURE_2D, baseSlot + 1, midBuffer->getDepthBuffer()->id);
 	render->useTexture(TEXTURE_2D, baseSlot + 2, farBuffer->getDepthBuffer()->id);
+	render->setShaderInt(deferredShader, "useShadow", useShadow ? 1 : 0);
 	filter->draw(scene->mainCamera, render, state, screenBuff->colorBuffers, screenBuff->depthBuffer);
+}
+
+void RenderManager::drawCombined(Render* render, Scene* scene, const std::vector<Texture2D*>& inputTextures, Filter* filter) {
+	static Shader* combinedShader = render->findShader("combined");
+	state->reset();
+	state->eyePos = &(scene->mainCamera->position);
+	state->enableCull = false;
+	state->enableDepthTest = false;
+	state->pass = DEFERRED_PASS;
+	state->shader = combinedShader;
+	state->quality = graphicQuality;
+
+	filter->draw(scene->mainCamera, render, state, inputTextures, NULL);
 }
 
 void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, FrameBuffer* inputBuff, Filter* filter) {
 	Shader* shader = render->findShader(shaderStr);
 	state->reset();
+	state->eyePos = &(scene->mainCamera->position);
 	state->enableCull = false;
 	state->enableDepthTest = false;
 	state->pass = POST_PASS;
@@ -287,6 +317,7 @@ void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* s
 void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter) {
 	Shader* shader = render->findShader(shaderStr);
 	state->reset();
+	state->eyePos = &(scene->mainCamera->position);
 	state->enableCull = false;
 	state->enableDepthTest = false;
 	state->pass = POST_PASS;
@@ -298,6 +329,7 @@ void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* s
 void RenderManager::drawSSRFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter) {
 	Shader* shader = render->findShader(shaderStr);
 	state->reset();
+	state->eyePos = &(scene->mainCamera->position);
 	state->enableCull = false;
 	state->enableDepthTest = false;
 	state->pass = POST_PASS;
@@ -310,6 +342,7 @@ void RenderManager::drawSSRFilter(Render* render, Scene* scene, const char* shad
 void RenderManager::drawTexture2Screen(Render* render, Scene* scene, uint texid) {
 	static Shader* screenShader = render->findShader("screen");
 	state->reset();
+	state->eyePos = &(scene->mainCamera->position);
 	state->enableCull = false;
 	state->enableDepthTest = false;
 	state->pass = POST_PASS;
@@ -337,22 +370,10 @@ void RenderManager::drawBoundings(Render* render, RenderState* state, Scene* sce
 	}
 }
 
-void RenderManager::enableShadow(Render* render) {
-	static Shader* deferredShader = render->findShader("deferred");
-	useShadow = true;
-	render->setShaderInt(deferredShader, "useShadow", 1);
+void RenderManager::showShadow(bool enable) {
+	useShadow = enable;
 }
 
-void RenderManager::disableShadow(Render* render) {
-	static Shader* deferredShader = render->findShader("deferred");
-	useShadow = false;
-	render->setShaderInt(deferredShader, "useShadow", 0);
-}
-
-void RenderManager::showBounding() {
-	drawBounding = true;
-}
-
-void RenderManager::hideBounding() {
-	drawBounding = false;
+void RenderManager::showBounding(bool enable) {
+	drawBounding = enable;
 }

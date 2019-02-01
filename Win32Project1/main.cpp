@@ -22,6 +22,8 @@ void DeleteMutex();
 DWORD currentTime = 0, startTime = 0;
 DWORD screenLeft, screenTop;
 int screenHalfX, screenHalfY;
+int centerX, centerY;
+RECT winRect;
 POINT mPoint;
 bool pressed = false;
 
@@ -50,32 +52,49 @@ void ResizeWindow(int width,int height) {
 }
 
 void DrawWindow() {
-	WaitForSingleObject(mutex, INFINITE);
-	dataPrepared = true;
-	ReleaseMutex(mutex);
-	app->draw();
-	WaitForSingleObject(mutex, INFINITE);
-	dataPrepared = false;
-	ReleaseMutex(mutex);
-	/*
-	if (pressed) {
-		GetCursorPos(&mPoint);
-		app->moveMouse(mPoint.x, mPoint.y, screenHalfX, screenHalfY);
-		SetCursorPos(screenHalfX, screenHalfY);
+	if (!app->dualThread) {
+		currentTime = timeGetTime();
+		app->act(startTime, currentTime);
+		app->prepare(false);
+		app->animate(startTime, currentTime);
+	} else {
+		WaitForSingleObject(mutex, INFINITE);
+		dataPrepared = true;
+		ReleaseMutex(mutex);
 	}
-	app->moveKey();
-	//*/
+
+	app->draw();
+	
+	if (app->dualThread) {
+		WaitForSingleObject(mutex, INFINITE);
+		dataPrepared = false;
+		ReleaseMutex(mutex);
+	} else {
+		///*
+		if (pressed) {
+			GetCursorPos(&mPoint);
+			GetWindowRect(hWnd, &winRect);
+			centerX = winRect.left + (LONG)(app->windowWidth >> 1);
+			centerY = winRect.top + (LONG)(app->windowHeight >> 1);
+			app->moveMouse(mPoint.x, mPoint.y, centerX, centerY);
+			SetCursorPos(centerX, centerY);
+		}
+		app->moveKey();
+		//*/
+	}
 }
 
 DWORD WINAPI ActThreadRun(LPVOID param) {
-	///*
 	DWORD last = 0;
-	while (!app->willExit) {
-		if (currentTime - last > 1) {
+	while (!app->willExit && app->dualThread) {
+		if (currentTime - last > 0) {
 			if (pressed) {
 				GetCursorPos(&mPoint);
-				app->moveMouse(mPoint.x, mPoint.y, screenHalfX, screenHalfY);
-				SetCursorPos(screenHalfX, screenHalfY);
+				GetWindowRect(hWnd, &winRect);
+				centerX = winRect.left + (LONG)(app->windowWidth >> 1);
+				centerY = winRect.top + (LONG)(app->windowHeight >> 1);
+				app->moveMouse(mPoint.x, mPoint.y, centerX, centerY);
+				SetCursorPos(centerX, centerY);
 			}
 			app->moveKey();
 
@@ -83,17 +102,16 @@ DWORD WINAPI ActThreadRun(LPVOID param) {
 		}
 		Sleep(0);
 	}
-	//*/
 	thread1End = true;
 	return 1;
 }
 
 DWORD WINAPI FrameThreadRun(LPVOID param) {
-	while (!app->willExit) {
+	while (!app->willExit && app->dualThread) {
 		currentTime = timeGetTime();
 		if(!dataPrepared) {
 			app->act(startTime, currentTime);
-			app->prepare();
+			app->prepare(true);
 			app->animate(startTime, currentTime);
 
 			WaitForSingleObject(mutex, INFINITE);
@@ -125,6 +143,7 @@ void InitGLWin() {
 
 void InitGL() {
 	//ShowCursor(false);
+	printf("Init GL\n");
 	app->init();
 	InitMutex();
 	CreateThreads();
@@ -205,7 +224,6 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hPrevInstance,PSTR szCmdLine,int iC
 		}
 	}
 
-	RECT winRect;
 	winRect.left=(LONG)0;
 	winRect.right=(LONG)app->windowWidth;
 	winRect.top=(LONG)0;
@@ -265,10 +283,13 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam) {
 			break;
 		case WM_MOUSEMOVE:
 			/*
-			if (app && pressed) {
+			if (app && app->dualThread && pressed) {
 				GetCursorPos(&mPoint);
-				app->moveMouse(mPoint.x, mPoint.y, screenHalfX, screenHalfY);
-				SetCursorPos(screenHalfX, screenHalfY);
+				GetWindowRect(hWnd, &winRect);
+				centerX = winRect.left + (LONG)(app->windowWidth >> 1);
+				centerY = winRect.top + (LONG)(app->windowHeight >> 1);
+				app->moveMouse(mPoint.x, mPoint.y, centerX, centerY);
+				SetCursorPos(centerX, centerY);
 			}
 			//*/
 			break;

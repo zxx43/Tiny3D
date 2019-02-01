@@ -7,15 +7,15 @@
 class SimpleApplication : public Application {
 private:
 	FrameBuffer* screen;
-	Filter* screenFilter;
+	FrameBuffer* waterFrame;
+	Filter* sceneFilter;
+	FilterChain* combinedChain;
 	Filter* aaFilter;
 	Filter* dofBlurFilter;
-	Filter* dofFilter;
-	Filter* ssrFilter;
+	FilterChain* dofChain;
+	FilterChain* ssrChain;
 	Filter* ssrBlurFilter;
 	Filter* rawScreenFilter;
-	std::vector<Texture2D*> dofInput;
-	std::vector<Texture2D*> ssrInput;
 public:
 	SimpleApplication();
 	virtual ~SimpleApplication();

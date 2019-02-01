@@ -19,10 +19,8 @@ mat4 convertMat(mat3x4 srcMat) {
 void main() {
 	vTexcoord = texcoord;
 	
-	///*
 	mat4x3 tranMat = transpose(modelMatrix);
 	vec4 worldVertex = vec4(mat3(tranMat) * vertex + tranMat[3], 1.0);
-	//*/
-	//vec4 worldVertex = convertMat(modelMatrix) * vec4(vertex, 1.0);
+
 	gl_Position = viewProjectMatrix * worldVertex;
 }

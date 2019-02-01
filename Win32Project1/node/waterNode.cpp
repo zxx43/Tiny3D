@@ -14,6 +14,11 @@ void WaterNode::putCenter() {
 	centerZ = position.z;
 }
 
+void WaterNode::addObject(Object* object) {
+	Node::addObject(object);
+	putCenter();
+}
+
 void WaterNode::moveWaterWithCamera(Camera* camera) {
 	float dx = camera->position.x;
 	float dz = camera->position.z;

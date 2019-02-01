@@ -20,6 +20,9 @@ AnimationObject::AnimationObject(const AnimationObject& rhs) {
 	normalMatrix = rhs.normalMatrix;
 	localBoundPosition = rhs.localBoundPosition;
 
+	genShadow = rhs.genShadow;
+	detailLevel = rhs.detailLevel;
+
 	if (rhs.billboard)
 		setBillboard(rhs.billboard->data[0], rhs.billboard->data[1], rhs.billboard->material);
 }
@@ -33,7 +36,7 @@ AnimationObject* AnimationObject::clone() {
 void AnimationObject::vertexTransform() {
 	MATRIX4X4 translateMat=translate(position.x,position.y,position.z);
 	MATRIX4X4 rotateMat=rotateZ(anglez)*rotateY(angley)*rotateX(anglex);
-	MATRIX4X4 scaleMat=scaleZ(sizez)*scaleY(sizey)*scaleX(sizex);
+	MATRIX4X4 scaleMat = scale(sizex, sizey, sizez);
 	localTransformMatrix=translateMat*rotateMat*scaleMat;
 }
 

@@ -18,6 +18,7 @@ public:
 	int windowWidth, windowHeight;
 	bool willExit;
 	float graphQuality, useDof, useFxaa, useSsr;
+	bool dualThread;
 public:
 	Application();
 	virtual ~Application();
@@ -28,7 +29,7 @@ public:
 	virtual void moveKey();
 	virtual void moveByDir(int dir);
 	void moveMouse(const float mx, const float my, const float cx, const float cy);
-	void prepare();
+	void prepare(bool swapQueue);
 	void animate(long startTime, long currentTime);
 	virtual void resize(int width, int height);
 	virtual void keyDown(int key);

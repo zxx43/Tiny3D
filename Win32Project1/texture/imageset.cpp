@@ -1,4 +1,5 @@
 #include "imageset.h"
+#include "../constants/constants.h"
 #include "../render/render.h"
 using namespace std;
 
@@ -11,10 +12,6 @@ ImageSet::ImageSet() {
 ImageSet::~ImageSet() {
 	releaseTextureArray();
 	set.clear();
-	for (unsigned int i = 0; i<imageNames.size(); i++)
-		delete images[i];
-	delete[] images;
-	images=NULL;
 	imageNames.clear();
 }
 
@@ -38,7 +35,6 @@ void ImageSet::initTextureArray(string dir) {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D_ARRAY,setId);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	//glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, Render::MaxAniso);
 
@@ -48,7 +44,7 @@ void ImageSet::initTextureArray(string dir) {
 		name = imageNames[i];
 		images[i] = new BmpImage((path + name).c_str());
 		if (i == 0) {
-			glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA,
+			glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_SRGB_ALPHA,
 				images[i]->width, images[i]->height,
 				imageNames.size(), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 		}
@@ -60,6 +56,11 @@ void ImageSet::initTextureArray(string dir) {
 
 	glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 	glBindTexture(GL_TEXTURE_2D_ARRAY,0);
+
+	for (uint i = 0; i<imageNames.size(); i++)
+		delete images[i];
+	delete[] images;
+	images = NULL;
 }
 
 void ImageSet::releaseTextureArray() {

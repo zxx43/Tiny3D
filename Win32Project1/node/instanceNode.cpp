@@ -5,10 +5,16 @@ using namespace std;
 
 InstanceNode::InstanceNode(const VECTOR3D& position):Node(position, VECTOR3D(0, 0, 0)) {
 	type = TYPE_INSTANCE;
+	dynamic = true;
+	instance = NULL;
+	simple = false;
+	isGroup = false;
+	groupBuffer = NULL;
 }
 
 InstanceNode::~InstanceNode() {
-		
+	if (instance) delete instance; instance = NULL;
+	if (groupBuffer) delete groupBuffer; groupBuffer = NULL;
 }
 
 void InstanceNode::addObject(Object* object) {
@@ -50,7 +56,37 @@ void InstanceNode::addObjects(Object** objectArray,int count) {
 		this->addObject(objectArray[i]);
 }
 
+void InstanceNode::prepareGroup() {
+	if (groupBuffer) return;
+	groupBuffer = new InstanceData(objects[0]->mesh, objects[0], objects.size(), singleSide, simple);
+	for (uint i = 0; i < objects.size(); ++i)
+		groupBuffer->addInstance(objects[i]);
+}
+
+void InstanceNode::releaseGroup() {
+	if (groupBuffer) {
+		delete groupBuffer;
+		groupBuffer = NULL;
+	}
+}
+
 void InstanceNode::prepareDrawcall() {
+	if (!dynamic) {
+		if (!drawcall && objects.size() > 0) {
+			Mesh* mesh = objects[0]->mesh;
+			instance = new Instance(mesh, dynamic, simple);
+			instance->singleSide = singleSide;
+			instance->initInstanceBuffers(objects[0], mesh->vertexCount, mesh->indexCount, objects.size(), true);
+			for (uint i = 0; i < objects.size(); i++)
+				instance->addObject(objects[i], i);
+
+			drawcall = new InstanceDrawcall(instance);
+			InstanceDrawcall* insDC = (InstanceDrawcall*)drawcall;
+			insDC->setSide(singleSide);
+			insDC->objectToPrepare = objects.size();
+		}
+	}
+
 	needCreateDrawcall = false;
 }
 

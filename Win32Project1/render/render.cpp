@@ -1,6 +1,7 @@
 #include "render.h"
 #include "../constants/constants.h"
 #include "../assets/assetManager.h"
+#include "instanceDrawcall.h"
 #include <stdio.h>
 
 Render::Render() {
@@ -37,7 +38,7 @@ void Render::initEnvironment() {
 	setDrawLine(false);
 	setBlend(false);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	setClearColor(1,1,1,0);
+	setClearColor(1,1,1,1);
 	currentShader=NULL;
 	clearTextureSlots();
 
@@ -165,6 +166,8 @@ void Render::resize(int width, int height, Camera* mainCamera, Camera* reflectCa
 	setViewPort(width, height);
 	float fAspect = (float)width / height;
 	mainCamera->initPerspectCamera(60.0, fAspect, 1.0, 2000.0);
+	mainCamera->initPerspectSub(800.0);
+	mainCamera->initPerspectNear(400.0);
 	reflectCamera->initPerspectCamera(60.0, fAspect, 0.1, 2000.0);
 }
 
@@ -183,7 +186,7 @@ void Render::useShader(Shader* shader) {
 // Pass 3 draw far shadow (use simple buffer)
 // Pass 4 draw scene with color
 // Pass 5 deferred process
-// Pass 6 fxaa
+// Pass 6 fxaa dof ssr
 void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 	bool beforeCullState = state->enableCull;
 	int beforeCullMode = state->cullMode;
@@ -199,7 +202,11 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 
 	Shader* shader = NULL;
 	if (drawcall->isBillboard() && state->shaderBillboard) shader = state->shaderBillboard; 
-	else shader = drawcall->getType() == INSTANCE_DC ? state->shaderIns : state->shader;
+	else {
+		shader = drawcall->getType() == INSTANCE_DC ? state->shaderIns : state->shader;
+		if (drawcall->getType() == INSTANCE_DC && state->simpleIns)
+			shader = state->shaderSimple;
+	}
 	useShader(shader);
 	if (camera) {
 		if (state->pass < DEFERRED_PASS) {
@@ -214,7 +221,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 				}
 				if (state->waterPass) {
 					shader->setFloat("time", state->time);
-					shader->setVector3("eyePos", camera->position.x, camera->position.y, camera->position.z);
+					shader->setVector3("eyePos", state->eyePos->x, state->eyePos->y, state->eyePos->z);
 					shader->setVector3("light", -state->light.x, -state->light.y, -state->light.z);
 					shader->setMatrix4("viewMatrix", camera->viewMatrix);
 					if (state->enableSsr)
@@ -236,11 +243,10 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 				shader->setMatrix4("viewMatrix", camera->viewMatrix);
 				shader->setMatrix4("projectMatrix", camera->projectMatrix);
 			}
-			if (drawcall->getType() == STATIC_DC && !drawcall->isFullStatic() && drawcall->uModelMatrix) 
-				shader->setMatrix3x4("modelMatrices", drawcall->objectCount, drawcall->uModelMatrix);
 		} else if (state->pass == DEFERRED_PASS) {
 			shader->setMatrix4("invViewProjMatrix", camera->invViewProjectMatrix);
 			shader->setMatrix4("viewMatrix", camera->viewMatrix);
+			shader->setVector3("eyePos", state->eyePos->x, state->eyePos->y, state->eyePos->z);
 
 			if (state->shadow) {
 				shader->setMatrix4("lightViewProjNear", state->shadow->lightNearMat);

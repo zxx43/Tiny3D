@@ -23,9 +23,12 @@ public:
 	int material;
 	Billboard* billboard;
 	MATRIX4X4 localTransformMatrix,normalMatrix;
-	MATRIX4X4 transformMatrix;
+	MATRIX4X4 transformMatrix,transformTransposed;
+	float* transforms;
 	BoundingBox* bounding;
 	VECTOR3D localBoundPosition;
+	bool genShadow;
+	int detailLevel;
 
 	Object();
 	Object(const Object& rhs);

@@ -8,17 +8,17 @@
 using namespace std;
 
 RenderQueue::RenderQueue(float midDis, float lowDis) {
-	queue.clear();
+	queue = new Queue(128);
 	instanceQueue.clear();
 	batchData = NULL;
 	midDistSqr = midDis * midDis;
 	lowDistSqr = lowDis * lowDis;
-	midDistZ = midDis;
-	lowDistZ = lowDis;
+	dual = true;
+	shadowLevel = 0;
 }
 
 RenderQueue::~RenderQueue() {
-	queue.clear();
+	delete queue;
 
 	if (batchData)
 		delete batchData;
@@ -29,19 +29,23 @@ RenderQueue::~RenderQueue() {
 	instanceQueue.clear();
 }
 
+void RenderQueue::setDual(bool dual) {
+	this->dual = dual;
+}
+
 void RenderQueue::push(Node* node) {
-	queue.push_back(node);
+	queue->push(node);
 }
 
 void RenderQueue::flush() {
-	queue.clear();
-
+	queue->flush();
+	
 	map<Mesh*, InstanceData*>::iterator itData = instanceQueue.begin();
 	while (itData != instanceQueue.end()) {
 		itData->second->resetInstance();
 		++itData;
 	}
-
+	
 	if (batchData)
 		batchData->resetBatch();
 }
@@ -52,14 +56,14 @@ void RenderQueue::deleteInstance(InstanceData* data) {
 	data->instance = NULL;
 }
 
-void RenderQueue::pushDatasToInstance(InstanceData* data) {
+void RenderQueue::pushDatasToInstance(InstanceData* data, bool copy) {
 	if (data->count <= 0) return;
 	if (!data->instance) {
-		data->instance = new Instance(data->insMesh);
-		data->instance->initInstanceBuffers(data->object, data->insMesh->vertexCount, data->insMesh->indexCount);
+		data->instance = new Instance(data->insMesh, true, data->simpleTransform);
+		data->instance->initInstanceBuffers(data->object, data->insMesh->vertexCount, data->insMesh->indexCount, MAX_INSTANCE_COUNT, copy);
 		data->instance->singleSide = data->singleSide;
 	}
-	data->instance->setRenderData(data->count, data->matrices, data->billboards, data->positions);
+	data->instance->setRenderData(data);
 }
 
 void RenderQueue::pushDatasToBatch(BatchData* data, int pass) {
@@ -69,17 +73,14 @@ void RenderQueue::pushDatasToBatch(BatchData* data, int pass) {
 		data->batch->initBatchBuffers(MAX_VERTEX_COUNT, MAX_INDEX_COUNT);
 		data->batch->setDynamic(true);
 	}
-	data->batch->setRenderData(pass, data->vertexCount, data->indexCount, data->objectCount,
-		data->vertices, data->normals, data->texcoords, data->colors, data->objectids,
-		data->indices, data->matrices);
+	data->batch->setRenderData(pass, data);
 }
 
-void RenderQueue::draw(Camera* camera, const VECTOR3D& eye, Render* render, RenderState* state) {
-	vector<Node*>::iterator it = queue.begin();
-	while (it != queue.end()) {
-		Node* node = *it;
+void RenderQueue::draw(Camera* camera, Render* render, RenderState* state) {
+	for (int it = 0; it < queue->size; it++) {
+		Node* node = queue->get(it);
 		if (!node->needUpdateNode) {
-			if (node->needCreateDrawcall)
+			if (node->needCreateDrawcall) 
 				node->prepareDrawcall();
 			else if (node->needUpdateDrawcall) {
 				node->updateRenderData();
@@ -89,7 +90,14 @@ void RenderQueue::draw(Camera* camera, const VECTOR3D& eye, Render* render, Rend
 
 		if (node->type == TYPE_STATIC) 
 			render->draw(camera, node->drawcall, state);
-		else if (node->type == TYPE_ANIMATE) {
+		else if (node->type == TYPE_INSTANCE) {
+			InstanceNode* instanceNode = (InstanceNode*)node;
+			if (!instanceNode->dynamic) {
+				state->simpleIns = instanceNode->getSimple();
+				render->draw(camera, node->drawcall, state);
+				state->simpleIns = false;
+			}
+		} else if (node->type == TYPE_ANIMATE) {
 			node->drawcall->uModelMatrix = node->uTransformMatrix->entries;
 
 			if (!node->drawcall->uNormalMatrix)
@@ -110,20 +118,21 @@ void RenderQueue::draw(Camera* camera, const VECTOR3D& eye, Render* render, Rend
 				state->shader = shader;
 			}
 		}
-
-		++it;
 	}
 
 	map<Mesh*, InstanceData*>::iterator itData = instanceQueue.begin();
 	while (itData != instanceQueue.end()) {
 		InstanceData* data = itData->second;
-		pushDatasToInstance(data);
+		//pushDatasToInstance(data, dual);
+		pushDatasToInstance(data, false);
 		Instance* instance = data->instance;
 		if (instance) {
 			if (!instance->drawcall) instance->createDrawcall();
 			if (data->count > 0 && (instance->modelMatrices || instance->billboards)) {
 				instance->drawcall->updateInstances(instance, state->pass);
+				state->simpleIns = instance->isSimple;
 				render->draw(camera, instance->drawcall, state);
+				state->simpleIns = false;
 			}
 		}
 		++itData;
@@ -137,8 +146,8 @@ void RenderQueue::draw(Camera* camera, const VECTOR3D& eye, Render* render, Rend
 		if (batch) {
 			if (!batch->drawcall) batch->createDrawcall();
 			if (batch->objectCount > 0) {
-				batch->drawcall->updateMatrices();
 				batch->drawcall->updateBuffers(state->pass);
+				batch->drawcall->updateMatrices();
 				render->draw(camera, batch->drawcall, state);
 			}
 		}
@@ -146,25 +155,35 @@ void RenderQueue::draw(Camera* camera, const VECTOR3D& eye, Render* render, Rend
 }
 
 void RenderQueue::animate(long startTime, long currentTime) {
-	vector<Node*>::iterator it = queue.begin();
-	while (it != queue.end()) {
-		Node* node = *it;
+	for (int it = 0; it < queue->size; it++) {
+		Node* node = queue->get(it);
 		if (node->type == TYPE_ANIMATE) {
 			AnimationNode* animateNode = (AnimationNode*)node;
 			animateNode->animate(0, startTime, currentTime);
 		}
-		++it;
 	}
 }
 
-void pushNodeToQueue(RenderQueue* queue, Node* node, Camera* camera, const VECTOR3D& eye) {
+Mesh* RenderQueue::queryLodMesh(Object* object, const VECTOR3D& eye) {
+	Mesh* mesh = object->mesh;
+	float e2oDis = (eye - object->bounding->position).GetSquaredLength();
+	if (e2oDis > lowDistSqr) 
+		mesh = object->meshLow;
+	else if (e2oDis > midDistSqr) 
+		mesh = object->meshMid;
+	
+	return mesh;
+}
+
+void PushNodeToQueue(RenderQueue* queue, Node* node, Camera* camera, Camera* mainCamera) {
 	if (node->checkInCamera(camera)) {
 		for (unsigned int i = 0; i<node->children.size(); ++i) {
 			Node* child = node->children[i];
 			if (child->objects.size() <= 0)
-				pushNodeToQueue(queue, child, camera, eye);
+				PushNodeToQueue(queue, child, camera, mainCamera);
 			else {
-				if (child->checkInCamera(camera)) {
+				if (child->shadowLevel < queue->shadowLevel) continue;
+				else if (child->checkInCamera(camera)) {
 					if (child->type != TYPE_INSTANCE && child->type != TYPE_STATIC)
 						queue->push(child);
 					else if (child->type == TYPE_STATIC) {
@@ -175,15 +194,10 @@ void pushNodeToQueue(RenderQueue* queue, Node* node, Camera* camera, const VECTO
 							child->needUpdateDrawcall = false;
 							for (uint j = 0; j < child->objects.size(); ++j) {
 								Object* object = child->objects[j];
+								if (queue->shadowLevel > 0 && !object->genShadow) continue;
 								if (object->checkInCamera(camera)) {
-									Mesh* mesh = object->mesh;
-									if ((eye - object->bounding->position).GetSquaredLength() > queue->lowDistSqr) {
-										if (object->meshLow) mesh = object->meshLow;
-										else if (object->meshMid) mesh = object->meshMid;
-									} else if ((eye - object->bounding->position).GetSquaredLength() > queue->midDistSqr) {
-										if (object->meshMid) mesh = object->meshMid;
-									}
-
+									Mesh* mesh = queue->queryLodMesh(object, mainCamera->position);
+									if (!mesh) continue;
 									if (!queue->batchData)
 										queue->batchData = new BatchData();
 									queue->batchData->addObject(object, mesh);
@@ -191,28 +205,58 @@ void pushNodeToQueue(RenderQueue* queue, Node* node, Camera* camera, const VECTO
 							}
 						}
 					} else if (child->type == TYPE_INSTANCE) {
-						child->needCreateDrawcall = false;
-						child->needUpdateDrawcall = false;
-						for (uint j = 0; j < child->objects.size(); j++) {
-							Object* object = child->objects[j];
-							if (object->checkInCamera(camera)) {
-								Mesh* mesh = object->mesh;
-								if ((eye - object->bounding->position).GetSquaredLength() > queue->lowDistSqr) {
-									if (object->meshLow) mesh = object->meshLow;
-									else if (object->meshMid) mesh = object->meshMid;
-								} else if ((eye - object->bounding->position).GetSquaredLength() > queue->midDistSqr) {
-									if (object->meshMid) mesh = object->meshMid;
-								}
+						InstanceNode* insChild = (InstanceNode*)child;
+						if (insChild->getGroup()) {
+							if (queue->shadowLevel == 0) {
+								if (mainCamera->frustumSub && !insChild->checkInFrustum(mainCamera->frustumSub))
+									continue;
+							} else {
+								if (mainCamera->frustumNear && !insChild->checkInFrustum(mainCamera->frustumNear))
+									continue;
+							}
+						}
 
-								InstanceData* insData = NULL;
-								map<Mesh*, InstanceData*>::iterator itres = queue->instanceQueue.find(mesh);
-								if (itres != queue->instanceQueue.end())
-									insData = itres->second;
-								else {
-									insData = new InstanceData(mesh, object, child->singleSide);
-									queue->instanceQueue[mesh] = insData;
+						if (!insChild->dynamic) {
+							queue->push(insChild);
+							continue;
+						}
+						
+						insChild->needCreateDrawcall = false;
+						insChild->needUpdateDrawcall = false;
+						
+						if (insChild->getGroup()) {
+							Object* object = insChild->objects[0];
+							Mesh* mesh = object->mesh;
+
+							InstanceData* insData = NULL;
+							map<Mesh*, InstanceData*>::iterator itres = queue->instanceQueue.find(mesh);
+							if (itres != queue->instanceQueue.end())
+								insData = itres->second;
+							else {
+								insData = new InstanceData(mesh, object, MAX_INSTANCE_COUNT, insChild->singleSide, insChild->getSimple());
+								queue->instanceQueue.insert(pair<Mesh*, InstanceData*>(mesh, insData));
+							}
+
+							if (!insChild->groupBuffer)
+								insChild->prepareGroup();
+							insData->merge(insChild->groupBuffer);
+						} else {
+							for (uint j = 0; j < insChild->objects.size(); ++j) {
+								Object* object = insChild->objects[j];
+								if (queue->shadowLevel > 0 && !object->genShadow) continue;
+								if (object->checkInCamera(camera)) {
+									Mesh* mesh = queue->queryLodMesh(object, mainCamera->position);
+									if (!mesh) continue;
+									InstanceData* insData = NULL;
+									map<Mesh*, InstanceData*>::iterator itres = queue->instanceQueue.find(mesh);
+									if (itres != queue->instanceQueue.end())
+										insData = itres->second;
+									else {
+										insData = new InstanceData(mesh, object, MAX_INSTANCE_COUNT, insChild->singleSide, insChild->getSimple());
+										queue->instanceQueue.insert(pair<Mesh*, InstanceData*>(mesh, insData));
+									}
+									insData->addInstance(object);
 								}
-								insData->addInstance(object);
 							}
 						}
 					}

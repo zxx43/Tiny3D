@@ -3,7 +3,11 @@
 
 StaticObject::StaticObject(Mesh* mesh) :Object() {
 	this->mesh = mesh;
+	this->meshMid = mesh;
+	this->meshLow = mesh;
 	anglex = 0; angley = 0; anglez = 0;
+
+	transforms = (float*)malloc(4 * sizeof(float));
 }
 
 StaticObject::StaticObject(Mesh* mesh, Mesh* meshMid, Mesh* meshLow) :Object() {
@@ -11,6 +15,8 @@ StaticObject::StaticObject(Mesh* mesh, Mesh* meshMid, Mesh* meshLow) :Object() {
 	this->meshMid = meshMid;
 	this->meshLow = meshLow;
 	anglex = 0; angley = 0; anglez = 0;
+
+	transforms = (float*)malloc(4 * sizeof(float));
 }
 
 StaticObject::StaticObject(const StaticObject& rhs) {
@@ -30,11 +36,21 @@ StaticObject::StaticObject(const StaticObject& rhs) {
 	normalMatrix = rhs.normalMatrix;
 	localBoundPosition = rhs.localBoundPosition;
 
+	genShadow = rhs.genShadow;
+	detailLevel = rhs.detailLevel;
+
 	if (rhs.billboard)
 		setBillboard(rhs.billboard->data[0], rhs.billboard->data[1], rhs.billboard->material);
+	if (rhs.transforms) {
+		transforms = (float*)malloc(4 * sizeof(float));
+		memcpy(transforms, rhs.transforms, 4 * sizeof(float));
+	}
 }
 
-StaticObject::~StaticObject() {}
+StaticObject::~StaticObject() {
+	if (transforms) free(transforms);
+	transforms = NULL;
+}
 
 StaticObject* StaticObject::clone() {
 	return new StaticObject(*this);
@@ -43,7 +59,7 @@ StaticObject* StaticObject::clone() {
 void StaticObject::vertexTransform() {
 	MATRIX4X4 translateMat=translate(position.x,position.y,position.z);
 	MATRIX4X4 rotateMat=rotateZ(anglez)*rotateY(angley)*rotateX(anglex);
-	MATRIX4X4 scaleMat=scaleZ(sizez)*scaleY(sizey)*scaleX(sizex);
+	MATRIX4X4 scaleMat = scale(sizex, sizey, sizez);
 	localTransformMatrix=translateMat*rotateMat*scaleMat;
 }
 

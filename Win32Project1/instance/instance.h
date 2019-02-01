@@ -8,12 +8,10 @@
 #ifndef INSTANCE_H_
 #define INSTANCE_H_
 
-#include "../mesh/mesh.h"
-#include "../maths/MATRIX4X4.h"
 #include "../render/instanceDrawcall.h"
-#include "../object/object.h"
+#include "instanceData.h"
 
-#define MAX_INSTANCE_COUNT 8192
+#define MAX_INSTANCE_COUNT 819200
 
 class Instance {
 public:
@@ -34,15 +32,20 @@ public:
 	InstanceDrawcall* drawcall;
 	bool singleSide;
 	bool isBillboard;
+	bool isDynamic;
+	bool isSimple;
+	bool copyData;
 
-	Instance(Mesh* mesh);
+	Instance(Mesh* mesh, bool dyn, bool simp);
 	~Instance();
-	void initInstanceBuffers(Object* object,int vertices,int indices);
-	void setRenderData(int count, float* matrices, float* billboards, float* positions);
+	void releaseInstanceData();
+	void initInstanceBuffers(Object* object,int vertices,int indices,int cnt,bool copy);
+	void setRenderData(InstanceData* data);
+	void addObject(Object* object, int index);
 	void createDrawcall();
 private:
-	void initMatrices();
-	void initBillboards();
+	void initMatrices(int cnt);
+	void initBillboards(int cnt);
 };
 
 #endif /* INSTANCE_H_ */

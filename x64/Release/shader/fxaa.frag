@@ -37,6 +37,6 @@ void main() {
 		vec3 sum = vec3(0.0);
 		sum += ld.rgb + dd.rgb + rd.rgb + ll.rgb;
 		sum += rr.rgb + lt.rgb + tt.rgb + rt.rgb;
-		FragColor = vec4(mix(color.rgb, sum * 0.125, edgeWeight), 1.0);
+		FragColor.rgb = mix(color.rgb, sum * 0.125, edgeWeight);
 	}	
 }

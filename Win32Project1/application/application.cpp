@@ -20,6 +20,7 @@ Application::Application() {
 }
 
 void Application::init() {
+	printf("Init app\n");
 	render = new Render();
 	SetupShaders(render);
 	AssetManager::Init();
@@ -28,13 +29,16 @@ void Application::init() {
 	input = new Input();
 
 	config->get("quality", graphQuality);
-	float lowDist = graphQuality > 4.0 ? 500 : 200;
-	float farDist = graphQuality > 4.0 ? 1200 : 800;
-	renderMgr = new RenderManager(graphQuality, scene->mainCamera, lowDist, farDist, VECTOR3D(-1, -1, -1));
+	float lowDist = graphQuality > 4.0 ? 800 : 200;
+	float farDist = graphQuality > 4.0 ? 1500 : 800;
+	float dual = 0.0;
+	config->get("dualthread", dual);
+	dualThread = dual > 0.1 ? true : false;
+	renderMgr = new RenderManager(graphQuality, scene->mainCamera, lowDist, farDist, dual, VECTOR3D(-1, -1, -1));
 	if (graphQuality > 1)
-		renderMgr->enableShadow(render);
+		renderMgr->showShadow(true);
 	else
-		renderMgr->disableShadow(render);
+		renderMgr->showShadow(false);
 
 	config->get("dof", useDof);
 	config->get("fxaa", useFxaa);
@@ -43,9 +47,9 @@ void Application::init() {
 	float debug = 0.0;
 	config->get("debug", debug);
 	if (debug > 0.5)
-		renderMgr->showBounding();
+		renderMgr->showBounding(true);
 	else
-		renderMgr->hideBounding();
+		renderMgr->showBounding(false);
 }
 
 Application::~Application() {
@@ -61,7 +65,7 @@ Application::~Application() {
 void Application::act(long startTime, long currentTime) {
 	if (renderMgr) {
 		input->updateExtra(renderMgr);
-		renderMgr->act();
+		renderMgr->act(currentTime - startTime);
 	}
 }
 
@@ -77,10 +81,10 @@ void Application::moveMouse(const float mx, const float my, const float cx, cons
 	input->updateCameraByMouse(scene->mainCamera, mx, my, cx, cy);
 }
 
-void Application::prepare() {
+void Application::prepare(bool swapQueue) {
 	scene->mainCamera->updateFrustum(); // Update main camera's frustum for cull
 	renderMgr->updateMainLight(); // Update shadow cameras' frustum for cull
-	renderMgr->swapRenderQueues(scene); // Caculate cull result
+	renderMgr->swapRenderQueues(scene, swapQueue); // Caculate cull result
 }
 
 void Application::animate(long startTime, long currentTime) {
@@ -91,7 +95,7 @@ void Application::resize(int width, int height) {
 	windowWidth = width; windowHeight = height;
 	render->resize(width, height, scene->mainCamera, scene->reflectCamera);
 	renderMgr->resize(width, height);
-	renderMgr->updateShadowCamera();
+	renderMgr->updateShadowCamera(scene->mainCamera);
 }
 
 void Application::keyDown(int key) {
