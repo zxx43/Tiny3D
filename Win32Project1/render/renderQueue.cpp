@@ -188,12 +188,11 @@ void PushNodeToQueue(RenderQueue* queue, Node* node, Camera* camera, Camera* mai
 				if (child->type == TYPE_INSTANCE) {
 					insChild = (InstanceNode*)child;
 					if (insChild->getGroup()) {
-						if (queue->shadowLevel == 0) {
-							if (mainCamera->frustumSub && !insChild->checkInFrustum(mainCamera->frustumSub))
-								continue;
-						}
-						else {
+						if (queue->shadowLevel > 0) {
 							if (mainCamera->frustumNear && !insChild->checkInFrustum(mainCamera->frustumNear))
+								continue;
+						} else {
+							if (mainCamera->frustumSub && !insChild->checkInFrustum(mainCamera->frustumSub))
 								continue;
 						}
 					}
