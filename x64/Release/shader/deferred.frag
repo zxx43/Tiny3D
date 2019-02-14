@@ -4,7 +4,6 @@ uniform sampler2D texBuffer, colorBuffer, normalBuffer, depthBuffer;
 uniform vec2 pixelSize;
 
 uniform mat4 invViewProjMatrix;
-uniform mat4 viewMatrix;
 
 uniform mat4 lightViewProjNear, lightViewProjMid, lightViewProjFar;
 uniform sampler2D depthBufferNear, depthBufferMid, depthBufferFar;
@@ -12,6 +11,7 @@ uniform vec2 shadowPixSize;
 uniform int useShadow;
 uniform vec2 levels;
 uniform vec3 light;
+uniform vec3 eyePos;
 
 in vec2 vTexcoord;
 
@@ -122,15 +122,14 @@ void main() {
 	float depth = texture2D(depthBuffer, vTexcoord).r;
 	vec3 ndcPos = vec3(vTexcoord, depth) * 2.0 - 1.0;
 	vec4 tex = texture2D(texBuffer, vTexcoord);
-
 	vec3 sceneColor = tex.rgb;
-	
-	vec4 worldPos = invViewProjMatrix * vec4(ndcPos, 1.0);
-	worldPos /= worldPos.w;
-	vec4 viewPosition = viewMatrix * worldPos;
-	float depthView = -viewPosition.z / viewPosition.w;
 
 	if(ndcPos.z < 1.0) {
+		vec4 worldPos = invViewProjMatrix * vec4(ndcPos, 1.0);
+		worldPos /= worldPos.w;
+
+		float depthView = distance(worldPos.xyz, eyePos);
+
 		vec3 normal = texture2D(normalBuffer, vTexcoord).xyz * 2.0 - vec3(1.0);
 		vec3 color = texture2D(colorBuffer, vTexcoord).rgb;
 

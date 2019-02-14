@@ -32,11 +32,12 @@ void main() {
 	vec4 dDepth = step(minDDepth * 10.0, maxDDepth);
 	float edgeWeight = dot(dDepth, vec4(1.0)) * 0.25;
 	
-	FragColor = vec4(color.rgb, 1.0);
 	if(edgeWeight > 0.0001) {
 		vec3 sum = vec3(0.0);
 		sum += ld.rgb + dd.rgb + rd.rgb + ll.rgb;
 		sum += rr.rgb + lt.rgb + tt.rgb + rt.rgb;
-		FragColor.rgb = mix(color.rgb, sum * 0.125, edgeWeight);
+		FragColor = vec4(mix(color.rgb, sum * 0.125, edgeWeight), 1.0);
+	} else {
+		FragColor = vec4(color.rgb, 1.0);
 	}	
 }

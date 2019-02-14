@@ -11,6 +11,7 @@ out vec4 ReflectColor;
 
 #define FAIL_COLOR vec4(1.0, 1.0, 1.0, 0.0)
 #define RAND_FACTOR vec4(12.9898, 78.233, 45.164, 94.673)
+#define GAMMA vec3(2.2)
 
 float random(vec3 seed, float i){
 	vec4 seed4 = vec4(seed,i);
@@ -113,5 +114,5 @@ void main() {
 		vec3 reflectDir = normalize(reflect(viewPos.xyz, viewNormal));
 		ReflectColor = RayCast(reflectDir, viewPos.xyz);
 	}
-	ReflectColor.rgb = pow(ReflectColor.rgb, vec3(2.2));
+	ReflectColor.rgb = pow(ReflectColor.rgb, GAMMA);
 }

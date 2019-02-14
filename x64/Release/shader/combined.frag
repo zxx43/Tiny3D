@@ -2,7 +2,7 @@
 
 uniform sampler2D sceneBuffer, sceneDepthBuffer, waterBuffer, waterDepthBuffer, colorBuffer, waterNormalBuffer;
 uniform vec2 pixelSize;
-uniform mat4 invViewProjMatrix, viewMatrix;
+uniform mat4 invViewProjMatrix;
 uniform vec3 eyePos;
 uniform float quality;
 
@@ -11,17 +11,19 @@ in vec2 vTexcoord;
 out vec4 FragColor;
 
 #define LOG2 float(1.442695)
+#define START_H float(200.0)
+#define END_H float(1600.0)
+#define FOG_COLOR vec3(0.95)
+#define INV_GAMMA vec3(0.4546)
 
 vec3 GenFogColor(vec4 worldPos, float depthView, vec3 sceneColor) {
-	float startH = 200.0, endH = 1600.0;
-	vec3 fogColor = vec3(0.9);
 	float worldH = worldPos.y / worldPos.w;
-	float heightFactor = smoothstep(startH, endH, worldH);
-	float fogFactor = exp2(-0.0000007 * depthView * depthView * LOG2);
+	float heightFactor = smoothstep(START_H, END_H, worldH);
+	float fogFactor = exp2(-0.0000006 * depthView * depthView * LOG2);
 
 	fogFactor = mix(fogFactor, 1.0, heightFactor);
 	fogFactor = clamp(fogFactor, 0.0, 1.0);
-	return mix(fogColor, sceneColor, fogFactor);
+	return mix(FOG_COLOR, sceneColor, fogFactor);
 }
 
 void main() {
@@ -39,16 +41,15 @@ void main() {
 	vec4 waterPos = invViewProjMatrix * vec4(ndcWater, 1.0);
 	waterPos /= waterPos.w;
 
-	vec4 viewPosition = viewMatrix * waterPos;
-	float depthView = -viewPosition.z / viewPosition.w;
+	vec3 eye2Water = waterPos.xyz - eyePos;
+	float depthView = length(eye2Water);
 
 	vec4 waterMatColor = texture2D(colorBuffer, vTexcoord);
 	float waterFactor = 1.0 - step(0.2, waterMatColor.w);
 	float depthFactor = clamp((waterPos.y - scenePos.y - 10.0) * 0.01, 0.0, 1.0) * waterFactor;
 
 	vec3 waterNormal = texture2D(waterNormalBuffer, vTexcoord).rgb * 2.0 - 1.0;
-	vec3 eye2Water = normalize(waterPos.xyz - eyePos);
-	float ndote = -dot(waterNormal, eye2Water);
+	float ndote = -dot(waterNormal, normalize(eye2Water));
 
 	vec3 sceneRefract = sceneColor.rgb;
 	vec3 waterReflect = waterRefColor.rgb;
@@ -61,5 +62,5 @@ void main() {
 	FragColor = vec4(GenFogColor(waterPos, depthView, finalColor), wDepth);
 	if(quality > 3.0) 
 		FragColor.rgb = vec3(1.0) - exp(-FragColor.rgb * 2.5);
-	FragColor.rgb = pow(FragColor.rgb, vec3(0.4546));
+	FragColor.rgb = pow(FragColor.rgb, INV_GAMMA);
 }

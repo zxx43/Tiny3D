@@ -101,7 +101,7 @@ void main() {
 	
 	vNormal = normal;
 	vViewNormal = mat3(viewMatrix) * normal;
-	vEye2Water = (position - eyePos);
+	vEye2Water = position - eyePos;
 
 	vProjPos = viewProjectMatrix * vec4(position, 1.0);
 	gl_Position = vProjPos;

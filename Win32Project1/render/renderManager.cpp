@@ -156,11 +156,11 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	currentQueue->queues[QUEUE_ANIMATE_SM]->draw(cameraMid, render, state);
 
 	///*
-	//static ushort flushCount = 1;
-	//if (flushCount % 2 == 0) 
-	//	flushCount = 1;
-	//else {
-	//	if (flushCount % 2 == 1) {
+	static ushort flushCount = 1;
+	if (flushCount % 3 == 0) 
+		flushCount = 1;
+	else {
+		if (flushCount % 3 == 1) {
 			render->setFrameBuffer(farBuffer);
 			if (graphicQuality > 2) {
 				Camera* cameraFar = shadow->lightCameraFar;
@@ -171,9 +171,9 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 				state->shader = boneShadowShader;
 				currentQueue->queues[QUEUE_ANIMATE_SF]->draw(cameraFar, render, state);
 			}
-	//	}
-	//	flushCount++;
-	//}
+		}
+		flushCount++;
+	}
 	//*/
 }
 

@@ -26,6 +26,6 @@ void main() {
 	float ty = (texcoord.y * texPixel.w + board.w) * texPixel.y;
 
 	vTexcoord = vec2(tx, ty);
-	vNormal = cross(viewRight, TOP_VEC);
+	vNormal = normalize(cross(viewRight, TOP_VEC)) * 0.5 + 0.5;
 	gl_Position = viewProjectMatrix * vec4(worldVertex, 1.0);
 }

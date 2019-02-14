@@ -16,5 +16,5 @@ void main() {
 	
 	FragTex = textureColor;
 	FragColor = vec4(0.3, 0.0, 0.0, 1.0);
-	FragNormal = vec4(normalize(vNormal) * 0.5 + 0.5, 1.0);
+	FragNormal = vec4(vNormal, 1.0);
 }
