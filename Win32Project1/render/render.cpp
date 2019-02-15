@@ -7,9 +7,12 @@
 Render::Render() {
 	shaders=new ShaderManager();
 	initEnvironment();
+	tmpState = new RenderState();
+	needRevertState = false;
 }
 
 Render::~Render() {
+	delete tmpState;
 	delete shaders;
 	shaders=NULL;
 	clearTextureSlots();
@@ -188,16 +191,21 @@ void Render::useShader(Shader* shader) {
 // Pass 5 deferred process
 // Pass 6 fxaa dof ssr
 void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
-	bool beforeCullState = state->enableCull;
-	int beforeCullMode = state->cullMode;
+	needRevertState = false;
 	if (drawcall->isSingleSide()) { // Special case
+		tmpState->copy(state);
+		needRevertState = true;
 		if (state->pass == COLOR_PASS)
 			state->enableCull = false;
 		else
 			state->cullMode = CULL_BACK;
 	}
-	if (drawcall->isBillboard())
+	if (drawcall->isBillboard()) {
+		if (!needRevertState) tmpState->copy(state);
+		needRevertState = true;
 		state->enableCull = false;
+	}
+
 	setState(state);
 
 	Shader* shader = NULL;
@@ -214,10 +222,18 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 				shader->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
 
 				if (drawcall->isBillboard()) {
-					if (state->pass == COLOR_PASS)
-						shader->setMatrix4("viewMatrix", camera->viewMatrix);
-					else 
-						shader->setVector3("light", -state->light.x, -state->light.y, -state->light.z);
+					if (state->pass != COLOR_PASS)
+						shader->setVector3("viewRight", state->light.z, 0.0, -state->light.x);
+					else if (state->pass == COLOR_PASS) {
+						static VECTOR3D upVec(0.0, 1.0, 0.0);
+						VECTOR3D viewRight(camera->viewMatrix.entries[0], camera->viewMatrix.entries[4], camera->viewMatrix.entries[8]);
+						VECTOR3D normal = (viewRight.CrossProduct(upVec)).GetNormalized();
+						normal.x = normal.x * 0.5 + 0.5;
+						normal.y = normal.y * 0.5 + 0.5;
+						normal.z = normal.z * 0.5 + 0.5;
+						shader->setVector3("uNormal", normal.x, normal.y, normal.z);
+						shader->setVector3("viewRight", viewRight.x, viewRight.y, viewRight.z);
+					} 
 				}
 				if (state->waterPass) {
 					shader->setFloat("time", state->time);
@@ -267,10 +283,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 
 	drawcall->draw(shader, state->pass);
 
-	if (drawcall->isSingleSide() || drawcall->isBillboard()) { // Reset state
-		state->enableCull = beforeCullState;
-		state->cullMode = beforeCullMode;
-	}
+	if (needRevertState) state->copy(tmpState); // Reset state
 }
 
 void Render::finishDraw() {

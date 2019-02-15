@@ -37,31 +37,34 @@ struct RenderState {
 		eyePos = NULL;
 	}
 	RenderState(const RenderState& rhs) {
-		enableCull = rhs.enableCull;
-		cullMode = rhs.cullMode;
-		drawLine = rhs.drawLine;
-		enableDepthTest = rhs.enableDepthTest;
-		depthTestMode = rhs.depthTestMode;
-		enableAlphaTest = rhs.enableAlphaTest;
-		alphaTestMode = rhs.alphaTestMode;
-		alphaThreshold = rhs.alphaThreshold;
-		lightEffect = rhs.lightEffect;
-		skyPass = rhs.skyPass;
-		waterPass = rhs.waterPass;
-		ssrPass = rhs.ssrPass;
-		enableSsr = rhs.enableSsr;
-		blend = rhs.blend;
-		simpleIns = rhs.simpleIns;
-		pass = rhs.pass;
-		time = rhs.time;
-		quality = rhs.quality;
-		shadow = rhs.shadow;
-		light = rhs.light;
-		eyePos = rhs.eyePos;
-		shader = rhs.shader;
-		shaderIns = rhs.shaderIns;
-		shaderBillboard = rhs.shaderBillboard;
-		shaderSimple = rhs.shaderSimple;
+		copy(&rhs);
+	}
+	void copy(const RenderState* rhs) {
+		enableCull = rhs->enableCull;
+		cullMode = rhs->cullMode;
+		drawLine = rhs->drawLine;
+		enableDepthTest = rhs->enableDepthTest;
+		depthTestMode = rhs->depthTestMode;
+		enableAlphaTest = rhs->enableAlphaTest;
+		alphaTestMode = rhs->alphaTestMode;
+		alphaThreshold = rhs->alphaThreshold;
+		lightEffect = rhs->lightEffect;
+		skyPass = rhs->skyPass;
+		waterPass = rhs->waterPass;
+		ssrPass = rhs->ssrPass;
+		enableSsr = rhs->enableSsr;
+		blend = rhs->blend;
+		simpleIns = rhs->simpleIns;
+		pass = rhs->pass;
+		time = rhs->time;
+		quality = rhs->quality;
+		shadow = rhs->shadow;
+		light = rhs->light;
+		eyePos = rhs->eyePos;
+		shader = rhs->shader;
+		shaderIns = rhs->shaderIns;
+		shaderBillboard = rhs->shaderBillboard;
+		shaderSimple = rhs->shaderSimple;
 	}
 	void reset() {
 		enableCull = true;

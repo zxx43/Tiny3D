@@ -20,6 +20,9 @@ class Render {
 public:
 	static float MaxAniso;
 private:
+	bool needRevertState;
+	RenderState* tmpState;
+private:
 	void initEnvironment();
 public: // Global render state
 	bool enableCull;
