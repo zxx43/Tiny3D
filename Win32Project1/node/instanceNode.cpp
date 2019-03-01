@@ -7,14 +7,15 @@ InstanceNode::InstanceNode(const VECTOR3D& position):Node(position, VECTOR3D(0, 
 	type = TYPE_INSTANCE;
 	dynamic = true;
 	instance = NULL;
-	simple = false;
 	isGroup = false;
 	groupBuffer = NULL;
+	insState = new InstanceState(singleSide, false, false);
 }
 
 InstanceNode::~InstanceNode() {
 	if (instance) delete instance; instance = NULL;
 	if (groupBuffer) delete groupBuffer; groupBuffer = NULL;
+	delete insState;
 }
 
 void InstanceNode::addObject(Object* object) {
@@ -58,7 +59,7 @@ void InstanceNode::addObjects(Object** objectArray,int count) {
 
 void InstanceNode::prepareGroup() {
 	if (groupBuffer) return;
-	groupBuffer = new InstanceData(objects[0]->mesh, objects[0], objects.size(), singleSide, simple);
+	groupBuffer = new InstanceData(objects[0]->mesh, objects[0], objects.size(), insState);
 	for (uint i = 0; i < objects.size(); ++i)
 		groupBuffer->addInstance(objects[i]);
 }
@@ -74,7 +75,7 @@ void InstanceNode::prepareDrawcall() {
 	if (!dynamic) {
 		if (!drawcall && objects.size() > 0) {
 			Mesh* mesh = objects[0]->mesh;
-			instance = new Instance(mesh, dynamic, simple);
+			instance = new Instance(mesh, dynamic, insState);
 			instance->singleSide = singleSide;
 			instance->initInstanceBuffers(objects[0], mesh->vertexCount, mesh->indexCount, objects.size(), true);
 			for (uint i = 0; i < objects.size(); i++)

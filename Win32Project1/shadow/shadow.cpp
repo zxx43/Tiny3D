@@ -1,9 +1,9 @@
 #include "shadow.h"
 
-Shadow::Shadow(Camera* view, float distance1, float distance2) {
+Shadow::Shadow(Camera* view) {
 	viewCamera=view;
-	this->distance1 = distance1;
-	this->distance2 = distance2;
+	distance1 = 0.0;
+	distance2 = 0.0;
 	shadowMapSize = 0, shadowPixSize = 0;
 
 	corners0 = new VECTOR3D[4];
@@ -26,7 +26,10 @@ Shadow::~Shadow() {
 	delete lightCameraFar; lightCameraFar=NULL;
 }
 
-void Shadow::prepareViewCamera() {
+void Shadow::prepareViewCamera(float dist1, float dist2) {
+	distance1 = dist1;
+	distance2 = dist2;
+
 	nearDist=viewCamera->zNear;
 	level1=distance1+nearDist;
 	level2=distance2+nearDist;

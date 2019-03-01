@@ -4,7 +4,15 @@
 
 std::map<Mesh*, int> Instance::instanceTable;
 
-Instance::Instance(Mesh* mesh, bool dyn, bool simp) {
+Instance::Instance(InstanceData* data, bool dyn) {
+	create(data->insMesh, dyn, data->state);
+}
+
+Instance::Instance(Mesh* mesh, bool dyn, InstanceState* state) {
+	create(mesh, dyn, state);
+}
+
+void Instance::create(Mesh* mesh, bool dyn, InstanceState* state) {
 	instanceMesh = mesh;
 	vertexCount = 0;
 	indexCount = 0;
@@ -16,10 +24,11 @@ Instance::Instance(Mesh* mesh, bool dyn, bool simp) {
 
 	instanceCount = 0;
 	drawcall = NULL;
-	singleSide = false;
 	isBillboard = instanceMesh->isBillboard;
 	isDynamic = dyn;
-	isSimple = simp;
+	singleSide = state->singleSide;
+	isSimple = state->simple;
+	isGrass = state->grass;
 
 	modelMatrices = NULL;
 	positions = NULL;

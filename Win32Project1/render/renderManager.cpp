@@ -6,14 +6,14 @@
 RenderManager::RenderManager(int quality, Camera* view, float distance1, float distance2, bool copyData, const VECTOR3D& light) {
 	graphicQuality = quality;
 	int precision = LOW_PRE;
-	shadow = new Shadow(view, 0.0, 0.0);
+	shadow = new Shadow(view);
 	float nearSize = 1024;
 	float midSize = 1024;
-	float farSize = 1024;
+	float farSize = 512;
 	if (graphicQuality > 4.0) {
 		nearSize = 2048;
 		midSize = 1024;
-		farSize = 1024;
+		farSize = 512;
 		precision = HIGH_PRE;
 	}
 	shadow->shadowMapSize = nearSize;
@@ -22,10 +22,10 @@ RenderManager::RenderManager(int quality, Camera* view, float distance1, float d
 	nearBuffer = new FrameBuffer(nearSize, nearSize, precision);
 	midBuffer = new FrameBuffer(midSize, midSize, precision);
 	farBuffer = new FrameBuffer(farSize, farSize, precision);
-	lightDir = light; lightDir.Normalize();
+	lightDir = light.GetNormalized();
 
-	queue1 = new Renderable(distance1, distance2, copyData); queue1->copyCamera(view);
-	queue2 = new Renderable(distance1, distance2, copyData); queue2->copyCamera(view);
+	queue1 = new Renderable(distance1, distance2, copyData); 
+	queue2 = new Renderable(distance1, distance2, copyData); 
 	currentQueue = queue1;
 	nextQueue = queue2;
 
@@ -56,17 +56,17 @@ void RenderManager::act(float dTime) {
 }
 
 void RenderManager::resize(float width, float height) {
-	if (reflectBuffer) delete reflectBuffer;
-	reflectBuffer = new FrameBuffer(width, height, LOW_PRE, 4, false);
-	reflectBuffer->addColorBuffer(LOW_PRE, 4);
-	reflectBuffer->addColorBuffer(LOW_PRE, 3);
-	reflectBuffer->attachDepthBuffer(LOW_PRE);
+	if (reflectBuffer) delete reflectBuffer; reflectBuffer = NULL;
+	if (!enableSsr) {
+		reflectBuffer = new FrameBuffer(width, height, LOW_PRE, 4, false);
+		reflectBuffer->addColorBuffer(LOW_PRE, 4);
+		reflectBuffer->addColorBuffer(LOW_PRE, 3);
+		reflectBuffer->attachDepthBuffer(LOW_PRE);
+	}
 }
 
 void RenderManager::updateShadowCamera(Camera* mainCamera) {
-	shadow->distance1 = mainCamera->zFar / 3.0;
-	shadow->distance2 = mainCamera->zFar * 2.0 / 3.0;
-	shadow->prepareViewCamera();
+	shadow->prepareViewCamera(mainCamera->zFar * 0.333, mainCamera->zFar * 0.667);
 }
 
 void RenderManager::updateMainLight() {
@@ -192,6 +192,15 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	state->enableSsr = enableSsr;
 
 	Camera* camera = scene->mainCamera;
+
+	// Draw terrain
+	if (scene->terrainNode && scene->terrainNode->checkInCamera(camera)) {
+		static Shader* terrainShader = render->findShader("terrain");
+		render->useTexture(TEXTURE_2D_ARRAY, 0, AssetManager::assetManager->texArray->setId);
+		state->shader = terrainShader;
+		render->draw(camera, scene->terrainNode->drawcall, state);
+	}
+
 	render->useTexture(TEXTURE_2D, 0, AssetManager::assetManager->texAlt->texId);
 	state->shader = phongShader;
 	state->shaderIns = phongInsShader;

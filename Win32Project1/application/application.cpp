@@ -44,6 +44,8 @@ void Application::init() {
 	config->get("fxaa", useFxaa);
 	config->get("ssr", useSsr);
 
+	renderMgr->enableSsr = useSsr > 0.5 ? true : false;
+
 	float debug = 0.0;
 	config->get("debug", debug);
 	if (debug > 0.5)

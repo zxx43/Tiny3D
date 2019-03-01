@@ -32,10 +32,10 @@ public:
 	float shadowMapSize,shadowPixSize;
 	VECTOR3D lightDir;
 
-	Shadow(Camera* view,float distance1,float distance2);
+	Shadow(Camera* view);
 	~Shadow();
 
-	void prepareViewCamera();
+	void prepareViewCamera(float dist1, float dist2);
 	void update(const VECTOR3D& light);
 };
 

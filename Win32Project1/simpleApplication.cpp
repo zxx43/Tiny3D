@@ -119,7 +119,6 @@ void SimpleApplication::draw() {
 	if (ssrChain) {
 		AssetManager::assetManager->setReflectTexture(ssrBlurFilter->getOutput(0));
 		//AssetManager::assetManager->setReflectTexture(ssrChain->getOutputTex(0));
-		renderMgr->enableSsr = true;
 	} else {
 		if (renderMgr->reflectBuffer) {
 			renderMgr->renderReflect(render, scene);
@@ -312,7 +311,7 @@ void SimpleApplication::initScene() {
 	//return;
 	scene->createSky();
 	scene->createWater(VECTOR3D(-2048, 0, -2048), VECTOR3D(6, 1, 6));
-	scene->createTerrain(VECTOR3D(-2048, -200, -2048), VECTOR3D(6, 1.5, 6));
+	scene->createTerrain(VECTOR3D(-2048, -200, -2048), VECTOR3D(6, 1.6, 6));
 
 	StaticNode* node1 = new StaticNode(VECTOR3D(2, 2, 2));
 	node1->setDynamicBatch(false);
@@ -375,7 +374,7 @@ void SimpleApplication::initScene() {
 	
 	srand(100);
 	InstanceNode* instanceNode1 = new InstanceNode(VECTOR3D(900, 0, 600));
-	instanceNode1->singleSide = true;
+	instanceNode1->setSingle(true);
 	instanceNode1->setSimple(true);
 	instanceNode1->detailLevel = 4;
 	for (int i = -12; i < 12; i++) {
@@ -394,7 +393,7 @@ void SimpleApplication::initScene() {
 		}
 	}
 	InstanceNode* instanceNode2 = new InstanceNode(VECTOR3D(2746, 0, 2565));
-	instanceNode2->singleSide = true;
+	instanceNode2->setSingle(true);
 	instanceNode2->setSimple(true);
 	instanceNode2->detailLevel = 4;
 	for (int i = -12; i < 12; i++) {
@@ -413,7 +412,7 @@ void SimpleApplication::initScene() {
 		}
 	}
 	InstanceNode* instanceNode3 = new InstanceNode(VECTOR3D(-700, 0, 1320));
-	instanceNode3->singleSide = true;
+	instanceNode3->setSingle(true);
 	instanceNode3->setSimple(true);
 	instanceNode3->detailLevel = 4;
 	for (int i = -12; i < 12; i++) {
@@ -432,7 +431,7 @@ void SimpleApplication::initScene() {
 		}
 	}
 	InstanceNode* instanceNode4 = new InstanceNode(VECTOR3D(-750, 0, -500));
-	instanceNode4->singleSide = true;
+	instanceNode4->setSingle(true);
 	instanceNode4->setSimple(true);
 	instanceNode4->detailLevel = 4;
 	for (int i = -12; i < 12; i++) {
@@ -451,7 +450,7 @@ void SimpleApplication::initScene() {
 		}
 	}
 	InstanceNode* instanceNode5 = new InstanceNode(VECTOR3D(2100, 0, -600));
-	instanceNode5->singleSide = true;
+	instanceNode5->setSingle(true);
 	instanceNode5->setSimple(true);
 	instanceNode5->detailLevel = 4;
 	for (int i = -12; i < 12; i++) {
@@ -470,7 +469,7 @@ void SimpleApplication::initScene() {
 		}
 	}
 	InstanceNode* instanceNode6 = new InstanceNode(VECTOR3D(800, 0, 2000));
-	instanceNode6->singleSide = true;
+	instanceNode6->setSingle(true);
 	instanceNode6->setSimple(true);
 	instanceNode6->detailLevel = 4;
 	for (int i = -12; i < 12; i++) {
@@ -490,11 +489,12 @@ void SimpleApplication::initScene() {
 	}
 
 	InstanceNode* instanceNode8 = new InstanceNode(VECTOR3D(2500, 0, 860));
-	instanceNode8->singleSide = true;
+	instanceNode8->setSingle(true);
 	instanceNode8->shadowLevel = grassShadowLevel;
 	instanceNode8->dynamic = grassDynamic;
 	instanceNode8->setGroup(true);
 	instanceNode8->setSimple(true);
+	instanceNode8->setGrass(true);
 	int grassSize = 50;
 	for (int i = -grassSize; i < grassSize; i++) {
 		for (int j = -grassSize; j < grassSize; j++) {
@@ -510,11 +510,12 @@ void SimpleApplication::initScene() {
 		}
 	}
 	InstanceNode* instanceNode9 = new InstanceNode(VECTOR3D(1300, 0, 2400));
-	instanceNode9->singleSide = true;
+	instanceNode9->setSingle(true);
 	instanceNode9->shadowLevel = grassShadowLevel;
 	instanceNode9->dynamic = grassDynamic;
 	instanceNode9->setGroup(true);
 	instanceNode9->setSimple(true);
+	instanceNode9->setGrass(true);
 	for (int i = -grassSize; i < grassSize; i++) {
 		for (int j = -grassSize; j < grassSize; j++) {
 			StaticObject* grass = model7->clone();
@@ -529,11 +530,12 @@ void SimpleApplication::initScene() {
 		}
 	}
 	InstanceNode* instanceNode10 = new InstanceNode(VECTOR3D(500, 0, -300));
-	instanceNode10->singleSide = true;
+	instanceNode10->setSingle(true);
 	instanceNode10->shadowLevel = grassShadowLevel;
 	instanceNode10->dynamic = grassDynamic;
 	instanceNode10->setGroup(true);
 	instanceNode10->setSimple(true);
+	instanceNode10->setGrass(true);
 	for (int i = -grassSize; i < grassSize; i++) {
 		for (int j = -grassSize; j < grassSize; j++) {
 			StaticObject* grass = model7->clone();
@@ -548,11 +550,12 @@ void SimpleApplication::initScene() {
 		}
 	}
 	InstanceNode* instanceNode11 = new InstanceNode(VECTOR3D(1300, 0, 1360));
-	instanceNode11->singleSide = true;
+	instanceNode11->setSingle(true);
 	instanceNode11->shadowLevel = grassShadowLevel;
 	instanceNode11->dynamic = grassDynamic;
 	instanceNode11->setGroup(true);
 	instanceNode11->setSimple(true);
+	instanceNode11->setGrass(true);
 	for (int i = -grassSize; i < grassSize; i++) {
 		for (int j = -grassSize; j < grassSize; j++) {
 			StaticObject* grass = model7->clone();
@@ -567,11 +570,12 @@ void SimpleApplication::initScene() {
 		}
 	}
 	InstanceNode* instanceNode12 = new InstanceNode(VECTOR3D(-500, 0, 2500));
-	instanceNode12->singleSide = true;
+	instanceNode12->setSingle(true);
 	instanceNode12->shadowLevel = grassShadowLevel;
 	instanceNode12->dynamic = grassDynamic;
 	instanceNode12->setGroup(true);
 	instanceNode12->setSimple(true);
+	instanceNode12->setGrass(true);
 	for (int i = -grassSize; i < grassSize; i++) {
 		for (int j = -grassSize; j < grassSize; j++) {
 			StaticObject* grass = model7->clone();
@@ -586,11 +590,12 @@ void SimpleApplication::initScene() {
 		}
 	}
 	InstanceNode* instanceNode13 = new InstanceNode(VECTOR3D(2500, 0, 2500));
-	instanceNode13->singleSide = true;
+	instanceNode13->setSingle(true);
 	instanceNode13->shadowLevel = grassShadowLevel;
 	instanceNode13->dynamic = grassDynamic;
 	instanceNode13->setGroup(true);
 	instanceNode13->setSimple(true);
+	instanceNode13->setGrass(true);
 	for (int i = -grassSize; i < grassSize; i++) {
 		for (int j = -grassSize; j < grassSize; j++) {
 			StaticObject* grass = model7->clone();
@@ -605,11 +610,12 @@ void SimpleApplication::initScene() {
 		}
 	}
 	InstanceNode* instanceNode14 = new InstanceNode(VECTOR3D(2500, 0, -450));
-	instanceNode14->singleSide = true;
+	instanceNode14->setSingle(true);
 	instanceNode14->shadowLevel = grassShadowLevel;
 	instanceNode14->dynamic = grassDynamic;
 	instanceNode14->setGroup(true);
 	instanceNode14->setSimple(true);
+	instanceNode14->setGrass(true);
 	for (int i = -grassSize; i < grassSize; i++) {
 		for (int j = -grassSize; j < grassSize; j++) {
 			StaticObject* grass = model7->clone();
@@ -624,11 +630,12 @@ void SimpleApplication::initScene() {
 		}
 	}
 	InstanceNode* instanceNode15 = new InstanceNode(VECTOR3D(-520, 0, -530));
-	instanceNode15->singleSide = true;
+	instanceNode15->setSingle(true);
 	instanceNode15->shadowLevel = grassShadowLevel;
 	instanceNode15->dynamic = grassDynamic;
 	instanceNode15->setGroup(true);
 	instanceNode15->setSimple(true);
+	instanceNode15->setGrass(true);
 	for (int i = -grassSize; i < grassSize; i++) {
 		for (int j = -grassSize; j < grassSize; j++) {
 			StaticObject* grass = model7->clone();

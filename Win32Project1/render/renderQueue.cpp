@@ -59,9 +59,8 @@ void RenderQueue::deleteInstance(InstanceData* data) {
 void RenderQueue::pushDatasToInstance(InstanceData* data, bool copy) {
 	if (data->count <= 0) return;
 	if (!data->instance) {
-		data->instance = new Instance(data->insMesh, true, data->simpleTransform);
+		data->instance = new Instance(data, true);
 		data->instance->initInstanceBuffers(data->object, data->insMesh->vertexCount, data->insMesh->indexCount, MAX_INSTANCE_COUNT, copy);
-		data->instance->singleSide = data->singleSide;
 	}
 	data->instance->setRenderData(data);
 }
@@ -227,17 +226,19 @@ void PushNodeToQueue(RenderQueue* queue, Node* node, Camera* camera, Camera* mai
 						
 						insChild->needCreateDrawcall = false;
 						insChild->needUpdateDrawcall = false;
+
+						static map<Mesh*, InstanceData*>::iterator itres;
 						
 						if (insChild->getGroup()) {
 							Object* object = insChild->objects[0];
 							Mesh* mesh = object->mesh;
 
 							InstanceData* insData = NULL;
-							map<Mesh*, InstanceData*>::iterator itres = queue->instanceQueue.find(mesh);
+							itres = queue->instanceQueue.find(mesh);
 							if (itres != queue->instanceQueue.end())
 								insData = itres->second;
 							else {
-								insData = new InstanceData(mesh, object, MAX_INSTANCE_COUNT, insChild->singleSide, insChild->getSimple());
+								insData = new InstanceData(mesh, object, MAX_INSTANCE_COUNT, insChild->insState);
 								queue->instanceQueue.insert(pair<Mesh*, InstanceData*>(mesh, insData));
 							}
 
@@ -252,11 +253,11 @@ void PushNodeToQueue(RenderQueue* queue, Node* node, Camera* camera, Camera* mai
 									Mesh* mesh = queue->queryLodMesh(object, mainCamera->position);
 									if (!mesh) continue;
 									InstanceData* insData = NULL;
-									map<Mesh*, InstanceData*>::iterator itres = queue->instanceQueue.find(mesh);
+									itres = queue->instanceQueue.find(mesh);
 									if (itres != queue->instanceQueue.end())
 										insData = itres->second;
 									else {
-										insData = new InstanceData(mesh, object, MAX_INSTANCE_COUNT, insChild->singleSide, insChild->getSimple());
+										insData = new InstanceData(mesh, object, MAX_INSTANCE_COUNT, insChild->insState);
 										queue->instanceQueue.insert(pair<Mesh*, InstanceData*>(mesh, insData));
 									}
 									insData->addInstance(object);

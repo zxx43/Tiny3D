@@ -220,6 +220,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 		if (state->pass < DEFERRED_PASS) {
 			if (!state->skyPass) {
 				shader->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
+				shader->setFloat("time", state->time * 0.05);
 
 				if (drawcall->isBillboard()) {
 					if (state->pass != COLOR_PASS)

@@ -69,6 +69,7 @@ RenderBuffer* InstanceDrawcall::createBuffers(Instance* instance, bool dyn, bool
 }
 
 void InstanceDrawcall::draw(Shader* shader,int pass) {
+	shader->setFloat("isGrass", instanceRef->isGrass ? 1.0 : 0.0);
 	dataBufferDraw->use();
 	if(indexed)
 		glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, 0, objectToDraw);

@@ -4,6 +4,27 @@
 #include "../mesh/mesh.h"
 #include "../object/object.h"
 
+struct InstanceState {
+	bool singleSide;
+	bool simple;
+	bool grass;
+	InstanceState() {
+		singleSide = false;
+		simple = false;
+		grass = false;
+	}
+	InstanceState(bool sing, bool simp, bool gras) {
+		singleSide = sing;
+		simple = simp;
+		grass = gras;
+	}
+	InstanceState(const InstanceState& rhs) {
+		singleSide = rhs.singleSide;
+		simple = rhs.simple;
+		grass = rhs.grass;
+	}
+};
+
 class Instance;
 
 class InstanceData {
@@ -14,11 +35,10 @@ public:
 	float* positions;
 	int count;
 	Object* object;
-	bool singleSide;
-	bool simpleTransform;
+	InstanceState* state;
 	Instance* instance;
 public:
-	InstanceData(Mesh* mesh, Object* obj, int maxCount, bool side, bool simple);
+	InstanceData(Mesh* mesh, Object* obj, int maxCount, InstanceState* insState);
 	~InstanceData();
 	void resetInstance();
 	void addInstance(Object* object);

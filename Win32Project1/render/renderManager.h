@@ -25,7 +25,6 @@
 
 struct Renderable {
 	std::vector<RenderQueue*> queues;
-	Camera* mainCamera;
 	Renderable(float midDis, float lowDis, bool dual) {
 		queues.clear();
 		for (uint i = 0; i < 8; i++) {
@@ -38,16 +37,10 @@ struct Renderable {
 		queues[QUEUE_ANIMATE_SN]->shadowLevel = 1;
 		queues[QUEUE_ANIMATE_SM]->shadowLevel = 2;
 		queues[QUEUE_ANIMATE_SF]->shadowLevel = 3;
-
-		mainCamera = new Camera(0);
 	}
 	~Renderable() {
 		for (uint i = 0; i < queues.size(); i++)
 			delete queues[i];
-		delete mainCamera; mainCamera = NULL;
-	}
-	void copyCamera(Camera* srcCam) {
-		mainCamera->copy(srcCam);
 	}
 	void flush() {
 		for (uint i = 0; i < queues.size(); i++)

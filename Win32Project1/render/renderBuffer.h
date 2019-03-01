@@ -86,7 +86,8 @@ struct RenderData {
 		streamData = data;
 		///*
 		glBindBuffer(GL_ARRAY_BUFFER, bufferid);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, dataSize * bitSize, streamData);
+		glBufferData(GL_ARRAY_BUFFER, dataSize * bitSize, streamData, drawType);
+		//glBufferSubData(GL_ARRAY_BUFFER, 0, dataSize * bitSize, streamData);
 		//*/
 		//memcpy(gpuPtr, streamData, dataSize * bitSize);
 	}
@@ -95,7 +96,8 @@ struct RenderData {
 		streamData = data;
 		///*
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferid);
-		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, dataSize * bitSize, streamData);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, dataSize * bitSize, streamData, drawType);
+		//glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, dataSize * bitSize, streamData);
 		//*/
 		//memcpy(gpuPtr, streamData, dataSize * bitSize);
 	}

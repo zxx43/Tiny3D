@@ -12,7 +12,7 @@ using namespace std;
 
 Scene::Scene() {
 	inited = false;
-	mainCamera = new Camera(4.0);
+	mainCamera = new Camera(20.0);
 	reflectCamera = new Camera(0.0);
 	skyBox = NULL;
 	water = NULL;
@@ -34,6 +34,7 @@ Scene::~Scene() {
 	if (reflectCamera) delete reflectCamera; reflectCamera = NULL;
 	if (skyBox) delete skyBox; skyBox = NULL;
 	if (water) delete water; water = NULL;
+	if (terrainNode) delete terrainNode; terrainNode = NULL;
 	if (textureNode) delete textureNode; textureNode = NULL;
 	if (staticRoot) delete staticRoot; staticRoot = NULL;
 	if (billboardRoot) delete billboardRoot; billboardRoot = NULL;
@@ -97,7 +98,9 @@ void Scene::createTerrain(const VECTOR3D& position, const VECTOR3D& size) {
 	terrainObject->setSize(size.x, size.y, size.z);
 	terrainNode->addObject(terrainObject);
 	terrainNode->prepareCollisionData();
-	staticRoot->attachChild(terrainNode);
+	terrainNode->updateNode();
+	terrainNode->prepareDrawcall();
+	//staticRoot->attachChild(terrainNode);
 }
 
 void Scene::createNodeAABB(Node* node) {

@@ -1,22 +1,21 @@
 #include "instance.h"
 
-InstanceData::InstanceData(Mesh* mesh, Object* obj, int maxCount, bool side, bool simple) {
+InstanceData::InstanceData(Mesh* mesh, Object* obj, int maxCount, InstanceState* insState) {
 	insMesh = mesh;
 	count = 0;
 	matrices = NULL;
 	billboards = NULL;
 	positions = NULL;
 	object = obj;
-	singleSide = side;
 	instance = NULL;
-	simpleTransform = simple;
-	
+	state = new InstanceState(*insState);
+
 	if (mesh->isBillboard) {
 		billboards = (float*)malloc(maxCount * 4 * sizeof(float));
 		positions = (float*)malloc(maxCount * 3 * sizeof(float));
 		memset(billboards, 0, maxCount * 4 * sizeof(float));
 		memset(positions, 0, maxCount * 3 * sizeof(float));
-	} else if (simpleTransform) {
+	} else if (state->simple) {
 		matrices = (float*)malloc(maxCount * 4 * sizeof(float));
 		memset(matrices, 0, maxCount * 4 * sizeof(float));
 	} else {
@@ -30,6 +29,7 @@ InstanceData::~InstanceData() {
 	if (billboards) free(billboards);
 	if (positions) free(positions);
 	if (instance) delete instance;
+	delete state;
 }
 
 void InstanceData::resetInstance() {
@@ -37,9 +37,9 @@ void InstanceData::resetInstance() {
 }
 
 void InstanceData::addInstance(Object* object) {
-	if (matrices && !simpleTransform)
+	if (matrices && !state->simple)
 		memcpy(matrices + (count * 12), object->transformTransposed.entries, 12 * sizeof(float));
-	else if (matrices && simpleTransform)
+	else if (matrices && state->simple)
 		memcpy(matrices + (count * 4), object->transforms, 4 * sizeof(float));
 	else {
 		Material* mat = NULL;
@@ -59,7 +59,7 @@ void InstanceData::addInstance(Object* object) {
 }
 
 void InstanceData::merge(InstanceData* data) {
-	if (data->matrices && data->simpleTransform)
+	if (data->matrices && data->state->simple)
 		memcpy(matrices + (count * 4), data->matrices, data->count * 4 * sizeof(float));
 	else if (data->matrices)
 		memcpy(matrices + (count * 12), data->matrices, data->count * 12 * sizeof(float));

@@ -1,6 +1,7 @@
 #version 330
 
 uniform mat4 viewProjectMatrix;
+uniform float time, isGrass;
 
 layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 normal;
@@ -18,6 +19,9 @@ void main() {
 	vColor = COLOR_SCALE * color;
 
 	vec4 worldVertex = vec4(modelTrans.w * vertex + modelTrans.xyz, 1.0);
+	if(isGrass > 0.5 && vertex.y > 0.1)
+		worldVertex.x += sin(time);
+
 	vNormal = normal;
 	vTexcoord = texcoord;
 	gl_Position = viewProjectMatrix * worldVertex;

@@ -34,9 +34,11 @@ public:
 	bool isBillboard;
 	bool isDynamic;
 	bool isSimple;
+	bool isGrass;
 	bool copyData;
 
-	Instance(Mesh* mesh, bool dyn, bool simp);
+	Instance(InstanceData* data, bool dyn);
+	Instance(Mesh* mesh, bool dyn, InstanceState* state);
 	~Instance();
 	void releaseInstanceData();
 	void initInstanceBuffers(Object* object,int vertices,int indices,int cnt,bool copy);
@@ -44,6 +46,7 @@ public:
 	void addObject(Object* object, int index);
 	void createDrawcall();
 private:
+	void create(Mesh* mesh, bool dyn, InstanceState* state);
 	void initMatrices(int cnt);
 	void initBillboards(int cnt);
 };
