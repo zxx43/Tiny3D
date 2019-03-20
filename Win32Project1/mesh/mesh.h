@@ -23,12 +23,15 @@ public:
 	int* materialids;
 	int* indices;
 	bool isBillboard;
+	float* bounding;
 
 	Mesh();
 	Mesh(const Mesh& rhs);
 	virtual ~Mesh();
 	void caculateExData();
 	void setIsBillboard(bool billboard);
+private:
+	void caculateBounding();
 };
 
 

@@ -16,7 +16,8 @@ private:
 public:
 	ShaderManager();
 	~ShaderManager();
-	Shader* addShader(const char* name,const char* vs,const char* fs);
+	Shader* addShader(const char* name, const char* vs, const char* fs);
+	Shader* addShader(const char* name, const char* vs, const char* fs, const char* gs);
 	Shader* findShader(const char* name);
 };
 

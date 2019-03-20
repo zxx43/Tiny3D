@@ -9,9 +9,9 @@
 #define OBJECT_H_
 
 #include "../mesh/mesh.h"
-#include "../bounding/aabb.h"
 #include "../material/materialManager.h"
 #include "../billboard/billboard.h"
+#include "../bounding/aabb.h"
 
 class Object {
 public:

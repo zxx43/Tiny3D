@@ -125,6 +125,7 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	static Shader* boneShadowShader = render->findShader("bone_s");
 	static Shader* phongShadowLowShader = render->findShader("phong_sl");
 	static Shader* phongShadowLowInsShader = render->findShader("phong_sl_ins");
+	static Shader* grassShadowShader = render->findShader("grass_s");
 
 	state->reset();
 	state->eyePos = &(scene->mainCamera->position);
@@ -143,6 +144,7 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	state->shaderIns = phongShadowInsShader;
 	state->shaderBillboard = billboardShadowShader;
 	state->shaderSimple = phongShadowInsSimpShader;
+	state->shaderGrass = grassShadowShader;
 	currentQueue->queues[QUEUE_STATIC_SN]->draw(cameraNear, render, state);
 	state->shader = boneShadowShader;
 	currentQueue->queues[QUEUE_ANIMATE_SN]->draw(cameraNear, render, state);
@@ -184,6 +186,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	static Shader* billboardShader = render->findShader("billboard");
 	static Shader* boneShader = render->findShader("bone");
 	static Shader* skyShader = render->findShader("sky");
+	static Shader* grassShader = render->findShader("grass");
 
 	state->reset();
 	state->eyePos = &(scene->mainCamera->position);
@@ -206,6 +209,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	state->shaderIns = phongInsShader;
 	state->shaderBillboard = billboardShader;
 	state->shaderSimple = phongInsSimpShader;
+	state->shaderGrass = grassShader;
 	currentQueue->queues[QUEUE_STATIC]->draw(camera, render, state);
 
 	state->shader = boneShader;

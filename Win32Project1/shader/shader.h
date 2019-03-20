@@ -23,7 +23,8 @@ private:
 	std::map<std::string,GLuint> attribLocations;
 public:
 	std::string name;
-	Shader(const char* vert,const char* frag);
+	Shader(const char* vert, const char* frag);
+	Shader(const char* vert, const char* frag, const char* geom);
 	~Shader();
 	void use();
 	void addAttrib(const char* name);

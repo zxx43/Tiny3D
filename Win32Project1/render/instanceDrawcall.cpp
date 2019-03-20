@@ -5,6 +5,7 @@ InstanceDrawcall::InstanceDrawcall(Instance* instance) :Drawcall() {
 	instanceRef = instance;
 	dynDC = instanceRef->isDynamic;
 	isSimple = instanceRef->isSimple;
+	isGrass = instanceRef->isGrass;
 	vertexCount = instanceRef->vertexCount;
 	indexCount = instanceRef->indexCount;
 	indexed = indexCount > 0 ? true : false;
@@ -50,27 +51,36 @@ RenderBuffer* InstanceDrawcall::createBuffers(Instance* instance, bool dyn, bool
 		buffer->setAttribData(3, GL_FLOAT, objectCount, 4, 1, false, draw, 1, instanceRef->billboards);
 		if (indexed)
 			buffer->setIndexData(4, GL_UNSIGNED_SHORT, indexCount, GL_STATIC_DRAW, instanceRef->indexBuffer);
-	}
-	else {
-		buffer = new RenderBuffer(indexed ? 6 : 5);
+	} else {
+		int bufCount = 5;
+		if (indexed) bufCount++;
+		int lastBuf = bufCount - 1;
+
+		buffer = new RenderBuffer(bufCount);
 		buffer->setAttribData(0, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->vertexBuffer);
 		buffer->setAttribData(1, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->normalBuffer);
 		buffer->setAttribData(2, GL_FLOAT, vertexCount, 4, 1, false, GL_STATIC_DRAW, 0, instanceRef->texcoordBuffer);
 		buffer->setAttribData(3, GL_UNSIGNED_BYTE, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->colorBuffer);
 		if (!isSimple)
 			buffer->setAttribData(4, GL_FLOAT, objectCount, 4, 3, false, draw, 1, instanceRef->modelMatrices);
-		else
+		else 
 			buffer->setAttribData(4, GL_FLOAT, objectCount, 4, 1, false, draw, 1, instanceRef->modelMatrices);
-		if (indexed)
-			buffer->setIndexData(5, GL_UNSIGNED_SHORT, indexCount, GL_STATIC_DRAW, instanceRef->indexBuffer);
+
+		if (indexed) buffer->setIndexData(lastBuf, GL_UNSIGNED_SHORT, indexCount, GL_STATIC_DRAW, instanceRef->indexBuffer);
 	}
 	buffer->unuse();
 	return buffer;
 }
 
 void InstanceDrawcall::draw(Shader* shader,int pass) {
-	shader->setFloat("isGrass", instanceRef->isGrass ? 1.0 : 0.0);
 	dataBufferDraw->use();
+	if (isGrass) {
+		float* boundInfo = instanceRef->instanceMesh->bounding;
+		if (boundInfo) {
+			shader->setVector3("boundPos", boundInfo[0], boundInfo[1], boundInfo[2]);
+			shader->setVector3("boundScl", boundInfo[3], boundInfo[4], boundInfo[5]);
+		}
+	}
 	if(indexed)
 		glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, 0, objectToDraw);
 	else

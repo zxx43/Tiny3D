@@ -321,12 +321,17 @@
     <None Include="..\x64\Release\shader\mean.vert" />
     <None Include="..\x64\Release\shader\phong.frag" />
     <None Include="..\x64\Release\shader\phong.vert" />
+    <None Include="..\x64\Release\shader\phong_grass.frag" />
+    <None Include="..\x64\Release\shader\phong_grass.geom" />
+    <None Include="..\x64\Release\shader\phong_grass.vert" />
     <None Include="..\x64\Release\shader\phong_ins.frag" />
     <None Include="..\x64\Release\shader\phong_ins.vert" />
     <None Include="..\x64\Release\shader\phong_ins_simp.frag" />
     <None Include="..\x64\Release\shader\phong_ins_simp.vert" />
     <None Include="..\x64\Release\shader\phong_shadow.frag" />
     <None Include="..\x64\Release\shader\phong_shadow.vert" />
+    <None Include="..\x64\Release\shader\phong_shadow_grass.frag" />
+    <None Include="..\x64\Release\shader\phong_shadow_grass.vert" />
     <None Include="..\x64\Release\shader\phong_shadow_ins.frag" />
     <None Include="..\x64\Release\shader\phong_shadow_ins.vert" />
     <None Include="..\x64\Release\shader\phong_shadow_ins_simp.frag" />

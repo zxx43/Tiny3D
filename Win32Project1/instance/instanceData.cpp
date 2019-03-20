@@ -21,7 +21,7 @@ InstanceData::InstanceData(Mesh* mesh, Object* obj, int maxCount, InstanceState*
 	} else {
 		matrices = (float*)malloc(maxCount * 12 * sizeof(float));
 		memset(matrices, 0, maxCount * 12 * sizeof(float));
-	} 
+	}
 }
 
 InstanceData::~InstanceData() {
@@ -55,6 +55,7 @@ void InstanceData::addInstance(Object* object) {
 
 		memcpy(positions + (count * 3), object->transformMatrix.entries + 12, 3 * sizeof(float));
 	}
+
 	count++;
 }
 
@@ -67,5 +68,6 @@ void InstanceData::merge(InstanceData* data) {
 		memcpy(billboards + (count * 4), data->billboards, data->count * 4 * sizeof(float));
 		memcpy(positions + (count * 3), data->positions, data->count * 3 * sizeof(float));
 	}
+
 	count += data->count;
 }

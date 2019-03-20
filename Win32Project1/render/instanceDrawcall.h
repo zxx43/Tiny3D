@@ -27,6 +27,7 @@ private:
 public:
 	int objectToPrepare;
 	bool isSimple;
+	bool isGrass;
 private:
 	RenderBuffer* createBuffers(Instance* instance, bool dyn, bool indexed, int vertexCount, int indexCount);
 public:

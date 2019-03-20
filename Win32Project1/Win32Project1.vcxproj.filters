@@ -661,6 +661,21 @@
     <None Include="..\x64\Release\shader\phong_shadow_ins_simp.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\x64\Release\shader\phong_grass.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\phong_grass.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\phong_shadow_grass.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\phong_shadow_grass.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\phong_grass.geom">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\x64\Release\config\config.txt">

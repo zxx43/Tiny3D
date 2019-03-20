@@ -3,7 +3,11 @@
 using namespace std;
 
 Shader::Shader(const char* vert,const char* frag) {
-	program=new ShaderProgram(vert,frag);
+	program = new ShaderProgram(vert, frag);
+}
+
+Shader::Shader(const char* vert, const char* frag, const char* geom) {
+	program = new ShaderProgram(vert, frag, geom);
 }
 
 Shader::~Shader() {

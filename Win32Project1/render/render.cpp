@@ -169,8 +169,8 @@ void Render::resize(int width, int height, Camera* mainCamera, Camera* reflectCa
 	setViewPort(width, height);
 	float fAspect = (float)width / height;
 	mainCamera->initPerspectCamera(60.0, fAspect, 1.0, 2000.0);
-	mainCamera->initPerspectSub(800.0);
-	mainCamera->initPerspectNear(400.0);
+	mainCamera->initPerspectSub(1000.0);
+	mainCamera->initPerspectNear(300.0);
 	reflectCamera->initPerspectCamera(60.0, fAspect, 0.1, 2000.0);
 }
 
@@ -212,15 +212,23 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 	if (drawcall->isBillboard() && state->shaderBillboard) shader = state->shaderBillboard; 
 	else {
 		shader = drawcall->getType() == INSTANCE_DC ? state->shaderIns : state->shader;
-		if (drawcall->getType() == INSTANCE_DC && state->simpleIns)
-			shader = state->shaderSimple;
+		if (drawcall->getType() == INSTANCE_DC) {
+			if (state->grass)
+				shader = state->shaderGrass;
+			else if (state->simpleIns)
+				shader = state->shaderSimple;		
+		}
 	}
 	useShader(shader);
 	if (camera) {
 		if (state->pass < DEFERRED_PASS) {
 			if (!state->skyPass) {
 				shader->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
-				shader->setFloat("time", state->time * 0.05);
+				if (state->grass) {
+					shader->setFloat("time", state->time * 0.05);
+					shader->setVector3("eyePos", state->eyePos->x, state->eyePos->y, state->eyePos->z);
+					shader->setMatrix4("viewMatrix", camera->viewMatrix);
+				}
 
 				if (drawcall->isBillboard()) {
 					if (state->pass != COLOR_PASS)

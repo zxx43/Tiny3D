@@ -135,9 +135,9 @@ struct RenderBuffer {
 		if (streamDatas[loc]) delete streamDatas[loc];
 		streamDatas[loc] = new RenderData(loc, type, count, channel, row, vbos[loc], normalize, draw, divisor, data);
 	}
-	void setIndexData(uint loc, GLenum type, uint size, GLenum draw, void* data) {
-		if (streamDatas[loc]) delete streamDatas[loc];
-		streamDatas[loc] = new RenderData(type, size, vbos[loc], draw, data);
+	void setIndexData(uint ind, GLenum type, uint size, GLenum draw, void* data) {
+		if (streamDatas[ind]) delete streamDatas[ind];
+		streamDatas[ind] = new RenderData(type, size, vbos[ind], draw, data);
 	}
 	void updateAttribData(uint loc, uint count, void* data) {
 		streamDatas[loc]->updateAttrBuf(count, data);

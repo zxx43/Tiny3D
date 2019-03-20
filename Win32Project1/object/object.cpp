@@ -1,4 +1,5 @@
 #include "object.h"
+#include <stdlib.h>
 #include "../constants/constants.h"
 
 Object::Object() {
@@ -57,10 +58,8 @@ void Object::caculateLocalAABB(bool looseWidth, bool looseAll) {
 		lz = lz < local3.z ? local3.z : lz;
 	}
 	VECTOR3D minVertex(sx, sy, sz), maxVertex(lx, ly, lz);
-	if (!bounding) 
-		bounding = new AABB(minVertex, maxVertex);
-	else 
-		((AABB*)bounding)->update(minVertex, maxVertex);
+	if (!bounding) bounding = new AABB(minVertex, maxVertex);
+	else ((AABB*)bounding)->update(minVertex, maxVertex);
 
 	if (looseWidth) {
 		AABB* aabb = (AABB*)bounding;

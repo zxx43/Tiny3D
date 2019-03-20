@@ -93,8 +93,10 @@ void RenderQueue::draw(Camera* camera, Render* render, RenderState* state) {
 			InstanceNode* instanceNode = (InstanceNode*)node;
 			if (!instanceNode->dynamic) {
 				state->simpleIns = instanceNode->getSimple();
+				state->grass = instanceNode->getGrass();
 				render->draw(camera, node->drawcall, state);
 				state->simpleIns = false;
+				state->grass = false;
 			}
 		} else if (node->type == TYPE_ANIMATE) {
 			node->drawcall->uModelMatrix = node->uTransformMatrix->entries;
@@ -130,8 +132,10 @@ void RenderQueue::draw(Camera* camera, Render* render, RenderState* state) {
 			if (data->count > 0 && (instance->modelMatrices || instance->billboards)) {
 				instance->drawcall->updateInstances(instance, state->pass);
 				state->simpleIns = instance->isSimple;
+				state->grass = instance->isGrass;
 				render->draw(camera, instance->drawcall, state);
 				state->simpleIns = false;
+				state->grass = false;
 			}
 		}
 		++itData;

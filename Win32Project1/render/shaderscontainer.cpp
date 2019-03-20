@@ -2,6 +2,9 @@
 
 #define PHONG_VERT "shader/phong.vert"
 #define PHONG_FRAG "shader/phong.frag"
+#define GRASS_VERT "shader/phong_grass.vert"
+#define GRASS_FRAG "shader/phong_grass.frag"
+#define GRASS_GEOM "shader/phong_grass.geom"
 #define PHONG_INS_VERT "shader/phong_ins.vert"
 #define PHONG_INS_FRAG "shader/phong_ins.frag"
 #define PHONG_INS_SIMPLE_VERT "shader/phong_ins_simp.vert"
@@ -10,6 +13,8 @@
 #define BONE_FRAG "shader/bone.frag"
 #define PHONG_SHADOW_VERT "shader/phong_shadow.vert"
 #define PHONG_SHADOW_FRAG "shader/phong_shadow.frag"
+#define GRASS_SHADOW_VERT "shader/phong_shadow_grass.vert"
+#define GRASS_SHADOW_FRAG "shader/phong_shadow_grass.frag"
 #define PHONG_SHADOW_INS_VERT "shader/phong_shadow_ins.vert"
 #define PHONG_SHADOW_INS_FRAG "shader/phong_shadow_ins.frag"
 #define PHONG_SHADOW_INS_SIMPLE_VERT "shader/phong_shadow_ins_simp.vert"
@@ -55,6 +60,10 @@ void SetupShaders(Render* render) {
 	Shader* phongIns = render->shaders->addShader("phong_ins", PHONG_INS_VERT, PHONG_INS_FRAG);
 	render->setShaderSampler(phongIns, "texture", 0);
 
+	//Shader* grass = render->shaders->addShader("grass", GRASS_VERT, GRASS_FRAG, GRASS_GEOM);
+	Shader* grass = render->shaders->addShader("grass", GRASS_VERT, GRASS_FRAG);
+	render->setShaderSampler(grass, "texture", 0);
+
 	Shader* phongInsSimp = render->shaders->addShader("phong_ins_simp", PHONG_INS_SIMPLE_VERT, PHONG_INS_SIMPLE_FRAG);
 	render->setShaderSampler(phongInsSimp, "texture", 0);
 
@@ -66,6 +75,9 @@ void SetupShaders(Render* render) {
 
 	Shader* phongShadow = render->shaders->addShader("phong_s", PHONG_SHADOW_VERT, PHONG_SHADOW_FRAG);
 	render->setShaderSampler(phongShadow, "texture", 0);
+
+	Shader* grassShadow = render->shaders->addShader("grass_s", GRASS_SHADOW_VERT, GRASS_SHADOW_FRAG);
+	render->setShaderSampler(grassShadow, "texture", 0);
 
 	Shader* phongShadowIns = render->shaders->addShader("phong_s_ins", PHONG_SHADOW_INS_VERT, PHONG_SHADOW_INS_FRAG);
 	render->setShaderSampler(phongShadowIns, "texture", 0);

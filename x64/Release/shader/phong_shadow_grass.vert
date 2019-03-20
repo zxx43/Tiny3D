@@ -3,23 +3,16 @@
 uniform mat4 viewProjectMatrix;
 
 layout (location = 0) in vec3 vertex;
-layout (location = 1) in vec3 normal;
 layout (location = 2) in vec4 texcoord;
-layout (location = 3) in vec3 color;
 layout (location = 4) in vec4 modelTrans;
 
-out vec4 vTexcoord;
-flat out vec3 vColor;
-out vec3 vNormal;
-
-#define COLOR_SCALE vec3(0.003, 0.006, 0.005)
+out VertexData {
+	vec4 vTexcoord;
+} vertOut;
 
 void main() {
-	vColor = COLOR_SCALE * color;
-
+	vertOut.vTexcoord = texcoord;
+	
 	vec4 worldVertex = vec4(modelTrans.w * vertex + modelTrans.xyz, 1.0);
-
-	vNormal = normal;
-	vTexcoord = texcoord;
 	gl_Position = viewProjectMatrix * worldVertex;
 }

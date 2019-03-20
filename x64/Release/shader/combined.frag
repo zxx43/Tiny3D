@@ -19,7 +19,7 @@ out vec4 FragColor;
 vec3 GenFogColor(vec4 worldPos, float depthView, vec3 sceneColor) {
 	float worldH = worldPos.y / worldPos.w;
 	float heightFactor = smoothstep(START_H, END_H, worldH);
-	float fogFactor = exp2(-0.0000006 * depthView * depthView * LOG2);
+	float fogFactor = exp2(-0.0000005 * depthView * depthView * LOG2);
 
 	fogFactor = mix(fogFactor, 1.0, heightFactor);
 	fogFactor = clamp(fogFactor, 0.0, 1.0);

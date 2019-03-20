@@ -241,9 +241,9 @@ void SimpleApplication::initScene() {
 	// Load textures
 	assetMgr->addTexture2Alt("cube.bmp");
 	assetMgr->addTexture2Alt("ground.bmp");
-	assetMgr->addTexture2Array("ground.bmp");
+	assetMgr->addTexture2Array("ground_g.bmp");
 	assetMgr->addTexture2Array("ground_r.bmp");
-	assetMgr->addTexture2Array("sand.bmp");
+	assetMgr->addTexture2Array("ground_s.bmp");
 	assetMgr->addTexture2Alt("sand.bmp");
 	assetMgr->addTexture2Alt("tree.bmp");
 	assetMgr->addTexture2Alt("treeA.bmp");
@@ -267,9 +267,9 @@ void SimpleApplication::initScene() {
 	
 	Material* terrainMat = new Material("terrain_mat");
 	terrainMat->useArray = true;
-	terrainMat->texOfs1.x = assetMgr->findTextureInArray("ground.bmp");
+	terrainMat->texOfs1.x = assetMgr->findTextureInArray("ground_g.bmp");
 	terrainMat->texOfs1.y = assetMgr->findTextureInArray("ground_r.bmp");
-	terrainMat->texOfs1.z = assetMgr->findTextureInArray("sand.bmp");
+	terrainMat->texOfs1.z = assetMgr->findTextureInArray("ground_s.bmp");
 	mtlMgr->add(terrainMat);
 	
 	Material* billboardTreeMat = new Material("billboard_tree_mat");
@@ -311,7 +311,7 @@ void SimpleApplication::initScene() {
 	//return;
 	scene->createSky();
 	scene->createWater(VECTOR3D(-2048, 0, -2048), VECTOR3D(6, 1, 6));
-	scene->createTerrain(VECTOR3D(-2048, -200, -2048), VECTOR3D(6, 1.6, 6));
+	scene->createTerrain(VECTOR3D(-2048, -200, -2048), VECTOR3D(6, 1.5, 6));
 
 	StaticNode* node1 = new StaticNode(VECTOR3D(2, 2, 2));
 	node1->setDynamicBatch(false);

@@ -20,6 +20,7 @@ struct RenderState {
 	bool enableSsr;
 	bool blend;
 	bool simpleIns;
+	bool grass;
 	int pass;
 	float time;
 	float quality;
@@ -28,6 +29,7 @@ struct RenderState {
 	VECTOR3D* eyePos;
 	Shader* shader;
 	Shader* shaderIns;
+	Shader* shaderGrass;
 	Shader* shaderBillboard;
 	Shader* shaderSimple;
 
@@ -55,6 +57,7 @@ struct RenderState {
 		enableSsr = rhs->enableSsr;
 		blend = rhs->blend;
 		simpleIns = rhs->simpleIns;
+		grass = rhs->grass;
 		pass = rhs->pass;
 		time = rhs->time;
 		quality = rhs->quality;
@@ -63,6 +66,7 @@ struct RenderState {
 		eyePos = rhs->eyePos;
 		shader = rhs->shader;
 		shaderIns = rhs->shaderIns;
+		shaderGrass = rhs->shaderGrass;
 		shaderBillboard = rhs->shaderBillboard;
 		shaderSimple = rhs->shaderSimple;
 	}
@@ -82,12 +86,14 @@ struct RenderState {
 		enableSsr = false;
 		blend = false;
 		simpleIns = false;
+		grass = false;
 		pass = COLOR_PASS;
 		time = 0.0;
 		quality = 1.0;
 		shadow = NULL;
 		shader = NULL;
 		shaderIns = NULL;
+		shaderGrass = NULL;
 		shaderBillboard = NULL;
 		shaderSimple = NULL;
 	}

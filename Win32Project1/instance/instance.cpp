@@ -186,7 +186,6 @@ void Instance::createDrawcall() {
 
 void Instance::addObject(Object* object, int index) {
 	instanceCount++;
-
 	if (isSimple && !billboards) 
 		memcpy(modelMatrices + (index * 4), object->transforms, 4 * sizeof(float));
 	else if (!isSimple && !billboards)
