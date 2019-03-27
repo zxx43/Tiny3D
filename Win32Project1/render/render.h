@@ -69,6 +69,9 @@ public:
 	void setShaderVec2(Shader* shader, const char* param, float x, float y) { useShader(shader); shader->setVector2(param, x, y); }
 	void setShaderVec3(Shader* shader, const char* param, float x, float y, float z) { useShader(shader); shader->setVector3(param, x, y, z); }
 	void setShaderVec4(Shader* shader, const char* param, float x, float y, float z, float w) { useShader(shader); shader->setVector4(param, x, y, z, w); }
+	void setShaderVec2v(Shader* shader, const char* param, float* arr) { useShader(shader); shader->setVector2v(param, arr); }
+	void setShaderVec3v(Shader* shader, const char* param, float* arr) { useShader(shader); shader->setVector3v(param, arr); }
+	void setShaderVec4v(Shader* shader, const char* param, float* arr) { useShader(shader); shader->setVector4v(param, arr); }
 	void setShaderMat4(Shader* shader, const char* param, float* matrix) { useShader(shader); shader->setMatrix4(param, matrix); }
 	void setShaderMat4(Shader* shader, const char* param, int count, float* matrices) { useShader(shader); shader->setMatrix4(param, count, matrices); }
 	void setShaderMat3x4(Shader* shader, const char* param, int count, float* matrices) { useShader(shader); shader->setMatrix3x4(param, count, matrices); }

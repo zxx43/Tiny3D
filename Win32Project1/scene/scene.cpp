@@ -76,10 +76,12 @@ void Scene::updateReflectCamera() {
 }
 
 void Scene::createSky() {
+	if (skyBox) delete skyBox;
 	skyBox = new Sky();
 }
 
 void Scene::createWater(const VECTOR3D& position, const VECTOR3D& size) {
+	if (water) delete water;
 	water = new WaterNode(VECTOR3D(0, 0, 0));
 	water->setFullStatic(true);
 	StaticObject* waterObject = new StaticObject(AssetManager::assetManager->meshes["water"]);
@@ -91,6 +93,7 @@ void Scene::createWater(const VECTOR3D& position, const VECTOR3D& size) {
 }
 
 void Scene::createTerrain(const VECTOR3D& position, const VECTOR3D& size) {
+	if (terrainNode) delete terrainNode;
 	terrainNode = new TerrainNode(position);
 	terrainNode->setFullStatic(true);
 	StaticObject* terrainObject = new StaticObject(AssetManager::assetManager->meshes["terrain"]);

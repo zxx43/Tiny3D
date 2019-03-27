@@ -77,8 +77,8 @@ void InstanceDrawcall::draw(Shader* shader,int pass) {
 	if (isGrass) {
 		float* boundInfo = instanceRef->instanceMesh->bounding;
 		if (boundInfo) {
-			shader->setVector3("boundPos", boundInfo[0], boundInfo[1], boundInfo[2]);
-			shader->setVector3("boundScl", boundInfo[3], boundInfo[4], boundInfo[5]);
+			shader->setVector3v("boundPos", boundInfo);
+			shader->setVector3v("boundScl", boundInfo + 3);
 		}
 	}
 	if(indexed)

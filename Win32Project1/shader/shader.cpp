@@ -101,6 +101,36 @@ void Shader::setVector4(const char* param,float x,float y,float z,float w) {
 		glUniform4f(location, x, y, z, w);
 }
 
+void Shader::setVector2v(const char* param, float* arr) {
+	int location = findParamLocation(param);
+	if (location == INVALID_LOCATION) {
+		addParam(param);
+		location = findParamLocation(param);
+	}
+	if (location != INVALID_LOCATION)
+		glUniform2fv(location, 1, arr);
+}
+
+void Shader::setVector3v(const char* param, float* arr) {
+	int location = findParamLocation(param);
+	if (location == INVALID_LOCATION) {
+		addParam(param);
+		location = findParamLocation(param);
+	}
+	if (location != INVALID_LOCATION)
+		glUniform3fv(location, 1, arr);
+}
+
+void Shader::setVector4v(const char* param, float* arr) {
+	int location = findParamLocation(param);
+	if (location == INVALID_LOCATION) {
+		addParam(param);
+		location = findParamLocation(param);
+	}
+	if (location != INVALID_LOCATION)
+		glUniform4fv(location, 1, arr);
+}
+
 void Shader::setMatrix4(const char* param,float* matrix) {
 	int location = findParamLocation(param);
 	if (location == INVALID_LOCATION) {

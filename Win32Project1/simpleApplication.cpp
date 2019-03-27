@@ -301,9 +301,9 @@ void SimpleApplication::initScene() {
 	model4->setBillboard(13, 14, mtlMgr->find("billboard_treeA_mat"));
 	StaticObject* model5 = new StaticObject(meshes["house"]);
 	StaticObject* model6 = new StaticObject(meshes["oildrum"]);
-	StaticObject* model7 = new StaticObject(meshes["grass1"], meshes["grass1"], NULL);
+	StaticObject* model7 = new StaticObject(meshes["grass1"], NULL, NULL);
 	model7->detailLevel = 1;
-	StaticObject* model8 = new StaticObject(meshes["grass2"], meshes["grass2"], NULL);
+	StaticObject* model8 = new StaticObject(meshes["grass2"], NULL, NULL);
 	model8->detailLevel = 1;
 	int grassShadowLevel = graphQuality > 4 ? 1 : 0;
 	bool grassDynamic = true;

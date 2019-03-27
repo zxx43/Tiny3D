@@ -43,6 +43,11 @@ public:
 	void resetInstance();
 	void addInstance(Object* object);
 	void merge(InstanceData* data);
+private:
+	void doMergeData(InstanceData* data);
+private:
+	std::vector<InstanceData*> subGroup;
+	int groupToMerge;
 };
 
 #endif

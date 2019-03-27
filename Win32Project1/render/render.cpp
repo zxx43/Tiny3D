@@ -226,7 +226,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 				shader->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
 				if (state->grass) {
 					shader->setFloat("time", state->time * 0.05);
-					shader->setVector3("eyePos", state->eyePos->x, state->eyePos->y, state->eyePos->z);
+					shader->setVector3v("eyePos", *(state->eyePos));
 					shader->setMatrix4("viewMatrix", camera->viewMatrix);
 				}
 
@@ -240,13 +240,13 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 						normal.x = normal.x * 0.5 + 0.5;
 						normal.y = normal.y * 0.5 + 0.5;
 						normal.z = normal.z * 0.5 + 0.5;
-						shader->setVector3("uNormal", normal.x, normal.y, normal.z);
-						shader->setVector3("viewRight", viewRight.x, viewRight.y, viewRight.z);
+						shader->setVector3v("uNormal", normal);
+						shader->setVector3v("viewRight", viewRight);
 					} 
 				}
 				if (state->waterPass) {
 					shader->setFloat("time", state->time);
-					shader->setVector3("eyePos", state->eyePos->x, state->eyePos->y, state->eyePos->z);
+					shader->setVector3v("eyePos", *(state->eyePos));
 					shader->setVector3("light", -state->light.x, -state->light.y, -state->light.z);
 					shader->setMatrix4("viewMatrix", camera->viewMatrix);
 					if (state->enableSsr)
@@ -271,7 +271,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 		} else if (state->pass == DEFERRED_PASS) {
 			shader->setMatrix4("invViewProjMatrix", camera->invViewProjectMatrix);
 			shader->setMatrix4("viewMatrix", camera->viewMatrix);
-			shader->setVector3("eyePos", state->eyePos->x, state->eyePos->y, state->eyePos->z);
+			shader->setVector3v("eyePos", *(state->eyePos));
 
 			if (state->shadow) {
 				shader->setMatrix4("lightViewProjNear", state->shadow->lightNearMat);

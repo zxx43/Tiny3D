@@ -22,6 +22,9 @@ InstanceData::InstanceData(Mesh* mesh, Object* obj, int maxCount, InstanceState*
 		matrices = (float*)malloc(maxCount * 12 * sizeof(float));
 		memset(matrices, 0, maxCount * 12 * sizeof(float));
 	}
+
+	subGroup.clear();
+	groupToMerge = 0;
 }
 
 InstanceData::~InstanceData() {
@@ -30,10 +33,12 @@ InstanceData::~InstanceData() {
 	if (positions) free(positions);
 	if (instance) delete instance;
 	delete state;
+	subGroup.clear();
 }
 
 void InstanceData::resetInstance() {
 	count = 0;
+	groupToMerge = 0;
 }
 
 void InstanceData::addInstance(Object* object) {
@@ -59,7 +64,7 @@ void InstanceData::addInstance(Object* object) {
 	count++;
 }
 
-void InstanceData::merge(InstanceData* data) {
+void InstanceData::doMergeData(InstanceData* data) {
 	if (data->matrices && data->state->simple)
 		memcpy(matrices + (count * 4), data->matrices, data->count * 4 * sizeof(float));
 	else if (data->matrices)
@@ -68,6 +73,16 @@ void InstanceData::merge(InstanceData* data) {
 		memcpy(billboards + (count * 4), data->billboards, data->count * 4 * sizeof(float));
 		memcpy(positions + (count * 3), data->positions, data->count * 3 * sizeof(float));
 	}
+}
 
+void InstanceData::merge(InstanceData* data) {
+	if (subGroup.size() <= groupToMerge) {
+		doMergeData(data);
+		subGroup.push_back(data);
+	} else if (subGroup[groupToMerge] != data) {
+		doMergeData(data);
+		subGroup[groupToMerge] = data;
+	}
+	groupToMerge++;
 	count += data->count;
 }
