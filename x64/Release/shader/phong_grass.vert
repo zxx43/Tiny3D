@@ -21,7 +21,7 @@ out VertexData {
 } vertOut;
 
 #define COLOR_SCALE vec3(0.003, 0.006, 0.005)
-#define INVALID_POINT vec4(2.0, 2.0, 2.0, 1.0)
+#define INVALID_POINT vec4(1.1, 1.1, 1.1, 1.0)
 
 float CheckOut(vec3 pos, vec3 scl) {
 	vec4 bb[8];

@@ -24,7 +24,7 @@ vec2 BinarySearch(float start, float end, vec2 projUV, vec3 refDir, vec3 refPos,
 	float curLen = start + (end - start) * 0.5;
 	vec2 uvCoord = projUV;
 
-	for(int i = 0; i < 5; i++) {
+	for(int i = 0; i < 3; i++) {
 		vec3 curPos = refPos + refDir * curLen;
 
 		vec4 projPos = projectMatrix * vec4(curPos, 1.0);
