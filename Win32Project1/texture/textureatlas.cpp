@@ -1,6 +1,7 @@
 #include "textureatlas.h"
 #include "../render/render.h"
 #include "../constants/constants.h"
+#include <stdlib.h>
 using namespace std;
 
 TextureAtlas::TextureAtlas() {
@@ -8,6 +9,7 @@ TextureAtlas::TextureAtlas() {
 	perImgWidth = 0, perImgHeight = 0;
 	pCountW = 0, pCountH = 0;
 	pixW = 0, pixH = 0;
+	atlasInfo = (float*)malloc(4 * sizeof(float));
 	imageNames.clear();
 	images = NULL;
 	data = NULL;
@@ -15,6 +17,7 @@ TextureAtlas::TextureAtlas() {
 }
 
 TextureAtlas::~TextureAtlas() {
+	free(atlasInfo);
 	releaseAtlas();
 	imageNames.clear();
 
@@ -67,6 +70,9 @@ void TextureAtlas::createAtlas(string dir) {
 	uint atlasHeight = pCountH * (perImgHeight + 2 * bh);
 	pixW = 1.0 / (float)atlasWidth;
 	pixH = 1.0 / (float)atlasHeight;
+
+	atlasInfo[0] = pixW, atlasInfo[1] = pixH;
+	atlasInfo[2] = perImgWidth, atlasInfo[3] = perImgHeight;
 
 	uint pixelCount = atlasWidth * atlasHeight;
 	data = (byte*)malloc(pixelCount * 4 * sizeof(byte));

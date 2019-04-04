@@ -1,5 +1,6 @@
 #version 330
 #extension GL_EXT_gpu_shader4 : enable 
+layout(early_fragment_tests) in;
 
 uniform sampler2DArray texArray;
 uniform float waterHeight, isReflect;

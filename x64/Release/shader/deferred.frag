@@ -86,18 +86,18 @@ float genShadowFactor(vec4 worldPos, float depthView, float bias) {
 		vec4 near = lightViewProjNear * worldPos;
 		vec3 lightPosition = near.xyz / near.w;
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
-		float bs = bias * 0.00005;
+		float bs = bias * 0.00001;
 		return genPCF(depthBufferNear, shadowCoord, bs, 2.0, 0.04);
 	} else if(depthView > levels.x - GAP && depthView < levels.x + GAP) {
 		vec4 near = lightViewProjNear * worldPos;
 		vec3 lightPositionNear = near.xyz / near.w;
 		vec3 shadowCoordNear = lightPositionNear * 0.5 + 0.5;
-		float bsNear = bias * 0.00005;
+		float bsNear = bias * 0.00001;
 
 		vec4 mid = lightViewProjMid * worldPos;
 		vec3 lightPositionMid = mid.xyz / mid.w;
 		vec3 shadowCoordMid = lightPositionMid * 0.5 + 0.5;
-		float bsMid = bias * 0.00005;
+		float bsMid = bias * 0.00001;
 
 		float factorNear = genPCF(depthBufferNear, shadowCoordNear, bsNear, 2.0, 0.04);
 		float factorMid = genPCF(depthBufferMid, shadowCoordMid, bsMid, 1.0, 0.111);
@@ -106,7 +106,7 @@ float genShadowFactor(vec4 worldPos, float depthView, float bias) {
 		vec4 mid = lightViewProjMid * worldPos;
 		vec3 lightPosition = mid.xyz / mid.w;
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
-		float bs = bias * 0.00005;
+		float bs = bias * 0.00001;
 		return genPCF(depthBufferMid, shadowCoord, bs, 1.0, 0.111);
 	} else {
 		vec4 far = lightViewProjFar * worldPos;
@@ -138,6 +138,14 @@ void main() {
 		ndotl = max(ndotl, 0.0);
 
 		float shadowFactor = (useShadow != 0) ? tex.a * genShadowFactor(worldPos, depthView, bias) : 1.0;
+		/*
+		float shadowFactor = 1.0;
+		if(useShadow != 0) {
+			if(tex.a > 0.5) shadowFactor = genShadowFactor(worldPos, depthView, bias);
+			else shadowFactor = 0.0;
+		}
+		*/
+
 		sceneColor *= dot(color, vec3(1.0, shadowFactor * ndotl, 0.0));
 	}
 

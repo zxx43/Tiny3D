@@ -13,7 +13,7 @@ using namespace std;
 Scene::Scene() {
 	inited = false;
 	mainCamera = new Camera(20.0);
-	reflectCamera = new Camera(0.0);
+	reflectCamera = NULL;
 	skyBox = NULL;
 	water = NULL;
 	terrainNode = NULL;
@@ -65,7 +65,7 @@ void Scene::flushNodes() {
 }
 
 void Scene::updateReflectCamera() {
-	if (water) {
+	if (water && reflectCamera) {
 		static MATRIX4X4 transMat = scaleY(-1) * translate(0, water->position.y, 0);
 		reflectCamera->viewMatrix = mainCamera->viewMatrix * transMat;
 		reflectCamera->lookDir.x = mainCamera->lookDir.x;
@@ -73,6 +73,11 @@ void Scene::updateReflectCamera() {
 		reflectCamera->lookDir.z = mainCamera->lookDir.z;
 		reflectCamera->updateFrustum();
 	}
+}
+
+void Scene::createReflectCamera() {
+	if (reflectCamera) delete reflectCamera;
+	reflectCamera = new Camera(0.0);
 }
 
 void Scene::createSky() {

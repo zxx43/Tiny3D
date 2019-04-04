@@ -30,7 +30,6 @@ vec2 BinarySearch(float start, float end, vec2 projUV, vec3 refDir, vec3 refPos,
 		vec4 projPos = projectMatrix * vec4(curPos, 1.0);
 		projPos /= projPos.w;
 		vec3 projCoord = projPos.xyz * 0.5 + 0.5;
-		projCoord.x = clamp(projCoord.x, 0.0, 1.0);
 
 		float storedDepth = texture2D(depthBuffer, projCoord.xy).r;
 
@@ -46,7 +45,7 @@ vec2 BinarySearch(float start, float end, vec2 projUV, vec3 refDir, vec3 refPos,
 }
 
 vec4 RayCast(vec3 refDir, vec3 refPos) {
-	float stepLen = 100.0;
+	float stepLen = 200.0;
 	float lenStart = 0.0;
 	float lenBefore = lenStart;
 	float lenCurrent = lenStart;
@@ -58,13 +57,12 @@ vec4 RayCast(vec3 refDir, vec3 refPos) {
 	vec4 projRef = projectMatrix * vec4(refPos, 1.0);
 	projRef /= projRef.w;
 	
-	for(float i = 0.0; i < 20.0; i += 1.0) {
+	for(float i = 0.0; i < 10.0; i += 1.0) {
 		vec3 curPos = refPos + refDir * lenCurrent;
 
 		vec4 projPos = projectMatrix * vec4(curPos, 1.0);
 		projPos /= projPos.w;
 		vec3 projCoord = projPos.xyz * 0.5 + 0.5;
-		projCoord.x = clamp(projCoord.x, 0.0, 1.0);
 
 		float storedDepth = texture2D(depthBuffer, projCoord.xy).r;
 		vec4 storedView = invProjMatrix * vec4(vec3(projCoord.xy, storedDepth) * 2.0 - 1.0, 1.0);
@@ -74,7 +72,7 @@ vec4 RayCast(vec3 refDir, vec3 refPos) {
 
 		if(storedDepth >= 1.0)
 			return FAIL_COLOR;
-		else if(curPos.z <= storedView.z + 0.01 && refFlag > 0.9 && refPos.z >= storedView.z - 15.0) {
+		else if(curPos.z <= storedView.z + 0.01 && refFlag > 0.9 && refPos.z >= storedView.z - 20.0) {
 			vec2 searchData = BinarySearch(lenBefore, lenCurrent, projCoord.xy, refDir, refPos, projRef);
 			vec4 storedData = texture2D(lightBuffer, searchData);
 

@@ -25,6 +25,7 @@ public:
 	GLuint texId;
 	int perImgWidth, perImgHeight;
 	float pixW, pixH;
+	float* atlasInfo;
 private:
 	void releaseAtlas();
 public:

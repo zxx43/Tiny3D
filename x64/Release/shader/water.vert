@@ -12,7 +12,7 @@ out vec3 vViewNormal;
 out vec3 vEye2Water;
 out vec4 vProjPos;
 
-vec3 calculateWavePosition(float q, float a, float w, vec3 dir, vec3 meshVert, float ph, float t) {
+vec3 CalculateWavePosition(float q, float a, float w, vec3 dir, vec3 meshVert, float ph, float t) {
 	float qa = q * a;
 	float theta = dot(w * dir.xz, meshVert.xz) + ph * t;
 	float cosTh = cos(theta);
@@ -23,7 +23,7 @@ vec3 calculateWavePosition(float q, float a, float w, vec3 dir, vec3 meshVert, f
 	return vec3(x, y, z);
 }
 
-vec3 calculateWaveNormal(float q, float a, float w, vec3 dir, vec3 waveVert, float ph, float t) {
+vec3 CalculateWaveNormal(float q, float a, float w, vec3 dir, vec3 waveVert, float ph, float t) {
 	float wa = w * a;
 	float theta = dot(w * dir, waveVert) + ph * t;
 	float cosTh = cos(theta);
@@ -69,32 +69,29 @@ void main() {
 
 	vec3 worldVertex = vertex + vec3(eyePos.x, 0.0, eyePos.z);
 	
-	vec3 pos0 = calculateWavePosition(q0, a0, w0, dir0, worldVertex, ph0, time);
-	vec3 pos1 = calculateWavePosition(q1, a1, w1, dir1, worldVertex, ph1, time);
-	vec3 pos2 = calculateWavePosition(q2, a2, w2, dir2, worldVertex, ph2, time); 
-	vec3 pos3 = calculateWavePosition(q3, a3, w3, dir3, worldVertex, ph3, time); 
-	vec3 pos4 = calculateWavePosition(q4, a4, w4, dir4, worldVertex, ph4, time); 
-	vec3 pos5 = calculateWavePosition(q5, a5, w5, dir5, worldVertex, ph5, time);
-	vec3 pos6 = calculateWavePosition(q6, a6, w6, dir6, worldVertex, ph6, time);
-	vec3 pos7 = calculateWavePosition(q7, a7, w7, dir7, worldVertex, ph7, time);
+	vec3 pos0 = CalculateWavePosition(q0, a0, w0, dir0, worldVertex, ph0, time);
+	vec3 pos1 = CalculateWavePosition(q1, a1, w1, dir1, worldVertex, ph1, time);
+	vec3 pos2 = CalculateWavePosition(q2, a2, w2, dir2, worldVertex, ph2, time); 
+	vec3 pos3 = CalculateWavePosition(q3, a3, w3, dir3, worldVertex, ph3, time); 
+	vec3 pos4 = CalculateWavePosition(q4, a4, w4, dir4, worldVertex, ph4, time); 
+	vec3 pos5 = CalculateWavePosition(q5, a5, w5, dir5, worldVertex, ph5, time);
+	vec3 pos6 = CalculateWavePosition(q6, a6, w6, dir6, worldVertex, ph6, time);
+	vec3 pos7 = CalculateWavePosition(q7, a7, w7, dir7, worldVertex, ph7, time);
 	
 	vec3 position = pos0 + pos1 + pos2 + pos3 + pos4 + pos5 + pos6 + pos7;
-	position.x += worldVertex.x;
-	position.z += worldVertex.z;
+	position.xz += worldVertex.xz;
 	
-	vec3 nor0 = calculateWaveNormal(q0, a0, w0, dir0, position, ph0, time);
-	vec3 nor1 = calculateWaveNormal(q1, a1, w1, dir1, position, ph1, time);
-	vec3 nor2 = calculateWaveNormal(q2, a2, w2, dir2, position, ph2, time);
-	vec3 nor3 = calculateWaveNormal(q3, a3, w3, dir3, position, ph3, time);
-	vec3 nor4 = calculateWaveNormal(q4, a4, w4, dir4, position, ph4, time);
-	vec3 nor5 = calculateWaveNormal(q5, a5, w5, dir5, position, ph5, time);
-	vec3 nor6 = calculateWaveNormal(q6, a6, w6, dir6, position, ph6, time);
-	vec3 nor7 = calculateWaveNormal(q7, a7, w7, dir7, position, ph7, time);
+	vec3 nor0 = CalculateWaveNormal(q0, a0, w0, dir0, position, ph0, time);
+	vec3 nor1 = CalculateWaveNormal(q1, a1, w1, dir1, position, ph1, time);
+	vec3 nor2 = CalculateWaveNormal(q2, a2, w2, dir2, position, ph2, time);
+	vec3 nor3 = CalculateWaveNormal(q3, a3, w3, dir3, position, ph3, time);
+	vec3 nor4 = CalculateWaveNormal(q4, a4, w4, dir4, position, ph4, time);
+	vec3 nor5 = CalculateWaveNormal(q5, a5, w5, dir5, position, ph5, time);
+	vec3 nor6 = CalculateWaveNormal(q6, a6, w6, dir6, position, ph6, time);
+	vec3 nor7 = CalculateWaveNormal(q7, a7, w7, dir7, position, ph7, time);
 
 	vec3 normal = nor0 + nor1 + nor2 + nor3 + nor4 + nor5 + nor6 + nor7;
-	normal.x = -normal.x;
-	normal.y = 1.0 - normal.y;
-	normal.z = -normal.z;
+	normal = vec3(0.0, 1.0, 0.0) - normal;
 
 	//normal = vec3(0.0,1.0,0.0);
 	//position = worldVertex;

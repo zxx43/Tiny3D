@@ -162,7 +162,6 @@
     <ClCompile Include="batch\batch.cpp" />
     <ClCompile Include="batch\batchData.cpp" />
     <ClCompile Include="bounding\aabb.cpp" />
-    <ClCompile Include="bounding\boundingBox.cpp" />
     <ClCompile Include="camera\camera.cpp" />
     <ClCompile Include="camera\frustum.cpp" />
     <ClCompile Include="config\config.cpp" />

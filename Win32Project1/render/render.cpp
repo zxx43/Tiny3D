@@ -171,7 +171,8 @@ void Render::resize(int width, int height, Camera* mainCamera, Camera* reflectCa
 	mainCamera->initPerspectCamera(60.0, fAspect, 1.0, 2000.0);
 	mainCamera->initPerspectSub(1000.0);
 	mainCamera->initPerspectNear(300.0);
-	reflectCamera->initPerspectCamera(60.0, fAspect, 0.1, 2000.0);
+	if (reflectCamera) 
+		reflectCamera->initPerspectCamera(60.0, fAspect, 0.1, 2000.0);
 }
 
 Shader* Render::findShader(const char* shader) {
@@ -244,6 +245,9 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 						shader->setVector3v("viewRight", viewRight);
 					} 
 				}
+
+				if (state->pass != FAR_SHADOW_PASS || drawcall->isBillboard())  // use texture atlas
+					shader->setVector4v("texPixel", AssetManager::assetManager->texAlt->atlasInfo);
 				if (state->waterPass) {
 					shader->setFloat("time", state->time);
 					shader->setVector3v("eyePos", *(state->eyePos));
@@ -257,12 +261,6 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 						useTexture(TEXTURE_CUBE, 1, AssetManager::assetManager->getSkyTexture()->id);
 					if (AssetManager::assetManager->getReflectTexture())
 						useTexture(TEXTURE_2D, 2, AssetManager::assetManager->getReflectTexture()->id);
-				} else if (state->pass != FAR_SHADOW_PASS || drawcall->isBillboard()) { // use texture atlas
-					float pcw = AssetManager::assetManager->texAlt->pixW;
-					float pch = AssetManager::assetManager->texAlt->pixH;
-					float piw = AssetManager::assetManager->texAlt->perImgWidth;
-					float pih = AssetManager::assetManager->texAlt->perImgHeight;
-					shader->setVector4("texPixel", pcw, pch, piw, pih);
 				}
 			} else {
 				shader->setMatrix4("viewMatrix", camera->viewMatrix);

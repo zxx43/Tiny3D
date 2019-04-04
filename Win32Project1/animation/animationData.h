@@ -19,46 +19,38 @@ struct AnimationData {
 		indexCount = anim->aIndices.size();
 		vertexCount = anim->aVertices.size();
 		boneCount = anim->boneCount;
-		vertices = new float[vertexCount * 3];
-		normals = new float[vertexCount * 3];
-		texcoords = new float[vertexCount * 4];
-		colors = new byte[vertexCount * 3];
-		boneids = new byte[vertexCount * 4];
-		weights = new float[vertexCount * 4];
-		indices = new ushort[indexCount];
+		vertices = (float*)malloc(vertexCount * 3 * sizeof(float));
+		normals = (float*)malloc(vertexCount * 3 * sizeof(float));
+		texcoords = (float*)malloc(vertexCount * 4 * sizeof(float));
+		colors = (byte*)malloc(vertexCount * 3 * sizeof(byte));
+		boneids = (byte*)malloc(vertexCount * 4 * sizeof(byte));
+		weights = (float*)malloc(vertexCount * 4 * sizeof(float));
+		indices = (ushort*)malloc(indexCount * sizeof(ushort));
 
 		for (uint i = 0; i < (uint)vertexCount; i++) {
-			vertices[i * 3] = anim->aVertices[i].x;
+			vertices[i * 3 + 0] = anim->aVertices[i].x;
 			vertices[i * 3 + 1] = anim->aVertices[i].y;
 			vertices[i * 3 + 2] = anim->aVertices[i].z;
-		}
-		for (uint i = 0; i < (uint)vertexCount; i++) {
-			normals[i * 3] = anim->aNormals[i].x;
+
+			normals[i * 3 + 0] = anim->aNormals[i].x;
 			normals[i * 3 + 1] = anim->aNormals[i].y;
 			normals[i * 3 + 2] = anim->aNormals[i].z;
-		}
-		for (uint i = 0; i < (uint)vertexCount; i++) {
-			VECTOR2D texcoord = anim->aTexcoords[i];
-			Material* mat = anim->aTextures[i];
-			
-			texcoords[i * 4] = texcoord.x;
-			texcoords[i * 4 + 1] = texcoord.y;
-			texcoords[i * 4 + 2] = mat->texOfs1.x;
-			texcoords[i * 4 + 3] = mat->texOfs1.y;
-		}
-		for (uint i = 0; i < (uint)vertexCount; i++) {
-			colors[i * 3] = (byte)(anim->aAmbients[i].x * 255);
+
+			texcoords[i * 4 + 0] = anim->aTexcoords[i].x;
+			texcoords[i * 4 + 1] = anim->aTexcoords[i].y;
+			texcoords[i * 4 + 2] = anim->aTextures[i]->texOfs1.x;
+			texcoords[i * 4 + 3] = anim->aTextures[i]->texOfs1.y;
+
+			colors[i * 3 + 0] = (byte)(anim->aAmbients[i].x * 255);
 			colors[i * 3 + 1] = (byte)(anim->aDiffuses[i].x * 255);
 			colors[i * 3 + 2] = (byte)(anim->aSpeculars[i].x * 255);
-		}
-		for (uint i = 0; i < (uint)vertexCount; i++) {
-			boneids[i * 4] = (byte)(anim->aBoneids[i].x);
+
+			boneids[i * 4 + 0] = (byte)(anim->aBoneids[i].x);
 			boneids[i * 4 + 1] = (byte)(anim->aBoneids[i].y);
 			boneids[i * 4 + 2] = (byte)(anim->aBoneids[i].z);
 			boneids[i * 4 + 3] = (byte)(anim->aBoneids[i].w);
-		}
-		for (uint i = 0; i < (uint)vertexCount; i++) {
-			weights[i * 4] = anim->aWeights[i].x;
+			
+			weights[i * 4 + 0] = anim->aWeights[i].x;
 			weights[i * 4 + 1] = anim->aWeights[i].y;
 			weights[i * 4 + 2] = anim->aWeights[i].z;
 			weights[i * 4 + 3] = anim->aWeights[i].w;
@@ -72,13 +64,13 @@ struct AnimationData {
 		releaseAnimData();
 	}
 	void releaseAnimData() {
-		if (vertices) delete[] vertices; vertices = NULL;
-		if (normals) delete[] normals; normals = NULL;
-		if (texcoords) delete[] texcoords; texcoords = NULL;
-		if (colors) delete[] colors; colors = NULL;
-		if (boneids) delete[] boneids; boneids = NULL;
-		if (weights) delete[] weights; weights = NULL;
-		if (indices) delete[] indices; indices = NULL;
+		if (vertices) free(vertices); vertices = NULL;
+		if (normals) free(normals); normals = NULL;
+		if (texcoords) free(texcoords); texcoords = NULL;
+		if (colors) free(colors); colors = NULL;
+		if (boneids) free(boneids); boneids = NULL;
+		if (weights) free(weights); weights = NULL;
+		if (indices) free(indices); indices = NULL;
 	}
 };
 

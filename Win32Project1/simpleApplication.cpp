@@ -67,7 +67,7 @@ void SimpleApplication::resize(int width, int height) {
 		}
 		if (useDof) {
 			if (dofBlurFilter) delete dofBlurFilter;
-			dofBlurFilter = new Filter(width * 0.5, height * 0.5, true, precision, 4);
+			dofBlurFilter = new Filter(width * 0.5, height * 0.5, true, LOW_PRE, 4);
 			if (dofChain) delete dofChain;
 			dofChain = new FilterChain(width, height, useFxaa, precision, 4);
 			dofChain->addInputTex(dofBlurFilter->getOutput(0));

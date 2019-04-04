@@ -20,8 +20,7 @@ RenderQueue::RenderQueue(float midDis, float lowDis) {
 RenderQueue::~RenderQueue() {
 	delete queue;
 
-	if (batchData)
-		delete batchData;
+	if (batchData) delete batchData;
 
 	map<Mesh*, InstanceData*>::iterator itIns;
 	for (itIns = instanceQueue.begin(); itIns != instanceQueue.end(); ++itIns)

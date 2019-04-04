@@ -44,7 +44,13 @@ void Application::init() {
 	config->get("fxaa", useFxaa);
 	config->get("ssr", useSsr);
 
-	renderMgr->enableSsr = useSsr > 0.5 ? true : false;
+	if (useSsr > 0.5) 
+		renderMgr->enableSsr = true;
+	else {
+		scene->createReflectCamera();
+		renderMgr->enableSsr = false;
+	}
+
 
 	float debug = 0.0;
 	config->get("debug", debug);

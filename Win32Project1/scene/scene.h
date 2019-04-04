@@ -32,6 +32,7 @@ public:
 public:
 	Scene();
 	~Scene();
+	void createReflectCamera();
 	void createSky();
 	void createWater(const VECTOR3D& position, const VECTOR3D& size);
 	void createTerrain(const VECTOR3D& position, const VECTOR3D& size);

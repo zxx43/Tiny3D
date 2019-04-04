@@ -285,7 +285,7 @@ void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* scre
 	static Shader* deferredShader = render->findShader("deferred");
 	state->reset();
 	state->eyePos = &(scene->mainCamera->position);
-	state->enableCull = false;
+	//state->enableCull = false;
 	state->enableDepthTest = false;
 	state->pass = DEFERRED_PASS;
 	state->shader = deferredShader;
@@ -306,7 +306,7 @@ void RenderManager::drawCombined(Render* render, Scene* scene, const std::vector
 	static Shader* combinedShader = render->findShader("combined");
 	state->reset();
 	state->eyePos = &(scene->mainCamera->position);
-	state->enableCull = false;
+	//state->enableCull = false;
 	state->enableDepthTest = false;
 	state->pass = DEFERRED_PASS;
 	state->shader = combinedShader;
@@ -319,7 +319,7 @@ void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* s
 	Shader* shader = render->findShader(shaderStr);
 	state->reset();
 	state->eyePos = &(scene->mainCamera->position);
-	state->enableCull = false;
+	//state->enableCull = false;
 	state->enableDepthTest = false;
 	state->pass = POST_PASS;
 	state->shader = shader;
@@ -331,7 +331,7 @@ void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* s
 	Shader* shader = render->findShader(shaderStr);
 	state->reset();
 	state->eyePos = &(scene->mainCamera->position);
-	state->enableCull = false;
+	//state->enableCull = false;
 	state->enableDepthTest = false;
 	state->pass = POST_PASS;
 	state->shader = shader;
@@ -343,7 +343,7 @@ void RenderManager::drawSSRFilter(Render* render, Scene* scene, const char* shad
 	Shader* shader = render->findShader(shaderStr);
 	state->reset();
 	state->eyePos = &(scene->mainCamera->position);
-	state->enableCull = false;
+	//state->enableCull = false;
 	state->enableDepthTest = false;
 	state->pass = POST_PASS;
 	state->shader = shader;
@@ -356,7 +356,7 @@ void RenderManager::drawTexture2Screen(Render* render, Scene* scene, uint texid)
 	static Shader* screenShader = render->findShader("screen");
 	state->reset();
 	state->eyePos = &(scene->mainCamera->position);
-	state->enableCull = false;
+	//state->enableCull = false;
 	state->enableDepthTest = false;
 	state->pass = POST_PASS;
 	state->shader = screenShader;
