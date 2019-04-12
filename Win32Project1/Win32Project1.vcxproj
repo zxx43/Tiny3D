@@ -344,6 +344,8 @@
     <None Include="..\x64\Release\shader\screen.vert" />
     <None Include="..\x64\Release\shader\sky.frag" />
     <None Include="..\x64\Release\shader\sky.vert" />
+    <None Include="..\x64\Release\shader\ssg.frag" />
+    <None Include="..\x64\Release\shader\ssg.vert" />
     <None Include="..\x64\Release\shader\ssr.frag" />
     <None Include="..\x64\Release\shader\ssr.vert" />
     <None Include="..\x64\Release\shader\terrain.frag" />

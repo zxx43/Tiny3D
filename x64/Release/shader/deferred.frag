@@ -1,9 +1,9 @@
 #version 330
 
-uniform sampler2D texBuffer, colorBuffer, normalBuffer, depthBuffer;
+uniform sampler2D texBuffer, colorBuffer, normalBuffer, grassBuffer, depthBuffer;
 uniform vec2 pixelSize;
 
-uniform mat4 invViewProjMatrix;
+uniform mat4 invViewProjMatrix, invProjMatrix;
 
 uniform mat4 lightViewProjNear, lightViewProjMid, lightViewProjFar;
 uniform sampler2D depthBufferNear, depthBufferMid, depthBufferFar;
@@ -12,6 +12,7 @@ uniform int useShadow;
 uniform vec2 levels;
 uniform vec3 light;
 uniform vec3 eyePos;
+uniform float time;
 
 in vec2 vTexcoord;
 
@@ -112,10 +113,52 @@ float genShadowFactor(vec4 worldPos, float depthView, float bias) {
 		vec4 far = lightViewProjFar * worldPos;
 		vec3 lightPosition = far.xyz / far.w;
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
-		float bs = bias * 0.000005;
+		float bs = bias * 0.00001;
 		return genShadow(depthBufferFar, shadowCoord, bs);
 	}
 	return 1.0;
+}
+
+float saturate(float value) {
+	return clamp(value, 0.0, 1.0);
+}
+
+float Blend(float val, float val0, float val1, float res0, float res1) {
+	if (val <= val0) return res0;
+	if (val >= val1) return res1;
+	return res0 + (val - val0) * (res1 - res0) / (val1 - val0);
+}
+
+vec3 Smudge(vec3 sceneTex, vec3 viewPos) {
+	vec4 grassFlag = texture2D(grassBuffer, vTexcoord);
+	if(grassFlag.r < 0.5) 
+		return sceneTex;
+	else {
+		float xx = vTexcoord.x;
+		float yy = vTexcoord.y;
+
+		float len = -viewPos.z;
+		float d = Blend(len, 0.0, 500.0, 100.0, 500.0);
+		float dclose = Blend(len, 0.0, 10.0, 30.0, 1.0);
+		d *= dclose;
+		yy += dot(vec3(xx), vec3(1009.0, 1259.0, 2713.0));
+		yy += time * 0.00004;
+		yy += dot(viewPos, vec3(1.0));
+		
+		float yoffset = 1.0 - fract(yy * d) / d * 2.0;
+		vec2 uvoffset = vTexcoord - vec2(0.0, yoffset);
+		vec4 grassColor = texture2D(texBuffer, uvoffset);
+
+		float depthGrass = texture2D(depthBuffer, uvoffset).r;
+		vec3 ndcGrass = vec3(uvoffset, depthGrass) * 2.0 - 1.0;
+		vec4 viewGrass = invProjMatrix * vec4(ndcGrass, 1.0);
+		viewGrass /= viewGrass.w;
+		
+		if(viewGrass.z > viewPos.z)
+			return sceneTex;
+		else 
+			return mix(sceneTex, grassColor.rgb, saturate(yoffset * d / 3.8));
+	}
 }
 
 void main() {
@@ -138,14 +181,11 @@ void main() {
 		ndotl = max(ndotl, 0.0);
 
 		float shadowFactor = (useShadow != 0) ? tex.a * genShadowFactor(worldPos, depthView, bias) : 1.0;
-		/*
-		float shadowFactor = 1.0;
-		if(useShadow != 0) {
-			if(tex.a > 0.5) shadowFactor = genShadowFactor(worldPos, depthView, bias);
-			else shadowFactor = 0.0;
-		}
-		*/
 
+		vec4 viewPos = invProjMatrix * vec4(ndcPos, 1.0);
+		viewPos /= viewPos.w;
+
+		sceneColor = Smudge(sceneColor, viewPos.xyz);
 		sceneColor *= dot(color, vec3(1.0, shadowFactor * ndotl, 0.0));
 	}
 

@@ -42,10 +42,11 @@ void SimpleApplication::resize(int width, int height) {
 	int hdrPre = graphQuality > 3.0 ? FLOAT_PRE : precision;
 
 	if (screen) delete screen;
-	screen = new FrameBuffer(width, height, hdrPre, 4, false);
-	screen->addColorBuffer(precision, 4);
-	screen->addColorBuffer(scrPre, 3);
-	screen->attachDepthBuffer(scrPre);
+	screen = new FrameBuffer(width, height, hdrPre, 4, false); // texBuffer
+	screen->addColorBuffer(precision, 4); // colorBuffer
+	screen->addColorBuffer(scrPre, 3); // normalBuffer
+	screen->addColorBuffer(scrPre, 3); // grassBuffer
+	screen->attachDepthBuffer(scrPre); // depthBuffer
 
 	if (waterFrame) delete waterFrame;
 	waterFrame = new FrameBuffer(width, height, hdrPre, 4, false);
@@ -294,10 +295,12 @@ void SimpleApplication::initScene() {
 	StaticObject* quad = new StaticObject(meshes["quad"]);
 
 	StaticObject* model1 = new StaticObject(meshes["tree"], meshes["treeMid"], meshes["billboard"]);
+	model1->detailLevel = 4;
 	model1->setBillboard(5, 10, mtlMgr->find("billboard_tree_mat"));
 	StaticObject* model2 = new StaticObject(meshes["tank"]);
 	StaticObject* model3 = new StaticObject(meshes["m1a2"]);
 	StaticObject* model4 = new StaticObject(meshes["treeA"], meshes["treeAMid"], meshes["billboard"]);
+	model4->detailLevel = 4;
 	model4->setBillboard(13, 14, mtlMgr->find("billboard_treeA_mat"));
 	StaticObject* model5 = new StaticObject(meshes["house"]);
 	StaticObject* model6 = new StaticObject(meshes["oildrum"]);
@@ -488,6 +491,7 @@ void SimpleApplication::initScene() {
 		}
 	}
 
+	/*
 	InstanceNode* instanceNode8 = new InstanceNode(VECTOR3D(2500, 0, 860));
 	instanceNode8->setSingle(true);
 	instanceNode8->shadowLevel = grassShadowLevel;
@@ -649,7 +653,7 @@ void SimpleApplication::initScene() {
 			instanceNode15->addObject(grass);
 		}
 	}
-
+	//*/
 
 	InstanceNode* instanceNode7 = new InstanceNode(VECTOR3D(3500, 0, 200));
 	StaticObject* oil1 = model6->clone();
@@ -692,6 +696,7 @@ void SimpleApplication::initScene() {
 	scene->staticRoot->attachChild(instanceNode5);
 	scene->staticRoot->attachChild(instanceNode6);
 	scene->staticRoot->attachChild(instanceNode7);
+	/*
 	scene->staticRoot->attachChild(instanceNode8);
 	scene->staticRoot->attachChild(instanceNode9);
 	scene->staticRoot->attachChild(instanceNode10);
@@ -700,7 +705,8 @@ void SimpleApplication::initScene() {
 	scene->staticRoot->attachChild(instanceNode13);
 	scene->staticRoot->attachChild(instanceNode14);
 	scene->staticRoot->attachChild(instanceNode15);
-	
+	//*/
+
 	AnimationNode* animNode1 = new AnimationNode(VECTOR3D(5, 10, 5));
 	animNode1->setAnimation(animations["army"]);
 	animNode1->getObject()->setSize(0.05, 0.05, 0.05);

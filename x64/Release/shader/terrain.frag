@@ -14,6 +14,7 @@ in float worldHeight;
 layout (location = 0) out vec4 FragTex;
 layout (location = 1) out vec4 FragColor;
 layout (location = 2) out vec4 FragNormal;
+layout (location = 3) out vec4 FragGrass;
 
 void main() {
 	if(isReflect > 0.1 && worldHeight < waterHeight - 4.0)
@@ -32,4 +33,7 @@ void main() {
 	FragTex = texColor;
 	FragColor = vec4(vColor, 1.0);
 	FragNormal = vec4(normalize(vNormal) * 0.5 + 0.5, 1.0);
+	FragGrass = vec4(0.0, 0.0, 0.0, 1.0);
+	if(texColor.g > texColor.r + 0.01 && texColor.g > texColor.b + 0.01)
+		FragGrass.r = 1.0;
 }

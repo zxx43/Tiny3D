@@ -673,6 +673,12 @@
     <None Include="..\x64\Release\shader\phong_grass.geom">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\x64\Release\shader\ssg.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shader\ssg.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\x64\Release\config\config.txt">

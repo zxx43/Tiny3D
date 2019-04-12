@@ -52,6 +52,8 @@
 #define SSR_FRAG "shader/ssr.frag"
 #define COMBINE_VERT "shader/combined.vert"
 #define COMBINE_FRAG "shader/combined.frag"
+#define SSG_VERT "shader/ssg.vert"
+#define SSG_FRAG "shader/ssg.frag"
 
 void SetupShaders(Render* render) {
 	Shader* phong=render->shaders->addShader("phong",PHONG_VERT,PHONG_FRAG);
@@ -106,10 +108,11 @@ void SetupShaders(Render* render) {
 	render->setShaderSampler(deferred, "texBuffer", 0);
 	render->setShaderSampler(deferred, "colorBuffer", 1);
 	render->setShaderSampler(deferred, "normalBuffer", 2);
-	render->setShaderSampler(deferred, "depthBuffer", 3);
-	render->setShaderSampler(deferred, "depthBufferNear", 4);
-	render->setShaderSampler(deferred, "depthBufferMid", 5);
-	render->setShaderSampler(deferred, "depthBufferFar", 6);
+	render->setShaderSampler(deferred, "grassBuffer", 3);
+	render->setShaderSampler(deferred, "depthBuffer", 4);
+	render->setShaderSampler(deferred, "depthBufferNear", 5);
+	render->setShaderSampler(deferred, "depthBufferMid", 6);
+	render->setShaderSampler(deferred, "depthBufferFar", 7);
 
 	Shader* fxaa = render->shaders->addShader("fxaa", AA_VERT, AA_FRAG);
 	render->setShaderSampler(fxaa, "colorBuffer", 0);

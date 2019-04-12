@@ -268,8 +268,10 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 			}
 		} else if (state->pass == DEFERRED_PASS) {
 			shader->setMatrix4("invViewProjMatrix", camera->invViewProjectMatrix);
+			shader->setMatrix4("invProjMatrix", camera->invProjMatrix);
 			shader->setMatrix4("viewMatrix", camera->viewMatrix);
 			shader->setVector3v("eyePos", *(state->eyePos));
+			shader->setFloat("time", state->time);
 
 			if (state->shadow) {
 				shader->setMatrix4("lightViewProjNear", state->shadow->lightNearMat);
