@@ -123,29 +123,29 @@ float saturate(float value) {
 	return clamp(value, 0.0, 1.0);
 }
 
-float Blend(float val, float val0, float val1, float res0, float res1) {
+float BlendVal(float val, float val0, float val1, float res0, float res1) {
 	if (val <= val0) return res0;
 	if (val >= val1) return res1;
 	return res0 + (val - val0) * (res1 - res0) / (val1 - val0);
 }
 
-vec3 Smudge(vec3 sceneTex, vec3 viewPos) {
+vec3 Smudge(vec3 sceneTex, float viewDist) {
 	vec4 grassFlag = texture2D(grassBuffer, vTexcoord);
 	if(grassFlag.r < 0.5) 
 		return sceneTex;
 	else {
 		float xx = vTexcoord.x;
-		float yy = vTexcoord.y;
+		float yy = 1.0 - vTexcoord.y;
 
-		float len = -viewPos.z;
-		float d = Blend(len, 0.0, 500.0, 100.0, 500.0);
-		float dclose = Blend(len, 0.0, 10.0, 30.0, 1.0);
+		float len = viewDist;
+		float d = BlendVal(len, 0.0, 500.0, 100.0, 500.0);
+		float dclose = BlendVal(len, 0.0, 20.0, 30.0, 1.0);
 		d *= dclose;
 		yy += dot(vec3(xx), vec3(1009.0, 1259.0, 2713.0));
-		yy += time * 0.00004;
-		yy += dot(viewPos, vec3(1.0));
+		yy += time * 0.000004;
+		yy += sceneTex.g * 0.04;
 		
-		float yoffset = 1.0 - fract(yy * d) / d * 2.0;
+		float yoffset = 1.0 - fract(yy * d) / d * 1.5;
 		vec2 uvoffset = vTexcoord - vec2(0.0, yoffset);
 		vec4 grassColor = texture2D(texBuffer, uvoffset);
 
@@ -154,7 +154,7 @@ vec3 Smudge(vec3 sceneTex, vec3 viewPos) {
 		vec4 viewGrass = invProjMatrix * vec4(ndcGrass, 1.0);
 		viewGrass /= viewGrass.w;
 		
-		if(viewGrass.z > viewPos.z)
+		if(viewGrass.z > -viewDist)
 			return sceneTex;
 		else 
 			return mix(sceneTex, grassColor.rgb, saturate(yoffset * d / 3.8));
@@ -182,10 +182,7 @@ void main() {
 
 		float shadowFactor = (useShadow != 0) ? tex.a * genShadowFactor(worldPos, depthView, bias) : 1.0;
 
-		vec4 viewPos = invProjMatrix * vec4(ndcPos, 1.0);
-		viewPos /= viewPos.w;
-
-		sceneColor = Smudge(sceneColor, viewPos.xyz);
+		sceneColor = Smudge(sceneColor, depthView);
 		sceneColor *= dot(color, vec3(1.0, shadowFactor * ndotl, 0.0));
 	}
 
