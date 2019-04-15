@@ -31,8 +31,5 @@ void main() {
 		
 	FragTex = texColor;
 	FragColor = vec4(vColor, 1.0);
-	
-	float grass = 0.0;
-	if(texColor.g > texColor.r + 0.01 && texColor.g > texColor.b + 0.01) grass = 1.0;
-	FragNormalGrass = vec4(normalize(vNormal) * 0.5 + 0.5, grass);
+	FragNormalGrass = vec4(normalize(vNormal) * 0.5 + 0.5, 1.0);
 }
