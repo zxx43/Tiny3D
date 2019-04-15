@@ -1,6 +1,6 @@
 #version 330
 
-uniform sampler2D texBuffer, colorBuffer, normalBuffer, grassBuffer, depthBuffer;
+uniform sampler2D texBuffer, colorBuffer, normalGrassBuffer, grassBuffer, depthBuffer;
 uniform vec2 pixelSize;
 
 uniform mat4 invViewProjMatrix, invProjMatrix;
@@ -129,9 +129,8 @@ float BlendVal(float val, float val0, float val1, float res0, float res1) {
 	return res0 + (val - val0) * (res1 - res0) / (val1 - val0);
 }
 
-vec3 Smudge(vec3 sceneTex, float viewDist) {
-	vec4 grassFlag = texture2D(grassBuffer, vTexcoord);
-	if(grassFlag.r < 0.5) 
+vec3 Smudge(vec3 sceneTex, float grassFlag, float viewDist) {
+	if(grassFlag < 0.5) 
 		return sceneTex;
 	else {
 		float xx = vTexcoord.x;
@@ -173,7 +172,9 @@ void main() {
 
 		float depthView = distance(worldPos.xyz, eyePos);
 
-		vec3 normal = texture2D(normalBuffer, vTexcoord).xyz * 2.0 - vec3(1.0);
+		vec4 normalGrass = texture2D(normalGrassBuffer, vTexcoord);
+		vec3 normal = normalGrass.xyz * 2.0 - vec3(1.0);
+		float grassFlag = normalGrass.a;
 		vec3 color = texture2D(colorBuffer, vTexcoord).rgb;
 
 		float ndotl = dot(light, normal);
@@ -182,7 +183,7 @@ void main() {
 
 		float shadowFactor = (useShadow != 0) ? tex.a * genShadowFactor(worldPos, depthView, bias) : 1.0;
 
-		sceneColor = Smudge(sceneColor, depthView);
+		sceneColor = Smudge(sceneColor, grassFlag, depthView);
 		sceneColor *= dot(color, vec3(1.0, shadowFactor * ndotl, 0.0));
 	}
 

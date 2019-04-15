@@ -44,8 +44,7 @@ void SimpleApplication::resize(int width, int height) {
 	if (screen) delete screen;
 	screen = new FrameBuffer(width, height, hdrPre, 4, false); // texBuffer
 	screen->addColorBuffer(precision, 4); // colorBuffer
-	screen->addColorBuffer(scrPre, 3); // normalBuffer
-	screen->addColorBuffer(scrPre, 3); // grassBuffer
+	screen->addColorBuffer(scrPre, 4); // normal-grassBuffer
 	screen->attachDepthBuffer(scrPre); // depthBuffer
 
 	if (waterFrame) delete waterFrame;

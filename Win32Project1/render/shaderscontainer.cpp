@@ -107,12 +107,11 @@ void SetupShaders(Render* render) {
 	Shader* deferred = render->shaders->addShader("deferred", DEFERRED_VERT, DEFERRED_FRAG);
 	render->setShaderSampler(deferred, "texBuffer", 0);
 	render->setShaderSampler(deferred, "colorBuffer", 1);
-	render->setShaderSampler(deferred, "normalBuffer", 2);
-	render->setShaderSampler(deferred, "grassBuffer", 3);
-	render->setShaderSampler(deferred, "depthBuffer", 4);
-	render->setShaderSampler(deferred, "depthBufferNear", 5);
-	render->setShaderSampler(deferred, "depthBufferMid", 6);
-	render->setShaderSampler(deferred, "depthBufferFar", 7);
+	render->setShaderSampler(deferred, "normalGrassBuffer", 2);
+	render->setShaderSampler(deferred, "depthBuffer", 3);
+	render->setShaderSampler(deferred, "depthBufferNear", 4);
+	render->setShaderSampler(deferred, "depthBufferMid", 5);
+	render->setShaderSampler(deferred, "depthBufferFar", 6);
 
 	Shader* fxaa = render->shaders->addShader("fxaa", AA_VERT, AA_FRAG);
 	render->setShaderSampler(fxaa, "colorBuffer", 0);

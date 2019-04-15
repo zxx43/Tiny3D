@@ -54,6 +54,7 @@ void ResizeWindow(int width,int height) {
 void DrawWindow() {
 	if (!app->dualThread) {
 		currentTime = timeGetTime();
+		//currentTime = GetTickCount();
 		app->act(startTime, currentTime);
 		app->prepare(false);
 		app->animate(startTime, currentTime);
@@ -109,6 +110,7 @@ DWORD WINAPI ActThreadRun(LPVOID param) {
 DWORD WINAPI FrameThreadRun(LPVOID param) {
 	while (!app->willExit && app->dualThread) {
 		currentTime = timeGetTime();
+		//currentTime = GetTickCount();
 		if(!dataPrepared) {
 			app->act(startTime, currentTime);
 			app->prepare(true);
@@ -174,6 +176,7 @@ void CreateApplication() {
 	app = new SimpleApplication();
 	app->config->get("fullscreen", fullscreen);
 	startTime = timeGetTime();
+	//startTime = GetTickCount();
 }
 
 void ReleaseApplication() {
