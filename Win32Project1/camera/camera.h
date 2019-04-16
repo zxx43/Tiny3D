@@ -30,6 +30,7 @@ public:
 	Frustum* frustumNear;
 	VECTOR3D position, lookDir, up;
 	float fovy,aspect,zNear,zFar;
+	float velocity;
 	MATRIX4X4 viewMatrix, projectMatrix, viewProjectMatrix;
 	MATRIX4X4 invViewProjectMatrix, invProjMatrix, invViewMatrix;
 

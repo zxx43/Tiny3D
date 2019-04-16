@@ -11,6 +11,7 @@ Application::Application() {
 	config->get("height", height);
 	windowWidth = width;
 	windowHeight = height;
+	fps = 0.0;
 
 	willExit = false;
 	scene = NULL;
@@ -77,7 +78,8 @@ void Application::act(long startTime, long currentTime) {
 	}
 }
 
-void Application::moveKey() {
+void Application::moveKey(float velocity) {
+	scene->mainCamera->velocity = velocity;
 	input->updateCameraByKey(scene->mainCamera);
 }
 

@@ -82,18 +82,18 @@ void Input::keyUp(int key) {
 }
 
 void Input::updateCameraByKey(Camera* camera) {
-	if(move[0])
-		camera->move(MNEAR,D_DISTANCE);
-	if(move[1])
-		camera->move(MFAR,D_DISTANCE);
-	if(move[2])
-		camera->move(LEFT,D_DISTANCE);
-	if(move[3])
-		camera->move(RIGHT,D_DISTANCE);
-	if(move[4])
-		camera->move(UP,D_DISTANCE);
-	if(move[5])
-		camera->move(DOWN,D_DISTANCE);
+	if (move[0])
+		camera->move(MNEAR, camera->velocity);
+	if (move[1])
+		camera->move(MFAR, camera->velocity);
+	if (move[2])
+		camera->move(LEFT, camera->velocity);
+	if (move[3])
+		camera->move(RIGHT, camera->velocity);
+	if (move[4])
+		camera->move(UP, camera->velocity);
+	if (move[5])
+		camera->move(DOWN, camera->velocity);
 
 	if(turn[0])
 		camera->turnY(UP);

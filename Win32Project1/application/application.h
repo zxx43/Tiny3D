@@ -16,6 +16,7 @@ public:
 	RenderManager* renderMgr;
 public:
 	int windowWidth, windowHeight;
+	float fps;
 	bool willExit;
 	float graphQuality, useDof, useFxaa, useSsr;
 	bool dualThread;
@@ -26,7 +27,7 @@ public:
 	virtual void init();
 	virtual void draw() = 0;
 	virtual void act(long startTime, long currentTime);
-	virtual void moveKey();
+	virtual void moveKey(float velocity);
 	virtual void moveByDir(int dir);
 	void moveMouse(const float mx, const float my, const float cx, const float cy);
 	void prepare(bool swapQueue);
@@ -34,6 +35,8 @@ public:
 	virtual void resize(int width, int height);
 	virtual void keyDown(int key);
 	virtual void keyUp(int key);
+	void setFps(float fv) { fps = fv; }
+	float getFps() { return fps; }
 };
 
 #endif

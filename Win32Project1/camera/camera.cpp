@@ -9,6 +9,7 @@ Camera::Camera(float height) {
 
 	xrot = 0; yrot = 0;
 	this->height = height;
+	velocity = 1.0;
 
 	frustum = new Frustum();
 	frustumSub = NULL;

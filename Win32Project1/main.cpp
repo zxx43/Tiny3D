@@ -9,9 +9,8 @@ HGLRC hrc;
 HINSTANCE hInstance;
 const TCHAR szName[]=TEXT("win");
 
-HANDLE actThread = NULL, frameThread = NULL;
-bool thread1End, thread2End;
-DWORD WINAPI ActThreadRun(LPVOID param);
+HANDLE frameThread = NULL;
+bool threadEnd;
 DWORD WINAPI FrameThreadRun(LPVOID param);
 void CreateThreads();
 void ReleaseThreads();
@@ -19,7 +18,7 @@ bool dataPrepared = false;
 HANDLE mutex = NULL;
 void InitMutex();
 void DeleteMutex();
-DWORD currentTime = 0, startTime = 0;
+DWORD currentTime = 0, lastTime = 0, startTime = 0, actTime = 0;
 DWORD screenLeft, screenTop;
 int screenHalfX, screenHalfY;
 int centerX, centerY;
@@ -53,11 +52,10 @@ void ResizeWindow(int width,int height) {
 
 void DrawWindow() {
 	if (!app->dualThread) {
-		currentTime = timeGetTime();
-		//currentTime = GetTickCount();
-		app->act(startTime, currentTime);
+		actTime = timeGetTime();
+		app->act(startTime, actTime);
 		app->prepare(false);
-		app->animate(startTime, currentTime);
+		app->animate(startTime, actTime);
 	} else {
 		WaitForSingleObject(mutex, INFINITE);
 		dataPrepared = true;
@@ -70,58 +68,37 @@ void DrawWindow() {
 		WaitForSingleObject(mutex, INFINITE);
 		dataPrepared = false;
 		ReleaseMutex(mutex);
-	} else {
-		///*
-		if (pressed) {
-			GetCursorPos(&mPoint);
-			GetWindowRect(hWnd, &winRect);
-			centerX = winRect.left + (LONG)(app->windowWidth >> 1);
-			centerY = winRect.top + (LONG)(app->windowHeight >> 1);
-			app->moveMouse(mPoint.x, mPoint.y, centerX, centerY);
-			SetCursorPos(centerX, centerY);
-		}
-		app->moveKey();
-		//*/
-	}
-}
+	} 
 
-DWORD WINAPI ActThreadRun(LPVOID param) {
-	DWORD last = 0;
-	while (!app->willExit && app->dualThread) {
-		if (currentTime - last > 0) {
-			if (pressed) {
-				GetCursorPos(&mPoint);
-				GetWindowRect(hWnd, &winRect);
-				centerX = winRect.left + (LONG)(app->windowWidth >> 1);
-				centerY = winRect.top + (LONG)(app->windowHeight >> 1);
-				app->moveMouse(mPoint.x, mPoint.y, centerX, centerY);
-				SetCursorPos(centerX, centerY);
-			}
-			app->moveKey();
-
-			last = currentTime;
-		}
-		Sleep(0);
+	currentTime = timeGetTime();
+	app->setFps(1000.0 / (currentTime - lastTime));
+	lastTime = currentTime;
+	float moveVelocity = D_DISTANCE * 1000.0 / app->getFps();
+	if (pressed) {
+		GetCursorPos(&mPoint);
+		GetWindowRect(hWnd, &winRect);
+		centerX = winRect.left + (LONG)(app->windowWidth >> 1);
+		centerY = winRect.top + (LONG)(app->windowHeight >> 1);
+		app->moveMouse(mPoint.x, mPoint.y, centerX, centerY);
+		SetCursorPos(centerX, centerY);
 	}
-	thread1End = true;
-	return 1;
+	app->moveKey(moveVelocity);
 }
 
 DWORD WINAPI FrameThreadRun(LPVOID param) {
 	while (!app->willExit && app->dualThread) {
-		currentTime = timeGetTime();
-		//currentTime = GetTickCount();
+		actTime = timeGetTime();
 		if(!dataPrepared) {
-			app->act(startTime, currentTime);
+			app->act(startTime, actTime);
 			app->prepare(true);
-			app->animate(startTime, currentTime);
+			app->animate(startTime, actTime);
 
 			WaitForSingleObject(mutex, INFINITE);
 			dataPrepared = true;
 			ReleaseMutex(mutex);
 		}
 	}
-	thread2End = true;
+	threadEnd = true;
 	return 1;
 }
 
@@ -152,15 +129,12 @@ void InitGL() {
 }
 
 void CreateThreads() {
-	actThread = CreateThread(NULL, 0, ActThreadRun, NULL, 0, NULL);
 	frameThread = CreateThread(NULL, 0, FrameThreadRun, NULL, 0, NULL);
-	thread1End = false;
-	thread2End = false;
+	threadEnd = false;
 }
 
 void ReleaseThreads() {
 	CloseHandle(frameThread);
-	CloseHandle(actThread);
 }
 
 void InitMutex() {
@@ -176,7 +150,9 @@ void CreateApplication() {
 	app = new SimpleApplication();
 	app->config->get("fullscreen", fullscreen);
 	startTime = timeGetTime();
-	//startTime = GetTickCount();
+	actTime = startTime;
+	currentTime = startTime;
+	lastTime = startTime;
 }
 
 void ReleaseApplication() {
@@ -261,7 +237,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hPrevInstance,PSTR szCmdLine,int iC
 			}
 		} 
 	}
-	while (!thread1End || !thread2End)
+	while (!threadEnd)
 		Sleep(0);
 	KillWindow();
 	return msg.wParam;

@@ -165,8 +165,8 @@ void SimpleApplication::init() {
 	initScene();
 }
 
-void SimpleApplication::moveKey() {
-	Application::moveKey();
+void SimpleApplication::moveKey(float velocity) {
+	Application::moveKey(velocity);
 	updateMovement();
 }
 

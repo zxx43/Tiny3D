@@ -23,7 +23,7 @@ public:
 	virtual void init();
 	virtual void draw();
 	virtual void act(long startTime, long currentTime);
-	virtual void moveKey();
+	virtual void moveKey(float velocity);
 	virtual void moveByDir(int dir);
 	virtual void resize(int width, int height);
 	virtual void keyDown(int key);

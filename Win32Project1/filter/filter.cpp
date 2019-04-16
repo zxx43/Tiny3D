@@ -30,7 +30,6 @@ void Filter::draw(Camera* camera, Render* render, RenderState* state,
 		const std::vector<Texture2D*>& inputTextures, const Texture2D* depthTexture) {
 	render->setFrameBuffer(framebuffer);
 	render->setShaderVec2(state->shader, "pixelSize", pixWidth, pixHeight);
-	render->setShaderVec2(state->shader, "screenSize", width, height);
 	render->setShaderFloat(state->shader, "quality", state->quality);
 
 	if (state->shadow) {

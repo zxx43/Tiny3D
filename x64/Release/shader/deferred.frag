@@ -130,7 +130,7 @@ float BlendVal(float val, float val0, float val1, float res0, float res1) {
 }
 
 vec3 Smudge(vec3 sceneTex, float grassFlag, float viewDist) {
-	if((grassFlag < 0.5) || !(sceneTex.g > sceneTex.r + 0.01 && sceneTex.g > sceneTex.b + 0.01)) 
+	if(grassFlag < 0.5) 
 		return sceneTex;
 	else {
 		float xx = vTexcoord.x;
