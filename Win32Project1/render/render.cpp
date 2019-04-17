@@ -190,7 +190,7 @@ void Render::useShader(Shader* shader) {
 // Pass 3 draw far shadow (use simple buffer)
 // Pass 4 draw scene with color
 // Pass 5 deferred process
-// Pass 6 fxaa dof ssr
+// Pass 6 fxaa dof ssr ssg
 void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 	needRevertState = false;
 	if (drawcall->isSingleSide()) { // Special case
@@ -281,7 +281,10 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 			}
 			if (state->lightEffect) 
 				shader->setVector3("light", -state->light.x, -state->light.y, -state->light.z);
-		} 
+		} else if (state->pass > DEFERRED_PASS && state->ssgPass) {
+			shader->setMatrix4("invProjMatrix", camera->invProjMatrix);
+			shader->setFloat("time", state->time);
+		}
 		if (state->ssrPass) {
 			shader->setMatrix4("viewMatrix", camera->viewMatrix);
 			shader->setMatrix4("projectMatrix", camera->projectMatrix);

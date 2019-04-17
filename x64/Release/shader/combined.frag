@@ -1,6 +1,6 @@
 #version 330
 
-uniform sampler2D sceneBuffer, sceneDepthBuffer, waterBuffer, waterDepthBuffer, colorBuffer, waterNormalBuffer;
+uniform sampler2D sceneBuffer, sceneDepthBuffer, waterBuffer, waterDepthBuffer, matBuffer, waterNormalBuffer;
 uniform vec2 pixelSize;
 uniform mat4 invViewProjMatrix;
 uniform vec3 eyePos;
@@ -44,7 +44,7 @@ void main() {
 	vec3 eye2Water = waterPos.xyz - eyePos;
 	float depthView = length(eye2Water);
 
-	vec4 waterMatColor = texture2D(colorBuffer, vTexcoord);
+	vec4 waterMatColor = texture2D(matBuffer, vTexcoord);
 	float waterFactor = 1.0 - step(0.2, waterMatColor.w);
 	float depthFactor = clamp((waterPos.y - scenePos.y - 10.0) * 0.01, 0.0, 1.0) * waterFactor;
 

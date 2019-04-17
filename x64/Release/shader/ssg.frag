@@ -3,7 +3,7 @@
 uniform mat4 invProjMatrix;
 uniform vec2 screenSize, pixelSize;
 uniform float time;
-uniform sampler2D colorBuffer, grassBuffer, depthBuffer;
+uniform sampler2D colorBuffer, normalGrassBuffer, depthBuffer;
 
 in vec2 vTexcoord;
 
@@ -13,35 +13,26 @@ float saturate(float value) {
 	return clamp(value, 0.0, 1.0);
 }
 
-float Blend(float val, float val0, float val1, float res0, float res1) {
+float BlendVal(float val, float val0, float val1, float res0, float res1) {
 	if (val <= val0) return res0;
 	if (val >= val1) return res1;
 	return res0 + (val - val0) * (res1 - res0) / (val1 - val0);
 }
 
-void main() {
-	vec4 sceneTex = texture2D(colorBuffer, vTexcoord);
-	vec4 grassFlag = texture2D(grassBuffer, vTexcoord);
-	
-	if(grassFlag.r < 0.5) 
-		SceneColor = sceneTex;
+vec3 Smudge(vec3 sceneTex, float grassFlag, float viewDist) {
+	if(grassFlag < 0.5) 
+		return sceneTex;
 	else {
-		float depth = texture2D(depthBuffer, vTexcoord).r;
-		vec3 ndcPos = vec3(vTexcoord, depth) * 2.0 - 1.0;
-		vec4 viewPos = invProjMatrix * vec4(ndcPos, 1.0);
-		viewPos /= viewPos.w;
-		
-		float len = -viewPos.z;
 		float xx = vTexcoord.x;
-		float yy = vTexcoord.y;
+		float yy = 1.0 - vTexcoord.y;
 
-		float d = Blend(len, 0.0, 500.0, 100.0, 500.0);
-		float dclose = Blend(len, 0.0, 1.0, 40.0, 1.0);
+		float len = viewDist;
+		float d = BlendVal(len, 0.0, 500.0, 100.0, 500.0);
+		float dclose = BlendVal(len, 0.0, 20.0, 30.0, 1.0);
 		d *= dclose;
-		//yy += xx * 1000.0;
 		yy += dot(vec3(xx), vec3(1009.0, 1259.0, 2713.0));
-		//yy += time * 0.00005;
-		yy += dot(viewPos.xyz, vec3(1.0));
+		yy += time * 0.004;
+		yy += sceneTex.g * 0.4;
 		
 		float yoffset = 1.0 - fract(yy * d) / d;
 		vec2 uvoffset = vTexcoord - vec2(0.0, yoffset);
@@ -52,10 +43,23 @@ void main() {
 		vec4 viewGrass = invProjMatrix * vec4(ndcGrass, 1.0);
 		viewGrass /= viewGrass.w;
 		
-		if(viewGrass.z > viewPos.z)
-			SceneColor = sceneTex;
+		if(viewGrass.z > -viewDist)
+			return sceneTex;
 		else 
-			SceneColor = mix(sceneTex, grassColor, saturate(yoffset * d / 2.8));
+			return mix(sceneTex, grassColor.rgb, saturate(yoffset * d / 3.8));
 	}
-	//*/
+}
+
+void main() {
+	vec4 normalGrass = texture2D(normalGrassBuffer, vTexcoord);
+	float grassFlag = normalGrass.a;
+
+	float depth = texture2D(depthBuffer, vTexcoord).r;
+	vec3 ndcPos = vec3(vTexcoord, depth) * 2.0 - 1.0;
+	vec4 viewPos = invProjMatrix * vec4(ndcPos, 1.0);
+	viewPos /= viewPos.w;
+	float depthView = abs(viewPos.z);
+
+	vec4 tex = texture2D(colorBuffer, vTexcoord);
+	SceneColor = vec4(Smudge(tex.rgb, grassFlag, depthView), tex.a);
 }

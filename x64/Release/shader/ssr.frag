@@ -2,7 +2,7 @@
 
 uniform mat4 viewMatrix;
 uniform mat4 projectMatrix, invProjMatrix;
-uniform sampler2D lightBuffer, colorBuffer, normalBuffer, depthBuffer;
+uniform sampler2D lightBuffer, matBuffer, normalBuffer, depthBuffer;
 uniform vec2 screenSize, pixelSize;
 
 in vec2 vTexcoord;
@@ -68,7 +68,7 @@ vec4 RayCast(vec3 refDir, vec3 refPos) {
 		vec4 storedView = invProjMatrix * vec4(vec3(projCoord.xy, storedDepth) * 2.0 - 1.0, 1.0);
 		storedView /= storedView.w;
 
-		float refFlag = texture2D(colorBuffer, projCoord.xy).a;
+		float refFlag = texture2D(matBuffer, projCoord.xy).a;
 
 		if(storedDepth >= 1.0)
 			return FAIL_COLOR;
@@ -95,7 +95,7 @@ vec4 RayCast(vec3 refDir, vec3 refPos) {
 }
 
 void main() {
-	float refFlag = texture2D(colorBuffer, vTexcoord).a;
+	float refFlag = texture2D(matBuffer, vTexcoord).a;
 
 	if(refFlag > 0.9)
 		ReflectColor = texture2D(lightBuffer, vTexcoord);

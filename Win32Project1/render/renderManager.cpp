@@ -352,6 +352,19 @@ void RenderManager::drawSSRFilter(Render* render, Scene* scene, const char* shad
 	filter->draw(scene->mainCamera, render, state, inputTextures, NULL);
 }
 
+void RenderManager::drawSSGFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter) {
+	Shader* shader = render->findShader(shaderStr);
+	state->reset();
+	state->eyePos = &(scene->mainCamera->position);
+	//state->enableCull = false;
+	state->enableDepthTest = false;
+	state->pass = POST_PASS;
+	state->shader = shader;
+	state->ssgPass = true;
+
+	filter->draw(scene->mainCamera, render, state, inputTextures, NULL);
+}
+
 void RenderManager::drawTexture2Screen(Render* render, Scene* scene, uint texid) {
 	static Shader* screenShader = render->findShader("screen");
 	state->reset();

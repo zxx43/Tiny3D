@@ -30,7 +30,7 @@ void Application::init() {
 	input = new Input();
 
 	config->get("quality", graphQuality);
-	float lowDist = graphQuality > 4.0 ? 600 : 200;
+	float lowDist = graphQuality > 4.0 ? 800 : 200;
 	float farDist = graphQuality > 4.0 ? 1500 : 800;
 	float dual = 0.0;
 	config->get("dualthread", dual);

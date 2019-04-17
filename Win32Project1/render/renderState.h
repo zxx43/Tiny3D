@@ -17,6 +17,7 @@ struct RenderState {
 	bool skyPass;
 	bool waterPass;
 	bool ssrPass;
+	bool ssgPass;
 	bool enableSsr;
 	bool blend;
 	bool simpleIns;
@@ -54,6 +55,7 @@ struct RenderState {
 		skyPass = rhs->skyPass;
 		waterPass = rhs->waterPass;
 		ssrPass = rhs->ssrPass;
+		ssgPass = rhs->ssgPass;
 		enableSsr = rhs->enableSsr;
 		blend = rhs->blend;
 		simpleIns = rhs->simpleIns;
@@ -83,6 +85,7 @@ struct RenderState {
 		skyPass = false;
 		waterPass = false;
 		ssrPass = false;
+		ssgPass = false;
 		enableSsr = false;
 		blend = false;
 		simpleIns = false;

@@ -9,7 +9,7 @@ in VertexData {
 } vertIn;
 
 layout (location = 0) out vec4 FragTex;
-layout (location = 1) out vec4 FragColor;
+layout (location = 1) out vec4 FragMat;
 layout (location = 2) out vec4 FragNormalGrass;
 
 void main() {
@@ -17,6 +17,6 @@ void main() {
 	if(textureColor.a < 0.3) discard;
 
 	FragTex = textureColor;
-	FragColor = vec4(vertIn.vColor, 1.0);
+	FragMat = vec4(vertIn.vColor, 1.0);
 	FragNormalGrass = vec4(normalize(vertIn.vNormal) * 0.5 + 0.5, 0.0);
 }

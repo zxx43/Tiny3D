@@ -8,6 +8,6 @@ layout (location = 2) in vec4 texcoord;
 out vec2 vTexcoord;
 
 void main() {
-	vTexcoord = texcoord.xy + pixelSize * 0.5;
+	vTexcoord = texcoord.xy;
 	gl_Position = vec4(vertex, 1.0);
 }

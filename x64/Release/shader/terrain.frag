@@ -12,7 +12,7 @@ in vec3 vNormal;
 in float worldHeight;
 
 layout (location = 0) out vec4 FragTex;
-layout (location = 1) out vec4 FragColor;
+layout (location = 1) out vec4 FragMat;
 layout (location = 2) out vec4 FragNormalGrass;
 
 void main() {
@@ -30,7 +30,7 @@ void main() {
 	texColor = mix(tex3, texColor, blendPer);
 		
 	FragTex = texColor;
-	FragColor = vec4(vColor, 1.0);
+	FragMat = vec4(vColor, 1.0);
 	float grassFlag = 0.0;
 	if(FragTex.g > FragTex.r + 0.01 && FragTex.g > FragTex.b + 0.01) grassFlag = 1.0;
 	FragNormalGrass = vec4(normalize(vNormal) * 0.5 + 0.5, grassFlag);

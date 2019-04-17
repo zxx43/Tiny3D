@@ -18,6 +18,7 @@ SimpleApplication::SimpleApplication() {
 	ssrChain = NULL;
 	ssrBlurFilter = NULL;
 	rawScreenFilter = NULL;
+	ssgChain = NULL;
 }
 
 SimpleApplication::~SimpleApplication() {
@@ -31,6 +32,7 @@ SimpleApplication::~SimpleApplication() {
 	if (ssrChain) delete ssrChain; ssrChain = NULL;
 	if (ssrBlurFilter) delete ssrBlurFilter; ssrBlurFilter = NULL;
 	if (rawScreenFilter) delete rawScreenFilter; rawScreenFilter = NULL;
+	if (ssgChain) delete ssgChain; ssgChain = NULL;
 }
 
 void SimpleApplication::resize(int width, int height) {
@@ -43,7 +45,7 @@ void SimpleApplication::resize(int width, int height) {
 
 	if (screen) delete screen;
 	screen = new FrameBuffer(width, height, hdrPre, 4, false); // texBuffer
-	screen->addColorBuffer(precision, 4); // colorBuffer
+	screen->addColorBuffer(precision, 4); // matBuffer
 	screen->addColorBuffer(scrPre, 4); // normal-grassBuffer
 	screen->attachDepthBuffer(scrPre); // depthBuffer
 
@@ -55,6 +57,14 @@ void SimpleApplication::resize(int width, int height) {
 
 	if (sceneFilter) delete sceneFilter;
 	sceneFilter = new Filter(width, height, true, precision, 4, false);
+
+	/*
+	if (ssgChain) delete ssgChain;
+	ssgChain = new FilterChain(width, height, true, hdrPre, 4, false);
+	ssgChain->addInputTex(sceneFilter->getOutput(0));
+	ssgChain->addInputTex(screen->getColorBuffer(2));
+	ssgChain->addInputTex(screen->getDepthBuffer());
+	*/
 
 	if (combinedChain) delete combinedChain;
 	if (!useFxaa && !useDof && !useSsr) 
@@ -92,7 +102,10 @@ void SimpleApplication::resize(int width, int height) {
 	}
 
 	if (combinedChain) {
-		combinedChain->addInputTex(sceneFilter->getOutput(0));
+		if (ssgChain)
+			combinedChain->addInputTex(ssgChain->getOutputTex(0));
+		else
+			combinedChain->addInputTex(sceneFilter->getOutput(0));
 		combinedChain->addInputTex(screen->getDepthBuffer());
 		combinedChain->addInputTex(waterFrame->getColorBuffer(0));
 		combinedChain->addInputTex(waterFrame->getDepthBuffer());
@@ -131,6 +144,8 @@ void SimpleApplication::draw() {
 	render->setFrameBuffer(screen);
 	renderMgr->renderScene(render, scene);
 	renderMgr->drawDeferred(render, scene, screen, sceneFilter);
+	if (ssgChain)
+		renderMgr->drawSSGFilter(render, scene, "ssg", ssgChain->input, ssgChain->output);
 
 	render->setFrameBuffer(waterFrame);
 	waterFrame->getDepthBuffer()->copyDataFrom(screen->getDepthBuffer());
@@ -309,6 +324,7 @@ void SimpleApplication::initScene() {
 	model8->detailLevel = 1;
 	int grassShadowLevel = graphQuality > 4 ? 1 : 0;
 	bool grassDynamic = true;
+	bool treeSimple = false;
 
 	//return;
 	scene->createSky();
@@ -377,7 +393,7 @@ void SimpleApplication::initScene() {
 	srand(100);
 	InstanceNode* instanceNode1 = new InstanceNode(VECTOR3D(900, 0, 600));
 	instanceNode1->setSingle(true);
-	instanceNode1->setSimple(true);
+	instanceNode1->setSimple(treeSimple);
 	instanceNode1->detailLevel = 4;
 	for (int i = -12; i < 12; i++) {
 		for (int j = -12; j < 12; j++) {
@@ -396,7 +412,7 @@ void SimpleApplication::initScene() {
 	}
 	InstanceNode* instanceNode2 = new InstanceNode(VECTOR3D(2746, 0, 2565));
 	instanceNode2->setSingle(true);
-	instanceNode2->setSimple(true);
+	instanceNode2->setSimple(treeSimple);
 	instanceNode2->detailLevel = 4;
 	for (int i = -12; i < 12; i++) {
 		for (int j = -12; j < 12; j++) {
@@ -415,7 +431,7 @@ void SimpleApplication::initScene() {
 	}
 	InstanceNode* instanceNode3 = new InstanceNode(VECTOR3D(-700, 0, 1320));
 	instanceNode3->setSingle(true);
-	instanceNode3->setSimple(true);
+	instanceNode3->setSimple(treeSimple);
 	instanceNode3->detailLevel = 4;
 	for (int i = -12; i < 12; i++) {
 		for (int j = -12; j < 12; j++) {
@@ -434,7 +450,7 @@ void SimpleApplication::initScene() {
 	}
 	InstanceNode* instanceNode4 = new InstanceNode(VECTOR3D(-750, 0, -500));
 	instanceNode4->setSingle(true);
-	instanceNode4->setSimple(true);
+	instanceNode4->setSimple(treeSimple);
 	instanceNode4->detailLevel = 4;
 	for (int i = -12; i < 12; i++) {
 		for (int j = -12; j < 12; j++) {
@@ -453,7 +469,7 @@ void SimpleApplication::initScene() {
 	}
 	InstanceNode* instanceNode5 = new InstanceNode(VECTOR3D(2100, 0, -600));
 	instanceNode5->setSingle(true);
-	instanceNode5->setSimple(true);
+	instanceNode5->setSimple(treeSimple);
 	instanceNode5->detailLevel = 4;
 	for (int i = -12; i < 12; i++) {
 		for (int j = -12; j < 12; j++) {
@@ -472,7 +488,7 @@ void SimpleApplication::initScene() {
 	}
 	InstanceNode* instanceNode6 = new InstanceNode(VECTOR3D(800, 0, 2000));
 	instanceNode6->setSingle(true);
-	instanceNode6->setSimple(true);
+	instanceNode6->setSimple(treeSimple);
 	instanceNode6->detailLevel = 4;
 	for (int i = -12; i < 12; i++) {
 		for (int j = -12; j < 12; j++) {

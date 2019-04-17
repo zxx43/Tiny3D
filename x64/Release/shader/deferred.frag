@@ -1,6 +1,6 @@
 #version 330
 
-uniform sampler2D texBuffer, colorBuffer, normalGrassBuffer, grassBuffer, depthBuffer;
+uniform sampler2D texBuffer, matBuffer, normalGrassBuffer, grassBuffer, depthBuffer;
 uniform vec2 pixelSize;
 
 uniform mat4 invViewProjMatrix, invProjMatrix;
@@ -174,8 +174,7 @@ void main() {
 
 		vec4 normalGrass = texture2D(normalGrassBuffer, vTexcoord);
 		vec3 normal = normalGrass.xyz * 2.0 - vec3(1.0);
-		float grassFlag = normalGrass.a;
-		vec3 color = texture2D(colorBuffer, vTexcoord).rgb;
+		vec3 material = texture2D(matBuffer, vTexcoord).rgb;
 
 		float ndotl = dot(light, normal);
 		float bias = tan(acos(abs(ndotl)));
@@ -183,8 +182,9 @@ void main() {
 
 		float shadowFactor = (useShadow != 0) ? tex.a * genShadowFactor(worldPos, depthView, bias) : 1.0;
 
+		float grassFlag = normalGrass.a;
 		sceneColor = Smudge(sceneColor, grassFlag, depthView);
-		sceneColor *= dot(color, vec3(1.0, shadowFactor * ndotl, 0.0));
+		sceneColor *= dot(material, vec3(1.0, shadowFactor * ndotl, 0.0));
 	}
 
 	FragColor = vec4(sceneColor, depth);

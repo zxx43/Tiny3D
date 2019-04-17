@@ -106,7 +106,7 @@ void SetupShaders(Render* render) {
 
 	Shader* deferred = render->shaders->addShader("deferred", DEFERRED_VERT, DEFERRED_FRAG);
 	render->setShaderSampler(deferred, "texBuffer", 0);
-	render->setShaderSampler(deferred, "colorBuffer", 1);
+	render->setShaderSampler(deferred, "matBuffer", 1);
 	render->setShaderSampler(deferred, "normalGrassBuffer", 2);
 	render->setShaderSampler(deferred, "depthBuffer", 3);
 	render->setShaderSampler(deferred, "depthBufferNear", 4);
@@ -133,7 +133,7 @@ void SetupShaders(Render* render) {
 
 	Shader* ssr = render->shaders->addShader("ssr", SSR_VERT, SSR_FRAG);
 	render->setShaderSampler(ssr, "lightBuffer", 0);
-	render->setShaderSampler(ssr, "colorBuffer", 1);
+	render->setShaderSampler(ssr, "matBuffer", 1);
 	render->setShaderSampler(ssr, "normalBuffer", 2);
 	render->setShaderSampler(ssr, "depthBuffer", 3);
 
@@ -142,7 +142,12 @@ void SetupShaders(Render* render) {
 	render->setShaderSampler(combined, "sceneDepthBuffer", 1);
 	render->setShaderSampler(combined, "waterBuffer", 2);
 	render->setShaderSampler(combined, "waterDepthBuffer", 3);
-	render->setShaderSampler(combined, "colorBuffer", 4);
+	render->setShaderSampler(combined, "matBuffer", 4);
 	render->setShaderSampler(combined, "waterNormalBuffer", 5);
+
+	Shader* ssg = render->shaders->addShader("ssg", SSG_VERT, SSG_FRAG);
+	render->setShaderSampler(ssg, "colorBuffer", 0);
+	render->setShaderSampler(ssg, "normalGrassBuffer", 1);
+	render->setShaderSampler(ssg, "depthBuffer", 2);
 }
 

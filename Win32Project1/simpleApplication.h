@@ -9,6 +9,7 @@ private:
 	FrameBuffer* screen;
 	FrameBuffer* waterFrame;
 	Filter* sceneFilter;
+	FilterChain* ssgChain;
 	FilterChain* combinedChain;
 	Filter* aaFilter;
 	Filter* dofBlurFilter;

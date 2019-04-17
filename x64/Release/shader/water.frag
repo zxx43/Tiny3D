@@ -11,7 +11,7 @@ in vec3 vEye2Water;
 in vec4 vProjPos;
 
 layout (location = 0) out vec4 FragTex;
-layout (location = 1) out vec4 FragColor;
+layout (location = 1) out vec4 FragMat;
 layout (location = 2) out vec4 FragNormal;
 
 void main() {
@@ -32,6 +32,6 @@ void main() {
 	vec4 matColor = vec4(refractedColor, 0.0);
 		
 	FragTex = surfaceColor;
-	FragColor = matColor;
+	FragMat = matColor;
 	FragNormal = vec4(normal * 0.5 + 0.5, 1.0);
 }
