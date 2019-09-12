@@ -3,14 +3,19 @@
 #include "../mesh/board.h"
 #include "../object/staticObject.h"
 
-RenderManager::RenderManager(int quality, Camera* view, float distance1, float distance2, bool copyData, const VECTOR3D& light) {
+RenderManager::RenderManager(int quality, Camera* view, float distance1, float distance2, bool copyData, const vec3& light) {
 	graphicQuality = quality;
 	int precision = LOW_PRE;
 	shadow = new Shadow(view);
 	float nearSize = 1024;
 	float midSize = 1024;
 	float farSize = 512;
-	if (graphicQuality > 4.0) {
+	if (graphicQuality > 6.0) {
+		nearSize = 4096;
+		midSize = 1024;
+		farSize = 512;
+		precision = HIGH_PRE;
+	} else if (graphicQuality > 4.0) {
 		nearSize = 2048;
 		midSize = 1024;
 		farSize = 512;
@@ -21,7 +26,7 @@ RenderManager::RenderManager(int quality, Camera* view, float distance1, float d
 
 	nearBuffer = new FrameBuffer(nearSize, nearSize, precision);
 	midBuffer = new FrameBuffer(midSize, midSize, precision);
-	farBuffer = new FrameBuffer(farSize, farSize, precision);
+	farBuffer = new FrameBuffer(farSize, farSize, LOW_PRE);
 	lightDir = light.GetNormalized();
 
 	queue1 = new Renderable(distance1, distance2, copyData); 
@@ -66,7 +71,7 @@ void RenderManager::resize(float width, float height) {
 }
 
 void RenderManager::updateShadowCamera(Camera* mainCamera) {
-	shadow->prepareViewCamera(mainCamera->zFar * 0.333, mainCamera->zFar * 0.667);
+	shadow->prepareViewCamera(mainCamera->zFar * 0.25, mainCamera->zFar * 0.75);
 }
 
 void RenderManager::updateMainLight() {
@@ -83,14 +88,14 @@ void RenderManager::updateRenderQueues(Scene* scene) {
 	Camera* cameraFar = shadow->lightCameraFar;
 	Camera* cameraMain = scene->mainCamera;
 
-	PushNodeToQueue(renderData->queues[QUEUE_STATIC_SN], scene->staticRoot, cameraNear, cameraMain);
-	PushNodeToQueue(renderData->queues[QUEUE_STATIC_SM], scene->staticRoot, cameraMid, cameraMain);
-	PushNodeToQueue(renderData->queues[QUEUE_STATIC_SF], scene->staticRoot, cameraFar, cameraMain);
-	PushNodeToQueue(renderData->queues[QUEUE_STATIC], scene->staticRoot, cameraMain, cameraMain);
-	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE_SN], scene->animationRoot, cameraNear, cameraMain);
-	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE_SM], scene->animationRoot, cameraMid, cameraMain);
-	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE_SF], scene->animationRoot, cameraFar, cameraMain);
-	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE], scene->animationRoot, cameraMain, cameraMain);
+	PushNodeToQueue(renderData->queues[QUEUE_STATIC_SN], scene, scene->staticRoot, cameraNear, cameraMain);
+	PushNodeToQueue(renderData->queues[QUEUE_STATIC_SM], scene, scene->staticRoot, cameraMid, cameraMain);
+	PushNodeToQueue(renderData->queues[QUEUE_STATIC_SF], scene, scene->staticRoot, cameraFar, cameraMain);
+	PushNodeToQueue(renderData->queues[QUEUE_STATIC], scene, scene->staticRoot, cameraMain, cameraMain);
+	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE_SN], scene, scene->animationRoot, cameraNear, cameraMain);
+	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE_SM], scene, scene->animationRoot, cameraMid, cameraMain);
+	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE_SF], scene, scene->animationRoot, cameraFar, cameraMain);
+	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE], scene, scene->animationRoot, cameraMain, cameraMain);
 }
 
 void RenderManager::animateQueues(long startTime, long currentTime) {
@@ -135,8 +140,6 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 
 	Camera* mainCamera = scene->mainCamera;
 
-	render->useTexture(TEXTURE_2D, 0, AssetManager::assetManager->texAlt->texId);
-
 	render->setFrameBuffer(nearBuffer);
 	Camera* cameraNear=shadow->lightCameraNear;
 	state->pass = NEAR_SHADOW_PASS;
@@ -145,17 +148,17 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	state->shaderBillboard = billboardShadowShader;
 	state->shaderSimple = phongShadowInsSimpShader;
 	state->shaderGrass = grassShadowShader;
-	currentQueue->queues[QUEUE_STATIC_SN]->draw(cameraNear, render, state);
+	currentQueue->queues[QUEUE_STATIC_SN]->draw(scene, cameraNear, render, state);
 	state->shader = boneShadowShader;
-	currentQueue->queues[QUEUE_ANIMATE_SN]->draw(cameraNear, render, state);
+	currentQueue->queues[QUEUE_ANIMATE_SN]->draw(scene, cameraNear, render, state);
 
 	render->setFrameBuffer(midBuffer);
 	Camera* cameraMid=shadow->lightCameraMid;
 	state->pass = MID_SHADOW_PASS;
 	state->shader = phongShadowShader;
-	currentQueue->queues[QUEUE_STATIC_SM]->draw(cameraMid, render, state);
+	currentQueue->queues[QUEUE_STATIC_SM]->draw(scene, cameraMid, render, state);
 	state->shader = boneShadowShader;
-	currentQueue->queues[QUEUE_ANIMATE_SM]->draw(cameraMid, render, state);
+	currentQueue->queues[QUEUE_ANIMATE_SM]->draw(scene, cameraMid, render, state);
 
 	///*
 	static ushort flushCount = 1;
@@ -164,14 +167,14 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	else {
 		if (flushCount % 3 == 1) {
 			render->setFrameBuffer(farBuffer);
-			if (graphicQuality > 2) {
+			if (graphicQuality > 5) {
 				Camera* cameraFar = shadow->lightCameraFar;
 				state->pass = FAR_SHADOW_PASS;
 				state->shader = phongShadowLowShader;
 				state->shaderIns = phongShadowLowInsShader;
-				currentQueue->queues[QUEUE_STATIC_SF]->draw(cameraFar, render, state);
+				currentQueue->queues[QUEUE_STATIC_SF]->draw(scene, cameraFar, render, state);
 				state->shader = boneShadowShader;
-				currentQueue->queues[QUEUE_ANIMATE_SF]->draw(cameraFar, render, state);
+				currentQueue->queues[QUEUE_ANIMATE_SF]->draw(scene, cameraFar, render, state);
 			}
 		}
 		flushCount++;
@@ -199,21 +202,19 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	// Draw terrain
 	if (scene->terrainNode && scene->terrainNode->checkInCamera(camera)) {
 		static Shader* terrainShader = render->findShader("terrain");
-		render->useTexture(TEXTURE_2D_ARRAY, 0, AssetManager::assetManager->texArray->setId);
 		state->shader = terrainShader;
 		render->draw(camera, scene->terrainNode->drawcall, state);
 	}
 
-	render->useTexture(TEXTURE_2D, 0, AssetManager::assetManager->texAlt->texId);
 	state->shader = phongShader;
 	state->shaderIns = phongInsShader;
 	state->shaderBillboard = billboardShader;
 	state->shaderSimple = phongInsSimpShader;
 	state->shaderGrass = grassShader;
-	currentQueue->queues[QUEUE_STATIC]->draw(camera, render, state);
+	currentQueue->queues[QUEUE_STATIC]->draw(scene, camera, render, state);
 
 	state->shader = boneShader;
-	currentQueue->queues[QUEUE_ANIMATE]->draw(camera, render, state);
+	currentQueue->queues[QUEUE_ANIMATE]->draw(scene, camera, render, state);
 
 	// Draw sky
 	if (scene->skyBox)
@@ -273,7 +274,6 @@ void RenderManager::renderReflect(Render* render, Scene* scene) {
 				
 				render->setShaderFloat(terrainShader, "isReflect", 1.0);
 				render->setShaderFloat(terrainShader, "waterHeight", scene->water->position.y);
-				render->useTexture(TEXTURE_2D_ARRAY, 0, AssetManager::assetManager->texArray->setId);
 				render->draw(scene->reflectCamera, scene->terrainNode->drawcall, state);
 				render->setShaderFloat(terrainShader, "isReflect", 0.0);
 			}
@@ -295,9 +295,12 @@ void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* scre
 	state->quality = graphicQuality;
 
 	uint baseSlot = screenBuff->colorBuffers.size() + 1; // Color buffers + Depth buffer
-	render->useTexture(TEXTURE_2D, baseSlot + 0, nearBuffer->getDepthBuffer()->id);
-	render->useTexture(TEXTURE_2D, baseSlot + 1, midBuffer->getDepthBuffer()->id);
-	render->useTexture(TEXTURE_2D, baseSlot + 2, farBuffer->getDepthBuffer()->id);
+	if(!deferredShader->isTexBinded(nearBuffer->getDepthBuffer()->hnd))
+		deferredShader->setHandle64("depthBufferNear", nearBuffer->getDepthBuffer()->hnd);
+	if(!deferredShader->isTexBinded(midBuffer->getDepthBuffer()->hnd))
+		deferredShader->setHandle64("depthBufferMid", midBuffer->getDepthBuffer()->hnd);
+	if(!deferredShader->isTexBinded(farBuffer->getDepthBuffer()->hnd))
+		deferredShader->setHandle64("depthBufferFar", farBuffer->getDepthBuffer()->hnd);
 	render->setShaderInt(deferredShader, "useShadow", useShadow ? 1 : 0);
 	filter->draw(scene->mainCamera, render, state, screenBuff->colorBuffers, screenBuff->depthBuffer);
 }
@@ -365,7 +368,7 @@ void RenderManager::drawSSGFilter(Render* render, Scene* scene, const char* shad
 	filter->draw(scene->mainCamera, render, state, inputTextures, NULL);
 }
 
-void RenderManager::drawTexture2Screen(Render* render, Scene* scene, uint texid) {
+void RenderManager::drawTexture2Screen(Render* render, Scene* scene, u64 texhnd) {
 	static Shader* screenShader = render->findShader("screen");
 	state->reset();
 	state->eyePos = &(scene->mainCamera->position);
@@ -373,19 +376,19 @@ void RenderManager::drawTexture2Screen(Render* render, Scene* scene, uint texid)
 	state->enableDepthTest = false;
 	state->pass = POST_PASS;
 	state->shader = screenShader;
+	state->shader->setHandle64("tex", texhnd);
 
 	if (!scene->textureNode) {
 		Board* board = new Board(2, 2, 2);
-		scene->textureNode = new StaticNode(VECTOR3D(0, 0, 0));
+		scene->textureNode = new StaticNode(vec3(0, 0, 0));
 		scene->textureNode->setFullStatic(true);
 		StaticObject* boardObject = new StaticObject(board);
-		scene->textureNode->addObject(boardObject);
+		scene->textureNode->addObject(scene, boardObject);
 		scene->textureNode->prepareDrawcall();
 		delete board;
 	}
 
 	render->setFrameBuffer(NULL);
-	render->useTexture(TEXTURE_2D, 0, texid);
 	render->draw(scene->mainCamera, scene->textureNode->drawcall, state);
 }
 

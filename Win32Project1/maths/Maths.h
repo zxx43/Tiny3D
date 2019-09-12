@@ -28,3 +28,8 @@
 #include "PLANE.h"
 
 #include "COLOR.h"
+
+typedef VECTOR2D vec2;
+typedef VECTOR3D vec3;
+typedef VECTOR4D vec4;
+typedef MATRIX4X4 mat4;

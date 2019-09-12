@@ -5,7 +5,7 @@ FrameBuffer::FrameBuffer(float width, float height, int precision, int component
 	this->height = height;
 	this->clampBorder = clampBorder;
 
-	glGenFramebuffersEXT(1, &fboId);
+	glGenFramebuffers(1, &fboId);
 
 	colorBuffers.clear();
 	colorBufferCount = 0;
@@ -19,7 +19,7 @@ FrameBuffer::FrameBuffer(float width, float height, int precision) {
 	this->width = width;
 	this->height = height;
 
-	glGenFramebuffersEXT(1, &fboId);
+	glGenFramebuffers(1, &fboId);
 
 	colorBuffers.clear();
 	colorBufferCount = 0;
@@ -38,33 +38,25 @@ FrameBuffer::~FrameBuffer() {
 		delete depthBuffer;
 	depthBuffer=NULL;
 
-	glDeleteFramebuffersEXT(1,&fboId);
+	glDeleteFramebuffers(1,&fboId);
 }
 
 void FrameBuffer::attachDepthBuffer(int precision) {
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId);
-	
 	depthBuffer = new Texture2D(width, height, TEXTURE_TYPE_DEPTH, precision, 4);
-	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, depthBuffer->id, 0);
+	glNamedFramebufferTexture2DEXT(fboId, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthBuffer->id, 0);
 
 	if (depthOnly) {
-		glDrawBuffer(GL_NONE);
-		glReadBuffer(GL_NONE);
+		glNamedFramebufferDrawBuffer(fboId, GL_NONE);
+		glNamedFramebufferReadBuffer(fboId, GL_NONE);
 	}
-
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 }
 
 void FrameBuffer::addColorBuffer(int precision, int component) {
 	colorBufferCount++;
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId);
-
 	colorBuffers.push_back(new Texture2D(width,height,TEXTURE_TYPE_COLOR,precision,component,clampBorder));
-	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT+(colorBufferCount-1),GL_TEXTURE_2D,
+	glNamedFramebufferTexture2DEXT(fboId,GL_COLOR_ATTACHMENT0+(colorBufferCount-1),GL_TEXTURE_2D,
 			colorBuffers[colorBufferCount-1]->id,0);
-	glDrawBuffers(colorBufferCount,ColorAttachments);
-
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
+	glNamedFramebufferDrawBuffers(fboId,colorBufferCount,ColorAttachments);
 }
 
 Texture2D* FrameBuffer::getColorBuffer(int n) {
@@ -78,7 +70,7 @@ Texture2D* FrameBuffer::getDepthBuffer() {
 }
 
 void FrameBuffer::use() {
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId);
+	glBindFramebuffer(GL_FRAMEBUFFER, fboId);
 	GLbitfield clearMask = GL_COLOR_BUFFER_BIT;
 	if (depthOnly)
 		clearMask = GL_DEPTH_BUFFER_BIT;

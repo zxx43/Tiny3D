@@ -1,6 +1,7 @@
 #include "waterNode.h"
+#include "../scene/scene.h"
 
-WaterNode::WaterNode(const VECTOR3D& position) : StaticNode(position) {
+WaterNode::WaterNode(const vec3& position) : StaticNode(position) {
 	centerX = 0, centerZ = 0;
 	type = TYPE_WATER;
 }
@@ -14,8 +15,8 @@ void WaterNode::putCenter() {
 	centerZ = position.z;
 }
 
-void WaterNode::addObject(Object* object) {
-	Node::addObject(object);
+void WaterNode::addObject(Scene* scene, Object* object) {
+	Node::addObject(scene, object);
 	putCenter();
 }
 

@@ -2,7 +2,7 @@
 
 InstanceData::InstanceData(Mesh* mesh, Object* obj, int maxCount, InstanceState* insState) {
 	insMesh = mesh;
-	count = 0;
+	count = 0, maxInsCount = maxCount;
 	matrices = NULL;
 	billboards = NULL;
 	positions = NULL;
@@ -54,8 +54,8 @@ void InstanceData::addInstance(Object* object) {
 		billboards[count * 4 + 0] = object->billboard->data[0];
 		billboards[count * 4 + 1] = object->billboard->data[1];
 		if (mat) {
-			billboards[count * 4 + 2] = mat->texOfs1.x;
-			billboards[count * 4 + 3] = mat->texOfs1.y;
+			billboards[count * 4 + 2] = mat->texids.x;
+			billboards[count * 4 + 3] = mat->texids.y;
 		}
 
 		memcpy(positions + (count * 3), object->transformMatrix.entries + 12, 3 * sizeof(float));

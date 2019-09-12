@@ -7,9 +7,10 @@ Water::Water(int size, float height) :Mesh() {
 	waterSize = size;
 	waterHeight = height;
 	vertexCount = waterSize * waterSize;
-	vertices = new VECTOR4D[vertexCount];
-	normals = new VECTOR3D[vertexCount];
-	texcoords = new VECTOR2D[vertexCount];
+	vertices = new vec4[vertexCount];
+	normals = new vec3[vertexCount];
+	tangents = new vec3[vertexCount];
+	texcoords = new vec2[vertexCount];
 	indexCount = (waterSize - 1) * (waterSize - 1) * 6;
 	indices = (int*)malloc(indexCount*sizeof(int));
 	materialids = NULL;
@@ -29,9 +30,10 @@ void Water::initFaces() {
 		for (int j = 0, col = 0; col < stepCount + 1; j++, col++) {
 			x = j; z = i; y = 0;
 			u = col / 4.0; v = row / 4.0;
-			vertices[currentVertex] = VECTOR4D(x, y, z, 1);
-			normals[currentVertex] = VECTOR3D(0, 1, 0);
-			texcoords[currentVertex] = VECTOR2D(u, v);
+			vertices[currentVertex] = vec4(x, y, z, 1);
+			normals[currentVertex] = vec3(0, 1, 0);
+			tangents[currentVertex] = vec3(1, 0, 0);
+			texcoords[currentVertex] = vec2(u, v);
 			currentVertex++;
 		}
 	}

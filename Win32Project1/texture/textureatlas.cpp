@@ -17,6 +17,13 @@ TextureAtlas::TextureAtlas() {
 }
 
 TextureAtlas::~TextureAtlas() {
+	if (images) {
+		for (uint i = 0; i < imageNames.size(); i++)
+			delete images[i];
+		delete[] images;
+		images = NULL;
+	}
+
 	free(atlasInfo);
 	releaseAtlas();
 	imageNames.clear();
@@ -118,7 +125,6 @@ void TextureAtlas::createAtlas(string dir) {
 	}
 
 	glGenTextures(1, &texId);
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texId);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -130,13 +136,14 @@ void TextureAtlas::createAtlas(string dir) {
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	if (data) free(data); data = NULL;
+	/*
 	if (images) {
 		for (uint i = 0; i < imageCount; i++)
 			delete images[i];
 		delete[] images;
 		images = NULL;
 	}
-
+	*/
 	printf("img: %d,%d,%d\n", pCountW, pCountH, imageCount);
 	map<string, TexOffset*>::iterator it = offsetMap.begin();
 	while (it != offsetMap.end()) {

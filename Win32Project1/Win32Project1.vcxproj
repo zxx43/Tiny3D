@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -22,31 +22,32 @@
     <ProjectGuid>{7B39068E-E00A-4D20-ACFE-AC964B492D80}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Win32Project1</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -73,12 +74,16 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)\Tiny\bins\</OutDir>
     <IntDir>$(SolutionDir)tmp\$(Platform)\$(Configuration)\Tiny</IntDir>
+    <TargetName>tiny</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)\Tiny\bins\</OutDir>
+    <IntDir>$(SolutionDir)tmp\$(Platform)\$(Configuration)\Tiny</IntDir>
+    <TargetName>tiny</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -106,10 +111,11 @@
       <AdditionalIncludeDirectories>..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glew32s.lib;opengl32.lib;assimp.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <EntryPointSymbol>WinMainCRTStartup</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -219,6 +225,7 @@
     <ClCompile Include="texture\imageset.cpp" />
     <ClCompile Include="texture\texture2d.cpp" />
     <ClCompile Include="texture\textureatlas.cpp" />
+    <ClCompile Include="texture\texturebindless.cpp" />
     <ClCompile Include="util\triangle.cpp" />
     <ClCompile Include="util\util.cpp" />
   </ItemGroup>
@@ -293,68 +300,44 @@
     <ClInclude Include="texture\imageset.h" />
     <ClInclude Include="texture\texture2d.h" />
     <ClInclude Include="texture\textureatlas.h" />
+    <ClInclude Include="texture\texturebindless.h" />
     <ClInclude Include="util\dirent.h" />
     <ClInclude Include="util\triangle.h" />
     <ClInclude Include="util\util.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\x64\Release\shader\billboard.frag" />
-    <None Include="..\x64\Release\shader\billboard.vert" />
-    <None Include="..\x64\Release\shader\billboard_shadow.frag" />
-    <None Include="..\x64\Release\shader\billboard_shadow.vert" />
-    <None Include="..\x64\Release\shader\combined.frag" />
-    <None Include="..\x64\Release\shader\combined.vert" />
-    <None Include="..\x64\Release\shader\debug.frag" />
-    <None Include="..\x64\Release\shader\debug.vert" />
-    <None Include="..\x64\Release\shader\deferred.frag" />
-    <None Include="..\x64\Release\shader\deferred.vert" />
-    <None Include="..\x64\Release\shader\bone.frag" />
-    <None Include="..\x64\Release\shader\bone.vert" />
-    <None Include="..\x64\Release\shader\bone_shadow.frag" />
-    <None Include="..\x64\Release\shader\bone_shadow.vert" />
-    <None Include="..\x64\Release\shader\dof.frag" />
-    <None Include="..\x64\Release\shader\dof.vert" />
-    <None Include="..\x64\Release\shader\fxaa.frag" />
-    <None Include="..\x64\Release\shader\fxaa.vert" />
-    <None Include="..\x64\Release\shader\mean.frag" />
-    <None Include="..\x64\Release\shader\mean.vert" />
-    <None Include="..\x64\Release\shader\phong.frag" />
-    <None Include="..\x64\Release\shader\phong.vert" />
-    <None Include="..\x64\Release\shader\phong_grass.frag" />
-    <None Include="..\x64\Release\shader\phong_grass.geom" />
-    <None Include="..\x64\Release\shader\phong_grass.vert" />
-    <None Include="..\x64\Release\shader\phong_ins.frag" />
-    <None Include="..\x64\Release\shader\phong_ins.vert" />
-    <None Include="..\x64\Release\shader\phong_ins_simp.frag" />
-    <None Include="..\x64\Release\shader\phong_ins_simp.vert" />
-    <None Include="..\x64\Release\shader\phong_shadow.frag" />
-    <None Include="..\x64\Release\shader\phong_shadow.vert" />
-    <None Include="..\x64\Release\shader\phong_shadow_grass.frag" />
-    <None Include="..\x64\Release\shader\phong_shadow_grass.vert" />
-    <None Include="..\x64\Release\shader\phong_shadow_ins.frag" />
-    <None Include="..\x64\Release\shader\phong_shadow_ins.vert" />
-    <None Include="..\x64\Release\shader\phong_shadow_ins_simp.frag" />
-    <None Include="..\x64\Release\shader\phong_shadow_ins_simp.vert" />
-    <None Include="..\x64\Release\shader\phong_shadow_low.frag" />
-    <None Include="..\x64\Release\shader\phong_shadow_low.vert" />
-    <None Include="..\x64\Release\shader\phong_shadow_low_ins.vert" />
-    <None Include="..\x64\Release\shader\blur.frag" />
-    <None Include="..\x64\Release\shader\blur.vert" />
-    <None Include="..\x64\Release\shader\screen.frag" />
-    <None Include="..\x64\Release\shader\screen.vert" />
-    <None Include="..\x64\Release\shader\sky.frag" />
-    <None Include="..\x64\Release\shader\sky.vert" />
-    <None Include="..\x64\Release\shader\ssg.frag" />
-    <None Include="..\x64\Release\shader\ssg.vert" />
-    <None Include="..\x64\Release\shader\ssr.frag" />
-    <None Include="..\x64\Release\shader\ssr.vert" />
-    <None Include="..\x64\Release\shader\terrain.frag" />
-    <None Include="..\x64\Release\shader\terrain.vert" />
-    <None Include="..\x64\Release\shader\water.frag" />
-    <None Include="..\x64\Release\shader\water.vert" />
+    <None Include="..\Tiny\shader\billboard.frag" />
+    <None Include="..\Tiny\shader\billboard.vert" />
+    <None Include="..\Tiny\shader\blur.frag" />
+    <None Include="..\Tiny\shader\bone.frag" />
+    <None Include="..\Tiny\shader\bone.vert" />
+    <None Include="..\Tiny\shader\combined.frag" />
+    <None Include="..\Tiny\shader\debug.frag" />
+    <None Include="..\Tiny\shader\debug.vert" />
+    <None Include="..\Tiny\shader\deferred.frag" />
+    <None Include="..\Tiny\shader\dof.frag" />
+    <None Include="..\Tiny\shader\fxaa.frag" />
+    <None Include="..\Tiny\shader\grass.vert" />
+    <None Include="..\Tiny\shader\instance.vert" />
+    <None Include="..\Tiny\shader\instance_simp.vert" />
+    <None Include="..\Tiny\shader\mean.frag" />
+    <None Include="..\Tiny\shader\phong.frag" />
+    <None Include="..\Tiny\shader\phong.vert" />
+    <None Include="..\Tiny\shader\post.vert" />
+    <None Include="..\Tiny\shader\screen.frag" />
+    <None Include="..\Tiny\shader\shadow_nontex.frag" />
+    <None Include="..\Tiny\shader\shadow_tex.frag" />
+    <None Include="..\Tiny\shader\sky.frag" />
+    <None Include="..\Tiny\shader\sky.vert" />
+    <None Include="..\Tiny\shader\ssg.frag" />
+    <None Include="..\Tiny\shader\ssr.frag" />
+    <None Include="..\Tiny\shader\terrain.frag" />
+    <None Include="..\Tiny\shader\terrain.vert" />
+    <None Include="..\Tiny\shader\water.frag" />
+    <None Include="..\Tiny\shader\water.vert" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\x64\Release\config\config.txt" />
+    <Text Include="..\Tiny\config\config.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

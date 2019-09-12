@@ -31,10 +31,10 @@ void MtlLoader::readMtlInfo() {
 void MtlLoader::readMtlFile() {
 	ifstream infile(mtlFilePath);
 	string sline;
-	int n=0,t=0,d=0,a=0,s=0;
+	int n = 0, t = 0, d = 0, a = 0, s = 0, c = 0;
 
 	string value,name,texture;
-	float red=0,green=0,blue=0;
+	float red = 0, green = 0, blue = 0, single = 0;
 	Material* mtl=NULL;
 	while(getline(infile,sline)) {
 		if(sline!="") {
@@ -45,15 +45,35 @@ void MtlLoader::readMtlFile() {
 				mtl = new Material(name.c_str());
 				objMtls[name] = MaterialManager::materials->add(mtl);
 				n++;
-			} else if(value=="map_Kd") {
-				ins>>texture;
+			} else if (value == "map_Kd") {
+				ins >> texture;
 				if (mtl) {
-					if (!AssetManager::assetManager->findTextureAtlasOfs(texture.c_str()))
-						AssetManager::assetManager->addTexture2Alt(texture.c_str());
 					mtl->tex1 = texture;
+					mtl->srgb1 = true;
 				}
 				t++;
-			} else if(value=="Kd") {
+			} else if (value == "map_Kn") {
+				ins >> texture;
+				if (mtl) {
+					mtl->tex2 = texture;
+					mtl->srgb2 = false;
+				}
+				t++;
+			} else if (value == "map_Km") {
+				ins >> texture;
+				if (mtl) {
+					mtl->tex3 = texture;
+					mtl->srgb3 = false;
+				}
+				t++;
+			} else if (value == "map_Kr") {
+				ins >> texture;
+				if (mtl) {
+					mtl->tex4 = texture;
+					mtl->srgb4 = false;
+				}
+				t++;
+			} else if (value == "Kd") {
 				ins>>red>>green>>blue;
 				if(mtl) {
 					mtl->diffuse.x=red;
@@ -77,6 +97,11 @@ void MtlLoader::readMtlFile() {
 					mtl->specular.z = blue;
 				}
 				s++;
+			} else if (value == "single") {
+				ins >> single;
+				if (mtl)
+					mtl->singleFace = true;
+				c++;
 			}
 		}
 	}

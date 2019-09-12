@@ -11,7 +11,9 @@ class BatchData {
 public:
 	float* vertices;
 	float* normals;
+	float* tangents;
 	float* texcoords;
+	float* texids;
 	byte* colors;
 	byte* objectids;
 	uint* indices;

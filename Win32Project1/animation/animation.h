@@ -73,24 +73,25 @@ private:
 	int findPositionIndex(aiNodeAnim* anim,float animTime);
 	int findRotationIndex(aiNodeAnim* anim,float animTime);
 	int findScaleIndex(aiNodeAnim* anim,float animTime);
-	void calcPosition(aiNodeAnim* anim,float animTime,aiVector3D& position);
-	void calcRotation(aiNodeAnim* anim,float animTime,aiQuaternion& rotation);
-	void calcScale(aiNodeAnim* anim,float animTime,aiVector3D& scale);
+	void calcPosition(aiNodeAnim* anim, float animTime, aiVector3D& position);
+	void calcRotation(aiNodeAnim* anim, float animTime, aiQuaternion& rotation);
+	void calcScale(aiNodeAnim* anim, float animTime, aiVector3D& scale);
 	aiNodeAnim* findNodeAnim(int animIndex,std::string boneName);
 	void readNode(int animIndex,float animTime,aiNode* node,const aiMatrix4x4& parentTransform);
 
 public:
 	int faceCount,vertCount,boneCount;
-	std::vector<VECTOR3D> aVertices;
-	std::vector<VECTOR3D> aNormals;
-	std::vector<VECTOR2D> aTexcoords;
+	std::vector<vec3> aVertices;
+	std::vector<vec3> aNormals;
+	std::vector<vec3> aTangents;
+	std::vector<vec2> aTexcoords;
 	std::vector<Material*> aTextures;
-	std::vector<VECTOR3D> aAmbients;
-	std::vector<VECTOR3D> aDiffuses;
-	std::vector<VECTOR3D> aSpeculars;
+	std::vector<vec3> aAmbients;
+	std::vector<vec3> aDiffuses;
+	std::vector<vec3> aSpeculars;
 	std::vector<int> aIndices;
-	std::vector<VECTOR4D> aBoneids;
-	std::vector<VECTOR4D> aWeights;
+	std::vector<vec4> aBoneids;
+	std::vector<vec4> aWeights;
 	std::map<int,int> materialMap;
 	float* boneTransformMats;
 

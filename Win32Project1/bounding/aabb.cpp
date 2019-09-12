@@ -1,6 +1,6 @@
 #include "aabb.h"
 
-AABB::AABB(const VECTOR3D& min,const VECTOR3D& max) {
+AABB::AABB(const vec3& min,const vec3& max) {
 	minVertex.x=min.x; minVertex.y=min.y; minVertex.z=min.z;
 	maxVertex.x=max.x; maxVertex.y=max.y; maxVertex.z=max.z;
 	sizex=maxVertex.x-minVertex.x;
@@ -10,30 +10,30 @@ AABB::AABB(const VECTOR3D& min,const VECTOR3D& max) {
 	position.y=minVertex.y+sizey*0.5;
 	position.z=minVertex.z+sizez*0.5;
 
-	vertices[0]=VECTOR3D(min.x,min.y,min.z);
-	vertices[1]=VECTOR3D(max.x,min.y,min.z);
-	vertices[2]=VECTOR3D(min.x,max.y,min.z);
-	vertices[3]=VECTOR3D(max.x,max.y,min.z);
-	vertices[4]=VECTOR3D(min.x,min.y,max.z);
-	vertices[5]=VECTOR3D(max.x,min.y,max.z);
-	vertices[6]=VECTOR3D(min.x,max.y,max.z);
-	vertices[7]=VECTOR3D(max.x,max.y,max.z);
+	vertices[0]=vec3(min.x,min.y,min.z);
+	vertices[1]=vec3(max.x,min.y,min.z);
+	vertices[2]=vec3(min.x,max.y,min.z);
+	vertices[3]=vec3(max.x,max.y,min.z);
+	vertices[4]=vec3(min.x,min.y,max.z);
+	vertices[5]=vec3(max.x,min.y,max.z);
+	vertices[6]=vec3(min.x,max.y,max.z);
+	vertices[7]=vec3(max.x,max.y,max.z);
 }
 
-AABB::AABB(const VECTOR3D& pos,float sx,float sy,float sz) {
+AABB::AABB(const vec3& pos,float sx,float sy,float sz) {
 	minVertex.x=pos.x-sx*0.5; minVertex.y=pos.y-sy*0.5; minVertex.z=pos.z-sz*0.5;
 	maxVertex.x=pos.x+sx*0.5; maxVertex.y=pos.y+sy*0.5; maxVertex.z=pos.z+sz*0.5;
 	sizex=sx; sizey=sy; sizez=sz;
 	position.x=pos.x; position.y=pos.y; position.z=pos.z;
 
-	vertices[0]=VECTOR3D(minVertex.x,minVertex.y,minVertex.z);
-	vertices[1]=VECTOR3D(maxVertex.x,minVertex.y,minVertex.z);
-	vertices[2]=VECTOR3D(minVertex.x,maxVertex.y,minVertex.z);
-	vertices[3]=VECTOR3D(maxVertex.x,maxVertex.y,minVertex.z);
-	vertices[4]=VECTOR3D(minVertex.x,minVertex.y,maxVertex.z);
-	vertices[5]=VECTOR3D(maxVertex.x,minVertex.y,maxVertex.z);
-	vertices[6]=VECTOR3D(minVertex.x,maxVertex.y,maxVertex.z);
-	vertices[7]=VECTOR3D(maxVertex.x,maxVertex.y,maxVertex.z);
+	vertices[0]=vec3(minVertex.x,minVertex.y,minVertex.z);
+	vertices[1]=vec3(maxVertex.x,minVertex.y,minVertex.z);
+	vertices[2]=vec3(minVertex.x,maxVertex.y,minVertex.z);
+	vertices[3]=vec3(maxVertex.x,maxVertex.y,minVertex.z);
+	vertices[4]=vec3(minVertex.x,minVertex.y,maxVertex.z);
+	vertices[5]=vec3(maxVertex.x,minVertex.y,maxVertex.z);
+	vertices[6]=vec3(minVertex.x,maxVertex.y,maxVertex.z);
+	vertices[7]=vec3(maxVertex.x,maxVertex.y,maxVertex.z);
 }
 
 AABB::AABB(const AABB& rhs) {
@@ -53,7 +53,7 @@ AABB::~AABB() {
 
 }
 
-void AABB::update(const VECTOR3D& newMinVertex,const VECTOR3D& newMaxVertex) {
+void AABB::update(const vec3& newMinVertex,const vec3& newMaxVertex) {
 	minVertex.x=newMinVertex.x; minVertex.y=newMinVertex.y; minVertex.z=newMinVertex.z;
 	maxVertex.x=newMaxVertex.x; maxVertex.y=newMaxVertex.y; maxVertex.z=newMaxVertex.z;
 	sizex=maxVertex.x-minVertex.x;
@@ -74,20 +74,20 @@ void AABB::update(const VECTOR3D& newMinVertex,const VECTOR3D& newMaxVertex) {
 }
 
 void AABB::update(float sx, float sy, float sz) {
-	update(VECTOR3D(position.x - sx*0.5, position.y - sy*0.5, position.z - sz*0.5),
-		VECTOR3D(position.x + sx*0.5, position.y + sy*0.5, position.z + sz*0.5));
+	update(vec3(position.x - sx*0.5, position.y - sy*0.5, position.z - sz*0.5),
+		vec3(position.x + sx*0.5, position.y + sy*0.5, position.z + sz*0.5));
 }
 
-void AABB::update(const VECTOR3D& pos) {
-	update(VECTOR3D(pos.x-sizex*0.5,pos.y-sizey*0.5,pos.z-sizez*0.5),
-			VECTOR3D(pos.x+sizex*0.5,pos.y+sizey*0.5,pos.z+sizez*0.5));
+void AABB::update(const vec3& pos) {
+	update(vec3(pos.x-sizex*0.5,pos.y-sizey*0.5,pos.z-sizez*0.5),
+			vec3(pos.x+sizex*0.5,pos.y+sizey*0.5,pos.z+sizez*0.5));
 }
 
 AABB* AABB::clone() {
 	return new AABB(*this);
 }
 
-bool AABB::vertexInsideCamera(const VECTOR3D& vertex, const Frustum* frustum) {
+bool AABB::vertexInsideCamera(const vec3& vertex, const Frustum* frustum) {
 	for(int i=0;i<6;i++) {
 		if(frustum->normals[i].DotProduct(vertex)+frustum->ds[i]<0)
 			return false;
@@ -95,9 +95,9 @@ bool AABB::vertexInsideCamera(const VECTOR3D& vertex, const Frustum* frustum) {
 	return true;
 }
 
-bool AABB::intersectsWidthRay(const VECTOR3D& origin,const VECTOR3D& dir,float maxDistance) {
+bool AABB::intersectsWidthRay(const vec3& origin,const vec3& dir,float maxDistance) {
 	float distance=0;
-	static VECTOR3D vertex;
+	static vec3 vertex;
 
 	if(dir.x!=0) {
 		float d[2]={vertices[0].x,vertices[7].x};
@@ -141,7 +141,7 @@ bool AABB::intersectsWidthRay(const VECTOR3D& origin,const VECTOR3D& dir,float m
 	return false;
 }
 
-bool AABB::cameraVertexInside(const VECTOR3D& vertex) {
+bool AABB::cameraVertexInside(const vec3& vertex) {
 	if(vertex.x<minVertex.x)
 		return false;
 	if(vertex.x>maxVertex.x)
@@ -179,10 +179,10 @@ bool AABB::checkWithCamera(Frustum* frustum, int checkLevel) {
 	}
 
 	if (checkLevel >= 3) {
-		static VECTOR3D right = VECTOR3D(1, 0, 0);
-		static VECTOR3D far = VECTOR3D(0, 0, 1);
-		static VECTOR3D left = VECTOR3D(-1, 0, 0);
-		static VECTOR3D near = VECTOR3D(0, 0, -1);
+		static vec3 right = vec3(1, 0, 0);
+		static vec3 far = vec3(0, 0, 1);
+		static vec3 left = vec3(-1, 0, 0);
+		static vec3 near = vec3(0, 0, -1);
 
 		if (frustum->intersectsWidthRay(vertices[0], right, sizex))
 			return true;
@@ -203,8 +203,8 @@ bool AABB::checkWithCamera(Frustum* frustum, int checkLevel) {
 	}
 
 	if (checkLevel >= 4) {
-		static VECTOR3D up = VECTOR3D(0, 1, 0);
-		static VECTOR3D down = VECTOR3D(0, -1, 0);
+		static vec3 up = vec3(0, 1, 0);
+		static vec3 down = vec3(0, -1, 0);
 
 		if (frustum->intersectsWidthRay(vertices[0], up, sizey))
 			return true;
@@ -222,8 +222,8 @@ bool AABB::checkWithCamera(Frustum* frustum, int checkLevel) {
 void AABB::merge(const std::vector<BoundingBox*>& others) {
 	if (others.size() > 0) {
 		AABB* first = (AABB*)(others[0]);
-		VECTOR3D min = first->minVertex;
-		VECTOR3D max = first->maxVertex;
+		vec3 min = first->minVertex;
+		vec3 max = first->maxVertex;
 		if (others.size() > 1) {
 			for (unsigned int i = 1; i < others.size(); i++) {
 				AABB* other = (AABB*)(others[i]);

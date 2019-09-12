@@ -13,24 +13,27 @@ struct Material
 {
 	int id;
 	std::string name;
-	VECTOR3D ambient;
-	VECTOR3D diffuse;
-	VECTOR3D specular;
-	bool useArray;
-	std::string tex1, tex2, tex3;
-	VECTOR4D texOfs1, texOfs2;
-	VECTOR4D texSize;
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+	bool prepared;
+	std::string tex1, tex2, tex3, tex4;
+	bool srgb1, srgb2, srgb3, srgb4;
+	vec4 texids;
+	vec2 exTexids;
+	bool singleFace;
 	Material(const char* mtlName) {
 		id = -1;
 		name = mtlName;
-		useArray = false;
-		tex1 = "", tex2 = "", tex3 = "";
-		texOfs1 = VECTOR4D(-1, -1, -1, -1);
-		texOfs2 = VECTOR4D(-1, -1, -1, -1);
-		texSize = VECTOR4D(-1, -1, -1, -1);
-		ambient = VECTOR3D(0.4, 0.4, 0.4);
-		diffuse = VECTOR3D(0.6, 0.6, 0.6);
-		specular = VECTOR3D(0, 0, 0);
+		prepared = false;
+		tex1 = "", tex2 = "", tex3 = "", tex4 = "";
+		srgb1 = true, srgb2 = false, srgb3 = false, srgb4 = false;
+		texids = vec4(-1, -1, -1, -1);
+		exTexids = vec2(-1, -1);
+		ambient = vec3(0.4, 0.4, 0.4);
+		diffuse = vec3(0.6, 0.6, 0.6);
+		specular = vec3(0, 0, 0);
+		singleFace = false;
 	}
 }; 
 

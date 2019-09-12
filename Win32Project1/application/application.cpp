@@ -35,7 +35,7 @@ void Application::init() {
 	float dual = 0.0;
 	config->get("dualthread", dual);
 	dualThread = dual > 0.1 ? true : false;
-	renderMgr = new RenderManager(graphQuality, scene->mainCamera, lowDist, farDist, dual, VECTOR3D(-1, -1, -1));
+	renderMgr = new RenderManager(graphQuality, scene->mainCamera, lowDist, farDist, dual, vec3(-1, -1, -1));
 	if (graphQuality > 1)
 		renderMgr->showShadow(true);
 	else

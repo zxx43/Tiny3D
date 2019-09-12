@@ -16,6 +16,8 @@
 
 class Scene {
 private:
+	std::map<Mesh*, uint> meshCount;
+private:
 	void initNodes();
 public:
 	bool inited;
@@ -34,11 +36,13 @@ public:
 	~Scene();
 	void createReflectCamera();
 	void createSky();
-	void createWater(const VECTOR3D& position, const VECTOR3D& size);
-	void createTerrain(const VECTOR3D& position, const VECTOR3D& size);
+	void createWater(const vec3& position, const vec3& size);
+	void createTerrain(const vec3& position, const vec3& size);
 	void updateNodes();
 	void flushNodes();
 	void updateReflectCamera();
+	void addObject(Object* object);
+	uint queryMeshCount(Mesh* mesh);
 public: // Just for debugging
 	void createNodeAABB(Node* node);
 	void clearAllAABB();

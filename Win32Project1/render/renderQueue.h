@@ -45,7 +45,7 @@ class RenderQueue {
 private:
 	Queue* queue;
 private:
-	void pushDatasToInstance(InstanceData* data, bool copy);
+	void pushDatasToInstance(Scene* scene, InstanceData* data, bool copy);
 	void pushDatasToBatch(BatchData* data, int pass);
 public:
 	float midDistSqr, lowDistSqr;
@@ -60,11 +60,11 @@ public:
 	void flush();
 	void deleteInstance(InstanceData* data);
 	void setDual(bool dual);
-	void draw(Camera* camera,Render* render, RenderState* state);
+	void draw(Scene* scene, Camera* camera, Render* render, RenderState* state);
 	void animate(long startTime, long currentTime);
-	Mesh* queryLodMesh(Object* object, const VECTOR3D& eye);
+	Mesh* queryLodMesh(Object* object, const vec3& eye);
 };
 
-void PushNodeToQueue(RenderQueue* queue, Node* node, Camera* camera, Camera* mainCamera);
+void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camera, Camera* mainCamera);
 
 #endif

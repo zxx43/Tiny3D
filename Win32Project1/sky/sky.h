@@ -13,6 +13,8 @@
 #include "../render/render.h"
 #include "../camera/camera.h"
 
+class Scene;
+
 class Sky {
 private:
 	Sphere* mesh;
@@ -20,7 +22,7 @@ private:
 public:
 	StaticNode* skyNode;
 
-	Sky();
+	Sky(Scene* scene);
 	~Sky();
 
 	void draw(Render* render,Shader* shader,Camera* camera);

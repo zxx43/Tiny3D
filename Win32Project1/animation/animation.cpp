@@ -11,6 +11,7 @@ Animation::Animation(const char* path) {
 	boneTransformMats=NULL;
 	aVertices.clear();
 	aNormals.clear();
+	aTangents.clear();
 	aTexcoords.clear();
 	aTextures.clear();
 	aAmbients.clear();
@@ -32,6 +33,7 @@ Animation::Animation(const char* path) {
 Animation::~Animation() {
 	aVertices.clear();
 	aNormals.clear();
+	aTangents.clear();
 	aTexcoords.clear();
 	aTextures.clear();
 	aAmbients.clear();
@@ -76,8 +78,8 @@ void Animation::loadModel() {
 	aBoneids.resize(vertCount);
 	aWeights.resize(vertCount);
 	for(int i=0;i<vertCount;i++) {
-		aBoneids[i]=VECTOR4D(0,0,0,0);
-		aWeights[i]=VECTOR4D(0,0,0,0);
+		aBoneids[i]=vec4(0,0,0,0);
+		aWeights[i]=vec4(0,0,0,0);
 	}
 	for(int i=0;i<meshCount;i++) {
 		aiMesh* mesh=scene->mMeshes[i];
@@ -154,11 +156,14 @@ void Animation::loadMaterials() {
 		aiColor4D ambent(0, 0, 0, 1), diffuse(0, 0, 0, 1), specular(0, 0, 0, 1);
 		if(mat->Get(AI_MATKEY_NAME, name)!=AI_SUCCESS) name="animation_mat";
 		Material* mtl = new Material(name.data);
-		if (mat->GetTexture(aiTextureType_DIFFUSE, 0, &path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) {
-			if (!AssetManager::assetManager->findTextureAtlasOfs(path.data))
-				AssetManager::assetManager->addTexture2Alt(path.data);
+		if (mat->GetTexture(aiTextureType_DIFFUSE, 0, &path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) 
 			mtl->tex1 = path.data;
-		}
+		if (mat->GetTexture(aiTextureType_NORMALS, 0, &path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
+			mtl->tex2 = path.data;
+		if (mat->GetTexture(aiTextureType_SPECULAR, 0, &path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
+			mtl->tex3 = path.data;
+		if (mat->GetTexture(aiTextureType_AMBIENT, 0, &path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
+			mtl->tex4 = path.data;
 		aiGetMaterialColor(mat, AI_MATKEY_COLOR_AMBIENT, &ambent);
 		aiGetMaterialColor(mat, AI_MATKEY_COLOR_DIFFUSE, &diffuse);
 		aiGetMaterialColor(mat, AI_MATKEY_COLOR_SPECULAR, &specular);
@@ -174,15 +179,19 @@ void Animation::loadMeshes(Entry* entry) {
 	int aVertCount=aMesh->mNumVertices;
 	vertCount+=aVertCount;
 	for(int i=0;i<aVertCount;i++) {
-		aiVector3D* vertex=&aMesh->mVertices[i];
-		aiVector3D* normal=&aMesh->mNormals[i];
-		aVertices.push_back(VECTOR3D(vertex->x,vertex->y,vertex->z));
-		aNormals.push_back(VECTOR3D(normal->x,normal->y,normal->z));
+		aiVector3D* vertex = &aMesh->mVertices[i];
+		aiVector3D* normal = &aMesh->mNormals[i];
+		aVertices.push_back(vec3(vertex->x, vertex->y, vertex->z));
+		aNormals.push_back(vec3(normal->x, normal->y, normal->z));
+		if (aMesh->HasTangentsAndBitangents()) {
+			aiVector3D* tangent = &aMesh->mTangents[i];
+			aTangents.push_back(vec3(tangent->x, tangent->y, tangent->z));
+		}
 		if(aMesh->HasTextureCoords(0)) {
 			aiVector3D* texcoord=&aMesh->mTextureCoords[0][i];
-			aTexcoords.push_back(VECTOR2D(texcoord->x,texcoord->y));
+			aTexcoords.push_back(vec2(texcoord->x,texcoord->y));
 		} else
-			aTexcoords.push_back(VECTOR2D(0,0));
+			aTexcoords.push_back(vec2(0,0));
 
 		int mid = materialMap[entry->materialIndex];
 		Material* mat = MaterialManager::materials->find(mid);
@@ -233,7 +242,7 @@ int Animation::findScaleIndex(aiNodeAnim* anim,float animTime) {
 	return 0;
 }
 
-void Animation::calcPosition(aiNodeAnim* anim,float animTime,aiVector3D& position) {
+void Animation::calcPosition(aiNodeAnim* anim,float animTime, aiVector3D& position) {
 	if(anim->mNumPositionKeys==1) {
 		position=anim->mPositionKeys[0].mValue;
 		return;
@@ -271,7 +280,7 @@ void Animation::calcRotation(aiNodeAnim* anim,float animTime,aiQuaternion& rotat
 	rotation=rotation.Normalize();
 }
 
-void Animation::calcScale(aiNodeAnim* anim,float animTime,aiVector3D& scale) {
+void Animation::calcScale(aiNodeAnim* anim,float animTime, aiVector3D& scale) {
 	if(anim->mNumScalingKeys==1) {
 		scale=anim->mScalingKeys[0].mValue;
 		return;

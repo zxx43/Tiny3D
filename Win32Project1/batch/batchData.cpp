@@ -3,7 +3,9 @@
 BatchData::BatchData() {
 	vertices = (float*)malloc(MAX_VERTEX_COUNT * 3 * sizeof(float));
 	normals = (float*)malloc(MAX_VERTEX_COUNT * 3 * sizeof(float));
+	tangents = (float*)malloc(MAX_VERTEX_COUNT * 3 * sizeof(float));
 	texcoords = (float*)malloc(MAX_VERTEX_COUNT * 4 * sizeof(float));
+	texids = (float*)malloc(MAX_VERTEX_COUNT * 4 * sizeof(float));
 	colors = (byte*)malloc(MAX_VERTEX_COUNT * 3 * sizeof(byte));
 	objectids = (byte*)malloc(MAX_VERTEX_COUNT * sizeof(byte));
 	indices = (uint*)malloc(MAX_INDEX_COUNT * sizeof(uint));
@@ -18,7 +20,9 @@ BatchData::BatchData() {
 BatchData::~BatchData() {
 	free(vertices);
 	free(normals);
+	free(tangents);
 	free(texcoords);
+	free(texids);
 	free(colors);
 	free(objectids);
 	free(indices);
@@ -45,7 +49,7 @@ void BatchData::addObject(Object* object, Mesh* mesh) {
 		if (mesh->materialids)
 			mat = MaterialManager::materials->find(mesh->materialids[i]);
 
-		VECTOR3D vertex3 = mesh->vertices3[i];
+		vec3 vertex3 = mesh->vertices3[i];
 		vertices[vertexCount * 3 + 0] = vertex3.x;
 		vertices[vertexCount * 3 + 1] = vertex3.y;
 		vertices[vertexCount * 3 + 2] = vertex3.z;
@@ -54,10 +58,19 @@ void BatchData::addObject(Object* object, Mesh* mesh) {
 		normals[vertexCount * 3 + 1] = mesh->normals4[i].y;
 		normals[vertexCount * 3 + 2] = mesh->normals4[i].z;
 
+		tangents[vertexCount * 3 + 0] = mesh->tangents[i].x;
+		tangents[vertexCount * 3 + 1] = mesh->tangents[i].y;
+		tangents[vertexCount * 3 + 2] = mesh->tangents[i].z;
+
 		texcoords[vertexCount * 4 + 0] = mesh->texcoords[i].x;
 		texcoords[vertexCount * 4 + 1] = mesh->texcoords[i].y;
-		texcoords[vertexCount * 4 + 2] = mat->texOfs1.x;
-		texcoords[vertexCount * 4 + 3] = mat->texOfs1.y;
+		texcoords[vertexCount * 4 + 2] = mat->exTexids.x;
+		texcoords[vertexCount * 4 + 3] = mat->exTexids.y;
+
+		texids[vertexCount * 4 + 0] = mat->texids.x;
+		texids[vertexCount * 4 + 1] = mat->texids.y;
+		texids[vertexCount * 4 + 2] = mat->texids.z;
+		texids[vertexCount * 4 + 3] = mat->texids.w;
 
 		colors[vertexCount * 3 + 0] = (byte)(mat->ambient.x * 255);
 		colors[vertexCount * 3 + 1] = (byte)(mat->diffuse.x * 255);

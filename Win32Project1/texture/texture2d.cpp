@@ -11,7 +11,6 @@ Texture2D::Texture2D(float w,float h,int t,int p,int c,bool clampBorder) {
 	if (type == TEXTURE_TYPE_DEPTH) channel = 1;
 
 	glGenTextures(1,&id);
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D,id);
 	GLint filterParam = precision >= HIGH_PRE ? GL_LINEAR : GL_NEAREST;
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterParam);
@@ -21,11 +20,9 @@ Texture2D::Texture2D(float w,float h,int t,int p,int c,bool clampBorder) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 		float borderColor[4] = { 1, 1, 1, 1 };
 		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-	} else {
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	}
+	} 
 	preDepth = precision >= HIGH_PRE ? GL_DEPTH_COMPONENT32 : GL_DEPTH_COMPONENT24;
+	if (precision == FLOAT_PRE) preDepth = GL_DEPTH_COMPONENT32F;
 	format = GL_RGBA;
 	
 	preColor = precision >= HIGH_PRE ? GL_RGBA16 : GL_RGBA8;
@@ -76,13 +73,26 @@ Texture2D::Texture2D(float w,float h,int t,int p,int c,bool clampBorder) {
 
 	if (texData) free(texData);
 	glBindTexture(GL_TEXTURE_2D,0);
+
+	hnd = genBindless();
 }
 
 Texture2D::~Texture2D() {
+	releaseBindless(hnd);
 	glDeleteTextures(1, &id);
 }
 
 void Texture2D::copyDataFrom(Texture2D* src) {
 	glCopyImageSubData(src->id, GL_TEXTURE_2D, 0, 0, 0, 0,
 		id, GL_TEXTURE_2D, 0, 0, 0, 0, width, height, 1);
+}
+
+u64 Texture2D::genBindless() {
+	u64 texHnd = glGetTextureHandleARB(id);
+	glMakeTextureHandleResidentARB(texHnd);
+	return texHnd;
+}
+
+void Texture2D::releaseBindless(u64 texHnd) {
+	glMakeTextureHandleNonResidentARB(texHnd);
 }

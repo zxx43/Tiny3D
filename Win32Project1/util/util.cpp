@@ -1,9 +1,9 @@
 #include "util.h"
 
-MATRIX4X4 lookAt(float eyeX, float eyeY, float eyeZ,
+mat4 lookAt(float eyeX, float eyeY, float eyeZ,
 		float centerX, float centerY, float centerZ,
 		float upX, float upY, float upZ) {
-	static VECTOR3D eye, center, up;
+	static vec3 eye, center, up;
 	eye.x=eyeX;
 	eye.y=eyeY;
 	eye.z=eyeZ;
@@ -14,14 +14,14 @@ MATRIX4X4 lookAt(float eyeX, float eyeY, float eyeZ,
 	up.y=upY;
 	up.z=upZ;
 
-	VECTOR3D f=center - eye;
+	vec3 f=center - eye;
 	f.Normalize();
-	VECTOR3D s=f.CrossProduct(up);
+	vec3 s=f.CrossProduct(up);
 	s.Normalize();
-	VECTOR3D u=s.CrossProduct(f);
+	vec3 u=s.CrossProduct(f);
 	u.Normalize();
 
-	MATRIX4X4 mat;
+	mat4 mat;
 	mat.entries[0]=s.x;
 	mat.entries[4]=s.y;
 	mat.entries[8]=s.z;
@@ -37,15 +37,15 @@ MATRIX4X4 lookAt(float eyeX, float eyeY, float eyeZ,
 	return mat;
 }
 
-MATRIX4X4 lookAt(const VECTOR3D& eye, const VECTOR3D& center, const VECTOR3D& up) {
-	VECTOR3D f = center - eye;
+mat4 lookAt(const vec3& eye, const vec3& center, const vec3& up) {
+	vec3 f = center - eye;
 	f.Normalize();
-	VECTOR3D s = f.CrossProduct(up);
+	vec3 s = f.CrossProduct(up);
 	s.Normalize();
-	VECTOR3D u = s.CrossProduct(f);
+	vec3 u = s.CrossProduct(f);
 	u.Normalize();
 
-	MATRIX4X4 mat;
+	mat4 mat;
 	mat.entries[0] = s.x;
 	mat.entries[4] = s.y;
 	mat.entries[8] = s.z;
@@ -61,11 +61,11 @@ MATRIX4X4 lookAt(const VECTOR3D& eye, const VECTOR3D& center, const VECTOR3D& up
 	return mat;
 }
 
-MATRIX4X4 perspective(float fovy,float aspect,float zNear,float zFar) {
+mat4 perspective(float fovy,float aspect,float zNear,float zFar) {
 	float rFovy=fovy*A2R;
 	float tanHalfFovy=tanf(rFovy*0.5);
 
-	MATRIX4X4 mat;
+	mat4 mat;
 	mat.entries[0]=1/(aspect * tanHalfFovy);
 	mat.entries[5]=1/tanHalfFovy;
 	mat.entries[10]=-(zFar + zNear)/(zFar - zNear);
@@ -75,8 +75,8 @@ MATRIX4X4 perspective(float fovy,float aspect,float zNear,float zFar) {
 	return mat;
 }
 
-MATRIX4X4 ortho(float left, float right, float bottom, float top, float n, float f) {
-	MATRIX4X4 mat;
+mat4 ortho(float left, float right, float bottom, float top, float n, float f) {
+	mat4 mat;
 	mat.entries[0]=2.0f/(right-left);
 	mat.entries[5]=2.0f/(top-bottom);
 	mat.entries[10]=-2.0f/(f-n);
@@ -89,20 +89,20 @@ MATRIX4X4 ortho(float left, float right, float bottom, float top, float n, float
 int project(float objX, float objY, float objZ,
 		const float* model, const float* proj, const int* view,
 		float* winX, float* winY, float* winZ) {
-	VECTOR4D point;
+	vec4 point;
 	point.x=objX;
 	point.y=objY;
 	point.z=objZ;
 	point.w=1.0f;
 
-	MATRIX4X4 modelMat,projMat;
+	mat4 modelMat,projMat;
 	modelMat = model;
 	projMat = proj;
 	point=modelMat * point;
 	point=projMat * point;
 	point /= point.w;
 
-	VECTOR4D bias(0.5,0.5,0.5,0.5);
+	vec4 bias(0.5,0.5,0.5,0.5);
 	point = (point * 0.5);
 	point = (point + bias);
 
@@ -114,11 +114,11 @@ int project(float objX, float objY, float objZ,
 	return 1;
 }
 
-MATRIX4X4 rotateX(float angle) {
+mat4 rotateX(float angle) {
 	float radian=angle*A2R;
 	float sinA=sinf(radian);
 	float cosA=cosf(radian);
-	MATRIX4X4 mat;
+	mat4 mat;
 	mat.entries[5]=cosA;
 	mat.entries[6]=sinA;
 	mat.entries[9]=-sinA;
@@ -126,11 +126,11 @@ MATRIX4X4 rotateX(float angle) {
 	return mat;
 }
 
-MATRIX4X4 rotateY(float angle) {
+mat4 rotateY(float angle) {
 	float radian=angle*A2R;
 	float sinA=sinf(radian);
 	float cosA=cosf(radian);
-	MATRIX4X4 mat;
+	mat4 mat;
 	mat.entries[0]=cosA;
 	mat.entries[2]=-sinA;
 	mat.entries[8]=sinA;
@@ -138,11 +138,11 @@ MATRIX4X4 rotateY(float angle) {
 	return mat;
 }
 
-MATRIX4X4 rotateZ(float angle) {
+mat4 rotateZ(float angle) {
 	float radian=angle*A2R;
 	float sinA=sinf(radian);
 	float cosA=cosf(radian);
-	MATRIX4X4 mat;
+	mat4 mat;
 	mat.entries[0]=cosA;
 	mat.entries[1]=sinA;
 	mat.entries[4]=-sinA;
@@ -150,58 +150,58 @@ MATRIX4X4 rotateZ(float angle) {
 	return mat;
 }
 
-MATRIX4X4 scale(float size) {
-	MATRIX4X4 mat;
+mat4 scale(float size) {
+	mat4 mat;
 	mat.entries[0]=size;
 	mat.entries[5]=size;
 	mat.entries[10]=size;
 	return mat;
 }
 
-MATRIX4X4 scale(float sx, float sy, float sz) {
-	MATRIX4X4 mat;
+mat4 scale(float sx, float sy, float sz) {
+	mat4 mat;
 	mat.entries[0] = sx;
 	mat.entries[5] = sy;
 	mat.entries[10] = sz;
 	return mat;
 }
 
-MATRIX4X4 scaleX(float size) {
-	MATRIX4X4 mat;
+mat4 scaleX(float size) {
+	mat4 mat;
 	mat.entries[0]=size;
 	return mat;
 }
 
-MATRIX4X4 scaleY(float size) {
-	MATRIX4X4 mat;
+mat4 scaleY(float size) {
+	mat4 mat;
 	mat.entries[5]=size;
 	return mat;
 }
 
-MATRIX4X4 scaleZ(float size) {
-	MATRIX4X4 mat;
+mat4 scaleZ(float size) {
+	mat4 mat;
 	mat.entries[10]=size;
 	return mat;
 }
 
-MATRIX4X4 translate(float tx,float ty,float tz) {
-	MATRIX4X4 mat;
+mat4 translate(float tx,float ty,float tz) {
+	mat4 mat;
 	mat.entries[12]=tx;
 	mat.entries[13]=ty;
 	mat.entries[14]=tz;
 	return mat;
 }
 
-MATRIX4X4 translate(const VECTOR3D& t) {
-	MATRIX4X4 mat;
+mat4 translate(const vec3& t) {
+	mat4 mat;
 	mat.entries[12] = t.x;
 	mat.entries[13] = t.y;
 	mat.entries[14] = t.z;
 	return mat;
 }
 
-VECTOR4D mul(const VECTOR4D& a,const VECTOR4D& b) {
-	VECTOR4D vec;
+vec4 mul(const vec4& a,const vec4& b) {
+	vec4 vec;
 	vec.x=a.x*b.x;
 	vec.y=a.y*b.y;
 	vec.z=a.z*b.z;
@@ -209,20 +209,20 @@ VECTOR4D mul(const VECTOR4D& a,const VECTOR4D& b) {
 	return vec;
 }
 
-VECTOR3D mul(const VECTOR3D& a, const VECTOR3D& b) {
-	VECTOR3D vec;
+vec3 mul(const vec3& a, const vec3& b) {
+	vec3 vec;
 	vec.x = a.x*b.x;
 	vec.y = a.y*b.y;
 	vec.z = a.z*b.z;
 	return vec;
 }
 
-bool CaculateIntersect(const Line* line, const Plane* plane, const float lineDistance, VECTOR3D& result) {
-	VECTOR3D p = line->origin;// (x1, y1, z1)
-	VECTOR3D v = line->dir;// (Vx, Vy, Vz)   
+bool CaculateIntersect(const Line* line, const Plane* plane, const float lineDistance, vec3& result) {
+	vec3 p = line->origin;// (x1, y1, z1)
+	vec3 v = line->dir;// (Vx, Vy, Vz)   
 
 	// from plane: ax + by + cz + d = 0
-	VECTOR3D n = plane->normal;// (a, b, c)
+	vec3 n = plane->normal;// (a, b, c)
 	float d = plane->d;// constant term of plane
 
 	// dot products
@@ -240,4 +240,15 @@ bool CaculateIntersect(const Line* line, const Plane* plane, const float lineDis
 	// find intersection point
 	result = p + (t * v);
 	return true;
+}
+
+vec3 CaculateTangent(const vec3& p0, const vec3& p1, const vec3& p2, const vec2& t0, const vec2& t1, const vec2& t2) {
+	vec3 deltaPos1 = p1 - p0;
+	vec3 deltaPos2 = p2 - p0;
+	vec2 deltaUV1 = t1 - t0;
+	vec2 deltaUV2 = t2 - t0;
+	float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+	vec3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
+	tangent.Normalize();
+	return tangent;
 }

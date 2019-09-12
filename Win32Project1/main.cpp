@@ -31,6 +31,7 @@ void CreateApplication();
 void ReleaseApplication();
 
 float fullscreen = 0.0;
+bool inited = false;
 
 void KillWindow() {
 	DeleteMutex();
@@ -88,7 +89,7 @@ void DrawWindow() {
 DWORD WINAPI FrameThreadRun(LPVOID param) {
 	while (!app->willExit && app->dualThread) {
 		actTime = timeGetTime();
-		if(!dataPrepared) {
+		if(!dataPrepared && inited) {
 			app->act(startTime, actTime);
 			app->prepare(true);
 			app->animate(startTime, actTime);
@@ -126,6 +127,7 @@ void InitGL() {
 	app->init();
 	InitMutex();
 	CreateThreads();
+	inited = true;
 }
 
 void CreateThreads() {
@@ -248,7 +250,7 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam) {
 	switch(msg) {
 		case WM_PAINT:
 			BeginPaint(hWnd, &ps);
-			if (!app->willExit)
+			if (!app->willExit && inited)
 				DrawWindow();
 			SwapBuffers(hdc);
 			EndPaint(hWnd, &ps);

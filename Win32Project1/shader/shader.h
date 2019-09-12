@@ -9,6 +9,7 @@
 #define SHADER_H_
 
 #include "shaderprogram.h"
+#include "../constants/constants.h"
 #include <map>
 #include <string>
 
@@ -21,6 +22,20 @@ private:
 	ShaderProgram* program;
 	std::map<std::string,GLuint> paramLocations;
 	std::map<std::string,GLuint> attribLocations;
+	std::map<u64, bool> bindedTexs;
+	std::map<int, std::string> texSlots;
+public:
+	bool isTexBinded(u64 texhnd) { 
+		std::map<u64, bool>::iterator it = bindedTexs.find(texhnd);
+		if (it == bindedTexs.end()) 
+			return false; 
+		else 
+			return it->second; 
+	}
+	void rebindTex(u64 texhnd) { bindedTexs[texhnd] = false; }
+	void setSlot(const std::string& texName, int slot) { texSlots[slot] = texName; }
+	bool hasSlot(int slot) { return texSlots.find(slot) != texSlots.end(); }
+	std::string getSlot(int slot) { return texSlots[slot]; }
 public:
 	std::string name;
 	Shader(const char* vert, const char* frag);
@@ -45,6 +60,8 @@ public:
 	void setMatrix3x4(const char* param, int count, float* matrices);
 	void setMatrix3(const char* param, float* matrix);
 	void setMatrix3(const char* param, int count, float* matrices);
+	void setHandle64(const char* param, u64 value);
+	void setHandle64v(const char* param, int count, u64* arr);
 };
 
 

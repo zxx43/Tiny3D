@@ -3,8 +3,8 @@
 
 Camera::Camera(float height) {
 	position.x = 0; position.y = 0; position.z = 0;
-	lookDir = VECTOR3D();
-	lookDir4 = VECTOR4D();
+	lookDir = vec3();
+	lookDir4 = vec4();
 	up.x = 0; up.y = 1; up.z = 0;
 
 	xrot = 0; yrot = 0;
@@ -48,15 +48,15 @@ void Camera::initOrthoCamera(float left, float right, float bottom, float top, f
 	invProjMatrix = projectMatrix.GetInverse();
 }
 
-void Camera::setView(const VECTOR3D& pos, const VECTOR3D& dir) {
+void Camera::setView(const vec3& pos, const vec3& dir) {
 	position.x = pos.x; position.y = pos.y; position.z = pos.z;
 	lookDir.x = dir.x; lookDir.y = dir.y; lookDir.z = dir.z;
 
-	VECTOR3D center(lookDir.x + position.x, lookDir.y + position.y, lookDir.z + position.z);
+	vec3 center(lookDir.x + position.x, lookDir.y + position.y, lookDir.z + position.z);
 	viewMatrix = lookAt(position, center, up);
 }
 
-void Camera::updateLook(const VECTOR3D& pos, const VECTOR3D& dir) {
+void Camera::updateLook(const vec3& pos, const vec3& dir) {
 	setView(pos,dir);
 	updateFrustum();
 }
@@ -163,7 +163,7 @@ void Camera::move(int dir,float speed) {
 	updateMoveable(TRANS_TRANSLATE);
 }
 
-void Camera::moveTo(const VECTOR3D& pos) {
+void Camera::moveTo(const vec3& pos) {
 	position.x = pos.x; 
 	position.y = pos.y; 
 	position.z = pos.z;

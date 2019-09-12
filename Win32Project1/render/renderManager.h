@@ -50,7 +50,7 @@ struct Renderable {
 
 class RenderManager {
 public:
-	VECTOR3D lightDir;
+	vec3 lightDir;
 	RenderState* state;
 	bool enableSsr;
 private:
@@ -74,7 +74,7 @@ public:
 	FrameBuffer* farBuffer;
 	FrameBuffer* reflectBuffer;
 
-	RenderManager(int quality, Camera* view, float distance1, float distance2, bool copyData, const VECTOR3D& light);
+	RenderManager(int quality, Camera* view, float distance1, float distance2, bool copyData, const vec3& light);
 	~RenderManager();
 
 	void act(float dTime);
@@ -98,7 +98,7 @@ public:
 	void drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter);
 	void drawSSRFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter);
 	void drawSSGFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter);
-	void drawTexture2Screen(Render* render, Scene* scene, uint texid);
+	void drawTexture2Screen(Render* render, Scene* scene, u64 texhnd);
 };
 
 

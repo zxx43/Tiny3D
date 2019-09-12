@@ -294,6 +294,9 @@
     <ClCompile Include="batch\batchData.cpp">
       <Filter>Source Files\batch</Filter>
     </ClCompile>
+    <ClCompile Include="texture\texturebindless.cpp">
+      <Filter>Source Files\texture</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="animation\animation.h">
@@ -515,173 +518,101 @@
     <ClInclude Include="batch\batchData.h">
       <Filter>Source Files\batch</Filter>
     </ClInclude>
+    <ClInclude Include="texture\texturebindless.h">
+      <Filter>Source Files\texture</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\x64\Release\shader\bone.frag">
+    <None Include="..\Tiny\shader\billboard.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\bone.vert">
+    <None Include="..\Tiny\shader\billboard.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\phong.frag">
+    <None Include="..\Tiny\shader\blur.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\phong.vert">
+    <None Include="..\Tiny\shader\bone.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\sky.frag">
+    <None Include="..\Tiny\shader\bone.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\sky.vert">
+    <None Include="..\Tiny\shader\combined.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\terrain.frag">
+    <None Include="..\Tiny\shader\debug.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\terrain.vert">
+    <None Include="..\Tiny\shader\debug.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\bone_shadow.frag">
+    <None Include="..\Tiny\shader\deferred.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\bone_shadow.vert">
+    <None Include="..\Tiny\shader\dof.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\phong_shadow.frag">
+    <None Include="..\Tiny\shader\fxaa.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\phong_shadow.vert">
+    <None Include="..\Tiny\shader\grass.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\phong_shadow_low.frag">
+    <None Include="..\Tiny\shader\instance.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\phong_shadow_low.vert">
+    <None Include="..\Tiny\shader\instance_simp.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\phong_ins.vert">
+    <None Include="..\Tiny\shader\mean.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\phong_shadow_ins.vert">
+    <None Include="..\Tiny\shader\phong.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\phong_shadow_low_ins.vert">
+    <None Include="..\Tiny\shader\phong.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\phong_ins.frag">
+    <None Include="..\Tiny\shader\post.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\deferred.vert">
+    <None Include="..\Tiny\shader\screen.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\deferred.frag">
+    <None Include="..\Tiny\shader\shadow_nontex.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\billboard.frag">
+    <None Include="..\Tiny\shader\shadow_tex.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\billboard.vert">
+    <None Include="..\Tiny\shader\sky.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\billboard_shadow.frag">
+    <None Include="..\Tiny\shader\sky.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\billboard_shadow.vert">
+    <None Include="..\Tiny\shader\ssg.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\water.frag">
+    <None Include="..\Tiny\shader\ssr.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\water.vert">
+    <None Include="..\Tiny\shader\terrain.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\fxaa.frag">
+    <None Include="..\Tiny\shader\terrain.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\fxaa.vert">
+    <None Include="..\Tiny\shader\water.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shader\dof.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\dof.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\blur.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\blur.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\debug.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\debug.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\screen.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\screen.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\phong_shadow_ins.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\ssr.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\ssr.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\mean.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\mean.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\combined.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\combined.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\phong_shadow_ins_simp.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\phong_ins_simp.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\phong_ins_simp.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\phong_shadow_ins_simp.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\phong_grass.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\phong_grass.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\phong_shadow_grass.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\phong_shadow_grass.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\phong_grass.geom">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\ssg.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shader\ssg.vert">
+    <None Include="..\Tiny\shader\water.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\x64\Release\config\config.txt">
+    <Text Include="..\Tiny\config\config.txt">
       <Filter>config</Filter>
     </Text>
   </ItemGroup>

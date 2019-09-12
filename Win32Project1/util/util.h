@@ -12,43 +12,43 @@
 #include "../constants/constants.h"
 #include <stdio.h>
 
-MATRIX4X4 lookAt(float eyeX, float eyeY, float eyeZ,
+mat4 lookAt(float eyeX, float eyeY, float eyeZ,
 		float centerX, float centerY, float centerZ,
 		float upX, float upY, float upZ);
 
-MATRIX4X4 lookAt(const VECTOR3D& eye, const VECTOR3D& center, const VECTOR3D& up);
+mat4 lookAt(const vec3& eye, const vec3& center, const vec3& up);
 
-MATRIX4X4 perspective(float fovy,float aspect,float zNear,float zFar);
+mat4 perspective(float fovy,float aspect,float zNear,float zFar);
 
-MATRIX4X4 ortho(float left, float right, float bottom, float top, float n, float f);
+mat4 ortho(float left, float right, float bottom, float top, float n, float f);
 
 int project(float objX, float objY, float objZ,
 		const float* model, const float* proj, const int* view,
 		float* winX, float* winY, float* winZ);
 
-MATRIX4X4 rotateX(float angle);
+mat4 rotateX(float angle);
 
-MATRIX4X4 rotateY(float angle);
+mat4 rotateY(float angle);
 
-MATRIX4X4 rotateZ(float angle);
+mat4 rotateZ(float angle);
 
-MATRIX4X4 scale(float size);
+mat4 scale(float size);
 
-MATRIX4X4 scale(float sx, float sy, float sz);
+mat4 scale(float sx, float sy, float sz);
 
-MATRIX4X4 scaleX(float size);
+mat4 scaleX(float size);
 
-MATRIX4X4 scaleY(float size);
+mat4 scaleY(float size);
 
-MATRIX4X4 scaleZ(float size);
+mat4 scaleZ(float size);
 
-MATRIX4X4 translate(float tx,float ty,float tz);
+mat4 translate(float tx,float ty,float tz);
 
-MATRIX4X4 translate(const VECTOR3D& t);
+mat4 translate(const vec3& t);
 
-VECTOR4D mul(const VECTOR4D& a,const VECTOR4D& b);
+vec4 mul(const vec4& a,const vec4& b);
 
-VECTOR3D mul(const VECTOR3D& a, const VECTOR3D& b);
+vec3 mul(const vec3& a, const vec3& b);
 
 inline float angleToRadian(float angle) {
 	return angle*A2R;
@@ -59,36 +59,42 @@ inline float radianToAngle(float radian) {
 }
 
 struct Line {
-	VECTOR3D dir;
-	VECTOR3D origin;
-	Line(const VECTOR3D& ld, const VECTOR3D& lo) {
+	vec3 dir;
+	vec3 origin;
+	Line(const vec3& ld, const vec3& lo) {
 		dir = ld;
 		origin = lo;
 	}
 };
 
 struct Plane {
-	VECTOR3D normal;
+	vec3 normal;
 	float d;
 	Plane() {}
-	Plane(const VECTOR3D& pn, const float pd) {
+	Plane(const vec3& pn, const float pd) {
 		normal = pn;
 		d = pd;
 	}
-	void update(const VECTOR3D& pn, const float pd) {
+	void update(const vec3& pn, const float pd) {
 		normal = pn;
 		d = pd;
 	}
 };
 
-bool CaculateIntersect(const Line* line, const Plane* plane, const float lineDistance, VECTOR3D& result);
+bool CaculateIntersect(const Line* line, const Plane* plane, const float lineDistance, vec3& result);
+
+vec3 CaculateTangent(const vec3& p0, const vec3& p1, const vec3& p2, const vec2& t0, const vec2& t1, const vec2& t2);
+inline vec3 CaculateTangent(const vec4& p0, const vec4& p1, const vec4& p2, const vec2& t0, const vec2& t1, const vec2& t2) {
+	vec3 p03(p0.x, p0.y, p0.z), p13(p1.x, p1.y, p1.z), p23(p2.x, p2.y, p2.z);
+	return CaculateTangent(p03, p13, p23, t0, t1, t2);
+}
 
 inline void RestrictAngle(float& angle) {
 	if (angle > 360.0) angle -= 360.0;
 	else if (angle < 0.0) angle += 360.0;
 }
 
-inline float GetVec2(const VECTOR2D* vec2, int i) {
+inline float GetVec2(const vec2* vec2, int i) {
 	float ret;
 	switch (i) {
 		case 0:
@@ -101,7 +107,7 @@ inline float GetVec2(const VECTOR2D* vec2, int i) {
 	return ret;
 }
 
-inline float GetVec3(const VECTOR3D* vec3, int i) {
+inline float GetVec3(const vec3* vec3, int i) {
 	float ret;
 	switch (i) {
 		case 0:
@@ -117,7 +123,7 @@ inline float GetVec3(const VECTOR3D* vec3, int i) {
 	return ret;
 }
 
-inline float GetVec4(const VECTOR4D* vec4, int i) {
+inline float GetVec4(const vec4* vec4, int i) {
 	float ret;
 	switch (i) {
 		case 0:

@@ -1,14 +1,14 @@
 #include "frustum.h"
 
 Frustum::Frustum() {
-	ndcVertex[0]=VECTOR4D(-1.0f, -1.0f, 1.0f, 1.0f);
-	ndcVertex[1]=VECTOR4D(1.0f, -1.0f, 1.0f, 1.0f);
-	ndcVertex[2]=VECTOR4D(-1.0f, 1.0f, 1.0f, 1.0f);
-	ndcVertex[3]=VECTOR4D(1.0f, 1.0f, 1.0f, 1.0f);
-	ndcVertex[4]=VECTOR4D(-1.0f, -1.0f, -1.0f, 1.0f);
-	ndcVertex[5]=VECTOR4D(1.0f, -1.0f, -1.0f, 1.0f);
-	ndcVertex[6]=VECTOR4D(-1.0f, 1.0f, -1.0f, 1.0f);
-	ndcVertex[7]=VECTOR4D(1.0f, 1.0f, -1.0f, 1.0f);
+	ndcVertex[0]=vec4(-1.0f, -1.0f, 1.0f, 1.0f);
+	ndcVertex[1]=vec4(1.0f, -1.0f, 1.0f, 1.0f);
+	ndcVertex[2]=vec4(-1.0f, 1.0f, 1.0f, 1.0f);
+	ndcVertex[3]=vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	ndcVertex[4]=vec4(-1.0f, -1.0f, -1.0f, 1.0f);
+	ndcVertex[5]=vec4(1.0f, -1.0f, -1.0f, 1.0f);
+	ndcVertex[6]=vec4(-1.0f, 1.0f, -1.0f, 1.0f);
+	ndcVertex[7]=vec4(1.0f, 1.0f, -1.0f, 1.0f);
 
 	planeVertexIndex[0] = 0; planeVertexIndex[1] = 4; planeVertexIndex[2] = 6; planeVertexIndex[3] = 2;
 	planeVertexIndex[4] = 3; planeVertexIndex[5] = 7; planeVertexIndex[6] = 5; planeVertexIndex[7] = 6;
@@ -20,8 +20,8 @@ Frustum::Frustum() {
 
 Frustum::~Frustum() {}
 
-void Frustum::update(const MATRIX4X4& invViewProjectMatrix, const VECTOR3D& lookDir) {
-	static VECTOR4D worldVert(0, 0, 0, 1);
+void Frustum::update(const mat4& invViewProjectMatrix, const vec3& lookDir) {
+	static vec4 worldVert(0, 0, 0, 1);
 	for (int i = 0; i<8; i++) {
 		worldVert = invViewProjectMatrix * ndcVertex[i];
 		float invW = 1.0 / worldVert.w;
@@ -62,9 +62,9 @@ void Frustum::update(const MATRIX4X4& invViewProjectMatrix, const VECTOR3D& look
 	planes[5].update(normals[5], ds[5]);
 }
 
-bool Frustum::intersectsWidthRay(const VECTOR3D& origin, const VECTOR3D& dir, float maxDistance) {
+bool Frustum::intersectsWidthRay(const vec3& origin, const vec3& dir, float maxDistance) {
 	Line line(dir, origin);
-	static VECTOR3D interPoint(0, 0, 0);
+	static vec3 interPoint(0, 0, 0);
 	for (uint i = 0; i < 6; i++) {
 	//for (uint i = 0; i < 5; i++) {
 		bool isInter = CaculateIntersect(&line, &planes[i], maxDistance, interPoint);
@@ -73,18 +73,18 @@ bool Frustum::intersectsWidthRay(const VECTOR3D& origin, const VECTOR3D& dir, fl
 		uint pi1 = planeVertexIndex[i * 4 + 1];
 		uint pi2 = planeVertexIndex[i * 4 + 2];
 		uint pi3 = planeVertexIndex[i * 4 + 3];
-		VECTOR3D a = worldVertex[pi0];
-		VECTOR3D b = worldVertex[pi1];
-		VECTOR3D c = worldVertex[pi2];
-		VECTOR3D d = worldVertex[pi3];
-		VECTOR3D ia = a - interPoint;
-		VECTOR3D ib = b - interPoint;
-		VECTOR3D ic = c - interPoint;
-		VECTOR3D id = d - interPoint;
-		VECTOR3D aib = ia.CrossProduct(ib);
-		VECTOR3D bic = ib.CrossProduct(ic);
-		VECTOR3D cid = ic.CrossProduct(id);
-		VECTOR3D dia = id.CrossProduct(ia);
+		vec3 a = worldVertex[pi0];
+		vec3 b = worldVertex[pi1];
+		vec3 c = worldVertex[pi2];
+		vec3 d = worldVertex[pi3];
+		vec3 ia = a - interPoint;
+		vec3 ib = b - interPoint;
+		vec3 ic = c - interPoint;
+		vec3 id = d - interPoint;
+		vec3 aib = ia.CrossProduct(ib);
+		vec3 bic = ib.CrossProduct(ic);
+		vec3 cid = ic.CrossProduct(id);
+		vec3 dia = id.CrossProduct(ia);
 		if ((aib.DotProduct(bic) >= 0 && bic.DotProduct(cid) >= 0 && cid.DotProduct(dia) >= 0 && dia.DotProduct(aib) >= 0) ||
 			(aib.DotProduct(bic) <= 0 && bic.DotProduct(cid) <= 0 && cid.DotProduct(dia) <= 0 && dia.DotProduct(aib) <= 0))
 			return true;

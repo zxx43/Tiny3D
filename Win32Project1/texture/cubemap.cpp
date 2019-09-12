@@ -11,7 +11,6 @@ CubeMap::CubeMap(const char* xpos,const char* xneg,const char* ypos,
 	znegImg=new BmpImage(zneg);
 
 	glGenTextures(1,&id);
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP,id);
 
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -40,16 +39,37 @@ CubeMap::CubeMap(const char* xpos,const char* xneg,const char* ypos,
 		0, GL_RGBA, GL_UNSIGNED_BYTE, znegImg->data);
 
 	glBindTexture(GL_TEXTURE_CUBE_MAP,0);
-
+	///*
 	delete xposImg; xposImg = NULL;
 	delete xnegImg; xnegImg = NULL;
 	delete yposImg; yposImg = NULL;
 	delete ynegImg; ynegImg = NULL;
 	delete zposImg; zposImg = NULL;
 	delete znegImg; znegImg = NULL;
+	//*/
+
+	hnd = genBindless();
 }
 
 CubeMap::~CubeMap() {
+	if (xposImg) delete xposImg; xposImg = NULL;
+	if (xnegImg) delete xnegImg; xnegImg = NULL;
+	if (yposImg) delete yposImg; yposImg = NULL;
+	if (ynegImg) delete ynegImg; ynegImg = NULL;
+	if (zposImg) delete zposImg; zposImg = NULL;
+	if (znegImg) delete znegImg; znegImg = NULL;
+
+	releaseBindless(hnd);
 	glDeleteTextures(1,&id);
+}
+
+u64 CubeMap::genBindless() {
+	u64 texHnd = glGetTextureHandleARB(id);
+	glMakeTextureHandleResidentARB(texHnd);
+	return texHnd;
+}
+
+void CubeMap::releaseBindless(u64 texHnd) {
+	glMakeTextureHandleNonResidentARB(texHnd);
 }
 

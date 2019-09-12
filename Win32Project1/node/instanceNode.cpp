@@ -1,15 +1,16 @@
 #include "instanceNode.h"
 #include "../render/instanceDrawcall.h"
 #include "../util/util.h"
+#include "../scene/scene.h"
 using namespace std;
 
-InstanceNode::InstanceNode(const VECTOR3D& position):Node(position, VECTOR3D(0, 0, 0)) {
+InstanceNode::InstanceNode(const vec3& position):Node(position, vec3(0, 0, 0)) {
 	type = TYPE_INSTANCE;
 	dynamic = true;
 	instance = NULL;
 	isGroup = false;
 	groupBuffer = NULL;
-	insState = new InstanceState(singleSide, false, false);
+	insState = new InstanceState(false, false);
 }
 
 InstanceNode::~InstanceNode() {
@@ -18,8 +19,8 @@ InstanceNode::~InstanceNode() {
 	delete insState;
 }
 
-void InstanceNode::addObject(Object* object) {
-	Node::addObject(object);
+void InstanceNode::addObject(Scene* scene, Object* object) {
+	Node::addObject(scene, object);
 	if (Instance::instanceTable.find(object->mesh) == Instance::instanceTable.end())
 		Instance::instanceTable[object->mesh] = 1;
 	else
@@ -38,6 +39,8 @@ void InstanceNode::addObject(Object* object) {
 		else
 			Instance::instanceTable[object->meshLow]++;
 	}
+
+	scene->addObject(object);
 }
 
 Object* InstanceNode::removeObject(Object* object) {
@@ -52,9 +55,9 @@ Object* InstanceNode::removeObject(Object* object) {
 	return object2Remove;
 }
 
-void InstanceNode::addObjects(Object** objectArray,int count) {
+void InstanceNode::addObjects(Scene* scene,Object** objectArray,int count) {
 	for(int i=0;i<count;i++)
-		this->addObject(objectArray[i]);
+		this->addObject(scene,objectArray[i]);
 }
 
 void InstanceNode::prepareGroup() {
@@ -76,14 +79,12 @@ void InstanceNode::prepareDrawcall() {
 		if (!drawcall && objects.size() > 0) {
 			Mesh* mesh = objects[0]->mesh;
 			instance = new Instance(mesh, dynamic, insState);
-			instance->singleSide = singleSide;
 			instance->initInstanceBuffers(objects[0], mesh->vertexCount, mesh->indexCount, objects.size(), true);
 			for (uint i = 0; i < objects.size(); i++)
 				instance->addObject(objects[i], i);
 
 			drawcall = new InstanceDrawcall(instance);
 			InstanceDrawcall* insDC = (InstanceDrawcall*)drawcall;
-			insDC->setSide(singleSide);
 			insDC->objectToPrepare = objects.size();
 		}
 	}

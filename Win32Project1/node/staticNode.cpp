@@ -1,8 +1,9 @@
 #include "staticNode.h"
 #include "../render/staticDrawcall.h"
 #include "../util/util.h"
+#include "../scene/scene.h"
 
-StaticNode::StaticNode(const VECTOR3D& position):Node(position, VECTOR3D(0, 0, 0)) {
+StaticNode::StaticNode(const vec3& position):Node(position, vec3(0, 0, 0)) {
 	batch = NULL;
 	dynamicBatch = true;
 	fullStatic = false;
@@ -15,9 +16,9 @@ StaticNode::~StaticNode() {
 	batch=NULL;
 }
 
-void StaticNode::addObjects(Object** objectArray,int count) {
+void StaticNode::addObjects(Scene* scene,Object** objectArray,int count) {
 	for(int i=0;i<count;i++)
-		addObject(objectArray[i]);
+		addObject(scene,objectArray[i]);
 }
 
 void StaticNode::createBatch() {
@@ -39,7 +40,6 @@ void StaticNode::createBatch() {
 
 	if (drawcall) delete drawcall;
 	drawcall=new StaticDrawcall(batch);
-	drawcall->setSide(singleSide);
 }
 
 void StaticNode::prepareDrawcall() {

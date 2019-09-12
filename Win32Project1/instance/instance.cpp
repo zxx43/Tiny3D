@@ -6,6 +6,7 @@ std::map<Mesh*, int> Instance::instanceTable;
 
 Instance::Instance(InstanceData* data, bool dyn) {
 	create(data->insMesh, dyn, data->state);
+	maxInstanceCount = data->maxInsCount;
 }
 
 Instance::Instance(Mesh* mesh, bool dyn, InstanceState* state) {
@@ -18,15 +19,16 @@ void Instance::create(Mesh* mesh, bool dyn, InstanceState* state) {
 	indexCount = 0;
 	vertexBuffer = NULL;
 	normalBuffer = NULL;
+	tangentBuffer = NULL;
 	texcoordBuffer = NULL;
+	texidBuffer = NULL;
 	colorBuffer = NULL;
 	indexBuffer = NULL;
 
-	instanceCount = 0;
+	instanceCount = 0, maxInstanceCount = 0;
 	drawcall = NULL;
 	isBillboard = instanceMesh->isBillboard;
 	isDynamic = dyn;
-	singleSide = state->singleSide;
 	isSimple = state->simple;
 	isGrass = state->grass;
 
@@ -39,7 +41,9 @@ void Instance::create(Mesh* mesh, bool dyn, InstanceState* state) {
 Instance::~Instance() {
 	if (vertexBuffer) free(vertexBuffer); vertexBuffer = NULL;
 	if (normalBuffer) free(normalBuffer); normalBuffer = NULL;
+	if (tangentBuffer) free(tangentBuffer); tangentBuffer = NULL;
 	if (texcoordBuffer) free(texcoordBuffer); texcoordBuffer = NULL;
+	if (texidBuffer) free(texidBuffer); texidBuffer = NULL;
 	if (colorBuffer) free(colorBuffer); colorBuffer = NULL;
 	if (indexBuffer) free(indexBuffer); indexBuffer = NULL;
 
@@ -54,7 +58,9 @@ Instance::~Instance() {
 void Instance::releaseInstanceData() {
 	if (vertexBuffer) free(vertexBuffer); vertexBuffer = NULL;
 	if (normalBuffer) free(normalBuffer); normalBuffer = NULL;
+	if (tangentBuffer) free(tangentBuffer); tangentBuffer = NULL;
 	if (texcoordBuffer) free(texcoordBuffer); texcoordBuffer = NULL;
+	if (texidBuffer) free(texidBuffer); texidBuffer = NULL;
 	if (colorBuffer) free(colorBuffer); colorBuffer = NULL;
 	if (indexBuffer) free(indexBuffer); indexBuffer = NULL;
 
@@ -69,7 +75,9 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 	vertexCount = vertices;
 	vertexBuffer = (float*)malloc(vertexCount * 3 * sizeof(float));
 	normalBuffer = (float*)malloc(vertexCount * 3 * sizeof(float));
+	tangentBuffer = (float*)malloc(vertexCount * 3 * sizeof(float));
 	texcoordBuffer = (float*)malloc(vertexCount * 4 * sizeof(float));
+	texidBuffer = (float*)malloc(vertexCount * 2 * sizeof(float));
 	colorBuffer = (byte*)malloc(vertexCount * 3 * sizeof(byte));
 
 	indexCount=indices;
@@ -79,9 +87,10 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 	int mid = object->material;
 	if (isBillboard) mid = object->billboard->material;
 	for(int i=0;i<vertexCount;i++) {
-		VECTOR4D vertex=instanceMesh->vertices[i];
-		VECTOR3D normal=instanceMesh->normals[i];
-		VECTOR2D texcoord=instanceMesh->texcoords[i];
+		vec4 vertex=instanceMesh->vertices[i];
+		vec3 normal=instanceMesh->normals[i];
+		vec3 tangent = instanceMesh->tangents[i];
+		vec2 texcoord=instanceMesh->texcoords[i];
 
 		Material* mat = NULL;
 		if (!instanceMesh->materialids && mid >= 0)
@@ -89,18 +98,15 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 		else if (instanceMesh->materialids)
 			mat = MaterialManager::materials->find(instanceMesh->materialids[i]);
 		if (!mat) mat = MaterialManager::materials->find(0);
-		VECTOR3D ambient = mat->ambient;
-		VECTOR3D diffuse = mat->diffuse;
-		VECTOR3D specular = mat->specular;
-		VECTOR4D texOfs = mat->texOfs1;
-		float texWidth = mat->texSize.x;
-		float texHeight = mat->texSize.y;
-		float pixWidth = mat->texSize.z;
-		float pixHeight = mat->texSize.w;
+		vec3 ambient = mat->ambient;
+		vec3 diffuse = mat->diffuse;
+		vec3 specular = mat->specular;
+		vec4 texids = mat->texids;
 
 		for (int v = 0; v < 3; v++) {
 			vertexBuffer[i * 3 + v] = GetVec4(&vertex, v);
 			normalBuffer[i * 3 + v] = GetVec3(&normal, v);
+			tangentBuffer[i * 3 + v] = GetVec3(&tangent, v);
 		}
 
 		if (texcoord.x < 0) 
@@ -112,12 +118,15 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 		else if (texcoord.y > 1)
 			texcoord.y = texcoord.y - (int)texcoord.y;
 
-		texcoordBuffer[i * 4] = texcoord.x;
+		texcoordBuffer[i * 4 + 0] = texcoord.x;
 		texcoordBuffer[i * 4 + 1] = texcoord.y;
-		texcoordBuffer[i * 4 + 2] = (texcoord.x * texWidth + texOfs.x) * pixWidth;
-		texcoordBuffer[i * 4 + 3] = (texcoord.y * texHeight + texOfs.y) * pixHeight;
+		texcoordBuffer[i * 4 + 2] = texids.x;
+		texcoordBuffer[i * 4 + 3] = texids.y;
 
-		colorBuffer[i * 3] = (byte)(ambient.x * 255);
+		texidBuffer[i * 2 + 0] = texids.z;
+		texidBuffer[i * 2 + 1] = texids.w;
+
+		colorBuffer[i * 3 + 0] = (byte)(ambient.x * 255);
 		colorBuffer[i * 3 + 1] = (byte)(diffuse.x * 255);
 		colorBuffer[i * 3 + 2] = (byte)(specular.x * 255);
 	}
@@ -136,6 +145,8 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 		else
 			initMatrices(cnt);
 	}
+
+	maxInstanceCount = cnt;
 }
 
 
@@ -181,7 +192,6 @@ void Instance::setRenderData(InstanceData* data) {
 
 void Instance::createDrawcall() {
 	drawcall = new InstanceDrawcall(this);
-	drawcall->setSide(singleSide);
 }
 
 void Instance::addObject(Object* object, int index) {
@@ -198,8 +208,8 @@ void Instance::addObject(Object* object, int index) {
 		billboards[index * 4 + 0] = object->billboard->data[0];
 		billboards[index * 4 + 1] = object->billboard->data[1];
 		if (mat) {
-			billboards[index * 4 + 2] = mat->texOfs1.x;
-			billboards[index * 4 + 3] = mat->texOfs1.y;
+			billboards[index * 4 + 2] = mat->texids.x;
+			billboards[index * 4 + 3] = mat->texids.y;
 		}
 
 		memcpy(positions + (index * 3), object->transformMatrix.entries + 12, 3 * sizeof(float));

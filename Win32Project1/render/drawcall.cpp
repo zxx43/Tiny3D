@@ -5,12 +5,12 @@
 Drawcall::Drawcall() {
 	uModelMatrix = NULL;
 	uNormalMatrix = NULL; 
-	setSide(false);
 	setType(NULL_DC);
 	setFullStatic(false);
 	objectCount = 0;
 	dataBuffer = NULL;
 	billboardDC = false;
+	frame = 0;
 }
 
 Drawcall::~Drawcall() {
@@ -18,14 +18,6 @@ Drawcall::~Drawcall() {
 	dataBuffer = NULL;
 	if (uNormalMatrix) free(uNormalMatrix);
 	uNormalMatrix = NULL;
-}
-
-void Drawcall::setSide(bool single) {
-	singleSide = single;
-}
-
-bool Drawcall::isSingleSide() {
-	return singleSide;
 }
 
 void Drawcall::setType(int typ) {

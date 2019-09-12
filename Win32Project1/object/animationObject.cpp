@@ -34,9 +34,9 @@ AnimationObject* AnimationObject::clone() {
 }
 
 void AnimationObject::vertexTransform() {
-	MATRIX4X4 translateMat=translate(position.x,position.y,position.z);
-	MATRIX4X4 rotateMat=rotateZ(anglez)*rotateY(angley)*rotateX(anglex);
-	MATRIX4X4 scaleMat = scale(sizex, sizey, sizez);
+	mat4 translateMat=translate(position.x,position.y,position.z);
+	mat4 rotateMat=rotateZ(anglez)*rotateY(angley)*rotateX(anglex);
+	mat4 scaleMat = scale(sizex, sizey, sizez);
 	localTransformMatrix=translateMat*rotateMat*scaleMat;
 }
 

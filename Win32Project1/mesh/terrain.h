@@ -19,9 +19,11 @@ private:
 
 	void loadHeightMap(const char* fileName);
 	float getHeight(int px,int pz);
-	VECTOR3D caculateNormal(VECTOR3D p1,VECTOR3D p2,VECTOR3D p3);
-	VECTOR3D normalize(VECTOR3D n1,VECTOR3D n2,VECTOR3D n3,VECTOR3D n4,VECTOR3D n5,VECTOR3D n6);
-	VECTOR3D getTerrainNormal(float x,float y,float z);
+	vec3 caculateNormal(vec3 p1,vec3 p2,vec3 p3);
+	vec3 normalize(vec3 n1,vec3 n2,vec3 n3,vec3 n4,vec3 n5,vec3 n6);
+	vec3 getTerrainNormal(float x,float y,float z);
+	vec3 getTerrainTangent(float x, float y, float z, float u, float v, float du, float dv);
+	vec3 getTangent(const vec3& normal);
 	virtual void initFaces();
 public:
 	int blockCount;

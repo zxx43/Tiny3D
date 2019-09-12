@@ -32,6 +32,9 @@ public:
 	VECTOR3D(const VECTOR3D & rhs)	:	x(rhs.x), y(rhs.y), z(rhs.z)
 	{}
 
+	VECTOR3D(const VECTOR2D & rhs, float newZ) : x(rhs.x), y(rhs.y), z(newZ)
+	{}
+
 	~VECTOR3D() {}	//empty
 
 	void Set(float newX, float newY, float newZ)

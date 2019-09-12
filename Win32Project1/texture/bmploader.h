@@ -14,6 +14,7 @@ private:
 	unsigned int width, height;//图片宽度 高度
 	unsigned int imageSize;//图片内容大小
 	unsigned short bit;//位数
+	unsigned char* tmp;
 public:
 	unsigned char* data;//图片内容 rgb
 	bool hasAlpha;

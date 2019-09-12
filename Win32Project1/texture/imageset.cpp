@@ -7,9 +7,17 @@ ImageSet::ImageSet() {
 	setId=0;
 	imageNames.clear();
 	set.clear();
+	images = NULL;
 }
 
 ImageSet::~ImageSet() {
+	if (images) {
+		for (uint i = 0; i < imageNames.size(); i++)
+			delete images[i];
+		delete[] images;
+		images = NULL;
+	}
+
 	releaseTextureArray();
 	set.clear();
 	imageNames.clear();
@@ -32,11 +40,12 @@ void ImageSet::initTextureArray(string dir) {
 	images = new BmpImage*[imageNames.size()];
 
 	glGenTextures(1,&setId);
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D_ARRAY,setId);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, Render::MaxAniso);
+	glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_ANISOTROPY_EXT, Render::MaxAniso);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	string path=dir.append("/");
 	string name("");
@@ -56,14 +65,31 @@ void ImageSet::initTextureArray(string dir) {
 
 	glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 	glBindTexture(GL_TEXTURE_2D_ARRAY,0);
+	/*
+	if(images){
+		for (uint i = 0; i<imageNames.size(); i++)
+			delete images[i];
+		delete[] images;
+		images = NULL;
+	}
+	//*/
 
-	for (uint i = 0; i<imageNames.size(); i++)
-		delete images[i];
-	delete[] images;
-	images = NULL;
+	hnd = genBindless();
 }
 
 void ImageSet::releaseTextureArray() {
-	if(setId>0)
-		glDeleteTextures(1,&setId);
+	if (setId > 0) {
+		releaseBindless(hnd);
+		glDeleteTextures(1, &setId);
+	}
+}
+
+u64 ImageSet::genBindless() {
+	u64 texHnd = glGetTextureHandleARB(setId);
+	glMakeTextureHandleResidentARB(texHnd);
+	return texHnd;
+}
+
+void ImageSet::releaseBindless(u64 texHnd) {
+	glMakeTextureHandleNonResidentARB(texHnd);
 }

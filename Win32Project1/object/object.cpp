@@ -3,7 +3,7 @@
 #include "../constants/constants.h"
 
 Object::Object() {
-	position = VECTOR3D(0, 0, 0);
+	position = vec3(0, 0, 0);
 	sizex = 1.0; sizey = 1.0; sizez = 1.0;
 	localTransformMatrix.LoadIdentity();
 	normalMatrix.LoadIdentity();
@@ -38,8 +38,8 @@ void Object::caculateLocalAABB(bool looseWidth, bool looseAll) {
 	if (!mesh) return; // caculate AABB by yourself
 	int vertexCount = mesh->vertexCount;
 	if (vertexCount <= 0) return;
-	VECTOR4D* vertices = mesh->vertices;
-	VECTOR4D first4 = localTransformMatrix * vertices[0];
+	vec4* vertices = mesh->vertices;
+	vec4 first4 = localTransformMatrix * vertices[0];
 	float sx = first4.x / first4.w;
 	float sy = first4.y / first4.w;
 	float sz = first4.z / first4.w;
@@ -47,9 +47,9 @@ void Object::caculateLocalAABB(bool looseWidth, bool looseAll) {
 	float ly = sy;
 	float lz = sz;
 	for (int i = 1; i < vertexCount; i++) {
-		VECTOR4D vertex4 = vertices[i];
-		VECTOR4D local4 = localTransformMatrix * vertex4;
-		VECTOR3D local3(local4.x / local4.w, local4.y / local4.w, local4.z / local4.w);
+		vec4 vertex4 = vertices[i];
+		vec4 local4 = localTransformMatrix * vertex4;
+		vec3 local3(local4.x / local4.w, local4.y / local4.w, local4.z / local4.w);
 		sx = sx > local3.x ? local3.x : sx;
 		sy = sy > local3.y ? local3.y : sy;
 		sz = sz > local3.z ? local3.z : sz;
@@ -57,7 +57,7 @@ void Object::caculateLocalAABB(bool looseWidth, bool looseAll) {
 		ly = ly < local3.y ? local3.y : ly;
 		lz = lz < local3.z ? local3.z : lz;
 	}
-	VECTOR3D minVertex(sx, sy, sz), maxVertex(lx, ly, lz);
+	vec3 minVertex(sx, sy, sz), maxVertex(lx, ly, lz);
 	if (!bounding) bounding = new AABB(minVertex, maxVertex);
 	else ((AABB*)bounding)->update(minVertex, maxVertex);
 

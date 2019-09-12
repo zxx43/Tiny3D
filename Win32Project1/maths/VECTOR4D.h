@@ -37,6 +37,12 @@ public:
 	VECTOR4D(const VECTOR3D & rhs):	x(rhs.x), y(rhs.y), z(rhs.z), w(1.0f)
 	{}
 
+	VECTOR4D(const VECTOR3D & rhs, float newW) : x(rhs.x), y(rhs.y), z(rhs.z), w(newW)
+	{}
+
+	VECTOR4D(const VECTOR2D & rhs, float newZ ,float newW) : x(rhs.x), y(rhs.y), z(newZ), w(newW)
+	{}
+
 	~VECTOR4D() {}	//empty
 
 	void Set(float newX, float newY, float newZ, float newW)

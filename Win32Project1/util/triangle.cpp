@@ -6,23 +6,23 @@
 	   /  \
 	 pb----pc
 */
-Triangle::Triangle(const VECTOR3D& a, const VECTOR3D& b, const VECTOR3D& c) {
+Triangle::Triangle(const vec3& a, const vec3& b, const vec3& c) {
 	pa = a; pb = b; pc = c;
 	caculateNormal();
 	pd = -normal.DotProduct(pa);
 }
 
 void Triangle::caculateNormal() {
-	VECTOR3D ba = pa - pb;
-	VECTOR3D bc = pc - pb;
+	vec3 ba = pa - pb;
+	vec3 bc = pc - pb;
 	normal = bc.CrossProduct(ba);
 }
 
 // Determine whether point in this triangle
-bool Triangle::pointIsIn(const VECTOR3D& point) {
-	VECTOR3D v0 = pc - pb;
-	VECTOR3D v1 = pa - pb;
-	VECTOR3D v2 = point - pb;
+bool Triangle::pointIsIn(const vec3& point) {
+	vec3 v0 = pc - pb;
+	vec3 v1 = pa - pb;
+	vec3 v2 = point - pb;
 
 	float dot00 = v0.DotProduct(v0);
 	float dot01 = v0.DotProduct(v1);
@@ -44,10 +44,10 @@ bool Triangle::pointIsIn(const VECTOR3D& point) {
 }
 
 // Determine whether point in this project triangle
-bool Triangle::pointIsIn(const VECTOR2D& point) {
-	VECTOR2D v0 = VECTOR2D(pc.x, pc.z) - VECTOR2D(pb.x, pb.z);
-	VECTOR2D v1 = VECTOR2D(pa.x, pa.z) - VECTOR2D(pb.x, pb.z);
-	VECTOR2D v2 = point - VECTOR2D(pb.x, pb.z);
+bool Triangle::pointIsIn(const vec2& point) {
+	vec2 v0 = vec2(pc.x, pc.z) - vec2(pb.x, pb.z);
+	vec2 v1 = vec2(pa.x, pa.z) - vec2(pb.x, pb.z);
+	vec2 v2 = point - vec2(pb.x, pb.z);
 
 	float dot00 = v0.x*v0.x + v0.y*v0.y;
 	float dot01 = v0.x*v1.x + v0.y*v1.y;

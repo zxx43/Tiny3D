@@ -1,0 +1,30 @@
+#ifndef TEXTURE_BINDLESS_H_
+#define TEXTURE_BINDLESS_H_
+
+#include "../render/glheader.h"
+#include "../constants/constants.h"
+#include "bmpimage.h"
+#include <map>
+#include <string>
+#include <vector>
+
+class TextureBindless {
+private:
+	std::map<std::string, int> texinds;
+	GLuint* texids;
+	u64* texhnds;
+	std::vector<bool> texSrgbs;
+	std::vector<const char*> texnames;
+	std::vector<BmpImage*> imgs;
+	int size;
+public:
+	TextureBindless();
+	~TextureBindless();
+	void addTexture(const char* name, bool srgb);
+	int findTexture(const char* name);
+	void initData(std::string dir);
+	int getSize() { return size; }
+	GLuint64* getHnds() { return texhnds; }
+};
+
+#endif

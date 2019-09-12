@@ -19,6 +19,8 @@
 #include "../object/object.h"
 #include "../render/drawcall.h"
 
+class Scene;
+
 class Node {
 public:
 	static std::vector<Node*> nodesToUpdate;
@@ -31,15 +33,15 @@ private:
 	void moveSelfAndDownwardNodesBounding(float dx,float dy,float dz);
 	void updateSelfAndDownwardNodesDrawcall(bool updateNormal);
 public:
-	MATRIX4X4* uTransformMatrix;
-	MATRIX4X4* uNormalMatrix;
+	mat4* uTransformMatrix;
+	mat4* uNormalMatrix;
 public:
-	VECTOR4D position;
-	VECTOR3D size;
+	vec4 position;
+	vec3 size;
 	int type;
 	int shadowLevel, detailLevel;
 	BoundingBox* boundingBox;
-	MATRIX4X4 nodeTransform;
+	mat4 nodeTransform;
 
 	std::vector<Object*> objects;
 	std::vector<BoundingBox*> objectsBBs;
@@ -49,13 +51,12 @@ public:
 	std::vector<BoundingBox*> nodeBBs;
 
 	Drawcall* drawcall;
-	bool singleSide;
 	bool needUpdateNormal;
 	bool needUpdateDrawcall;
 	bool needCreateDrawcall;
 	bool needUpdateNode;
 
-	Node(const VECTOR3D& position,const VECTOR3D& size);
+	Node(const vec3& position,const vec3& size);
 	virtual ~Node();
 	bool checkInCamera(Camera* camera);
 	bool checkInFrustum(Frustum* frustum);
@@ -66,7 +67,7 @@ public:
 	void pushToUpdate();
 
 	void updateBounding();
-	virtual void addObject(Object* object);
+	virtual void addObject(Scene* scene, Object* object);
 	virtual Object* removeObject(Object* object);
 	void attachChild(Node* child);
 	Node* detachChild(Node* child);
@@ -78,7 +79,7 @@ public:
 	Node* getAncestor();
 	void clearChildren();
 	void pushToRemove();
-	void recursiveTransform(MATRIX4X4& finalNodeMatrix);
+	void recursiveTransform(mat4& finalNodeMatrix);
 };
 
 #endif /* NODE_H_ */

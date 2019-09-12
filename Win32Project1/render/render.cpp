@@ -7,12 +7,9 @@
 Render::Render() {
 	shaders=new ShaderManager();
 	initEnvironment();
-	tmpState = new RenderState();
-	needRevertState = false;
 }
 
 Render::~Render() {
-	delete tmpState;
 	delete shaders;
 	shaders=NULL;
 	clearTextureSlots();
@@ -192,21 +189,6 @@ void Render::useShader(Shader* shader) {
 // Pass 5 deferred process
 // Pass 6 fxaa dof ssr ssg
 void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
-	needRevertState = false;
-	if (drawcall->isSingleSide()) { // Special case
-		tmpState->copy(state);
-		needRevertState = true;
-		if (state->pass == COLOR_PASS)
-			state->enableCull = false;
-		else
-			state->cullMode = CULL_BACK;
-	}
-	if (drawcall->isBillboard()) {
-		if (!needRevertState) tmpState->copy(state);
-		needRevertState = true;
-		state->enableCull = false;
-	}
-
 	setState(state);
 
 	Shader* shader = NULL;
@@ -220,7 +202,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 				shader = state->shaderSimple;		
 		}
 	}
-	useShader(shader);
+	
 	if (camera) {
 		if (state->pass < DEFERRED_PASS) {
 			if (!state->skyPass) {
@@ -235,9 +217,9 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 					if (state->pass != COLOR_PASS)
 						shader->setVector3("viewRight", state->light.z, 0.0, -state->light.x);
 					else if (state->pass == COLOR_PASS) {
-						static VECTOR3D upVec(0.0, 1.0, 0.0);
-						VECTOR3D viewRight(camera->viewMatrix.entries[0], camera->viewMatrix.entries[4], camera->viewMatrix.entries[8]);
-						VECTOR3D normal = (viewRight.CrossProduct(upVec)).GetNormalized();
+						static vec3 upVec(0.0, 1.0, 0.0);
+						vec3 viewRight(camera->viewMatrix.entries[0], camera->viewMatrix.entries[4], camera->viewMatrix.entries[8]);
+						vec3 normal = (viewRight.CrossProduct(upVec)).GetNormalized();
 						normal.x = normal.x * 0.5 + 0.5;
 						normal.y = normal.y * 0.5 + 0.5;
 						normal.z = normal.z * 0.5 + 0.5;
@@ -246,8 +228,6 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 					} 
 				}
 
-				if (state->pass != FAR_SHADOW_PASS || drawcall->isBillboard())  // use texture atlas
-					shader->setVector4v("texPixel", AssetManager::assetManager->texAlt->atlasInfo);
 				if (state->waterPass) {
 					shader->setFloat("time", state->time);
 					shader->setVector3v("eyePos", *(state->eyePos));
@@ -257,10 +237,12 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 						shader->setVector2("waterBias", 0.0, 0.0);
 					else
 						shader->setVector2("waterBias", 0.05, -0.05);
-					if (AssetManager::assetManager->getSkyTexture())
-						useTexture(TEXTURE_CUBE, 1, AssetManager::assetManager->getSkyTexture()->id);
-					if (AssetManager::assetManager->getReflectTexture())
-						useTexture(TEXTURE_2D, 2, AssetManager::assetManager->getReflectTexture()->id);
+					if (AssetManager::assetManager->getSkyTexture() &&
+						!shader->isTexBinded(AssetManager::assetManager->getSkyTexture()->hnd))
+							shader->setHandle64("texEnv", AssetManager::assetManager->getSkyTexture()->hnd);
+					if (AssetManager::assetManager->getReflectTexture() &&
+						!shader->isTexBinded(AssetManager::assetManager->getReflectTexture()->hnd))
+							shader->setHandle64("texRef", AssetManager::assetManager->getReflectTexture()->hnd);
 				}
 			} else {
 				shader->setMatrix4("viewMatrix", camera->viewMatrix);
@@ -293,15 +275,16 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 		}
 	}
 
-	drawcall->draw(shader, state->pass);
+	useShader(shader);
+	drawcall->draw(this, state, shader);
 
-	if (needRevertState) state->copy(tmpState); // Reset state
+	//GLenum err = glGetError();
+	//if (err != GL_NO_ERROR)
+	//	printf("GL Error: %d\n", err);
 }
 
 void Render::finishDraw() {
 	//glBindVertexArray(0);
-	//glBindBuffer(GL_ARRAY_BUFFER, 0);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void Render::setFrameBuffer(FrameBuffer* framebuffer) {
@@ -345,8 +328,7 @@ void Render::useTexture(uint type, uint slot, uint texid) {
 			textureType = GL_TEXTURE_CUBE_MAP;
 			break;
 	}
-	glActiveTexture(GL_TEXTURE0 + slot);
-	glBindTexture(textureType, texid);
+	glBindTextureUnit(slot, texid);
 	(*textureInUse)[slot] = texid;
 }
 
@@ -358,5 +340,11 @@ void Render::clearTextureSlots() {
 		++itor;
 	}
 	textureTypeSlots.clear();
+}
+
+void Render::setTextureBindless2Shaders(TextureBindless* tex) {
+	std::vector<Shader*>* shaders2Bind = shaders->getShaderBindTex();
+	for(uint i = 0; i<shaders2Bind->size(); i++)
+		(*shaders2Bind)[i]->setHandle64v("texBlds", tex->getSize(), tex->getHnds());
 }
 

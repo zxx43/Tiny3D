@@ -33,7 +33,7 @@ private:
 public:
 	StaticDrawcall(Batch* batch);
 	virtual ~StaticDrawcall();
-	virtual void draw(Shader* shader,int pass);
+	virtual void draw(Render* render, RenderState* state, Shader* shader);
 	void updateMatrices();
 	void updateBuffers(int pass);
 };

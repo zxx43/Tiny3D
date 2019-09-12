@@ -14,6 +14,7 @@ class Sphere: public Mesh {
 private:
 	int longitude,latitude;
 	virtual void initFaces();
+	vec3 caculateTangent(int j, int i);
 public:
 	Sphere(int m,int n);
 	Sphere(const Sphere& rhs);

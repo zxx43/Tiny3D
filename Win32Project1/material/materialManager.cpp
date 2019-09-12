@@ -9,8 +9,8 @@ MaterialManager::MaterialManager() {
 	Material* defaultMat = new Material(DEFAULT_MAT);
 	add(defaultMat);
 	Material* blackMat = new Material(BLACK_MAT);
-	blackMat->ambient = VECTOR3D(0, 0, 0);
-	blackMat->diffuse = VECTOR3D(0, 0, 0);
+	blackMat->ambient = vec3(0, 0, 0);
+	blackMat->diffuse = vec3(0, 0, 0);
 	add(blackMat);
 }
 

@@ -5,24 +5,10 @@
 #include "../object/object.h"
 
 struct InstanceState {
-	bool singleSide;
-	bool simple;
-	bool grass;
-	InstanceState() {
-		singleSide = false;
-		simple = false;
-		grass = false;
-	}
-	InstanceState(bool sing, bool simp, bool gras) {
-		singleSide = sing;
-		simple = simp;
-		grass = gras;
-	}
-	InstanceState(const InstanceState& rhs) {
-		singleSide = rhs.singleSide;
-		simple = rhs.simple;
-		grass = rhs.grass;
-	}
+	bool simple, grass;
+	InstanceState() : simple(false), grass(false) {}
+	InstanceState(bool simp, bool gras) : simple(simp), grass(gras) {}
+	InstanceState(const InstanceState& rhs) : simple(rhs.simple), grass(rhs.grass) {}
 };
 
 class Instance;
@@ -33,7 +19,7 @@ public:
 	float* matrices;
 	float* billboards;
 	float* positions;
-	int count;
+	int count, maxInsCount;
 	Object* object;
 	InstanceState* state;
 	Instance* instance;

@@ -11,7 +11,7 @@
 #include "../render/instanceDrawcall.h"
 #include "instanceData.h"
 
-#define MAX_INSTANCE_COUNT 819200
+#define MAX_INSTANCE_COUNT 100000
 
 class Instance {
 public:
@@ -21,16 +21,17 @@ public:
 	int vertexCount,indexCount;
 	float* vertexBuffer;
 	float* normalBuffer;
+	float* tangentBuffer;
 	float* texcoordBuffer;
+	float* texidBuffer;
 	unsigned char* colorBuffer;
 	unsigned short* indexBuffer;
 
-	int instanceCount;
+	int instanceCount, maxInstanceCount;
 	float* modelMatrices;
 	float* positions;
 	float* billboards;
 	InstanceDrawcall* drawcall;
-	bool singleSide;
 	bool isBillboard;
 	bool isDynamic;
 	bool isSimple;

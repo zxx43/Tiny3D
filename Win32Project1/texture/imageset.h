@@ -9,6 +9,7 @@
 #define IMAGESET_H_
 
 #include "../render/glheader.h"
+#include "../constants/constants.h"
 #include "bmpimage.h"
 #include <map>
 #include <string>
@@ -22,7 +23,11 @@ private:
 public:
 	GLuint setId;
 	std::vector<std::string> imageNames;
-
+	u64 hnd;
+private:
+	u64 genBindless();
+	void releaseBindless(u64 texHnd);
+public:
 	ImageSet();
 	~ImageSet();
 	void addTexture(const char* name);

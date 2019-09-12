@@ -1,11 +1,12 @@
 #include "node.h"
 #include "../util/util.h"
 #include "../instance/instance.h"
+#include "../scene/scene.h"
 
 std::vector<Node*> Node::nodesToUpdate;
 std::vector<Node*> Node::nodesToRemove;
 
-Node::Node(const VECTOR3D& position,const VECTOR3D& size) {
+Node::Node(const vec3& position,const vec3& size) {
 	this->position.x=position.x;
 	this->position.y=position.y;
 	this->position.z=position.z;
@@ -17,7 +18,6 @@ Node::Node(const VECTOR3D& position,const VECTOR3D& size) {
 	objects.clear();
 	objectsBBs.clear();
 	drawcall=NULL;
-	singleSide = false;
 	needUpdateDrawcall = false;
 	needCreateDrawcall = false;
 	needUpdateNormal = false;
@@ -80,15 +80,15 @@ bool Node::checkInFrustum(Frustum* frustum) {
 void Node::updateObjectBoundingInNode(Object* object) {
 	BoundingBox* objectBB = object->bounding;
 	if (objectBB) {
-		MATRIX4X4 nodeMat; nodeMat.LoadIdentity();
+		mat4 nodeMat; nodeMat.LoadIdentity();
 		recursiveTransform(nodeMat);
-		VECTOR4D localBB4(object->localBoundPosition.x, object->localBoundPosition.y, object->localBoundPosition.z, 1.0);
-		VECTOR4D bb4 = nodeMat * localBB4;
-		objectBB->update(VECTOR3D(bb4.x / bb4.w, bb4.y / bb4.w, bb4.z / bb4.w));
+		vec4 localBB4(object->localBoundPosition.x, object->localBoundPosition.y, object->localBoundPosition.z, 1.0);
+		vec4 bb4 = nodeMat * localBB4;
+		objectBB->update(vec3(bb4.x / bb4.w, bb4.y / bb4.w, bb4.z / bb4.w));
 	}
 }
 
-void Node::addObject(Object* object) {
+void Node::addObject(Scene* scene, Object* object) {
 	objects.push_back(object);
 	object->caculateLocalAABB(false, false);
 	BoundingBox* objectBB = object->bounding;
@@ -144,9 +144,9 @@ void Node::updateBaseNodeBounding() {
 		if (objectsBBs.size() > 0) 
 			boundingBox->merge(objectsBBs);
 		else if (objectsBBs.size() <= 0) { // Base Node and without object boundings
-			MATRIX4X4 nodeTransform; nodeTransform.LoadIdentity();
+			mat4 nodeTransform; nodeTransform.LoadIdentity();
 			recursiveTransform(nodeTransform);
-			boundingBox->update(nodeTransform * VECTOR4D(0, 0, 0, 1));
+			boundingBox->update(nodeTransform * vec4(0, 0, 0, 1));
 		}
 	}
 
@@ -170,7 +170,7 @@ void Node::updateSelfAndDownwardNodesBounding() {
 
 // Move Node's objects's bounding
 void Node::moveBaseObjectsBounding(float dx, float dy, float dz) {
-	VECTOR3D offset = VECTOR3D(dx, dy, dz);
+	vec3 offset = vec3(dx, dy, dz);
 	for (uint i = 0; i < objects.size(); i++) {
 		BoundingBox* objectBB = objects[i]->bounding;
 		if (objectBB) objectBB->update(objectBB->position + offset);
@@ -182,7 +182,7 @@ void Node::moveBaseObjectsBounding(float dx, float dy, float dz) {
 // Just move Node's bounding & its children's & children's children...
 void Node::moveSelfAndDownwardNodesBounding(float dx, float dy, float dz) {
 	if (boundingBox) {
-		VECTOR3D offset = VECTOR3D(dx, dy, dz);
+		vec3 offset = vec3(dx, dy, dz);
 		boundingBox->update(boundingBox->position + offset);
 	}
 	for (uint n = 0; n < children.size(); n++) 
@@ -314,9 +314,9 @@ void Node::translateNodeObject(int i, float x, float y, float z) {
 
 void Node::translateNodeObjectCenterAtWorld(int i, float x, float y, float z) {
 	Object* object = objects[i];
-	VECTOR3D worldCenter = object->bounding->position;
-	VECTOR3D offset = VECTOR3D(x, y, z) - worldCenter;
-	VECTOR3D localPosition = object->position;
+	vec3 worldCenter = object->bounding->position;
+	vec3 offset = vec3(x, y, z) - worldCenter;
+	vec3 localPosition = object->position;
 	translateNodeObject(i, localPosition.x + offset.x, localPosition.y + offset.y, localPosition.z + offset.z);
 }
 
@@ -384,9 +384,9 @@ void Node::pushToRemove() {
 	Node::nodesToRemove.push_back(this);
 }
 
-void Node::recursiveTransform(MATRIX4X4& finalNodeMatrix) {
+void Node::recursiveTransform(mat4& finalNodeMatrix) {
 	if(parent) {
-		MATRIX4X4 parentTransform;
+		mat4 parentTransform;
 		parent->recursiveTransform(parentTransform);
 		finalNodeMatrix=parentTransform*translate(position.x,position.y,position.z);
 	} else

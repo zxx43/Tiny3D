@@ -21,19 +21,18 @@ public:
 	InstanceData* groupBuffer;
 	InstanceState* insState;
 public:
-	InstanceNode(const VECTOR3D& position);
+	InstanceNode(const vec3& position);
 	virtual ~InstanceNode();
-	void addObjects(Object** objectArray,int count);
+	void addObjects(Scene* scene, Object** objectArray, int count);
 	void prepareGroup();
 	void releaseGroup();
-	void setSingle(bool single) { singleSide = single; insState->singleSide = single; };
 	void setGroup(bool group) { isGroup = group; };
 	void setSimple(bool simp) { insState->simple = simp; };
 	void setGrass(bool grass) { insState->grass = grass; };
 	bool getGroup() { return isGroup; };
 	bool getSimple() { return insState->simple; };
 	bool getGrass() { return insState->grass; };
-	virtual void addObject(Object* object);
+	virtual void addObject(Scene* scene, Object* object);
 	virtual Object* removeObject(Object* object);
 	virtual void prepareDrawcall();
 	virtual void updateRenderData();

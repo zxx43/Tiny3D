@@ -2,18 +2,19 @@
 #include "../util/util.h"
 #include "../object/staticObject.h"
 #include "../assets/assetManager.h"
+#include "../scene/scene.h"
 
-Sky::Sky() {
+Sky::Sky(Scene* scene) {
 	mesh=new Sphere(16,16);
 	StaticObject* skyObject=new StaticObject(mesh);
 	Material* mat = new Material("sky_mat");
-	mat->diffuse = VECTOR3D(0.5f, 0.7f, 0.8f);
+	mat->diffuse = vec3(0.5f, 0.7f, 0.8f);
 	skyObject->bindMaterial(MaterialManager::materials->add(mat));
 	skyObject->setPosition(0,0,0);
 	skyObject->setSize(4, 4, 4);
-	skyNode=new StaticNode(VECTOR3D(0,0,0));
+	skyNode=new StaticNode(vec3(0,0,0));
 	skyNode->setFullStatic(true);
-	skyNode->addObject(skyObject);
+	skyNode->addObject(scene, skyObject);
 	skyNode->updateNode();
 	skyNode->prepareDrawcall();
 
@@ -43,7 +44,8 @@ Sky::~Sky() {
 
 void Sky::draw(Render* render,Shader* shader,Camera* camera) {
 	state->shader = shader;
-	render->useTexture(TEXTURE_CUBE, 0, AssetManager::assetManager->getSkyTexture()->id);
+	if (!shader->isTexBinded(AssetManager::assetManager->getSkyTexture()->hnd))
+		shader->setHandle64("texSky", AssetManager::assetManager->getSkyTexture()->hnd);
 	render->draw(camera,skyNode->drawcall,state);
 }
 

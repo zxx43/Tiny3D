@@ -10,12 +10,14 @@ Filter::Filter(float width, float height, bool useFramebuffer, int precision, in
 	framebuffer = useFramebuffer ? new FrameBuffer(width, height, precision, component, clampBorder) : NULL;
 
 	Board* board=new Board(2,2,2);
-	boardNode=new StaticNode(VECTOR3D(0,0,0));
+	boardNode=new StaticNode(vec3(0,0,0));
 	boardNode->setFullStatic(true);
 	StaticObject* boardObject=new StaticObject(board);
-	boardNode->addObject(boardObject);
+	boardNode->addObject(NULL, boardObject);
 	boardNode->prepareDrawcall();
 	delete board;
+
+	setResize(true);
 }
 
 Filter::~Filter() {
@@ -28,19 +30,34 @@ Filter::~Filter() {
 
 void Filter::draw(Camera* camera, Render* render, RenderState* state,
 		const std::vector<Texture2D*>& inputTextures, const Texture2D* depthTexture) {
+	Shader* shader = state->shader;
 	render->setFrameBuffer(framebuffer);
-	render->setShaderVec2(state->shader, "pixelSize", pixWidth, pixHeight);
-	render->setShaderFloat(state->shader, "quality", state->quality);
+	render->setShaderVec2(shader, "pixelSize", pixWidth, pixHeight);
+	render->setShaderFloat(shader, "quality", state->quality);
 
 	if (state->shadow) {
 		float shadowPixSize = state->shadow->shadowPixSize;
-		render->setShaderVec2(state->shader, "shadowPixSize", shadowPixSize, shadowPixSize);
+		render->setShaderVec2(shader, "shadowPixSize", shadowPixSize, shadowPixSize);
 	}
 	uint bufferid;
-	for (bufferid = 0; bufferid < inputTextures.size(); bufferid++)
-		render->useTexture(TEXTURE_2D, bufferid, inputTextures[bufferid]->id);
-	if (depthTexture)
-		render->useTexture(TEXTURE_2D, bufferid, depthTexture->id);
+	for (bufferid = 0; bufferid < inputTextures.size(); bufferid++) {
+		if (!shader->isTexBinded(inputTextures[bufferid]->hnd) || shouldResize) {
+			if (!shader->hasSlot(bufferid)) {
+				printf("error slot:%d\n", bufferid);
+				continue;
+			}
+			shader->setHandle64(shader->getSlot(bufferid).data(), inputTextures[bufferid]->hnd);
+		}
+	}
+	if (depthTexture) {
+		if (!shader->isTexBinded(depthTexture->hnd) || shouldResize) {
+			if (!shader->hasSlot(bufferid))
+				printf("error slot:%d\n", bufferid);
+			else
+				shader->setHandle64(shader->getSlot(bufferid).data(), depthTexture->hnd);
+		}
+	}
+	if (shouldResize) setResize(false);
 	render->draw(camera, boardNode->drawcall, state);
 }
 

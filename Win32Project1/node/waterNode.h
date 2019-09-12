@@ -9,9 +9,9 @@ private:
 private:
 	void putCenter();
 public:
-	WaterNode(const VECTOR3D& position);
+	WaterNode(const vec3& position);
 	virtual ~WaterNode();
-	virtual void addObject(Object* object);
+	virtual void addObject(Scene* scene, Object* object);
 	void moveWaterWithCamera(Camera* camera);
 };
 

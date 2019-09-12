@@ -8,9 +8,9 @@ class TerrainNode: public StaticNode {
 public:
 	std::vector<Triangle*> triangles;
 	int blockCount, lineSize;
-	VECTOR3D offset, offsize;
+	vec3 offset, offsize;
 public:
-	TerrainNode(const VECTOR3D& position);
+	TerrainNode(const vec3& position);
 	virtual ~TerrainNode();
 	void prepareCollisionData();
 	bool cauculateY(float x, float z, float& y);

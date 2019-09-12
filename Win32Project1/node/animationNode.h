@@ -15,12 +15,12 @@ class AnimationNode: public Node {
 private:
 	Animation* animation;
 public:
-	AnimationNode(const VECTOR3D& boundingSize);
+	AnimationNode(const vec3& boundingSize);
 	virtual ~AnimationNode();
 	virtual void prepareDrawcall();
 	virtual void updateRenderData();
 	virtual void updateDrawcall();
-	void setAnimation(Animation* anim);
+	void setAnimation(Scene* scene, Animation* anim);
 	AnimationObject* getObject();
 	void animate(int animIndex,long startTime,long currentTime);
 	virtual void translateNode(float x, float y, float z);

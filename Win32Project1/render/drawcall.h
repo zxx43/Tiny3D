@@ -20,13 +20,15 @@
 #define DEFERRED_PASS 5
 #define POST_PASS 6
 
+#define DELAY_FRAME 2
+
 #include "../maths/Maths.h"
 #include "renderState.h"
 #include "renderBuffer.h"
 
+class Render;
 class Drawcall {
 private:
-	bool singleSide;
 	int type;
 	bool fullStatic;
 	bool billboardDC;
@@ -35,13 +37,12 @@ public:
 	float* uNormalMatrix;
 	int objectCount;
 	RenderBuffer* dataBuffer;
+	int frame;
 
 	Drawcall();
 	virtual ~Drawcall();
 
-	virtual void draw(Shader* shader,int pass)=0;
-	void setSide(bool single);
-	bool isSingleSide();
+	virtual void draw(Render* render, RenderState* state, Shader* shader) = 0;
 	void setType(int typ);
 	int getType();
 	void setFullStatic(bool stat);

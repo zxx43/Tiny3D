@@ -26,8 +26,8 @@ struct RenderState {
 	float time;
 	float quality;
 	Shadow* shadow;
-	VECTOR3D light;
-	VECTOR3D* eyePos;
+	vec3 light;
+	vec3* eyePos;
 	Shader* shader;
 	Shader* shaderIns;
 	Shader* shaderGrass;
@@ -36,7 +36,7 @@ struct RenderState {
 
 	RenderState() {
 		reset();
-		light = VECTOR3D(0, 0, 0);
+		light = vec3(0, 0, 0);
 		eyePos = NULL;
 	}
 	RenderState(const RenderState& rhs) {

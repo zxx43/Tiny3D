@@ -10,12 +10,15 @@
 
 #include "mesh.h"
 #include "../model/objloader.h"
+#include <vector>
 
 class Model: public Mesh {
 private:
 	ObjLoader* loader;
 	void initFaces();
 	void initFacesWidthIndices();
+public:
+	std::vector<int> mats;
 public:
 	Model(const char* obj, const char* mtl, int vt, bool simple);
 	Model(const Model& rhs);

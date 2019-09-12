@@ -14,29 +14,29 @@ class Shadow {
 private:
 	Camera* viewCamera;
 	float nearDist, farDist;
-	VECTOR3D* corners0;
-	VECTOR3D* corners1;
-	VECTOR3D* corners2;
-	VECTOR3D* corners3;
-	VECTOR4D center0,center1,center2;
+	vec3* corners0;
+	vec3* corners1;
+	vec3* corners2;
+	vec3* corners3;
+	vec4 center0,center1,center2;
 	float radius0,radius1,radius2;
 
-	void updateLightCamera(Camera* lightCamera,const VECTOR4D* center,float radius);
+	void updateLightCamera(Camera* lightCamera,const vec4* center,float radius);
 public:
 	float distance1, distance2;
 	Camera* lightCameraNear;
 	Camera* lightCameraMid;
 	Camera* lightCameraFar;
-	MATRIX4X4 lightNearMat, lightMidMat, lightFarMat;
+	mat4 lightNearMat, lightMidMat, lightFarMat;
 	float level1,level2;
 	float shadowMapSize,shadowPixSize;
-	VECTOR3D lightDir;
+	vec3 lightDir;
 
 	Shadow(Camera* view);
 	~Shadow();
 
 	void prepareViewCamera(float dist1, float dist2);
-	void update(const VECTOR3D& light);
+	void update(const vec3& light);
 };
 
 

@@ -15,18 +15,18 @@
 
 class Object {
 public:
-	VECTOR3D position;
+	vec3 position;
 	float sizex, sizey, sizez;
 	Mesh* mesh;
 	Mesh* meshMid;
 	Mesh* meshLow;
 	int material;
 	Billboard* billboard;
-	MATRIX4X4 localTransformMatrix,normalMatrix;
-	MATRIX4X4 transformMatrix,transformTransposed;
+	mat4 localTransformMatrix,normalMatrix;
+	mat4 transformMatrix,transformTransposed;
 	float* transforms;
 	BoundingBox* bounding;
-	VECTOR3D localBoundPosition;
+	vec3 localBoundPosition;
 	bool genShadow;
 	int detailLevel;
 

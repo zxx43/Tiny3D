@@ -3,6 +3,7 @@
 #include "../node/animationNode.h"
 #include "../node/instanceNode.h"
 #include "../assets/assetManager.h"
+#include "../scene/scene.h"
 #include <string.h>
 #include <stdlib.h>
 using namespace std;
@@ -55,11 +56,11 @@ void RenderQueue::deleteInstance(InstanceData* data) {
 	data->instance = NULL;
 }
 
-void RenderQueue::pushDatasToInstance(InstanceData* data, bool copy) {
+void RenderQueue::pushDatasToInstance(Scene* scene, InstanceData* data, bool copy) {
 	if (data->count <= 0) return;
 	if (!data->instance) {
 		data->instance = new Instance(data, true);
-		data->instance->initInstanceBuffers(data->object, data->insMesh->vertexCount, data->insMesh->indexCount, MAX_INSTANCE_COUNT, copy);
+		data->instance->initInstanceBuffers(data->object, data->insMesh->vertexCount, data->insMesh->indexCount, scene->queryMeshCount(data->insMesh), copy);
 	}
 	data->instance->setRenderData(data);
 }
@@ -74,7 +75,7 @@ void RenderQueue::pushDatasToBatch(BatchData* data, int pass) {
 	data->batch->setRenderData(pass, data);
 }
 
-void RenderQueue::draw(Camera* camera, Render* render, RenderState* state) {
+void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState* state) {
 	for (int it = 0; it < queue->size; it++) {
 		Node* node = queue->get(it);
 		if (!node->needUpdateNode) {
@@ -112,9 +113,7 @@ void RenderQueue::draw(Camera* camera, Render* render, RenderState* state) {
 				static Shader* terrainShader = render->findShader("terrain");
 				Shader* shader = state->shader;
 				state->shader = terrainShader;
-				render->useTexture(TEXTURE_2D_ARRAY, 0, AssetManager::assetManager->texArray->setId);
 				render->draw(camera, node->drawcall, state);
-				render->useTexture(TEXTURE_2D, 0, AssetManager::assetManager->texAlt->texId);
 				state->shader = shader;
 			}
 		}
@@ -123,8 +122,7 @@ void RenderQueue::draw(Camera* camera, Render* render, RenderState* state) {
 	map<Mesh*, InstanceData*>::iterator itData = instanceQueue.begin();
 	while (itData != instanceQueue.end()) {
 		InstanceData* data = itData->second;
-		//pushDatasToInstance(data, dual);
-		pushDatasToInstance(data, false);
+		pushDatasToInstance(scene, data, false);
 		Instance* instance = data->instance;
 		if (instance) {
 			if (!instance->drawcall) instance->createDrawcall();
@@ -166,7 +164,7 @@ void RenderQueue::animate(long startTime, long currentTime) {
 	}
 }
 
-Mesh* RenderQueue::queryLodMesh(Object* object, const VECTOR3D& eye) {
+Mesh* RenderQueue::queryLodMesh(Object* object, const vec3& eye) {
 	Mesh* mesh = object->mesh;
 	float e2oDis = (eye - object->bounding->position).GetSquaredLength();
 	if (e2oDis > lowDistSqr) 
@@ -177,12 +175,12 @@ Mesh* RenderQueue::queryLodMesh(Object* object, const VECTOR3D& eye) {
 	return mesh;
 }
 
-void PushNodeToQueue(RenderQueue* queue, Node* node, Camera* camera, Camera* mainCamera) {
+void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camera, Camera* mainCamera) {
 	if (node->checkInCamera(camera)) {
 		for (unsigned int i = 0; i<node->children.size(); ++i) {
 			Node* child = node->children[i];
 			if (child->objects.size() <= 0)
-				PushNodeToQueue(queue, child, camera, mainCamera);
+				PushNodeToQueue(queue, scene, child, camera, mainCamera);
 			else {
 				if (child->shadowLevel < queue->shadowLevel) continue;
 
@@ -241,7 +239,7 @@ void PushNodeToQueue(RenderQueue* queue, Node* node, Camera* camera, Camera* mai
 							if (itres != queue->instanceQueue.end())
 								insData = itres->second;
 							else {
-								insData = new InstanceData(mesh, object, MAX_INSTANCE_COUNT, insChild->insState);
+								insData = new InstanceData(mesh, object, scene->queryMeshCount(mesh), insChild->insState);
 								queue->instanceQueue.insert(pair<Mesh*, InstanceData*>(mesh, insData));
 							}
 
@@ -260,7 +258,7 @@ void PushNodeToQueue(RenderQueue* queue, Node* node, Camera* camera, Camera* mai
 									if (itres != queue->instanceQueue.end())
 										insData = itres->second;
 									else {
-										insData = new InstanceData(mesh, object, MAX_INSTANCE_COUNT, insChild->insState);
+										insData = new InstanceData(mesh, object, scene->queryMeshCount(mesh), insChild->insState);
 										queue->instanceQueue.insert(pair<Mesh*, InstanceData*>(mesh, insData));
 									}
 									insData->addInstance(object);

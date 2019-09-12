@@ -1,0 +1,16 @@
+#
+# sharprockfree.mtl
+#
+
+newmtl default
+illum 2
+Kd 0.800000 0.800000 0.800000
+Ka 0.200000 0.200000 0.200000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ns 0.000000
+map_Ka sharprockfree_default_color.bmp
+map_Kd sharprockfree_default_color.bmp
+map_Kn sharprockfree_default_nmap-dx.bmp
+map_Kr sharprockfree_default_rough.bmp
+map_Km sharprockfree_default_metalness.bmp

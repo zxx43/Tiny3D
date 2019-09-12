@@ -1,27 +1,27 @@
 #include "animationNode.h"
 #include "../render/animationDrawcall.h"
 #include "../util/util.h"
+#include "../scene/scene.h"
 #include <string.h>
 
-AnimationNode::AnimationNode(const VECTOR3D& boundingSize):
-		Node(VECTOR3D(0, 0, 0), boundingSize) {
+AnimationNode::AnimationNode(const vec3& boundingSize):
+		Node(vec3(0, 0, 0), boundingSize) {
 	animation = NULL;
-	uTransformMatrix = new MATRIX4X4();
-	uNormalMatrix = new MATRIX4X4();
+	uTransformMatrix = new mat4();
+	uNormalMatrix = new mat4();
 	type = TYPE_ANIMATE;
 }
 
 AnimationNode::~AnimationNode() {}
 
-void AnimationNode::setAnimation(Animation* anim) {
+void AnimationNode::setAnimation(Scene* scene, Animation* anim) {
 	animation = anim;
-	addObject(new AnimationObject(animation));
+	addObject(scene, new AnimationObject(animation));
 }
 
 void AnimationNode::prepareDrawcall() {
 	if(drawcall) delete drawcall;
 	drawcall = new AnimationDrawcall(animation);
-	drawcall->setSide(singleSide);
 	needCreateDrawcall = false;
 }
 
@@ -46,14 +46,14 @@ void AnimationNode::translateNode(float x,float y,float z) {
 	position.x=x; position.y=y; position.z=z;
 
 	recursiveTransform(nodeTransform);
-	MATRIX4X4 transform = nodeTransform * objects[0]->localTransformMatrix;
-	MATRIX4X4 nTransform = objects[0]->normalMatrix;
+	mat4 transform = nodeTransform * objects[0]->localTransformMatrix;
+	mat4 nTransform = objects[0]->normalMatrix;
 	memcpy(uTransformMatrix->entries, transform.entries, 16 * sizeof(float));
 	memcpy(uNormalMatrix->entries, nTransform.entries, 16 * sizeof(float));
 
-	VECTOR4D final4 = nodeTransform * VECTOR4D(0, 0, 0, 1);
+	vec4 final4 = nodeTransform * vec4(0, 0, 0, 1);
 	float invw = 1.0 / final4.w;
-	VECTOR3D final3(final4.x * invw, final4.y * invw, final4.z * invw);
+	vec3 final3(final4.x * invw, final4.y * invw, final4.z * invw);
 	boundingBox->update(final3);
 
 	Node* superior = parent;
@@ -64,8 +64,8 @@ void AnimationNode::translateNode(float x,float y,float z) {
 }
 
 void AnimationNode::translateNodeCenterAtWorld(float x, float y, float z) {
-	VECTOR3D beforeWorldCenter = boundingBox->position;
-	VECTOR3D offset = VECTOR3D(x, y, z) - beforeWorldCenter;
+	vec3 beforeWorldCenter = boundingBox->position;
+	vec3 offset = vec3(x, y, z) - beforeWorldCenter;
 	translateNode(position.x + offset.x, position.y + offset.y, position.z + offset.z);
 }
 

@@ -9,8 +9,7 @@ using namespace std;
 AssetManager* AssetManager::assetManager = NULL;
 
 AssetManager::AssetManager() {
-	texAlt = new TextureAtlas();
-	texArray = new ImageSet();
+	texBld = new TextureBindless();
 	skyTexture = NULL;
 	reflectTexture = NULL;
 	meshes.clear();
@@ -26,36 +25,43 @@ AssetManager::~AssetManager() {
 	for (iter = animations.begin(); iter != animations.end(); iter++)
 		delete iter->second;
 	animations.clear();
-	if (texAlt) delete texAlt;
-	texAlt = NULL;
-	if (texArray) delete texArray;
-	texArray = NULL;
+	if (texBld) delete texBld;
+	texBld = NULL;
 	if (skyTexture) delete skyTexture;
 	skyTexture = NULL;
 }
 
-void AssetManager::addTexture2Alt(const char* name) {
-	texAlt->addTexture(name);
+void AssetManager::addTextureBindless(const char* name, bool srgb) {
+	texBld->addTexture(name, srgb);
 }
 
-void AssetManager::initTextureAtlas() {
-	texAlt->createAtlas(COMMON_TEXTURE);
+void AssetManager::initTextureBindless(MaterialManager* mtls) {
+	for (uint i = 0; i < mtls->size(); i++) {
+		Material* mat = mtls->find(i);
+		if (mat->prepared) continue;
+		if (mat->tex1.length() > 0) {
+			if (texBld->findTexture(mat->tex1.data()) < 0) texBld->addTexture(mat->tex1.data(), mat->srgb1);
+			mat->texids.x = texBld->findTexture(mat->tex1.data());
+		}
+		if (mat->tex2.length() > 0) {
+			if (texBld->findTexture(mat->tex2.data()) < 0) texBld->addTexture(mat->tex2.data(), mat->srgb2);
+			mat->texids.y = texBld->findTexture(mat->tex2.data());
+		}
+		if (mat->tex3.length() > 0) {
+			if (texBld->findTexture(mat->tex3.data()) < 0) texBld->addTexture(mat->tex3.data(), mat->srgb3);
+			mat->texids.z = texBld->findTexture(mat->tex3.data());
+		}
+		if (mat->tex4.length() > 0) {
+			if (texBld->findTexture(mat->tex4.data()) < 0) texBld->addTexture(mat->tex4.data(), mat->srgb4);
+			mat->texids.w = texBld->findTexture(mat->tex4.data());
+		}
+		printf("mat %s: [%d]%s\n", mat->name.data(), (int)mat->texids.x, mat->tex1.data());
+	}
+	texBld->initData(COMMON_TEXTURE);
 }
 
-TexOffset* AssetManager::findTextureAtlasOfs(const char* name) {
-	return texAlt->findTextureOfs(name);
-}
-
-void AssetManager::addTexture2Array(const char* name) {
-	texArray->addTexture(name);
-}
-
-void AssetManager::initTextureArray() {
-	texArray->initTextureArray(COMMON_TEXTURE);
-}
-
-int AssetManager::findTextureInArray(const char* name) {
-	return texArray->findTexture(name);
+int AssetManager::findTextureBindless(const char* name) {
+	return texBld->findTexture(name);
 }
 
 void AssetManager::setSkyTexture(CubeMap* tex) {
@@ -83,37 +89,6 @@ void AssetManager::addMesh(const char* name, Mesh* mesh, bool billboard) {
 
 void AssetManager::addAnimation(const char* name, Animation* animation) {
 	animations[name] = animation;
-}
-
-void AssetManager::createMaterialTextureAtlas(MaterialManager* mtls) {
-	for (uint i = 0; i < mtls->size(); i++) {
-		Material* mat = mtls->find(i);
-		if (mat->tex1.length() > 0) {
-			TexOffset* ofs1 = findTextureAtlasOfs(mat->tex1.data());
-			if (ofs1) {
-				mat->texOfs1.x = ofs1->x;
-				mat->texOfs1.y = ofs1->y;
-				mat->texSize.x = texAlt->perImgWidth;
-				mat->texSize.y = texAlt->perImgHeight;
-				mat->texSize.z = texAlt->pixW;
-				mat->texSize.w = texAlt->pixH;
-			}
-		}
-		if (mat->tex2.length() > 0) {
-			TexOffset* ofs2 = findTextureAtlasOfs(mat->tex2.data());
-			if (ofs2) {
-				mat->texOfs1.z = ofs2->x;
-				mat->texOfs1.w = ofs2->y;
-			}
-		}
-		if (mat->tex3.length() > 0) {
-			TexOffset* ofs3 = findTextureAtlasOfs(mat->tex3.data());
-			if (ofs3) {
-				mat->texOfs2.x = ofs3->x;
-				mat->texOfs2.y = ofs3->y;
-			}
-		}
-	}
 }
 
 void AssetManager::Init() {

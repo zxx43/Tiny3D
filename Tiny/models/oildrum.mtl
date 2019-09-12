@@ -1,0 +1,15 @@
+# Max2Mtl Version 4.0 Mar 10th, 2001
+#
+# EOF
+
+
+newmtl Oildrum-ref
+s
+illum 2
+Kd 0.800000 0.800000 0.800000
+Ka 0.200000 0.200000 0.200000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ns 0.000000
+map_Ka oildrum_col.bmp
+map_Kd oildrum_col.bmp

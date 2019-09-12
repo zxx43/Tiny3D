@@ -17,17 +17,17 @@
 #define MNEAR 5
 #define MFAR 6
 
-#define PI 3.1415926
-#define PI2 6.2831852
-#define A2R 0.01745329222
-#define R2A 57.2957804905
+#define PI 3.1415926f
+#define PI2 6.2831852f
+#define A2R 0.01745329222f
+#define R2A 57.2957804905f
 
 #define SCR_WIDTH 640
 #define SCR_HEIGHT 480
 
-#define D_ROTATION 1.0
-#define D_DISTANCE 1.0
-#define L_DISTANCE 0.01
+#define D_ROTATION 1.0f
+#define D_DISTANCE 1.0f
+#define L_DISTANCE 0.01f
 #endif
 
 #ifndef NULL
@@ -37,5 +37,6 @@
 typedef unsigned int uint;
 typedef unsigned char byte;
 typedef unsigned short ushort;
+typedef unsigned long long u64;
 
 #endif /* CONSTANTS_H_ */

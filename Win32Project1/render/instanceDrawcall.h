@@ -26,14 +26,13 @@ private:
 	int objectToDraw;
 public:
 	int objectToPrepare;
-	bool isSimple;
-	bool isGrass;
+	bool isSimple, isGrass;
 private:
-	RenderBuffer* createBuffers(Instance* instance, bool dyn, bool indexed, int vertexCount, int indexCount);
+	RenderBuffer* createBuffers(Instance* instance, bool dyn, bool indexed, int vertexCount, int indexCount, RenderBuffer* dupBuf);
 public:
 	InstanceDrawcall(Instance* instance);
 	virtual ~InstanceDrawcall();
-	virtual void draw(Shader* shader,int pass);
+	virtual void draw(Render* render, RenderState* state, Shader* shader);
 	void updateInstances(Instance* instance, int pass);
 };
 

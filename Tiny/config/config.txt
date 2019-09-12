@@ -1,0 +1,9 @@
+width 320
+height 240
+fullscreen 0
+dualthread 1
+quality 10
+ssr 1
+dof 1
+fxaa 1
+debug 0

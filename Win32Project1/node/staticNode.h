@@ -20,9 +20,9 @@ private:
 public:
 	Batch* batch;
 
-	StaticNode(const VECTOR3D& position);
+	StaticNode(const vec3& position);
 	virtual ~StaticNode();
-	void addObjects(Object** objectArray,int count);
+	void addObjects(Scene* scene,Object** objectArray,int count);
 	virtual void prepareDrawcall();
 	virtual void updateRenderData();
 	virtual void updateDrawcall();

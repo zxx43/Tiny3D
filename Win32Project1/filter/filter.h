@@ -16,6 +16,7 @@ private:
 	float width,height,pixWidth,pixHeight;
 	FrameBuffer* framebuffer;
 	StaticNode* boardNode;
+	bool shouldResize;
 public:
 	Filter(float width, float height, bool useFramebuffer, int precision, int component, bool clampBorder = true);
 	~Filter();
@@ -26,13 +27,14 @@ public:
 	void addDepthBuffer(int precision);
 	FrameBuffer* getFrameBuffer();
 	Texture2D* getOutput(int i);
+	void setResize(bool res) { shouldResize = res; }
 };
 
 struct FilterChain {
 	std::vector<Texture2D*> input;
 	Filter* output;
 	FilterChain(int width, int height, bool useFramebuffer, int precision, int component, bool clampBorder = true) {
-		input.clear();
+		input.clear(); 
 		output = new Filter(width, height, useFramebuffer, precision, component, clampBorder);
 	}
 	~FilterChain() {

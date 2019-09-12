@@ -5,17 +5,17 @@
 
 class Triangle {
 private:
-	VECTOR3D pa, pb, pc;
+	vec3 pa, pb, pc;
 public:
-	VECTOR3D normal;
+	vec3 normal;
 	float pd;
 private:
 	void caculateNormal();
 public:
-	Triangle(const VECTOR3D& a, const VECTOR3D& b, const VECTOR3D& c);
+	Triangle(const vec3& a, const vec3& b, const vec3& c);
 	~Triangle() {}
-	bool pointIsIn(const VECTOR3D& point);
-	bool pointIsIn(const VECTOR2D& point);
+	bool pointIsIn(const vec3& point);
+	bool pointIsIn(const vec2& point);
 	float caculateY(const float x, const float z);
 };
 

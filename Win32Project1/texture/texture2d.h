@@ -17,21 +17,27 @@
 #endif
 
 #include "../render/glheader.h"
+#include "../constants/constants.h"
+#include <string>
 
 class Texture2D {
 private:
 	GLenum texType, depthType;
 	int buffSize;
 public:
-	unsigned int id;
+	uint id;
+	u64 hnd;
 	float width, height, channel;
 	GLenum preColor, preDepth, format;
 	int type, precision;
 public:
 	Texture2D(float w,float h,int t,int p,int c,bool clampBorder=true);
 	~Texture2D();
-
+public:
 	void copyDataFrom(Texture2D* src);
+private:
+	u64 genBindless();
+	void releaseBindless(u64 texHnd);
 };
 
 #endif /* TEXTURE2D_H_ */
