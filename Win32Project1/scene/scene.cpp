@@ -113,6 +113,11 @@ void Scene::createTerrain(const vec3& position, const vec3& size) {
 	//staticRoot->attachChild(terrainNode);
 }
 
+void Scene::updateVisualTerrain(int bx, int bz, int sizex, int sizez) {
+	if (!terrainNode) return;
+	terrainNode->cauculateBlockIndices(bx, bz, sizex, sizez);
+}
+
 void Scene::createNodeAABB(Node* node) {
 	AABB* aabb = (AABB*)node->boundingBox;
 	if(aabb) {

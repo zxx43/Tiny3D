@@ -207,10 +207,11 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 		if (state->pass < DEFERRED_PASS) {
 			if (!state->skyPass) {
 				shader->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
-				if (state->grass) {
-					shader->setFloat("time", state->time * 0.05);
+				if (state->grass || state->tess) {
+					shader->setFloat("time", state->time * 0.025);
 					shader->setVector3v("eyePos", *(state->eyePos));
 					shader->setMatrix4("viewMatrix", camera->viewMatrix);
+					shader->setFloat("distortionId", AssetManager::assetManager->getDistortionTex());
 				}
 
 				if (drawcall->isBillboard()) {

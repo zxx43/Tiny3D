@@ -9,6 +9,8 @@
 #define TERRAIN_H_
 
 #include "mesh.h"
+#include "../constants/constants.h"
+#include <map>
 
 #define MAP_SIZE 1024
 #define	STEP_SIZE 4
@@ -27,6 +29,9 @@ private:
 	virtual void initFaces();
 public:
 	int blockCount;
+	std::map<uint, uint*> blockIndexMap;
+	uint* visualIndices;
+	uint visualIndCount;
 public:
 	Terrain(const char* fileName);
 	virtual ~Terrain();

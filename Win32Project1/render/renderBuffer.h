@@ -111,6 +111,7 @@ struct RenderBuffer {
 		relies = (bool*)malloc(bufferSize * sizeof(bool));
 		for (uint i = 0; i < bufferSize; i++)
 			pushData(i, NULL);
+
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
 		glGenBuffers(bufferSize, vbos);

@@ -17,6 +17,8 @@ private:
 	std::vector<const char*> texnames;
 	std::vector<BmpImage*> imgs;
 	int size;
+private:
+	void releaseMemory();
 public:
 	TextureBindless();
 	~TextureBindless();

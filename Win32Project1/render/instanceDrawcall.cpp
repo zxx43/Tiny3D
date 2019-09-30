@@ -35,8 +35,9 @@ InstanceDrawcall::InstanceDrawcall(Instance* instance) :Drawcall() {
 
 	setBillboard(instanceRef->isBillboard);
 	
+	doubleBuffer = false;
 	dataBuffer = createBuffers(instanceRef, dynDC, indexed, vertexCount, indexCount, NULL);
-	if (dynDC)
+	if (dynDC && doubleBuffer)
 		dataBuffer2 = createBuffers(instanceRef, dynDC, indexed, vertexCount, indexCount, dataBuffer);
 	else
 		dataBuffer2 = NULL;
@@ -147,14 +148,20 @@ void InstanceDrawcall::draw(Render* render, RenderState* state, Shader* shader) 
 		}
 	}
 
-	if (dynDC) objectToDraw = objectToPrepare;
+	if (dynDC && doubleBuffer) objectToDraw = objectToPrepare;
 }
 
 void InstanceDrawcall::updateInstances(Instance* instance, int pass) {
-	if (!dataBuffer2) return;
+	if (!dynDC) return;
 	
-	dataBufferDraw = dataBufferDraw == dataBuffer ? dataBuffer2 : dataBuffer;
-	dataBufferPrepare = dataBufferPrepare == dataBuffer ? dataBuffer2 : dataBuffer;
+	if (doubleBuffer) {
+		dataBufferDraw = dataBufferDraw == dataBuffer ? dataBuffer2 : dataBuffer;
+		dataBufferPrepare = dataBufferPrepare == dataBuffer ? dataBuffer2 : dataBuffer; 
+	} else {
+		dataBufferDraw = dataBuffer;
+		dataBufferPrepare = dataBuffer;
+		objectToDraw = objectToPrepare;
+	}
 
 	if (!isBillboard()) 
 		dataBufferPrepare->updateAttribData(PositionSlot, objectToPrepare, (void*)(instance->modelMatrices));

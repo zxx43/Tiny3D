@@ -26,6 +26,7 @@ public:
 private:
 	u64 genBindless();
 	void releaseBindless(u64 texHnd);
+	void releaseMemory();
 public:
 	CubeMap(const char* xpos,const char* xneg,
 			const char* ypos,const char* yneg,

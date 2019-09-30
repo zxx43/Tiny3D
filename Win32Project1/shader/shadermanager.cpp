@@ -14,15 +14,8 @@ ShaderManager::~ShaderManager() {
 	shaderBindTex.clear();
 }
 
-Shader* ShaderManager::addShader(const char* name,const char* vs,const char* fs) {
-	Shader* shader=new Shader(vs,fs);
-	shader->name = name;
-	shaders.insert(pair<string,Shader*>(name,shader));
-	return shader;
-}
-
-Shader* ShaderManager::addShader(const char* name, const char* vs, const char* fs, const char* gs) {
-	Shader* shader = new Shader(vs, fs, gs);
+Shader* ShaderManager::addShader(const char* name, const char* vs, const char* fs, const char* tc, const char* te, const char* gs) {
+	Shader* shader = new Shader(vs, fs, tc, te, gs);
 	shader->name = name;
 	shaders.insert(pair<string, Shader*>(name, shader));
 	return shader;

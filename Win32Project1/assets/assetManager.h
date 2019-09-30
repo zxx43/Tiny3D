@@ -21,6 +21,7 @@ public:
 	TextureBindless* texBld;
 	CubeMap* skyTexture;
 	Texture2D* reflectTexture;
+	int distortionTex;
 private:
 	AssetManager();
 	~AssetManager();
@@ -34,6 +35,8 @@ public:
 	CubeMap* getSkyTexture();
 	void setReflectTexture(Texture2D* tex);
 	Texture2D* getReflectTexture();
+	void addDistortionTex(const char* texName);
+	int getDistortionTex() { return distortionTex; }
 };
 
 #endif

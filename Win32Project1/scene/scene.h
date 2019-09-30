@@ -38,6 +38,7 @@ public:
 	void createSky();
 	void createWater(const vec3& position, const vec3& size);
 	void createTerrain(const vec3& position, const vec3& size);
+	void updateVisualTerrain(int bx, int bz, int sizex, int sizez);
 	void updateNodes();
 	void flushNodes();
 	void updateReflectCamera();

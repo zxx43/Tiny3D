@@ -1,5 +1,4 @@
 #include "terrainNode.h"
-#include "../mesh/terrain.h"
 #include "../object/staticObject.h"
 #include "../util/util.h"
 #include "animationNode.h"
@@ -53,33 +52,65 @@ void TerrainNode::prepareCollisionData() {
 	}
 }
 
-bool TerrainNode::cauculateY(float x, float z, float& y) {
+void TerrainNode::caculateBlock(float x, float z, int& bx, int& bz) {
 	float offx = x - offset.x;
 	float offz = z - offset.z;
 	offx /= offsize.x;
 	offz /= offsize.z;
 	float invStepSize = 1.0 / STEP_SIZE;
-	int ix = (int)(offx*invStepSize);
-	int iz = (int)(offz*invStepSize);
-	if (ix < 0 || iz < 0) return false;
-	if (ix < lineSize && iz < lineSize) {
-		int ib = iz*lineSize + ix;
+	bx = (int)(offx*invStepSize);
+	bz = (int)(offz*invStepSize);
+}
+
+bool TerrainNode::cauculateY(int bx, int bz, float x, float z, float& y) {
+	if (bx < 0 || bz < 0) return false;
+	if (bx < lineSize && bz < lineSize) {
+		int ib = bz * lineSize + bx;
 		int ita = ib * 2, itb = ib * 2 + 1;
 
 		if ((uint)ita >= triangles.size() ||
-			(uint)itb >= triangles.size()) 
-				return false;
+			(uint)itb >= triangles.size())
+			return false;
 
 		Triangle* ta = triangles[ita];
 		Triangle* tb = triangles[itb];
 		vec2 p2d = vec2(x, z);
-		if (ta->pointIsIn(p2d))
+		if (ta->pointIsIn(p2d)) 
 			y = ta->caculateY(x, z);
-		else
+		else 
 			y = tb->caculateY(x, z);
 		return true;
 	}
 	return false;
+}
+
+void TerrainNode::cauculateBlockIndices(int bx, int bz, int sizex, int sizez) {
+	static const int BORDER = 6;
+
+	StaticObject* object = (StaticObject*)(objects[0]);
+	int maxBlock = lineSize - 1 - BORDER;
+	int left = bx - sizex;
+	int right = bx + sizex;
+	int bottom = bz - sizez;
+	int top = bz + sizez;
+	left = left < BORDER ? BORDER : left;
+	right = right > maxBlock ? maxBlock : right;
+	bottom = bottom < BORDER ? BORDER : bottom;
+	top = top > maxBlock ? maxBlock : top;
+
+	uint curIndex = 0, count = 0;
+	Terrain* mesh = (Terrain*)object->mesh;
+	for (int i = bottom; i <= top; i++) {
+		for (int j = left; j < right; j++) {
+			uint blockIndex = i * lineSize + j;
+			uint* blockIndices = mesh->blockIndexMap[blockIndex];
+			for (int b = 0; b < 6; b++) {
+				mesh->visualIndices[curIndex++] = blockIndices[b];
+				++count;
+			}
+		}
+	}
+	mesh->visualIndCount = count;
 }
 
 void TerrainNode::standObjectsOnGround(Node* node) {
@@ -88,14 +119,18 @@ void TerrainNode::standObjectsOnGround(Node* node) {
 		if (node->type == TYPE_ANIMATE) {
 			AnimationNode* animNode = (AnimationNode*)node;
 			vec3 worldCenter = animNode->boundingBox->position;
-			this->cauculateY(worldCenter.x, worldCenter.z, worldCenter.y);
+			int bx, bz;
+			this->caculateBlock(worldCenter.x, worldCenter.z, bx, bz);
+			this->cauculateY(bx, bz, worldCenter.x, worldCenter.z, worldCenter.y);
 			worldCenter.y += ((AABB*)animNode->boundingBox)->sizey * 0.5;
 			animNode->translateNodeCenterAtWorld(worldCenter.x, worldCenter.y, worldCenter.z);
 		} else {
 			for (uint i = 0; i < node->objects.size(); i++) {
 				StaticObject* obj = (StaticObject*)node->objects[i];
 				vec3 worldCenter = obj->bounding->position;
-				this->cauculateY(worldCenter.x, worldCenter.z, worldCenter.y);
+				int bx, bz;
+				this->caculateBlock(worldCenter.x, worldCenter.z, bx, bz);
+				this->cauculateY(bx, bz, worldCenter.x, worldCenter.z, worldCenter.y);
 				worldCenter.y += ((AABB*)obj->bounding)->sizey * 0.47;
 				node->translateNodeObjectCenterAtWorld(i, worldCenter.x, worldCenter.y, worldCenter.z);
 			}

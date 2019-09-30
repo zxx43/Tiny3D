@@ -2,14 +2,8 @@
 #include "../constants/constants.h"
 using namespace std;
 
-Shader::Shader(const char* vert,const char* frag) {
-	program = new ShaderProgram(vert, frag);
-	bindedTexs.clear();
-	texSlots.clear();
-}
-
-Shader::Shader(const char* vert, const char* frag, const char* geom) {
-	program = new ShaderProgram(vert, frag, geom);
+Shader::Shader(const char* vert, const char* frag, const char* tesc, const char* tese, const char* geom) {
+	program = new ShaderProgram(vert, frag, tesc, tese, geom);
 	bindedTexs.clear();
 	texSlots.clear();
 }

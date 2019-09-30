@@ -22,6 +22,7 @@ struct RenderState {
 	bool blend;
 	bool simpleIns;
 	bool grass;
+	bool tess;
 	int pass;
 	float time;
 	float quality;
@@ -60,6 +61,7 @@ struct RenderState {
 		blend = rhs->blend;
 		simpleIns = rhs->simpleIns;
 		grass = rhs->grass;
+		tess = rhs->tess;
 		pass = rhs->pass;
 		time = rhs->time;
 		quality = rhs->quality;
@@ -90,6 +92,7 @@ struct RenderState {
 		blend = false;
 		simpleIns = false;
 		grass = false;
+		tess = false;
 		pass = COLOR_PASS;
 		time = 0.0;
 		quality = 1.0;

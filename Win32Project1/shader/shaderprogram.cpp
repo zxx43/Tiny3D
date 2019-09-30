@@ -44,78 +44,69 @@ void printProgramInfoLog(GLuint obj)
 	}
 }
 
-ShaderProgram::ShaderProgram(const char* vert, const char* frag) {
-	char *vs = 0, *fs = 0;
+ShaderProgram::ShaderProgram(const char* vert, const char* frag, const char* tesc, const char* tese, const char* geom) {
+	char *vs = NULL, *fs = NULL, *tc = NULL, *te = NULL, *gs = NULL;
+	vertShader = NULL, fragShader = NULL, tescShader = NULL, teseShader = NULL, geomShader = NULL;
 
 	vertShader = glCreateShader(GL_VERTEX_SHADER);
 	fragShader = glCreateShader(GL_FRAGMENT_SHADER);
-	geomShader = NULL;
+	if (tesc) tescShader = glCreateShader(GL_TESS_CONTROL_SHADER);
+	if (tese) teseShader = glCreateShader(GL_TESS_EVALUATION_SHADER);
+	if (geom) geomShader = glCreateShader(GL_GEOMETRY_SHADER);
 
 	vs = textFileRead((char*)vert);
 	fs = textFileRead((char*)frag);
-
-	const char * vv = vs;
-	const char * ff = fs;
-
-	glShaderSource(vertShader, 1, &vv, NULL);
-	glShaderSource(fragShader, 1, &ff, NULL);
-
-	free(vs);
-	free(fs);
-
-	glCompileShader(vertShader);
-	glCompileShader(fragShader);
-
-	printf("%s: ", vert);
-	printShaderInfoLog(vertShader);
-	printf("%s: ", frag);
-	printShaderInfoLog(fragShader);
-
-	shaderProg = glCreateProgram();
-	glAttachShader(shaderProg, vertShader);
-	glAttachShader(shaderProg, fragShader);
-
-	glLinkProgram(shaderProg);
-}
-
-ShaderProgram::ShaderProgram(const char* vert, const char* frag, const char* geom) {
-	char *vs = 0, *fs = 0, *gs = 0;
-
-	vertShader = glCreateShader(GL_VERTEX_SHADER);
-	fragShader = glCreateShader(GL_FRAGMENT_SHADER);
-	geomShader = glCreateShader(GL_GEOMETRY_SHADER);
-
-	vs = textFileRead((char*)vert);
-	fs = textFileRead((char*)frag);
-	gs = textFileRead((char*)geom);
+	if (tesc) tc = textFileRead((char*)tesc);
+	if (tese) te = textFileRead((char*)tese);
+	if (geom) gs = textFileRead((char*)geom);
 
 	const char* vv = vs;
 	const char* ff = fs;
+	const char* cc = tc;
+	const char* ee = te;
 	const char* gg = gs;
 
 	glShaderSource(vertShader, 1, &vv, NULL);
 	glShaderSource(fragShader, 1, &ff, NULL);
-	glShaderSource(geomShader, 1, &gg, NULL);
+	if (cc) glShaderSource(tescShader, 1, &cc, NULL);
+	if (ee) glShaderSource(teseShader, 1, &ee, NULL);
+	if (gg) glShaderSource(geomShader, 1, &gg, NULL);
 
 	free(vs);
 	free(fs);
-	free(gs);
+	if (tc) free(tc);
+	if (te) free(te);
+	if (gs) free(gs);
 
 	glCompileShader(vertShader);
 	glCompileShader(fragShader);
-	glCompileShader(geomShader);
+	if (tescShader) glCompileShader(tescShader);
+	if (teseShader) glCompileShader(teseShader);
+	if (geomShader) glCompileShader(geomShader);
 
 	printf("%s: ", vert);
 	printShaderInfoLog(vertShader);
 	printf("%s: ", frag);
 	printShaderInfoLog(fragShader);
-	printf("%s: ", geom);
-	printShaderInfoLog(geomShader);
+	if (tesc) {
+		printf("%s: ", tesc);
+		printShaderInfoLog(tescShader);
+	}
+	if (tese) {
+		printf("%s: ", tese);
+		printShaderInfoLog(teseShader);
+	}
+	if (geom) {
+		printf("%s: ", geom);
+		printShaderInfoLog(geomShader);
+	}
 
 	shaderProg = glCreateProgram();
 	glAttachShader(shaderProg, vertShader);
 	glAttachShader(shaderProg, fragShader);
-	glAttachShader(shaderProg, geomShader);
+	if (tescShader) glAttachShader(shaderProg, tescShader);
+	if (teseShader) glAttachShader(shaderProg, teseShader);
+	if (geomShader) glAttachShader(shaderProg, geomShader);
 
 	glLinkProgram(shaderProg);
 }
@@ -123,9 +114,13 @@ ShaderProgram::ShaderProgram(const char* vert, const char* frag, const char* geo
 ShaderProgram::~ShaderProgram() {
 	glDetachShader(shaderProg, vertShader);
 	glDetachShader(shaderProg, fragShader);
+	if (tescShader) glDetachShader(shaderProg, tescShader);
+	if (teseShader) glDetachShader(shaderProg, teseShader);
 	if (geomShader) glDetachShader(shaderProg, geomShader);
 	glDeleteShader(vertShader);
 	glDeleteShader(fragShader);
+	if (tescShader) glDeleteShader(tescShader);
+	if (teseShader) glDeleteShader(teseShader);
 	if (geomShader) glDeleteShader(geomShader);
 	glDeleteProgram(shaderProg);
 }

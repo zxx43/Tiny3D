@@ -38,8 +38,7 @@ public:
 	std::string getSlot(int slot) { return texSlots[slot]; }
 public:
 	std::string name;
-	Shader(const char* vert, const char* frag);
-	Shader(const char* vert, const char* frag, const char* geom);
+	Shader(const char* vert, const char* frag, const char* tesc = NULL, const char* tese = NULL, const char* geom = NULL);
 	~Shader();
 	void use();
 	void addAttrib(const char* name);

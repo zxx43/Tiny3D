@@ -610,6 +610,21 @@
     <None Include="..\Tiny\shader\water.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\Tiny\shader\grassLayer.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Tiny\shader\grassLayer.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Tiny\shader\grassLayer.geom">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Tiny\shader\grassLayer.tesc">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Tiny\shader\grassLayer.tese">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Tiny\config\config.txt">

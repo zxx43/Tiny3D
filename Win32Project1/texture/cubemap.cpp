@@ -40,27 +40,27 @@ CubeMap::CubeMap(const char* xpos,const char* xneg,const char* ypos,
 
 	glBindTexture(GL_TEXTURE_CUBE_MAP,0);
 	///*
-	delete xposImg; xposImg = NULL;
-	delete xnegImg; xnegImg = NULL;
-	delete yposImg; yposImg = NULL;
-	delete ynegImg; ynegImg = NULL;
-	delete zposImg; zposImg = NULL;
-	delete znegImg; znegImg = NULL;
+#ifndef _DEBUG 
+	releaseMemory();
+#endif
 	//*/
 
 	hnd = genBindless();
 }
 
 CubeMap::~CubeMap() {
+	releaseMemory();
+	releaseBindless(hnd);
+	glDeleteTextures(1,&id);
+}
+
+void CubeMap::releaseMemory() {
 	if (xposImg) delete xposImg; xposImg = NULL;
 	if (xnegImg) delete xnegImg; xnegImg = NULL;
 	if (yposImg) delete yposImg; yposImg = NULL;
 	if (ynegImg) delete ynegImg; ynegImg = NULL;
 	if (zposImg) delete zposImg; zposImg = NULL;
 	if (znegImg) delete znegImg; znegImg = NULL;
-
-	releaseBindless(hnd);
-	glDeleteTextures(1,&id);
 }
 
 u64 CubeMap::genBindless() {

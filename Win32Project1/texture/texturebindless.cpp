@@ -22,12 +22,16 @@ TextureBindless::~TextureBindless() {
 		free(texids); texids = NULL;
 	}
 
-	for (uint i = 0; i < imgs.size(); i++) 
-		delete imgs[i];
+	releaseMemory();
 	
 	texnames.clear();
 	texSrgbs.clear();
 	texinds.clear();
+}
+
+void TextureBindless::releaseMemory() {
+	for (uint i = 0; i < imgs.size(); i++)
+		delete imgs[i];
 	imgs.clear();
 }
 
@@ -75,7 +79,7 @@ void TextureBindless::initData(string dir) {
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	for (uint i = 0; i < imgs.size(); i++)
-		delete imgs[i];
-	imgs.clear();
+#ifndef _DEBUG
+	releaseMemory();
+#endif
 }

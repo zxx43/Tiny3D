@@ -29,6 +29,11 @@
 #define SSR_FRAG "shader/ssr.frag"
 #define COMBINE_FRAG "shader/combined.frag"
 #define SSG_FRAG "shader/ssg.frag"
+#define GRASS_LAYER_VERT "shader/grassLayer.vert"
+#define GRASS_LAYER_FRAG "shader/grassLayer.frag"
+#define GRASS_LAYER_GEOM "shader/grassLayer.geom"
+#define GRASS_LAYER_TESC "shader/grassLayer.tesc"
+#define GRASS_LAYER_TESE "shader/grassLayer.tese"
 
 void SetupShaders(Render* render) {
 	Shader* phong = render->shaders->addShader("phong", PHONG_VERT, PHONG_FRAG);
@@ -60,8 +65,14 @@ void SetupShaders(Render* render) {
 	Shader* terrain = render->shaders->addShader("terrain", TERRAIN_VERT, TERRAIN_FRAG);
 	render->shaders->addShaderBindTex(terrain);
 
+	Shader* grassLayer = render->shaders->addShader("grassLayer", GRASS_LAYER_VERT, GRASS_LAYER_FRAG, GRASS_LAYER_TESC, GRASS_LAYER_TESE, GRASS_LAYER_GEOM);
+	render->shaders->addShaderBindTex(grassLayer);
+
 	render->shaders->addShader("sky", SKY_VERT, SKY_FRAG);
 	render->shaders->addShader("water", WATER_VERT, WATER_FRAG);
+
+	Shader* grassLayerShadow = render->shaders->addShader("grassLayerShadow", GRASS_LAYER_VERT, GRASS_LAYER_FRAG, GRASS_LAYER_TESC, GRASS_LAYER_TESE, SHADOW_NONTEX_FRAG);
+	render->shaders->addShaderBindTex(grassLayerShadow);
 
 	Shader* phongShadow = render->shaders->addShader("phong_s", PHONG_VERT, SHADOW_TEX_FRAG);
 	render->shaders->addShaderBindTex(phongShadow);

@@ -17,6 +17,7 @@ private:
 	int vertexCount,indexCount;
 	bool indexed;
 	Instance* instanceRef;
+	bool doubleBuffer;
 	RenderBuffer* dataBuffer2;
 
 	RenderBuffer* dataBufferDraw;

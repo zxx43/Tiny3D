@@ -318,6 +318,11 @@
     <None Include="..\Tiny\shader\dof.frag" />
     <None Include="..\Tiny\shader\fxaa.frag" />
     <None Include="..\Tiny\shader\grass.vert" />
+    <None Include="..\Tiny\shader\grassLayer.frag" />
+    <None Include="..\Tiny\shader\grassLayer.geom" />
+    <None Include="..\Tiny\shader\grassLayer.tesc" />
+    <None Include="..\Tiny\shader\grassLayer.tese" />
+    <None Include="..\Tiny\shader\grassLayer.vert" />
     <None Include="..\Tiny\shader\instance.vert" />
     <None Include="..\Tiny\shader\instance_simp.vert" />
     <None Include="..\Tiny\shader\mean.frag" />

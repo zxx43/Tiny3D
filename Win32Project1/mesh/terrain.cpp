@@ -18,6 +18,11 @@ Terrain::Terrain(const char* fileName):Mesh() {
 	materialids = NULL;
 	indices = (int*)malloc(indexCount*sizeof(int));
 
+	visualIndices = (uint*)malloc(indexCount * sizeof(uint));
+	memset(visualIndices, 0, indexCount * sizeof(uint));
+	visualIndCount = 0;
+	blockIndexMap.clear();
+
 	initFaces();
 	caculateExData();
 }
@@ -37,6 +42,15 @@ void Terrain::loadHeightMap(const char* fileName) {
 Terrain::~Terrain() {
 	free(heightMap);
 	heightMap=NULL;
+
+	std::map<uint, uint*>::iterator it = blockIndexMap.begin();
+	while (it != blockIndexMap.end()) {
+		free(it->second);
+		++it;
+	}
+	blockIndexMap.clear();
+
+	free(visualIndices);
 }
 
 float Terrain::getHeight(int px,int pz) {
@@ -149,16 +163,27 @@ void Terrain::initFaces() {
 	int sideVertexCount = stepCount + 1;
 	for (int i = 0; i < stepCount; i++) {
 		for (int j = 0; j < stepCount; j++) {
-			indices[currentIndex++] = blockFirstIndex;
-			indices[currentIndex++] = blockFirstIndex + sideVertexCount;
-			indices[currentIndex++] = blockFirstIndex + sideVertexCount + 1;
-			indices[currentIndex++] = blockFirstIndex;
-			indices[currentIndex++] = blockFirstIndex + sideVertexCount + 1;
-			indices[currentIndex++] = blockFirstIndex + 1;
+			uint* iArray = (uint*)malloc(6 * sizeof(uint));
+			iArray[0] = blockFirstIndex;
+			iArray[1] = blockFirstIndex + sideVertexCount;
+			iArray[2] = blockFirstIndex + sideVertexCount + 1;
+			iArray[3] = blockFirstIndex;
+			iArray[4] = blockFirstIndex + sideVertexCount + 1;
+			iArray[5] = blockFirstIndex + 1;
+
+			indices[currentIndex++] = iArray[0];
+			indices[currentIndex++] = iArray[1];
+			indices[currentIndex++] = iArray[2];
+			indices[currentIndex++] = iArray[3];
+			indices[currentIndex++] = iArray[4];
+			indices[currentIndex++] = iArray[5];
 			if (j < stepCount - 1)
 				blockFirstIndex++;
 			else
 				blockFirstIndex += 2;
+
+			uint blockIndex = i * stepCount + j;
+			blockIndexMap[blockIndex] = iArray;
 		}
 	}
 }

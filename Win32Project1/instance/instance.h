@@ -11,8 +11,6 @@
 #include "../render/instanceDrawcall.h"
 #include "instanceData.h"
 
-#define MAX_INSTANCE_COUNT 100000
-
 class Instance {
 public:
 	static std::map<Mesh*, int> instanceTable;

@@ -50,7 +50,6 @@ void Batch::releaseBatchData() {
 		if (texidBuffer) free(texidBuffer); texidBuffer = NULL;
 		if (colorBuffer) free(colorBuffer); colorBuffer = NULL;
 		if (objectidBuffer) free(objectidBuffer); objectidBuffer = NULL;
-		if (indexBuffer) free(indexBuffer); indexBuffer = NULL;
 	}
 }
 

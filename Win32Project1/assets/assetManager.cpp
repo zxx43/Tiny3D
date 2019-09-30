@@ -12,6 +12,7 @@ AssetManager::AssetManager() {
 	texBld = new TextureBindless();
 	skyTexture = NULL;
 	reflectTexture = NULL;
+	distortionTex = -1;
 	meshes.clear();
 	animations.clear();
 }
@@ -80,6 +81,12 @@ void AssetManager::setReflectTexture(Texture2D* tex) {
 
 Texture2D* AssetManager::getReflectTexture() {
 	return reflectTexture;
+}
+
+void AssetManager::addDistortionTex(const char* texName) {
+	if (distortionTex < 0)
+		addTextureBindless(texName, false);
+	distortionTex = findTextureBindless(texName);
 }
 
 void AssetManager::addMesh(const char* name, Mesh* mesh, bool billboard) {
