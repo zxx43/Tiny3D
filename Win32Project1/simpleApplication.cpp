@@ -178,9 +178,7 @@ void SimpleApplication::init() {
 	Application::init();
 	initScene();
 	printf("Init ok!\n");
-
-	GLenum error = glGetError();
-	printf("gl error! %d\n", error);
+	render->getError();
 }
 
 void SimpleApplication::moveKey(float velocity) {
@@ -200,7 +198,7 @@ void SimpleApplication::updateMovement() {
 		vec3 cp = scene->mainCamera->position;
 		int bx, bz;
 		scene->terrainNode->caculateBlock(cp.x, cp.z, bx, bz);
-		scene->updateVisualTerrain(bx, bz, 50, 50);
+		scene->updateVisualTerrain(bx, bz, 40, 40);
 		if (scene->terrainNode->cauculateY(bx, bz, cp.x, cp.z, cp.y)) {
 			if (scene->water) {
 				float waterHeight = scene->water->position.y;
@@ -234,8 +232,7 @@ void SimpleApplication::act(long startTime, long currentTime) {
 	}
 	//*/
 	scene->updateNodes();
-	if (!useSsr)
-		scene->updateReflectCamera();
+	if (!useSsr) scene->updateReflectCamera();
 }
 
 void SimpleApplication::initScene() {

@@ -1,9 +1,5 @@
-#version 450
-
 uniform mat3x4 modelMatrices[100];
 uniform mat4 viewProjectMatrix;
-uniform float shadowPass;
-uniform float lowPass;
 
 layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 normal;
@@ -37,15 +33,15 @@ mat3 GetTBN(vec3 normal, vec3 tangent) {
 void main() {
 	mat4 matModel = convertMat(modelMatrices[int(objectid)]);
 	vec4 worldVertex = matModel * vec4(vertex, 1.0);
-	if(shadowPass < 0.5) {
-		mat3 normalMat = mat3(matModel);
-		vNormal = normalMat * normal;
-		vTBN = normalMat * GetTBN(normalize(normal), normalize(tangent));
-		vColor = COLOR_SCALE * color;
-	} 
-	if(lowPass < 0.5) {
-		vTexcoord = texcoord.xy;
-		vTexid = texid;
-	}
+#ifndef ShadowPass 
+	mat3 normalMat = mat3(matModel);
+	vNormal = normalMat * normal;
+	vTBN = normalMat * GetTBN(normalize(normal), normalize(tangent));
+	vColor = COLOR_SCALE * color;
+#endif 
+#ifndef LowPass
+	vTexcoord = texcoord.xy;
+	vTexid = texid;
+#endif
 	gl_Position = viewProjectMatrix * worldVertex;
 }

@@ -1,10 +1,7 @@
-#version 450
-
 uniform mat4 viewProjectMatrix;
 uniform mat4 uModelMatrix;
 uniform mat3 uNormalMatrix;
 uniform mat3x4 boneMats[100];
-uniform float shadowPass;
 
 layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 normal;
@@ -41,14 +38,15 @@ void main() {
     boneMat += convertMat(boneMats[int(boneids.w)]) * weights.w;
     
     vec4 position = boneMat * vec4(vertex, 1.0);
-	if(shadowPass < 0.5) {
-		vColor = vec3(0.6, 1.2, 1.0) * color * 0.005;
-		mat3 normalMat = uNormalMatrix * mat3(boneMat);
-		vNormal = normalMat * normal;
-		vTBN = normalMat * GetTBN(normal, tangent);
-		vTexcoord = texcoord.xy;
-		vTexid = vec4(texcoord.zw, texid);
-	}
+
+#ifndef ShadowPass
+	vColor = vec3(0.6, 1.2, 1.0) * color * 0.005;
+	mat3 normalMat = uNormalMatrix * mat3(boneMat);
+	vNormal = normalMat * normal;
+	vTBN = normalMat * GetTBN(normal, tangent);
+	vTexcoord = texcoord.xy;
+	vTexid = vec4(texcoord.zw, texid);
+#endif
 
 	vec4 modelPosition = uModelMatrix * position;
 	gl_Position = viewProjectMatrix * modelPosition;

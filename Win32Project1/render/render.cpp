@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 Render::Render() {
-	shaders=new ShaderManager();
+	shaders = new ShaderManager();
 	initEnvironment();
 }
 
@@ -43,6 +43,7 @@ void Render::initEnvironment() {
 	clearTextureSlots();
 
 	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &MaxAniso);
+	debugMode = false;
 }
 
 void Render::clearFrame(bool clearColor,bool clearDepth,bool clearStencil) {
@@ -278,14 +279,11 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 
 	useShader(shader);
 	drawcall->draw(this, state, shader);
-
-	//GLenum err = glGetError();
-	//if (err != GL_NO_ERROR)
-	//	printf("GL Error: %d\n", err);
 }
 
 void Render::finishDraw() {
 	//glBindVertexArray(0);
+	getError();
 }
 
 void Render::setFrameBuffer(FrameBuffer* framebuffer) {
@@ -299,6 +297,13 @@ void Render::setFrameBuffer(FrameBuffer* framebuffer) {
 
 void Render::setColorMask(bool r, bool g, bool b, bool a) {
 	glColorMask(r, g, b, a);
+}
+
+int Render::getError() {
+	GLenum error = debugMode ? glGetError() : GL_NO_ERROR;
+	if (error != GL_NO_ERROR)
+		printf("gl error! %d\n", error);
+	return (int)error;
 }
 
 void Render::useTexture(uint type, uint slot, uint texid) {

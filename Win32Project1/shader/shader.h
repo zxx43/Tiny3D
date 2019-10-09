@@ -20,10 +20,11 @@
 class Shader {
 private:
 	ShaderProgram* program;
-	std::map<std::string,GLuint> paramLocations;
-	std::map<std::string,GLuint> attribLocations;
+	std::map<std::string,GLint> paramLocations;
+	std::map<std::string,GLint> attribLocations;
 	std::map<u64, bool> bindedTexs;
 	std::map<int, std::string> texSlots;
+	std::string vertName, fragName;
 public:
 	bool isTexBinded(u64 texhnd) { 
 		std::map<u64, bool>::iterator it = bindedTexs.find(texhnd);
@@ -38,13 +39,14 @@ public:
 	std::string getSlot(int slot) { return texSlots[slot]; }
 public:
 	std::string name;
-	Shader(const char* vert, const char* frag, const char* tesc = NULL, const char* tese = NULL, const char* geom = NULL);
+	Shader(const char* vert, const char* frag, const char* defines = NULL, const char* tesc = NULL, const char* tese = NULL, const char* geom = NULL);
 	~Shader();
 	void use();
 	void addAttrib(const char* name);
 	void addParam(const char* name);
 	int findAttribLocation(const char* attrib);
 	int findParamLocation(const char* param);
+	bool getError(const char* param, int location);
 	void setInt(const char* param,int value);
 	void setSampler(const char* param,int value);
 	void setFloat(const char* param,float value);

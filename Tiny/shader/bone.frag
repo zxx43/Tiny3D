@@ -1,4 +1,3 @@
-#version 450
 #extension GL_ARB_bindless_texture : enable 
 
 layout(bindless_sampler) uniform sampler2D texBlds[256];

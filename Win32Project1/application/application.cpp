@@ -55,10 +55,13 @@ void Application::init() {
 
 	float debug = 0.0;
 	config->get("debug", debug);
-	if (debug > 0.5)
+	if (debug > 0.5) {
 		renderMgr->showBounding(true);
-	else
+		render->setDebug(true);
+	} else {
 		renderMgr->showBounding(false);
+		render->setDebug(false);
+	}
 }
 
 Application::~Application() {

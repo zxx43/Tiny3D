@@ -14,7 +14,7 @@ public:
 	GLuint geomShader;
 	GLuint shaderProg;
 
-	ShaderProgram(const char* vert, const char* frag, const char* tesc = NULL, const char* tese = NULL, const char* geom = NULL);
+	ShaderProgram(const char* vert, const char* frag, const char* defines = NULL, const char* tesc = NULL, const char* tese = NULL, const char* geom = NULL);
 	~ShaderProgram();
 	void use();
 };

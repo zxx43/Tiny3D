@@ -1,5 +1,4 @@
-﻿#version 450
-#extension GL_ARB_bindless_texture : enable 
+﻿#extension GL_ARB_bindless_texture : enable 
 
 layout(bindless_sampler) uniform sampler2D texBuffer, matBuffer, normalGrassBuffer, roughMetalBuffer, depthBuffer;
 uniform vec2 pixelSize;
@@ -96,8 +95,8 @@ vec3 Smudge(vec3 sceneTex, float grassFlag, float viewDist) {
 		float dclose = BlendVal(len, 0.0, 20.0, 30.0, 1.0);
 		d *= dclose;
 		yy += dot(vec3(xx), vec3(1009.0, 1259.0, 2713.0));
-		yy += time * 0.000004;
-		yy += sceneTex.g * 0.04;
+		yy += time * 0.00005;
+		yy += sceneTex.g * 0.4;
 		
 		float yoffset = 1.0 - fract(yy * d) / d;
 		vec2 uvoffset = vTexcoord - vec2(0.0, yoffset);
@@ -181,13 +180,14 @@ void main() {
 
 		float shadowFactor = (useShadow != 0) ? tex.a * genShadowFactor(worldPos, depthView, bias) : 1.0;
 
-		//float grassFlag = normalGrass.a;
-		//sceneColor = Smudge(sceneColor, grassFlag, depthView);
 		//sceneColor *= dot(material, vec3(1.0, shadowFactor * ndotl, 0.0));
 
-		// Cook-Torrance BRDF
-		vec3 F0 = mix(vec3(0.04), albedo, roughMetal.g);
-		
+		// SSG
+		float grassFlag = normalGrass.a;
+		albedo = Smudge(albedo, grassFlag, depthView);
+
+		// Cook-Torrance BRDF	
+		vec3 F0 = mix(vec3(0.04), albedo, roughMetal.g);	
         float NDF = DistributionGGX(normal, h, roughMetal.r);   
         float G   = GeometrySmith(normal, v, ndotl, roughMetal.r);      
         vec3 kS   = FresnelSchlick(max(dot(h, v), 0.0), F0);
@@ -196,7 +196,9 @@ void main() {
         float specular = (NDF * G) / (4 * max(dot(normal, v), 0.0) * ndotl + 0.001);
 
 		vec3 Lo = (kD * albedo / PI + kS * specular) * radiance * ndotl;
-		sceneColor = material.r * albedo + shadowFactor * Lo;
+		vec3 ambient = material.r * albedo;
+
+		sceneColor = ambient + shadowFactor * Lo;
 	}
 
 	FragColor = vec4(sceneColor, depth);

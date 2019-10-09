@@ -1,8 +1,4 @@
-#version 450
-
 uniform mat4 viewProjectMatrix;
-uniform float shadowPass;
-uniform float lowPass;
 
 layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 normal;
@@ -37,14 +33,14 @@ void main() {
 	mat4x3 tranMat = transpose(modelMatrix);
 	mat3 matRot = mat3(tranMat);
 	vec4 worldVertex = vec4(matRot * vertex + tranMat[3], 1.0);
-	if(shadowPass < 0.5) {
-		vNormal = matRot * normal;
-		vTBN = matRot * GetTBN(normalize(normal), normalize(tangent));
-		vColor = COLOR_SCALE * color;
-	}
-	if(lowPass < 0.5) {
-		vTexcoord = texcoord.xy;
-		vTexid = vec4(texcoord.zw, texid);
-	}
+#ifndef ShadowPass
+	vNormal = matRot * normal;
+	vTBN = matRot * GetTBN(normalize(normal), normalize(tangent));
+	vColor = COLOR_SCALE * color;
+#endif
+#ifndef LowPass
+	vTexcoord = texcoord.xy;
+	vTexid = vec4(texcoord.zw, texid);
+#endif
 	gl_Position = viewProjectMatrix * worldVertex;
 }

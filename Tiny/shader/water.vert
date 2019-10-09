@@ -1,5 +1,3 @@
-#version 450
-
 uniform mat4 viewProjectMatrix;
 uniform mat4 viewMatrix;
 uniform float time;

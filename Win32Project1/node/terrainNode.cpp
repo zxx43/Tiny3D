@@ -85,7 +85,7 @@ bool TerrainNode::cauculateY(int bx, int bz, float x, float z, float& y) {
 }
 
 void TerrainNode::cauculateBlockIndices(int bx, int bz, int sizex, int sizez) {
-	static const int BORDER = 6;
+	static const int BORDER = 2;
 
 	StaticObject* object = (StaticObject*)(objects[0]);
 	int maxBlock = lineSize - 1 - BORDER;

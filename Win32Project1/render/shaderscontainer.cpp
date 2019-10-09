@@ -1,4 +1,5 @@
 #include "shaderscontainer.h"
+using namespace std;
 
 #define SHADOW_TEX_FRAG "shader/shadow_tex.frag"
 #define SHADOW_NONTEX_FRAG "shader/shadow_nontex.frag"
@@ -36,76 +37,68 @@
 #define GRASS_LAYER_TESE "shader/grassLayer.tese"
 
 void SetupShaders(Render* render) {
-	Shader* phong = render->shaders->addShader("phong", PHONG_VERT, PHONG_FRAG);
+	string shaderDef = "";
+
+	Shader* phong = render->shaders->addShader("phong", PHONG_VERT, PHONG_FRAG, shaderDef.data());
 	render->shaders->addShaderBindTex(phong);
-	phong->setFloat("shadowPass", 0.0);
-	phong->setFloat("lowPass", 0.0);
 
-	Shader* phongIns = render->shaders->addShader("phong_ins", INSTANCE_VERT, PHONG_FRAG);
+	Shader* phongIns = render->shaders->addShader("phong_ins", INSTANCE_VERT, PHONG_FRAG, shaderDef.data());
 	render->shaders->addShaderBindTex(phongIns);
-	phongIns->setFloat("shadowPass", 0.0);
-	phongIns->setFloat("lowPass", 0.0);
 
-	Shader* grass = render->shaders->addShader("grass", GRASS_VERT, PHONG_FRAG);
+	Shader* grass = render->shaders->addShader("grass", GRASS_VERT, PHONG_FRAG, shaderDef.data());
 	render->shaders->addShaderBindTex(grass);
-	grass->setFloat("shadowPass", 0.0);
 
-	Shader* phongInsSimp = render->shaders->addShader("phong_ins_simp", INSTANCE_SIMPLE_VERT, PHONG_FRAG);
+	Shader* phongInsSimp = render->shaders->addShader("phong_ins_simp", INSTANCE_SIMPLE_VERT, PHONG_FRAG, shaderDef.data());
 	render->shaders->addShaderBindTex(phongInsSimp);
-	phongInsSimp->setFloat("shadowPass", 0.0);
 
-	Shader* bone = render->shaders->addShader("bone", BONE_VERT, BONE_FRAG);
+	Shader* bone = render->shaders->addShader("bone", BONE_VERT, BONE_FRAG, shaderDef.data());
 	render->shaders->addShaderBindTex(bone);
-	bone->setFloat("shadowPass", 0.0);
 
-	Shader* billboard = render->shaders->addShader("billboard", BILLBOARD_VERT, BILLBOARD_FRAG);
+	Shader* billboard = render->shaders->addShader("billboard", BILLBOARD_VERT, BILLBOARD_FRAG, shaderDef.data());
 	render->shaders->addShaderBindTex(billboard);
-	billboard->setFloat("shadowPass", 0.0);
 
 	Shader* terrain = render->shaders->addShader("terrain", TERRAIN_VERT, TERRAIN_FRAG);
 	render->shaders->addShaderBindTex(terrain);
 
-	Shader* grassLayer = render->shaders->addShader("grassLayer", GRASS_LAYER_VERT, GRASS_LAYER_FRAG, GRASS_LAYER_TESC, GRASS_LAYER_TESE, GRASS_LAYER_GEOM);
+	Shader* grassLayer = render->shaders->addShader("grassLayer", GRASS_LAYER_VERT, GRASS_LAYER_FRAG, NULL, GRASS_LAYER_TESC, GRASS_LAYER_TESE, GRASS_LAYER_GEOM);
 	render->shaders->addShaderBindTex(grassLayer);
 
 	render->shaders->addShader("sky", SKY_VERT, SKY_FRAG);
 	render->shaders->addShader("water", WATER_VERT, WATER_FRAG);
 
-	Shader* grassLayerShadow = render->shaders->addShader("grassLayerShadow", GRASS_LAYER_VERT, GRASS_LAYER_FRAG, GRASS_LAYER_TESC, GRASS_LAYER_TESE, SHADOW_NONTEX_FRAG);
-	render->shaders->addShaderBindTex(grassLayerShadow);
+	//Shader* grassLayerShadow = render->shaders->addShader("grassLayerShadow", GRASS_LAYER_VERT, GRASS_LAYER_FRAG, NULL, GRASS_LAYER_TESC, GRASS_LAYER_TESE, SHADOW_NONTEX_FRAG);
+	//render->shaders->addShaderBindTex(grassLayerShadow);
 
-	Shader* phongShadow = render->shaders->addShader("phong_s", PHONG_VERT, SHADOW_TEX_FRAG);
+	shaderDef = "#define ShadowPass 1.0\n";
+	Shader* phongShadow = render->shaders->addShader("phong_s", PHONG_VERT, SHADOW_TEX_FRAG, shaderDef.data());
 	render->shaders->addShaderBindTex(phongShadow);
-	phongShadow->setFloat("shadowPass", 1.0);
-	phongShadow->setFloat("lowPass", 0.0);
 
-	Shader* grassShadow = render->shaders->addShader("grass_s", GRASS_VERT, SHADOW_TEX_FRAG);
+	shaderDef = "#define ShadowPass 1.0\n";
+	Shader* grassShadow = render->shaders->addShader("grass_s", GRASS_VERT, SHADOW_TEX_FRAG, shaderDef.data());
 	render->shaders->addShaderBindTex(grassShadow);
-	grassShadow->setFloat("shadowPass", 1.0);
 
-	Shader* phongShadowIns = render->shaders->addShader("phong_s_ins", INSTANCE_VERT, SHADOW_TEX_FRAG);
+	shaderDef = "#define ShadowPass 1.0\n";
+	Shader* phongShadowIns = render->shaders->addShader("phong_s_ins", INSTANCE_VERT, SHADOW_TEX_FRAG, shaderDef.data());
 	render->shaders->addShaderBindTex(phongShadowIns);
-	phongShadowIns->setFloat("shadowPass", 1.0);
-	phongShadowIns->setFloat("lowPass", 0.0);
 
-	Shader* phongShadowInsSimp = render->shaders->addShader("phong_s_ins_simp", INSTANCE_SIMPLE_VERT, SHADOW_TEX_FRAG);
+	shaderDef = "#define ShadowPass 1.0\n";
+	Shader* phongShadowInsSimp = render->shaders->addShader("phong_s_ins_simp", INSTANCE_SIMPLE_VERT, SHADOW_TEX_FRAG, shaderDef.data());
 	render->shaders->addShaderBindTex(phongShadowInsSimp);
-	phongShadowInsSimp->setFloat("shadowPass", 1.0);
 
-	Shader* phongShadowLow = render->shaders->addShader("phong_sl", PHONG_VERT, SHADOW_TEX_FRAG);
-	phongShadowLow->setFloat("shadowPass", 1.0);
-	phongShadowLow->setFloat("lowPass", 1.0);
+	shaderDef = "#define ShadowPass 1.0\n";
+	shaderDef += "#define LowPass 1.0\n";
+	Shader* phongShadowLow = render->shaders->addShader("phong_sl", PHONG_VERT, SHADOW_TEX_FRAG, shaderDef.data());
 
-	Shader* phongSimpShadowLow = render->shaders->addShader("phong_sl_ins", INSTANCE_VERT, SHADOW_NONTEX_FRAG);
-	phongSimpShadowLow->setFloat("shadowPass", 1.0);
-	phongSimpShadowLow->setFloat("lowPass", 1.0);
+	shaderDef = "#define ShadowPass 1.0\n";
+	shaderDef += "#define LowPass 1.0\n";
+	Shader* phongSimpShadowLow = render->shaders->addShader("phong_sl_ins", INSTANCE_VERT, SHADOW_NONTEX_FRAG, shaderDef.data());
 
-	Shader* boneShadow = render->shaders->addShader("bone_s", BONE_VERT, SHADOW_NONTEX_FRAG);
-	boneShadow->setFloat("shadowPass", 1.0);
+	shaderDef = "#define ShadowPass 1.0\n";
+	Shader* boneShadow = render->shaders->addShader("bone_s", BONE_VERT, SHADOW_NONTEX_FRAG, shaderDef.data());
 
-	Shader* billboardShadow = render->shaders->addShader("billboard_s", BILLBOARD_VERT, SHADOW_TEX_FRAG);
+	shaderDef = "#define ShadowPass 1.0\n";
+	Shader* billboardShadow = render->shaders->addShader("billboard_s", BILLBOARD_VERT, SHADOW_TEX_FRAG, shaderDef.data());
 	render->shaders->addShaderBindTex(billboardShadow);
-	billboardShadow->setFloat("shadowPass", 1.0);
 
 	Shader* deferred = render->shaders->addShader("deferred", POST_VERT, DEFERRED_FRAG);
 	deferred->setSlot("texBuffer", 0);

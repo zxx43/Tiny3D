@@ -34,23 +34,25 @@ public: // Global render state
 	bool enableBlend;
 	COLOR clearColor;
 	Shader* currentShader;
+private:
+	bool debugMode;
 public:
-	int viewWidth,viewHeight;
+	int viewWidth, viewHeight;
 	ShaderManager* shaders;
 	std::map<uint, std::map<uint, uint>*> textureTypeSlots;
 public:
 	Render();
 	~Render();
-	void clearFrame(bool clearColor,bool clearDepth,bool clearStencil);
+	void clearFrame(bool clearColor, bool clearDepth, bool clearStencil);
 	void setState(const RenderState* state);
-	void setDepthTest(bool enable,int testMode);
+	void setDepthTest(bool enable, int testMode);
 	void setAlphaTest(bool enable, int testMode, float threshold);
 	void setCullState(bool enable);
 	void setCullMode(int mode);
 	void setDrawLine(bool line);
 	void setBlend(bool enable);
-	void setClearColor(float r,float g,float b,float a);
-	void setViewPort(int width,int height);
+	void setClearColor(float r, float g, float b, float a);
+	void setViewPort(int width, int height);
 	void resize(int width, int height, Camera* mainCamera, Camera* reflectCamera);
 	Shader* findShader(const char* shader);
 	void useShader(Shader* shader);
@@ -61,6 +63,9 @@ public:
 	void useTexture(uint type, uint slot, uint texid);
 	void clearTextureSlots();
 	void setTextureBindless2Shaders(TextureBindless* tex);
+	int getError();
+	void setDebug(bool debug) { debugMode = debug; }
+	bool getDebug() { return debugMode; }
 
 	void setShaderInt(Shader* shader, const char* param, int value) {  shader->setInt(param, value); }
 	void setShaderSampler(Shader* shader, const char* param, int value) { shader->setSampler(param, value); }

@@ -1,12 +1,9 @@
-#version 450
-
 uniform mat4 viewProjectMatrix;
 uniform mat4 viewMatrix;
 uniform float time;
 uniform vec3 eyePos;
 uniform vec3 boundPos;
 uniform vec3 boundScl;
-uniform float shadowPass;
 
 layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 normal;
@@ -69,7 +66,7 @@ mat3 GetIdentity() {
 void main() {
 	vec4 worldVertex = vec4(modelTrans.w * vertex + modelTrans.xyz, 1.0);
 
-	if(shadowPass < 0.5) {
+#ifndef ShadowPass
 		//vec3 bbPos = boundPos + modelTrans.xyz;
 		//vec3 bbView = (viewMatrix * vec4(bbPos, 1.0)).xyz;
 		////vec3 bbScl = boundScl * modelTrans.w * 0.7;
@@ -88,11 +85,11 @@ void main() {
 			vTexid = vec4(texcoord.zw, -1.0, -1.0);
 			gl_Position = viewProjectMatrix * worldVertex;
 		//}
-	} else {
+#else
 		worldVertex.xz += vec2(Wave(texcoord, modelTrans));
 
 		vTexcoord = texcoord.xy;
 		vTexid = vec4(texcoord.zw, -1.0, -1.0);
 		gl_Position = viewProjectMatrix * worldVertex;
-	}
+#endif
 }

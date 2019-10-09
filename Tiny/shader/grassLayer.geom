@@ -1,4 +1,3 @@
-#version 450
 #extension GL_ARB_bindless_texture : enable 
  
 layout (triangles) in;
@@ -11,15 +10,16 @@ uniform float time;
 uniform float distortionId;
 
 in vec3 tePosition[];
+in vec3 teNormal[];
 
-out float vHeight;
+out vec4 vNormalHeight;
 
 #define RAND_FACTOR vec4(12.9898, 78.233, 45.164, 94.673)
 #define PI 3.1415926
 #define WindStrength 0.6
 #define WindFrequency vec2(0.05, 0.05)
 
-mat3 rotY(float r) {
+mat3 RotY(float r) {
 	float cosR = cos(r);
 	float sinR = sin(r);
 	return mat3(
@@ -32,7 +32,7 @@ mat3 rotY(float r) {
 mat3 AngleAxis3x3(float angle, vec3 axis) {
 	float c = cos(angle), s = sin(angle);
 
-	float t = 1 - c;
+	float t = 1.0 - c;
 	float x = axis.x;
 	float y = axis.y;
 	float z = axis.z;
@@ -60,42 +60,43 @@ float random(vec3 seed, float i){
 }
 
 void main() {
-	vec3 vert0 = tePosition[0];
-	vec3 vert1 = tePosition[1];
-	vec3 vert2 = tePosition[2];
-	vec3 trans = (vert0 + vert1 + vert2) * 0.333;
+	vec3 trans = tePosition[1];
 	vec2 randTrans = vec2(random(trans, 0.1), random(trans.xzy, 0.2)); 
 	trans.xz += randTrans;
 
-	float viewz = (viewMatrix * vec4(trans, 1.0)).z;
-	if(viewz < 10.0) {
-		float rand = random(trans, randTrans.x);
-		float gw = rand * 0.3 + 0.1;
-		float gh = rand * 2.0 + 0.5;
+	vec4 projPos = viewProjectMatrix * vec4(trans, 1.0);
+	if(projPos.z > 0.0 && 
+			projPos.x > -projPos.w && projPos.x < projPos.w && 
+			projPos.y < projPos.w) {
+		float rand = randTrans.x + randTrans.y;
+		float gw = rand * 0.5 + 0.1;
+		float gh = rand * 2.5 + 0.5;
 
-		vec3 vertA = vec3(-gw, 0.0, 0.0);
-		vec3 vertB = vec3(gw, 0.0, 0.0);
+		vec3 vertA = vec3(-gw, 0.0, 0.0), vertB = -vertA;
 		vec3 vertC = vec3(0.0, gh, 0.0);
-		float hA = vertA.y, hB = vertB.y, hC = vertC.y;
+		vec2 hbt = vec2(vertA.y, vertC.y);
+		float invh = 1.0 / (hbt.y - hbt.x);
+		hbt *= invh;
 
-		mat3 rotMat = rotY(rand * PI);
-		mat3 windMat = GetWindMat(trans.xz + vec2(viewz));
+		mat3 rotMat = RotY(rand * PI);
+		float viewz = (viewMatrix * vec4(trans, 1.0)).z;
+		mat3 windMat = GetWindMat(trans.xz + randTrans + vec2(viewz));
 		rotMat = rotMat * windMat;
 		vertA = rotMat * vertA + trans;
 		vertB = rotMat * vertB + trans;
 		vertC = rotMat * vertC + trans;
 
-		float invHeight = 1.0 / (hC - hA);
+		vec3 normal = (teNormal[0] + teNormal[1] + teNormal[2]) * 0.333;
 
-		vHeight = hA * invHeight;
+		vNormalHeight = vec4(normal, hbt.x);
 		gl_Position = viewProjectMatrix * vec4(vertA, 1.0);
 		EmitVertex();
 	
-		vHeight = hB * invHeight;
+		vNormalHeight = vec4(normal, hbt.x);
 		gl_Position = viewProjectMatrix * vec4(vertB, 1.0);
 		EmitVertex();
 	
-		vHeight = hC * invHeight;
+		vNormalHeight = vec4(normal, hbt.y);
 		gl_Position = viewProjectMatrix * vec4(vertC, 1.0);
 		EmitVertex();
 	

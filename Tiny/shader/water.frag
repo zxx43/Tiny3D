@@ -1,4 +1,3 @@
-#version 450
 #extension GL_ARB_bindless_texture : enable 
 layout(early_fragment_tests) in;
 

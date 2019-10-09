@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
+#include <string>
 using namespace std;
 
 //Got this from http://www.lighthouse3d.com/opengl/glsl/index.php?oglinfo
@@ -44,7 +45,7 @@ void printProgramInfoLog(GLuint obj)
 	}
 }
 
-ShaderProgram::ShaderProgram(const char* vert, const char* frag, const char* tesc, const char* tese, const char* geom) {
+ShaderProgram::ShaderProgram(const char* vert, const char* frag, const char* defines, const char* tesc, const char* tese, const char* geom) {
 	char *vs = NULL, *fs = NULL, *tc = NULL, *te = NULL, *gs = NULL;
 	vertShader = NULL, fragShader = NULL, tescShader = NULL, teseShader = NULL, geomShader = NULL;
 
@@ -59,12 +60,33 @@ ShaderProgram::ShaderProgram(const char* vert, const char* frag, const char* tes
 	if (tesc) tc = textFileRead((char*)tesc);
 	if (tese) te = textFileRead((char*)tese);
 	if (geom) gs = textFileRead((char*)geom);
+	
+	string vss = string(vs);
+	string fss = string(fs);
+	string tcs = "", tes = "", gss = "";
+	if (tc) tcs = string(tc);
+	if (te) tes = string(te);
+	if (gs) gss = string(gs);
+	if (defines) {
+		string defStr = "\n" + string(defines) + "\n";
+		vss = defStr + vss;
+		fss = defStr + fss;
+		if (tcs.length() > 0) tcs = defStr + tcs;
+		if (tes.length() > 0) tes = defStr + tes;
+		if (gss.length() > 0) gss = defStr + gss;
+	}
+	string version = "#version 450\n";
+	vss = version + vss;
+	fss = version + fss;
+	if (tcs.length() > 0) tcs = version + tcs;
+	if (tes.length() > 0) tes = version + tes;
+	if (gss.length() > 0) gss = version + gss;
 
-	const char* vv = vs;
-	const char* ff = fs;
-	const char* cc = tc;
-	const char* ee = te;
-	const char* gg = gs;
+	const char* vv = vss.data();
+	const char* ff = fss.data();
+	const char* cc = tcs.length() > 0 ? tcs.data() : NULL;
+	const char* ee = tes.length() > 0 ? tes.data() : NULL;
+	const char* gg = gss.length() > 0 ? gss.data() : NULL;
 
 	glShaderSource(vertShader, 1, &vv, NULL);
 	glShaderSource(fragShader, 1, &ff, NULL);

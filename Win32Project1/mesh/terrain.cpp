@@ -53,14 +53,13 @@ Terrain::~Terrain() {
 	free(visualIndices);
 }
 
-float Terrain::getHeight(int px,int pz) {
-	int x=px%MAP_SIZE;
-	int z=pz%MAP_SIZE;
-	if(!heightMap)
-		return 0;
-	float y=0;
-	if(px>=0&&pz>=0)
-		y=heightMap[x+(z*MAP_SIZE)];
+float Terrain::getHeight(int px, int pz) {
+	int x = px % MAP_SIZE;
+	int z = pz % MAP_SIZE;
+	if (!heightMap) return 0;
+	float y = 0;
+	if (px >= 0 && pz >= 0)
+		y = heightMap[x + (z * MAP_SIZE)];
 	return y;
 }
 
