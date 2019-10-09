@@ -330,24 +330,24 @@ void SimpleApplication::initScene() {
 	map<string, Mesh*> meshes = assetMgr->meshes;
 	map<string, Animation*> animations = assetMgr->animations;
 
-	StaticObject* box = new StaticObject(meshes["box"]); 
-	box->bindMaterial(mtlMgr->find("box_mat"));
-	StaticObject* sphere = new StaticObject(meshes["sphere"]); 
-	sphere->bindMaterial(mtlMgr->find("iron_mat"));
-	StaticObject* board = new StaticObject(meshes["board"]);
-	StaticObject* quad = new StaticObject(meshes["quad"]);
+	StaticObject box(meshes["box"]); 
+	box.bindMaterial(mtlMgr->find("box_mat"));
+	StaticObject sphere(meshes["sphere"]); 
+	sphere.bindMaterial(mtlMgr->find("iron_mat"));
+	StaticObject board(meshes["board"]);
+	StaticObject quad(meshes["quad"]);
 
-	StaticObject* model1 = new StaticObject(meshes["tree"], meshes["treeMid"], meshes["billboard"]);
-	model1->detailLevel = 4;
-	model1->setBillboard(5, 10, mtlMgr->find("billboard_tree_mat"));
-	StaticObject* model2 = new StaticObject(meshes["tank"]);
-	StaticObject* model3 = new StaticObject(meshes["m1a2"]);
-	StaticObject* model4 = new StaticObject(meshes["treeA"], meshes["treeAMid"], meshes["billboard"]);
-	model4->detailLevel = 4;
-	model4->setBillboard(13, 14, mtlMgr->find("billboard_treeA_mat"));
-	StaticObject* model5 = new StaticObject(meshes["house"]);
-	StaticObject* model6 = new StaticObject(meshes["oildrum"]);
-	StaticObject* model9 = new StaticObject(meshes["rock"], meshes["rock"], NULL);
+	StaticObject model1(meshes["tree"], meshes["treeMid"], meshes["billboard"]);
+	model1.detailLevel = 4;
+	model1.setBillboard(5, 10, mtlMgr->find("billboard_tree_mat"));
+	StaticObject model2(meshes["tank"]);
+	StaticObject model3(meshes["m1a2"]);
+	StaticObject model4(meshes["treeA"], meshes["treeAMid"], meshes["billboard"]);
+	model4.detailLevel = 4;
+	model4.setBillboard(13, 14, mtlMgr->find("billboard_treeA_mat"));
+	StaticObject model5(meshes["house"]);
+	StaticObject model6(meshes["oildrum"]);
+	StaticObject model9(meshes["rock"], meshes["rock"], NULL);
 	bool treeSimple = false;
 
 	//return;
@@ -357,46 +357,46 @@ void SimpleApplication::initScene() {
 
 	StaticNode* node1 = new StaticNode(vec3(2, 2, 2));
 	node1->setDynamicBatch(false);
-	StaticObject* object11 = model2->clone();
+	StaticObject* object11 = model2.clone();
 	object11->setPosition(-15, -7, 10);
 	object11->setRotation(0, 90, 0);
 	object11->setSize(0.3, 0.3, 0.3);
 	node1->addObject(scene, object11);
-	StaticObject* object12 = model2->clone();
+	StaticObject* object12 = model2.clone();
 	object12->setPosition(15, -7, 10);
 	object12->setRotation(0, 90, 0);
 	object12->setSize(0.3, 0.3, 0.3);
 	node1->addObject(scene, object12);
-	StaticObject* object13 = model3->clone();
+	StaticObject* object13 = model3.clone();
 	object13->setPosition(-30, -7, 70);
 	object13->setSize(0.3, 0.3, 0.3);
 	node1->addObject(scene, object13);
-	StaticObject* object14 = model3->clone();
+	StaticObject* object14 = model3.clone();
 	object14->setPosition(30, -7, 70);
 	object14->setSize(0.3, 0.3, 0.3);
 	node1->addObject(scene, object14);
 
 	StaticNode* node2 = new StaticNode(vec3(10, 2, 2));
 	node2->setDynamicBatch(true);
-	StaticObject* object6 = box->clone();
+	StaticObject* object6 = box.clone();
 	//object6->bindMaterial(mtlMgr->find(DEFAULT_MAT));
 	object6->setPosition(3, 3, 3);
 	object6->setRotation(0, 30, 0);
 	object6->setSize(1, 1, 1);
 	node2->addObject(scene, object6);
-	StaticObject* object7 = box->clone();
+	StaticObject* object7 = box.clone();
 	object7->setPosition(-1, 1, 2);
 	object7->setRotation(0, 0, 30);
 	object7->setSize(2, 2, 2);
 	node2->addObject(scene, object7);
-	StaticObject* house = model5->clone();
+	StaticObject* house = model5.clone();
 	house->setPosition(60, 0, 80);
 	house->setSize(5, 5, 5);
 	node2->addObject(scene, house);
 
 	StaticNode* node3 = new StaticNode(vec3(25, 10, 0));
 	node3->setDynamicBatch(true);
-	StaticObject* objectSphere = sphere->clone();
+	StaticObject* objectSphere = sphere.clone();
 	objectSphere->setSize(10, 10, 10);
 	node3->addObject(scene, objectSphere);
 
@@ -408,7 +408,7 @@ void SimpleApplication::initScene() {
 	node->attachChild(node3);
 	scene->staticRoot->attachChild(node);
 
-	StaticObject* objectRock = model9->clone();
+	StaticObject* objectRock = model9.clone();
 	objectRock->setPosition(-60, 0, 0);
 	objectRock->setSize(0.1, 0.1, 0.1);
 	node3->addObject(scene, objectRock);
@@ -425,7 +425,7 @@ void SimpleApplication::initScene() {
 			//StaticObject* tree = model1->clone();
 			//float baseSize = 2;
 			bool changeTree = (rand() % 100) > 95;
-			StaticObject* tree = changeTree ? model4->clone() : model1->clone();
+			StaticObject* tree = changeTree ? model4.clone() : model1.clone();
 			float baseSize = changeTree ? 3 : 5;
 			float size = (rand() % 100 * 0.01) * 2 + baseSize;
 
@@ -444,7 +444,7 @@ void SimpleApplication::initScene() {
 			//StaticObject* tree = model1->clone();
 			//float baseSize = 2;
 			bool changeTree = (rand() % 100) > 95;
-			StaticObject* tree = changeTree ? model4->clone() : model1->clone();
+			StaticObject* tree = changeTree ? model4.clone() : model1.clone();
 			float baseSize = changeTree ? 3 : 5;
 			float size = (rand() % 100 * 0.01) * 2 + baseSize;
 
@@ -462,7 +462,7 @@ void SimpleApplication::initScene() {
 			//StaticObject* tree = model1->clone();
 			//float baseSize = 2;
 			bool changeTree = (rand() % 100) > 95;
-			StaticObject* tree = changeTree ? model4->clone() : model1->clone();
+			StaticObject* tree = changeTree ? model4.clone() : model1.clone();
 			float baseSize = changeTree ? 3 : 5;
 			float size = (rand() % 100 * 0.01) * 2 + baseSize;
 
@@ -480,7 +480,7 @@ void SimpleApplication::initScene() {
 			//StaticObject* tree = model1->clone();
 			//float baseSize = 2;
 			bool changeTree = (rand() % 100) > 95;
-			StaticObject* tree = changeTree ? model4->clone() : model1->clone();
+			StaticObject* tree = changeTree ? model4.clone() : model1.clone();
 			float baseSize = changeTree ? 3 : 5;
 			float size = (rand() % 100 * 0.01) * 2 + baseSize;
 
@@ -498,7 +498,7 @@ void SimpleApplication::initScene() {
 			//StaticObject* tree = model1->clone();
 			//float baseSize = 2;
 			bool changeTree = (rand() % 100) > 95;
-			StaticObject* tree = changeTree ? model4->clone() : model1->clone();
+			StaticObject* tree = changeTree ? model4.clone() : model1.clone();
 			float baseSize = changeTree ? 3 : 5;
 			float size = (rand() % 100 * 0.01) * 2 + baseSize;
 
@@ -514,7 +514,7 @@ void SimpleApplication::initScene() {
 	instanceNode6->detailLevel = 4;
 	for (int i = -treeScale; i < treeScale; i++) {
 		for (int j = -treeScale; j < treeScale; j++) {
-			StaticObject* tree = model1->clone();
+			StaticObject* tree = model1.clone();
 			float baseSize = 5;
 			//bool changeTree = (rand() % 100) > 90;
 			//StaticObject* tree = changeTree ? model4->clone() : model1->clone();
@@ -529,28 +529,28 @@ void SimpleApplication::initScene() {
 	}
 
 	InstanceNode* instanceNode7 = new InstanceNode(vec3(3500, 0, 200));
-	StaticObject* oil1 = model6->clone();
+	StaticObject* oil1 = model6.clone();
 	oil1->setPosition(30, 0, 30);
 	oil1->setSize(10, 10, 10);
-	StaticObject* oil2 = model6->clone();
+	StaticObject* oil2 = model6.clone();
 	oil2->setPosition(30, 0, 40);
 	oil2->setSize(10, 10, 10);
-	StaticObject* oil3 = model6->clone();
+	StaticObject* oil3 = model6.clone();
 	oil3->setPosition(40, 0, 30);
 	oil3->setSize(10, 10, 10);
-	StaticObject* oil4 = model6->clone();
+	StaticObject* oil4 = model6.clone();
 	oil4->setPosition(40, 0, 40);
 	oil4->setSize(10, 10, 10);
-	StaticObject* box1 = box->clone();
+	StaticObject* box1 = box.clone();
 	box1->setPosition(0, 0, 30);
 	box1->setSize(6, 6, 6);
-	StaticObject* box2 = box->clone();
+	StaticObject* box2 = box.clone();
 	box2->setPosition(0, 0, 40);
 	box2->setSize(6, 6, 6);
-	StaticObject* box3 = box->clone();
+	StaticObject* box3 = box.clone();
 	box3->setPosition(-10, 0, 30);
 	box3->setSize(6, 6, 6);
-	StaticObject* box4 = box->clone();
+	StaticObject* box4 = box.clone();
 	box4->setPosition(-10, 0, 40);
 	box4->setSize(6, 6, 6);
 	instanceNode7->addObject(scene, oil1);
@@ -607,20 +607,9 @@ void SimpleApplication::initScene() {
 	
 	node1->translateNode(0, 0, 20);
 
-	delete box;
-	delete sphere;
-	delete board;
-	delete quad;
-	delete model1;
-	delete model2;
-	delete model3;
-	delete model4;
-	delete model5;
-	delete model6;
-	delete model9;
-
 	scene->terrainNode->standObjectsOnGround(scene->staticRoot);
 	scene->terrainNode->standObjectsOnGround(scene->animationRoot);
-	scene->inited = true;
+	
+	Application::initScene();
 }
 

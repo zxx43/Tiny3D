@@ -235,7 +235,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	// Debug mode
 	if (drawBounding) {
 		static bool boxInit = false;
-		if (!boxInit && scene->inited) {
+		if (!boxInit && scene->isInited()) {
 			scene->clearAllAABB();
 			scene->createNodeAABB(scene->staticRoot);
 			scene->createNodeAABB(scene->animationRoot);

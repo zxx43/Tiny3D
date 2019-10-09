@@ -64,6 +64,11 @@ void Application::init() {
 	}
 }
 
+void Application::initScene() {
+	scene->finishInit();
+	printf("Scene inited!\n");
+}
+
 Application::~Application() {
 	MaterialManager::Release();
 	AssetManager::Release();

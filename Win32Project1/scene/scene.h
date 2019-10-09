@@ -17,10 +17,10 @@
 class Scene {
 private:
 	std::map<Mesh*, uint> meshCount;
+	bool inited;
 private:
 	void initNodes();
 public:
-	bool inited;
 	Camera* mainCamera;
 	Camera* reflectCamera;
 	Sky* skyBox;
@@ -44,6 +44,8 @@ public:
 	void updateReflectCamera();
 	void addObject(Object* object);
 	uint queryMeshCount(Mesh* mesh);
+	void finishInit() { inited = true; }
+	bool isInited() { return inited; }
 public: // Just for debugging
 	void createNodeAABB(Node* node);
 	void clearAllAABB();

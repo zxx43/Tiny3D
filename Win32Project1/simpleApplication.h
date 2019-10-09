@@ -30,7 +30,7 @@ public:
 	virtual void keyDown(int key);
 	virtual void keyUp(int key);
 private:
-	void initScene();
+	virtual void initScene();
 	void updateMovement();
 };
 

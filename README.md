@@ -3,7 +3,7 @@ A Small OpenGL Based Renderer
 
 ### Features:    
 
-- OpenGL3.3 based  
+- OpenGL4.5 based  
 - Instanced rendering  
 - Post processing  
 - .obj model file    

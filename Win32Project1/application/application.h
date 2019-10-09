@@ -25,6 +25,7 @@ public:
 	virtual ~Application();
 public:
 	virtual void init();
+	virtual void initScene();
 	virtual void draw() = 0;
 	virtual void act(long startTime, long currentTime);
 	virtual void moveKey(float velocity);

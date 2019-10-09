@@ -7,7 +7,7 @@ using namespace std;
 
 //Got this from http://www.lighthouse3d.com/opengl/glsl/index.php?oglinfo
 // it prints out shader info (debugging!)
-void printShaderInfoLog(GLuint obj)
+void printShaderInfoLog(GLuint obj, const char* shaderStr)
 {
 	int infologLength = 0;
 	int charsWritten = 0;
@@ -18,6 +18,7 @@ void printShaderInfoLog(GLuint obj)
 		infoLog = (char *)malloc(infologLength);
 		glGetShaderInfoLog(obj, infologLength, &charsWritten, infoLog);
 		printf("printShaderInfoLog: %s\n", infoLog);
+		printf("%s\n", shaderStr);
 		free(infoLog);
 	}
 	else{
@@ -45,6 +46,16 @@ void printProgramInfoLog(GLuint obj)
 	}
 }
 
+char* ShaderProgram::attach(const char* version, const char* attachStr, const char* shaderStr) {
+	if (!shaderStr) return NULL;
+	string shstr = string(version) + string("\n");
+	if (attachStr) shstr += string(attachStr) + string("\n");
+	shstr += string(shaderStr);
+	char* resStr = (char*)malloc(sizeof(char) * (shstr.length() + 1));
+	strcpy(resStr, shstr.data());
+	return resStr;
+}
+
 ShaderProgram::ShaderProgram(const char* vert, const char* frag, const char* defines, const char* tesc, const char* tese, const char* geom) {
 	char *vs = NULL, *fs = NULL, *tc = NULL, *te = NULL, *gs = NULL;
 	vertShader = NULL, fragShader = NULL, tescShader = NULL, teseShader = NULL, geomShader = NULL;
@@ -61,32 +72,12 @@ ShaderProgram::ShaderProgram(const char* vert, const char* frag, const char* def
 	if (tese) te = textFileRead((char*)tese);
 	if (geom) gs = textFileRead((char*)geom);
 	
-	string vss = string(vs);
-	string fss = string(fs);
-	string tcs = "", tes = "", gss = "";
-	if (tc) tcs = string(tc);
-	if (te) tes = string(te);
-	if (gs) gss = string(gs);
-	if (defines) {
-		string defStr = "\n" + string(defines) + "\n";
-		vss = defStr + vss;
-		fss = defStr + fss;
-		if (tcs.length() > 0) tcs = defStr + tcs;
-		if (tes.length() > 0) tes = defStr + tes;
-		if (gss.length() > 0) gss = defStr + gss;
-	}
-	string version = "#version 450\n";
-	vss = version + vss;
-	fss = version + fss;
-	if (tcs.length() > 0) tcs = version + tcs;
-	if (tes.length() > 0) tes = version + tes;
-	if (gss.length() > 0) gss = version + gss;
-
-	const char* vv = vss.data();
-	const char* ff = fss.data();
-	const char* cc = tcs.length() > 0 ? tcs.data() : NULL;
-	const char* ee = tes.length() > 0 ? tes.data() : NULL;
-	const char* gg = gss.length() > 0 ? gss.data() : NULL;
+	const char* version = "#version 450";
+	char* vv = attach(version, defines, vs);
+	char* ff = attach(version, defines, fs);
+	char* cc = attach(version, defines, tc);
+	char* ee = attach(version, defines, te);
+	char* gg = attach(version, defines, gs);
 
 	glShaderSource(vertShader, 1, &vv, NULL);
 	glShaderSource(fragShader, 1, &ff, NULL);
@@ -107,21 +98,27 @@ ShaderProgram::ShaderProgram(const char* vert, const char* frag, const char* def
 	if (geomShader) glCompileShader(geomShader);
 
 	printf("%s: ", vert);
-	printShaderInfoLog(vertShader);
+	printShaderInfoLog(vertShader, vv);
 	printf("%s: ", frag);
-	printShaderInfoLog(fragShader);
+	printShaderInfoLog(fragShader, ff);
 	if (tesc) {
 		printf("%s: ", tesc);
-		printShaderInfoLog(tescShader);
+		printShaderInfoLog(tescShader, cc);
 	}
 	if (tese) {
 		printf("%s: ", tese);
-		printShaderInfoLog(teseShader);
+		printShaderInfoLog(teseShader, ee);
 	}
 	if (geom) {
 		printf("%s: ", geom);
-		printShaderInfoLog(geomShader);
+		printShaderInfoLog(geomShader, gg);
 	}
+
+	if (vv) free(vv);
+	if (ff) free(ff);
+	if (cc) free(cc);
+	if (ee) free(ee);
+	if (gg) free(gg);
 
 	shaderProg = glCreateProgram();
 	glAttachShader(shaderProg, vertShader);
