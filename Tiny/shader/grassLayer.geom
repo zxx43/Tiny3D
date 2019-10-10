@@ -1,20 +1,20 @@
 #extension GL_ARB_bindless_texture : enable 
- 
-layout (triangles) in;
+
+layout (points) in;
 layout (triangle_strip, max_vertices = 3) out;
 
 layout(bindless_sampler) uniform sampler2D texBlds[256];
 uniform mat4 viewProjectMatrix;
 uniform mat4 viewMatrix;
-uniform float time;
-uniform float distortionId;
+uniform float time, distortionId;
 
 in vec3 tePosition[];
+in vec4 teProjPos[];
 in vec3 teNormal[];
+in vec4 teInfo[];
 
 out vec4 vNormalHeight;
 
-#define RAND_FACTOR vec4(12.9898, 78.233, 45.164, 94.673)
 #define PI 3.1415926
 #define WindStrength 0.6
 #define WindFrequency vec2(0.05, 0.05)
@@ -53,40 +53,33 @@ mat3 GetWindMat(vec2 pos) {
 	return windRotation;
 }
 
-float random(vec3 seed, float i){
-	vec4 seed4 = vec4(seed,i);
-	float dotProduct = dot(seed4, RAND_FACTOR);
-	return fract(sin(dotProduct) * 43758.5453);
-}
-
 void main() {
-	vec3 trans = tePosition[1];
-	vec2 randTrans = vec2(random(trans, 0.1), random(trans.xzy, 0.2)); 
-	trans.xz += randTrans;
-
-	vec4 projPos = viewProjectMatrix * vec4(trans, 1.0);
+	vec4 projPos = teProjPos[0];
 	if(projPos.z > 0.0 && 
 			projPos.x > -projPos.w && projPos.x < projPos.w && 
 			projPos.y < projPos.w) {
-		float rand = randTrans.x + randTrans.y;
+
+		vec4 info = teInfo[0];
+		vec3 trans = tePosition[0];
+		vec3 normal = teNormal[0];
+
+		float rand = info.x + info.y;
 		float gw = rand * 0.5 + 0.1;
 		float gh = rand * 2.5 + 0.5;
 
 		vec3 vertA = vec3(-gw, 0.0, 0.0), vertB = -vertA;
 		vec3 vertC = vec3(0.0, gh, 0.0);
 		vec2 hbt = vec2(vertA.y, vertC.y);
-		float invh = 1.0 / (hbt.y - hbt.x);
-		hbt *= invh;
+		hbt /= gh;
 
 		mat3 rotMat = RotY(rand * PI);
 		float viewz = (viewMatrix * vec4(trans, 1.0)).z;
-		mat3 windMat = GetWindMat(trans.xz + randTrans + vec2(viewz));
+		mat3 windMat = GetWindMat(trans.xz + vec2(viewz));
 		rotMat = rotMat * windMat;
+
 		vertA = rotMat * vertA + trans;
 		vertB = rotMat * vertB + trans;
 		vertC = rotMat * vertC + trans;
-
-		vec3 normal = (teNormal[0] + teNormal[1] + teNormal[2]) * 0.333;
 
 		vNormalHeight = vec4(normal, hbt.x);
 		gl_Position = viewProjectMatrix * vec4(vertA, 1.0);
