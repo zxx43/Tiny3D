@@ -97,6 +97,8 @@ RenderBuffer* StaticDrawcall::createBuffers(Batch* batch, int bufCount, int vert
 	if (indexed)
 		buffer->setIndexData(bufCount - 1, GL_UNSIGNED_INT, indCount, indType, batch->indexBuffer);
 	buffer->unuse();
+	buffer->unuseAttr();
+	buffer->unuseElement();
 	return buffer;
 }
 

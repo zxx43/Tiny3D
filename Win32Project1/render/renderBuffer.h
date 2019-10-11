@@ -159,6 +159,9 @@ struct RenderBuffer {
 	void unuseAttr() {
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
+	void unuseElement() {
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	}
 	void use() {
 		glBindVertexArray(vao);
 	}

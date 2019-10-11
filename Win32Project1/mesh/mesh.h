@@ -22,6 +22,8 @@ struct FaceBuf {
 class Mesh {
 private:
 	virtual void initFaces()=0;
+private:
+	std::string name;
 public:
 	int vertexCount,indexCount;
 	vec4* vertices;
@@ -43,6 +45,8 @@ public:
 	void caculateExData();
 	void setIsBillboard(bool billboard);
 	void setSingle(bool single);
+	std::string getName() { return name; }
+	void setName(std::string value) { name = value; }
 private:
 	void caculateBounding();
 };

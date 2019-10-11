@@ -18,6 +18,8 @@ flat out vec3 vColor;
 out vec3 vNormal;
 out mat3 vTBN;
 
+#define MatScale vec3(0.6, 1.2, 1.0)
+
 mat4 convertMat(mat3x4 srcMat) {
 	mat4x3 transMat = transpose(srcMat);
 	return mat4(transMat[0], 0.0, 
@@ -40,7 +42,7 @@ void main() {
     vec4 position = boneMat * vec4(vertex, 1.0);
 
 #ifndef ShadowPass
-	vColor = vec3(0.6, 1.2, 1.0) * color * 0.005;
+	vColor = MatScale * color * 0.005;
 	mat3 normalMat = uNormalMatrix * mat3(boneMat);
 	vNormal = normalMat * normal;
 	vTBN = normalMat * GetTBN(normal, tangent);

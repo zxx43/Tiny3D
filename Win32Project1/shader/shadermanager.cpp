@@ -15,7 +15,11 @@ ShaderManager::~ShaderManager() {
 }
 
 Shader* ShaderManager::addShader(const char* name, const char* vs, const char* fs, const char* defines, const char* tc, const char* te, const char* gs) {
+	// Preload
 	Shader* shader = new Shader(vs, fs, defines, tc, te, gs);
+	delete shader; shader = NULL;
+	
+	shader = new Shader(vs, fs, defines, tc, te, gs);
 	shader->name = name;
 	shaders.insert(pair<string, Shader*>(name, shader));
 	return shader;

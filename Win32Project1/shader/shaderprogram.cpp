@@ -30,6 +30,13 @@ void printShaderInfoLog(GLuint obj, const char* shaderStr)
 // it prints out shader info (debugging!)
 void printProgramInfoLog(GLuint obj)
 {
+	GLint isLinked = 0;
+	glGetProgramiv(obj, GL_LINK_STATUS, &isLinked);
+	if (isLinked == GL_FALSE)
+	{
+		printf("Link error!\n");
+	}
+
 	int infologLength = 0;
 	int charsWritten = 0;
 	char *infoLog;
@@ -72,7 +79,7 @@ ShaderProgram::ShaderProgram(const char* vert, const char* frag, const char* def
 	if (tese) te = textFileRead((char*)tese);
 	if (geom) gs = textFileRead((char*)geom);
 	
-	const char* version = "#version 450";
+	const char* version = "#version 400";
 	char* vv = attach(version, defines, vs);
 	char* ff = attach(version, defines, fs);
 	char* cc = attach(version, defines, tc);
@@ -128,6 +135,8 @@ ShaderProgram::ShaderProgram(const char* vert, const char* frag, const char* def
 	if (geomShader) glAttachShader(shaderProg, geomShader);
 
 	glLinkProgram(shaderProg);
+	printf("%s, %s: ", vert, frag);
+	printProgramInfoLog(shaderProg);
 }
 
 ShaderProgram::~ShaderProgram() {

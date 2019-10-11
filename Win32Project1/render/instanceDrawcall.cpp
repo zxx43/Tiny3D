@@ -26,6 +26,8 @@ InstanceDrawcall::InstanceDrawcall(Instance* instance) :Drawcall() {
 	indexCount = instanceRef->indexCount;
 	indexed = indexCount > 0 ? true : false;
 
+	//printf("create mesh vao: %s?\n", instanceRef->instanceMesh->getName().data());
+
 	objectCount = dynDC ? instanceRef->maxInstanceCount : instanceRef->instanceCount;
 	objectToPrepare = 0, objectToDraw = 0;
 	if (!dynDC) {
@@ -51,6 +53,7 @@ InstanceDrawcall::InstanceDrawcall(Instance* instance) :Drawcall() {
 	setType(INSTANCE_DC);
 
 	instanceRef->releaseInstanceData();
+	//printf("create mesh vao: %s!\n", instanceRef->instanceMesh->getName().data());
 }
 
 InstanceDrawcall::~InstanceDrawcall() {
@@ -104,6 +107,8 @@ RenderBuffer* InstanceDrawcall::createBuffers(Instance* instance, bool dyn, bool
 		}
 	}
 	buffer->unuse();
+	buffer->unuseAttr();
+	buffer->unuseElement();
 	return buffer;
 }
 
