@@ -338,6 +338,7 @@
     <None Include="..\Tiny\shader\ssr.frag" />
     <None Include="..\Tiny\shader\terrain.frag" />
     <None Include="..\Tiny\shader\terrain.vert" />
+    <None Include="..\Tiny\shader\util.glsl" />
     <None Include="..\Tiny\shader\water.frag" />
     <None Include="..\Tiny\shader\water.vert" />
   </ItemGroup>

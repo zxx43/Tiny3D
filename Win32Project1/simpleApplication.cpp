@@ -377,7 +377,7 @@ void SimpleApplication::initScene() {
 	node1->addObject(scene, object14);
 
 	StaticNode* node2 = new StaticNode(vec3(10, 2, 2));
-	node2->setDynamicBatch(true);
+	node2->setDynamicBatch(false);
 	StaticObject* object6 = box.clone();
 	//object6->bindMaterial(mtlMgr->find(DEFAULT_MAT));
 	object6->setPosition(3, 3, 3);
@@ -395,7 +395,7 @@ void SimpleApplication::initScene() {
 	node2->addObject(scene, house);
 
 	StaticNode* node3 = new StaticNode(vec3(25, 10, 0));
-	node3->setDynamicBatch(true);
+	node3->setDynamicBatch(false);
 	StaticObject* objectSphere = sphere.clone();
 	objectSphere->setSize(10, 10, 10);
 	node3->addObject(scene, objectSphere);

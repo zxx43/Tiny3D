@@ -16,7 +16,7 @@ in vec4 teInfo[];
 out vec4 vNormalHeight;
 
 #define PI 3.1415926
-#define WindStrength 0.6
+#define WindStrength 0.8
 #define WindFrequency vec2(0.05, 0.05)
 
 mat3 RotY(float r) {
@@ -64,13 +64,10 @@ void main() {
 		vec3 normal = teNormal[0];
 
 		float rand = info.x + info.y;
-		float gw = rand * 0.5 + 0.1;
-		float gh = rand * 2.5 + 0.5;
 
-		vec3 vertA = vec3(-gw, 0.0, 0.0), vertB = -vertA;
-		vec3 vertC = vec3(0.0, gh, 0.0);
-		vec2 hbt = vec2(vertA.y, vertC.y);
-		hbt /= gh;
+		vec2 size = vec2(rand * 0.5 + 0.1, rand * 2.5 + 0.5);
+		vec3 vertA = vec3(-size.x, 0.0, 0.0), vertB = -vertA, vertC = vec3(0.0, size.y, 0.0);
+		vec2 hbt = vec2(vertA.y, vertC.y) / size.y;
 
 		mat3 rotMat = RotY(rand * PI);
 		float viewz = (viewMatrix * vec4(trans, 1.0)).z;

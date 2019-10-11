@@ -90,6 +90,7 @@ void AssetManager::addDistortionTex(const char* texName) {
 }
 
 void AssetManager::addMesh(const char* name, Mesh* mesh, bool billboard) {
+	mesh->setName(name);
 	meshes[name] = mesh;
 	meshes[name]->setIsBillboard(billboard);
 }

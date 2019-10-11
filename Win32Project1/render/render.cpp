@@ -5,19 +5,20 @@
 #include <stdio.h>
 
 Render::Render() {
-	shaders = new ShaderManager();
 	initEnvironment();
+	shaders = new ShaderManager();
 }
 
 Render::~Render() {
 	delete shaders;
-	shaders=NULL;
+	shaders = NULL;
 	clearTextureSlots();
 }
 
 float Render::MaxAniso = 0.0;
 
 void Render::initEnvironment() {
+	glewExperimental = GL_TRUE;
 	GLenum err=glewInit();
 	if(GLEW_OK!=err)
 		printf("Error: %s\n",glewGetErrorString(err));

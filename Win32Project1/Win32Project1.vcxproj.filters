@@ -625,6 +625,9 @@
     <None Include="..\Tiny\shader\grassLayer.tese">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\Tiny\shader\util.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Tiny\config\config.txt">

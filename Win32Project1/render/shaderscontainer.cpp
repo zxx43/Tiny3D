@@ -66,9 +66,6 @@ void SetupShaders(Render* render) {
 	render->shaders->addShader("sky", SKY_VERT, SKY_FRAG);
 	render->shaders->addShader("water", WATER_VERT, WATER_FRAG);
 
-	//Shader* grassLayerShadow = render->shaders->addShader("grassLayerShadow", GRASS_LAYER_VERT, GRASS_LAYER_FRAG, NULL, GRASS_LAYER_TESC, GRASS_LAYER_TESE, SHADOW_NONTEX_FRAG);
-	//render->shaders->addShaderBindTex(grassLayerShadow);
-
 	shaderDef = "#define ShadowPass 1.0\n";
 	Shader* phongShadow = render->shaders->addShader("phong_s", PHONG_VERT, SHADOW_TEX_FRAG, shaderDef.data());
 	render->shaders->addShaderBindTex(phongShadow);
