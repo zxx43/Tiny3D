@@ -39,8 +39,13 @@ public:
 	std::string getSlot(int slot) { return texSlots[slot]; }
 public:
 	std::string name;
-	Shader(const char* vert, const char* frag, const char* defines = NULL, const char* tesc = NULL, const char* tese = NULL, const char* geom = NULL);
+	Shader(const char* vert, const char* frag, const char* tesc = NULL, const char* tese = NULL, const char* geom = NULL);
 	~Shader();
+	void attachDef(const char* def, const char* value);
+	void attachEx(std::string ex);
+	void compose();
+	void compile(bool preload);
+	void dettach();
 	void use();
 	void addAttrib(const char* name);
 	void addParam(const char* name);

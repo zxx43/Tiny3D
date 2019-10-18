@@ -1,6 +1,4 @@
-﻿#extension GL_ARB_bindless_texture : enable 
-
-layout(bindless_sampler) uniform sampler2D texBuffer, matBuffer, normalGrassBuffer, roughMetalBuffer, depthBuffer;
+﻿layout(bindless_sampler) uniform sampler2D texBuffer, matBuffer, normalGrassBuffer, roughMetalBuffer, depthBuffer;
 uniform vec2 pixelSize;
 
 uniform mat4 invViewProjMatrix, invProjMatrix;
@@ -20,7 +18,6 @@ out vec4 FragColor;
 
 #define GAP float(30.0)
 #define INV2GAP float(0.01667)
-#define PI 3.14159265359
 
 float genPCF(sampler2D shadowMap, vec3 shadowCoord, float bias, float pcount, float inv) {
 	float shadowFactor = 0.0;
@@ -71,16 +68,6 @@ float genShadowFactor(vec4 worldPos, float depthView, float bias) {
 		return genShadow(depthBufferFar, shadowCoord, bs);
 	}
 	return 1.0;
-}
-
-float saturate(float value) {
-	return clamp(value, 0.0, 1.0);
-}
-
-float BlendVal(float val, float val0, float val1, float res0, float res1) {
-	if (val <= val0) return res0;
-	if (val >= val1) return res1;
-	return res0 + (val - val0) * (res1 - res0) / (val1 - val0);
 }
 
 vec3 Smudge(vec3 sceneTex, float grassFlag, float viewDist) {
@@ -184,7 +171,7 @@ void main() {
 
 		// SSG
 		float grassFlag = normalGrass.a;
-		albedo = Smudge(albedo, grassFlag, depthView);
+		//albedo = Smudge(albedo, grassFlag, depthView);
 
 		// Cook-Torrance BRDF	
 		vec3 F0 = mix(vec3(0.04), albedo, roughMetal.g);	
@@ -193,9 +180,9 @@ void main() {
         vec3 kS   = FresnelSchlick(max(dot(h, v), 0.0), F0);
 		vec3 kD   = (vec3(1.0) - kS) * (1.0 - roughMetal.g);	 
 
-        float specular = (NDF * G) / (4 * max(dot(normal, v), 0.0) * ndotl + 0.001);
+        float specular = (NDF * G) / (4.0 * max(dot(normal, v), 0.0) * ndotl + 0.001);
 
-		vec3 Lo = (kD * albedo / PI + kS * specular) * radiance * ndotl;
+		vec3 Lo = (kD * albedo * INV_PI + kS * specular) * radiance * ndotl;
 		vec3 ambient = material.r * albedo;
 
 		sceneColor = ambient + shadowFactor * Lo;

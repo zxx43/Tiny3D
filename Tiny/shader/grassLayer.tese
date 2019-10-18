@@ -10,15 +10,6 @@ out vec4 teProjPos;
 out vec3 teNormal;
 out vec4 teInfo;
 
-#define RAND_FACTOR vec4(12.9898, 78.233, 45.164, 94.673)
-#define PI 3.1415926
-
-float random(vec3 seed, float i){
-	vec4 seed4 = vec4(seed,i);
-	float dotProduct = dot(seed4, RAND_FACTOR);
-	return fract(sin(dotProduct) * 43758.5453);
-}
-
 void main() {
 	vec3 pos =  gl_TessCoord.x * tcPosition[0] + 
 				gl_TessCoord.y * tcPosition[1] + 

@@ -17,7 +17,7 @@ void main() {
 
 	float level = NO_TESS;
 	if(vpos.w <= 30.0) 
-		level = (MAX_TESS - MIN_TESS) * (400.0 + vpos.w) * 0.01 + MIN_TESS + 0.1;
+		level = (MAX_TESS - MIN_TESS) * (450.0 + vpos.w) * 0.01 + MIN_TESS + 0.1;
 
 	gl_TessLevelInner[0] = level;
     gl_TessLevelOuter[0] = level;

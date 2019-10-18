@@ -1,5 +1,3 @@
-#extension GL_ARB_bindless_texture : enable 
-
 layout(bindless_sampler) uniform sampler2D colorBufferLow, colorBufferHigh;
 
 in vec2 vTexcoord;

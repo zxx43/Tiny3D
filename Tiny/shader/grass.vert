@@ -15,10 +15,12 @@ layout (location = 6) in vec4 modelTrans;
 
 out vec2 vTexcoord;
 flat out vec4 vTexid;
+#ifndef ShadowPass
 flat out vec3 vColor;
 out vec3 vNormal;
 out mat3 vTBN;
 //flat out float vOutBound;
+#endif
 
 #define COLOR_SCALE vec3(0.003, 0.006, 0.005)
 #define INVALID_POINT vec4(1.1, 1.1, 1.1, 1.0)
@@ -49,18 +51,6 @@ float CheckOut(vec3 pos, vec3 scl) {
 
 float Wave(vec4 tex, vec4 pos) {
 	return step(0.9, tex.y) * sin(time + dot(pos.xz, vec2(1.0))) * 2.0;
-}
-
-mat3 GetTBN(vec3 normal, vec3 tangent) {
-	vec3 bitangent = cross(normal, tangent);
-	return mat3(tangent, bitangent, normal);
-}
-
-mat3 GetIdentity() {
-	return mat3(
-		1.0, 0.0, 0.0,
-		0.0, 1.0, 0.0,
-		0.0, 0.0, 1.0);
 }
 
 void main() {

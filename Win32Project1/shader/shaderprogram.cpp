@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
-#include <string>
 using namespace std;
 
 //Got this from http://www.lighthouse3d.com/opengl/glsl/index.php?oglinfo
@@ -53,50 +52,63 @@ void printProgramInfoLog(GLuint obj)
 	}
 }
 
-char* ShaderProgram::attach(const char* version, const char* attachStr, const char* shaderStr) {
-	if (!shaderStr) return NULL;
+std::string ShaderProgram::attach(const char* version, const char* shaderStr) {
+	if (!shaderStr) return "";
 	string shstr = string(version) + string("\n");
-	if (attachStr) shstr += string(attachStr) + string("\n");
+	if (exStr.length() > 0) shstr += exStr + string("\n");
 	shstr += string(shaderStr);
-	char* resStr = (char*)malloc(sizeof(char) * (shstr.length() + 1));
-	strcpy(resStr, shstr.data());
-	return resStr;
+	return shstr;
 }
 
-ShaderProgram::ShaderProgram(const char* vert, const char* frag, const char* defines, const char* tesc, const char* tese, const char* geom) {
-	char *vs = NULL, *fs = NULL, *tc = NULL, *te = NULL, *gs = NULL;
+ShaderProgram::ShaderProgram(const char* vert, const char* frag, const char* tesc, const char* tese, const char* geom) {
+	vfile = (char*)vert, ffile = (char*)frag, cfile = (char*)tesc, efile = (char*)tese, gfile = (char*)geom;
+	vs = NULL, fs = NULL, tc = NULL, te = NULL, gs = NULL;
 	vertShader = NULL, fragShader = NULL, tescShader = NULL, teseShader = NULL, geomShader = NULL;
 
+	vs = textFileRead(vfile);
+	fs = textFileRead(ffile);
+	if (cfile) tc = textFileRead(cfile);
+	if (efile) te = textFileRead(efile);
+	if (gfile) gs = textFileRead(gfile);
+
+	exStr = "";
+}
+
+void ShaderProgram::attachDef(const char* def, const char* value) {
+	exStr += "#define " + string(def) + " " + string(value) + "\n";
+}
+
+void ShaderProgram::attachEx(const char* ex) {
+	exStr += string(ex) + "\n";
+}
+
+void ShaderProgram::compose() {
+	const char* version = "#version 400";
+	vStr = attach(version, vs);
+	fStr = attach(version, fs);
+	cStr = attach(version, tc);
+	eStr = attach(version, te);
+	gStr = attach(version, gs);
+}
+
+void ShaderProgram::compile(bool preload) {
 	vertShader = glCreateShader(GL_VERTEX_SHADER);
 	fragShader = glCreateShader(GL_FRAGMENT_SHADER);
-	if (tesc) tescShader = glCreateShader(GL_TESS_CONTROL_SHADER);
-	if (tese) teseShader = glCreateShader(GL_TESS_EVALUATION_SHADER);
-	if (geom) geomShader = glCreateShader(GL_GEOMETRY_SHADER);
+	if (tc) tescShader = glCreateShader(GL_TESS_CONTROL_SHADER);
+	if (te) teseShader = glCreateShader(GL_TESS_EVALUATION_SHADER);
+	if (gs) geomShader = glCreateShader(GL_GEOMETRY_SHADER);
 
-	vs = textFileRead((char*)vert);
-	fs = textFileRead((char*)frag);
-	if (tesc) tc = textFileRead((char*)tesc);
-	if (tese) te = textFileRead((char*)tese);
-	if (geom) gs = textFileRead((char*)geom);
-	
-	const char* version = "#version 400";
-	char* vv = attach(version, defines, vs);
-	char* ff = attach(version, defines, fs);
-	char* cc = attach(version, defines, tc);
-	char* ee = attach(version, defines, te);
-	char* gg = attach(version, defines, gs);
+	GLchar* vv = (GLchar*)vStr.data();
+	GLchar* ff = (GLchar*)fStr.data();
+	GLchar* cc = (GLchar*)cStr.data();
+	GLchar* ee = (GLchar*)eStr.data();
+	GLchar* gg = (GLchar*)gStr.data();
 
 	glShaderSource(vertShader, 1, &vv, NULL);
 	glShaderSource(fragShader, 1, &ff, NULL);
-	if (cc) glShaderSource(tescShader, 1, &cc, NULL);
-	if (ee) glShaderSource(teseShader, 1, &ee, NULL);
-	if (gg) glShaderSource(geomShader, 1, &gg, NULL);
-
-	free(vs);
-	free(fs);
-	if (tc) free(tc);
-	if (te) free(te);
-	if (gs) free(gs);
+	if (cStr.length() > 0) glShaderSource(tescShader, 1, &cc, NULL);
+	if (eStr.length() > 0) glShaderSource(teseShader, 1, &ee, NULL);
+	if (gStr.length() > 0) glShaderSource(geomShader, 1, &gg, NULL);
 
 	glCompileShader(vertShader);
 	glCompileShader(fragShader);
@@ -104,28 +116,24 @@ ShaderProgram::ShaderProgram(const char* vert, const char* frag, const char* def
 	if (teseShader) glCompileShader(teseShader);
 	if (geomShader) glCompileShader(geomShader);
 
-	printf("%s: ", vert);
-	printShaderInfoLog(vertShader, vv);
-	printf("%s: ", frag);
-	printShaderInfoLog(fragShader, ff);
-	if (tesc) {
-		printf("%s: ", tesc);
-		printShaderInfoLog(tescShader, cc);
+	if (!preload) {
+		printf("%s: ", vfile);
+		printShaderInfoLog(vertShader, vv);
+		printf("%s: ", ffile);
+		printShaderInfoLog(fragShader, ff);
+		if (cfile) {
+			printf("%s: ", cfile);
+			printShaderInfoLog(tescShader, cc);
+		}
+		if (efile) {
+			printf("%s: ", efile);
+			printShaderInfoLog(teseShader, ee);
+		}
+		if (gfile) {
+			printf("%s: ", gfile);
+			printShaderInfoLog(geomShader, gg);
+		}
 	}
-	if (tese) {
-		printf("%s: ", tese);
-		printShaderInfoLog(teseShader, ee);
-	}
-	if (geom) {
-		printf("%s: ", geom);
-		printShaderInfoLog(geomShader, gg);
-	}
-
-	if (vv) free(vv);
-	if (ff) free(ff);
-	if (cc) free(cc);
-	if (ee) free(ee);
-	if (gg) free(gg);
 
 	shaderProg = glCreateProgram();
 	glAttachShader(shaderProg, vertShader);
@@ -135,11 +143,13 @@ ShaderProgram::ShaderProgram(const char* vert, const char* frag, const char* def
 	if (geomShader) glAttachShader(shaderProg, geomShader);
 
 	glLinkProgram(shaderProg);
-	printf("%s, %s: ", vert, frag);
-	printProgramInfoLog(shaderProg);
+	if (!preload) {
+		printf("%s, %s: ", vfile, ffile);
+		printProgramInfoLog(shaderProg);
+	}
 }
 
-ShaderProgram::~ShaderProgram() {
+void ShaderProgram::dettach() {
 	glDetachShader(shaderProg, vertShader);
 	glDetachShader(shaderProg, fragShader);
 	if (tescShader) glDetachShader(shaderProg, tescShader);
@@ -151,6 +161,16 @@ ShaderProgram::~ShaderProgram() {
 	if (teseShader) glDeleteShader(teseShader);
 	if (geomShader) glDeleteShader(geomShader);
 	glDeleteProgram(shaderProg);
+}
+
+ShaderProgram::~ShaderProgram() {
+	dettach();
+
+	if (vs) free(vs); vs = NULL;
+	if (fs) free(fs); fs = NULL;
+	if (tc) free(tc); tc = NULL;
+	if (te) free(te); te = NULL;
+	if (gs) free(gs); gs = NULL;
 }
 
 void ShaderProgram::use() {

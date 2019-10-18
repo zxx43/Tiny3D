@@ -5,8 +5,6 @@ layout (location = 0) in vec3 vertex;
 
 out vec3 texCoord;
 
-#define CenterPosition vec4(0.0, 0.0, 0.0, 1.0)
-
 void main() {
 	mat4 skyView = viewMatrix;
 	skyView[3] = CenterPosition;

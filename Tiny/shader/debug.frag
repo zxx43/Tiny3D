@@ -1,5 +1,3 @@
-#extension GL_ARB_bindless_texture : enable 
-
 flat in vec3 vColor;
 in vec3 vNormal;
 
@@ -12,5 +10,5 @@ void main() {
 	FragTex = vec4(0.0, 0.0, 0.0, 1.0);
 	FragMat = vec4(vColor, 1.0);
 	FragNormalGrass = vec4(normalize(vNormal) * 0.5 + 0.5, 0.0);
-	FragRoughMetal = vec4(0.0, 0.0, 0.0, 1.0);
+	FragRoughMetal = DefaultRM;
 }

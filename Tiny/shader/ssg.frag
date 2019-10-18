@@ -1,5 +1,3 @@
-#extension GL_ARB_bindless_texture : enable 
-
 uniform mat4 invProjMatrix;
 uniform vec2 screenSize, pixelSize;
 uniform float time;
@@ -8,16 +6,6 @@ layout(bindless_sampler) uniform sampler2D colorBuffer, normalGrassBuffer, depth
 in vec2 vTexcoord;
 
 out vec4 SceneColor;
-
-float saturate(float value) {
-	return clamp(value, 0.0, 1.0);
-}
-
-float BlendVal(float val, float val0, float val1, float res0, float res1) {
-	if (val <= val0) return res0;
-	if (val >= val1) return res1;
-	return res0 + (val - val0) * (res1 - res0) / (val1 - val0);
-}
 
 vec3 Smudge(vec3 sceneTex, float grassFlag, float viewDist) {
 	if(grassFlag < 0.5) 

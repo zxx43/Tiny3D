@@ -8,8 +8,8 @@
 #ifndef SHADERSCONTAINER_H_
 #define SHADERSCONTAINER_H_
 
-#include "render.h"
+#include "../shader/shadermanager.h"
 
-void SetupShaders(Render* render);
+void SetupShaders(ShaderManager* shaders);
 
 #endif /* SHADERSCONTAINER_H_ */

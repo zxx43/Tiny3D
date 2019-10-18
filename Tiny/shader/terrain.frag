@@ -1,8 +1,6 @@
-#extension GL_EXT_gpu_shader4 : enable 
-#extension GL_ARB_bindless_texture : enable 
 layout(early_fragment_tests) in;
 
-layout(bindless_sampler) uniform sampler2D texBlds[256];
+layout(bindless_sampler) uniform sampler2D texBlds[MAX_TEX];
 uniform float waterHeight, isReflect;
 
 in vec2 vTexcoord;
@@ -17,8 +15,6 @@ layout (location = 0) out vec4 FragTex;
 layout (location = 1) out vec4 FragMat;
 layout (location = 2) out vec4 FragNormalGrass;
 layout (location = 3) out vec4 FragRoughMetal;
-
-#define DefaultRM vec4(0.0, 0.0, 0.0, 1.0)
 
 void main() {
 	if(isReflect > 0.1 && worldHeight < waterHeight - 4.0)

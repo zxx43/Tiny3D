@@ -1,7 +1,6 @@
 #include "application.h"
 #include "../constants/constants.h"
 #include "../util/util.h"
-#include "../render/shaderscontainer.h"
 
 Application::Application() {
 	config = new Config("config/config.txt");
@@ -23,7 +22,7 @@ Application::Application() {
 void Application::init() {
 	printf("Init app\n");
 	render = new Render();
-	SetupShaders(render);
+	render->initShaders();
 	AssetManager::Init();
 	MaterialManager::Init();
 	scene = new Scene();

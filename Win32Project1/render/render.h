@@ -11,6 +11,7 @@
 #include "../shader/shadermanager.h"
 #include "../framebuffer/framebuffer.h"
 #include "../texture/texturebindless.h"
+#include "../render/shaderscontainer.h"
 #include "drawcall.h"
 
 #define TEXTURE_2D 1
@@ -36,9 +37,9 @@ public: // Global render state
 	Shader* currentShader;
 private:
 	bool debugMode;
+	ShaderManager* shaders;
 public:
 	int viewWidth, viewHeight;
-	ShaderManager* shaders;
 	std::map<uint, std::map<uint, uint>*> textureTypeSlots;
 public:
 	Render();
@@ -67,6 +68,7 @@ public:
 	void setDebug(bool debug) { debugMode = debug; }
 	bool getDebug() { return debugMode; }
 
+	void initShaders() { SetupShaders(shaders); }
 	void setShaderInt(Shader* shader, const char* param, int value) {  shader->setInt(param, value); }
 	void setShaderSampler(Shader* shader, const char* param, int value) { shader->setSampler(param, value); }
 	void setShaderFloat(Shader* shader, const char* param, float value) { shader->setFloat(param, value); }

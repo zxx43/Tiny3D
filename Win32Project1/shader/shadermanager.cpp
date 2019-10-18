@@ -14,12 +14,8 @@ ShaderManager::~ShaderManager() {
 	shaderBindTex.clear();
 }
 
-Shader* ShaderManager::addShader(const char* name, const char* vs, const char* fs, const char* defines, const char* tc, const char* te, const char* gs) {
-	// Preload
-	Shader* shader = new Shader(vs, fs, defines, tc, te, gs);
-	delete shader; shader = NULL;
-	
-	shader = new Shader(vs, fs, defines, tc, te, gs);
+Shader* ShaderManager::addShader(const char* name, const char* vs, const char* fs, const char* tc, const char* te, const char* gs) {
+	Shader* shader = new Shader(vs, fs, tc, te, gs);
 	shader->name = name;
 	shaders.insert(pair<string, Shader*>(name, shader));
 	return shader;
@@ -30,6 +26,20 @@ Shader* ShaderManager::findShader(const char* name) {
 	if(itor!=shaders.end())
 		return itor->second;
 	return NULL;
+}
+
+void ShaderManager::compile() {
+	map<string, Shader*>::iterator itor = shaders.begin();
+	while (itor != shaders.end()) {
+		Shader* shader = itor->second;
+		shader->compose();
+
+		shader->compile(true); // Preload
+		shader->dettach();
+
+		shader->compile(false);
+		++itor;
+	}
 }
 
 void ShaderManager::addShaderBindTex(Shader* shader) {

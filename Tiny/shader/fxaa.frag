@@ -1,5 +1,3 @@
-#extension GL_ARB_bindless_texture : enable 
-
 layout(bindless_sampler) uniform sampler2D colorBuffer;
 uniform vec2 pixelSize;
 
@@ -33,7 +31,7 @@ void main() {
 	float edgeWeight = dot(dDepth, vec4(1.0)) * 0.25;
 	
 	if(edgeWeight > 0.0001) {
-		vec3 sum = vec3(0.0);
+		vec3 sum = ZERO_VEC3;
 		sum += ld.rgb + dd.rgb + rd.rgb + ll.rgb;
 		sum += rr.rgb + lt.rgb + tt.rgb + rt.rgb;
 		FragColor = vec4(mix(color.rgb, sum * 0.125, edgeWeight), 1.0);

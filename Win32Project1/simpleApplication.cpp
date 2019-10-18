@@ -413,8 +413,8 @@ void SimpleApplication::initScene() {
 	objectRock->setSize(0.1, 0.1, 0.1);
 	node3->addObject(scene, objectRock);
 
-	int treeScale = 10;
-	int treeSpace = 250;
+	int treeScale = 12;
+	int treeSpace = 180;
 	
 	srand(100);
 	InstanceNode* instanceNode1 = new InstanceNode(vec3(900, 0, 600));
@@ -435,7 +435,7 @@ void SimpleApplication::initScene() {
 			instanceNode1->addObject(scene, tree);
 		}
 	}
-	treeSpace = 120;
+	treeSpace = 100;
 	InstanceNode* instanceNode2 = new InstanceNode(vec3(2746, 0, 2565));
 	instanceNode2->setSimple(treeSimple);
 	instanceNode2->detailLevel = 4;
@@ -508,7 +508,7 @@ void SimpleApplication::initScene() {
 			instanceNode5->addObject(scene, tree);
 		}
 	}
-	treeSpace = 180;
+	treeSpace = 150;
 	InstanceNode* instanceNode6 = new InstanceNode(vec3(800, 0, 2000));
 	instanceNode6->setSimple(treeSimple);
 	instanceNode6->detailLevel = 4;

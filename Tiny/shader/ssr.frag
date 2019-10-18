@@ -1,5 +1,3 @@
-#extension GL_ARB_bindless_texture : enable 
-
 uniform mat4 viewMatrix;
 uniform mat4 projectMatrix, invProjMatrix;
 layout(bindless_sampler) uniform sampler2D lightBuffer, matBuffer, normalBuffer, depthBuffer;
@@ -8,16 +6,6 @@ uniform vec2 screenSize, pixelSize;
 in vec2 vTexcoord;
 
 out vec4 ReflectColor;
-
-#define FAIL_COLOR vec4(1.0, 1.0, 1.0, 0.0)
-#define RAND_FACTOR vec4(12.9898, 78.233, 45.164, 94.673)
-#define GAMMA vec3(2.2)
-
-float random(vec3 seed, float i){
-	vec4 seed4 = vec4(seed,i);
-	float dotProduct = dot(seed4, RAND_FACTOR);
-	return fract(sin(dotProduct) * 43758.5453);
-}
 
 vec2 BinarySearch(float start, float end, vec2 projUV, vec3 refDir, vec3 refPos, vec4 projRef) {
 	float startLen = start, endLen = end;

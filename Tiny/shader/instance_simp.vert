@@ -10,16 +10,11 @@ layout (location = 6) in vec4 modelTrans;
 
 out vec2 vTexcoord;
 flat out vec4 vTexid;
+#ifndef ShadowPass
 flat out vec3 vColor;
 out vec3 vNormal;
 out mat3 vTBN;
-
-#define COLOR_SCALE vec3(0.003, 0.006, 0.005)
-
-mat3 GetTBN(vec3 normal, vec3 tangent) {
-	vec3 bitangent = cross(normal, tangent);
-	return mat3(tangent, bitangent, normal);
-}
+#endif
 
 void main() {
 	vec4 worldVertex = vec4(modelTrans.w * vertex + modelTrans.xyz, 1.0);

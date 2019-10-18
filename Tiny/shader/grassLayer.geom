@@ -1,9 +1,7 @@
-#extension GL_ARB_bindless_texture : enable 
-
 layout (points) in;
 layout (triangle_strip, max_vertices = 3) out;
 
-layout(bindless_sampler) uniform sampler2D texBlds[256];
+layout(bindless_sampler) uniform sampler2D texBlds[MAX_TEX];
 uniform mat4 viewProjectMatrix;
 uniform mat4 viewMatrix;
 uniform float time, distortionId;
@@ -15,19 +13,8 @@ in vec4 teInfo[];
 
 out vec4 vNormalHeight;
 
-#define PI 3.1415926
-#define WindStrength 0.8
-#define WindFrequency vec2(0.05, 0.05)
-
-mat3 RotY(float r) {
-	float cosR = cos(r);
-	float sinR = sin(r);
-	return mat3(
-		cosR, 0.0, -sinR,
-		0.0,  1.0, 0.0,
-		sinR, 0.0, cosR
-	);
-}
+const float WindStrength = 0.6;
+const vec2 WindFrequency = vec2(0.05, 0.05);
 
 mat3 AngleAxis3x3(float angle, vec3 axis) {
 	float c = cos(angle), s = sin(angle);

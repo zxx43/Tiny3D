@@ -1,5 +1,3 @@
-#extension GL_ARB_bindless_texture : enable 
-
 layout(bindless_sampler) uniform sampler2D sceneBuffer, sceneDepthBuffer, waterBuffer, waterDepthBuffer, matBuffer, waterNormalBuffer;
 uniform vec2 pixelSize;
 uniform mat4 invViewProjMatrix;
@@ -11,11 +9,9 @@ in vec2 vTexcoord;
 
 out vec4 FragColor;
 
-#define LOG2 float(1.442695)
 #define START_H float(200.0)
 #define END_H float(1600.0)
 #define FOG_COLOR vec3(0.95)
-#define INV_GAMMA vec3(0.4546)
 
 vec3 GenFogColor(vec4 worldPos, float depthView, vec3 sceneColor) {
 	float worldH = worldPos.y / worldPos.w;

@@ -18,8 +18,9 @@ private:
 public:
 	ShaderManager();
 	~ShaderManager();
-	Shader* addShader(const char* name, const char* vs, const char* fs, const char* defines = NULL, const char* tc = NULL, const char* te = NULL, const char* gs = NULL);
+	Shader* addShader(const char* name, const char* vs, const char* fs, const char* tc = NULL, const char* te = NULL, const char* gs = NULL);
 	Shader* findShader(const char* name);
+	void compile();
 	void addShaderBindTex(Shader* shader);
 	std::vector<Shader*>* getShaderBindTex() { return &shaderBindTex; }
 };

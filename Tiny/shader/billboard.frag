@@ -1,6 +1,4 @@
-#extension GL_ARB_bindless_texture : enable 
-
-layout(bindless_sampler) uniform sampler2D texBlds[256];
+layout(bindless_sampler) uniform sampler2D texBlds[MAX_TEX];
 uniform vec3 uNormal;
 
 in vec2 vTexcoord;

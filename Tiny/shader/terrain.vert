@@ -15,11 +15,6 @@ out vec3 vNormal;
 out mat3 vTBN;
 out float worldHeight;
 
-mat3 GetTBN(vec3 normal, vec3 tangent) {
-	vec3 bitangent = cross(normal, tangent);
-	return mat3(tangent, bitangent, normal);
-}
-
 void main() {
 	vColor = vec3(0.1, 1.8, 1.0) * color * 0.005;
 	

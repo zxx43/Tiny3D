@@ -1,6 +1,4 @@
-#extension GL_ARB_bindless_texture : enable 
-
-layout(bindless_sampler) uniform sampler2D texBlds[256];
+layout(bindless_sampler) uniform sampler2D texBlds[MAX_TEX];
 
 in vec2 vTexcoord;
 flat in vec4 vTexid;
@@ -25,7 +23,7 @@ void main() {
 	FragMat = vec4(vColor, 1.0);
 	FragNormalGrass = vec4(normalize(normal) * 0.5 + 0.5, 0.0);
 
-	FragRoughMetal = vec4(0.0, 0.0, 0.0, 1.0);
+	FragRoughMetal = DefaultRM;
 	if(vTexid.z >= 0.0) {
 		float roughness = texture2D(texBlds[int(vTexid.z)], vTexcoord).r;
 		FragRoughMetal.r = roughness;

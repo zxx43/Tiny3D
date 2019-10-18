@@ -1,4 +1,3 @@
-#extension GL_ARB_bindless_texture : enable 
 layout(early_fragment_tests) in;
 
 layout(bindless_sampler) uniform samplerCube texSky;

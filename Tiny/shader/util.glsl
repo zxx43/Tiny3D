@@ -1,10 +1,21 @@
-#define PI 3.1415926
-#define RAND_FACTOR vec4(12.9898, 78.233, 45.164, 94.673)
-#define DefaultRM vec4(0.0, 0.0, 0.0, 1.0)
-#define MatScale vec3(0.6, 1.2, 1.0)
-#define GAMMA vec3(2.2)
-#define INV_GAMMA vec3(0.4546)
-#define LOG2 float(1.442695)
+#extension GL_ARB_bindless_texture : enable 
+
+const float PI = 3.1415926;
+const float INV_PI = 0.318309891613572;
+const vec4 RAND_FACTOR = vec4(12.9898, 78.233, 45.164, 94.673);
+const vec4 DefaultRM = vec4(0.0, 0.0, 0.0, 1.0);
+const vec3 MatScale = vec3(0.6, 1.2, 1.0);
+const vec3 COLOR_SCALE = vec3(0.003, 0.006, 0.005);
+const vec3 GAMMA = vec3(2.2);
+const vec3 INV_GAMMA = vec3(0.4546);
+const float LOG2 = float(1.442695);
+const vec4 CenterPosition = vec4(0.0, 0.0, 0.0, 1.0);
+const vec4 FAIL_COLOR = vec4(1.0, 1.0, 1.0, 0.0);
+const vec3 UP_VEC3 = vec3(0.0, 1.0, 0.0);
+const vec3 ZERO_VEC3 = vec3(0.0);
+
+#define MAX_TEX 256
+#define MAX_BONE 100
 
 mat3 RotY(float r) {
 	float cosR = cos(r);
@@ -34,7 +45,20 @@ float saturate(float value) {
 	return clamp(value, 0.0, 1.0);
 }
 
+float BlendVal(float val, float val0, float val1, float res0, float res1) {
+	if (val <= val0) return res0;
+	if (val >= val1) return res1;
+	return res0 + (val - val0) * (res1 - res0) / (val1 - val0);
+}
+
 mat3 GetTBN(vec3 normal, vec3 tangent) {
 	vec3 bitangent = cross(normal, tangent);
 	return mat3(tangent, bitangent, normal);
+}
+
+mat3 GetIdentity() {
+	return mat3(
+		1.0, 0.0, 0.0,
+		0.0, 1.0, 0.0,
+		0.0, 0.0, 1.0);
 }

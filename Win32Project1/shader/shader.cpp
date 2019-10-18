@@ -4,9 +4,9 @@ using namespace std;
 
 //#define DEBUG_SHADER 1
 
-Shader::Shader(const char* vert, const char* frag, const char* defines, const char* tesc, const char* tese, const char* geom) {
+Shader::Shader(const char* vert, const char* frag, const char* tesc, const char* tese, const char* geom) {
 	vertName = vert, fragName = frag;
-	program = new ShaderProgram(vert, frag, defines, tesc, tese, geom);
+	program = new ShaderProgram(vert, frag, tesc, tese, geom);
 	bindedTexs.clear();
 	texSlots.clear();
 }
@@ -18,6 +18,26 @@ Shader::~Shader() {
 	attribLocations.clear();
 	bindedTexs.clear();
 	texSlots.clear();
+}
+
+void Shader::attachDef(const char* def, const char* value) {
+	program->attachDef(def, value);
+}
+
+void Shader::attachEx(string ex) {
+	program->attachEx(ex.data());
+}
+
+void Shader::compose() {
+	program->compose();
+}
+
+void Shader::compile(bool preload) {
+	program->compile(preload);
+}
+
+void Shader::dettach() {
+	program->dettach();
 }
 
 void Shader::use() {
