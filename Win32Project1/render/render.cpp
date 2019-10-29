@@ -7,6 +7,7 @@
 Render::Render() {
 	initEnvironment();
 	shaders = new ShaderManager();
+	currentFrame = NULL;
 }
 
 Render::~Render() {
@@ -288,6 +289,7 @@ void Render::finishDraw() {
 }
 
 void Render::setFrameBuffer(FrameBuffer* framebuffer) {
+	currentFrame = framebuffer;
 	if(framebuffer) framebuffer->use();
 	else {
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);

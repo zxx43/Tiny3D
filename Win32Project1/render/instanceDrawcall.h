@@ -15,7 +15,6 @@ class Instance;
 class InstanceDrawcall: public Drawcall {
 private:
 	int vertexCount,indexCount;
-	bool indexed;
 	Instance* instanceRef;
 	bool doubleBuffer;
 	RenderBuffer* dataBuffer2;
@@ -29,7 +28,7 @@ public:
 	int objectToPrepare;
 	bool isSimple, isGrass;
 private:
-	RenderBuffer* createBuffers(Instance* instance, bool dyn, bool indexed, int vertexCount, int indexCount, RenderBuffer* dupBuf);
+	RenderBuffer* createBuffers(Instance* instance, bool dyn, int vertexCount, int indexCount, RenderBuffer* dupBuf);
 public:
 	InstanceDrawcall(Instance* instance);
 	virtual ~InstanceDrawcall();

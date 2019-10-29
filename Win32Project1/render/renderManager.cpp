@@ -202,6 +202,11 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	// Draw grass & terrain
 	TerrainNode* terrainNode = scene->terrainNode;
 	if (terrainNode && terrainNode->checkInCamera(camera)) {
+		static Shader* terrainShader = render->findShader("terrain");
+		state->shader = terrainShader;
+		((StaticDrawcall*)terrainNode->drawcall)->updateBuffers(state->pass);
+		render->draw(camera, terrainNode->drawcall, state);
+
 		static Shader* grassLayerShader = render->findShader("grassLayer");
 		state->shader = grassLayerShader;
 		state->tess = true;
@@ -209,13 +214,8 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 		Terrain* terrainMesh = terrainNode->getMesh();
 		((StaticDrawcall*)terrainNode->drawcall)->updateBuffers(state->pass, terrainMesh->visualIndices, terrainMesh->visualIndCount);
 		render->draw(camera, terrainNode->drawcall, state);
-
-		static Shader* terrainShader = render->findShader("terrain");
-		state->shader = terrainShader;
 		state->tess = false;
 		state->enableCull = true;
-		((StaticDrawcall*)terrainNode->drawcall)->updateBuffers(state->pass);
-		render->draw(camera, terrainNode->drawcall, state);
 	}
 
 	state->shader = phongShader;

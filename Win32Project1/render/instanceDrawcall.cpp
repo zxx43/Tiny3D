@@ -24,7 +24,6 @@ InstanceDrawcall::InstanceDrawcall(Instance* instance) :Drawcall() {
 	isGrass = instanceRef->isGrass;
 	vertexCount = instanceRef->vertexCount;
 	indexCount = instanceRef->indexCount;
-	indexed = indexCount > 0 ? true : false;
 
 	//printf("create mesh vao: %s?\n", instanceRef->instanceMesh->getName().data());
 
@@ -38,9 +37,9 @@ InstanceDrawcall::InstanceDrawcall(Instance* instance) :Drawcall() {
 	setBillboard(instanceRef->isBillboard);
 	
 	doubleBuffer = false;
-	dataBuffer = createBuffers(instanceRef, dynDC, indexed, vertexCount, indexCount, NULL);
+	dataBuffer = createBuffers(instanceRef, dynDC, vertexCount, indexCount, NULL);
 	if (dynDC && doubleBuffer)
-		dataBuffer2 = createBuffers(instanceRef, dynDC, indexed, vertexCount, indexCount, dataBuffer);
+		dataBuffer2 = createBuffers(instanceRef, dynDC, vertexCount, indexCount, dataBuffer);
 	else
 		dataBuffer2 = NULL;
 
@@ -60,11 +59,11 @@ InstanceDrawcall::~InstanceDrawcall() {
 	if(dataBuffer2) delete dataBuffer2;
 }
 
-RenderBuffer* InstanceDrawcall::createBuffers(Instance* instance, bool dyn, bool indexed, int vertexCount, int indexCount, RenderBuffer* dupBuf) {
+RenderBuffer* InstanceDrawcall::createBuffers(Instance* instance, bool dyn, int vertexCount, int indexCount, RenderBuffer* dupBuf) {
 	RenderBuffer* buffer = NULL;
 	GLenum draw = dyn ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
 	if (isBillboard()) {
-		buffer = new RenderBuffer(indexed ? 5 : 4);
+		buffer = new RenderBuffer(5);
 		if (!dupBuf) {
 			buffer->setAttribData(BillboardVertexSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->vertexBuffer);
 			buffer->setAttribData(BillboardTexcoordSlot, GL_FLOAT, vertexCount, 4, 1, false, GL_STATIC_DRAW, 0, instanceRef->texcoordBuffer);
@@ -74,15 +73,11 @@ RenderBuffer* InstanceDrawcall::createBuffers(Instance* instance, bool dyn, bool
 		}
 		buffer->setAttribData(BillboardPositionSlot, GL_FLOAT, objectCount, 3, 1, false, draw, 1, instanceRef->positions);
 		buffer->setAttribData(BillboardInfoSlot, GL_FLOAT, objectCount, 4, 1, false, draw, 1, instanceRef->billboards);
-		if (indexed) {
-			if(!dupBuf) buffer->setIndexData(BillboardIndexSlot, GL_UNSIGNED_SHORT, indexCount, GL_STATIC_DRAW, instanceRef->indexBuffer);
-			else buffer->setIndexData(BillboardIndexSlot, dupBuf->streamDatas[BillboardIndexSlot]);
-		}
-	} else {
-		int bufCount = 7;
-		if (indexed) bufCount++;
 
-		buffer = new RenderBuffer(bufCount);
+		if(!dupBuf) buffer->setIndexData(BillboardIndexSlot, GL_UNSIGNED_SHORT, indexCount, GL_STATIC_DRAW, instanceRef->indexBuffer);
+		else buffer->setIndexData(BillboardIndexSlot, dupBuf->streamDatas[BillboardIndexSlot]);
+	} else {
+		buffer = new RenderBuffer(8);
 		if (!dupBuf) {
 			buffer->setAttribData(VertexSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->vertexBuffer);
 			buffer->setAttribData(NormalSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->normalBuffer);
@@ -90,6 +85,7 @@ RenderBuffer* InstanceDrawcall::createBuffers(Instance* instance, bool dyn, bool
 			buffer->setAttribData(TexidSlot, GL_FLOAT, vertexCount, 2, 1, false, GL_STATIC_DRAW, 0, instanceRef->texidBuffer);
 			buffer->setAttribData(ColorSlot, GL_UNSIGNED_BYTE, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->colorBuffer);
 			buffer->setAttribData(TangentSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->tangentBuffer);
+			buffer->setIndexData(IndexSlot, GL_UNSIGNED_SHORT, indexCount, GL_STATIC_DRAW, instanceRef->indexBuffer);
 		} else {
 			buffer->setAttribData(VertexSlot, dupBuf->streamDatas[VertexSlot]);
 			buffer->setAttribData(NormalSlot, dupBuf->streamDatas[NormalSlot]);
@@ -97,18 +93,12 @@ RenderBuffer* InstanceDrawcall::createBuffers(Instance* instance, bool dyn, bool
 			buffer->setAttribData(TexidSlot, dupBuf->streamDatas[TexidSlot]);
 			buffer->setAttribData(ColorSlot, dupBuf->streamDatas[ColorSlot]);
 			buffer->setAttribData(TangentSlot, dupBuf->streamDatas[TangentSlot]);
+			buffer->setIndexData(IndexSlot, dupBuf->streamDatas[IndexSlot]);
 		}
 		if (!isSimple) buffer->setAttribData(PositionSlot, GL_FLOAT, objectCount, 4, 3, false, draw, 1, instanceRef->modelMatrices);
 		else buffer->setAttribData(PositionSlot, GL_FLOAT, objectCount, 4, 1, false, draw, 1, instanceRef->modelMatrices);
-
-		if (indexed) {
-			if(!dupBuf) buffer->setIndexData(IndexSlot, GL_UNSIGNED_SHORT, indexCount, GL_STATIC_DRAW, instanceRef->indexBuffer);
-			else buffer->setIndexData(IndexSlot, dupBuf->streamDatas[IndexSlot]);
-		}
 	}
 	buffer->unuse();
-	buffer->unuseAttr();
-	buffer->unuseElement();
 	return buffer;
 }
 
@@ -123,33 +113,30 @@ void InstanceDrawcall::draw(Render* render, RenderState* state, Shader* shader) 
 				shader->setVector3v("boundScl", boundInfo + 3);
 			}
 		}
-		if (!indexed)
-			glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, objectToDraw);
+
+		if (instanceRef->instanceMesh->singleFaces.size() == 0) {
+			render->setCullState(state->enableCull);
+			glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, 0, objectToDraw);
+		}
+		else if (instanceRef->instanceMesh->normalFaces.size() == 0) {
+			render->setCullState(false);
+			glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, 0, objectToDraw);
+		}
 		else {
-			if (instanceRef->instanceMesh->singleFaces.size() == 0) {
+			render->setCullState(false);
+			glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, 0, objectToDraw);
+			/*
+			for (uint i = 0; i < instanceRef->instanceMesh->normalFaces.size(); i++) {
+				FaceBuf* fb = instanceRef->instanceMesh->normalFaces[i];
 				render->setCullState(state->enableCull);
-				glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, 0, objectToDraw);
+				glDrawElementsInstancedBaseVertex(GL_TRIANGLES, fb->count, GL_UNSIGNED_SHORT, 0, objectToDraw, fb->start);
 			}
-			else if (instanceRef->instanceMesh->normalFaces.size() == 0) {
+			for (uint i = 0; i < instanceRef->instanceMesh->singleFaces.size(); i++) {
+				FaceBuf* fb = instanceRef->instanceMesh->singleFaces[i];
 				render->setCullState(false);
-				glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, 0, objectToDraw);
+				glDrawElementsInstancedBaseVertex(GL_TRIANGLES, fb->count, GL_UNSIGNED_SHORT, 0, objectToDraw, fb->start);
 			}
-			else {
-				render->setCullState(false);
-				glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, 0, objectToDraw);
-				/*
-				for (uint i = 0; i < instanceRef->instanceMesh->normalFaces.size(); i++) {
-					FaceBuf* fb = instanceRef->instanceMesh->normalFaces[i];
-					render->setCullState(state->enableCull);
-					glDrawElementsInstancedBaseVertex(GL_TRIANGLES, fb->count, GL_UNSIGNED_SHORT, 0, objectToDraw, fb->start);
-				}
-				for (uint i = 0; i < instanceRef->instanceMesh->singleFaces.size(); i++) {
-					FaceBuf* fb = instanceRef->instanceMesh->singleFaces[i];
-					render->setCullState(false);
-					glDrawElementsInstancedBaseVertex(GL_TRIANGLES, fb->count, GL_UNSIGNED_SHORT, 0, objectToDraw, fb->start);
-				}
-				//*/
-			}
+			//*/
 		}
 	}
 

@@ -35,8 +35,8 @@ public:
 	virtual void addObject(Scene* scene, Object* object);
 	virtual Object* removeObject(Object* object);
 	virtual void prepareDrawcall();
-	virtual void updateRenderData();
-	virtual void updateDrawcall();
+	virtual void updateRenderData() {}
+	virtual void updateDrawcall() { needUpdateDrawcall = false; }
 };
 
 

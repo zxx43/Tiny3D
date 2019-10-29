@@ -20,7 +20,6 @@ StaticDrawcall::StaticDrawcall(Batch* batch) :Drawcall() {
 	vertexCount = batchRef->vertexCount;
 	indexCount = batchRef->indexCount;
 	objectCount = batchRef->objectCount;
-	indexed = indexCount > 0 ? true : false;
 	setFullStatic(batchRef->fullStatic);
 
 	dynDC = batchRef->isDynamic();
@@ -28,10 +27,7 @@ StaticDrawcall::StaticDrawcall(Batch* batch) :Drawcall() {
 	indCount = dynDC ? MAX_INDEX_COUNT : indexCount;
 	drawType = dynDC ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
 
-	bufCount = 6;
-	bufCount = !isFullStatic() ? bufCount + 1 : bufCount;
-	bufCount = indexed ? bufCount + 1 : bufCount;
-
+	bufCount = !isFullStatic() ? 8 : 7;
 	doubleBuffer = false;
 	dataBuffer = createBuffers(batchRef, bufCount, vertCount, indCount, drawType, NULL);
 	if (dynDC && doubleBuffer)
@@ -94,11 +90,8 @@ RenderBuffer* StaticDrawcall::createBuffers(Batch* batch, int bufCount, int vert
 			buffer->setAttribData(ObjidSlot, dupBuf->streamDatas[ObjidSlot]);
 	}
 	GLenum indType = !dupBuf ? drawType : GL_DYNAMIC_DRAW;
-	if (indexed)
-		buffer->setIndexData(bufCount - 1, GL_UNSIGNED_INT, indCount, indType, batch->indexBuffer);
+	buffer->setIndexData(bufCount - 1, GL_UNSIGNED_INT, indCount, indType, batch->indexBuffer);
 	buffer->unuse();
-	buffer->unuseAttr();
-	buffer->unuseElement();
 	return buffer;
 }
 
@@ -114,10 +107,7 @@ void StaticDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
 		bufferToDraw->use();
 		if(state->tess) 
 			glPatchParameteri(GL_PATCH_VERTICES, 3);
-		if (indexed)
-			glDrawElements(type, indexCntToDraw, GL_UNSIGNED_INT, 0);
-		else
-			glDrawArrays(type, 0, vertexCntToDraw);
+		glDrawElements(type, indexCntToDraw, GL_UNSIGNED_INT, 0);
 	}
 
 	if (dynDC && doubleBuffer) {
@@ -181,26 +171,23 @@ void StaticDrawcall::updateBuffers(int pass, uint* indices, int indexCount) {
 		bufferToPrepare->updateAttribData(ColorSlot, vertexCntToPrepare, (void*)batchRef->colorBuffer);
 		bufferToPrepare->updateAttribData(TangentSlot, vertexCntToPrepare, (void*)batchRef->tangentBuffer);
 		bufferToPrepare->updateAttribData(ObjidSlot, vertexCntToPrepare, (void*)batchRef->objectidBuffer);
-		if (indexed) {
-			bufferToPrepare->use();
-			bufferToPrepare->updateIndexData(IndexSlot, indexCntToPrepare, (void*)batchRef->indexBuffer);
-		}
+
+		bufferToPrepare->use();
+		bufferToPrepare->updateIndexData(IndexSlot, indexCntToPrepare, (void*)batchRef->indexBuffer);
 	}
 	else if (pass == NEAR_SHADOW_PASS || pass == MID_SHADOW_PASS) {
 		bufferToPrepare->updateAttribData(VertexSlot, vertexCntToPrepare, (void*)batchRef->vertexBuffer);
 		bufferToPrepare->updateAttribData(TexcoordSlot, vertexCntToPrepare, (void*)batchRef->texcoordBuffer);
 		bufferToPrepare->updateAttribData(ObjidSlot, vertexCntToPrepare, (void*)batchRef->objectidBuffer);
-		if (indexed) {
-			bufferToPrepare->use();
-			bufferToPrepare->updateIndexData(IndexSlot, indexCntToPrepare, (void*)batchRef->indexBuffer);
-		}
+
+		bufferToPrepare->use();
+		bufferToPrepare->updateIndexData(IndexSlot, indexCntToPrepare, (void*)batchRef->indexBuffer);
 	}
 	else if (pass == FAR_SHADOW_PASS) {
 		bufferToPrepare->updateAttribData(VertexSlot, vertexCntToPrepare, (void*)batchRef->vertexBuffer);
 		bufferToPrepare->updateAttribData(ObjidSlot, vertexCntToPrepare, (void*)batchRef->objectidBuffer);
-		if (indexed) {
-			bufferToPrepare->use();
-			bufferToPrepare->updateIndexData(IndexSlot, indexCntToPrepare, (void*)batchRef->indexBuffer);
-		}
+
+		bufferToPrepare->use();
+		bufferToPrepare->updateIndexData(IndexSlot, indexCntToPrepare, (void*)batchRef->indexBuffer);
 	}
 }

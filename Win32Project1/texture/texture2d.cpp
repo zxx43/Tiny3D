@@ -87,6 +87,20 @@ void Texture2D::copyDataFrom(Texture2D* src) {
 		id, GL_TEXTURE_2D, 0, 0, 0, 0, width, height, 1);
 }
 
+void Texture2D::readData(int bitSize, void* ret) {
+	GLenum readType;
+	switch (type) {
+		case TEXTURE_TYPE_COLOR:
+			readType = texType;
+			break;
+		case TEXTURE_TYPE_DEPTH:
+			readType = depthType;
+			break;
+	}
+	int bufSize = width * height * channel * bitSize;
+	glGetTextureSubImage(id, 0, 0, 0, 0, width, height, 1, format, readType, bufSize, ret);
+}
+
 u64 Texture2D::genBindless() {
 	u64 texHnd = glGetTextureHandleARB(id);
 	glMakeTextureHandleResidentARB(texHnd);

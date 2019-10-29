@@ -15,7 +15,6 @@ class Batch;
 class StaticDrawcall: public Drawcall {
 private:
 	int vertexCount, indexCount;
-	bool indexed;
 	Batch* batchRef;
 
 	RenderBuffer* dataBuffer2;

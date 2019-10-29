@@ -181,11 +181,11 @@ void Instance::setRenderData(InstanceData* data) {
 			memcpy(positions, data->positions, instanceCount * 3 * sizeof(float));
 		}
 	} else {
-		if (data->matrices)
-			modelMatrices = data->matrices;
-		else {
-			billboards = data->billboards;
-			positions = data->positions;
+		if (data->matrices) {
+			if (modelMatrices != data->matrices) modelMatrices = data->matrices;
+		} else {
+			if (billboards != data->billboards) billboards = data->billboards;
+			if (positions != data->positions) positions = data->positions;
 		}
 	}
 }

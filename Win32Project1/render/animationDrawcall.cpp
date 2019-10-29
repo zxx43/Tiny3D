@@ -20,8 +20,6 @@ AnimationDrawcall::AnimationDrawcall(Animation* anim) :Drawcall() {
 	dataBuffer->setAttribData(7, GL_FLOAT, vertexCount, 4, 1, false, GL_STATIC_DRAW, -1, animData->weights);
 	dataBuffer->setIndexData(8, GL_UNSIGNED_SHORT, indexCount, GL_STATIC_DRAW, animData->indices);
 	dataBuffer->unuse();
-	dataBuffer->unuseAttr();
-	dataBuffer->unuseElement();
 
 	setType(ANIMATE_DC);
 

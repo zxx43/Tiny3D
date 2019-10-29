@@ -91,10 +91,3 @@ void InstanceNode::prepareDrawcall() {
 
 	needCreateDrawcall = false;
 }
-
-void InstanceNode::updateRenderData() {
-}
-
-void InstanceNode::updateDrawcall() {
-	needUpdateDrawcall = false;
-}

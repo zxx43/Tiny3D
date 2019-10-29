@@ -35,6 +35,7 @@ public:
 	~Texture2D();
 public:
 	void copyDataFrom(Texture2D* src);
+	void readData(int bitSize, void* ret);
 private:
 	u64 genBindless();
 	void releaseBindless(u64 texHnd);

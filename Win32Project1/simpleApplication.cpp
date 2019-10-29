@@ -37,24 +37,26 @@ SimpleApplication::~SimpleApplication() {
 
 void SimpleApplication::resize(int width, int height) {
 	if (!render) return;
-	Application::resize(width, height);
 
 	int precision = graphQuality > 4.0 ? HIGH_PRE : LOW_PRE;
 	int scrPre = (graphQuality > 4.0 || useSsr) ? HIGH_PRE : LOW_PRE;
 	int hdrPre = graphQuality > 3.0 ? FLOAT_PRE : precision;
+	int depthPre = LOW_PRE;
+
+	Application::resize(width, height);
 
 	if (screen) delete screen;
 	screen = new FrameBuffer(width, height, hdrPre, 4, false); // texBuffer
 	screen->addColorBuffer(precision, 4); // matBuffer
 	screen->addColorBuffer(scrPre, 4); // normal-grassBuffer
 	screen->addColorBuffer(scrPre, 3); // rough-metalBuffer
-	screen->attachDepthBuffer(scrPre); // depthBuffer
+	screen->attachDepthBuffer(depthPre); // depthBuffer
 
 	if (waterFrame) delete waterFrame;
 	waterFrame = new FrameBuffer(width, height, hdrPre, 4, false);
 	waterFrame->addColorBuffer(precision, 4);
 	waterFrame->addColorBuffer(scrPre, 3);
-	waterFrame->attachDepthBuffer(scrPre);
+	waterFrame->attachDepthBuffer(depthPre);
 
 	if (sceneFilter) delete sceneFilter;
 	sceneFilter = new Filter(width, height, true, precision, 4, false);
@@ -240,17 +242,17 @@ void SimpleApplication::initScene() {
 	MaterialManager* mtlMgr = MaterialManager::materials;
 
 	// Load meshes
-	assetMgr->addMesh("tree", new Model("models/firC.obj", "models/firC.mtl", 2, true));
-	assetMgr->addMesh("treeMid", new Model("models/firC_mid.obj", "models/firC_mid.mtl", 2, true));
-	assetMgr->addMesh("treeLow", new Model("models/fir_mesh.obj", "models/fir_mesh.mtl", 3, true));
-	assetMgr->addMesh("treeA", new Model("models/treeA.obj", "models/treeA.mtl", 2, true));
-	assetMgr->addMesh("treeAMid", new Model("models/treeA_mid.obj", "models/treeA_mid.mtl", 2, true));
-	assetMgr->addMesh("treeALow", new Model("models/treeA_low.obj", "models/treeA_low.mtl", 2, true));
-	assetMgr->addMesh("tank", new Model("models/tank.obj", "models/tank.mtl", 3, true));
-	assetMgr->addMesh("m1a2", new Model("models/m1a2.obj", "models/m1a2.mtl", 2, true));
-	assetMgr->addMesh("house", new Model("models/house.obj", "models/house.mtl", 2, true));
-	assetMgr->addMesh("oildrum", new Model("models/oildrum.obj", "models/oildrum.mtl", 3, true));
-	assetMgr->addMesh("rock", new Model("models/sharprockfree.obj", "models/sharprockfree.mtl", 2, true));
+	assetMgr->addMesh("tree", new Model("models/firC.obj", "models/firC.mtl", 2));
+	assetMgr->addMesh("treeMid", new Model("models/firC_mid.obj", "models/firC_mid.mtl", 2));
+	assetMgr->addMesh("treeLow", new Model("models/fir_mesh.obj", "models/fir_mesh.mtl", 3));
+	assetMgr->addMesh("treeA", new Model("models/treeA.obj", "models/treeA.mtl", 2));
+	assetMgr->addMesh("treeAMid", new Model("models/treeA_mid.obj", "models/treeA_mid.mtl", 2));
+	assetMgr->addMesh("treeALow", new Model("models/treeA_low.obj", "models/treeA_low.mtl", 2));
+	assetMgr->addMesh("tank", new Model("models/tank.obj", "models/tank.mtl", 3));
+	assetMgr->addMesh("m1a2", new Model("models/m1a2.obj", "models/m1a2.mtl", 2));
+	assetMgr->addMesh("house", new Model("models/house.obj", "models/house.mtl", 2));
+	assetMgr->addMesh("oildrum", new Model("models/oildrum.obj", "models/oildrum.mtl", 3));
+	assetMgr->addMesh("rock", new Model("models/sharprockfree.obj", "models/sharprockfree.mtl", 2));
 	assetMgr->addMesh("terrain", new Terrain("terrain/Terrain.raw"));
 	assetMgr->addMesh("water", new Water(1024, 16));
 	assetMgr->addAnimation("army", new Animation("models/ArmyPilot.dae"));

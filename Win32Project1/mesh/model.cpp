@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-Model::Model(const char* obj, const char* mtl, int vt, bool simple) :Mesh() {
+Model::Model(const char* obj, const char* mtl, int vt) :Mesh() {
 	vertexCount = 0;
 	indexCount = 0;
 	vertices = NULL;
@@ -15,8 +15,7 @@ Model::Model(const char* obj, const char* mtl, int vt, bool simple) :Mesh() {
 	materialids = NULL;
 	indices = NULL;
 	mats.clear();
-	if (simple) loadModelSimple(obj, mtl, vt);
-	else loadModel(obj, mtl, vt);
+	loadModel(obj, mtl, vt);
 	caculateExData();
 }
 
@@ -60,74 +59,7 @@ void Model::loadModel(const char* obj,const char* mtl,int vt) {
 	loader=NULL;
 }
 
-void Model::loadModelSimple(const char* obj,const char* mtl,int vt) {
-	loader=new ObjLoader(obj,mtl,vt);
-	initFacesWidthIndices();
-	delete loader;
-	loader=NULL;
-}
-
 void Model::initFaces() {
-	vertexCount=loader->faceCount*3;
-	vertices=new vec4[vertexCount];
-	normals=new vec3[vertexCount];
-	tangents = new vec3[vertexCount];
-	texcoords=new vec2[vertexCount];
-	materialids = new int[vertexCount];
-
-	for (int i=0;i<loader->faceCount;i++) {
-		vec3 p1(loader->vArr[loader->fvArr[i][0]-1][0],
-				loader->vArr[loader->fvArr[i][0]-1][1],
-				loader->vArr[loader->fvArr[i][0]-1][2]);
-		vec3 p2(loader->vArr[loader->fvArr[i][1]-1][0],
-				loader->vArr[loader->fvArr[i][1]-1][1],
-				loader->vArr[loader->fvArr[i][1]-1][2]);
-		vec3 p3(loader->vArr[loader->fvArr[i][2]-1][0],
-				loader->vArr[loader->fvArr[i][2]-1][1],
-				loader->vArr[loader->fvArr[i][2]-1][2]);
-
-		vec3 n1(loader->vnArr[loader->fnArr[i][0]-1][0],
-				loader->vnArr[loader->fnArr[i][0]-1][1],
-				loader->vnArr[loader->fnArr[i][0]-1][2]);
-		vec3 n2(loader->vnArr[loader->fnArr[i][1]-1][0],
-				loader->vnArr[loader->fnArr[i][1]-1][1],
-				loader->vnArr[loader->fnArr[i][1]-1][2]);
-		vec3 n3(loader->vnArr[loader->fnArr[i][2]-1][0],
-				loader->vnArr[loader->fnArr[i][2]-1][1],
-				loader->vnArr[loader->fnArr[i][2]-1][2]);
-
-		vec2 c1(loader->vtArr[loader->ftArr[i][0]-1][0],
-				loader->vtArr[loader->ftArr[i][0]-1][1]);
-		vec2 c2(loader->vtArr[loader->ftArr[i][1]-1][0],
-				loader->vtArr[loader->ftArr[i][1]-1][1]);
-		vec2 c3(loader->vtArr[loader->ftArr[i][2]-1][0],
-				loader->vtArr[loader->ftArr[i][2]-1][1]);
-
-		vertices[i * 3 + 0].x = p1.x; vertices[i * 3 + 0].y = p1.y; vertices[i * 3 + 0].z = p1.z; vertices[i * 3 + 0].w = 1;
-		vertices[i * 3 + 1].x = p2.x; vertices[i * 3 + 1].y = p2.y; vertices[i * 3 + 1].z = p2.z; vertices[i * 3 + 1].w = 1;
-		vertices[i * 3 + 2].x = p3.x; vertices[i * 3 + 2].y = p3.y; vertices[i * 3 + 2].z = p3.z; vertices[i * 3 + 2].w = 1;
-
-		normals[i * 3 + 0].x = n1.x; normals[i * 3 + 0].y = n1.y; normals[i * 3 + 0].z = n1.z;
-		normals[i * 3 + 1].x = n2.x; normals[i * 3 + 1].y = n2.y; normals[i * 3 + 1].z = n2.z;
-		normals[i * 3 + 2].x = n3.x; normals[i * 3 + 2].y = n3.y; normals[i * 3 + 2].z = n3.z;
-
-		texcoords[i * 3 + 0].x = c1.x; texcoords[i * 3 + 0].y = c1.y;
-		texcoords[i * 3 + 1].x = c2.x; texcoords[i * 3 + 1].y = c2.y;
-		texcoords[i * 3 + 2].x = c3.x; texcoords[i * 3 + 2].y = c3.y;
-
-		vec3 faceTangent = CaculateTangent(p1, p2, p3, c1, c2, c3);
-		tangents[i * 3 + 0] = faceTangent;
-		tangents[i * 3 + 1] = faceTangent;
-		tangents[i * 3 + 2] = faceTangent;
-
-		int mid = loader->mtlLoader->objMtls[loader->mtArr[i]];
-		materialids[i * 3 + 0] = mid;
-		materialids[i * 3 + 1] = mid;
-		materialids[i * 3 + 2] = mid;
-	}
-}
-
-void Model::initFacesWidthIndices() {
 	vertexCount = loader->vCount;
 	indexCount = loader->faceCount * 3;
 	vertices = new vec4[indexCount];

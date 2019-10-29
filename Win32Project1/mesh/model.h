@@ -16,15 +16,13 @@ class Model: public Mesh {
 private:
 	ObjLoader* loader;
 	void initFaces();
-	void initFacesWidthIndices();
 public:
 	std::vector<int> mats;
 public:
-	Model(const char* obj, const char* mtl, int vt, bool simple);
+	Model(const char* obj, const char* mtl, int vt);
 	Model(const Model& rhs);
 	virtual ~Model();
 	void loadModel(const char* obj,const char* mtl,int vt);
-	void loadModelSimple(const char* obj,const char* mtl,int vt);
 };
 
 #endif /* MODEL_H_ */
