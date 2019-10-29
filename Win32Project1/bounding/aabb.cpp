@@ -6,9 +6,10 @@ AABB::AABB(const vec3& min,const vec3& max) {
 	sizex=maxVertex.x-minVertex.x;
 	sizey=maxVertex.y-minVertex.y;
 	sizez=maxVertex.z-minVertex.z;
-	position.x=minVertex.x+sizex*0.5;
-	position.y=minVertex.y+sizey*0.5;
-	position.z=minVertex.z+sizez*0.5;
+	halfSize = vec3(sizex, sizey, sizez) * 0.5;
+	position.x = minVertex.x + halfSize.x;
+	position.y = minVertex.y + halfSize.y;
+	position.z = minVertex.z + halfSize.z;
 
 	vertices[0]=vec3(min.x,min.y,min.z);
 	vertices[1]=vec3(max.x,min.y,min.z);
@@ -24,6 +25,7 @@ AABB::AABB(const vec3& pos,float sx,float sy,float sz) {
 	minVertex.x=pos.x-sx*0.5; minVertex.y=pos.y-sy*0.5; minVertex.z=pos.z-sz*0.5;
 	maxVertex.x=pos.x+sx*0.5; maxVertex.y=pos.y+sy*0.5; maxVertex.z=pos.z+sz*0.5;
 	sizex=sx; sizey=sy; sizez=sz;
+	halfSize = vec3(sizex, sizey, sizez) * 0.5;
 	position.x=pos.x; position.y=pos.y; position.z=pos.z;
 
 	vertices[0]=vec3(minVertex.x,minVertex.y,minVertex.z);
@@ -42,6 +44,7 @@ AABB::AABB(const AABB& rhs) {
 	sizex=rhs.sizex;
 	sizey=rhs.sizey;
 	sizez=rhs.sizez;
+	halfSize = rhs.halfSize;
 	position.x=rhs.position.x;
 	position.y=rhs.position.y;
 	position.z=rhs.position.z;
@@ -59,9 +62,10 @@ void AABB::update(const vec3& newMinVertex,const vec3& newMaxVertex) {
 	sizex=maxVertex.x-minVertex.x;
 	sizey=maxVertex.y-minVertex.y;
 	sizez=maxVertex.z-minVertex.z;
-	position.x=minVertex.x+sizex*0.5;
-	position.y=minVertex.y+sizey*0.5;
-	position.z=minVertex.z+sizez*0.5;
+	halfSize = vec3(sizex, sizey, sizez) * 0.5;
+	position.x = minVertex.x + halfSize.x;
+	position.y = minVertex.y + halfSize.y;
+	position.z = minVertex.z + halfSize.z;
 
 	vertices[0].x=newMinVertex.x; vertices[0].y=newMinVertex.y; vertices[0].z=newMinVertex.z;
 	vertices[1].x=newMaxVertex.x; vertices[1].y=newMinVertex.y; vertices[1].z=newMinVertex.z;
@@ -79,8 +83,7 @@ void AABB::update(float sx, float sy, float sz) {
 }
 
 void AABB::update(const vec3& pos) {
-	update(vec3(pos.x-sizex*0.5,pos.y-sizey*0.5,pos.z-sizez*0.5),
-			vec3(pos.x+sizex*0.5,pos.y+sizey*0.5,pos.z+sizez*0.5));
+	update(pos - halfSize, pos + halfSize);
 }
 
 AABB* AABB::clone() {

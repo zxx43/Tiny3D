@@ -6,6 +6,8 @@ InstanceData::InstanceData(Mesh* mesh, Object* obj, int maxCount, InstanceState*
 	matrices = NULL;
 	billboards = NULL;
 	positions = NULL;
+	boundingPose = NULL;
+	boundingSize = NULL;
 	object = obj;
 	instance = NULL;
 	state = new InstanceState(*insState);
@@ -23,6 +25,11 @@ InstanceData::InstanceData(Mesh* mesh, Object* obj, int maxCount, InstanceState*
 		memset(matrices, 0, maxCount * 12 * sizeof(float));
 	}
 
+	boundingPose = (float*)malloc(maxCount * 3 * sizeof(float));
+	memset(boundingPose, 0, maxCount * 3 * sizeof(float));
+	boundingSize = (float*)malloc(maxCount * 3 * sizeof(float));
+	memset(boundingSize, 0, maxCount * 3 * sizeof(float));
+
 	subGroup.clear();
 	groupToMerge = 0;
 }
@@ -31,6 +38,8 @@ InstanceData::~InstanceData() {
 	if (matrices) free(matrices);
 	if (billboards) free(billboards);
 	if (positions) free(positions);
+	if (boundingPose) free(boundingPose);
+	if (boundingSize) free(boundingSize);
 	if (instance) delete instance;
 	delete state;
 	subGroup.clear();
@@ -61,6 +70,12 @@ void InstanceData::addInstance(Object* object) {
 		memcpy(positions + (count * 3), object->transformMatrix.entries + 12, 3 * sizeof(float));
 	}
 
+	AABB* bb = (AABB*)object->bounding;
+	float bbPose[3] = { bb->position.x, bb->position.y, bb->position.z };
+	float bbSize[3] = { bb->halfSize.x, bb->halfSize.y, bb->halfSize.z };
+	memcpy(boundingPose + (count * 3), bbPose, 3 * sizeof(float));
+	memcpy(boundingSize + (count * 3), bbSize, 3 * sizeof(float));
+
 	count++;
 }
 
@@ -73,6 +88,9 @@ void InstanceData::doMergeData(InstanceData* data) {
 		memcpy(billboards + (count * 4), data->billboards, data->count * 4 * sizeof(float));
 		memcpy(positions + (count * 3), data->positions, data->count * 3 * sizeof(float));
 	}
+
+	memcpy(boundingPose + (count * 3), data->boundingPose, data->count * 3 * sizeof(float));
+	memcpy(boundingSize + (count * 3), data->boundingSize, data->count * 3 * sizeof(float));
 }
 
 void InstanceData::merge(InstanceData* data) {

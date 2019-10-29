@@ -53,6 +53,7 @@ public:
 	vec3 lightDir;
 	RenderState* state;
 	bool enableSsr;
+	Texture2D* occluderDepth;
 private:
 	Shadow* shadow;
 	float time;

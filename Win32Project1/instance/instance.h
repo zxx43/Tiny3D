@@ -29,6 +29,9 @@ public:
 	float* modelMatrices;
 	float* positions;
 	float* billboards;
+	float* boundingPose;
+	float* boundingSize;
+
 	InstanceDrawcall* drawcall;
 	bool isBillboard;
 	bool isDynamic;
@@ -48,6 +51,7 @@ private:
 	void create(Mesh* mesh, bool dyn, InstanceState* state);
 	void initMatrices(int cnt);
 	void initBillboards(int cnt);
+	void initBoundings(int cnt);
 };
 
 #endif /* INSTANCE_H_ */

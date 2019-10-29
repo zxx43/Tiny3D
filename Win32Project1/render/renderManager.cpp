@@ -41,6 +41,7 @@ RenderManager::RenderManager(int quality, Camera* view, float distance1, float d
 	time = 0.0;
 	enableSsr = false;
 	reflectBuffer = NULL;
+	occluderDepth = NULL;
 }
 
 RenderManager::~RenderManager() {
@@ -54,6 +55,7 @@ RenderManager::~RenderManager() {
 
 	delete state; state = NULL;
 	if (reflectBuffer) delete reflectBuffer; reflectBuffer = NULL;
+	if (occluderDepth) delete occluderDepth; occluderDepth = NULL;
 }
 
 void RenderManager::act(float dTime) {
@@ -68,6 +70,9 @@ void RenderManager::resize(float width, float height) {
 		reflectBuffer->addColorBuffer(LOW_PRE, 3);
 		reflectBuffer->attachDepthBuffer(LOW_PRE);
 	}
+
+	if (occluderDepth) delete occluderDepth;
+	occluderDepth = new Texture2D(width, height, TEXTURE_TYPE_DEPTH, LOW_PRE, 1);
 }
 
 void RenderManager::updateShadowCamera(Camera* mainCamera) {
@@ -206,6 +211,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 		state->shader = terrainShader;
 		((StaticDrawcall*)terrainNode->drawcall)->updateBuffers(state->pass);
 		render->draw(camera, terrainNode->drawcall, state);
+		occluderDepth->copyDataFrom(render->getFrameBuffer()->getDepthBuffer());
 
 		static Shader* grassLayerShader = render->findShader("grassLayer");
 		state->shader = grassLayerShader;

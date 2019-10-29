@@ -16,6 +16,7 @@ private:
 	vec3 vertices[8];
 public:
 	float sizex, sizey, sizez;
+	vec3 halfSize;
 	vec3 minVertex, maxVertex;
 
 private:
