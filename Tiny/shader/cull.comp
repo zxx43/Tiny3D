@@ -1,0 +1,68 @@
+layout(local_size_x = 1) in;
+
+struct Bounding {
+	vec4 data1;
+	vec4 data2;
+};
+
+layout(binding = 1, std140) buffer InPosition {
+	mat3x4 inMatrices[];
+};
+
+layout(binding = 2, std140) buffer InBounding {
+	Bounding bound[];
+};
+
+layout(binding = 3, std140) buffer OutPosition {
+	mat3x4 outMatrices[];
+};
+
+layout(binding = 4) buffer IndirectBuff {
+	uint count;
+	uint primCount;
+	uint firstIndex;
+	uint baseVertex;
+	uint baseInstance;
+} indirect;
+
+layout(binding = 0) uniform sampler2D texDepth;
+uniform mat4 viewProjectMatrix;
+uniform float isColor;
+
+void main() {
+	uint curIndex = gl_GlobalInvocationID.x;
+
+	if(isColor < 0.1) outMatrices[atomicAdd(indirect.primCount, 1)] = inMatrices[curIndex];
+	else {
+		Bounding bbInfo = bound[curIndex];
+		vec3 pose = bbInfo.data1.xyz;
+		vec3 size = vec3(bbInfo.data1.w, bbInfo.data2.xy);
+
+		vec4 bv0 = vec4(pose + size * vec3( 0.5, 0.5,  0.5), 1.0);
+		vec4 bv1 = vec4(pose + size * vec3( 0.5, 0.5, -0.5), 1.0);
+		vec4 bv2 = vec4(pose + size * vec3(-1.5, 0.5, -0.5), 1.0);
+		vec4 bv3 = vec4(pose + size * vec3(-0.5, 0.5,  0.5), 1.0);
+
+		bv0 = viewProjectMatrix * bv0;
+		bv1 = viewProjectMatrix * bv1;
+		bv2 = viewProjectMatrix * bv2;
+		bv3 = viewProjectMatrix * bv3;
+
+		vec3 t0 = bv0.xyz / bv0.w * 0.5 + 0.5;
+		vec3 t1 = bv1.xyz / bv1.w * 0.5 + 0.5;
+		vec3 t2 = bv2.xyz / bv2.w * 0.5 + 0.5;
+		vec3 t3 = bv3.xyz / bv3.w * 0.5 + 0.5;
+
+		vec4 ocDepth = vec4(texture(texDepth, t0.xy).x,
+							texture(texDepth, t1.xy).x,
+							texture(texDepth, t2.xy).x,
+							texture(texDepth, t3.xy).x);
+		vec4 bbDepth = vec4(t0.z, t1.z, t2.z, t3.z);
+		vec4 dd = bbDepth - ocDepth;
+
+		if(dd.x > 0.0001 && dd.y > 0.0001 && dd.z > 0.0001 && dd.w > 0.0001) return;
+		else outMatrices[atomicAdd(indirect.primCount, 1)] = inMatrices[curIndex];
+	}
+}
+
+

@@ -17,14 +17,12 @@ private:
 	int vertexCount, indexCount;
 	Batch* batchRef;
 
-	RenderBuffer* dataBuffer2;
 	RenderBuffer* dataBufferVisual;
 	RenderBuffer* bufferToDraw;
-	RenderBuffer* bufferToPrepare;
 
 	int vertexCntToDraw, indexCntToDraw, objectCntToDraw;
 	float* modelMatricesToPrepare;
-	bool dynDC, doubleBuffer;
+	bool dynDC;
 private:
 	int bufCount, vertCount, indCount;
 	GLenum drawType;

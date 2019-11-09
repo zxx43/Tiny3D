@@ -143,9 +143,11 @@ void SimpleApplication::draw() {
 	}
 	
 	///*
+
 	renderMgr->renderShadow(render, scene);
 	render->setFrameBuffer(screen);
 	renderMgr->renderScene(render, scene);
+
 	renderMgr->drawDeferred(render, scene, screen, sceneFilter);
 	if (ssgChain)
 		renderMgr->drawSSGFilter(render, scene, "ssg", ssgChain->input, ssgChain->output);
@@ -379,17 +381,17 @@ void SimpleApplication::initScene() {
 	node1->addObject(scene, object14);
 
 	StaticNode* node2 = new StaticNode(vec3(10, 2, 2));
-	node2->setDynamicBatch(false);
+	node2->setDynamicBatch(true);
 	StaticObject* object6 = box.clone();
 	//object6->bindMaterial(mtlMgr->find(DEFAULT_MAT));
-	object6->setPosition(3, 3, 3);
+	object6->setPosition(0, 0, 0);
 	object6->setRotation(0, 30, 0);
-	object6->setSize(1, 1, 1);
+	object6->setSize(4, 4, 4);
 	node2->addObject(scene, object6);
 	StaticObject* object7 = box.clone();
-	object7->setPosition(-1, 1, 2);
+	object7->setPosition(-5, 5, 6);
 	object7->setRotation(0, 0, 30);
-	object7->setSize(2, 2, 2);
+	object7->setSize(5, 5, 5);
 	node2->addObject(scene, object7);
 	StaticObject* house = model5.clone();
 	house->setPosition(60, 0, 80);
@@ -417,6 +419,7 @@ void SimpleApplication::initScene() {
 
 	int treeScale = 12;
 	int treeSpace = 180;
+	int treePerc = 95;
 	
 	srand(100);
 	InstanceNode* instanceNode1 = new InstanceNode(vec3(900, 0, 600));
@@ -426,7 +429,7 @@ void SimpleApplication::initScene() {
 		for (int j = -treeScale; j < treeScale; j++) {
 			//StaticObject* tree = model1->clone();
 			//float baseSize = 2;
-			bool changeTree = (rand() % 100) > 95;
+			bool changeTree = (rand() % 100) > treePerc;
 			StaticObject* tree = changeTree ? model4.clone() : model1.clone();
 			float baseSize = changeTree ? 3 : 5;
 			float size = (rand() % 100 * 0.01) * 2 + baseSize;
@@ -445,7 +448,7 @@ void SimpleApplication::initScene() {
 		for (int j = -treeScale; j < treeScale; j++) {
 			//StaticObject* tree = model1->clone();
 			//float baseSize = 2;
-			bool changeTree = (rand() % 100) > 95;
+			bool changeTree = (rand() % 100) > treePerc;
 			StaticObject* tree = changeTree ? model4.clone() : model1.clone();
 			float baseSize = changeTree ? 3 : 5;
 			float size = (rand() % 100 * 0.01) * 2 + baseSize;
@@ -463,7 +466,7 @@ void SimpleApplication::initScene() {
 		for (int j = -treeScale; j < treeScale; j++) {
 			//StaticObject* tree = model1->clone();
 			//float baseSize = 2;
-			bool changeTree = (rand() % 100) > 95;
+			bool changeTree = (rand() % 100) > treePerc;
 			StaticObject* tree = changeTree ? model4.clone() : model1.clone();
 			float baseSize = changeTree ? 3 : 5;
 			float size = (rand() % 100 * 0.01) * 2 + baseSize;
@@ -481,7 +484,7 @@ void SimpleApplication::initScene() {
 		for (int j = -treeScale; j < treeScale; j++) {
 			//StaticObject* tree = model1->clone();
 			//float baseSize = 2;
-			bool changeTree = (rand() % 100) > 95;
+			bool changeTree = (rand() % 100) > treePerc;
 			StaticObject* tree = changeTree ? model4.clone() : model1.clone();
 			float baseSize = changeTree ? 3 : 5;
 			float size = (rand() % 100 * 0.01) * 2 + baseSize;
@@ -499,7 +502,7 @@ void SimpleApplication::initScene() {
 		for (int j = -treeScale; j < treeScale; j++) {
 			//StaticObject* tree = model1->clone();
 			//float baseSize = 2;
-			bool changeTree = (rand() % 100) > 95;
+			bool changeTree = (rand() % 100) > treePerc;
 			StaticObject* tree = changeTree ? model4.clone() : model1.clone();
 			float baseSize = changeTree ? 3 : 5;
 			float size = (rand() % 100 * 0.01) * 2 + baseSize;

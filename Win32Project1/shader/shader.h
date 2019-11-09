@@ -25,6 +25,7 @@ private:
 	std::map<u64, bool> bindedTexs;
 	std::map<int, std::string> texSlots;
 	std::string vertName, fragName;
+	std::string compName;
 public:
 	bool isTexBinded(u64 texhnd) { 
 		std::map<u64, bool>::iterator it = bindedTexs.find(texhnd);
@@ -40,6 +41,7 @@ public:
 public:
 	std::string name;
 	Shader(const char* vert, const char* frag, const char* tesc = NULL, const char* tese = NULL, const char* geom = NULL);
+	Shader(const char* comp);
 	~Shader();
 	void attachDef(const char* def, const char* value);
 	void attachEx(std::string ex);

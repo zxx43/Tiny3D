@@ -21,7 +21,8 @@ A Small OpenGL Based Renderer
 - Antialiasing  
 - Screen Space Reflection  
 - Screen Space Grass  
-- PBR Material
+- PBR Material  
+- GPU occlusion culling  
 
 
 ### Screenshot:  

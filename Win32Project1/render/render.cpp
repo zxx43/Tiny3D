@@ -217,6 +217,11 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 					shader->setFloat("distortionId", AssetManager::assetManager->getDistortionTex());
 				}
 
+				if (state->shaderCompute) {
+					state->shaderCompute->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
+					state->shaderCompute->setFloat("isColor", state->pass >= COLOR_PASS ? 1.0 : 0.0);
+				}
+
 				if (drawcall->isBillboard()) {
 					if (state->pass != COLOR_PASS)
 						shader->setVector3("viewRight", state->light.z, 0.0, -state->light.x);
@@ -279,7 +284,6 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 		}
 	}
 
-	useShader(shader);
 	drawcall->draw(this, state, shader);
 }
 

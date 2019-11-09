@@ -29,8 +29,7 @@ public:
 	float* modelMatrices;
 	float* positions;
 	float* billboards;
-	float* boundingPose;
-	float* boundingSize;
+	float* boundings;
 
 	InstanceDrawcall* drawcall;
 	bool isBillboard;

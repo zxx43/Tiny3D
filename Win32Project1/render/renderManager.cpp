@@ -42,6 +42,7 @@ RenderManager::RenderManager(int quality, Camera* view, float distance1, float d
 	enableSsr = false;
 	reflectBuffer = NULL;
 	occluderDepth = NULL;
+	needResize = true;
 }
 
 RenderManager::~RenderManager() {
@@ -73,6 +74,7 @@ void RenderManager::resize(float width, float height) {
 
 	if (occluderDepth) delete occluderDepth;
 	occluderDepth = new Texture2D(width, height, TEXTURE_TYPE_DEPTH, LOW_PRE, 1);
+	needResize = true;
 }
 
 void RenderManager::updateShadowCamera(Camera* mainCamera) {
@@ -136,6 +138,7 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	static Shader* phongShadowLowShader = render->findShader("phong_sl");
 	static Shader* phongShadowLowInsShader = render->findShader("phong_sl_ins");
 	static Shader* grassShadowShader = render->findShader("grass_s");
+	static Shader* cullShader = render->findShader("cull");
 
 	state->reset();
 	state->eyePos = &(scene->mainCamera->position);
@@ -153,6 +156,7 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	state->shaderBillboard = billboardShadowShader;
 	state->shaderSimple = phongShadowInsSimpShader;
 	state->shaderGrass = grassShadowShader;
+	state->shaderCompute = cullShader;
 	currentQueue->queues[QUEUE_STATIC_SN]->draw(scene, cameraNear, render, state);
 	state->shader = boneShadowShader;
 	currentQueue->queues[QUEUE_ANIMATE_SN]->draw(scene, cameraNear, render, state);
@@ -195,6 +199,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	static Shader* boneShader = render->findShader("bone");
 	static Shader* skyShader = render->findShader("sky");
 	static Shader* grassShader = render->findShader("grass");
+	static Shader* cullShader = render->findShader("cull");
 
 	state->reset();
 	state->eyePos = &(scene->mainCamera->position);
@@ -211,7 +216,6 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 		state->shader = terrainShader;
 		((StaticDrawcall*)terrainNode->drawcall)->updateBuffers(state->pass);
 		render->draw(camera, terrainNode->drawcall, state);
-		occluderDepth->copyDataFrom(render->getFrameBuffer()->getDepthBuffer());
 
 		static Shader* grassLayerShader = render->findShader("grassLayer");
 		state->shader = grassLayerShader;
@@ -222,6 +226,8 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 		render->draw(camera, terrainNode->drawcall, state);
 		state->tess = false;
 		state->enableCull = true;
+
+		occluderDepth->copyDataFrom(render->getFrameBuffer()->getDepthBuffer());
 	}
 
 	state->shader = phongShader;
@@ -229,6 +235,9 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	state->shaderBillboard = billboardShader;
 	state->shaderSimple = phongInsSimpShader;
 	state->shaderGrass = grassShader;
+	state->shaderCompute = cullShader;
+	
+	render->useTexture(TEXTURE_2D, 0, occluderDepth->id);
 	currentQueue->queues[QUEUE_STATIC]->draw(scene, camera, render, state);
 
 	state->shader = boneShader;
@@ -259,6 +268,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	}
 
 	scene->flushNodes();
+	if (needResize) needResize = false;
 }
 
 void RenderManager::renderWater(Render* render, Scene* scene) {

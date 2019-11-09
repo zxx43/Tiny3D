@@ -57,6 +57,7 @@ public:
 private:
 	Shadow* shadow;
 	float time;
+	bool needResize;
 public:
 	Renderable* renderData;
 	Renderable* queue1;

@@ -21,6 +21,13 @@ Shader* ShaderManager::addShader(const char* name, const char* vs, const char* f
 	return shader;
 }
 
+Shader* ShaderManager::addShader(const char* name, const char* cs) {
+	Shader* shader = new Shader(cs);
+	shader->name = name;
+	shaders.insert(pair<string, Shader*>(name, shader));
+	return shader;
+}
+
 Shader* ShaderManager::findShader(const char* name) {
 	map<string,Shader*>::iterator itor=shaders.find(name);
 	if(itor!=shaders.end())

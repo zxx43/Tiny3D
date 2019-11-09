@@ -12,23 +12,26 @@ class Instance;
 
 #include "drawcall.h"
 
+struct Indirect {
+	uint count;
+	uint primCount;
+	uint firstIndex;
+	uint baseVertex;
+	uint baseInstance;
+};
+
 class InstanceDrawcall: public Drawcall {
 private:
 	int vertexCount,indexCount;
 	Instance* instanceRef;
-	bool doubleBuffer;
-	RenderBuffer* dataBuffer2;
-
-	RenderBuffer* dataBufferDraw;
-	RenderBuffer* dataBufferPrepare;
 	bool dynDC;
-private:
-	int objectToDraw;
+	Indirect* indirectBuf;
+	Indirect* readBuf;
 public:
 	int objectToPrepare;
 	bool isSimple, isGrass;
 private:
-	RenderBuffer* createBuffers(Instance* instance, bool dyn, int vertexCount, int indexCount, RenderBuffer* dupBuf);
+	RenderBuffer* createBuffers(Instance* instance, bool dyn, int vertexCount, int indexCount);
 public:
 	InstanceDrawcall(Instance* instance);
 	virtual ~InstanceDrawcall();

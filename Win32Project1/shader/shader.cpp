@@ -5,8 +5,15 @@ using namespace std;
 //#define DEBUG_SHADER 1
 
 Shader::Shader(const char* vert, const char* frag, const char* tesc, const char* tese, const char* geom) {
-	vertName = vert, fragName = frag;
+	vertName = vert, fragName = frag, compName = "";
 	program = new ShaderProgram(vert, frag, tesc, tese, geom);
+	bindedTexs.clear();
+	texSlots.clear();
+}
+
+Shader::Shader(const char* comp) {
+	vertName = "", fragName = "", compName = comp;
+	program = new ShaderProgram(comp);
 	bindedTexs.clear();
 	texSlots.clear();
 }
@@ -75,7 +82,10 @@ bool Shader::getError(const char* param, int location) {
 	GLenum error = glGetError();
 	if (error == GL_NO_ERROR) return false;
 	else {
-		printf("%s,%s param error %d: %s,%d\n", vertName.data(), fragName.data(), error, param, location);
+		if (vertName.length() > 0)
+			printf("%s,%s param error %d: %s,%d\n", vertName.data(), fragName.data(), error, param, location);
+		else
+			printf("%s param error %d: %s,%d\n", compName.data(), error, param, location);
 		return true;
 	}
 #endif

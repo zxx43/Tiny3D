@@ -9,6 +9,7 @@ using namespace std;
 #define GRASS_VERT "shader/grass.vert"
 #define INSTANCE_VERT "shader/instance.vert"
 #define INSTANCE_SIMPLE_VERT "shader/instance_simp.vert"
+#define CULL_COMP "shader/cull.comp"
 #define BONE_VERT "shader/bone.vert"
 #define BONE_FRAG "shader/bone.frag"
 #define SKY_VERT "shader/sky.vert"
@@ -106,7 +107,7 @@ void SetupShaders(ShaderManager* shaders) {
 	phongShadowInsSimp->attachDef("ShadowPass", "1.0");
 	shaders->addShaderBindTex(phongShadowInsSimp);
 
-	Shader* phongShadowLow = shaders->addShader("phong_sl", PHONG_VERT, SHADOW_TEX_FRAG);
+	Shader* phongShadowLow = shaders->addShader("phong_sl", PHONG_VERT, SHADOW_NONTEX_FRAG);
 	phongShadowLow->attachEx(shaderUtil);
 	phongShadowLow->attachDef("ShadowPass", "1.0");
 	phongShadowLow->attachDef("LowPass", "1.0");
@@ -178,6 +179,9 @@ void SetupShaders(ShaderManager* shaders) {
 	ssg->setSlot("colorBuffer", 0);
 	ssg->setSlot("normalGrassBuffer", 1);
 	ssg->setSlot("depthBuffer", 2);
+
+	Shader* cull = shaders->addShader("cull", CULL_COMP);
+	cull->attachEx(shaderUtil);
 
 	shaders->compile();
 }

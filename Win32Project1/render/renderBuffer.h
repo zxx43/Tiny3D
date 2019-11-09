@@ -10,7 +10,9 @@ const std::map<GLenum, uint> TypeSize = {
 	std::map<GLenum, uint>::value_type(GL_UNSIGNED_INT, sizeof(GLuint)),
 	std::map<GLenum, uint>::value_type(GL_UNSIGNED_SHORT, sizeof(GLushort)),
 	std::map<GLenum, uint>::value_type(GL_UNSIGNED_BYTE, sizeof(GLubyte)),
-	std::map<GLenum, uint>::value_type(GL_DOUBLE, sizeof(GLdouble))
+	std::map<GLenum, uint>::value_type(GL_DOUBLE, sizeof(GLdouble)),
+	std::map<GLenum, uint>::value_type(GL_BYTE, sizeof(GLbyte)),
+	std::map<GLenum, uint>::value_type(GL_ONE, 1)
 };
 
 struct RenderData {
@@ -19,7 +21,6 @@ struct RenderData {
 	GLuint bufferid;
 	GLenum drawType;
 	void* streamData;
-	void* gpuPtr;
 
 	uint locid;
 	bool norm;
@@ -36,7 +37,7 @@ struct RenderData {
 		}
 	}
 
-	RenderData(uint loc, GLenum type, uint count, uint channel, uint row, GLuint vbo, bool normalize, GLenum draw, int divisor, void* data) {
+	RenderData(GLenum target, uint loc, GLenum type, uint count, uint channel, uint row, GLuint vbo, bool normalize, GLenum draw, int divisor, void* data) {
 		bitSize = TypeSize.find(type)->second;
 		channelCount = channel;
 		rowCount = row;
@@ -49,52 +50,64 @@ struct RenderData {
 		norm = normalize;
 		div = divisor;
 		dataType = type;
-		/*
-		glBindBuffer(GL_ARRAY_BUFFER, bufferid);
-		glBufferStorage(GL_ARRAY_BUFFER, dataSize * bitSize, streamData, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
-		if (drawType != GL_STATIC_DRAW)
-			gpuPtr = glMapNamedBufferRange(bufferid, 0, dataSize * bitSize, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
-		//*/
-		///*
-		glBindBuffer(GL_ARRAY_BUFFER, bufferid);
-		glBufferData(GL_ARRAY_BUFFER, dataSize * bitSize, streamData, drawType);
-		//glBufferStorage(GL_ARRAY_BUFFER, dataSize * bitSize, streamData, GL_MAP_WRITE_BIT);
-		//*/
-		createAttribute();
+
+		glBindBuffer(target, bufferid);
+		glBufferData(target, dataSize * bitSize, streamData, drawType);
+
+		if (target == GL_ARRAY_BUFFER) createAttribute();
 	}
-	RenderData(GLenum type, uint size, GLuint vbo, GLenum draw, void* data) {
+	RenderData(GLenum target, GLenum type, uint size, GLuint vbo, GLenum draw, void* data) {
 		bitSize = TypeSize.find(type)->second;
+		channelCount = 1;
+		rowCount = 1;
 		dataSize = size;
 		bufferid = vbo;
 		drawType = draw;
 		streamData = data;
-		/*
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferid);
-		glBufferStorage(GL_ELEMENT_ARRAY_BUFFER, dataSize * bitSize, streamData, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
-		if (drawType != GL_STATIC_DRAW)
-			gpuPtr = glMapNamedBufferRange(bufferid, 0, dataSize * bitSize, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
-		//*/
-		///*
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferid);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, dataSize * bitSize, streamData, drawType);
-		//glBufferStorage(GL_ELEMENT_ARRAY_BUFFER, dataSize * bitSize, streamData, GL_MAP_WRITE_BIT);
-		//*/
+
+		glBindBuffer(target, bufferid);
+		glBufferData(target, dataSize * bitSize, streamData, drawType);
 	}
-	void updateAttrBuf(uint count, void* data) {
+	RenderData(GLenum target, GLenum type, uint size, uint channel, GLuint vbo, GLenum draw, void* data) {
+		bitSize = TypeSize.find(type)->second;
+		channelCount = channel;
+		rowCount = 1;
+		dataSize = size * channelCount;
+		bufferid = vbo;
+		drawType = draw;
+		streamData = data;
+
+		glBindBuffer(target, bufferid);
+		glBufferData(target, dataSize * bitSize, streamData, drawType);
+	}
+	void useAs(GLenum target) {
+		glBindBuffer(target, bufferid);
+	}
+	void setShaderBase(int base) {
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, base, bufferid);
+	}
+	void updateBuffer(uint count, void* data) {
 		dataSize = count * channelCount * rowCount;
 		streamData = data;
 		glNamedBufferSubData(bufferid, 0, dataSize * bitSize, streamData);
-		//gpuPtr = glMapNamedBufferRange(bufferid, 0, dataSize * bitSize, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
-		//memcpy(gpuPtr, streamData, dataSize * bitSize);
-		//glUnmapNamedBuffer(bufferid);
 	}
-	void updateIndexBuf(uint count, void* data) {
-		dataSize = count;
-		streamData = data;
-		glNamedBufferSubData(bufferid, 0, dataSize * bitSize, streamData);
-		//gpuPtr = glMapNamedBufferRange(bufferid, 0, dataSize * bitSize, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
-		//memcpy(gpuPtr, streamData, dataSize * bitSize);
-		//glUnmapNamedBuffer(bufferid);
+	void updateBufferMap(GLenum target, uint count, void* data) {
+		int mapSize = count * channelCount * rowCount;
+		glBindBuffer(target, bufferid);
+		void* ptr = glMapBufferRange(target, 0, mapSize * bitSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+		if (ptr) {
+			memcpy(ptr, data, mapSize * bitSize);
+			glUnmapBuffer(target);
+		}
+	}
+	void readBufferData(GLenum target, uint count, void* ret) {
+		int mapSize = count * channelCount * rowCount;
+		glBindBuffer(target, bufferid);
+		void* ptr = glMapBufferRange(target, 0, mapSize * bitSize, GL_MAP_READ_BIT);
+		if (ptr) {
+			memcpy(ret, ptr, mapSize * bitSize);
+			glUnmapBuffer(target);
+		}
 	}
 };
 
@@ -131,36 +144,47 @@ struct RenderBuffer {
 		streamDatas[i] = data;
 		relies[i] = false;
 	}
-	void setAttribData(uint loc, GLenum type, uint count, uint channel, uint row, bool normalize, GLenum draw, int divisor, void* data) {
+	void setAttribData(GLenum target, uint loc, uint attrid, GLenum type, uint count, uint channel, uint row, bool normalize, GLenum draw, int divisor, void* data) {
 		if (streamDatas[loc]) delete streamDatas[loc];
-		streamDatas[loc] = new RenderData(loc, type, count, channel, row, vbos[loc], normalize, draw, divisor, data);
+		streamDatas[loc] = new RenderData(target, attrid, type, count, channel, row, vbos[loc], normalize, draw, divisor, data);
 	}
-	void setAttribData(uint loc, RenderData* data) {
+	void setAttribData(GLenum target, uint loc, RenderData* data) {
 		streamDatas[loc] = data;
 		relies[loc] = true;
-		glBindBuffer(GL_ARRAY_BUFFER, data->bufferid);
-		data->createAttribute();
+		glBindBuffer(target, data->bufferid);
+		if(target == GL_ARRAY_BUFFER)
+			data->createAttribute();
 	}
-	void setIndexData(uint ind, GLenum type, uint size, GLenum draw, void* data) {
+	void setBufferData(GLenum target, uint ind, GLenum type, uint size, GLenum draw, void* data) {
 		if (streamDatas[ind]) delete streamDatas[ind];
-		streamDatas[ind] = new RenderData(type, size, vbos[ind], draw, data);
+		streamDatas[ind] = new RenderData(target, type, size, vbos[ind], draw, data);
 	}
-	void setIndexData(uint ind, RenderData* data) {
+	void setBufferData(GLenum target, uint ind, GLenum type, uint size, uint channel, GLenum draw, void* data) {
+		if (streamDatas[ind]) delete streamDatas[ind];
+		streamDatas[ind] = new RenderData(target, type, size, channel, vbos[ind], draw, data);
+	}
+	void setBufferData(GLenum target, uint ind, RenderData* data) {
 		streamDatas[ind] = data;
 		relies[ind] = true;
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, data->bufferid);
+		glBindBuffer(target, data->bufferid);
 	}
-	void updateAttribData(uint loc, uint count, void* data) {
-		streamDatas[loc]->updateAttrBuf(count, data);
+	void useAs(uint ind, GLenum target) {
+		streamDatas[ind]->useAs(target);
 	}
-	void updateIndexData(uint loc, uint count, void* data) {
-		streamDatas[loc]->updateIndexBuf(count, data);
+	void setAttrib(uint ind) {
+		streamDatas[ind]->createAttribute();
 	}
-	void unuseAttr() {
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	void setShaderBase(uint ind, int base) {
+		streamDatas[ind]->setShaderBase(base);
 	}
-	void unuseElement() {
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	void updateBufferData(uint loc, uint count, void* data) {
+		streamDatas[loc]->updateBuffer(count, data);
+	}
+	void updateBufferMap(GLenum target, uint loc, uint count, void* data) {
+		streamDatas[loc]->updateBufferMap(target, count, data);
+	}
+	void readBufferData(GLenum target, uint loc, uint count, void* ret) {
+		streamDatas[loc]->readBufferData(target, count, ret);
 	}
 	void use() {
 		glBindVertexArray(vao);

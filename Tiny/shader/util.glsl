@@ -45,6 +45,10 @@ float saturate(float value) {
 	return clamp(value, 0.0, 1.0);
 }
 
+vec2 saturate(vec2 value) {
+	return clamp(value, 0.0, 1.0);
+}
+
 float BlendVal(float val, float val0, float val1, float res0, float res1) {
 	if (val <= val0) return res0;
 	if (val >= val1) return res1;

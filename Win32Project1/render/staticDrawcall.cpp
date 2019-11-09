@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+// Attribute slots
 const uint VertexSlot = 0;
 const uint NormalSlot = 1;
 const uint TexcoordSlot = 2;
@@ -11,9 +12,17 @@ const uint TexidSlot = 3;
 const uint ColorSlot = 4;
 const uint TangentSlot = 5;
 const uint ObjidSlot = 6;
-const uint IndexSlot = 7;
 
-const uint TerrainIndexSlot = 6;
+// VBO index
+const uint VertexIndex = 0;
+const uint NormalIndex = 1;
+const uint TexcoordIndex = 2;
+const uint TexidIndex = 3;
+const uint ColorIndex = 4;
+const uint TangentIndex = 5;
+const uint ObjidIndex = 6;
+const uint Index = 7;
+const uint TerrainIndex = 6;
 
 StaticDrawcall::StaticDrawcall(Batch* batch) :Drawcall() {
 	batchRef = batch;
@@ -28,19 +37,9 @@ StaticDrawcall::StaticDrawcall(Batch* batch) :Drawcall() {
 	drawType = dynDC ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
 
 	bufCount = !isFullStatic() ? 8 : 7;
-	doubleBuffer = false;
 	dataBuffer = createBuffers(batchRef, bufCount, vertCount, indCount, drawType, NULL);
-	if (dynDC && doubleBuffer)
-		dataBuffer2 = createBuffers(batchRef, bufCount, vertCount, indCount, drawType, NULL);
-	else
-		dataBuffer2 = NULL;
 	dataBufferVisual = NULL;
-
-	bufferToPrepare = dataBuffer;
-	if (dataBuffer2)
-		bufferToDraw = dataBuffer2;
-	else
-		bufferToDraw = dataBuffer;
+	bufferToDraw = dataBuffer;
 
 	setType(STATIC_DC);
 
@@ -63,7 +62,6 @@ StaticDrawcall::StaticDrawcall(Batch* batch) :Drawcall() {
 
 StaticDrawcall::~StaticDrawcall() {
 	uModelMatrix = NULL;
-	if (dataBuffer2) delete dataBuffer2;
 	if (dataBufferVisual) delete dataBufferVisual;
 	if (modelMatricesToPrepare) free(modelMatricesToPrepare);
 }
@@ -71,26 +69,26 @@ StaticDrawcall::~StaticDrawcall() {
 RenderBuffer* StaticDrawcall::createBuffers(Batch* batch, int bufCount, int vertCount, int indCount, GLenum drawType, RenderBuffer* dupBuf) {
 	RenderBuffer* buffer = new RenderBuffer(bufCount);
 	if (!dupBuf) {
-		buffer->setAttribData(VertexSlot, GL_FLOAT, vertCount, 3, 1, false, drawType, -1, batch->vertexBuffer);
-		buffer->setAttribData(NormalSlot, GL_FLOAT, vertCount, 3, 1, false, drawType, -1, batch->normalBuffer);
-		buffer->setAttribData(TexcoordSlot, GL_FLOAT, vertCount, 4, 1, false, drawType, -1, batch->texcoordBuffer);
-		buffer->setAttribData(TexidSlot, GL_FLOAT, vertCount, 4, 1, false, drawType, -1, batch->texidBuffer);
-		buffer->setAttribData(ColorSlot, GL_UNSIGNED_BYTE, vertCount, 3, 1, false, drawType, -1, batch->colorBuffer);
-		buffer->setAttribData(TangentSlot, GL_FLOAT, vertCount, 3, 1, false, drawType, -1, batch->tangentBuffer);
+		buffer->setAttribData(GL_ARRAY_BUFFER, VertexIndex,VertexSlot, GL_FLOAT, vertCount, 3, 1, false, drawType, -1, batch->vertexBuffer);
+		buffer->setAttribData(GL_ARRAY_BUFFER, NormalIndex, NormalSlot, GL_FLOAT, vertCount, 3, 1, false, drawType, -1, batch->normalBuffer);
+		buffer->setAttribData(GL_ARRAY_BUFFER, TexcoordIndex, TexcoordSlot, GL_FLOAT, vertCount, 4, 1, false, drawType, -1, batch->texcoordBuffer);
+		buffer->setAttribData(GL_ARRAY_BUFFER, TexidIndex, TexidSlot, GL_FLOAT, vertCount, 4, 1, false, drawType, -1, batch->texidBuffer);
+		buffer->setAttribData(GL_ARRAY_BUFFER, ColorIndex, ColorSlot, GL_UNSIGNED_BYTE, vertCount, 3, 1, false, drawType, -1, batch->colorBuffer);
+		buffer->setAttribData(GL_ARRAY_BUFFER, TangentIndex, TangentSlot, GL_FLOAT, vertCount, 3, 1, false, drawType, -1, batch->tangentBuffer);
 		if (!isFullStatic())
-			buffer->setAttribData(ObjidSlot, GL_UNSIGNED_BYTE, vertCount, 1, 1, false, drawType, -1, batch->objectidBuffer);
+			buffer->setAttribData(GL_ARRAY_BUFFER, ObjidIndex, ObjidSlot, GL_UNSIGNED_BYTE, vertCount, 1, 1, false, drawType, -1, batch->objectidBuffer);
 	} else {
-		buffer->setAttribData(VertexSlot, dupBuf->streamDatas[VertexSlot]);
-		buffer->setAttribData(NormalSlot, dupBuf->streamDatas[NormalSlot]);
-		buffer->setAttribData(TexcoordSlot, dupBuf->streamDatas[TexcoordSlot]);
-		buffer->setAttribData(TexidSlot, dupBuf->streamDatas[TexidSlot]);
-		buffer->setAttribData(ColorSlot, dupBuf->streamDatas[ColorSlot]);
-		buffer->setAttribData(TangentSlot, dupBuf->streamDatas[TangentSlot]);
+		buffer->setAttribData(GL_ARRAY_BUFFER, VertexIndex, dupBuf->streamDatas[VertexIndex]);
+		buffer->setAttribData(GL_ARRAY_BUFFER, NormalIndex, dupBuf->streamDatas[NormalIndex]);
+		buffer->setAttribData(GL_ARRAY_BUFFER, TexcoordIndex, dupBuf->streamDatas[TexcoordIndex]);
+		buffer->setAttribData(GL_ARRAY_BUFFER, TexidIndex, dupBuf->streamDatas[TexidIndex]);
+		buffer->setAttribData(GL_ARRAY_BUFFER, ColorIndex, dupBuf->streamDatas[ColorIndex]);
+		buffer->setAttribData(GL_ARRAY_BUFFER, TangentIndex, dupBuf->streamDatas[TangentIndex]);
 		if (!isFullStatic())
-			buffer->setAttribData(ObjidSlot, dupBuf->streamDatas[ObjidSlot]);
+			buffer->setAttribData(GL_ARRAY_BUFFER, ObjidIndex, dupBuf->streamDatas[ObjidIndex]);
 	}
 	GLenum indType = !dupBuf ? drawType : GL_DYNAMIC_DRAW;
-	buffer->setIndexData(bufCount - 1, GL_UNSIGNED_INT, indCount, indType, batch->indexBuffer);
+	buffer->setBufferData(GL_ELEMENT_ARRAY_BUFFER, bufCount - 1, GL_UNSIGNED_INT, indCount, indType, batch->indexBuffer);
 	buffer->unuse();
 	return buffer;
 }
@@ -99,6 +97,7 @@ void StaticDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
 	if (indexCntToDraw <= 0) return;
 	if (frame < DELAY_FRAME) frame++;
 	else {
+		render->useShader(shader);
 		if (state->pass < DEFERRED_PASS && !isFullStatic() && objectCntToDraw > 0 && uModelMatrix)
 			shader->setMatrix3x4("modelMatrices", objectCntToDraw, uModelMatrix);
 
@@ -109,14 +108,6 @@ void StaticDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
 			glPatchParameteri(GL_PATCH_VERTICES, 3);
 		glDrawElements(type, indexCntToDraw, GL_UNSIGNED_INT, 0);
 	}
-
-	if (dynDC && doubleBuffer) {
-		vertexCntToDraw = vertexCntToPrepare;
-		indexCntToDraw = indexCntToPrepare;
-
-		objectCntToDraw = objectCntToPrepare;
-		flushMatricesToPrepare();
-	}
 }
 
 void StaticDrawcall::flushMatricesToPrepare() {
@@ -125,69 +116,61 @@ void StaticDrawcall::flushMatricesToPrepare() {
 }
 
 void StaticDrawcall::updateMatrices() {
-	if (!dynDC || !doubleBuffer) {
-		objectCntToDraw = objectCntToPrepare;
-		if (dynDC) {
-			flushMatricesToPrepare();
-			uModelMatrix = modelMatricesToPrepare;
-		}
-		else if (!dynDC && batchRef->modelMatrices)
+	objectCntToDraw = objectCntToPrepare;
+	if (dynDC) {
+		flushMatricesToPrepare();
+		uModelMatrix = modelMatricesToPrepare;
+	} else {
+		if (batchRef->modelMatrices)
 			uModelMatrix = batchRef->modelMatrices;
 	}
-	else {
-		uModelMatrix = modelMatricesToPrepare;
-	}
+
 }
 
 void StaticDrawcall::updateBuffers(int pass, uint* indices, int indexCount) {
 	if (!indices) {
-		if (!dynDC || !doubleBuffer) {
+		if (!dynDC) {
 			bufferToDraw = dataBuffer;
 			indexCntToDraw = indexCntToPrepare;
-		} else {
-			bufferToDraw = bufferToDraw == dataBuffer ? dataBuffer2 : dataBuffer;
-			bufferToPrepare = bufferToPrepare == dataBuffer ? dataBuffer2 : dataBuffer;
-		} 
+		}
 	} else {
 		if(!dataBufferVisual) dataBufferVisual = createBuffers(batchRef, bufCount, vertCount, indCount, drawType, dataBuffer);
 		bufferToDraw = dataBufferVisual;
 		indexCntToDraw = indexCount;
 		bufferToDraw->use();
-		bufferToDraw->updateIndexData(TerrainIndexSlot, indexCntToDraw, (void*)indices);
+		bufferToDraw->updateBufferData(TerrainIndex, indexCntToDraw, (void*)indices);
 	}
 
 	if (!dynDC) return;
 
-	if (!doubleBuffer) {
-		vertexCntToDraw = vertexCntToPrepare;
-		indexCntToDraw = indexCntToPrepare;
-	}
+	vertexCntToDraw = vertexCntToPrepare;
+	indexCntToDraw = indexCntToPrepare;
 
 	if (pass == COLOR_PASS) {
-		bufferToPrepare->updateAttribData(VertexSlot, vertexCntToPrepare, (void*)batchRef->vertexBuffer);
-		bufferToPrepare->updateAttribData(NormalSlot, vertexCntToPrepare, (void*)batchRef->normalBuffer);
-		bufferToPrepare->updateAttribData(TexcoordSlot, vertexCntToPrepare, (void*)batchRef->texcoordBuffer);
-		bufferToPrepare->updateAttribData(TexidSlot, vertexCntToPrepare, (void*)batchRef->texidBuffer);
-		bufferToPrepare->updateAttribData(ColorSlot, vertexCntToPrepare, (void*)batchRef->colorBuffer);
-		bufferToPrepare->updateAttribData(TangentSlot, vertexCntToPrepare, (void*)batchRef->tangentBuffer);
-		bufferToPrepare->updateAttribData(ObjidSlot, vertexCntToPrepare, (void*)batchRef->objectidBuffer);
+		dataBuffer->updateBufferData(VertexIndex, vertexCntToPrepare, (void*)batchRef->vertexBuffer);
+		dataBuffer->updateBufferData(NormalIndex, vertexCntToPrepare, (void*)batchRef->normalBuffer);
+		dataBuffer->updateBufferData(TexcoordIndex, vertexCntToPrepare, (void*)batchRef->texcoordBuffer);
+		dataBuffer->updateBufferData(TexidIndex, vertexCntToPrepare, (void*)batchRef->texidBuffer);
+		dataBuffer->updateBufferData(ColorIndex, vertexCntToPrepare, (void*)batchRef->colorBuffer);
+		dataBuffer->updateBufferData(TangentIndex, vertexCntToPrepare, (void*)batchRef->tangentBuffer);
+		dataBuffer->updateBufferData(ObjidIndex, vertexCntToPrepare, (void*)batchRef->objectidBuffer);
 
-		bufferToPrepare->use();
-		bufferToPrepare->updateIndexData(IndexSlot, indexCntToPrepare, (void*)batchRef->indexBuffer);
+		dataBuffer->use();
+		dataBuffer->updateBufferData(Index, indexCntToPrepare, (void*)batchRef->indexBuffer);
 	}
 	else if (pass == NEAR_SHADOW_PASS || pass == MID_SHADOW_PASS) {
-		bufferToPrepare->updateAttribData(VertexSlot, vertexCntToPrepare, (void*)batchRef->vertexBuffer);
-		bufferToPrepare->updateAttribData(TexcoordSlot, vertexCntToPrepare, (void*)batchRef->texcoordBuffer);
-		bufferToPrepare->updateAttribData(ObjidSlot, vertexCntToPrepare, (void*)batchRef->objectidBuffer);
+		dataBuffer->updateBufferData(VertexIndex, vertexCntToPrepare, (void*)batchRef->vertexBuffer);
+		dataBuffer->updateBufferData(TexcoordIndex, vertexCntToPrepare, (void*)batchRef->texcoordBuffer);
+		dataBuffer->updateBufferData(ObjidIndex, vertexCntToPrepare, (void*)batchRef->objectidBuffer);
 
-		bufferToPrepare->use();
-		bufferToPrepare->updateIndexData(IndexSlot, indexCntToPrepare, (void*)batchRef->indexBuffer);
+		dataBuffer->use();
+		dataBuffer->updateBufferData(Index, indexCntToPrepare, (void*)batchRef->indexBuffer);
 	}
 	else if (pass == FAR_SHADOW_PASS) {
-		bufferToPrepare->updateAttribData(VertexSlot, vertexCntToPrepare, (void*)batchRef->vertexBuffer);
-		bufferToPrepare->updateAttribData(ObjidSlot, vertexCntToPrepare, (void*)batchRef->objectidBuffer);
+		dataBuffer->updateBufferData(VertexIndex, vertexCntToPrepare, (void*)batchRef->vertexBuffer);
+		dataBuffer->updateBufferData(ObjidIndex, vertexCntToPrepare, (void*)batchRef->objectidBuffer);
 
-		bufferToPrepare->use();
-		bufferToPrepare->updateIndexData(IndexSlot, indexCntToPrepare, (void*)batchRef->indexBuffer);
+		dataBuffer->use();
+		dataBuffer->updateBufferData(Index, indexCntToPrepare, (void*)batchRef->indexBuffer);
 	}
 }

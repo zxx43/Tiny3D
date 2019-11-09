@@ -19,8 +19,7 @@ public:
 	float* matrices;
 	float* billboards;
 	float* positions;
-	float* boundingPose;
-	float* boundingSize;
+	float* boundings;
 	int count, maxInsCount;
 	Object* object;
 	InstanceState* state;

@@ -312,6 +312,7 @@
     <None Include="..\Tiny\shader\bone.frag" />
     <None Include="..\Tiny\shader\bone.vert" />
     <None Include="..\Tiny\shader\combined.frag" />
+    <None Include="..\Tiny\shader\cull.comp" />
     <None Include="..\Tiny\shader\debug.frag" />
     <None Include="..\Tiny\shader\debug.vert" />
     <None Include="..\Tiny\shader\deferred.frag" />

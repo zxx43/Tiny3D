@@ -35,8 +35,7 @@ void Instance::create(Mesh* mesh, bool dyn, InstanceState* state) {
 	modelMatrices = NULL;
 	positions = NULL;
 	billboards = NULL;
-	boundingPose = NULL;
-	boundingSize = NULL;
+	boundings = NULL;
 	copyData = true;
 }
 
@@ -53,8 +52,7 @@ Instance::~Instance() {
 		if (modelMatrices) free(modelMatrices); modelMatrices = NULL;
 		if (positions) free(positions); positions = NULL;
 		if (billboards) free(billboards); billboards = NULL;
-		if (boundingPose) free(boundingPose); boundingPose = NULL;
-		if (boundingSize) free(boundingSize); boundingSize = NULL;
+		if (boundings) free(boundings); boundings = NULL;
 	}
 	if (drawcall) delete drawcall;
 }
@@ -72,8 +70,7 @@ void Instance::releaseInstanceData() {
 		if (modelMatrices) free(modelMatrices); modelMatrices = NULL;
 		if (positions) free(positions); positions = NULL;
 		if (billboards) free(billboards); billboards = NULL;
-		if (boundingPose) free(boundingPose); boundingPose = NULL;
-		if (boundingSize) free(boundingSize); boundingSize = NULL;
+		if (boundings) free(boundings); boundings = NULL;
 	}
 }
 
@@ -175,10 +172,8 @@ void Instance::initBillboards(int cnt) {
 }
 
 void Instance::initBoundings(int cnt) {
-	boundingPose = (float*)malloc(cnt * 3 * sizeof(float));
-	memset(boundingPose, 0, cnt * 3 * sizeof(float));
-	boundingSize = (float*)malloc(cnt * 3 * sizeof(float));
-	memset(boundingSize, 0, cnt * 3 * sizeof(float));
+	boundings = (float*)malloc(cnt * 8 * sizeof(float));
+	memset(boundings, 0, cnt * 8 * sizeof(float));
 }
 
 void Instance::setRenderData(InstanceData* data) {
@@ -194,8 +189,7 @@ void Instance::setRenderData(InstanceData* data) {
 			memcpy(billboards, data->billboards, instanceCount * 4 * sizeof(float));
 			memcpy(positions, data->positions, instanceCount * 3 * sizeof(float));
 		}
-		memcpy(boundingPose, data->boundingPose, instanceCount * 3 * sizeof(float));
-		memcpy(boundingSize, data->boundingSize, instanceCount * 3 * sizeof(float));
+		memcpy(boundings, data->boundings, instanceCount * 8 * sizeof(float));
 	} else {
 		if (data->matrices) {
 			if (modelMatrices != data->matrices) modelMatrices = data->matrices;
@@ -203,8 +197,7 @@ void Instance::setRenderData(InstanceData* data) {
 			if (billboards != data->billboards) billboards = data->billboards;
 			if (positions != data->positions) positions = data->positions;
 		}
-		if (boundingPose != data->boundingPose) boundingPose = data->boundingPose;
-		if (boundingSize != data->boundingSize) boundingSize = data->boundingSize;
+		if (boundings != data->boundings) boundings = data->boundings;
 	}
 }
 
@@ -234,8 +227,6 @@ void Instance::addObject(Object* object, int index) {
 	}
 
 	AABB* bb = (AABB*)object->bounding;
-	float bbPose[3] = { bb->position.x, bb->position.y, bb->position.z };
-	float bbSize[3] = { bb->halfSize.x, bb->halfSize.y, bb->halfSize.z };
-	memcpy(boundingPose + (index * 3), bbPose, 3 * sizeof(float));
-	memcpy(boundingSize + (index * 3), bbSize, 3 * sizeof(float));
+	float boundInfo[8] = { bb->position.x, bb->position.y, bb->position.z, bb->sizex, bb->sizey, bb->sizez, 0.0, 0.0 };
+	memcpy(boundings + (index * 8), boundInfo, 8 * sizeof(float));
 }

@@ -2,12 +2,12 @@
 #include "../instance/instance.h"
 #include "render.h"
 
+// Attribute slots
 const uint BillboardVertexSlot = 0;
 const uint BillboardTexcoordSlot = 1;
 const uint BillboardPositionSlot = 2;
 const uint BillboardInfoSlot = 3;
-const uint BillboardIndexSlot = 4;
-
+//----------------------------------------
 const uint VertexSlot = 0;
 const uint NormalSlot = 1;
 const uint TexcoordSlot = 2;
@@ -15,7 +15,25 @@ const uint TexidSlot = 3;
 const uint ColorSlot = 4;
 const uint TangentSlot = 5;
 const uint PositionSlot = 6;
-const uint IndexSlot = 7;
+
+// VBO index
+const uint BillboardVertexIndex = 0;
+const uint BillboardTexcoordIndex = 1;
+const uint BillboardPositionIndex = 2;
+const uint BillboardInfoIndex = 3;
+const uint BillboardIndex = 4;
+//----------------------------------------
+const uint VertexIndex = 0;
+const uint NormalIndex = 1;
+const uint TexcoordIndex = 2;
+const uint TexidIndex = 3;
+const uint ColorIndex = 4;
+const uint TangentIndex = 5;
+const uint PositionIndex = 6;
+const uint Index = 7;
+const uint BoundingIndex = 8;
+const uint PositionOutIndex = 9;
+const uint IndirectBufIndex = 10;
 
 InstanceDrawcall::InstanceDrawcall(Instance* instance) :Drawcall() {
 	instanceRef = instance;
@@ -24,79 +42,62 @@ InstanceDrawcall::InstanceDrawcall(Instance* instance) :Drawcall() {
 	isGrass = instanceRef->isGrass;
 	vertexCount = instanceRef->vertexCount;
 	indexCount = instanceRef->indexCount;
-
-	//printf("create mesh vao: %s?\n", instanceRef->instanceMesh->getName().data());
+	setBillboard(instanceRef->isBillboard);
 
 	objectCount = dynDC ? instanceRef->maxInstanceCount : instanceRef->instanceCount;
-	objectToPrepare = 0, objectToDraw = 0;
-	if (!dynDC) {
-		objectToPrepare = instanceRef->instanceCount;
-		objectToDraw = instanceRef->instanceCount;
-	}
+	objectToPrepare = 0;
+	if (!dynDC) objectToPrepare = instanceRef->instanceCount;
 
-	setBillboard(instanceRef->isBillboard);
-	
-	doubleBuffer = false;
-	dataBuffer = createBuffers(instanceRef, dynDC, vertexCount, indexCount, NULL);
-	if (dynDC && doubleBuffer)
-		dataBuffer2 = createBuffers(instanceRef, dynDC, vertexCount, indexCount, dataBuffer);
-	else
-		dataBuffer2 = NULL;
+	indirectBuf = (Indirect*)malloc(sizeof(Indirect));
+	indirectBuf->count = indexCount;
+	indirectBuf->primCount = 0;
+	indirectBuf->firstIndex = 0;
+	indirectBuf->baseVertex = 0;
+	indirectBuf->baseInstance = 0;
 
-	dataBufferDraw = dataBuffer;
-	if (dataBuffer2)
-		dataBufferPrepare = dataBuffer2;
-	else
-		dataBufferPrepare = dataBuffer;
+	readBuf = (Indirect*)malloc(sizeof(Indirect));
+	readBuf->count = 0;
+	readBuf->primCount = 0;
+	readBuf->firstIndex = 0;
+	readBuf->baseVertex = 0;
+	readBuf->baseInstance = 0;
+
+	dataBuffer = createBuffers(instanceRef, dynDC, vertexCount, indexCount);
 
 	setType(INSTANCE_DC);
-
 	instanceRef->releaseInstanceData();
-	//printf("create mesh vao: %s!\n", instanceRef->instanceMesh->getName().data());
 }
 
 InstanceDrawcall::~InstanceDrawcall() {
-	if(dataBuffer2) delete dataBuffer2;
+	free(indirectBuf);
 }
 
-RenderBuffer* InstanceDrawcall::createBuffers(Instance* instance, bool dyn, int vertexCount, int indexCount, RenderBuffer* dupBuf) {
+RenderBuffer* InstanceDrawcall::createBuffers(Instance* instance, bool dyn, int vertexCount, int indexCount) {
 	RenderBuffer* buffer = NULL;
 	GLenum draw = dyn ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
 	if (isBillboard()) {
 		buffer = new RenderBuffer(5);
-		if (!dupBuf) {
-			buffer->setAttribData(BillboardVertexSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->vertexBuffer);
-			buffer->setAttribData(BillboardTexcoordSlot, GL_FLOAT, vertexCount, 4, 1, false, GL_STATIC_DRAW, 0, instanceRef->texcoordBuffer);
-		} else {
-			buffer->setAttribData(BillboardVertexSlot, dupBuf->streamDatas[BillboardVertexSlot]);
-			buffer->setAttribData(BillboardTexcoordSlot, dupBuf->streamDatas[BillboardTexcoordSlot]);
-		}
-		buffer->setAttribData(BillboardPositionSlot, GL_FLOAT, objectCount, 3, 1, false, draw, 1, instanceRef->positions);
-		buffer->setAttribData(BillboardInfoSlot, GL_FLOAT, objectCount, 4, 1, false, draw, 1, instanceRef->billboards);
-
-		if(!dupBuf) buffer->setIndexData(BillboardIndexSlot, GL_UNSIGNED_SHORT, indexCount, GL_STATIC_DRAW, instanceRef->indexBuffer);
-		else buffer->setIndexData(BillboardIndexSlot, dupBuf->streamDatas[BillboardIndexSlot]);
+		buffer->setAttribData(GL_ARRAY_BUFFER, BillboardVertexIndex, BillboardVertexSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->vertexBuffer);
+		buffer->setAttribData(GL_ARRAY_BUFFER, BillboardTexcoordIndex, BillboardTexcoordSlot, GL_FLOAT, vertexCount, 4, 1, false, GL_STATIC_DRAW, 0, instanceRef->texcoordBuffer);
+		buffer->setBufferData(GL_ELEMENT_ARRAY_BUFFER, BillboardIndex, GL_UNSIGNED_SHORT, indexCount, GL_STATIC_DRAW, instanceRef->indexBuffer);
+		buffer->setAttribData(GL_ARRAY_BUFFER, BillboardPositionIndex, BillboardPositionSlot, GL_FLOAT, objectCount, 3, 1, false, draw, 1, instanceRef->positions);
+		buffer->setAttribData(GL_ARRAY_BUFFER, BillboardInfoIndex, BillboardInfoSlot, GL_FLOAT, objectCount, 4, 1, false, draw, 1, instanceRef->billboards);
 	} else {
-		buffer = new RenderBuffer(8);
-		if (!dupBuf) {
-			buffer->setAttribData(VertexSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->vertexBuffer);
-			buffer->setAttribData(NormalSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->normalBuffer);
-			buffer->setAttribData(TexcoordSlot, GL_FLOAT, vertexCount, 4, 1, false, GL_STATIC_DRAW, 0, instanceRef->texcoordBuffer);
-			buffer->setAttribData(TexidSlot, GL_FLOAT, vertexCount, 2, 1, false, GL_STATIC_DRAW, 0, instanceRef->texidBuffer);
-			buffer->setAttribData(ColorSlot, GL_UNSIGNED_BYTE, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->colorBuffer);
-			buffer->setAttribData(TangentSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->tangentBuffer);
-			buffer->setIndexData(IndexSlot, GL_UNSIGNED_SHORT, indexCount, GL_STATIC_DRAW, instanceRef->indexBuffer);
-		} else {
-			buffer->setAttribData(VertexSlot, dupBuf->streamDatas[VertexSlot]);
-			buffer->setAttribData(NormalSlot, dupBuf->streamDatas[NormalSlot]);
-			buffer->setAttribData(TexcoordSlot, dupBuf->streamDatas[TexcoordSlot]);
-			buffer->setAttribData(TexidSlot, dupBuf->streamDatas[TexidSlot]);
-			buffer->setAttribData(ColorSlot, dupBuf->streamDatas[ColorSlot]);
-			buffer->setAttribData(TangentSlot, dupBuf->streamDatas[TangentSlot]);
-			buffer->setIndexData(IndexSlot, dupBuf->streamDatas[IndexSlot]);
-		}
-		if (!isSimple) buffer->setAttribData(PositionSlot, GL_FLOAT, objectCount, 4, 3, false, draw, 1, instanceRef->modelMatrices);
-		else buffer->setAttribData(PositionSlot, GL_FLOAT, objectCount, 4, 1, false, draw, 1, instanceRef->modelMatrices);
+		buffer = new RenderBuffer(11);
+		buffer->setAttribData(GL_ARRAY_BUFFER, VertexIndex, VertexSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->vertexBuffer);
+		buffer->setAttribData(GL_ARRAY_BUFFER, NormalIndex, NormalSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->normalBuffer);
+		buffer->setAttribData(GL_ARRAY_BUFFER, TexcoordIndex, TexcoordSlot, GL_FLOAT, vertexCount, 4, 1, false, GL_STATIC_DRAW, 0, instanceRef->texcoordBuffer);
+		buffer->setAttribData(GL_ARRAY_BUFFER, TexidIndex, TexidSlot, GL_FLOAT, vertexCount, 2, 1, false, GL_STATIC_DRAW, 0, instanceRef->texidBuffer);
+		buffer->setAttribData(GL_ARRAY_BUFFER, ColorIndex, ColorSlot, GL_UNSIGNED_BYTE, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->colorBuffer);
+		buffer->setAttribData(GL_ARRAY_BUFFER, TangentIndex, TangentSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->tangentBuffer);
+		buffer->setBufferData(GL_ELEMENT_ARRAY_BUFFER, Index, GL_UNSIGNED_SHORT, indexCount, GL_STATIC_DRAW, instanceRef->indexBuffer);
+		
+		buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, PositionIndex, GL_FLOAT, objectCount, 12, draw, instanceRef->modelMatrices);
+		buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, BoundingIndex, GL_FLOAT, objectCount, 8, draw, instanceRef->boundings);
+		buffer->setAttribData(GL_SHADER_STORAGE_BUFFER, PositionOutIndex, PositionSlot, GL_FLOAT, objectCount, 4, 3, false, GL_DYNAMIC_DRAW, 1, NULL);
+		buffer->useAs(PositionOutIndex, GL_ARRAY_BUFFER);
+		buffer->setAttrib(PositionOutIndex);
+		buffer->setBufferData(GL_DRAW_INDIRECT_BUFFER, IndirectBufIndex, GL_ONE, sizeof(Indirect), GL_DYNAMIC_DRAW, indirectBuf);
 	}
 	buffer->unuse();
 	return buffer;
@@ -105,60 +106,47 @@ RenderBuffer* InstanceDrawcall::createBuffers(Instance* instance, bool dyn, int 
 void InstanceDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
 	if (frame < DELAY_FRAME) frame++;
 	else {
-		dataBufferDraw->use();
-		if (isGrass) {
-			float* boundInfo = instanceRef->instanceMesh->bounding;
-			if (boundInfo) {
-				shader->setVector3v("boundPos", boundInfo);
-				shader->setVector3v("boundScl", boundInfo + 3);
-			}
-		}
+		dataBuffer->use();
 
-		if (instanceRef->instanceMesh->singleFaces.size() == 0) {
+		if (instanceRef->instanceMesh->singleFaces.size() == 0)
 			render->setCullState(state->enableCull);
-			glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, 0, objectToDraw);
-		}
-		else if (instanceRef->instanceMesh->normalFaces.size() == 0) {
+		else 
 			render->setCullState(false);
-			glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, 0, objectToDraw);
-		}
-		else {
-			render->setCullState(false);
-			glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, 0, objectToDraw);
-			/*
-			for (uint i = 0; i < instanceRef->instanceMesh->normalFaces.size(); i++) {
-				FaceBuf* fb = instanceRef->instanceMesh->normalFaces[i];
-				render->setCullState(state->enableCull);
-				glDrawElementsInstancedBaseVertex(GL_TRIANGLES, fb->count, GL_UNSIGNED_SHORT, 0, objectToDraw, fb->start);
-			}
-			for (uint i = 0; i < instanceRef->instanceMesh->singleFaces.size(); i++) {
-				FaceBuf* fb = instanceRef->instanceMesh->singleFaces[i];
-				render->setCullState(false);
-				glDrawElementsInstancedBaseVertex(GL_TRIANGLES, fb->count, GL_UNSIGNED_SHORT, 0, objectToDraw, fb->start);
-			}
-			//*/
+
+		if (isBillboard()) {
+			render->useShader(shader);
+			glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, 0, objectToPrepare);
+		} else {
+			dataBuffer->setShaderBase(PositionIndex, 1);
+			dataBuffer->setShaderBase(BoundingIndex, 2);
+			dataBuffer->setShaderBase(PositionOutIndex, 3);
+			dataBuffer->setShaderBase(IndirectBufIndex, 4);
+
+			render->useShader(state->shaderCompute);
+			glDispatchCompute(objectToPrepare, 1, 1);
+			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT);
+
+			render->useShader(shader);
+			glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, 0);
+
+			//dataBuffer->readBufferData(GL_DRAW_INDIRECT_BUFFER, IndirectBufIndex, sizeof(Indirect), readBuf);
+			//if (state->pass == COLOR_PASS)
+			//	printf("culled %d\n", objectToPrepare - (int)readBuf->primCount);
 		}
 	}
-
-	if (dynDC && doubleBuffer) objectToDraw = objectToPrepare;
 }
 
 void InstanceDrawcall::updateInstances(Instance* instance, int pass) {
 	if (!dynDC) return;
-	
-	if (doubleBuffer) {
-		dataBufferDraw = dataBufferDraw == dataBuffer ? dataBuffer2 : dataBuffer;
-		dataBufferPrepare = dataBufferPrepare == dataBuffer ? dataBuffer2 : dataBuffer; 
-	} else {
-		dataBufferDraw = dataBuffer;
-		dataBufferPrepare = dataBuffer;
-		objectToDraw = objectToPrepare;
-	}
 
-	if (!isBillboard()) 
-		dataBufferPrepare->updateAttribData(PositionSlot, objectToPrepare, (void*)(instance->modelMatrices));
-	else {
-		dataBufferPrepare->updateAttribData(BillboardPositionSlot, objectToPrepare, (void*)(instance->positions));
-		dataBufferPrepare->updateAttribData(BillboardInfoSlot, objectToPrepare, (void*)(instance->billboards));
+	if (!isBillboard()) {
+		dataBuffer->updateBufferData(PositionIndex, objectToPrepare, (void*)(instance->modelMatrices));
+		dataBuffer->updateBufferData(BoundingIndex, objectToPrepare, (void*)(instance->boundings));
+
+		indirectBuf->primCount = 0;
+		dataBuffer->updateBufferMap(GL_DRAW_INDIRECT_BUFFER, IndirectBufIndex, sizeof(Indirect), (void*)indirectBuf);
+	} else {
+		dataBuffer->updateBufferData(BillboardPositionIndex, objectToPrepare, (void*)(instance->positions));
+		dataBuffer->updateBufferData(BillboardInfoIndex, objectToPrepare, (void*)(instance->billboards));
 	}
 }
