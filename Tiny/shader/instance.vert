@@ -6,7 +6,7 @@ layout (location = 2) in vec4 texcoord;
 layout (location = 3) in vec2 texid;
 layout (location = 4) in vec3 color;
 layout (location = 5) in vec3 tangent;
-layout (location = 6) in mat3x4 modelMatrix;
+layout (location = 6) in mat4 modelMatrix;
 
 #ifndef LowPass
 out vec2 vTexcoord;
@@ -19,9 +19,8 @@ out mat3 vTBN;
 #endif
 
 void main() {
-	mat4x3 tranMat = transpose(modelMatrix);
-	mat3 matRot = mat3(tranMat);
-	vec4 worldVertex = vec4(matRot * vertex + tranMat[3], 1.0);
+	mat3 matRot = mat3(modelMatrix);
+	vec4 worldVertex = modelMatrix * vec4(vertex, 1.0);
 #ifndef ShadowPass
 	vNormal = matRot * normal;
 	vTBN = matRot * GetTBN(normalize(normal), normalize(tangent));

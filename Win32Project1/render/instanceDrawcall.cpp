@@ -5,8 +5,7 @@
 // Attribute slots
 const uint BillboardVertexSlot = 0;
 const uint BillboardTexcoordSlot = 1;
-const uint BillboardPositionSlot = 2;
-const uint BillboardInfoSlot = 3;
+const uint BillboardInfoSlot = 2;
 //----------------------------------------
 const uint VertexSlot = 0;
 const uint NormalSlot = 1;
@@ -19,9 +18,8 @@ const uint PositionSlot = 6;
 // VBO index
 const uint BillboardVertexIndex = 0;
 const uint BillboardTexcoordIndex = 1;
-const uint BillboardPositionIndex = 2;
-const uint BillboardInfoIndex = 3;
-const uint BillboardIndex = 4;
+const uint BillboardInfoIndex = 2;
+const uint BillboardIndex = 3;
 //----------------------------------------
 const uint VertexIndex = 0;
 const uint NormalIndex = 1;
@@ -31,9 +29,8 @@ const uint ColorIndex = 4;
 const uint TangentIndex = 5;
 const uint PositionIndex = 6;
 const uint Index = 7;
-const uint BoundingIndex = 8;
-const uint PositionOutIndex = 9;
-const uint IndirectBufIndex = 10;
+const uint PositionOutIndex = 8;
+const uint IndirectBufIndex = 9;
 
 InstanceDrawcall::InstanceDrawcall(Instance* instance) :Drawcall() {
 	instanceRef = instance;
@@ -76,14 +73,13 @@ RenderBuffer* InstanceDrawcall::createBuffers(Instance* instance, bool dyn, int 
 	RenderBuffer* buffer = NULL;
 	GLenum draw = dyn ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
 	if (isBillboard()) {
-		buffer = new RenderBuffer(5);
+		buffer = new RenderBuffer(4);
 		buffer->setAttribData(GL_ARRAY_BUFFER, BillboardVertexIndex, BillboardVertexSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->vertexBuffer);
 		buffer->setAttribData(GL_ARRAY_BUFFER, BillboardTexcoordIndex, BillboardTexcoordSlot, GL_FLOAT, vertexCount, 4, 1, false, GL_STATIC_DRAW, 0, instanceRef->texcoordBuffer);
+		buffer->setAttribData(GL_ARRAY_BUFFER, BillboardInfoIndex, BillboardInfoSlot, GL_FLOAT, objectCount, 3, 2, false, draw, 1, instanceRef->billboards);
 		buffer->setBufferData(GL_ELEMENT_ARRAY_BUFFER, BillboardIndex, GL_UNSIGNED_SHORT, indexCount, GL_STATIC_DRAW, instanceRef->indexBuffer);
-		buffer->setAttribData(GL_ARRAY_BUFFER, BillboardPositionIndex, BillboardPositionSlot, GL_FLOAT, objectCount, 3, 1, false, draw, 1, instanceRef->positions);
-		buffer->setAttribData(GL_ARRAY_BUFFER, BillboardInfoIndex, BillboardInfoSlot, GL_FLOAT, objectCount, 4, 1, false, draw, 1, instanceRef->billboards);
 	} else {
-		buffer = new RenderBuffer(11);
+		buffer = new RenderBuffer(10);
 		buffer->setAttribData(GL_ARRAY_BUFFER, VertexIndex, VertexSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->vertexBuffer);
 		buffer->setAttribData(GL_ARRAY_BUFFER, NormalIndex, NormalSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->normalBuffer);
 		buffer->setAttribData(GL_ARRAY_BUFFER, TexcoordIndex, TexcoordSlot, GL_FLOAT, vertexCount, 4, 1, false, GL_STATIC_DRAW, 0, instanceRef->texcoordBuffer);
@@ -92,9 +88,8 @@ RenderBuffer* InstanceDrawcall::createBuffers(Instance* instance, bool dyn, int 
 		buffer->setAttribData(GL_ARRAY_BUFFER, TangentIndex, TangentSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->tangentBuffer);
 		buffer->setBufferData(GL_ELEMENT_ARRAY_BUFFER, Index, GL_UNSIGNED_SHORT, indexCount, GL_STATIC_DRAW, instanceRef->indexBuffer);
 		
-		buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, PositionIndex, GL_FLOAT, objectCount, 12, draw, instanceRef->modelMatrices);
-		buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, BoundingIndex, GL_FLOAT, objectCount, 8, draw, instanceRef->boundings);
-		buffer->setAttribData(GL_SHADER_STORAGE_BUFFER, PositionOutIndex, PositionSlot, GL_FLOAT, objectCount, 4, 3, false, GL_DYNAMIC_DRAW, 1, NULL);
+		buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, PositionIndex, GL_FLOAT, objectCount, 16, draw, instanceRef->modelMatrices);
+		buffer->setAttribData(GL_SHADER_STORAGE_BUFFER, PositionOutIndex, PositionSlot, GL_FLOAT, objectCount, 4, 4, false, GL_STREAM_DRAW, 1, NULL);
 		buffer->useAs(PositionOutIndex, GL_ARRAY_BUFFER);
 		buffer->setAttrib(PositionOutIndex);
 		buffer->setBufferData(GL_DRAW_INDIRECT_BUFFER, IndirectBufIndex, GL_ONE, sizeof(Indirect), GL_DYNAMIC_DRAW, indirectBuf);
@@ -118,9 +113,8 @@ void InstanceDrawcall::draw(Render* render, RenderState* state, Shader* shader) 
 			glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, 0, objectToPrepare);
 		} else {
 			dataBuffer->setShaderBase(PositionIndex, 1);
-			dataBuffer->setShaderBase(BoundingIndex, 2);
-			dataBuffer->setShaderBase(PositionOutIndex, 3);
-			dataBuffer->setShaderBase(IndirectBufIndex, 4);
+			dataBuffer->setShaderBase(PositionOutIndex, 2);
+			dataBuffer->setShaderBase(IndirectBufIndex, 3);
 
 			render->useShader(state->shaderCompute);
 			glDispatchCompute(objectToPrepare, 1, 1);
@@ -129,9 +123,11 @@ void InstanceDrawcall::draw(Render* render, RenderState* state, Shader* shader) 
 			render->useShader(shader);
 			glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, 0);
 
-			//dataBuffer->readBufferData(GL_DRAW_INDIRECT_BUFFER, IndirectBufIndex, sizeof(Indirect), readBuf);
-			//if (state->pass == COLOR_PASS)
-			//	printf("culled %d\n", objectToPrepare - (int)readBuf->primCount);
+			/*
+			dataBuffer->readBufferData(GL_DRAW_INDIRECT_BUFFER, IndirectBufIndex, sizeof(Indirect), readBuf);
+			if (state->pass == COLOR_PASS)
+				printf("culled %d\n", objectToPrepare - (int)readBuf->primCount);
+			//*/
 		}
 	}
 }
@@ -139,14 +135,11 @@ void InstanceDrawcall::draw(Render* render, RenderState* state, Shader* shader) 
 void InstanceDrawcall::updateInstances(Instance* instance, int pass) {
 	if (!dynDC) return;
 
-	if (!isBillboard()) {
-		dataBuffer->updateBufferData(PositionIndex, objectToPrepare, (void*)(instance->modelMatrices));
-		dataBuffer->updateBufferData(BoundingIndex, objectToPrepare, (void*)(instance->boundings));
-
+	if (isBillboard()) 
+		dataBuffer->updateBufferData(BillboardInfoIndex, objectToPrepare, (void*)(instance->billboards));
+	else {
 		indirectBuf->primCount = 0;
 		dataBuffer->updateBufferMap(GL_DRAW_INDIRECT_BUFFER, IndirectBufIndex, sizeof(Indirect), (void*)indirectBuf);
-	} else {
-		dataBuffer->updateBufferData(BillboardPositionIndex, objectToPrepare, (void*)(instance->positions));
-		dataBuffer->updateBufferData(BillboardInfoIndex, objectToPrepare, (void*)(instance->billboards));
+		dataBuffer->updateBufferData(PositionIndex, objectToPrepare, (void*)(instance->modelMatrices));
 	}
 }

@@ -3,8 +3,8 @@ uniform vec3 viewRight;
 
 layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec4 texcoord;
-layout (location = 2) in vec3 position;
-layout (location = 3) in vec4 board;
+layout (location = 2) in vec3 board;
+layout (location = 3) in vec3 position;
 
 out vec2 vTexcoord;
 flat out vec4 vTexid;

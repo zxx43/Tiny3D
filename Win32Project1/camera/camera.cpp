@@ -132,7 +132,7 @@ void Camera::move(int dir,float speed) {
 
 	switch(dir) {
 		case DOWN:
-			if (height - speed >  2.0) {
+			if (height - speed >  MIN_HEIGHT) {
 				height -= speed;
 				position.y -= speed;
 			}

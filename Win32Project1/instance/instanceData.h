@@ -18,8 +18,6 @@ public:
 	Mesh* insMesh;
 	float* matrices;
 	float* billboards;
-	float* positions;
-	float* boundings;
 	int count, maxInsCount;
 	Object* object;
 	InstanceState* state;

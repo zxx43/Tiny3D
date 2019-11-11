@@ -1,23 +1,14 @@
 layout(local_size_x = 1) in;
 
-struct Bounding {
-	vec4 data1;
-	vec4 data2;
-};
-
 layout(binding = 1, std140) buffer InPosition {
-	mat3x4 inMatrices[];
+	mat4 inMatrices[];
 };
 
-layout(binding = 2, std140) buffer InBounding {
-	Bounding bound[];
+layout(binding = 2, std140) buffer OutPosition {
+	mat4 outMatrices[];
 };
 
-layout(binding = 3, std140) buffer OutPosition {
-	mat3x4 outMatrices[];
-};
-
-layout(binding = 4) buffer IndirectBuff {
+layout(binding = 3) buffer IndirectBuff {
 	uint count;
 	uint primCount;
 	uint firstIndex;
@@ -32,11 +23,15 @@ uniform float isColor;
 void main() {
 	uint curIndex = gl_GlobalInvocationID.x;
 
-	if(isColor < 0.1) outMatrices[atomicAdd(indirect.primCount, 1)] = inMatrices[curIndex];
+	mat4 matbb = inMatrices[curIndex];
+	mat4 outMat = mat4(matbb[0], matbb[1], matbb[2], vec4(0.0, 0.0, 0.0, 1.0));
+	outMat = transpose(outMat);
+
+	if(isColor < 0.1) outMatrices[atomicAdd(indirect.primCount, 1)] = outMat;
 	else {
-		Bounding bbInfo = bound[curIndex];
-		vec3 pose = bbInfo.data1.xyz;
-		vec3 size = vec3(bbInfo.data1.w, bbInfo.data2.xy);
+		vec4 curBB = matbb[3];
+		vec3 size = curBB.xyz;
+		vec3 pose = vec3(outMat[3].x, curBB.w, outMat[3].z);
 
 		vec4 bv0 = vec4(pose + size * vec3( 0.5, 0.5,  0.5), 1.0);
 		vec4 bv1 = vec4(pose + size * vec3( 0.5, 0.5, -0.5), 1.0);
@@ -61,7 +56,7 @@ void main() {
 		vec4 dd = bbDepth - ocDepth;
 
 		if(dd.x > 0.0001 && dd.y > 0.0001 && dd.z > 0.0001 && dd.w > 0.0001) return;
-		else outMatrices[atomicAdd(indirect.primCount, 1)] = inMatrices[curIndex];
+		else outMatrices[atomicAdd(indirect.primCount, 1)] = outMat;
 	}
 }
 

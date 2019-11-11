@@ -33,9 +33,7 @@ void Instance::create(Mesh* mesh, bool dyn, InstanceState* state) {
 	isGrass = state->grass;
 
 	modelMatrices = NULL;
-	positions = NULL;
 	billboards = NULL;
-	boundings = NULL;
 	copyData = true;
 }
 
@@ -50,9 +48,7 @@ Instance::~Instance() {
 
 	if (copyData) {
 		if (modelMatrices) free(modelMatrices); modelMatrices = NULL;
-		if (positions) free(positions); positions = NULL;
 		if (billboards) free(billboards); billboards = NULL;
-		if (boundings) free(boundings); boundings = NULL;
 	}
 	if (drawcall) delete drawcall;
 }
@@ -68,9 +64,7 @@ void Instance::releaseInstanceData() {
 
 	if (!isDynamic && copyData) {
 		if (modelMatrices) free(modelMatrices); modelMatrices = NULL;
-		if (positions) free(positions); positions = NULL;
 		if (billboards) free(billboards); billboards = NULL;
-		if (boundings) free(boundings); boundings = NULL;
 	}
 }
 
@@ -147,7 +141,6 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 			initBillboards(cnt);
 		else
 			initMatrices(cnt);
-		initBoundings(cnt);
 	}
 
 	maxInstanceCount = cnt;
@@ -156,8 +149,8 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 
 void Instance::initMatrices(int cnt) {
 	if (!isSimple) {
-		modelMatrices = (float*)malloc(cnt * 12 * sizeof(float));
-		memset(modelMatrices, 0, cnt * 12 * sizeof(float));
+		modelMatrices = (float*)malloc(cnt * 16 * sizeof(float));
+		memset(modelMatrices, 0, cnt * 16 * sizeof(float));
 	} else {
 		modelMatrices = (float*)malloc(cnt * 4 * sizeof(float));
 		memset(modelMatrices, 0, cnt * 4 * sizeof(float));
@@ -165,15 +158,8 @@ void Instance::initMatrices(int cnt) {
 }
 
 void Instance::initBillboards(int cnt) {
-	positions = (float*)malloc(cnt * 3 * sizeof(float));
-	memset(positions, 0, cnt * 3 * sizeof(float));
-	billboards = (float*)malloc(cnt * 4 * sizeof(float));
-	memset(billboards, 0, cnt * 4 * sizeof(float));
-}
-
-void Instance::initBoundings(int cnt) {
-	boundings = (float*)malloc(cnt * 8 * sizeof(float));
-	memset(boundings, 0, cnt * 8 * sizeof(float));
+	billboards = (float*)malloc(cnt * 6 * sizeof(float));
+	memset(billboards, 0, cnt * 6 * sizeof(float));
 }
 
 void Instance::setRenderData(InstanceData* data) {
@@ -184,20 +170,15 @@ void Instance::setRenderData(InstanceData* data) {
 		if (isSimple && data->matrices)
 			memcpy(modelMatrices, data->matrices, instanceCount * 4 * sizeof(float));
 		else if (!isSimple && data->matrices)
-			memcpy(modelMatrices, data->matrices, instanceCount * 12 * sizeof(float));
-		else {
-			memcpy(billboards, data->billboards, instanceCount * 4 * sizeof(float));
-			memcpy(positions, data->positions, instanceCount * 3 * sizeof(float));
-		}
-		memcpy(boundings, data->boundings, instanceCount * 8 * sizeof(float));
+			memcpy(modelMatrices, data->matrices, instanceCount * 16 * sizeof(float));
+		else 
+			memcpy(billboards, data->billboards, instanceCount * 6 * sizeof(float));
 	} else {
 		if (data->matrices) {
 			if (modelMatrices != data->matrices) modelMatrices = data->matrices;
 		} else {
 			if (billboards != data->billboards) billboards = data->billboards;
-			if (positions != data->positions) positions = data->positions;
 		}
-		if (boundings != data->boundings) boundings = data->boundings;
 	}
 }
 
@@ -207,26 +188,23 @@ void Instance::createDrawcall() {
 
 void Instance::addObject(Object* object, int index) {
 	instanceCount++;
-	if (isSimple && !billboards) 
-		memcpy(modelMatrices + (index * 4), object->transforms, 4 * sizeof(float));
-	else if (!isSimple && !billboards)
-		memcpy(modelMatrices + (index * 12), object->transformTransposed.entries, 12 * sizeof(float));
-	else if (billboards) {
+	if (!billboards) {
+		if (isSimple) memcpy(modelMatrices + (index * 4), object->transforms, 4 * sizeof(float));
+		else {
+			memcpy(modelMatrices + (index * 16), object->transformTransposed.entries, 12 * sizeof(float));
+
+			AABB* bb = (AABB*)object->bounding;
+			float boundInfo[4] = { bb->sizex, bb->sizey, bb->sizez, bb->position.y };
+			memcpy(modelMatrices + (index * 16) + 12, boundInfo, 4 * sizeof(float));
+		}
+	} else {
 		Material* mat = NULL;
 		if (MaterialManager::materials)
 			mat = MaterialManager::materials->find(object->billboard->material);
 
-		billboards[index * 4 + 0] = object->billboard->data[0];
-		billboards[index * 4 + 1] = object->billboard->data[1];
-		if (mat) {
-			billboards[index * 4 + 2] = mat->texids.x;
-			billboards[index * 4 + 3] = mat->texids.y;
-		}
-
-		memcpy(positions + (index * 3), object->transformMatrix.entries + 12, 3 * sizeof(float));
+		billboards[index * 6 + 0] = object->billboard->data[0];
+		billboards[index * 6 + 1] = object->billboard->data[1];
+		billboards[index * 6 + 2] = mat ? mat->texids.x : 0.0;
+		memcpy(billboards + (index * 6) + 3, object->transformMatrix.entries + 12, 3 * sizeof(float));
 	}
-
-	AABB* bb = (AABB*)object->bounding;
-	float boundInfo[8] = { bb->position.x, bb->position.y, bb->position.z, bb->sizex, bb->sizey, bb->sizez, 0.0, 0.0 };
-	memcpy(boundings + (index * 8), boundInfo, 8 * sizeof(float));
 }

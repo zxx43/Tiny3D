@@ -27,9 +27,7 @@ public:
 
 	int instanceCount, maxInstanceCount;
 	float* modelMatrices;
-	float* positions;
 	float* billboards;
-	float* boundings;
 
 	InstanceDrawcall* drawcall;
 	bool isBillboard;
@@ -50,7 +48,6 @@ private:
 	void create(Mesh* mesh, bool dyn, InstanceState* state);
 	void initMatrices(int cnt);
 	void initBillboards(int cnt);
-	void initBoundings(int cnt);
 };
 
 #endif /* INSTANCE_H_ */

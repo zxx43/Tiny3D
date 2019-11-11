@@ -28,6 +28,7 @@
 #define D_ROTATION 1.0f
 #define D_DISTANCE 1.0f
 #define L_DISTANCE 0.01f
+#define MIN_HEIGHT 5.0f
 #endif
 
 #ifndef NULL

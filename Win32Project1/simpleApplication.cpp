@@ -419,7 +419,7 @@ void SimpleApplication::initScene() {
 
 	int treeScale = 12;
 	int treeSpace = 180;
-	int treePerc = 95;
+	int treePerc = 80;
 	
 	srand(100);
 	InstanceNode* instanceNode1 = new InstanceNode(vec3(900, 0, 600));
