@@ -142,4 +142,39 @@ inline float GetVec4(const vec4* vec4, int i) {
 	return ret;
 }
 
+inline vec4 MatrixToQuat(const mat4& mat) {
+	float tr = mat.entries[0] + mat.entries[5] + mat.entries[10];
+	float qw, qx, qy, qz;
+	if (tr > 0) {
+		float S = sqrtf(tr + 1.0) * 2.0; // S=4*qw 
+		float invS = 1.0 / S;
+		qw = 0.25 * S;
+		qx = (mat.entries[6] - mat.entries[9]) * invS;
+		qy = (mat.entries[8] - mat.entries[2]) * invS;
+		qz = (mat.entries[1] - mat.entries[4]) * invS;
+	} else if ((mat.entries[0] > mat.entries[5])&(mat.entries[0] > mat.entries[10])) {
+		float S = sqrtf(1.0 + mat.entries[0] - mat.entries[5] - mat.entries[10]) * 2.0; // S=4*qx 
+		float invS = 1.0 / S;
+		qw = (mat.entries[6] - mat.entries[9]) * invS;
+		qx = 0.25 * S;
+		qy = (mat.entries[4] + mat.entries[1]) * invS;
+		qz = (mat.entries[8] + mat.entries[2]) * invS;
+	} else if (mat.entries[5] > mat.entries[10]) {
+		float S = sqrtf(1.0 + mat.entries[5] - mat.entries[0] - mat.entries[10]) * 2.0; // S=4*qy
+		float invS = 1.0 / S;
+		qw = (mat.entries[8] - mat.entries[2]) * invS;
+		qx = (mat.entries[4] + mat.entries[1]) * invS;
+		qy = 0.25 * S;
+		qz = (mat.entries[9] + mat.entries[6]) * invS;
+	} else {
+		float S = sqrtf(1.0 + mat.entries[10] - mat.entries[0] - mat.entries[5]) * 2.0; // S=4*qz
+		float invS = 1.0 / S;
+		qw = (mat.entries[1] - mat.entries[4]) * invS;
+		qx = (mat.entries[8] + mat.entries[2]) * invS;
+		qy = (mat.entries[9] + mat.entries[6]) * invS;
+		qz = 0.25 * S;
+	}
+	return vec4(qx, qy, qz, qw);
+}
+
 #endif /* UTIL_H_ */

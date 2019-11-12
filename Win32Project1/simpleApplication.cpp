@@ -202,7 +202,8 @@ void SimpleApplication::updateMovement() {
 		vec3 cp = scene->mainCamera->position;
 		int bx, bz;
 		scene->terrainNode->caculateBlock(cp.x, cp.z, bx, bz);
-		scene->updateVisualTerrain(bx, bz, 40, 40);
+		int visualSize = graphQuality >= 8 ? 80 : 40;
+		scene->updateVisualTerrain(bx, bz, visualSize, visualSize);
 		if (scene->terrainNode->cauculateY(bx, bz, cp.x, cp.z, cp.y)) {
 			if (scene->water) {
 				float waterHeight = scene->water->position.y;
@@ -551,6 +552,7 @@ void SimpleApplication::initScene() {
 	box1->setSize(6, 6, 6);
 	StaticObject* box2 = box.clone();
 	box2->setPosition(0, 0, 40);
+	box2->setRotation(0, 45, 0);
 	box2->setSize(6, 6, 6);
 	StaticObject* box3 = box.clone();
 	box3->setPosition(-10, 0, 30);

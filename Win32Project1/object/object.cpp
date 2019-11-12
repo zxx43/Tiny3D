@@ -4,9 +4,14 @@
 
 Object::Object() {
 	position = vec3(0, 0, 0);
-	sizex = 1.0; sizey = 1.0; sizez = 1.0;
+	size = vec3(1.0, 1.0, 1.0);
 	localTransformMatrix.LoadIdentity();
 	normalMatrix.LoadIdentity();
+
+	translateMat.LoadIdentity();
+	rotateMat.LoadIdentity();
+	scaleMat.LoadIdentity();
+
 	mesh = NULL;
 	meshMid = NULL;
 	meshLow = NULL;
@@ -21,6 +26,7 @@ Object::Object() {
 	detailLevel = 2;
 
 	transforms = NULL;
+	rotateQuat = vec4(0.0, 0.0, 0.0, 1.0);
 }
 
 Object::Object(const Object& rhs) {

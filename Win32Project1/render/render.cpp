@@ -215,6 +215,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 					shader->setVector3v("eyePos", *(state->eyePos));
 					shader->setMatrix4("viewMatrix", camera->viewMatrix);
 					shader->setFloat("distortionId", AssetManager::assetManager->getDistortionTex());
+					shader->setFloat("quality", state->quality);
 				}
 
 				if (state->shaderCompute) {

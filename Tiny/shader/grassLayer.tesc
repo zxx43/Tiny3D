@@ -11,14 +11,19 @@ out vec3 tcNormal[];
 #define MIN_TESS 1.0
 #define NO_TESS 1.0
 
+uniform float quality;
+
 void main() {
 	vec4 vpos = vPosition[gl_InvocationID];
 	tcPosition[gl_InvocationID] = vpos.xyz;
 	tcNormal[gl_InvocationID] = vNormal[gl_InvocationID];
 
 	float level = NO_TESS;
-	if(vpos.w <= 30.0 && vBack[gl_InvocationID] > -0.0001) 
-		level = (MAX_TESS - MIN_TESS) * (450.0 + vpos.w) * 0.01 + MIN_TESS + 0.1;
+	if(vpos.w <= 30.0 && vBack[gl_InvocationID] > -0.0001) {
+		float visualDistance = quality > 7.9 ? 850.0 : 450.0;
+		float density = quality > 7.9 ? 0.015 : 0.01;
+		level = (MAX_TESS - MIN_TESS) * (visualDistance + vpos.w) * density + MIN_TESS + 0.1;
+	}
 
 	gl_TessLevelInner[0] = level;
     gl_TessLevelOuter[0] = level;

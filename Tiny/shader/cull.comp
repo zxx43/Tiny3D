@@ -1,7 +1,13 @@
 layout(local_size_x = 1) in;
 
+struct Transform {
+	vec4 trans;
+	vec4 rotat;
+	vec4 bound;
+};
+
 layout(binding = 1, std140) buffer InPosition {
-	mat4 inMatrices[];
+	Transform inTrans[];
 };
 
 layout(binding = 2, std140) buffer OutPosition {
@@ -22,16 +28,18 @@ uniform float isColor;
 
 void main() {
 	uint curIndex = gl_GlobalInvocationID.x;
-
-	mat4 matbb = inMatrices[curIndex];
-	mat4 outMat = mat4(matbb[0], matbb[1], matbb[2], vec4(0.0, 0.0, 0.0, 1.0));
-	outMat = transpose(outMat);
+	
+	Transform transform = inTrans[curIndex];
+	vec3 translate = transform.trans.xyz;
+	float scale = transform.trans.w;
+	vec4 rotate = transform.rotat;
+	mat4 outMat = Translate(translate) * QuatToMat(rotate) * Scale(scale);
 
 	if(isColor < 0.1) outMatrices[atomicAdd(indirect.primCount, 1)] = outMat;
 	else {
-		vec4 curBB = matbb[3];
-		vec3 size = curBB.xyz;
-		vec3 pose = vec3(outMat[3].x, curBB.w, outMat[3].z);
+		vec4 bound = transform.bound;
+		vec3 size = bound.xyz;
+		vec3 pose = vec3(translate.x, bound.w, translate.z);
 
 		vec4 bv0 = vec4(pose + size * vec3( 0.5, 0.5,  0.5), 1.0);
 		vec4 bv1 = vec4(pose + size * vec3( 0.5, 0.5, -0.5), 1.0);

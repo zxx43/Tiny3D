@@ -206,6 +206,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	state->light = lightDir;
 	state->time = time;
 	state->enableSsr = enableSsr;
+	state->quality = graphicQuality;
 
 	Camera* camera = scene->mainCamera;
 

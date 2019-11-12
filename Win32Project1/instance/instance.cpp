@@ -149,8 +149,8 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 
 void Instance::initMatrices(int cnt) {
 	if (!isSimple) {
-		modelMatrices = (float*)malloc(cnt * 16 * sizeof(float));
-		memset(modelMatrices, 0, cnt * 16 * sizeof(float));
+		modelMatrices = (float*)malloc(cnt * 12 * sizeof(float));
+		memset(modelMatrices, 0, cnt * 12 * sizeof(float));
 	} else {
 		modelMatrices = (float*)malloc(cnt * 4 * sizeof(float));
 		memset(modelMatrices, 0, cnt * 4 * sizeof(float));
@@ -170,7 +170,7 @@ void Instance::setRenderData(InstanceData* data) {
 		if (isSimple && data->matrices)
 			memcpy(modelMatrices, data->matrices, instanceCount * 4 * sizeof(float));
 		else if (!isSimple && data->matrices)
-			memcpy(modelMatrices, data->matrices, instanceCount * 16 * sizeof(float));
+			memcpy(modelMatrices, data->matrices, instanceCount * 12 * sizeof(float));
 		else 
 			memcpy(billboards, data->billboards, instanceCount * 6 * sizeof(float));
 	} else {
@@ -191,11 +191,12 @@ void Instance::addObject(Object* object, int index) {
 	if (!billboards) {
 		if (isSimple) memcpy(modelMatrices + (index * 4), object->transforms, 4 * sizeof(float));
 		else {
-			memcpy(modelMatrices + (index * 16), object->transformTransposed.entries, 12 * sizeof(float));
+			memcpy(modelMatrices + (index * 12), object->transforms, 4 * sizeof(float));
+			memcpy(modelMatrices + (index * 12) + 4, object->rotateQuat, 4 * sizeof(float));
 
 			AABB* bb = (AABB*)object->bounding;
 			float boundInfo[4] = { bb->sizex, bb->sizey, bb->sizez, bb->position.y };
-			memcpy(modelMatrices + (index * 16) + 12, boundInfo, 4 * sizeof(float));
+			memcpy(modelMatrices + (index * 12) + 8, boundInfo, 4 * sizeof(float));
 		}
 	} else {
 		Material* mat = NULL;

@@ -369,11 +369,12 @@ void Node::updateNode() {
 			Object* object = objects[i];
 			object->transformMatrix = nodeTransform * object->localTransformMatrix;
 			object->transformTransposed = object->transformMatrix.GetTranspose();
+			object->rotateQuat = MatrixToQuat(object->rotateMat);
 			if (object->transforms) {
 				object->transforms[0] = object->transformMatrix.entries[12];
 				object->transforms[1] = object->transformMatrix.entries[13];
 				object->transforms[2] = object->transformMatrix.entries[14];
-				object->transforms[3] = object->sizex;
+				object->transforms[3] = object->size.x;
 			}
 		}
 	}

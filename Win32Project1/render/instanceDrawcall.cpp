@@ -88,7 +88,7 @@ RenderBuffer* InstanceDrawcall::createBuffers(Instance* instance, bool dyn, int 
 		buffer->setAttribData(GL_ARRAY_BUFFER, TangentIndex, TangentSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->tangentBuffer);
 		buffer->setBufferData(GL_ELEMENT_ARRAY_BUFFER, Index, GL_UNSIGNED_SHORT, indexCount, GL_STATIC_DRAW, instanceRef->indexBuffer);
 		
-		buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, PositionIndex, GL_FLOAT, objectCount, 16, draw, instanceRef->modelMatrices);
+		buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, PositionIndex, GL_FLOAT, objectCount, 12, draw, instanceRef->modelMatrices);
 		buffer->setAttribData(GL_SHADER_STORAGE_BUFFER, PositionOutIndex, PositionSlot, GL_FLOAT, objectCount, 4, 4, false, GL_STREAM_DRAW, 1, NULL);
 		buffer->useAs(PositionOutIndex, GL_ARRAY_BUFFER);
 		buffer->setAttrib(PositionOutIndex);

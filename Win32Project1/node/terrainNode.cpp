@@ -21,12 +21,8 @@ TerrainNode::~TerrainNode() {
 
 void TerrainNode::prepareCollisionData() {
 	StaticObject* object = (StaticObject*)(objects[0]);
-	offsize.x = object->sizex;
-	offsize.y = object->sizey;
-	offsize.z = object->sizez;
-	offset.x = position.x + object->position.x;
-	offset.y = position.y + object->position.y;
-	offset.z = position.z + object->position.z;
+	offsize = object->size;
+	offset = vec3(position.x, position.y, position.z) + object->position;
 
 	Terrain* mesh = (Terrain*)(objects[0]->mesh);
 	blockCount = mesh->blockCount;

@@ -16,7 +16,8 @@
 class Object {
 public:
 	vec3 position;
-	float sizex, sizey, sizez;
+	vec3 size;
+	mat4 translateMat, rotateMat, scaleMat;
 	Mesh* mesh;
 	Mesh* meshMid;
 	Mesh* meshLow;
@@ -24,6 +25,7 @@ public:
 	Billboard* billboard;
 	mat4 localTransformMatrix,normalMatrix;
 	mat4 transformMatrix,transformTransposed;
+	vec4 rotateQuat;
 	float* transforms;
 	BoundingBox* bounding;
 	vec3 localBoundPosition;

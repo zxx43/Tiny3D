@@ -31,10 +31,15 @@ StaticObject::StaticObject(const StaticObject& rhs) {
 	anglex = rhs.anglex; angley = rhs.angley; anglez = rhs.anglez;
 
 	position = rhs.position;
-	sizex = rhs.sizex; sizey = rhs.sizey; sizez = rhs.sizez;
+	size = rhs.size;
 	localTransformMatrix = rhs.localTransformMatrix;
 	normalMatrix = rhs.normalMatrix;
 	localBoundPosition = rhs.localBoundPosition;
+	rotateQuat = rhs.rotateQuat;
+
+	rotateMat = rhs.rotateMat;
+	translateMat = rhs.translateMat;
+	scaleMat = rhs.scaleMat;
 
 	genShadow = rhs.genShadow;
 	detailLevel = rhs.detailLevel;
@@ -57,18 +62,18 @@ StaticObject* StaticObject::clone() {
 }
 
 void StaticObject::vertexTransform() {
-	mat4 translateMat=translate(position.x,position.y,position.z);
-	mat4 rotateMat=rotateZ(anglez)*rotateY(angley)*rotateX(anglex);
-	mat4 scaleMat = scale(sizex, sizey, sizez);
-	localTransformMatrix=translateMat*rotateMat*scaleMat;
+	translateMat = translate(position.x, position.y, position.z);
+	rotateMat = rotateZ(anglez)*rotateY(angley)*rotateX(anglex);
+	scaleMat = scale(size.x, size.y, size.z);
+	localTransformMatrix = translateMat * rotateMat*scaleMat;
 }
 
 void StaticObject::normalTransform() {
-	if(sizex==sizey&&sizey==sizez) {
-		normalMatrix=localTransformMatrix;
+	if (size.x == size.y && size.y == size.z) {
+		normalMatrix = localTransformMatrix;
 		return;
 	}
-	normalMatrix=localTransformMatrix.GetInverse().GetTranspose();
+	normalMatrix = localTransformMatrix.GetInverse().GetTranspose();
 }
 
 void StaticObject::setPosition(float x, float y, float z) {
@@ -84,11 +89,11 @@ void StaticObject::setRotation(float ax, float ay, float az) {
 }
 
 void StaticObject::setSize(float sx, float sy, float sz) {
-	sizex = sx; sizey = sy; sizez = sz;
+	size = vec3(sx, sy, sz);
 	updateLocalMatrices();
 	if (billboard) {
-		billboard->data[0] *= sizex;
-		billboard->data[1] *= sizey;
+		billboard->data[0] *= size.x;
+		billboard->data[1] *= size.y;
 	}
 }
 

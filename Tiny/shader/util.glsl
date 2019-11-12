@@ -1,4 +1,4 @@
-#extension GL_ARB_bindless_texture : enable 
+﻿#extension GL_ARB_bindless_texture : enable 
 
 const float PI = 3.1415926;
 const float INV_PI = 0.318309891613572;
@@ -65,4 +65,43 @@ mat3 GetIdentity() {
 		1.0, 0.0, 0.0,
 		0.0, 1.0, 0.0,
 		0.0, 0.0, 1.0);
+}
+
+mat4 QuatToMat(vec4 q) {
+	vec4 m0 = vec4(
+				1.0 - 2.0 * q.y * q.y - 2.0 * q.z * q.z, 
+				2.0 * q.x * q.y + 2.0 * q.w * q.z,
+				2.0 * q.x * q.z - 2.0 * q.w * q.y,
+				0.0);
+	vec4 m1 = vec4(
+				2.0 * q.x * q.y - 2.0 * q.w * q.z,
+				1.0 - 2.0 * q.x * q.x - 2.0 * q.z * q.z,
+				2.0 * q.y * q.z + 2.0 * q.w * q.x, 
+				0.0);
+	vec4 m2 = vec4(
+				2.0 * q.x * q.z + 2.0 * q.w * q.y,
+				2.0 * q.y * q.z - 2.0 * q.w * q.x, 
+				1.0 - 2.0 * q.x * q.x - 2.0 * q.y * q.y, 
+				0.0);
+	vec4 m3 = vec4(0.0, 0.0, 0.0, 1.0);
+	
+	return mat4(m0, m1, m2, m3);
+}
+
+mat4 Scale(float size) {
+	return mat4(
+		size, 0.0, 0.0, 0.0,
+		0.0, size, 0.0, 0.0,
+		0.0, 0.0, size, 0.0,
+		0.0, 0.0,  0.0, 1.0
+	);
+}
+
+mat4 Translate(vec3 t) {
+	return mat4(
+		1.0, 0.0, 0.0, 0.0,
+		0.0, 1.0, 0.0, 0.0,
+		0.0, 0.0, 1.0, 0.0,
+		t.x, t.y, t.z, 1.0
+	);
 }

@@ -16,8 +16,8 @@ InstanceData::InstanceData(Mesh* mesh, Object* obj, int maxCount, InstanceState*
 		matrices = (float*)malloc(maxCount * 4 * sizeof(float));
 		memset(matrices, 0, maxCount * 4 * sizeof(float));
 	} else {
-		matrices = (float*)malloc(maxCount * 16 * sizeof(float));
-		memset(matrices, 0, maxCount * 16 * sizeof(float));
+		matrices = (float*)malloc(maxCount * 12 * sizeof(float));
+		memset(matrices, 0, maxCount * 12 * sizeof(float));
 	}
 
 	subGroup.clear();
@@ -41,11 +41,12 @@ void InstanceData::addInstance(Object* object) {
 	if (matrices && state->simple)
 		memcpy(matrices + (count * 4), object->transforms, 4 * sizeof(float));
 	else if (matrices && !state->simple) {
-		memcpy(matrices + (count * 16), object->transformTransposed.entries, 12 * sizeof(float));
+		memcpy(matrices + (count * 12), object->transforms, 4 * sizeof(float));
+		memcpy(matrices + (count * 12) + 4, object->rotateQuat, 4 * sizeof(float));
 
 		AABB* bb = (AABB*)object->bounding;
 		float boundInfo[4] = { bb->sizex, bb->sizey, bb->sizez, bb->position.y };
-		memcpy(matrices + (count * 16) + 12, boundInfo, 4 * sizeof(float));
+		memcpy(matrices + (count * 12) + 8, boundInfo, 4 * sizeof(float));
 	} 
 	else {
 		Material* mat = NULL;
@@ -65,7 +66,7 @@ void InstanceData::doMergeData(InstanceData* data) {
 	if (data->matrices && data->state->simple)
 		memcpy(matrices + (count * 4), data->matrices, data->count * 4 * sizeof(float));
 	else if (data->matrices)
-		memcpy(matrices + (count * 16), data->matrices, data->count * 16 * sizeof(float));
+		memcpy(matrices + (count * 12), data->matrices, data->count * 12 * sizeof(float));
 	else if (data->billboards) 
 		memcpy(billboards + (count * 6), data->billboards, data->count * 6 * sizeof(float));
 }
