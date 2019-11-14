@@ -6,6 +6,7 @@
 
 const std::map<GLenum, uint> TypeSize = {
 	std::map<GLenum, uint>::value_type(GL_FLOAT, sizeof(GLfloat)),
+	std::map<GLenum, uint>::value_type(GL_HALF_FLOAT, sizeof(GLhalf)),
 	std::map<GLenum, uint>::value_type(GL_INT, sizeof(GLint)),
 	std::map<GLenum, uint>::value_type(GL_UNSIGNED_INT, sizeof(GLuint)),
 	std::map<GLenum, uint>::value_type(GL_UNSIGNED_SHORT, sizeof(GLushort)),

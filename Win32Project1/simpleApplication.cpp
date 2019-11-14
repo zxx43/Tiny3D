@@ -202,7 +202,7 @@ void SimpleApplication::updateMovement() {
 		vec3 cp = scene->mainCamera->position;
 		int bx, bz;
 		scene->terrainNode->caculateBlock(cp.x, cp.z, bx, bz);
-		int visualSize = graphQuality >= 8 ? 80 : 40;
+		int visualSize = graphQuality >= 8 ? 60 : 40;
 		scene->updateVisualTerrain(bx, bz, visualSize, visualSize);
 		if (scene->terrainNode->cauculateY(bx, bz, cp.x, cp.z, cp.y)) {
 			if (scene->water) {
@@ -342,6 +342,7 @@ void SimpleApplication::initScene() {
 	StaticObject board(meshes["board"]);
 	StaticObject quad(meshes["quad"]);
 
+	//StaticObject model1(meshes["billboard"], meshes["billboard"], meshes["billboard"]);
 	StaticObject model1(meshes["tree"], meshes["treeMid"], meshes["billboard"]);
 	model1.detailLevel = 4;
 	model1.setBillboard(5, 10, mtlMgr->find("billboard_tree_mat"));

@@ -20,6 +20,7 @@ AnimationObject::AnimationObject(const AnimationObject& rhs) {
 	normalMatrix = rhs.normalMatrix;
 	localBoundPosition = rhs.localBoundPosition;
 	rotateQuat = rhs.rotateQuat;
+	boundInfo = rhs.boundInfo;
 
 	rotateMat = rhs.rotateMat;
 	translateMat = rhs.translateMat;

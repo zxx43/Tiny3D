@@ -26,7 +26,9 @@ public:
 	mat4 localTransformMatrix,normalMatrix;
 	mat4 transformMatrix,transformTransposed;
 	vec4 rotateQuat;
+	vec4 boundInfo;
 	float* transforms;
+	buff* transformsFull;
 	BoundingBox* bounding;
 	vec3 localBoundPosition;
 	bool genShadow;

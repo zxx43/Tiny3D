@@ -76,19 +76,19 @@ RenderBuffer* InstanceDrawcall::createBuffers(Instance* instance, bool dyn, int 
 		buffer = new RenderBuffer(4);
 		buffer->setAttribData(GL_ARRAY_BUFFER, BillboardVertexIndex, BillboardVertexSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->vertexBuffer);
 		buffer->setAttribData(GL_ARRAY_BUFFER, BillboardTexcoordIndex, BillboardTexcoordSlot, GL_FLOAT, vertexCount, 4, 1, false, GL_STATIC_DRAW, 0, instanceRef->texcoordBuffer);
-		buffer->setAttribData(GL_ARRAY_BUFFER, BillboardInfoIndex, BillboardInfoSlot, GL_FLOAT, objectCount, 3, 2, false, draw, 1, instanceRef->billboards);
+		buffer->setAttribData(GL_ARRAY_BUFFER, BillboardInfoIndex, BillboardInfoSlot, GL_HALF_FLOAT, objectCount, 3, 2, false, draw, 1, instanceRef->billboards);
 		buffer->setBufferData(GL_ELEMENT_ARRAY_BUFFER, BillboardIndex, GL_UNSIGNED_SHORT, indexCount, GL_STATIC_DRAW, instanceRef->indexBuffer);
 	} else {
 		buffer = new RenderBuffer(10);
 		buffer->setAttribData(GL_ARRAY_BUFFER, VertexIndex, VertexSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->vertexBuffer);
-		buffer->setAttribData(GL_ARRAY_BUFFER, NormalIndex, NormalSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->normalBuffer);
-		buffer->setAttribData(GL_ARRAY_BUFFER, TexcoordIndex, TexcoordSlot, GL_FLOAT, vertexCount, 4, 1, false, GL_STATIC_DRAW, 0, instanceRef->texcoordBuffer);
-		buffer->setAttribData(GL_ARRAY_BUFFER, TexidIndex, TexidSlot, GL_FLOAT, vertexCount, 2, 1, false, GL_STATIC_DRAW, 0, instanceRef->texidBuffer);
+		buffer->setAttribData(GL_ARRAY_BUFFER, NormalIndex, NormalSlot, GL_HALF_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->normalBuffer);
+		buffer->setAttribData(GL_ARRAY_BUFFER, TexcoordIndex, TexcoordSlot, GL_HALF_FLOAT, vertexCount, 4, 1, false, GL_STATIC_DRAW, 0, instanceRef->texcoordBuffer);
+		buffer->setAttribData(GL_ARRAY_BUFFER, TexidIndex, TexidSlot, GL_HALF_FLOAT, vertexCount, 2, 1, false, GL_STATIC_DRAW, 0, instanceRef->texidBuffer);
 		buffer->setAttribData(GL_ARRAY_BUFFER, ColorIndex, ColorSlot, GL_UNSIGNED_BYTE, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->colorBuffer);
-		buffer->setAttribData(GL_ARRAY_BUFFER, TangentIndex, TangentSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->tangentBuffer);
+		buffer->setAttribData(GL_ARRAY_BUFFER, TangentIndex, TangentSlot, GL_HALF_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->tangentBuffer);
 		buffer->setBufferData(GL_ELEMENT_ARRAY_BUFFER, Index, GL_UNSIGNED_SHORT, indexCount, GL_STATIC_DRAW, instanceRef->indexBuffer);
 		
-		buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, PositionIndex, GL_FLOAT, objectCount, 12, draw, instanceRef->modelMatrices);
+		buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, PositionIndex, GL_FLOAT, objectCount, 12, draw, instanceRef->modelTransform);
 		buffer->setAttribData(GL_SHADER_STORAGE_BUFFER, PositionOutIndex, PositionSlot, GL_FLOAT, objectCount, 4, 4, false, GL_STREAM_DRAW, 1, NULL);
 		buffer->useAs(PositionOutIndex, GL_ARRAY_BUFFER);
 		buffer->setAttrib(PositionOutIndex);
@@ -140,6 +140,6 @@ void InstanceDrawcall::updateInstances(Instance* instance, int pass) {
 	else {
 		indirectBuf->primCount = 0;
 		dataBuffer->updateBufferMap(GL_DRAW_INDIRECT_BUFFER, IndirectBufIndex, sizeof(Indirect), (void*)indirectBuf);
-		dataBuffer->updateBufferData(PositionIndex, objectToPrepare, (void*)(instance->modelMatrices));
+		dataBuffer->updateBufferData(PositionIndex, objectToPrepare, (void*)(instance->modelTransform));
 	}
 }

@@ -126,7 +126,7 @@ void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState
 		Instance* instance = data->instance;
 		if (instance) {
 			if (!instance->drawcall) instance->createDrawcall();
-			if (data->count > 0 && (instance->modelMatrices || instance->billboards)) {
+			if (data->count > 0 && (instance->modelMatrices || instance->modelTransform || instance->billboards)) {
 				instance->drawcall->updateInstances(instance, state->pass);
 				state->simpleIns = instance->isSimple;
 				state->grass = instance->isGrass;

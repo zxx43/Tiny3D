@@ -20,8 +20,8 @@ void main() {
 
 	float level = NO_TESS;
 	if(vpos.w <= 30.0 && vBack[gl_InvocationID] > -0.0001) {
-		float visualDistance = quality > 7.9 ? 850.0 : 450.0;
-		float density = quality > 7.9 ? 0.015 : 0.01;
+		float visualDistance = quality > 7.9 ? 650.0 : 450.0;
+		float density = quality > 7.9 ? 0.011 : 0.01;
 		level = (MAX_TESS - MIN_TESS) * (visualDistance + vpos.w) * density + MIN_TESS + 0.1;
 	}
 

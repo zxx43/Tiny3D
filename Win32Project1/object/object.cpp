@@ -26,7 +26,9 @@ Object::Object() {
 	detailLevel = 2;
 
 	transforms = NULL;
+	transformsFull = NULL;
 	rotateQuat = vec4(0.0, 0.0, 0.0, 1.0);
+	boundInfo = vec4(0.0, 0.0, 0.0, 0.0);
 }
 
 Object::Object(const Object& rhs) {

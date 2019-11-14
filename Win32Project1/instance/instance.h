@@ -18,16 +18,17 @@ public:
 	Mesh* instanceMesh;
 	int vertexCount,indexCount;
 	float* vertexBuffer;
-	float* normalBuffer;
-	float* tangentBuffer;
-	float* texcoordBuffer;
-	float* texidBuffer;
+	half* normalBuffer;
+	half* tangentBuffer;
+	half* texcoordBuffer;
+	half* texidBuffer;
 	unsigned char* colorBuffer;
 	unsigned short* indexBuffer;
 
 	int instanceCount, maxInstanceCount;
 	float* modelMatrices;
-	float* billboards;
+	buff* modelTransform;
+	bill* billboards;
 
 	InstanceDrawcall* drawcall;
 	bool isBillboard;

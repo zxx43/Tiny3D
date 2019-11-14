@@ -12,6 +12,10 @@
 #include "../constants/constants.h"
 #include <stdio.h>
 
+typedef ushort half;
+typedef float buff;
+typedef half bill;
+
 mat4 lookAt(float eyeX, float eyeY, float eyeZ,
 		float centerX, float centerY, float centerZ,
 		float upX, float upY, float upZ);
@@ -175,6 +179,39 @@ inline vec4 MatrixToQuat(const mat4& mat) {
 		qz = 0.25 * S;
 	}
 	return vec4(qx, qy, qz, qw);
+}
+
+#define F16_EXPONENT_BITS 0x1F
+#define F16_EXPONENT_SHIFT 10
+#define F16_EXPONENT_BIAS 15
+#define F16_MANTISSA_BITS 0x3ff
+#define F16_MANTISSA_SHIFT (23 - F16_EXPONENT_SHIFT)
+#define F16_MAX_EXPONENT (F16_EXPONENT_BITS << F16_EXPONENT_SHIFT)
+
+inline half Float2Half(float value) {
+	uint f32 = (*(uint *)&value);
+	half f16 = 0;
+	/* Decode IEEE 754 little-endian 32-bit floating-point value */
+	int sign = (f32 >> 16) & 0x8000;
+	/* Map exponent to the range [-127,128] */
+	int exponent = ((f32 >> 23) & 0xff) - 127;
+	int mantissa = f32 & 0x007fffff;
+	if (exponent == 128) { /* Infinity or NaN */
+		f16 = sign | F16_MAX_EXPONENT;
+		if (mantissa) f16 |= (mantissa & F16_MANTISSA_BITS);
+	}
+	else if (exponent > 15) { /* Overflow - flush to Infinity */
+		f16 = sign | F16_MAX_EXPONENT;
+	}
+	else if (exponent > -15) { /* Representable value */
+		exponent += F16_EXPONENT_BIAS;
+		mantissa >>= F16_MANTISSA_SHIFT;
+		f16 = sign | exponent << F16_EXPONENT_SHIFT | mantissa;
+	}
+	else {
+		f16 = sign;
+	}
+	return f16;
 }
 
 #endif /* UTIL_H_ */

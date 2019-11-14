@@ -33,6 +33,7 @@ void Instance::create(Mesh* mesh, bool dyn, InstanceState* state) {
 	isGrass = state->grass;
 
 	modelMatrices = NULL;
+	modelTransform = NULL;
 	billboards = NULL;
 	copyData = true;
 }
@@ -48,6 +49,7 @@ Instance::~Instance() {
 
 	if (copyData) {
 		if (modelMatrices) free(modelMatrices); modelMatrices = NULL;
+		if (modelTransform) free(modelTransform); modelTransform = NULL;
 		if (billboards) free(billboards); billboards = NULL;
 	}
 	if (drawcall) delete drawcall;
@@ -64,6 +66,7 @@ void Instance::releaseInstanceData() {
 
 	if (!isDynamic && copyData) {
 		if (modelMatrices) free(modelMatrices); modelMatrices = NULL;
+		if (modelTransform) free(modelTransform); modelTransform = NULL;
 		if (billboards) free(billboards); billboards = NULL;
 	}
 }
@@ -71,10 +74,10 @@ void Instance::releaseInstanceData() {
 void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int cnt,bool copy) {
 	vertexCount = vertices;
 	vertexBuffer = (float*)malloc(vertexCount * 3 * sizeof(float));
-	normalBuffer = (float*)malloc(vertexCount * 3 * sizeof(float));
-	tangentBuffer = (float*)malloc(vertexCount * 3 * sizeof(float));
-	texcoordBuffer = (float*)malloc(vertexCount * 4 * sizeof(float));
-	texidBuffer = (float*)malloc(vertexCount * 2 * sizeof(float));
+	normalBuffer = (half*)malloc(vertexCount * 3 * sizeof(half));
+	tangentBuffer = (half*)malloc(vertexCount * 3 * sizeof(half));
+	texcoordBuffer = (half*)malloc(vertexCount * 4 * sizeof(half));
+	texidBuffer = (half*)malloc(vertexCount * 2 * sizeof(half));
 	colorBuffer = (byte*)malloc(vertexCount * 3 * sizeof(byte));
 
 	indexCount=indices;
@@ -102,8 +105,8 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 
 		for (int v = 0; v < 3; v++) {
 			vertexBuffer[i * 3 + v] = GetVec4(&vertex, v);
-			normalBuffer[i * 3 + v] = GetVec3(&normal, v);
-			tangentBuffer[i * 3 + v] = GetVec3(&tangent, v);
+			normalBuffer[i * 3 + v] = Float2Half(GetVec3(&normal, v));
+			tangentBuffer[i * 3 + v] = Float2Half(GetVec3(&tangent, v));
 		}
 
 		if (texcoord.x < 0) 
@@ -115,13 +118,13 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 		else if (texcoord.y > 1)
 			texcoord.y = texcoord.y - (int)texcoord.y;
 
-		texcoordBuffer[i * 4 + 0] = texcoord.x;
-		texcoordBuffer[i * 4 + 1] = texcoord.y;
-		texcoordBuffer[i * 4 + 2] = texids.x;
-		texcoordBuffer[i * 4 + 3] = texids.y;
+		texcoordBuffer[i * 4 + 0] = Float2Half(texcoord.x);
+		texcoordBuffer[i * 4 + 1] = Float2Half(texcoord.y);
+		texcoordBuffer[i * 4 + 2] = Float2Half(texids.x);
+		texcoordBuffer[i * 4 + 3] = Float2Half(texids.y);
 
-		texidBuffer[i * 2 + 0] = texids.z;
-		texidBuffer[i * 2 + 1] = texids.w;
+		texidBuffer[i * 2 + 0] = Float2Half(texids.z);
+		texidBuffer[i * 2 + 1] = Float2Half(texids.w);
 
 		colorBuffer[i * 3 + 0] = (byte)(ambient.x * 255);
 		colorBuffer[i * 3 + 1] = (byte)(diffuse.x * 255);
@@ -149,8 +152,8 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 
 void Instance::initMatrices(int cnt) {
 	if (!isSimple) {
-		modelMatrices = (float*)malloc(cnt * 12 * sizeof(float));
-		memset(modelMatrices, 0, cnt * 12 * sizeof(float));
+		modelTransform = (buff*)malloc(cnt * 12 * sizeof(buff));
+		memset(modelTransform, 0, cnt * 12 * sizeof(buff));
 	} else {
 		modelMatrices = (float*)malloc(cnt * 4 * sizeof(float));
 		memset(modelMatrices, 0, cnt * 4 * sizeof(float));
@@ -158,8 +161,8 @@ void Instance::initMatrices(int cnt) {
 }
 
 void Instance::initBillboards(int cnt) {
-	billboards = (float*)malloc(cnt * 6 * sizeof(float));
-	memset(billboards, 0, cnt * 6 * sizeof(float));
+	billboards = (bill*)malloc(cnt * 6 * sizeof(bill));
+	memset(billboards, 0, cnt * 6 * sizeof(bill));
 }
 
 void Instance::setRenderData(InstanceData* data) {
@@ -169,12 +172,16 @@ void Instance::setRenderData(InstanceData* data) {
 	if (copyData) {
 		if (isSimple && data->matrices)
 			memcpy(modelMatrices, data->matrices, instanceCount * 4 * sizeof(float));
+		else if (!isSimple && data->transformsFull)
+			memcpy(modelTransform, data->transformsFull, instanceCount * 12 * sizeof(buff));
 		else if (!isSimple && data->matrices)
 			memcpy(modelMatrices, data->matrices, instanceCount * 12 * sizeof(float));
 		else 
-			memcpy(billboards, data->billboards, instanceCount * 6 * sizeof(float));
+			memcpy(billboards, data->billboards, instanceCount * 6 * sizeof(bill));
 	} else {
-		if (data->matrices) {
+		if (data->transformsFull) {
+			if (modelTransform != data->transformsFull) modelTransform = data->transformsFull;
+		} else if (data->matrices) {
 			if (modelMatrices != data->matrices) modelMatrices = data->matrices;
 		} else {
 			if (billboards != data->billboards) billboards = data->billboards;
@@ -190,22 +197,23 @@ void Instance::addObject(Object* object, int index) {
 	instanceCount++;
 	if (!billboards) {
 		if (isSimple) memcpy(modelMatrices + (index * 4), object->transforms, 4 * sizeof(float));
-		else {
-			memcpy(modelMatrices + (index * 12), object->transforms, 4 * sizeof(float));
+		else if (modelTransform)
+			memcpy(modelTransform + (index * 12), object->transformsFull, 12 * sizeof(buff));
+		else if (modelMatrices) {
+			memcpy(modelMatrices + (index * 12) + 0, object->transforms, 4 * sizeof(float));
 			memcpy(modelMatrices + (index * 12) + 4, object->rotateQuat, 4 * sizeof(float));
-
-			AABB* bb = (AABB*)object->bounding;
-			float boundInfo[4] = { bb->sizex, bb->sizey, bb->sizez, bb->position.y };
-			memcpy(modelMatrices + (index * 12) + 8, boundInfo, 4 * sizeof(float));
+			memcpy(modelMatrices + (index * 12) + 8, object->boundInfo, 4 * sizeof(float));
 		}
 	} else {
 		Material* mat = NULL;
 		if (MaterialManager::materials)
 			mat = MaterialManager::materials->find(object->billboard->material);
 
-		billboards[index * 6 + 0] = object->billboard->data[0];
-		billboards[index * 6 + 1] = object->billboard->data[1];
-		billboards[index * 6 + 2] = mat ? mat->texids.x : 0.0;
-		memcpy(billboards + (index * 6) + 3, object->transformMatrix.entries + 12, 3 * sizeof(float));
+		billboards[index * 6 + 0] = Float2Half(object->billboard->data[0]);
+		billboards[index * 6 + 1] = Float2Half(object->billboard->data[1]);
+		billboards[index * 6 + 2] = Float2Half(mat ? mat->texids.x : 0.0);
+		billboards[index * 6 + 3] = Float2Half(object->transformMatrix.entries[12]);
+		billboards[index * 6 + 4] = Float2Half(object->transformMatrix.entries[13]);
+		billboards[index * 6 + 5] = Float2Half(object->transformMatrix.entries[14]);
 	}
 }

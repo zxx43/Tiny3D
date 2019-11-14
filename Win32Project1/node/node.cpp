@@ -370,11 +370,27 @@ void Node::updateNode() {
 			object->transformMatrix = nodeTransform * object->localTransformMatrix;
 			object->transformTransposed = object->transformMatrix.GetTranspose();
 			object->rotateQuat = MatrixToQuat(object->rotateMat);
+			AABB* bbox = (AABB*)object->bounding;
+			object->boundInfo = vec4(bbox->sizex, bbox->sizey, bbox->sizez, bbox->position.y);
 			if (object->transforms) {
 				object->transforms[0] = object->transformMatrix.entries[12];
 				object->transforms[1] = object->transformMatrix.entries[13];
 				object->transforms[2] = object->transformMatrix.entries[14];
 				object->transforms[3] = object->size.x;
+			}
+			if (object->transformsFull) {
+				object->transformsFull[0] = (object->transforms[0]);
+				object->transformsFull[1] = (object->transforms[1]);
+				object->transformsFull[2] = (object->transforms[2]);
+				object->transformsFull[3] = (object->transforms[3]);
+				object->transformsFull[4] = (object->rotateQuat.x);
+				object->transformsFull[5] = (object->rotateQuat.y);
+				object->transformsFull[6] = (object->rotateQuat.z);
+				object->transformsFull[7] = (object->rotateQuat.w);
+				object->transformsFull[8] = (object->boundInfo.x);
+				object->transformsFull[9] = (object->boundInfo.y);
+				object->transformsFull[10] = (object->boundInfo.z);
+				object->transformsFull[11] = (object->boundInfo.w);
 			}
 		}
 	}

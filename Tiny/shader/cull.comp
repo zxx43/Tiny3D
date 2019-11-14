@@ -62,7 +62,7 @@ void main() {
 							texture(texDepth, t3.xy).x);
 		vec4 bbDepth = vec4(t0.z, t1.z, t2.z, t3.z);
 		vec4 dd = bbDepth - ocDepth;
-
+		
 		if(dd.x > 0.0001 && dd.y > 0.0001 && dd.z > 0.0001 && dd.w > 0.0001) return;
 		else outMatrices[atomicAdd(indirect.primCount, 1)] = outMat;
 	}

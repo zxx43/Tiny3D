@@ -17,7 +17,8 @@ class InstanceData {
 public:
 	Mesh* insMesh;
 	float* matrices;
-	float* billboards;
+	buff* transformsFull;
+	bill* billboards;
 	int count, maxInsCount;
 	Object* object;
 	InstanceState* state;

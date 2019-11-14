@@ -8,6 +8,7 @@ StaticObject::StaticObject(Mesh* mesh) :Object() {
 	anglex = 0; angley = 0; anglez = 0;
 
 	transforms = (float*)malloc(4 * sizeof(float));
+	transformsFull = (buff*)malloc(12 * sizeof(buff));
 }
 
 StaticObject::StaticObject(Mesh* mesh, Mesh* meshMid, Mesh* meshLow) :Object() {
@@ -17,6 +18,7 @@ StaticObject::StaticObject(Mesh* mesh, Mesh* meshMid, Mesh* meshLow) :Object() {
 	anglex = 0; angley = 0; anglez = 0;
 
 	transforms = (float*)malloc(4 * sizeof(float));
+	transformsFull = (buff*)malloc(12 * sizeof(buff));
 }
 
 StaticObject::StaticObject(const StaticObject& rhs) {
@@ -36,6 +38,7 @@ StaticObject::StaticObject(const StaticObject& rhs) {
 	normalMatrix = rhs.normalMatrix;
 	localBoundPosition = rhs.localBoundPosition;
 	rotateQuat = rhs.rotateQuat;
+	boundInfo = rhs.boundInfo;
 
 	rotateMat = rhs.rotateMat;
 	translateMat = rhs.translateMat;
@@ -50,11 +53,17 @@ StaticObject::StaticObject(const StaticObject& rhs) {
 		transforms = (float*)malloc(4 * sizeof(float));
 		memcpy(transforms, rhs.transforms, 4 * sizeof(float));
 	}
+	if (rhs.transformsFull) {
+		transformsFull = (buff*)malloc(12 * sizeof(buff));
+		memcpy(transformsFull, rhs.transformsFull, 12 * sizeof(buff));
+	}
 }
 
 StaticObject::~StaticObject() {
 	if (transforms) free(transforms);
 	transforms = NULL;
+	if (transformsFull) free(transformsFull);
+	transformsFull = NULL;
 }
 
 StaticObject* StaticObject::clone() {
