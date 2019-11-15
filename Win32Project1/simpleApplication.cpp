@@ -19,6 +19,7 @@ SimpleApplication::SimpleApplication() {
 	ssrBlurFilter = NULL;
 	rawScreenFilter = NULL;
 	ssgChain = NULL;
+	bloomChain = NULL;
 }
 
 SimpleApplication::~SimpleApplication() {
@@ -33,6 +34,7 @@ SimpleApplication::~SimpleApplication() {
 	if (ssrBlurFilter) delete ssrBlurFilter; ssrBlurFilter = NULL;
 	if (rawScreenFilter) delete rawScreenFilter; rawScreenFilter = NULL;
 	if (ssgChain) delete ssgChain; ssgChain = NULL;
+	if (bloomChain) delete bloomChain; bloomChain = NULL;
 }
 
 void SimpleApplication::resize(int width, int height) {
@@ -60,6 +62,7 @@ void SimpleApplication::resize(int width, int height) {
 
 	if (sceneFilter) delete sceneFilter;
 	sceneFilter = new Filter(width, height, true, precision, 4, false);
+	sceneFilter->addOutput(hdrPre, 4);
 
 	/*
 	if (ssgChain) delete ssgChain;
@@ -104,6 +107,10 @@ void SimpleApplication::resize(int width, int height) {
 		}
 	}
 
+	if (bloomChain) delete bloomChain;
+	bloomChain = new FilterChain(width * 0.4, height * 0.4, true, hdrPre, 4, false);
+	bloomChain->addInputTex(sceneFilter->getOutput(1));
+
 	if (combinedChain) {
 		if (ssgChain)
 			combinedChain->addInputTex(ssgChain->getOutputTex(0));
@@ -114,6 +121,7 @@ void SimpleApplication::resize(int width, int height) {
 		combinedChain->addInputTex(waterFrame->getDepthBuffer());
 		combinedChain->addInputTex(waterFrame->getColorBuffer(1));
 		combinedChain->addInputTex(waterFrame->getColorBuffer(2));
+		combinedChain->addInputTex(bloomChain->getOutputTex(0));
 	}
 
 	render->clearTextureSlots();
@@ -156,6 +164,8 @@ void SimpleApplication::draw() {
 	waterFrame->getDepthBuffer()->copyDataFrom(screen->getDepthBuffer());
 	renderMgr->renderWater(render, scene);
 
+	bloomChain->output->setResize(true);
+	renderMgr->drawScreenFilter(render, scene, "blur", bloomChain->input, bloomChain->output);
 	renderMgr->drawCombined(render, scene, combinedChain->input, combinedChain->output);
 
 	if (ssrChain) {
@@ -167,6 +177,7 @@ void SimpleApplication::draw() {
 
 	Filter* lastFilter = combinedChain->output;
 	if (useDof) {
+		dofBlurFilter->setResize(true);
 		renderMgr->drawScreenFilter(render, scene, "blur", combinedChain->getOutFrameBuffer(), dofBlurFilter);
 		renderMgr->drawScreenFilter(render, scene, "dof", dofChain->input, dofChain->output);
 		lastFilter = dofChain->output;

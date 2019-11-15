@@ -20,8 +20,8 @@ public:
 	float* vertexBuffer;
 	half* normalBuffer;
 	half* tangentBuffer;
-	half* texcoordBuffer;
-	half* texidBuffer;
+	float* texcoordBuffer;
+	float* texidBuffer;
 	unsigned char* colorBuffer;
 	unsigned short* indexBuffer;
 

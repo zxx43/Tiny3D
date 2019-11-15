@@ -14,7 +14,8 @@ uniform float time;
 
 in vec2 vTexcoord;
 
-out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 FragBright;
 
 #define GAP float(30.0)
 #define INV2GAP float(0.01667)
@@ -144,6 +145,7 @@ void main() {
 	vec4 tex = texture2D(texBuffer, vTexcoord);
 	vec3 albedo = tex.rgb;
 	vec3 sceneColor = albedo;
+	vec3 bright = vec3(0.0);
 
 	if(ndcPos.z < 1.0) {
 		vec4 worldPos = invViewProjMatrix * vec4(ndcPos, 1.0);
@@ -186,7 +188,10 @@ void main() {
 		vec3 ambient = material.r * albedo;
 
 		sceneColor = ambient + shadowFactor * Lo;
+	} else {
+		bright = sceneColor * 0.5;
 	}
 
 	FragColor = vec4(sceneColor, depth);
+	FragBright = vec4(bright, 1.0);
 }

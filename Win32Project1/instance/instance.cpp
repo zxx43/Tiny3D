@@ -76,8 +76,8 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 	vertexBuffer = (float*)malloc(vertexCount * 3 * sizeof(float));
 	normalBuffer = (half*)malloc(vertexCount * 3 * sizeof(half));
 	tangentBuffer = (half*)malloc(vertexCount * 3 * sizeof(half));
-	texcoordBuffer = (half*)malloc(vertexCount * 4 * sizeof(half));
-	texidBuffer = (half*)malloc(vertexCount * 2 * sizeof(half));
+	texcoordBuffer = (float*)malloc(vertexCount * 4 * sizeof(float));
+	texidBuffer = (float*)malloc(vertexCount * 2 * sizeof(float));
 	colorBuffer = (byte*)malloc(vertexCount * 3 * sizeof(byte));
 
 	indexCount=indices;
@@ -118,13 +118,13 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 		else if (texcoord.y > 1)
 			texcoord.y = texcoord.y - (int)texcoord.y;
 
-		texcoordBuffer[i * 4 + 0] = Float2Half(texcoord.x);
-		texcoordBuffer[i * 4 + 1] = Float2Half(texcoord.y);
-		texcoordBuffer[i * 4 + 2] = Float2Half(texids.x);
-		texcoordBuffer[i * 4 + 3] = Float2Half(texids.y);
+		texcoordBuffer[i * 4 + 0] = (texcoord.x);
+		texcoordBuffer[i * 4 + 1] = (texcoord.y);
+		texcoordBuffer[i * 4 + 2] = (texids.x);
+		texcoordBuffer[i * 4 + 3] = (texids.y);
 
-		texidBuffer[i * 2 + 0] = Float2Half(texids.z);
-		texidBuffer[i * 2 + 1] = Float2Half(texids.w);
+		texidBuffer[i * 2 + 0] = (texids.z);
+		texidBuffer[i * 2 + 1] = (texids.w);
 
 		colorBuffer[i * 3 + 0] = (byte)(ambient.x * 255);
 		colorBuffer[i * 3 + 1] = (byte)(diffuse.x * 255);

@@ -1,4 +1,4 @@
-layout(bindless_sampler) uniform sampler2D sceneBuffer, sceneDepthBuffer, waterBuffer, waterDepthBuffer, matBuffer, waterNormalBuffer;
+layout(bindless_sampler) uniform sampler2D sceneBuffer, sceneDepthBuffer, waterBuffer, waterDepthBuffer, matBuffer, waterNormalBuffer, bloomBuffer;
 uniform vec2 pixelSize;
 uniform mat4 invViewProjMatrix;
 uniform vec3 light;
@@ -26,6 +26,8 @@ vec3 GenFogColor(vec4 worldPos, float depthView, vec3 sceneColor) {
 void main() {
  	vec4 waterRefColor = texture2D(waterBuffer, vTexcoord);	
 	vec4 sceneColor = texture2D(sceneBuffer, vTexcoord);
+	vec4 bloomColor = texture2D(bloomBuffer, vTexcoord);
+	sceneColor.rgb += bloomColor.rgb;
 
 	float sDepth = texture2D(sceneDepthBuffer, vTexcoord).r;
 	float wDepth = texture2D(waterDepthBuffer, vTexcoord).r;
@@ -51,10 +53,6 @@ void main() {
 	vec3 sceneRefract = sceneColor.rgb;
 	vec3 waterReflect = waterRefColor.rgb;
 	vec3 waterRefract = waterMatColor.rgb;
-
-	//float wnDotLD = abs(dot(waterNormal, normalize(light)));
-	//float caustic = waterFactor >= 0.99 ? pow(wnDotLD, 2.0) : 1.0;
-	//sceneRefract *= caustic;
 
 	waterRefract = mix(sceneRefract, waterRefract, depthFactor).rgb;
 

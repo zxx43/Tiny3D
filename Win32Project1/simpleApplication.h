@@ -17,6 +17,7 @@ private:
 	FilterChain* ssrChain;
 	Filter* ssrBlurFilter;
 	Filter* rawScreenFilter;
+	FilterChain* bloomChain;
 public:
 	SimpleApplication();
 	virtual ~SimpleApplication();

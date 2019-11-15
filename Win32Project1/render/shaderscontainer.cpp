@@ -173,6 +173,7 @@ void SetupShaders(ShaderManager* shaders) {
 	combined->setSlot("waterDepthBuffer", 3);
 	combined->setSlot("matBuffer", 4);
 	combined->setSlot("waterNormalBuffer", 5);
+	combined->setSlot("bloomBuffer", 6);
 
 	Shader* ssg = shaders->addShader("ssg", POST_VERT, SSG_FRAG);
 	ssg->attachEx(shaderUtil);
