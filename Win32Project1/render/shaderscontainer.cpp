@@ -25,6 +25,7 @@ using namespace std;
 #define AA_FRAG "shader/fxaa.frag"
 #define BLUR_FRAG "shader/blur.frag"
 #define MEAN_FRAG "shader/mean.frag"
+#define GAUSS_FRAG "shader/gaussian.frag"
 #define DOF_FRAG "shader/dof.frag"
 #define DEBUG_VERT "shader/debug.vert"
 #define DEBUG_FRAG "shader/debug.frag"
@@ -146,6 +147,10 @@ void SetupShaders(ShaderManager* shaders) {
 	mean->attachEx(shaderUtil);
 	mean->setSlot("colorBuffer", 0);
 
+	Shader* gauss = shaders->addShader("gauss", POST_VERT, GAUSS_FRAG);
+	gauss->attachEx(shaderUtil);
+	gauss->setSlot("colorBuffer", 0);
+
 	Shader* dof = shaders->addShader("dof", POST_VERT, DOF_FRAG);
 	dof->attachEx(shaderUtil);
 	dof->setSlot("colorBufferLow", 0);
@@ -182,6 +187,7 @@ void SetupShaders(ShaderManager* shaders) {
 	ssg->setSlot("depthBuffer", 2);
 
 	Shader* cull = shaders->addShader("cull", CULL_COMP);
+	cull->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());
 	cull->attachEx(shaderUtil);
 
 	shaders->compile();

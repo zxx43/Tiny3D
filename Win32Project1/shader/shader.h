@@ -24,6 +24,7 @@ private:
 	std::map<std::string,GLint> attribLocations;
 	std::map<u64, bool> bindedTexs;
 	std::map<int, std::string> texSlots;
+	std::map<int, u64> slotHnds;
 	std::string vertName, fragName;
 	std::string compName;
 public:
@@ -38,6 +39,13 @@ public:
 	void setSlot(const std::string& texName, int slot) { texSlots[slot] = texName; }
 	bool hasSlot(int slot) { return texSlots.find(slot) != texSlots.end(); }
 	std::string getSlot(int slot) { return texSlots[slot]; }
+	i64 getSlotHnd(int slot) { 
+		std::map<int, u64>::iterator it = slotHnds.find(slot);  
+		if (it == slotHnds.end()) 
+			return -1; 
+		else 
+			return it->second; 
+	}
 public:
 	std::string name;
 	Shader(const char* vert, const char* frag, const char* tesc = NULL, const char* tese = NULL, const char* geom = NULL);
@@ -70,6 +78,7 @@ public:
 	void setMatrix3(const char* param, int count, float* matrices);
 	void setHandle64(const char* param, u64 value);
 	void setHandle64v(const char* param, int count, u64* arr);
+	void setSlotHnd(int slot, u64 hnd);
 };
 
 

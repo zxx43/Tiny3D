@@ -16,8 +16,6 @@ Filter::Filter(float width, float height, bool useFramebuffer, int precision, in
 	boardNode->addObject(NULL, boardObject);
 	boardNode->prepareDrawcall();
 	delete board;
-
-	setResize(true);
 }
 
 Filter::~Filter() {
@@ -26,6 +24,19 @@ Filter::~Filter() {
 		delete framebuffer;
 		framebuffer=NULL;
 	}
+}
+
+bool Filter::bindTex(int slot, const Texture2D* tex, Shader* shader) {
+	if (!shader->hasSlot(slot)) {
+		printf("error slot:%d\n", slot);
+		return false;
+	}
+	int hnd = shader->getSlotHnd(slot);
+	if (hnd < 0 || hnd != tex->hnd) {
+		shader->setSlotHnd(slot, tex->hnd);
+		return true;
+	}
+	return false;
 }
 
 void Filter::draw(Camera* camera, Render* render, RenderState* state,
@@ -40,24 +51,10 @@ void Filter::draw(Camera* camera, Render* render, RenderState* state,
 		render->setShaderVec2(shader, "shadowPixSize", shadowPixSize, shadowPixSize);
 	}
 	uint bufferid;
-	for (bufferid = 0; bufferid < inputTextures.size(); bufferid++) {
-		if (!shader->isTexBinded(inputTextures[bufferid]->hnd) || shouldResize) {
-			if (!shader->hasSlot(bufferid)) {
-				printf("error slot:%d\n", bufferid);
-				continue;
-			}
-			shader->setHandle64(shader->getSlot(bufferid).data(), inputTextures[bufferid]->hnd);
-		}
-	}
-	if (depthTexture) {
-		if (!shader->isTexBinded(depthTexture->hnd) || shouldResize) {
-			if (!shader->hasSlot(bufferid))
-				printf("error slot:%d\n", bufferid);
-			else
-				shader->setHandle64(shader->getSlot(bufferid).data(), depthTexture->hnd);
-		}
-	}
-	if (shouldResize) setResize(false);
+	for (bufferid = 0; bufferid < inputTextures.size(); bufferid++)
+		bindTex(bufferid, inputTextures[bufferid], shader);
+	if (depthTexture) 
+		bindTex(bufferid, depthTexture, shader);
 	render->draw(camera, boardNode->drawcall, state);
 }
 

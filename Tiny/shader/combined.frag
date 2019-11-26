@@ -4,6 +4,7 @@ uniform mat4 invViewProjMatrix;
 uniform vec3 light;
 uniform vec3 eyePos;
 uniform float quality;
+uniform float useBloom;
 
 in vec2 vTexcoord;
 
@@ -26,8 +27,10 @@ vec3 GenFogColor(vec4 worldPos, float depthView, vec3 sceneColor) {
 void main() {
  	vec4 waterRefColor = texture2D(waterBuffer, vTexcoord);	
 	vec4 sceneColor = texture2D(sceneBuffer, vTexcoord);
-	vec4 bloomColor = texture2D(bloomBuffer, vTexcoord);
-	sceneColor.rgb += bloomColor.rgb;
+	if(useBloom > 0.5) {
+		vec4 bloomColor = texture2D(bloomBuffer, vTexcoord);
+		sceneColor.rgb += bloomColor.rgb;
+	}
 
 	float sDepth = texture2D(sceneDepthBuffer, vTexcoord).r;
 	float wDepth = texture2D(waterDepthBuffer, vTexcoord).r;

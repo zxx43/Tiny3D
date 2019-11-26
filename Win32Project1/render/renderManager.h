@@ -52,7 +52,7 @@ class RenderManager {
 public:
 	vec3 lightDir;
 	RenderState* state;
-	bool enableSsr;
+	bool enableSsr, enableBloom;
 	Texture2D* occluderDepth;
 private:
 	Shadow* shadow;
@@ -98,6 +98,7 @@ public:
 	void drawCombined(Render* render, Scene* scene, const std::vector<Texture2D*>& inputTextures, Filter* filter);
 	void drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, FrameBuffer* inputBuff, Filter* filter);
 	void drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter);
+	void drawDualFilter(Render* render, Scene* scene, const char* shaderStr, DualFilter* filter);
 	void drawSSRFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter);
 	void drawSSGFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter);
 	void drawTexture2Screen(Render* render, Scene* scene, u64 texhnd);

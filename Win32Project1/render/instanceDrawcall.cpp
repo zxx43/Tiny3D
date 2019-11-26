@@ -117,7 +117,7 @@ void InstanceDrawcall::draw(Render* render, RenderState* state, Shader* shader) 
 			dataBuffer->setShaderBase(IndirectBufIndex, 3);
 
 			render->useShader(state->shaderCompute);
-			glDispatchCompute(objectToPrepare, 1, 1);
+			glDispatchCompute(ceilf((float)objectToPrepare / WORKGROUPE_SIZE), 1, 1);
 			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT);
 
 			render->useShader(shader);

@@ -9,6 +9,7 @@ Shader::Shader(const char* vert, const char* frag, const char* tesc, const char*
 	program = new ShaderProgram(vert, frag, tesc, tese, geom);
 	bindedTexs.clear();
 	texSlots.clear();
+	slotHnds.clear();
 }
 
 Shader::Shader(const char* comp) {
@@ -16,6 +17,7 @@ Shader::Shader(const char* comp) {
 	program = new ShaderProgram(comp);
 	bindedTexs.clear();
 	texSlots.clear();
+	slotHnds.clear();
 }
 
 Shader::~Shader() {
@@ -25,6 +27,7 @@ Shader::~Shader() {
 	attribLocations.clear();
 	bindedTexs.clear();
 	texSlots.clear();
+	slotHnds.clear();
 }
 
 void Shader::attachDef(const char* def, const char* value) {
@@ -276,3 +279,7 @@ void Shader::setHandle64v(const char* param, int count, u64* arr) {
 		printf("value is: %lld\n", arr[count - 1]);
 }
 
+void Shader::setSlotHnd(int slot, u64 hnd) {
+	setHandle64(getSlot(slot).data(), hnd);
+	slotHnds[slot] = hnd;
+}

@@ -42,7 +42,10 @@ void Application::init() {
 
 	config->get("dof", useDof);
 	config->get("fxaa", useFxaa);
+
+	float useSsr = 0.0, useBloom = 0.0, useDebug = 0.0;
 	config->get("ssr", useSsr);
+	config->get("bloom", useBloom);
 
 	if (useSsr > 0.5) 
 		renderMgr->enableSsr = true;
@@ -51,10 +54,10 @@ void Application::init() {
 		renderMgr->enableSsr = false;
 	}
 
+	renderMgr->enableBloom = useBloom > 0.5 ? true : false;
 
-	float debug = 0.0;
-	config->get("debug", debug);
-	if (debug > 0.5) {
+	config->get("debug", useDebug);
+	if (useDebug > 0.5) {
 		renderMgr->showBounding(true);
 		render->setDebug(true);
 	} else {

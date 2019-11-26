@@ -39,5 +39,6 @@ typedef unsigned int uint;
 typedef unsigned char byte;
 typedef unsigned short ushort;
 typedef unsigned long long u64;
+typedef long long i64;
 
 #endif /* CONSTANTS_H_ */

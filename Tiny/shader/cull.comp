@@ -1,4 +1,4 @@
-layout(local_size_x = 1) in;
+layout(local_size_x = WORKGROUP_SIZE) in;
 
 struct Transform {
 	vec4 trans;
@@ -33,7 +33,7 @@ void main() {
 	vec3 translate = transform.trans.xyz;
 	float scale = transform.trans.w;
 	vec4 rotate = transform.rotat;
-	mat4 outMat = Translate(translate) * QuatToMat(rotate) * Scale(scale);
+	mat4 outMat = Translate(translate) * QuatToMat4(rotate) * Scale(scale);
 
 	if(isColor < 0.1) outMatrices[atomicAdd(indirect.primCount, 1)] = outMat;
 	else {

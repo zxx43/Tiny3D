@@ -10,6 +10,8 @@
 
 #include "../shader/shadermanager.h"
 
+#define WORKGROUPE_SIZE 1
+
 void SetupShaders(ShaderManager* shaders);
 
 #endif /* SHADERSCONTAINER_H_ */

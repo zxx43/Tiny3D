@@ -1,0 +1,15 @@
+layout(local_size_x = 1) in;
+
+struct Point {
+	vec4 vector;
+	vec4 normal;
+};
+
+layout(binding = 1, std140) buffer InVec {
+	Point inPoints[];
+};
+
+layout(binding = 2, std140) buffer OutVec {
+	Point outPoints[];
+};
+

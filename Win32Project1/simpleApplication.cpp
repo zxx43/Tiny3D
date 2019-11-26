@@ -41,7 +41,7 @@ void SimpleApplication::resize(int width, int height) {
 	if (!render) return;
 
 	int precision = graphQuality > 4.0 ? HIGH_PRE : LOW_PRE;
-	int scrPre = (graphQuality > 4.0 || useSsr) ? HIGH_PRE : LOW_PRE;
+	int scrPre = (graphQuality > 4.0 || renderMgr->enableSsr) ? HIGH_PRE : LOW_PRE;
 	int hdrPre = graphQuality > 3.0 ? FLOAT_PRE : precision;
 	int depthPre = LOW_PRE;
 
@@ -73,7 +73,7 @@ void SimpleApplication::resize(int width, int height) {
 	*/
 
 	if (combinedChain) delete combinedChain;
-	if (!useFxaa && !useDof && !useSsr) 
+	if (!useFxaa && !useDof && !renderMgr->enableSsr)
 		combinedChain = new FilterChain(width, height, false, precision, 4);
 	else {
 		combinedChain = new FilterChain(width, height, true, precision, 4);
@@ -89,7 +89,7 @@ void SimpleApplication::resize(int width, int height) {
 			dofChain->addInputTex(dofBlurFilter->getOutput(0));
 			dofChain->addInputTex(combinedChain->getOutputTex(0));
 		}
-		if (useSsr) {
+		if (renderMgr->enableSsr) {
 			if (ssrChain) delete ssrChain;
 			ssrChain = new FilterChain(width, height, true, LOW_PRE, 4, false);
 			ssrChain->addInputTex(combinedChain->getOutputTex(0));
@@ -102,13 +102,14 @@ void SimpleApplication::resize(int width, int height) {
 				rawScreenFilter = new Filter(width, height, false, precision, 4);
 			}
 
-			if (ssrBlurFilter) delete ssrBlurFilter;
-			ssrBlurFilter = new Filter(width * 0.5, height * 0.5, true, LOW_PRE, 4);
+			//if (ssrBlurFilter) delete ssrBlurFilter;
+			//ssrBlurFilter = new Filter(width * 0.5, height * 0.5, true, LOW_PRE, 4);
 		}
 	}
 
+	float bloomScale = 0.8;
 	if (bloomChain) delete bloomChain;
-	bloomChain = new FilterChain(width * 0.4, height * 0.4, true, hdrPre, 4, false);
+	bloomChain = new DualFilter(width * bloomScale, height * bloomScale, true, hdrPre, 4, false);
 	bloomChain->addInputTex(sceneFilter->getOutput(1));
 
 	if (combinedChain) {
@@ -121,7 +122,7 @@ void SimpleApplication::resize(int width, int height) {
 		combinedChain->addInputTex(waterFrame->getDepthBuffer());
 		combinedChain->addInputTex(waterFrame->getColorBuffer(1));
 		combinedChain->addInputTex(waterFrame->getColorBuffer(2));
-		combinedChain->addInputTex(bloomChain->getOutputTex(0));
+		combinedChain->addInputTex(bloomChain->getOutputTex());
 	}
 
 	render->clearTextureSlots();
@@ -141,8 +142,8 @@ void SimpleApplication::draw() {
 	if (!sceneFilter || !renderMgr || !AssetManager::assetManager) return;
 
 	if (ssrChain) {
-		AssetManager::assetManager->setReflectTexture(ssrBlurFilter->getOutput(0));
-		//AssetManager::assetManager->setReflectTexture(ssrChain->getOutputTex(0));
+		//AssetManager::assetManager->setReflectTexture(ssrBlurFilter->getOutput(0));
+		AssetManager::assetManager->setReflectTexture(ssrChain->getOutputTex(0));
 	} else {
 		if (renderMgr->reflectBuffer) {
 			renderMgr->renderReflect(render, scene);
@@ -164,20 +165,20 @@ void SimpleApplication::draw() {
 	waterFrame->getDepthBuffer()->copyDataFrom(screen->getDepthBuffer());
 	renderMgr->renderWater(render, scene);
 
-	bloomChain->output->setResize(true);
-	renderMgr->drawScreenFilter(render, scene, "blur", bloomChain->input, bloomChain->output);
+	if (renderMgr->enableBloom)
+		renderMgr->drawDualFilter(render, scene, "gauss", bloomChain);
+
 	renderMgr->drawCombined(render, scene, combinedChain->input, combinedChain->output);
 
 	if (ssrChain) {
 		if (rawScreenFilter)
 			renderMgr->drawScreenFilter(render, scene, "screen", combinedChain->getOutFrameBuffer(), rawScreenFilter);
 		renderMgr->drawSSRFilter(render, scene, "ssr", ssrChain->input, ssrChain->output);
-		renderMgr->drawScreenFilter(render, scene, "mean", ssrChain->getOutFrameBuffer(), ssrBlurFilter);
+		//renderMgr->drawScreenFilter(render, scene, "mean", ssrChain->getOutFrameBuffer(), ssrBlurFilter);
 	}
 
 	Filter* lastFilter = combinedChain->output;
 	if (useDof) {
-		dofBlurFilter->setResize(true);
 		renderMgr->drawScreenFilter(render, scene, "blur", combinedChain->getOutFrameBuffer(), dofBlurFilter);
 		renderMgr->drawScreenFilter(render, scene, "dof", dofChain->input, dofChain->output);
 		lastFilter = dofChain->output;
@@ -248,7 +249,7 @@ void SimpleApplication::act(long startTime, long currentTime) {
 	}
 	//*/
 	scene->updateNodes();
-	if (!useSsr) scene->updateReflectCamera();
+	if (!renderMgr->enableSsr) scene->updateReflectCamera();
 }
 
 void SimpleApplication::initScene() {
@@ -370,7 +371,7 @@ void SimpleApplication::initScene() {
 	//return;
 	scene->createSky();
 	scene->createWater(vec3(-2048, 0, -2048), vec3(6, 1, 6));
-	scene->createTerrain(vec3(-2048, -200, -2048), vec3(6, 1.8, 6));
+	scene->createTerrain(vec3(-2048, -200, -2048), vec3(6, 2.0, 6));
 
 	StaticNode* node1 = new StaticNode(vec3(2, 2, 2));
 	node1->setDynamicBatch(false);

@@ -18,7 +18,7 @@ public:
 	int windowWidth, windowHeight;
 	float fps;
 	bool willExit;
-	float graphQuality, useDof, useFxaa, useSsr;
+	float graphQuality, useDof, useFxaa;
 	bool dualThread;
 public:
 	Application();

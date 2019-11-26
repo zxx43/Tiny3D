@@ -21,6 +21,8 @@ Terrain::Terrain(const char* fileName):Mesh() {
 	visualIndices = (uint*)malloc(indexCount * sizeof(uint));
 	memset(visualIndices, 0, indexCount * sizeof(uint));
 	visualIndCount = 0;
+	visualPoints = (float*)malloc(indexCount * 8 * sizeof(float));
+	memset(visualPoints, 0, indexCount * 8 * sizeof(float));
 	blockIndexMap.clear();
 
 	initFaces();
@@ -51,6 +53,7 @@ Terrain::~Terrain() {
 	blockIndexMap.clear();
 
 	free(visualIndices);
+	free(visualPoints);
 }
 
 float Terrain::getHeight(int px, int pz) {

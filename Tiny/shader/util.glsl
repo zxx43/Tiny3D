@@ -67,25 +67,30 @@ mat3 GetIdentity() {
 		0.0, 0.0, 1.0);
 }
 
-mat4 QuatToMat(vec4 q) {
-	vec4 m0 = vec4(
+mat3 QuatToMat3(vec4 q) {
+	vec3 m0 = vec3(
 				1.0 - 2.0 * q.y * q.y - 2.0 * q.z * q.z, 
 				2.0 * q.x * q.y + 2.0 * q.w * q.z,
-				2.0 * q.x * q.z - 2.0 * q.w * q.y,
-				0.0);
-	vec4 m1 = vec4(
+				2.0 * q.x * q.z - 2.0 * q.w * q.y);
+	vec3 m1 = vec3(
 				2.0 * q.x * q.y - 2.0 * q.w * q.z,
 				1.0 - 2.0 * q.x * q.x - 2.0 * q.z * q.z,
-				2.0 * q.y * q.z + 2.0 * q.w * q.x, 
-				0.0);
-	vec4 m2 = vec4(
+				2.0 * q.y * q.z + 2.0 * q.w * q.x);
+	vec3 m2 = vec3(
 				2.0 * q.x * q.z + 2.0 * q.w * q.y,
 				2.0 * q.y * q.z - 2.0 * q.w * q.x, 
-				1.0 - 2.0 * q.x * q.x - 2.0 * q.y * q.y, 
-				0.0);
-	vec4 m3 = vec4(0.0, 0.0, 0.0, 1.0);
+				1.0 - 2.0 * q.x * q.x - 2.0 * q.y * q.y);
 	
-	return mat4(m0, m1, m2, m3);
+	return mat3(m0, m1, m2);
+}
+
+mat4 QuatToMat4(vec4 q) {
+	mat3 m3 = QuatToMat3(q);
+	return mat4(vec4(m3[0], 0.0), 
+				vec4(m3[1], 0.0), 
+				vec4(m3[2], 0.0), 
+				vec4(0.0, 0.0, 0.0, 1.0)
+			);
 }
 
 mat4 Scale(float size) {

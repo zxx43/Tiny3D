@@ -40,6 +40,7 @@ RenderManager::RenderManager(int quality, Camera* view, float distance1, float d
 
 	time = 0.0;
 	enableSsr = false;
+	enableBloom = false;
 	reflectBuffer = NULL;
 	occluderDepth = NULL;
 	needResize = true;
@@ -344,6 +345,7 @@ void RenderManager::drawCombined(Render* render, Scene* scene, const std::vector
 	state->shader = combinedShader;
 	state->quality = graphicQuality;
 
+	state->shader->setFloat("useBloom", enableBloom ? 1.0 : 0.0);
 	filter->draw(scene->mainCamera, render, state, inputTextures, NULL);
 }
 
@@ -369,6 +371,21 @@ void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* s
 	state->shader = shader;
 
 	filter->draw(scene->mainCamera, render, state, inputTextures, NULL);
+}
+
+void RenderManager::drawDualFilter(Render* render, Scene* scene, const char* shaderStr, DualFilter* filter) {
+	Shader* shader = render->findShader(shaderStr);
+	state->reset();
+	state->eyePos = &(scene->mainCamera->position);
+	//state->enableCull = false;
+	state->enableDepthTest = false;
+	state->pass = POST_PASS;
+	state->shader = shader;
+
+	shader->setFloat("pass", 1.0);
+	drawScreenFilter(render, scene, "gauss", filter->getInput1(), filter->getOutput1());
+	shader->setFloat("pass", 2.0);
+	drawScreenFilter(render, scene, "gauss", filter->getInput2(), filter->getOutput2());
 }
 
 void RenderManager::drawSSRFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter) {

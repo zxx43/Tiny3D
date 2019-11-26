@@ -10,6 +10,7 @@
 
 #include "../maths/Maths.h"
 #include <vector>
+#include <string>
 
 struct FaceBuf {
 	int start, count;
