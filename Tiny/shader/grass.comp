@@ -1,0 +1,66 @@
+layout(local_size_x = 1) in;
+
+struct Point {
+	vec4 vector;
+	vec4 normal;
+};
+
+layout(binding = 1, std140) buffer OutVec {
+	Point outPoints[];
+};
+
+layout(binding = 2) buffer IndirectBuff {
+	uint  count;
+	uint  instanceCount;
+	uint  first;
+	uint  baseInstance;
+} indirect;
+
+layout(bindless_sampler) uniform sampler2D terrainBuffer;
+layout(bindless_sampler) uniform sampler2D texBlds[MAX_TEX];
+uniform vec3 translate, scale;
+uniform vec2 mapSize;
+uniform float time, distortionId;
+uniform vec3 eyePos;
+
+const uint GRASS_SIZE = 1024;
+
+void main() {
+	uint curIndex = gl_GlobalInvocationID.x;
+
+	vec2 dPose = vec2(float(GRASS_SIZE) * 0.5 - float(curIndex % GRASS_SIZE), 
+				float(floor(float(curIndex) / float(GRASS_SIZE))) - float(GRASS_SIZE) * 0.5);
+	
+	float density = 1.0;
+	vec3 worldPose = vec3(0.0);
+	worldPose.xz = eyePos.xz - dPose * density;
+	worldPose.xz += vec2(random(worldPose, 0.1), random(worldPose, 0.2)) * density;
+	
+	vec2 coord = (worldPose.xz - translate.xz) / (scale.xz * mapSize);
+	if(coord.x < 0.0 || coord.y < 0.0 || coord.x > 1.0 || coord.y > 1.0) return;
+	
+	worldPose.y = texture(terrainBuffer, coord).y * scale.y;
+	vec3 normal = GetNormal(terrainBuffer, coord, scale * vec3(mapSize.x, 1.0, mapSize.y));
+	vec4 normal4 = vec4(normal, 0.0);
+	
+	float width = 0.5, height = 2.0;
+	vec3 pa = worldPose + vec3(-width, 0.0, 0.0);
+	vec3 pb = worldPose + vec3( width, 0.0, 0.0);
+	vec3 pc = worldPose + vec3(0.0, height, 0.0);
+	
+	Point p0;
+	p0.vector = vec4(pa, 1.0);
+	p0.normal = normal4;
+	
+	Point p1;
+	p1.vector = vec4(pb, 1.0);
+	p1.normal = normal4;
+	
+	Point p2;
+	p2.vector = vec4(pc, 1.0);
+	p2.normal = normal4;
+	
+	outPoints[atomicAdd(indirect.count, 1)] = p0;
+	outPoints[atomicAdd(indirect.count, 1)] = p1;
+	outPoints[atomicAdd(indirect.count, 1)] = p2;
+}

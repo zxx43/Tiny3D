@@ -204,6 +204,7 @@
     <ClCompile Include="object\object.cpp" />
     <ClCompile Include="object\staticObject.cpp" />
     <ClCompile Include="render\animationDrawcall.cpp" />
+    <ClCompile Include="render\computeDrawcall.cpp" />
     <ClCompile Include="render\drawcall.cpp" />
     <ClCompile Include="render\instanceDrawcall.cpp" />
     <ClCompile Include="render\render.cpp" />
@@ -276,6 +277,7 @@
     <ClInclude Include="object\object.h" />
     <ClInclude Include="object\staticObject.h" />
     <ClInclude Include="render\animationDrawcall.h" />
+    <ClInclude Include="render\computeDrawcall.h" />
     <ClInclude Include="render\drawcall.h" />
     <ClInclude Include="render\glheader.h" />
     <ClInclude Include="render\instanceDrawcall.h" />
@@ -319,7 +321,7 @@
     <None Include="..\Tiny\shader\dof.frag" />
     <None Include="..\Tiny\shader\fxaa.frag" />
     <None Include="..\Tiny\shader\gaussian.frag" />
-    <None Include="..\Tiny\shader\grass.vert" />
+    <None Include="..\Tiny\shader\grass.comp" />
     <None Include="..\Tiny\shader\grassLayer.frag" />
     <None Include="..\Tiny\shader\grassLayer.geom" />
     <None Include="..\Tiny\shader\grassLayer.tesc" />

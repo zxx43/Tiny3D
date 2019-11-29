@@ -243,6 +243,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 					shader->setVector3v("eyePos", *(state->eyePos));
 					shader->setVector3("light", -state->light.x, -state->light.y, -state->light.z);
 					shader->setMatrix4("viewMatrix", camera->viewMatrix);
+					shader->setFloat("distortionId", AssetManager::assetManager->getDistortionTex());
 					if (state->enableSsr)
 						shader->setVector2("waterBias", 0.0, 0.0);
 					else

@@ -103,16 +103,6 @@ void TerrainNode::cauculateBlockIndices(int bx, int bz, int sizex, int sizez) {
 			for (int b = 0; b < 6; b++) {
 				uint trIndex = blockIndices[b];
 				mesh->visualIndices[curIndex] = trIndex;
-
-				mesh->visualPoints[curIndex * 8 + 0] = mesh->vertices[trIndex].x;
-				mesh->visualPoints[curIndex * 8 + 1] = mesh->vertices[trIndex].y;
-				mesh->visualPoints[curIndex * 8 + 2] = mesh->vertices[trIndex].z;
-				mesh->visualPoints[curIndex * 8 + 3] = mesh->vertices[trIndex].w;
-				mesh->visualPoints[curIndex * 8 + 4] = mesh->normals4[trIndex].x;
-				mesh->visualPoints[curIndex * 8 + 5] = mesh->normals4[trIndex].y;
-				mesh->visualPoints[curIndex * 8 + 6] = mesh->normals4[trIndex].z;
-				mesh->visualPoints[curIndex * 8 + 7] = mesh->normals4[trIndex].w;
-
 				++curIndex, ++count;
 			}
 		}

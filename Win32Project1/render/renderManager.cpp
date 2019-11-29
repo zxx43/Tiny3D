@@ -285,6 +285,7 @@ void RenderManager::renderWater(Render* render, Scene* scene) {
 		state->waterPass = true;
 		state->shader = waterShader;
 
+		waterShader->setVector2("size", scene->water->size.x * 0.5, scene->water->size.y * 0.5);
 		render->draw(camera, scene->water->drawcall, state);
 	}
 }

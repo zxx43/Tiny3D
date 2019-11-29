@@ -67,6 +67,7 @@ InstanceDrawcall::InstanceDrawcall(Instance* instance) :Drawcall() {
 
 InstanceDrawcall::~InstanceDrawcall() {
 	free(indirectBuf);
+	free(readBuf);
 }
 
 RenderBuffer* InstanceDrawcall::createBuffers(Instance* instance, bool dyn, int vertexCount, int indexCount) {

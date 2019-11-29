@@ -6,7 +6,6 @@ using namespace std;
 #define SHADOW_NONTEX_FRAG "shader/shadow_nontex.frag"
 #define PHONG_VERT "shader/phong.vert"
 #define PHONG_FRAG "shader/phong.frag"
-#define GRASS_VERT "shader/grass.vert"
 #define INSTANCE_VERT "shader/instance.vert"
 #define INSTANCE_SIMPLE_VERT "shader/instance_simp.vert"
 #define CULL_COMP "shader/cull.comp"
@@ -38,6 +37,7 @@ using namespace std;
 #define GRASS_LAYER_GEOM "shader/grassLayer.geom"
 #define GRASS_LAYER_TESC "shader/grassLayer.tesc"
 #define GRASS_LAYER_TESE "shader/grassLayer.tese"
+#define GRASS_COMP "shader/grass.comp"
 #define UTIL_GLSL "shader/util.glsl" 
 
 string LoadExShader(char* name) {
@@ -57,10 +57,6 @@ void SetupShaders(ShaderManager* shaders) {
 	Shader* phongIns = shaders->addShader("phong_ins", INSTANCE_VERT, PHONG_FRAG);
 	phongIns->attachEx(shaderUtil);
 	shaders->addShaderBindTex(phongIns);
-
-	Shader* grass = shaders->addShader("grass", GRASS_VERT, PHONG_FRAG);
-	grass->attachEx(shaderUtil);
-	shaders->addShaderBindTex(grass);
 
 	Shader* phongInsSimp = shaders->addShader("phong_ins_simp", INSTANCE_SIMPLE_VERT, PHONG_FRAG);
 	phongInsSimp->attachEx(shaderUtil);
@@ -82,21 +78,21 @@ void SetupShaders(ShaderManager* shaders) {
 	grassLayer->attachEx(shaderUtil);
 	shaders->addShaderBindTex(grassLayer);
 
+	Shader* grassComp = shaders->addShader("grassComp", GRASS_COMP);
+	grassComp->attachEx(shaderUtil);
+	shaders->addShaderBindTex(grassComp);
+
 	Shader* sky = shaders->addShader("sky", SKY_VERT, SKY_FRAG);
 	sky->attachEx(shaderUtil);
 
 	Shader* water = shaders->addShader("water", WATER_VERT, WATER_FRAG);
 	water->attachEx(shaderUtil);
+	shaders->addShaderBindTex(water);
 
 	Shader* phongShadow = shaders->addShader("phong_s", PHONG_VERT, SHADOW_TEX_FRAG);
 	phongShadow->attachEx(shaderUtil);
 	phongShadow->attachDef("ShadowPass", "1.0");
 	shaders->addShaderBindTex(phongShadow);
-
-	Shader* grassShadow = shaders->addShader("grass_s", GRASS_VERT, SHADOW_TEX_FRAG);
-	grassShadow->attachEx(shaderUtil);
-	grassShadow->attachDef("ShadowPass", "1.0");
-	shaders->addShaderBindTex(grassShadow);
 
 	Shader* phongShadowIns = shaders->addShader("phong_s_ins", INSTANCE_VERT, SHADOW_TEX_FRAG);
 	phongShadowIns->attachEx(shaderUtil);

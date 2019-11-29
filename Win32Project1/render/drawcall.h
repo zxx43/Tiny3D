@@ -12,6 +12,7 @@
 #define STATIC_DC 1
 #define INSTANCE_DC 2
 #define ANIMATE_DC 3
+#define COMPUTE_DC 4
 
 #define NEAR_SHADOW_PASS 1
 #define MID_SHADOW_PASS 2

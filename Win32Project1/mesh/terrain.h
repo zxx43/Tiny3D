@@ -32,7 +32,6 @@ public:
 	std::map<uint, uint*> blockIndexMap;
 	uint* visualIndices;
 	uint visualIndCount;
-	float* visualPoints;
 public:
 	Terrain(const char* fileName);
 	virtual ~Terrain();

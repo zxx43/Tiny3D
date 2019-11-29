@@ -297,6 +297,9 @@
     <ClCompile Include="texture\texturebindless.cpp">
       <Filter>Source Files\texture</Filter>
     </ClCompile>
+    <ClCompile Include="render\computeDrawcall.cpp">
+      <Filter>Source Files\render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="animation\animation.h">
@@ -521,6 +524,9 @@
     <ClInclude Include="texture\texturebindless.h">
       <Filter>Source Files\texture</Filter>
     </ClInclude>
+    <ClInclude Include="render\computeDrawcall.h">
+      <Filter>Source Files\render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Tiny\shader\billboard.frag">
@@ -554,9 +560,6 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Tiny\shader\fxaa.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Tiny\shader\grass.vert">
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Tiny\shader\instance.vert">
@@ -632,6 +635,9 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Tiny\shader\gaussian.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Tiny\shader\grass.comp">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
