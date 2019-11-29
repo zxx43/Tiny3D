@@ -3,7 +3,6 @@
 
 // Attribute slots
 const uint VertexSlot = 0;
-const uint NormalSlot = 1;
 
 // VBO index
 const uint PointsOutIndex = 0;
@@ -19,10 +18,7 @@ ComputeDrawcall::ComputeDrawcall() :Drawcall() {
 	indirectBuf->baseInstance = 0;
 
 	readBuf = (ArrayIndirect*)malloc(sizeof(ArrayIndirect));
-	readBuf->count = 0;
-	readBuf->instanceCount = 0;
-	readBuf->first = 0;
-	readBuf->baseInstance = 0;
+	memset(readBuf, 0, sizeof(ArrayIndirect));
 
 	dataBuffer = createBuffers(MaxSize * MaxSize);
 }
@@ -48,7 +44,7 @@ void ComputeDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
 	dataBuffer->setShaderBase(IndirectBufIndex, 2);
 
 	render->useShader(state->shaderCompute);
-	glDispatchCompute(MaxSize, MaxSize, 1);
+	glDispatchCompute(MaxSize * 8, 1, 1);
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT);
 
 	render->useShader(shader);

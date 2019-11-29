@@ -297,6 +297,7 @@ void SimpleApplication::initScene() {
 	//assetMgr->addTextureBindless("grass1-rough.bmp", false);
 	//assetMgr->addTextureBindless("grass1-metalness.bmp", false);
 	assetMgr->addDistortionTex("distortion.bmp");
+	assetMgr->createHeightTex();
 
 	// Create materials
 	Material* boxMat = new Material("box_mat");

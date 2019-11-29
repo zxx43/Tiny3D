@@ -1,4 +1,4 @@
-layout(local_size_x = 1) in;
+layout(local_size_x = 128) in;
 
 struct Point {
 	vec4 vector;
@@ -31,10 +31,10 @@ void main() {
 	vec2 dPose = vec2(float(GRASS_SIZE) * 0.5 - float(curIndex % GRASS_SIZE), 
 				float(floor(float(curIndex) / float(GRASS_SIZE))) - float(GRASS_SIZE) * 0.5);
 	
-	float density = 1.0;
+	float spread = 1.0;
 	vec3 worldPose = vec3(0.0);
-	worldPose.xz = eyePos.xz - dPose * density;
-	worldPose.xz += vec2(random(worldPose, 0.1), random(worldPose, 0.2)) * density;
+	worldPose.xz = eyePos.xz - dPose * spread;
+	worldPose.xz += vec2(random(worldPose, 0.1), random(worldPose, 0.2)) * spread;
 	
 	vec2 coord = (worldPose.xz - translate.xz) / (scale.xz * mapSize);
 	if(coord.x < 0.0 || coord.y < 0.0 || coord.x > 1.0 || coord.y > 1.0) return;

@@ -53,11 +53,7 @@ InstanceDrawcall::InstanceDrawcall(Instance* instance) :Drawcall() {
 	indirectBuf->baseInstance = 0;
 
 	readBuf = (Indirect*)malloc(sizeof(Indirect));
-	readBuf->count = 0;
-	readBuf->primCount = 0;
-	readBuf->firstIndex = 0;
-	readBuf->baseVertex = 0;
-	readBuf->baseInstance = 0;
+	memset(readBuf, 0, sizeof(Indirect));
 
 	dataBuffer = createBuffers(instanceRef, dynDC, vertexCount, indexCount);
 

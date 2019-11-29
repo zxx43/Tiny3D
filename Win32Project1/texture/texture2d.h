@@ -31,7 +31,7 @@ public:
 	GLenum preColor, preDepth, format;
 	int type, precision;
 public:
-	Texture2D(float w,float h,int t,int p,int c,bool clampBorder=true);
+	Texture2D(float w,float h,int t,int p,int c,bool clampBorder=true,void* initData=NULL);
 	~Texture2D();
 public:
 	void copyDataFrom(Texture2D* src);

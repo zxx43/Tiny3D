@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-Texture2D::Texture2D(float w,float h,int t,int p,int c,bool clampBorder) {
+Texture2D::Texture2D(float w,float h,int t,int p,int c,bool clampBorder,void* initData) {
 	width = w, height = h;
 	type = t;
 	precision = p;
@@ -62,9 +62,10 @@ Texture2D::Texture2D(float w,float h,int t,int p,int c,bool clampBorder) {
 	if (dataType == GL_FLOAT) buffSize = width * height * channel * sizeof(GL_FLOAT);
 	else if (dataType == GL_UNSIGNED_BYTE) buffSize = width * height * channel * sizeof(GL_UNSIGNED_BYTE);
 
+	void* data = initData ? initData : texData;
 	switch(type) {
 		case TEXTURE_TYPE_COLOR:
-			glTexImage2D(GL_TEXTURE_2D, 0, preColor, width, height, 0, format, texType, texData);
+			glTexImage2D(GL_TEXTURE_2D, 0, preColor, width, height, 0, format, texType, data);
 			break;
 		case TEXTURE_TYPE_DEPTH:
 			glTexImage2D(GL_TEXTURE_2D, 0, preDepth, width, height, 0, format, depthType, 0);

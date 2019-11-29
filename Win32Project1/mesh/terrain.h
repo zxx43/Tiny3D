@@ -35,6 +35,8 @@ public:
 public:
 	Terrain(const char* fileName);
 	virtual ~Terrain();
+public:
+	unsigned char* getHeightMap() { return heightMap; }
 };
 
 #endif /* TERRAIN_H_ */

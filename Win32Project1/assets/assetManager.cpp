@@ -3,6 +3,7 @@
 #include "../mesh/sphere.h"
 #include "../mesh/board.h"
 #include "../mesh/quad.h"
+#include "../mesh/terrain.h"
 #include "../constants/constants.h"
 using namespace std;
 
@@ -12,6 +13,7 @@ AssetManager::AssetManager() {
 	texBld = new TextureBindless();
 	skyTexture = NULL;
 	reflectTexture = NULL;
+	heightTexture = NULL;
 	distortionTex = -1;
 	meshes.clear();
 	animations.clear();
@@ -30,6 +32,8 @@ AssetManager::~AssetManager() {
 	texBld = NULL;
 	if (skyTexture) delete skyTexture;
 	skyTexture = NULL;
+	if (heightTexture) delete heightTexture;
+	heightTexture = NULL;
 }
 
 void AssetManager::addTextureBindless(const char* name, bool srgb) {
@@ -87,6 +91,13 @@ void AssetManager::addDistortionTex(const char* texName) {
 	if (distortionTex < 0)
 		addTextureBindless(texName, false);
 	distortionTex = findTextureBindless(texName);
+}
+
+void AssetManager::createHeightTex() {
+	if (meshes.count("terrain") <= 0) return;
+	Terrain* mesh = (Terrain*)meshes["terrain"];
+	byte* heightData = mesh->getHeightMap();
+	heightTexture = new Texture2D(MAP_SIZE, MAP_SIZE, TEXTURE_TYPE_COLOR, LOW_PRE, 1, true, heightData);
 }
 
 void AssetManager::addMesh(const char* name, Mesh* mesh, bool billboard) {
