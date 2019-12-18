@@ -44,6 +44,8 @@ RenderManager::RenderManager(int quality, Camera* view, float distance1, float d
 	reflectBuffer = NULL;
 	occluderDepth = NULL;
 	needResize = true;
+
+	grassDrawcall = NULL;
 }
 
 RenderManager::~RenderManager() {
@@ -58,6 +60,7 @@ RenderManager::~RenderManager() {
 	delete state; state = NULL;
 	if (reflectBuffer) delete reflectBuffer; reflectBuffer = NULL;
 	if (occluderDepth) delete occluderDepth; occluderDepth = NULL;
+	if (grassDrawcall) delete grassDrawcall; grassDrawcall = NULL;
 }
 
 void RenderManager::act(float dTime) {
@@ -192,6 +195,41 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	//*/
 }
 
+void RenderManager::drawGrass(Render* render, RenderState* state, Scene* scene, Camera* camera) {
+	bool computeGrass = true;
+	state->enableCull = false;
+	TerrainNode* node = scene->terrainNode;
+	Terrain* mesh = node->getMesh();
+	if (computeGrass) {
+		if (!grassDrawcall) {
+			BufferData terrainData(mesh->visualPoints, mesh->visualPointsSize, 4, 4);
+			grassDrawcall = new ComputeDrawcall(&terrainData);
+		}
+		Shader* grassShader = render->findShader("grass");
+		Shader* compShader = render->findShader("grassComp");
+
+		state->shader = grassShader;
+		state->shaderCompute = compShader;
+		state->grass = true;
+
+		StaticObject* terrain = (StaticObject*)node->objects[0];
+		compShader->setVector3v("translate", terrain->transformMatrix.entries + 12);
+		compShader->setVector3v("scale", terrain->size);
+		compShader->setVector4("mapInfo", STEP_SIZE, node->lineSize, MAP_SIZE, MAP_SIZE);
+		grassDrawcall->update();
+		render->draw(camera, grassDrawcall, state);
+		state->grass = false;
+	} else {
+		static Shader* grassLayerShader = render->findShader("grassLayer");
+		state->shader = grassLayerShader;
+		state->tess = true;
+		((StaticDrawcall*)node->drawcall)->updateBuffers(state->pass, mesh->visualIndices, mesh->visualIndCount);
+		render->draw(camera, node->drawcall, state);
+		state->tess = false;
+	}
+	state->enableCull = true;
+}
+
 void RenderManager::renderScene(Render* render, Scene* scene) {
 	static Shader* phongShader = render->findShader("phong");
 	static Shader* phongInsShader = render->findShader("phong_ins");
@@ -219,15 +257,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 		((StaticDrawcall*)terrainNode->drawcall)->updateBuffers(state->pass);
 		render->draw(camera, terrainNode->drawcall, state);
 
-		static Shader* grassLayerShader = render->findShader("grassLayer");
-		state->shader = grassLayerShader;
-		state->tess = true;
-		state->enableCull = false;
-		Terrain* terrainMesh = terrainNode->getMesh();
-		((StaticDrawcall*)terrainNode->drawcall)->updateBuffers(state->pass, terrainMesh->visualIndices, terrainMesh->visualIndCount);
-		render->draw(camera, terrainNode->drawcall, state);
-		state->tess = false;
-		state->enableCull = true;
+		drawGrass(render, state, scene, camera);
 
 		occluderDepth->copyDataFrom(render->getFrameBuffer()->getDepthBuffer());
 	}

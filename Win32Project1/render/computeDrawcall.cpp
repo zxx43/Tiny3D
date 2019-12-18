@@ -3,48 +3,71 @@
 
 // Attribute slots
 const uint VertexSlot = 0;
+const uint ExSlot = 1;
+const uint PositionSlot = 2;
 
 // VBO index
-const uint PointsOutIndex = 0;
-const uint IndirectBufIndex = 1;
+const uint VertexIndex = 0;
+const uint ExIndex = 1;
+const uint PositionOutIndex = 2;
+const uint IndirectBufIndex = 3;
 
-const uint MaxSize = 1024;
+const uint MaxSize = 768;
 
-ComputeDrawcall::ComputeDrawcall() :Drawcall() {
+ComputeDrawcall::ComputeDrawcall(BufferData* exBuff) :Drawcall() {
+	setType(COMPUTE_DC);
+	channelCount = 3;
+
 	indirectBuf = (ArrayIndirect*)malloc(sizeof(ArrayIndirect));
-	indirectBuf->count = 0;
-	indirectBuf->instanceCount = 1;
+	indirectBuf->count = channelCount;
+	indirectBuf->instanceCount = 0;
 	indirectBuf->first = 0;
 	indirectBuf->baseInstance = 0;
 
 	readBuf = (ArrayIndirect*)malloc(sizeof(ArrayIndirect));
 	memset(readBuf, 0, sizeof(ArrayIndirect));
 
-	dataBuffer = createBuffers(MaxSize * MaxSize);
+	vertBuf = (half*)malloc(6 * sizeof(half));
+	float buf[6] = { -1.0, 0.0,
+					  0.0, 1.0,
+					  1.0, 0.0 };
+	Float2Halfv(buf, vertBuf, 6);
+
+	exData = exBuff;
+	dataBuffer = createBuffers(MaxSize * MaxSize * 16);
 }
 
 ComputeDrawcall::~ComputeDrawcall() {
 	free(indirectBuf);
 	free(readBuf);
+	free(vertBuf);
 }
 
 RenderBuffer* ComputeDrawcall::createBuffers(int vertexCount) {
-	RenderBuffer* buffer = new RenderBuffer(2);
-	buffer->setAttribData(GL_SHADER_STORAGE_BUFFER, PointsOutIndex, VertexSlot, GL_FLOAT, vertexCount, 4, 2, false, GL_STREAM_DRAW, 1, NULL);
-	buffer->useAs(PointsOutIndex, GL_ARRAY_BUFFER);
-	buffer->setAttrib(PointsOutIndex);
+	RenderBuffer* buffer = new RenderBuffer(4);
+	buffer->setAttribData(GL_ARRAY_BUFFER, VertexIndex, VertexSlot, GL_HALF_FLOAT, channelCount, 2, 1, false, GL_STATIC_DRAW, 0, vertBuf);
+	buffer->setAttribData(GL_SHADER_STORAGE_BUFFER, ExIndex, ExSlot, GL_FLOAT, exData->size / (exData->channel * exData->row), 
+		exData->channel, exData->row, false, GL_STATIC_DRAW, 0, exData->data);
+	buffer->setAttribData(GL_SHADER_STORAGE_BUFFER, PositionOutIndex, PositionSlot, GL_FLOAT, vertexCount, 4, 4, false, GL_STREAM_DRAW, 1, NULL);
+	buffer->useAs(PositionOutIndex, GL_ARRAY_BUFFER);
+	buffer->setAttrib(PositionOutIndex);
 	buffer->setBufferData(GL_DRAW_INDIRECT_BUFFER, IndirectBufIndex, GL_ONE, sizeof(ArrayIndirect), GL_DYNAMIC_DRAW, indirectBuf);
+	buffer->unuse();
 	return buffer;
 }
 
 void ComputeDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
 	dataBuffer->use();
 
-	dataBuffer->setShaderBase(PointsOutIndex, 1);
-	dataBuffer->setShaderBase(IndirectBufIndex, 2);
+	dataBuffer->setShaderBase(PositionOutIndex, 1);
+	dataBuffer->setShaderBase(ExIndex, 2);
+	dataBuffer->setShaderBase(IndirectBufIndex, 3);
 
 	render->useShader(state->shaderCompute);
-	glDispatchCompute(MaxSize * 8, 1, 1);
+	state->shaderCompute->setFloat("fullSize", MaxSize);
+
+	static int dispatchSize = MaxSize / COMP_GROUPE_SIZE;
+	glDispatchCompute(dispatchSize, dispatchSize, 1);
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT);
 
 	render->useShader(shader);
@@ -52,6 +75,6 @@ void ComputeDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
 }
 
 void ComputeDrawcall::update() {
-	indirectBuf->count = 0;
+	indirectBuf->instanceCount = 0;
 	dataBuffer->updateBufferMap(GL_DRAW_INDIRECT_BUFFER, IndirectBufIndex, sizeof(ArrayIndirect), (void*)indirectBuf);
 }

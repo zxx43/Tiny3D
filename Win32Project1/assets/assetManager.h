@@ -38,6 +38,7 @@ public:
 	Texture2D* getReflectTexture();
 	void addDistortionTex(const char* texName);
 	int getDistortionTex() { return distortionTex; }
+	u64 getDistortionHnd() { return texBld->getHnds()[distortionTex]; }
 	void createHeightTex();
 	Texture2D* getHeightTex() { return heightTexture; }
 };

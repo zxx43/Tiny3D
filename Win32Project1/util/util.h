@@ -65,20 +65,14 @@ inline float radianToAngle(float radian) {
 struct Line {
 	vec3 dir;
 	vec3 origin;
-	Line(const vec3& ld, const vec3& lo) {
-		dir = ld;
-		origin = lo;
-	}
+	Line(const vec3& ld, const vec3& lo) :dir(ld), origin(lo) {}
 };
 
 struct Plane {
 	vec3 normal;
 	float d;
 	Plane() {}
-	Plane(const vec3& pn, const float pd) {
-		normal = pn;
-		d = pd;
-	}
+	Plane(const vec3& pn, const float pd) :normal(pn), d(pd) {}
 	void update(const vec3& pn, const float pd) {
 		normal = pn;
 		d = pd;
@@ -212,6 +206,28 @@ inline half Float2Half(float value) {
 		f16 = sign;
 	}
 	return f16;
+}
+
+inline void Float2Halfv(float* value, half* hv, uint size) {
+	for (uint i = 0; i < size; i++)
+		hv[i] = Float2Half(value[i]);
+}
+
+inline void PushFloat(float v, float* array, uint& index) {
+	array[index++] = v;
+}
+
+inline void PushVec3(const vec3& v, float* array, uint& index) {
+	array[index++] = v.x;
+	array[index++] = v.y;
+	array[index++] = v.z;
+}
+
+inline void PushVec4(const vec4& v, float* array, uint& index) {
+	array[index++] = v.x;
+	array[index++] = v.y;
+	array[index++] = v.z;
+	array[index++] = v.w;
 }
 
 #endif /* UTIL_H_ */

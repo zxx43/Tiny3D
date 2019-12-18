@@ -1,66 +1,116 @@
-layout(local_size_x = 128) in;
+layout(local_size_x = WORKGROUP_SIZE, local_size_y = WORKGROUP_SIZE) in;
 
-struct Point {
-	vec4 vector;
-	vec4 normal;
+layout(bindless_sampler) uniform sampler2D distortionTex;
+uniform vec3 translate, scale;
+uniform vec4 mapInfo;
+uniform float time;
+uniform vec3 eyePos;
+uniform mat4 viewProjectMatrix;
+uniform mat4 viewMatrix;
+uniform float fullSize;
+
+const float WindStrength = 0.6;
+const vec2 WindFrequency = vec2(0.05, 0.05);
+
+struct VertexPoint {
+	vec4 vert;
+	vec4 norm;
+	vec4 planA;
+	vec4 planB;
 };
 
-layout(binding = 1, std140) buffer OutVec {
-	Point outPoints[];
+layout(binding = 1, std140) buffer OutPose {
+	mat4 outPose[];
 };
 
-layout(binding = 2) buffer IndirectBuff {
+layout(binding = 2, std140) buffer TerrainData {
+	VertexPoint terrainData[];
+};
+
+layout(binding = 3) buffer IndirectBuff {
 	uint  count;
 	uint  instanceCount;
 	uint  first;
 	uint  baseInstance;
 } indirect;
 
-layout(bindless_sampler) uniform sampler2D terrainBuffer;
-layout(bindless_sampler) uniform sampler2D texBlds[MAX_TEX];
-uniform vec3 translate, scale;
-uniform vec2 mapSize;
-uniform float time, distortionId;
-uniform vec3 eyePos;
+mat3 AngleAxis3x3(float angle, vec3 axis) {
+	float c = cos(angle), s = sin(angle);
 
-const uint GRASS_SIZE = 1024;
+	float t = 1.0 - c;
+	float x = axis.x;
+	float y = axis.y;
+	float z = axis.z;
+	
+	return mat3(
+		t * x * x + c, t * x * y + s * z, t * x * z - s * y,
+		t * x * y - s * z, t * y * y + c, t * y * z + s * x,
+		t * x * z + s * y, t * y * z - s * x, t * z * z + c
+	);
+}
+
+mat3 GetWindMat(vec2 pos) {
+	vec2 uv = pos * 0.01 + WindFrequency * time;
+	vec2 windSample = texture(distortionTex, uv).xy * 2.0 - 1.0;
+	windSample *= WindStrength;
+	vec3 wind = normalize(vec3(windSample, 0.0));
+	mat3 windRotation = AngleAxis3x3(PI * windSample.x, wind);
+	return windRotation;
+}
 
 void main() {
-	uint curIndex = gl_GlobalInvocationID.x;
-
-	vec2 dPose = vec2(float(GRASS_SIZE) * 0.5 - float(curIndex % GRASS_SIZE), 
-				float(floor(float(curIndex) / float(GRASS_SIZE))) - float(GRASS_SIZE) * 0.5);
+	uvec2 cur = gl_GlobalInvocationID.xy;
+	vec2 dPose = vec2(fullSize * 0.5 - float(cur.x), 
+					  fullSize * 0.5 - float(cur.y));
 	
-	float spread = 1.0;
+	float spread = 0.25 + length(dPose) * 0.005;
 	vec3 worldPose = vec3(0.0);
-	worldPose.xz = eyePos.xz - dPose * spread;
-	worldPose.xz += vec2(random(worldPose, 0.1), random(worldPose, 0.2)) * spread;
+	worldPose.xz = eyePos.xz + dPose * spread;
 	
-	vec2 coord = (worldPose.xz - translate.xz) / (scale.xz * mapSize);
-	if(coord.x < 0.0 || coord.y < 0.0 || coord.x > 1.0 || coord.y > 1.0) return;
+	vec2 coord = (worldPose.xz - translate.xz) / (scale.xz * mapInfo.zw);
+	if(coord.x < 0.01 || coord.y < 0.01 || coord.x > 0.99 || coord.y > 0.99) return;
 	
-	worldPose.y = texture(terrainBuffer, coord).y * scale.y;
-	vec3 normal = GetNormal(terrainBuffer, coord, scale * vec3(mapSize.x, 1.0, mapSize.y));
-	vec4 normal4 = vec4(normal, 0.0);
+	vec2 dRand = vec2(random(worldPose, 0.1), random(worldPose, 0.2));
+	worldPose.xz += dRand * spread;
+
+	ivec2 block = CaculateBlock(worldPose.xz, translate.xz, scale.xz, 1.0 / mapInfo.x);
+	int tra = CauculateTrIndex(block, mapInfo.y), trb = tra + 1, trp = tra;
 	
-	float width = 0.5, height = 2.0;
-	vec3 pa = worldPose + vec3(-width, 0.0, 0.0);
-	vec3 pb = worldPose + vec3( width, 0.0, 0.0);
-	vec3 pc = worldPose + vec3(0.0, height, 0.0);
+	VertexPoint pa = terrainData[trp * 3 + 0];
+	VertexPoint pb = terrainData[trp * 3 + 1];
+	VertexPoint pc = terrainData[trp * 3 + 2];
+	vec4 plan = pa.planA;
 	
-	Point p0;
-	p0.vector = vec4(pa, 1.0);
-	p0.normal = normal4;
+	bool inTr = CheckIn(worldPose.xz, pa.vert.xyz, pb.vert.xyz, pc.vert.xyz);
+	if(!inTr) {
+		trp = trb;
+		pa = terrainData[trp * 3 + 0];
+		pb = terrainData[trp * 3 + 1];
+		pc = terrainData[trp * 3 + 2];
+		plan = pa.planB;
+	}
+	worldPose.y = CaculateY(worldPose.xz, plan);
 	
-	Point p1;
-	p1.vector = vec4(pb, 1.0);
-	p1.normal = normal4;
+	float viewz = (viewMatrix * vec4(worldPose, 1.0)).z;
+	if(viewz > 0.0) return;
+	vec4 projPose = viewProjectMatrix * vec4(worldPose, 1.0);
+	if(projPose.x > projPose.w || projPose.x < -projPose.w ||
+		projPose.z > projPose.w ||
+		projPose.y > projPose.w) return;
+
+	vec3 bary = CaculateBary(worldPose, pa.vert.xyz, pb.vert.xyz, pc.vert.xyz);
+	vec3 normal = pa.norm.xyz * bary.x + pb.norm.xyz * bary.y + pc.norm.xyz * bary.z;
 	
-	Point p2;
-	p2.vector = vec4(pc, 1.0);
-	p2.normal = normal4;
+	float rand = (dRand.x + dRand.y) * 0.5;	
+	vec2 size = vec2(rand * 0.5 + 0.5, rand * 2.5 + 2.5);
+
+	mat3 rotMat = RotY(rand * PI);
+	mat3 windMat = GetWindMat(worldPose.xz + vec2(viewz));
+	rotMat = rotMat * windMat;
 	
-	outPoints[atomicAdd(indirect.count, 1)] = p0;
-	outPoints[atomicAdd(indirect.count, 1)] = p1;
-	outPoints[atomicAdd(indirect.count, 1)] = p2;
+	mat4 trans = Translate(worldPose) * M3ToM4(rotMat) * Scale(vec3(size, 1.0));
+	trans = transpose(trans);
+	trans[3] = vec4(normal, 1.0);
+	
+	outPose[atomicAdd(indirect.instanceCount, 1)] = trans;
 }

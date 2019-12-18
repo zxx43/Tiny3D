@@ -18,7 +18,7 @@
 class Terrain: public Mesh {
 private:
 	unsigned char* heightMap;
-
+private:
 	void loadHeightMap(const char* fileName);
 	float getHeight(int px,int pz);
 	vec3 caculateNormal(vec3 p1,vec3 p2,vec3 p3);
@@ -32,11 +32,14 @@ public:
 	std::map<uint, uint*> blockIndexMap;
 	uint* visualIndices;
 	uint visualIndCount;
+	float* visualPoints;
+	uint visualPointsSize;
 public:
 	Terrain(const char* fileName);
 	virtual ~Terrain();
 public:
 	unsigned char* getHeightMap() { return heightMap; }
+	void initPoint(const vec3& p, const vec3& n, const vec4& t1, const vec4& t2, uint& index);
 };
 
 #endif /* TERRAIN_H_ */

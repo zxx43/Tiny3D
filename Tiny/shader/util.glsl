@@ -14,7 +14,7 @@ const vec4 FAIL_COLOR = vec4(1.0, 1.0, 1.0, 0.0);
 const vec3 UP_VEC3 = vec3(0.0, 1.0, 0.0);
 const vec3 ZERO_VEC3 = vec3(0.0);
 
-#define MAX_TEX 256
+#define MAX_TEX 128
 #define MAX_BONE 100
 
 mat3 RotY(float r) {
@@ -24,6 +24,26 @@ mat3 RotY(float r) {
 		cosR, 0.0, -sinR,
 		0.0,  1.0, 0.0,
 		sinR, 0.0, cosR
+	);
+}
+
+mat4 RotY4(float r) {
+	float cosR = cos(r);
+	float sinR = sin(r);
+	return mat4(
+		cosR, 0.0, -sinR, 0.0,
+		0.0,  1.0, 0.0,   0.0,
+		sinR, 0.0, cosR,  0.0,
+		0.0,  0.0, 0.0,   1.0
+	);
+}
+
+mat4 M3ToM4(mat3 m) {
+	return mat4(
+		vec4(m[0], 0.0),
+		vec4(m[1], 0.0),
+		vec4(m[2], 0.0),
+		vec4(0.0, 0.0, 0.0, 1.0)
 	);
 }
 
@@ -102,6 +122,15 @@ mat4 Scale(float size) {
 	);
 }
 
+mat4 Scale(vec3 s) {
+	return mat4(
+		s.x, 0.0, 0.0, 0.0,
+		0.0, s.y, 0.0, 0.0,
+		0.0, 0.0, s.z, 0.0,
+		0.0, 0.0, 0.0, 1.0
+	);
+}
+
 mat4 Translate(vec3 t) {
 	return mat4(
 		1.0, 0.0, 0.0, 0.0,
@@ -109,38 +138,4 @@ mat4 Translate(vec3 t) {
 		0.0, 0.0, 1.0, 0.0,
 		t.x, t.y, t.z, 1.0
 	);
-}
-
-vec3 GetNormal(sampler2D tex, vec2 texcoord, vec3 scale) {
-	vec2 coord = texcoord;
-	float y = texture(tex, coord).r;
-	vec2 xz = coord;
-	vec3 pos0 = vec3(xz.x, y, xz.y) * scale;
-
-	coord = vec2(texcoord.x - 0.01, texcoord.y);
-	y = texture(tex, coord).r;
-	xz = coord;
-	vec3 pos1 = vec3(xz.x, y, xz.y) * scale;
-
-	coord = vec2(texcoord.x + 0.01, texcoord.y);
-	y = texture(tex, coord).r;
-	xz = coord;
-	vec3 pos2 = vec3(xz.x, y, xz.y) * scale;
-
-	coord = vec2(texcoord.x, texcoord.y - 0.01);
-	y = texture(tex, coord).r;
-	xz = coord;
-	vec3 pos3 = vec3(xz.x, y, xz.y) * scale;
-
-	coord = vec2(texcoord.x, texcoord.y + 0.01);
-	y = texture(tex, coord).r;
-	xz = coord;
-	vec3 pos4 = vec3(xz.x, y, xz.y) * scale;
-
-	vec3 n1 = cross(pos4 - pos0, pos1 - pos0);
-	vec3 n2 = cross(pos1 - pos0, pos3 - pos0);
-	vec3 n3 = cross(pos3 - pos0, pos2 - pos0);
-	vec3 n4 = cross(pos2 - pos0, pos4 - pos0);
-
-	return normalize((n1 + n2 + n3 + n4) * 0.25);
 }

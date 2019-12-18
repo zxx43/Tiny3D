@@ -11,6 +11,7 @@
 #include "../scene/scene.h"
 #include "../filter/filter.h"
 #include "../render/renderQueue.h"
+#include "../render/computeDrawcall.h"
 
 #ifndef QUEUE_STATIC
 #define QUEUE_STATIC_SN 0
@@ -58,6 +59,7 @@ private:
 	Shadow* shadow;
 	float time;
 	bool needResize;
+	ComputeDrawcall* grassDrawcall;
 public:
 	Renderable* renderData;
 	Renderable* queue1;
@@ -70,6 +72,7 @@ private: // States
 	int graphicQuality;
 private:
 	void drawBoundings(Render* render, RenderState* state, Scene* scene, Camera* camera);
+	void drawGrass(Render* render, RenderState* state, Scene* scene, Camera* camera);
 public:
 	FrameBuffer* nearBuffer;
 	FrameBuffer* midBuffer;

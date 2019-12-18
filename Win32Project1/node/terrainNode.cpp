@@ -28,12 +28,19 @@ void TerrainNode::prepareCollisionData() {
 	blockCount = mesh->blockCount;
 	lineSize = sqrt(blockCount);
 	vec4* vertices = mesh->vertices;
+	vec3* normals = mesh->normals;
+	uint curIndex = 0;
 	for (int i = 0; i < lineSize; i++) {
 		for (int j = 0; j < lineSize; j++) {
-			vec4 a = vertices[i*(lineSize + 1) + j];
-			vec4 b = vertices[i*(lineSize + 1) + (j + 1)];
-			vec4 c = vertices[(i + 1)*(lineSize + 1) + j];
-			vec4 d = vertices[(i + 1)*(lineSize + 1) + (j + 1)];
+			uint i0 = i * (lineSize + 1) + j;
+			uint i1 = i * (lineSize + 1) + (j + 1);
+			uint i2 = (i + 1)*(lineSize + 1) + j;
+			uint i3 = (i + 1)*(lineSize + 1) + (j + 1);
+
+			vec4 a = vertices[i0];
+			vec4 b = vertices[i1];
+			vec4 c = vertices[i2];
+			vec4 d = vertices[i3];
 			
 			vec3 pa = offset + mul(offsize, vec3(a.x,a.y,a.z));
 			vec3 pb = offset + mul(offsize, vec3(b.x,b.y,b.z));
@@ -44,6 +51,21 @@ void TerrainNode::prepareCollisionData() {
 			Triangle* t2 = new Triangle(pb, pd, pc);
 			triangles.push_back(t1);
 			triangles.push_back(t2);
+
+			vec3 na = normals[i0];
+			vec3 nb = normals[i1];
+			vec3 nc = normals[i2];
+			vec3 nd = normals[i3];
+
+			vec4 ta = vec4(t1->normal.x, t1->normal.y, t1->normal.z, t1->pd);
+			vec4 tb = vec4(t2->normal.x, t2->normal.y, t2->normal.z, t2->pd);
+
+			mesh->initPoint(pa, na, ta, tb, curIndex);
+			mesh->initPoint(pb, nb, ta, tb, curIndex);
+			mesh->initPoint(pc, nc, ta, tb, curIndex);
+			mesh->initPoint(pb, nb, ta, tb, curIndex);
+			mesh->initPoint(pd, nd, ta, tb, curIndex);
+			mesh->initPoint(pc, nc, ta, tb, curIndex);
 		}
 	}
 }

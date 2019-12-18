@@ -97,7 +97,7 @@ void AssetManager::createHeightTex() {
 	if (meshes.count("terrain") <= 0) return;
 	Terrain* mesh = (Terrain*)meshes["terrain"];
 	byte* heightData = mesh->getHeightMap();
-	heightTexture = new Texture2D(MAP_SIZE, MAP_SIZE, TEXTURE_TYPE_COLOR, LOW_PRE, 1, true, heightData);
+	heightTexture = new Texture2D(MAP_SIZE, MAP_SIZE, TEXTURE_TYPE_COLOR, HIGH_PRE, 1, true, heightData);
 }
 
 void AssetManager::addMesh(const char* name, Mesh* mesh, bool billboard) {

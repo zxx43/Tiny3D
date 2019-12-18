@@ -38,7 +38,9 @@ using namespace std;
 #define GRASS_LAYER_TESC "shader/grassLayer.tesc"
 #define GRASS_LAYER_TESE "shader/grassLayer.tese"
 #define GRASS_COMP "shader/grass.comp"
+#define GRASS_VERT "shader/grass.vert"
 #define UTIL_GLSL "shader/util.glsl" 
+#define TRIANGLE_GLSL "shader/triangle.glsl"
 
 string LoadExShader(char* name) {
 	char* fileStr = textFileRead(name);
@@ -78,16 +80,20 @@ void SetupShaders(ShaderManager* shaders) {
 	grassLayer->attachEx(shaderUtil);
 	shaders->addShaderBindTex(grassLayer);
 
+	string shaderTriangle = LoadExShader(TRIANGLE_GLSL);
 	Shader* grassComp = shaders->addShader("grassComp", GRASS_COMP);
+	grassComp->attachDef("WORKGROUP_SIZE", to_string(COMP_GROUPE_SIZE).data());
 	grassComp->attachEx(shaderUtil);
-	shaders->addShaderBindTex(grassComp);
+	grassComp->attachEx(shaderTriangle);
+
+	Shader* grass = shaders->addShader("grass", GRASS_VERT, GRASS_LAYER_FRAG);
+	grass->attachEx(shaderUtil);
 
 	Shader* sky = shaders->addShader("sky", SKY_VERT, SKY_FRAG);
 	sky->attachEx(shaderUtil);
 
 	Shader* water = shaders->addShader("water", WATER_VERT, WATER_FRAG);
 	water->attachEx(shaderUtil);
-	shaders->addShaderBindTex(water);
 
 	Shader* phongShadow = shaders->addShader("phong_s", PHONG_VERT, SHADOW_TEX_FRAG);
 	phongShadow->attachEx(shaderUtil);

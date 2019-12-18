@@ -35,7 +35,7 @@ mat3 GetWindMat(vec2 pos) {
 	vec2 uv = pos * 0.01 + WindFrequency * time;
 	vec2 windSample = texture(texBlds[int(distortionId)], uv).xy * 2.0 - 1.0;
 	windSample *= WindStrength;
-	vec3 wind = normalize(vec3(windSample.x, windSample.y, 0.0));
+	vec3 wind = normalize(vec3(windSample, 0.0));
 	mat3 windRotation = AngleAxis3x3(PI * windSample.x, wind);
 	return windRotation;
 }

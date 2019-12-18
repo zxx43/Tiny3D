@@ -37,27 +37,27 @@ void main() {
 	vec3 dir0 = vec3(0.58, 0.0, 0.42);
 	float w0 = 2.0 / l0, ph0 = s0 * w0, q0 = 1.28;
 	
-	float l1 = 25.0, a1 = 0.22, s1 = 5.12;
+	float l1 = 25.0, a1 = 0.32, s1 = 5.12;
 	vec3 dir1 = vec3(0.31, 0.0, 0.69);
 	float w1 = 2.0 / l1, ph1 = s1 * w1, q1 = 2.56;
 	
-	float l2 = 25.6, a2 = 0.22, s2 = 1.28;
+	float l2 = 25.6, a2 = 0.32, s2 = 1.28;
 	vec3 dir2 = vec3(0.33, 0.0, 0.67);
 	float w2 = 2.0 / l2, ph2 = s2 * w2, q2 = 2.56;
 	
-	float l3 = 52.5, a3 = 0.34, s3 = 0.64;
+	float l3 = 52.5, a3 = 0.54, s3 = 0.64;
 	vec3 dir3 = vec3(0.26, 0.0, 0.74);
 	float w3 = 2.0 / l3, ph3 = s3 * w3, q3 = 5.12;
 
-	float l4 = 25.6, a4 = 0.34, s4 = 2.56;
+	float l4 = 25.6, a4 = 0.54, s4 = 2.56;
 	vec3 dir4 = vec3(0.3, 0.0, -0.7);
 	float w4 = 2.0 / l4, ph4 = s4 * w4, q4 = 5.12;
 	
-	float l5 = 42.5, a5 = 0.46, s5 = 5.12;
+	float l5 = 42.5, a5 = 0.66, s5 = 5.12;
 	vec3 dir5 = vec3(0.4, 0.0, -0.6);
 	float w5 = 2.0 / l5, ph5 = s5 * w5, q5 = 2.56;
 
-	float l6 = 25.0, a6 = 0.22, s6 = 1.28;
+	float l6 = 25.0, a6 = 0.32, s6 = 1.28;
 	vec3 dir6 = vec3(0.1, 0.0, -0.9);
 	float w6 = 2.0 / l6, ph6 = s6 * w6, q6 = 2.56;
 

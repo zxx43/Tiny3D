@@ -11,6 +11,7 @@
 #include "../shader/shadermanager.h"
 
 #define WORKGROUPE_SIZE 1
+#define COMP_GROUPE_SIZE 16
 
 void SetupShaders(ShaderManager* shaders);
 

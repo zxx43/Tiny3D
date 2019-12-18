@@ -23,6 +23,10 @@ Terrain::Terrain(const char* fileName):Mesh() {
 	visualIndCount = 0;
 	blockIndexMap.clear();
 
+	visualPointsSize = indexCount * 16;
+	visualPoints = (float*)malloc(visualPointsSize * sizeof(float));
+	memset(visualPoints, 0, visualPointsSize * sizeof(float));
+
 	initFaces();
 	caculateExData();
 }
@@ -51,6 +55,7 @@ Terrain::~Terrain() {
 	blockIndexMap.clear();
 
 	free(visualIndices);
+	free(visualPoints);
 }
 
 float Terrain::getHeight(int px, int pz) {
@@ -176,6 +181,7 @@ void Terrain::initFaces() {
 			indices[currentIndex++] = iArray[3];
 			indices[currentIndex++] = iArray[4];
 			indices[currentIndex++] = iArray[5];
+
 			if (j < stepCount - 1)
 				blockFirstIndex++;
 			else
@@ -187,3 +193,11 @@ void Terrain::initFaces() {
 	}
 }
 
+void Terrain::initPoint(const vec3& p, const vec3& n, const vec4& t1, const vec4& t2, uint& index) {
+	PushVec3(p, visualPoints, index);
+	PushFloat(1.0, visualPoints, index);
+	PushVec3(n, visualPoints, index);
+	PushFloat(0.0, visualPoints, index);
+	PushVec4(t1, visualPoints, index);
+	PushVec4(t2, visualPoints, index);
+}

@@ -640,6 +640,12 @@
     <None Include="..\Tiny\shader\grass.comp">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\Tiny\shader\grass.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Tiny\shader\triangle.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Tiny\config\config.txt">

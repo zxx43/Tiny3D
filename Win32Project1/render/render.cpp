@@ -221,6 +221,14 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 				if (state->shaderCompute) {
 					state->shaderCompute->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
 					state->shaderCompute->setFloat("isColor", state->pass >= COLOR_PASS ? 1.0 : 0.0);
+
+					if (state->grass) {
+						state->shaderCompute->setVector3v("eyePos", *(state->eyePos));
+						state->shaderCompute->setMatrix4("viewMatrix", camera->viewMatrix);
+						state->shaderCompute->setHandle64("distortionTex", AssetManager::assetManager->getDistortionHnd());
+						state->shaderCompute->setFloat("time", state->time * 0.025);
+						state->shaderCompute->setFloat("quality", state->quality);
+					}
 				}
 
 				if (drawcall->isBillboard()) {
@@ -243,7 +251,6 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 					shader->setVector3v("eyePos", *(state->eyePos));
 					shader->setVector3("light", -state->light.x, -state->light.y, -state->light.z);
 					shader->setMatrix4("viewMatrix", camera->viewMatrix);
-					shader->setFloat("distortionId", AssetManager::assetManager->getDistortionTex());
 					if (state->enableSsr)
 						shader->setVector2("waterBias", 0.0, 0.0);
 					else

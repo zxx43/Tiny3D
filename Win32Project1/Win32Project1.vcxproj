@@ -322,6 +322,7 @@
     <None Include="..\Tiny\shader\fxaa.frag" />
     <None Include="..\Tiny\shader\gaussian.frag" />
     <None Include="..\Tiny\shader\grass.comp" />
+    <None Include="..\Tiny\shader\grass.vert" />
     <None Include="..\Tiny\shader\grassLayer.frag" />
     <None Include="..\Tiny\shader\grassLayer.geom" />
     <None Include="..\Tiny\shader\grassLayer.tesc" />
@@ -342,6 +343,7 @@
     <None Include="..\Tiny\shader\ssr.frag" />
     <None Include="..\Tiny\shader\terrain.frag" />
     <None Include="..\Tiny\shader\terrain.vert" />
+    <None Include="..\Tiny\shader\triangle.glsl" />
     <None Include="..\Tiny\shader\util.glsl" />
     <None Include="..\Tiny\shader\water.frag" />
     <None Include="..\Tiny\shader\water.vert" />
