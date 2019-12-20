@@ -140,6 +140,8 @@ void SetupShaders(ShaderManager* shaders) {
 	Shader* fxaa = shaders->addShader("fxaa", POST_VERT, AA_FRAG);
 	fxaa->attachEx(shaderUtil);
 	fxaa->setSlot("colorBuffer", 0);
+	fxaa->setSlot("normalBuffer", 1);
+	fxaa->setSlot("depthBuffer", 2);
 
 	Shader* blur = shaders->addShader("blur", POST_VERT, BLUR_FRAG);
 	blur->attachEx(shaderUtil);

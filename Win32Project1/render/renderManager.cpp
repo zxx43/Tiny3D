@@ -41,6 +41,7 @@ RenderManager::RenderManager(int quality, Camera* view, float distance1, float d
 	time = 0.0;
 	enableSsr = false;
 	enableBloom = false;
+	enableCartoon = false;
 	reflectBuffer = NULL;
 	occluderDepth = NULL;
 	needResize = true;
@@ -257,7 +258,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 		((StaticDrawcall*)terrainNode->drawcall)->updateBuffers(state->pass);
 		render->draw(camera, terrainNode->drawcall, state);
 
-		drawGrass(render, state, scene, camera);
+		if (!enableCartoon) drawGrass(render, state, scene, camera);
 
 		occluderDepth->copyDataFrom(render->getFrameBuffer()->getDepthBuffer());
 	}
@@ -363,6 +364,7 @@ void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* scre
 	if(!deferredShader->isTexBinded(farBuffer->getDepthBuffer()->hnd))
 		deferredShader->setHandle64("depthBufferFar", farBuffer->getDepthBuffer()->hnd);
 	render->setShaderInt(deferredShader, "useShadow", useShadow ? 1 : 0);
+	render->setShaderFloat(deferredShader, "useCartoon", enableCartoon ? 1.0 : 0.0);
 	filter->draw(scene->mainCamera, render, state, screenBuff->colorBuffers, screenBuff->depthBuffer);
 }
 
@@ -377,6 +379,7 @@ void RenderManager::drawCombined(Render* render, Scene* scene, const std::vector
 	state->quality = graphicQuality;
 
 	state->shader->setFloat("useBloom", enableBloom ? 1.0 : 0.0);
+	state->shader->setFloat("useCartoon", enableCartoon ? 1.0 : 0.0);
 	filter->draw(scene->mainCamera, render, state, inputTextures, NULL);
 }
 
@@ -401,6 +404,7 @@ void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* s
 	state->pass = POST_PASS;
 	state->shader = shader;
 
+	state->shader->setFloat("useCartoon", enableCartoon ? 1.0 : 0.0);
 	filter->draw(scene->mainCamera, render, state, inputTextures, NULL);
 }
 

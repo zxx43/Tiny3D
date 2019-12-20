@@ -20,6 +20,7 @@ SimpleApplication::SimpleApplication() {
 	rawScreenFilter = NULL;
 	ssgChain = NULL;
 	bloomChain = NULL;
+	aaInput.clear();
 }
 
 SimpleApplication::~SimpleApplication() {
@@ -35,6 +36,7 @@ SimpleApplication::~SimpleApplication() {
 	if (rawScreenFilter) delete rawScreenFilter; rawScreenFilter = NULL;
 	if (ssgChain) delete ssgChain; ssgChain = NULL;
 	if (bloomChain) delete bloomChain; bloomChain = NULL;
+	aaInput.clear();
 }
 
 void SimpleApplication::resize(int width, int height) {
@@ -80,6 +82,7 @@ void SimpleApplication::resize(int width, int height) {
 		if (useFxaa) {
 			if (aaFilter) delete aaFilter;
 			aaFilter = new Filter(width, height, false, precision, 4);
+			aaInput.clear();
 		}
 		if (useDof) {
 			if (dofBlurFilter) delete dofBlurFilter;
@@ -183,8 +186,14 @@ void SimpleApplication::draw() {
 		renderMgr->drawScreenFilter(render, scene, "dof", dofChain->input, dofChain->output);
 		lastFilter = dofChain->output;
 	}
-	if (useFxaa)
-		renderMgr->drawScreenFilter(render, scene, "fxaa", lastFilter->getFrameBuffer(), aaFilter);
+	if (useFxaa) {
+		if (aaInput.size() == 0) {
+			aaInput.push_back(lastFilter->getFrameBuffer()->getColorBuffer(0));
+			aaInput.push_back(screen->getColorBuffer(2));
+			aaInput.push_back(waterFrame->getDepthBuffer());
+		}
+		renderMgr->drawScreenFilter(render, scene, "fxaa", aaInput, aaFilter);
+	}
 	//*/
 
 	render->finishDraw();
@@ -411,6 +420,7 @@ void SimpleApplication::initScene() {
 	StaticObject* house = model5.clone();
 	house->setPosition(60, 0, 80);
 	house->setSize(5, 5, 5);
+	house->setRotation(0, 180, 0);
 	node2->addObject(scene, house);
 
 	StaticNode* node3 = new StaticNode(vec3(25, 10, 0));
@@ -419,9 +429,9 @@ void SimpleApplication::initScene() {
 	objectSphere->setSize(10, 10, 10);
 	node3->addObject(scene, objectSphere);
 
-	Node* node = new StaticNode(vec3(-1200, 0, 3300));
+	Node* node = new StaticNode(vec3(800, 0, -604));
 	Node* modelNode = new StaticNode(vec3(0, 0, 0));
-	modelNode->attachChild(node1);
+	//modelNode->attachChild(node1);
 	modelNode->attachChild(node2);
 	node->attachChild(modelNode);
 	node->attachChild(node3);
@@ -548,7 +558,7 @@ void SimpleApplication::initScene() {
 		}
 	}
 
-	InstanceNode* instanceNode7 = new InstanceNode(vec3(3500, 0, 200));
+	InstanceNode* instanceNode7 = new InstanceNode(vec3(903, 0, -608));
 	StaticObject* oil1 = model6.clone();
 	oil1->setPosition(30, 0, 30);
 	oil1->setSize(10, 10, 10);

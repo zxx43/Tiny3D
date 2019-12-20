@@ -11,6 +11,7 @@ uniform vec2 levels;
 uniform vec3 light;
 uniform vec3 eyePos;
 uniform float time;
+uniform float useCartoon;
 
 in vec2 vTexcoord;
 
@@ -144,6 +145,7 @@ void main() {
 	vec3 ndcPos = vec3(vTexcoord, depth) * 2.0 - 1.0;
 	vec4 tex = texture2D(texBuffer, vTexcoord);
 	vec3 albedo = tex.rgb;
+	if(useCartoon > 0.5) albedo *= 2.0;
 	vec3 sceneColor = albedo;
 	vec3 bright = vec3(0.0);
 

@@ -24,7 +24,7 @@ private:
 	int channelCount;
 	BufferData* exData;
 private:
-	RenderBuffer* createBuffers(int vertexCount);
+	RenderBuffer* createBuffers(int objCount);
 public:
 	ComputeDrawcall(BufferData* exBuff);
 	virtual ~ComputeDrawcall();

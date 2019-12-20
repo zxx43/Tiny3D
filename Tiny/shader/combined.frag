@@ -5,6 +5,7 @@ uniform vec3 light;
 uniform vec3 eyePos;
 uniform float quality;
 uniform float useBloom;
+uniform float useCartoon;
 
 in vec2 vTexcoord;
 
@@ -62,7 +63,8 @@ void main() {
 	vec3 waterColor = mix(waterReflect, waterRefract, ndote);
 	vec3 finalColor = mix(sceneColor.rgb, waterColor, waterFactor);
 	
-	FragColor = vec4(GenFogColor(waterPos, depthView, finalColor), wDepth);
+	if(useCartoon > 0.5) FragColor = vec4(finalColor, waterFactor);
+	else FragColor = vec4(GenFogColor(waterPos, depthView, finalColor), waterFactor);
 	if(quality > 3.0) 
 		FragColor.rgb = vec3(1.0) - exp(-FragColor.rgb * 2.5);
 	FragColor.rgb = pow(FragColor.rgb, INV_GAMMA);

@@ -9,7 +9,7 @@ uniform mat4 viewProjectMatrix;
 uniform mat4 viewMatrix;
 uniform float fullSize;
 
-const float WindStrength = 0.6;
+const float WindStrength = 0.65;
 const vec2 WindFrequency = vec2(0.05, 0.05);
 
 struct VertexPoint {
@@ -60,8 +60,7 @@ mat3 GetWindMat(vec2 pos) {
 
 void main() {
 	uvec2 cur = gl_GlobalInvocationID.xy;
-	vec2 dPose = vec2(fullSize * 0.5 - float(cur.x), 
-					  fullSize * 0.5 - float(cur.y));
+	vec2 dPose = vec2(fullSize * 0.5) - vec2(cur);
 	
 	float spread = 0.25 + length(dPose) * 0.005;
 	vec3 worldPose = vec3(0.0);

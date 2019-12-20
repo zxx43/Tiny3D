@@ -53,7 +53,7 @@ class RenderManager {
 public:
 	vec3 lightDir;
 	RenderState* state;
-	bool enableSsr, enableBloom;
+	bool enableSsr, enableBloom, enableCartoon;
 	Texture2D* occluderDepth;
 private:
 	Shadow* shadow;

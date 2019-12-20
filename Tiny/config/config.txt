@@ -7,4 +7,5 @@ ssr 1
 dof 1
 fxaa 1
 bloom 1
+cartoon 1
 debug 0
