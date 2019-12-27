@@ -91,13 +91,8 @@ void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState
 			render->draw(camera, node->drawcall, state);
 		else if (node->type == TYPE_INSTANCE) {
 			InstanceNode* instanceNode = (InstanceNode*)node;
-			if (!instanceNode->dynamic) {
-				state->simpleIns = instanceNode->getSimple();
-				state->grass = instanceNode->getGrass();
+			if (!instanceNode->dynamic) 
 				render->draw(camera, node->drawcall, state);
-				state->simpleIns = false;
-				state->grass = false;
-			}
 		} else if (node->type == TYPE_ANIMATE) {
 			node->drawcall->uModelMatrix = node->uTransformMatrix->entries;
 
@@ -128,11 +123,7 @@ void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState
 			if (!instance->drawcall) instance->createDrawcall();
 			if (data->count > 0 && (instance->modelMatrices || instance->modelTransform || instance->billboards)) {
 				instance->drawcall->updateInstances(instance, state->pass);
-				state->simpleIns = instance->isSimple;
-				state->grass = instance->isGrass;
 				render->draw(camera, instance->drawcall, state);
-				state->simpleIns = false;
-				state->grass = false;
 			}
 		}
 		++itData;
@@ -239,7 +230,7 @@ void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camer
 							if (itres != queue->instanceQueue.end())
 								insData = itres->second;
 							else {
-								insData = new InstanceData(mesh, object, scene->queryMeshCount(mesh), insChild->insState);
+								insData = new InstanceData(mesh, object, scene->queryMeshCount(mesh));
 								queue->instanceQueue.insert(pair<Mesh*, InstanceData*>(mesh, insData));
 							}
 
@@ -258,7 +249,7 @@ void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camer
 									if (itres != queue->instanceQueue.end())
 										insData = itres->second;
 									else {
-										insData = new InstanceData(mesh, object, scene->queryMeshCount(mesh), insChild->insState);
+										insData = new InstanceData(mesh, object, scene->queryMeshCount(mesh));
 										queue->instanceQueue.insert(pair<Mesh*, InstanceData*>(mesh, insData));
 									}
 									insData->addInstance(object);

@@ -196,21 +196,13 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 
 	Shader* shader = NULL;
 	if (drawcall->isBillboard() && state->shaderBillboard) shader = state->shaderBillboard; 
-	else {
-		shader = drawcall->getType() == INSTANCE_DC ? state->shaderIns : state->shader;
-		if (drawcall->getType() == INSTANCE_DC) {
-			if (state->grass)
-				shader = state->shaderGrass;
-			else if (state->simpleIns)
-				shader = state->shaderSimple;		
-		}
-	}
+	else shader = drawcall->getType() == INSTANCE_DC ? state->shaderIns : state->shader;
 	
 	if (camera) {
 		if (state->pass < DEFERRED_PASS) {
 			if (!state->skyPass) {
 				shader->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
-				if (state->grass || state->tess) {
+				if (state->tess && state->grassPass) {
 					shader->setFloat("time", state->time * 0.025);
 					shader->setVector3v("eyePos", *(state->eyePos));
 					shader->setMatrix4("viewMatrix", camera->viewMatrix);
@@ -220,9 +212,9 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 
 				if (state->shaderCompute) {
 					state->shaderCompute->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
-					state->shaderCompute->setFloat("isColor", state->pass >= COLOR_PASS ? 1.0 : 0.0);
-
-					if (state->grass) {
+					if(!state->grassPass)
+						state->shaderCompute->setFloat("isColor", state->pass >= COLOR_PASS ? 1.0 : 0.0);
+					else {
 						state->shaderCompute->setVector3v("eyePos", *(state->eyePos));
 						state->shaderCompute->setMatrix4("viewMatrix", camera->viewMatrix);
 						state->shaderCompute->setHandle64("distortionTex", AssetManager::assetManager->getDistortionHnd());

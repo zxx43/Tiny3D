@@ -137,12 +137,10 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 
 	static Shader* phongShadowShader = render->findShader("phong_s");
 	static Shader* phongShadowInsShader = render->findShader("phong_s_ins");
-	static Shader* phongShadowInsSimpShader = render->findShader("phong_s_ins_simp");
 	static Shader* billboardShadowShader = render->findShader("billboard_s");
 	static Shader* boneShadowShader = render->findShader("bone_s");
 	static Shader* phongShadowLowShader = render->findShader("phong_sl");
 	static Shader* phongShadowLowInsShader = render->findShader("phong_sl_ins");
-	static Shader* grassShadowShader = render->findShader("grass_s");
 	static Shader* cullShader = render->findShader("cull");
 
 	state->reset();
@@ -159,8 +157,6 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	state->shader = phongShadowShader;
 	state->shaderIns = phongShadowInsShader;
 	state->shaderBillboard = billboardShadowShader;
-	state->shaderSimple = phongShadowInsSimpShader;
-	state->shaderGrass = grassShadowShader;
 	state->shaderCompute = cullShader;
 	currentQueue->queues[QUEUE_STATIC_SN]->draw(scene, cameraNear, render, state);
 	state->shader = boneShadowShader;
@@ -199,6 +195,7 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 void RenderManager::drawGrass(Render* render, RenderState* state, Scene* scene, Camera* camera) {
 	bool computeGrass = true;
 	state->enableCull = false;
+	state->grassPass = true;
 	TerrainNode* node = scene->terrainNode;
 	Terrain* mesh = node->getMesh();
 	if (computeGrass) {
@@ -206,12 +203,11 @@ void RenderManager::drawGrass(Render* render, RenderState* state, Scene* scene, 
 			BufferData terrainData(mesh->visualPoints, mesh->visualPointsSize, 4, 4);
 			grassDrawcall = new ComputeDrawcall(&terrainData);
 		}
-		Shader* grassShader = render->findShader("grass");
+		static Shader* grassShader = render->findShader("grass");
 		Shader* compShader = render->findShader("grassComp");
 
 		state->shader = grassShader;
 		state->shaderCompute = compShader;
-		state->grass = true;
 
 		StaticObject* terrain = (StaticObject*)node->objects[0];
 		compShader->setVector3v("translate", terrain->transformMatrix.entries + 12);
@@ -219,7 +215,6 @@ void RenderManager::drawGrass(Render* render, RenderState* state, Scene* scene, 
 		compShader->setVector4("mapInfo", STEP_SIZE, node->lineSize, MAP_SIZE, MAP_SIZE);
 		grassDrawcall->update();
 		render->draw(camera, grassDrawcall, state);
-		state->grass = false;
 	} else {
 		static Shader* grassLayerShader = render->findShader("grassLayer");
 		state->shader = grassLayerShader;
@@ -229,16 +224,15 @@ void RenderManager::drawGrass(Render* render, RenderState* state, Scene* scene, 
 		state->tess = false;
 	}
 	state->enableCull = true;
+	state->grassPass = false;
 }
 
 void RenderManager::renderScene(Render* render, Scene* scene) {
 	static Shader* phongShader = render->findShader("phong");
 	static Shader* phongInsShader = render->findShader("phong_ins");
-	static Shader* phongInsSimpShader = render->findShader("phong_ins_simp");
 	static Shader* billboardShader = render->findShader("billboard");
 	static Shader* boneShader = render->findShader("bone");
 	static Shader* skyShader = render->findShader("sky");
-	static Shader* grassShader = render->findShader("grass");
 	static Shader* cullShader = render->findShader("cull");
 
 	state->reset();
@@ -250,7 +244,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 
 	Camera* camera = scene->mainCamera;
 
-	// Draw grass & terrain
+	// Draw terrain & grass
 	TerrainNode* terrainNode = scene->terrainNode;
 	if (terrainNode && terrainNode->checkInCamera(camera)) {
 		static Shader* terrainShader = render->findShader("terrain");
@@ -258,16 +252,17 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 		((StaticDrawcall*)terrainNode->drawcall)->updateBuffers(state->pass);
 		render->draw(camera, terrainNode->drawcall, state);
 
-		if (!enableCartoon) drawGrass(render, state, scene, camera);
-
 		occluderDepth->copyDataFrom(render->getFrameBuffer()->getDepthBuffer());
+
+		if (!enableCartoon) {
+			render->useTexture(TEXTURE_2D, 0, occluderDepth->id);
+			drawGrass(render, state, scene, camera);
+		}
 	}
 
 	state->shader = phongShader;
 	state->shaderIns = phongInsShader;
 	state->shaderBillboard = billboardShader;
-	state->shaderSimple = phongInsSimpShader;
-	state->shaderGrass = grassShader;
 	state->shaderCompute = cullShader;
 	
 	render->useTexture(TEXTURE_2D, 0, occluderDepth->id);

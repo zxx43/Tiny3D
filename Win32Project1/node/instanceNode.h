@@ -19,7 +19,6 @@ private:
 public:
 	bool dynamic;
 	InstanceData* groupBuffer;
-	InstanceState* insState;
 public:
 	InstanceNode(const vec3& position);
 	virtual ~InstanceNode();
@@ -27,11 +26,7 @@ public:
 	void prepareGroup();
 	void releaseGroup();
 	void setGroup(bool group) { isGroup = group; };
-	void setSimple(bool simp) { insState->simple = simp; };
-	void setGrass(bool grass) { insState->grass = grass; };
 	bool getGroup() { return isGroup; };
-	bool getSimple() { return insState->simple; };
-	bool getGrass() { return insState->grass; };
 	virtual void addObject(Scene* scene, Object* object);
 	virtual Object* removeObject(Object* object);
 	virtual void prepareDrawcall();

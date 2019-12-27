@@ -29,7 +29,6 @@ private:
 	Indirect* readBuf;
 public:
 	int objectToPrepare;
-	bool isSimple, isGrass;
 private:
 	RenderBuffer* createBuffers(Instance* instance, bool dyn, int vertexCount, int indexCount);
 public:

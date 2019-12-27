@@ -35,8 +35,6 @@ const uint IndirectBufIndex = 9;
 InstanceDrawcall::InstanceDrawcall(Instance* instance) :Drawcall() {
 	instanceRef = instance;
 	dynDC = instanceRef->isDynamic;
-	isSimple = instanceRef->isSimple;
-	isGrass = instanceRef->isGrass;
 	vertexCount = instanceRef->vertexCount;
 	indexCount = instanceRef->indexCount;
 	setBillboard(instanceRef->isBillboard);

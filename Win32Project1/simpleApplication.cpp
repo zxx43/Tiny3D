@@ -376,7 +376,6 @@ void SimpleApplication::initScene() {
 	StaticObject model5(meshes["house"]);
 	StaticObject model6(meshes["oildrum"]);
 	StaticObject model9(meshes["rock"], meshes["rock"], NULL);
-	bool treeSimple = false;
 
 	//return;
 	scene->createSky();
@@ -448,7 +447,6 @@ void SimpleApplication::initScene() {
 	
 	srand(100);
 	InstanceNode* instanceNode1 = new InstanceNode(vec3(900, 0, 600));
-	instanceNode1->setSimple(treeSimple);
 	instanceNode1->detailLevel = 4;
 	for (int i = -treeScale; i < treeScale; i++) {
 		for (int j = -treeScale; j < treeScale; j++) {
@@ -467,7 +465,6 @@ void SimpleApplication::initScene() {
 	}
 	treeSpace = 100;
 	InstanceNode* instanceNode2 = new InstanceNode(vec3(2746, 0, 2565));
-	instanceNode2->setSimple(treeSimple);
 	instanceNode2->detailLevel = 4;
 	for (int i = -treeScale; i < treeScale; i++) {
 		for (int j = -treeScale; j < treeScale; j++) {
@@ -485,7 +482,6 @@ void SimpleApplication::initScene() {
 		}
 	}
 	InstanceNode* instanceNode3 = new InstanceNode(vec3(-700, 0, 1320));
-	instanceNode3->setSimple(treeSimple);
 	instanceNode3->detailLevel = 4;
 	for (int i = -treeScale; i < treeScale; i++) {
 		for (int j = -treeScale; j < treeScale; j++) {
@@ -503,7 +499,6 @@ void SimpleApplication::initScene() {
 		}
 	}
 	InstanceNode* instanceNode4 = new InstanceNode(vec3(-750, 0, -500));
-	instanceNode4->setSimple(treeSimple);
 	instanceNode4->detailLevel = 4;
 	for (int i = -treeScale; i < treeScale; i++) {
 		for (int j = -treeScale; j < treeScale; j++) {
@@ -521,7 +516,6 @@ void SimpleApplication::initScene() {
 		}
 	}
 	InstanceNode* instanceNode5 = new InstanceNode(vec3(2100, 0, -600));
-	instanceNode5->setSimple(treeSimple);
 	instanceNode5->detailLevel = 4;
 	for (int i = -treeScale; i < treeScale; i++) {
 		for (int j = -treeScale; j < treeScale; j++) {
@@ -540,7 +534,6 @@ void SimpleApplication::initScene() {
 	}
 	treeSpace = 150;
 	InstanceNode* instanceNode6 = new InstanceNode(vec3(800, 0, 2000));
-	instanceNode6->setSimple(treeSimple);
 	instanceNode6->detailLevel = 4;
 	for (int i = -treeScale; i < treeScale; i++) {
 		for (int j = -treeScale; j < treeScale; j++) {

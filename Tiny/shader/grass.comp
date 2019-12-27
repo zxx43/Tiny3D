@@ -1,6 +1,7 @@
 layout(local_size_x = WORKGROUP_SIZE, local_size_y = WORKGROUP_SIZE) in;
 
 layout(bindless_sampler) uniform sampler2D distortionTex;
+layout(binding = 0) uniform sampler2D texDepth;
 uniform vec3 translate, scale;
 uniform vec4 mapInfo;
 uniform float time;
@@ -96,20 +97,27 @@ void main() {
 	if(projPose.x > projPose.w || projPose.x < -projPose.w ||
 		projPose.z > projPose.w ||
 		projPose.y > projPose.w) return;
-
-	vec3 bary = CaculateBary(worldPose, pa.vert.xyz, pb.vert.xyz, pc.vert.xyz);
-	vec3 normal = pa.norm.xyz * bary.x + pb.norm.xyz * bary.y + pc.norm.xyz * bary.z;
 	
 	float rand = (dRand.x + dRand.y) * 0.5;	
 	vec2 size = vec2(rand * 0.5 + 0.5, rand * 2.5 + 2.5);
 
+	vec4 topPose = viewProjectMatrix * vec4(worldPose + vec3(0.0, size.y, 0.0), 1.0);
+	if(topPose.y < -topPose.w) return;
+
+	vec3 tp = topPose.xyz / topPose.w * 0.5 + 0.5;
+	float ocDepth = texture(texDepth, tp.xy).x;
+	if((tp.z - ocDepth) > 0.0001) return;
+	
 	mat3 rotMat = RotY(rand * PI);
 	mat3 windMat = GetWindMat(worldPose.xz + vec2(viewz));
 	rotMat = rotMat * windMat;
 	
 	mat4 trans = Translate(worldPose) * M3ToM4(rotMat) * Scale(vec3(size, 1.0));
 	trans = transpose(trans);
+
+	vec3 bary = CaculateBary(worldPose, pa.vert.xyz, pb.vert.xyz, pc.vert.xyz);
+	vec3 normal = pa.norm.xyz * bary.x + pb.norm.xyz * bary.y + pc.norm.xyz * bary.z;
 	trans[3] = vec4(normal, 1.0);
-	
+
 	outPose[atomicAdd(indirect.instanceCount, 1)] = trans;
 }

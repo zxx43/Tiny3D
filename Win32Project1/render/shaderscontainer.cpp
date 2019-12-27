@@ -60,10 +60,6 @@ void SetupShaders(ShaderManager* shaders) {
 	phongIns->attachEx(shaderUtil);
 	shaders->addShaderBindTex(phongIns);
 
-	Shader* phongInsSimp = shaders->addShader("phong_ins_simp", INSTANCE_SIMPLE_VERT, PHONG_FRAG);
-	phongInsSimp->attachEx(shaderUtil);
-	shaders->addShaderBindTex(phongInsSimp);
-
 	Shader* bone = shaders->addShader("bone", BONE_VERT, BONE_FRAG);
 	bone->attachEx(shaderUtil);
 	shaders->addShaderBindTex(bone);
@@ -104,11 +100,6 @@ void SetupShaders(ShaderManager* shaders) {
 	phongShadowIns->attachEx(shaderUtil);
 	phongShadowIns->attachDef("ShadowPass", "1.0");
 	shaders->addShaderBindTex(phongShadowIns);
-
-	Shader* phongShadowInsSimp = shaders->addShader("phong_s_ins_simp", INSTANCE_SIMPLE_VERT, SHADOW_TEX_FRAG);
-	phongShadowInsSimp->attachEx(shaderUtil);
-	phongShadowInsSimp->attachDef("ShadowPass", "1.0");
-	shaders->addShaderBindTex(phongShadowInsSimp);
 
 	Shader* phongShadowLow = shaders->addShader("phong_sl", PHONG_VERT, SHADOW_NONTEX_FRAG);
 	phongShadowLow->attachEx(shaderUtil);

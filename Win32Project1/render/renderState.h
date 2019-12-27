@@ -16,12 +16,11 @@ struct RenderState {
 	bool lightEffect;
 	bool skyPass;
 	bool waterPass;
+	bool grassPass;
 	bool ssrPass;
 	bool ssgPass;
 	bool enableSsr;
 	bool blend;
-	bool simpleIns;
-	bool grass;
 	bool tess;
 	int pass;
 	float time;
@@ -31,9 +30,7 @@ struct RenderState {
 	vec3* eyePos;
 	Shader* shader;
 	Shader* shaderIns;
-	Shader* shaderGrass;
 	Shader* shaderBillboard;
-	Shader* shaderSimple;
 	Shader* shaderCompute;
 
 	RenderState() {
@@ -56,12 +53,11 @@ struct RenderState {
 		lightEffect = rhs->lightEffect;
 		skyPass = rhs->skyPass;
 		waterPass = rhs->waterPass;
+		grassPass = rhs->grassPass;
 		ssrPass = rhs->ssrPass;
 		ssgPass = rhs->ssgPass;
 		enableSsr = rhs->enableSsr;
 		blend = rhs->blend;
-		simpleIns = rhs->simpleIns;
-		grass = rhs->grass;
 		tess = rhs->tess;
 		pass = rhs->pass;
 		time = rhs->time;
@@ -71,9 +67,7 @@ struct RenderState {
 		eyePos = rhs->eyePos;
 		shader = rhs->shader;
 		shaderIns = rhs->shaderIns;
-		shaderGrass = rhs->shaderGrass;
 		shaderBillboard = rhs->shaderBillboard;
-		shaderSimple = rhs->shaderSimple;
 		shaderCompute = rhs->shaderCompute;
 	}
 	void reset() {
@@ -88,12 +82,11 @@ struct RenderState {
 		lightEffect = true;
 		skyPass = false;
 		waterPass = false;
+		grassPass = false;
 		ssrPass = false;
 		ssgPass = false;
 		enableSsr = false;
 		blend = false;
-		simpleIns = false;
-		grass = false;
 		tess = false;
 		pass = COLOR_PASS;
 		time = 0.0;
@@ -101,9 +94,7 @@ struct RenderState {
 		shadow = NULL;
 		shader = NULL;
 		shaderIns = NULL;
-		shaderGrass = NULL;
 		shaderBillboard = NULL;
-		shaderSimple = NULL;
 		shaderCompute = NULL;
 	}
 };

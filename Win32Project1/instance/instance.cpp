@@ -5,15 +5,15 @@
 std::map<Mesh*, int> Instance::instanceTable;
 
 Instance::Instance(InstanceData* data, bool dyn) {
-	create(data->insMesh, dyn, data->state);
+	create(data->insMesh, dyn);
 	maxInstanceCount = data->maxInsCount;
 }
 
-Instance::Instance(Mesh* mesh, bool dyn, InstanceState* state) {
-	create(mesh, dyn, state);
+Instance::Instance(Mesh* mesh, bool dyn) {
+	create(mesh, dyn);
 }
 
-void Instance::create(Mesh* mesh, bool dyn, InstanceState* state) {
+void Instance::create(Mesh* mesh, bool dyn) {
 	instanceMesh = mesh;
 	vertexCount = 0;
 	indexCount = 0;
@@ -29,8 +29,6 @@ void Instance::create(Mesh* mesh, bool dyn, InstanceState* state) {
 	drawcall = NULL;
 	isBillboard = instanceMesh->isBillboard;
 	isDynamic = dyn;
-	isSimple = state->simple;
-	isGrass = state->grass;
 
 	modelMatrices = NULL;
 	modelTransform = NULL;
@@ -151,13 +149,8 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 
 
 void Instance::initMatrices(int cnt) {
-	if (!isSimple) {
-		modelTransform = (buff*)malloc(cnt * 12 * sizeof(buff));
-		memset(modelTransform, 0, cnt * 12 * sizeof(buff));
-	} else {
-		modelMatrices = (float*)malloc(cnt * 4 * sizeof(float));
-		memset(modelMatrices, 0, cnt * 4 * sizeof(float));
-	}
+	modelTransform = (buff*)malloc(cnt * 12 * sizeof(buff));
+	memset(modelTransform, 0, cnt * 12 * sizeof(buff));
 }
 
 void Instance::initBillboards(int cnt) {
@@ -170,11 +163,9 @@ void Instance::setRenderData(InstanceData* data) {
 	if (drawcall) drawcall->objectToPrepare = instanceCount;
 
 	if (copyData) {
-		if (isSimple && data->matrices)
-			memcpy(modelMatrices, data->matrices, instanceCount * 4 * sizeof(float));
-		else if (!isSimple && data->transformsFull)
+		if (data->transformsFull)
 			memcpy(modelTransform, data->transformsFull, instanceCount * 12 * sizeof(buff));
-		else if (!isSimple && data->matrices)
+		else if (data->matrices)
 			memcpy(modelMatrices, data->matrices, instanceCount * 12 * sizeof(float));
 		else 
 			memcpy(billboards, data->billboards, instanceCount * 6 * sizeof(bill));
@@ -196,8 +187,7 @@ void Instance::createDrawcall() {
 void Instance::addObject(Object* object, int index) {
 	instanceCount++;
 	if (!billboards) {
-		if (isSimple) memcpy(modelMatrices + (index * 4), object->transforms, 4 * sizeof(float));
-		else if (modelTransform)
+		if (modelTransform)
 			memcpy(modelTransform + (index * 12), object->transformsFull, 12 * sizeof(buff));
 		else if (modelMatrices) {
 			memcpy(modelMatrices + (index * 12) + 0, object->transforms, 4 * sizeof(float));

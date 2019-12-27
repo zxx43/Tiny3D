@@ -230,4 +230,41 @@ inline void PushVec4(const vec4& v, float* array, uint& index) {
 	array[index++] = v.w;
 }
 
+template <typename T>
+struct TBuffer {
+	T* tdata;
+	uint size;
+	TBuffer(uint n) {
+		size = n;
+		tdata = (T*)malloc(size * sizeof(T));
+		memset(tdata, 0, size * sizeof(T));
+	}
+	~TBuffer() {
+		if(tdata) free(tdata);
+		tdata = NULL;
+	}
+	void resize(uint n) {
+		if (n <= size) {
+			size = n;
+			return;
+		}
+		T* tmp = (T*)malloc(n * sizeof(T));
+		memset(tmp, 0, (n * sizeof(T)));
+		memcpy(tmp, tdata, size * sizeof(T));
+		free(tdata);
+		tdata = tmp;
+		size = n;
+	}
+	void set(T v, uint i) {
+		asset(i > size - 1);
+		tdata[i] = v;
+	}
+	T get(uint i) {
+		return tdata[i];
+	}
+	T* data() {
+		return tdata;
+	}
+};
+
 #endif /* UTIL_H_ */

@@ -1,6 +1,6 @@
 #include "instance.h"
 
-InstanceData::InstanceData(Mesh* mesh, Object* obj, int maxCount, InstanceState* insState) {
+InstanceData::InstanceData(Mesh* mesh, Object* obj, int maxCount) {
 	insMesh = mesh;
 	count = 0, maxInsCount = maxCount;
 	matrices = NULL;
@@ -8,14 +8,10 @@ InstanceData::InstanceData(Mesh* mesh, Object* obj, int maxCount, InstanceState*
 	billboards = NULL;
 	object = obj;
 	instance = NULL;
-	state = new InstanceState(*insState);
 
 	if (mesh->isBillboard) {
 		billboards = (bill*)malloc(maxCount * 6 * sizeof(bill));
 		memset(billboards, 0, maxCount * 6 * sizeof(bill));
-	} else if (state->simple) {
-		matrices = (float*)malloc(maxCount * 4 * sizeof(float));
-		memset(matrices, 0, maxCount * 4 * sizeof(float));
 	} else {
 		transformsFull = (buff*)malloc(maxCount * 12 * sizeof(buff));
 		memset(transformsFull, 0, maxCount * 12 * sizeof(buff));
@@ -30,7 +26,6 @@ InstanceData::~InstanceData() {
 	if (transformsFull) free(transformsFull);
 	if (billboards) free(billboards);
 	if (instance) delete instance;
-	delete state;
 	subGroup.clear();
 }
 
@@ -40,11 +35,9 @@ void InstanceData::resetInstance() {
 }
 
 void InstanceData::addInstance(Object* object) {
-	if (matrices && state->simple)
-		memcpy(matrices + (count * 4), object->transforms, 4 * sizeof(float));
-	else if (transformsFull && !state->simple)
+	if (transformsFull)
 		memcpy(transformsFull + (count * 12), object->transformsFull, 12 * sizeof(buff));
-	else if (matrices && !state->simple) {
+	else if (matrices) {
 		memcpy(matrices + (count * 12) + 0, object->transforms, 4 * sizeof(float));
 		memcpy(matrices + (count * 12) + 4, object->rotateQuat, 4 * sizeof(float));
 		memcpy(matrices + (count * 12) + 8, object->boundInfo, 4 * sizeof(float));
@@ -66,9 +59,7 @@ void InstanceData::addInstance(Object* object) {
 }
 
 void InstanceData::doMergeData(InstanceData* data) {
-	if (data->matrices && data->state->simple)
-		memcpy(matrices + (count * 4), data->matrices, data->count * 4 * sizeof(float));
-	else if (data->transformsFull)
+	if (data->transformsFull)
 		memcpy(transformsFull + (count * 12), data->transformsFull, data->count * 12 * sizeof(buff));
 	else if (data->matrices)
 		memcpy(matrices + (count * 12), data->matrices, data->count * 12 * sizeof(float));
