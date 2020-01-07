@@ -139,3 +139,11 @@ mat4 Translate(vec3 t) {
 		t.x, t.y, t.z, 1.0
 	);
 }
+
+struct Indirect {
+	uint count;
+	uint primCount;
+	uint firstIndex;
+	uint baseVertex;
+	uint baseInstance;
+};

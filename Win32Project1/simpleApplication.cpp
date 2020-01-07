@@ -382,8 +382,7 @@ void SimpleApplication::initScene() {
 	scene->createWater(vec3(-2048, 0, -2048), vec3(6, 1, 6));
 	scene->createTerrain(vec3(-2048, -200, -2048), vec3(6, 2.0, 6));
 
-	StaticNode* node1 = new StaticNode(vec3(2, 2, 2));
-	node1->setDynamicBatch(false);
+	InstanceNode* node1 = new InstanceNode(vec3(2, 2, 2));
 	StaticObject* object11 = model2.clone();
 	object11->setPosition(-15, -7, 10);
 	object11->setRotation(0, 90, 0);
@@ -403,10 +402,8 @@ void SimpleApplication::initScene() {
 	object14->setSize(0.3, 0.3, 0.3);
 	node1->addObject(scene, object14);
 
-	StaticNode* node2 = new StaticNode(vec3(10, 2, 2));
-	node2->setDynamicBatch(true);
+	InstanceNode* node2 = new InstanceNode(vec3(10, 2, 2));
 	StaticObject* object6 = box.clone();
-	//object6->bindMaterial(mtlMgr->find(DEFAULT_MAT));
 	object6->setPosition(0, 0, 0);
 	object6->setRotation(0, 30, 0);
 	object6->setSize(4, 4, 4);
@@ -422,15 +419,14 @@ void SimpleApplication::initScene() {
 	house->setRotation(0, 180, 0);
 	node2->addObject(scene, house);
 
-	StaticNode* node3 = new StaticNode(vec3(25, 10, 0));
-	node3->setDynamicBatch(false);
+	InstanceNode* node3 = new InstanceNode(vec3(25, 10, 0));
 	StaticObject* objectSphere = sphere.clone();
 	objectSphere->setSize(10, 10, 10);
 	node3->addObject(scene, objectSphere);
 
 	Node* node = new StaticNode(vec3(800, 0, -604));
 	Node* modelNode = new StaticNode(vec3(0, 0, 0));
-	//modelNode->attachChild(node1);
+	modelNode->attachChild(node1);
 	modelNode->attachChild(node2);
 	node->attachChild(modelNode);
 	node->attachChild(node3);

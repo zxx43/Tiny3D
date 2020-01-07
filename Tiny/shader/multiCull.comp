@@ -1,27 +1,27 @@
-layout(local_size_x = WORKGROUP_SIZE) in;
+layout(local_size_x = 1) in;
 
 struct Transform {
 	vec4 trans;
 	vec4 rotat;
 	vec4 bound;
-	vec4 meshid;
+	vec4 mesh;
 };
 
-layout(binding = 1, std140) buffer InPosition {
+layout(binding = 1, std430) buffer InPosition {
 	Transform inTrans[];
 };
 
-layout(binding = 2, std140) buffer OutPosition {
+layout(binding = 2, std430) buffer OutPosition {
 	mat4 outMatrices[];
 };
 
-layout(binding = 3) buffer IndirectBuff {
-	uint count;
-	uint primCount;
-	uint firstIndex;
-	uint baseVertex;
-	uint baseInstance;
-} indirect;
+layout(binding = 3) buffer IndirectNormal {
+	Indirect normals[];
+};
+
+layout(binding = 4) buffer IndirectSingle {
+	Indirect singles[];
+};
 
 layout(binding = 0) uniform sampler2D texDepth;
 uniform mat4 viewProjectMatrix;
@@ -29,15 +29,18 @@ uniform float isColor;
 
 void main() {
 	uint curIndex = gl_GlobalInvocationID.x;
-	
 	Transform transform = inTrans[curIndex];
+	ivec4 meshid = ivec4(transform.mesh);
+
 	vec3 translate = transform.trans.xyz;
 	float scale = transform.trans.w;
 	vec4 rotate = transform.rotat;
 	mat4 outMat = Translate(translate) * QuatToMat4(rotate) * Scale(scale);
 
-	if(isColor < 0.1) outMatrices[atomicAdd(indirect.primCount, 1)] = outMat;
-	else {
+	if(isColor < 0.1) {
+		if(meshid.x >= 0) outMatrices[normals[meshid.x].baseInstance + atomicAdd(normals[meshid.x].primCount, 1)] = outMat;
+		if(meshid.y >= 0) outMatrices[singles[meshid.y].baseInstance + atomicAdd(singles[meshid.y].primCount, 1)] = outMat;
+	} else {
 		vec4 bound = transform.bound;
 		vec3 size = bound.xyz;
 		vec3 pose = vec3(translate.x, bound.w, translate.z);
@@ -65,7 +68,10 @@ void main() {
 		vec4 dd = bbDepth - ocDepth;
 		
 		if(dd.x > 0.0001 && dd.y > 0.0001 && dd.z > 0.0001 && dd.w > 0.0001) return;
-		else outMatrices[atomicAdd(indirect.primCount, 1)] = outMat;
+		else {
+			if(meshid.x >= 0) outMatrices[normals[meshid.x].baseInstance + atomicAdd(normals[meshid.x].primCount, 1)] = outMat;
+			if(meshid.y >= 0) outMatrices[singles[meshid.y].baseInstance + atomicAdd(singles[meshid.y].primCount, 1)] = outMat;
+		}
 	}
 }
 

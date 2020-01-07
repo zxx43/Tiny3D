@@ -191,7 +191,7 @@ void main() {
 
 		sceneColor = ambient + shadowFactor * Lo;
 	} else {
-		bright = sceneColor * 0.5;
+		bright = sceneColor * 1.5;
 	}
 
 	FragColor = vec4(sceneColor, depth);

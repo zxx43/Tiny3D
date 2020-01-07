@@ -9,7 +9,6 @@ class Instance;
 class InstanceData {
 public:
 	Mesh* insMesh;
-	float* matrices;
 	buff* transformsFull;
 	bill* billboards;
 	int count, maxInsCount;
@@ -20,12 +19,6 @@ public:
 	~InstanceData();
 	void resetInstance();
 	void addInstance(Object* object);
-	void merge(InstanceData* data);
-private:
-	void doMergeData(InstanceData* data);
-private:
-	std::vector<InstanceData*> subGroup;
-	int groupToMerge;
 };
 
 #endif

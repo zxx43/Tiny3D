@@ -12,25 +12,16 @@ class Instance;
 
 #include "drawcall.h"
 
-struct Indirect {
-	uint count;
-	uint primCount;
-	uint firstIndex;
-	uint baseVertex;
-	uint baseInstance;
-};
-
 class InstanceDrawcall: public Drawcall {
 private:
 	int vertexCount,indexCount;
 	Instance* instanceRef;
-	bool dynDC;
 	Indirect* indirectBuf;
 	Indirect* readBuf;
 public:
 	int objectToPrepare;
 private:
-	RenderBuffer* createBuffers(Instance* instance, bool dyn, int vertexCount, int indexCount);
+	RenderBuffer* createBuffers(Instance* instance, int vertexCount, int indexCount);
 public:
 	InstanceDrawcall(Instance* instance);
 	virtual ~InstanceDrawcall();

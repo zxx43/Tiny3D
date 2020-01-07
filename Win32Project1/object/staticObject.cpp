@@ -8,7 +8,7 @@ StaticObject::StaticObject(Mesh* mesh) :Object() {
 	anglex = 0; angley = 0; anglez = 0;
 
 	transforms = (float*)malloc(4 * sizeof(float));
-	transformsFull = (buff*)malloc(12 * sizeof(buff));
+	transformsFull = (buff*)malloc(16 * sizeof(buff));
 }
 
 StaticObject::StaticObject(Mesh* mesh, Mesh* meshMid, Mesh* meshLow) :Object() {
@@ -18,7 +18,7 @@ StaticObject::StaticObject(Mesh* mesh, Mesh* meshMid, Mesh* meshLow) :Object() {
 	anglex = 0; angley = 0; anglez = 0;
 
 	transforms = (float*)malloc(4 * sizeof(float));
-	transformsFull = (buff*)malloc(12 * sizeof(buff));
+	transformsFull = (buff*)malloc(16 * sizeof(buff));
 }
 
 StaticObject::StaticObject(const StaticObject& rhs) {
@@ -54,8 +54,8 @@ StaticObject::StaticObject(const StaticObject& rhs) {
 		memcpy(transforms, rhs.transforms, 4 * sizeof(float));
 	}
 	if (rhs.transformsFull) {
-		transformsFull = (buff*)malloc(12 * sizeof(buff));
-		memcpy(transformsFull, rhs.transformsFull, 12 * sizeof(buff));
+		transformsFull = (buff*)malloc(16 * sizeof(buff));
+		memcpy(transformsFull, rhs.transformsFull, 16 * sizeof(buff));
 	}
 }
 

@@ -9,6 +9,8 @@ using namespace std;
 #define INSTANCE_VERT "shader/instance.vert"
 #define INSTANCE_SIMPLE_VERT "shader/instance_simp.vert"
 #define CULL_COMP "shader/cull.comp"
+#define MULTI_COMP "shader/multiCull.comp"
+#define FLUSH_COMP "shader/flush.comp"
 #define BONE_VERT "shader/bone.vert"
 #define BONE_FRAG "shader/bone.frag"
 #define SKY_VERT "shader/sky.vert"
@@ -184,6 +186,13 @@ void SetupShaders(ShaderManager* shaders) {
 	Shader* cull = shaders->addShader("cull", CULL_COMP);
 	cull->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());
 	cull->attachEx(shaderUtil);
+
+	Shader* multi = shaders->addShader("multi", MULTI_COMP);
+	multi->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());
+	multi->attachEx(shaderUtil);
+
+	Shader* flush = shaders->addShader("flush", FLUSH_COMP);
+	flush->attachEx(shaderUtil);
 
 	shaders->compile();
 }

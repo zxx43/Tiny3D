@@ -194,9 +194,10 @@ void Render::useShader(Shader* shader) {
 void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 	setState(state);
 
-	Shader* shader = NULL;
-	if (drawcall->isBillboard() && state->shaderBillboard) shader = state->shaderBillboard; 
-	else shader = drawcall->getType() == INSTANCE_DC ? state->shaderIns : state->shader;
+	Shader* shader = state->shader;
+	if (drawcall->isBillboard() && state->shaderBillboard) shader = state->shaderBillboard;
+	else if (drawcall->getType() == INSTANCE_DC || drawcall->getType() == MULTI_DC)
+		shader = state->shaderIns;
 	
 	if (camera) {
 		if (state->pass < DEFERRED_PASS) {
@@ -221,6 +222,11 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 						state->shaderCompute->setFloat("time", state->time * 0.025);
 						state->shaderCompute->setFloat("quality", state->quality);
 					}
+				}
+
+				if (state->shaderMulti) {
+					state->shaderMulti->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
+					state->shaderMulti->setFloat("isColor", state->pass >= COLOR_PASS ? 1.0 : 0.0);
 				}
 
 				if (drawcall->isBillboard()) {

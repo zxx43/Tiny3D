@@ -32,6 +32,8 @@ struct RenderState {
 	Shader* shaderIns;
 	Shader* shaderBillboard;
 	Shader* shaderCompute;
+	Shader* shaderMulti;
+	Shader* shaderFlush;
 
 	RenderState() {
 		reset();
@@ -69,6 +71,8 @@ struct RenderState {
 		shaderIns = rhs->shaderIns;
 		shaderBillboard = rhs->shaderBillboard;
 		shaderCompute = rhs->shaderCompute;
+		shaderMulti = rhs->shaderMulti;
+		shaderFlush = rhs->shaderFlush;
 	}
 	void reset() {
 		enableCull = true;
@@ -96,6 +100,8 @@ struct RenderState {
 		shaderIns = NULL;
 		shaderBillboard = NULL;
 		shaderCompute = NULL;
+		shaderMulti = NULL;
+		shaderFlush = NULL;
 	}
 };
 

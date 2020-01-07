@@ -13,23 +13,12 @@
 #include "../render/renderQueue.h"
 #include "../render/computeDrawcall.h"
 
-#ifndef QUEUE_STATIC
-#define QUEUE_STATIC_SN 0
-#define QUEUE_STATIC_SM 1
-#define QUEUE_STATIC_SF 2
-#define QUEUE_ANIMATE_SN 3
-#define QUEUE_ANIMATE_SM 4
-#define QUEUE_ANIMATE_SF 5
-#define QUEUE_STATIC 6
-#define QUEUE_ANIMATE 7
-#endif
-
 struct Renderable {
 	std::vector<RenderQueue*> queues;
 	Renderable(float midDis, float lowDis, bool dual) {
 		queues.clear();
 		for (uint i = 0; i < 8; i++) {
-			queues.push_back(new RenderQueue(midDis, lowDis));
+			queues.push_back(new RenderQueue(i, midDis, lowDis));
 			queues[i]->setDual(dual);
 		}
 		queues[QUEUE_STATIC_SN]->shadowLevel = 1;

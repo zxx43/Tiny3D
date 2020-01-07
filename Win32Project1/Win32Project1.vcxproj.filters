@@ -300,6 +300,12 @@
     <ClCompile Include="render\computeDrawcall.cpp">
       <Filter>Source Files\render</Filter>
     </ClCompile>
+    <ClCompile Include="instance\multiInstance.cpp">
+      <Filter>Source Files\instance</Filter>
+    </ClCompile>
+    <ClCompile Include="render\multiDrawcall.cpp">
+      <Filter>Source Files\render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="animation\animation.h">
@@ -527,6 +533,12 @@
     <ClInclude Include="render\computeDrawcall.h">
       <Filter>Source Files\render</Filter>
     </ClInclude>
+    <ClInclude Include="instance\multiInstance.h">
+      <Filter>Source Files\instance</Filter>
+    </ClInclude>
+    <ClInclude Include="render\multiDrawcall.h">
+      <Filter>Source Files\render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Tiny\shader\billboard.frag">
@@ -644,6 +656,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Tiny\shader\triangle.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Tiny\shader\flush.comp">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Tiny\shader\multiCull.comp">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

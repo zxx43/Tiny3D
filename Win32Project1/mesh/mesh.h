@@ -39,15 +39,17 @@ public:
 	float* bounding;
 	std::vector<FaceBuf*> singleFaces;
 	std::vector<FaceBuf*> normalFaces;
-
+public:
 	Mesh();
 	Mesh(const Mesh& rhs);
 	virtual ~Mesh();
 	void caculateExData();
 	void setIsBillboard(bool billboard);
-	void setSingle(bool single);
+	void setAllSingle();
+	void setAllNormal();
 	std::string getName() { return name; }
 	void setName(std::string value) { name = value; }
+	void clearFaceBuf();
 private:
 	void caculateBounding();
 };

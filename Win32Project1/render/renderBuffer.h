@@ -113,12 +113,13 @@ struct RenderData {
 };
 
 struct RenderBuffer {
+	bool useVao;
 	GLuint vao;
 	GLuint* vbos;
 	RenderData** streamDatas;
 	bool* relies;
 	uint bufferSize;
-	RenderBuffer(uint size) {
+	RenderBuffer(uint size, bool uVao = true) {
 		bufferSize = size;
 		vbos = new GLuint[bufferSize];
 		streamDatas = new RenderData*[bufferSize];
@@ -126,13 +127,16 @@ struct RenderBuffer {
 		for (uint i = 0; i < bufferSize; i++)
 			pushData(i, NULL);
 
-		glGenVertexArrays(1, &vao);
-		glBindVertexArray(vao);
+		useVao = uVao;
+		if (useVao) {
+			glGenVertexArrays(1, &vao);
+			glBindVertexArray(vao);
+		}
 		glGenBuffers(bufferSize, vbos);
 	}
 	~RenderBuffer() {
 		glDeleteBuffers(bufferSize, vbos);
-		glDeleteVertexArrays(1, &vao);
+		if(useVao) glDeleteVertexArrays(1, &vao);
 		for (uint i = 0; i < bufferSize; i++) {
 			if (streamDatas[i] && !relies[i])
 				delete streamDatas[i];
@@ -172,6 +176,9 @@ struct RenderBuffer {
 	void useAs(uint ind, GLenum target) {
 		streamDatas[ind]->useAs(target);
 	}
+	void unuseAs(GLenum target) {
+		glBindBuffer(target, 0);
+	}
 	void setAttrib(uint ind) {
 		streamDatas[ind]->createAttribute();
 	}
@@ -188,7 +195,7 @@ struct RenderBuffer {
 		streamDatas[loc]->readBufferData(target, count, ret);
 	}
 	void use() {
-		glBindVertexArray(vao);
+		if(useVao) glBindVertexArray(vao);
 	}
 	void unuse() {
 		glBindVertexArray(0);

@@ -25,6 +25,7 @@ Scene::Scene() {
 	initNodes();
 	boundingNodes.clear();
 	meshCount.clear();
+	meshes.clear();
 	Node::nodesToUpdate.clear();
 	Node::nodesToRemove.clear();
 	Instance::instanceTable.clear();
@@ -42,6 +43,9 @@ Scene::~Scene() {
 	if (animationRoot) delete animationRoot; animationRoot = NULL;
 	meshCount.clear();
 	clearAllAABB();
+	for (uint i = 0; i < meshes.size(); ++i)
+		delete meshes[i];
+	meshes.clear();
 }
 
 void Scene::initNodes() {
@@ -165,20 +169,26 @@ void Scene::clearAllAABB() {
 void Scene::addObject(Object* object) {
 	Mesh* cur = object->mesh;
 	if (cur) {
-		if (meshCount.find(cur) == meshCount.end())
+		if (meshCount.find(cur) == meshCount.end()) {
 			meshCount[cur] = 0;
+			meshes.push_back(new MeshObject(cur, object));
+		}
 		meshCount[cur]++;
 	}
 	cur = object->meshMid;
 	if (cur && cur != object->mesh) {
-		if (meshCount.find(cur) == meshCount.end())
+		if (meshCount.find(cur) == meshCount.end()) {
 			meshCount[cur] = 0;
+			meshes.push_back(new MeshObject(cur, object));
+		}
 		meshCount[cur]++;
 	}
 	cur = object->meshLow;
 	if (cur && cur != object->meshMid && cur != object->mesh) {
-		if (meshCount.find(cur) == meshCount.end())
+		if (meshCount.find(cur) == meshCount.end()) {
 			meshCount[cur] = 0;
+			meshes.push_back(new MeshObject(cur, object));
+		}
 		meshCount[cur]++;
 	}
 }

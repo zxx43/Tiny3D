@@ -12,7 +12,7 @@ const uint ExIndex = 1;
 const uint PositionOutIndex = 2;
 const uint IndirectBufIndex = 3;
 
-const uint MaxSize = 1024;
+const uint MaxSize = 768;
 
 ComputeDrawcall::ComputeDrawcall(BufferData* exBuff) :Drawcall() {
 	setType(COMPUTE_DC);

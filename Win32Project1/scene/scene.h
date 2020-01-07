@@ -14,7 +14,15 @@
 #include "../node/instanceNode.h"
 #include "../sky/sky.h"
 
+struct MeshObject {
+	Mesh* mesh;
+	Object* object;
+	MeshObject(Mesh* m, Object* o) :mesh(m), object(o) {}
+};
+
 class Scene {
+public:
+	std::vector<MeshObject*> meshes;
 private:
 	std::map<Mesh*, uint> meshCount;
 	bool inited;

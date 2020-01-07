@@ -99,7 +99,7 @@ void MtlLoader::readMtlFile() {
 				s++;
 			} else if (value == "single") {
 				ins >> single;
-				if (mtl)
+				if (mtl) 
 					mtl->singleFace = true;
 				c++;
 			}

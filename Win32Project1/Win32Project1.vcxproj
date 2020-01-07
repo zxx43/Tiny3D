@@ -176,6 +176,7 @@
     <ClCompile Include="input\input.cpp" />
     <ClCompile Include="instance\instance.cpp" />
     <ClCompile Include="instance\instanceData.cpp" />
+    <ClCompile Include="instance\multiInstance.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="material\materialManager.cpp" />
     <ClCompile Include="maths\COLOR.cpp" />
@@ -207,6 +208,7 @@
     <ClCompile Include="render\computeDrawcall.cpp" />
     <ClCompile Include="render\drawcall.cpp" />
     <ClCompile Include="render\instanceDrawcall.cpp" />
+    <ClCompile Include="render\multiDrawcall.cpp" />
     <ClCompile Include="render\render.cpp" />
     <ClCompile Include="render\renderManager.cpp" />
     <ClCompile Include="render\renderQueue.cpp" />
@@ -249,6 +251,7 @@
     <ClInclude Include="input\input.h" />
     <ClInclude Include="instance\instance.h" />
     <ClInclude Include="instance\instanceData.h" />
+    <ClInclude Include="instance\multiInstance.h" />
     <ClInclude Include="material\materialManager.h" />
     <ClInclude Include="maths\COLOR.h" />
     <ClInclude Include="maths\Maths.h" />
@@ -281,6 +284,7 @@
     <ClInclude Include="render\drawcall.h" />
     <ClInclude Include="render\glheader.h" />
     <ClInclude Include="render\instanceDrawcall.h" />
+    <ClInclude Include="render\multiDrawcall.h" />
     <ClInclude Include="render\render.h" />
     <ClInclude Include="render\renderBuffer.h" />
     <ClInclude Include="render\renderManager.h" />
@@ -319,6 +323,7 @@
     <None Include="..\Tiny\shader\debug.vert" />
     <None Include="..\Tiny\shader\deferred.frag" />
     <None Include="..\Tiny\shader\dof.frag" />
+    <None Include="..\Tiny\shader\flush.comp" />
     <None Include="..\Tiny\shader\fxaa.frag" />
     <None Include="..\Tiny\shader\gaussian.frag" />
     <None Include="..\Tiny\shader\grass.comp" />
@@ -331,6 +336,7 @@
     <None Include="..\Tiny\shader\instance.vert" />
     <None Include="..\Tiny\shader\instance_simp.vert" />
     <None Include="..\Tiny\shader\mean.frag" />
+    <None Include="..\Tiny\shader\multiCull.comp" />
     <None Include="..\Tiny\shader\phong.frag" />
     <None Include="..\Tiny\shader\phong.vert" />
     <None Include="..\Tiny\shader\post.vert" />

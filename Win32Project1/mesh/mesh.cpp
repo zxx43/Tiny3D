@@ -51,12 +51,7 @@ Mesh::~Mesh() {
 	indices = NULL;
 	bounding = NULL;
 
-	for (uint i = 0; i < singleFaces.size(); i++)
-		delete singleFaces[i];
-	singleFaces.clear();
-	for (uint i = 0; i < normalFaces.size(); i++)
-		delete normalFaces[i];
-	normalFaces.clear();
+	clearFaceBuf();
 }
 
 void Mesh::caculateExData() {
@@ -99,16 +94,31 @@ void Mesh::caculateBounding() {
 	bounding[5] = bbox.sizez * 0.5;
 }
 
-void Mesh::setIsBillboard(bool billboard) {
-	isBillboard = billboard;
-	setSingle(true);
+void Mesh::clearFaceBuf() {
+	for (uint i = 0; i < singleFaces.size(); i++)
+		delete singleFaces[i];
+	singleFaces.clear();
+	for (uint i = 0; i < normalFaces.size(); i++)
+		delete normalFaces[i];
+	normalFaces.clear();
 }
 
-void Mesh::setSingle(bool single) {
+void Mesh::setIsBillboard(bool billboard) {
+	isBillboard = billboard;
+	if (isBillboard) setAllSingle();
+	else setAllNormal();
+}
+
+void Mesh::setAllSingle() {
 	if (indexCount > 0) {
-		if (single)
-			singleFaces.push_back(new FaceBuf(0, indexCount));
-		else
+		clearFaceBuf();
+		singleFaces.push_back(new FaceBuf(0, indexCount));
+	}
+}
+
+void Mesh::setAllNormal() {
+	if (indexCount > 0) {
+		if (singleFaces.size() == 0 && normalFaces.size() == 0)
 			normalFaces.push_back(new FaceBuf(0, indexCount));
 	}
 }

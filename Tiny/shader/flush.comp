@@ -1,0 +1,14 @@
+layout(local_size_x = 1) in;
+
+layout(binding = 1) buffer IndirectBuffer {
+	Indirect indirects[];
+};
+
+uniform uint uBases[64];
+
+void main() {
+	uint curIndex = gl_GlobalInvocationID.x;
+	
+	indirects[curIndex].primCount = 0;
+	indirects[curIndex].baseInstance = uBases[curIndex];
+}

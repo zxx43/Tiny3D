@@ -6,7 +6,6 @@ using namespace std;
 
 InstanceNode::InstanceNode(const vec3& position):Node(position, vec3(0, 0, 0)) {
 	type = TYPE_INSTANCE;
-	dynamic = true;
 	instance = NULL;
 	isGroup = false;
 	groupBuffer = NULL;
@@ -73,19 +72,5 @@ void InstanceNode::releaseGroup() {
 }
 
 void InstanceNode::prepareDrawcall() {
-	if (!dynamic) {
-		if (!drawcall && objects.size() > 0) {
-			Mesh* mesh = objects[0]->mesh;
-			instance = new Instance(mesh, dynamic);
-			instance->initInstanceBuffers(objects[0], mesh->vertexCount, mesh->indexCount, objects.size(), true);
-			for (uint i = 0; i < objects.size(); i++)
-				instance->addObject(objects[i], i);
-
-			drawcall = new InstanceDrawcall(instance);
-			InstanceDrawcall* insDC = (InstanceDrawcall*)drawcall;
-			insDC->objectToPrepare = objects.size();
-		}
-	}
-
 	needCreateDrawcall = false;
 }

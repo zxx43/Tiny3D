@@ -8,20 +8,24 @@
 #include <stdlib.h>
 using namespace std;
 
-RenderQueue::RenderQueue(float midDis, float lowDis) {
+RenderQueue::RenderQueue(int type, float midDis, float lowDis) {
+	queueType = type;
 	queue = new Queue(1);
 	instanceQueue.clear();
+	multiInstance = NULL;
 	batchData = NULL;
 	midDistSqr = powf(midDis, 2);
 	lowDistSqr = powf(lowDis, 2);
 	dual = true;
 	shadowLevel = 0;
+	firstFlush = true;
 }
 
 RenderQueue::~RenderQueue() {
 	delete queue;
 
 	if (batchData) delete batchData;
+	if (multiInstance) delete multiInstance;
 
 	map<Mesh*, InstanceData*>::iterator itIns;
 	for (itIns = instanceQueue.begin(); itIns != instanceQueue.end(); ++itIns)
@@ -57,9 +61,8 @@ void RenderQueue::deleteInstance(InstanceData* data) {
 }
 
 void RenderQueue::pushDatasToInstance(Scene* scene, InstanceData* data, bool copy) {
-	if (data->count <= 0) return;
 	if (!data->instance) {
-		data->instance = new Instance(data, true);
+		data->instance = new Instance(data);
 		data->instance->initInstanceBuffers(data->object, data->insMesh->vertexCount, data->insMesh->indexCount, scene->queryMeshCount(data->insMesh), copy);
 	}
 	data->instance->setRenderData(data);
@@ -89,11 +92,7 @@ void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState
 
 		if (node->type == TYPE_STATIC) 
 			render->draw(camera, node->drawcall, state);
-		else if (node->type == TYPE_INSTANCE) {
-			InstanceNode* instanceNode = (InstanceNode*)node;
-			if (!instanceNode->dynamic) 
-				render->draw(camera, node->drawcall, state);
-		} else if (node->type == TYPE_ANIMATE) {
+		else if (node->type == TYPE_ANIMATE) {
 			node->drawcall->uModelMatrix = node->uTransformMatrix->entries;
 
 			if (!node->drawcall->uNormalMatrix)
@@ -119,16 +118,28 @@ void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState
 		InstanceData* data = itData->second;
 		pushDatasToInstance(scene, data, false);
 		Instance* instance = data->instance;
-		if (instance) {
+		if (instance && instance->isBillboard) {
 			if (!instance->drawcall) instance->createDrawcall();
-			if (data->count > 0 && (instance->modelMatrices || instance->modelTransform || instance->billboards)) {
+			if (data->count > 0 && (instance->modelTransform || instance->billboards)) {
 				instance->drawcall->updateInstances(instance, state->pass);
 				render->draw(camera, instance->drawcall, state);
 			}
+		} else if (instance && !instance->isBillboard) {
+			if (!multiInstance) multiInstance = new MultiInstance();
+			if (!multiInstance->inited()) multiInstance->add(instance);
 		}
 		++itData;
-		if (instance && Instance::instanceTable[instance->instanceMesh] == 0)
-			deleteInstance(data);
+		//if (instance && Instance::instanceTable[instance->instanceMesh] == 0)
+		//	deleteInstance(data);
+	}
+
+	if (multiInstance) {
+		if (!multiInstance->inited()) {
+			multiInstance->initBuffers();
+			multiInstance->createDrawcall();
+		}
+		multiInstance->drawcall->update(render, state);
+		render->draw(camera, multiInstance->drawcall, state);
 	}
 	
 	if (batchData) {
@@ -167,6 +178,19 @@ Mesh* RenderQueue::queryLodMesh(Object* object, const vec3& eye) {
 }
 
 void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camera, Camera* mainCamera) {
+	if (queue->firstFlush) {
+		if (queue->queueType == QUEUE_STATIC_SN || queue->queueType == QUEUE_STATIC_SM || 
+			queue->queueType == QUEUE_STATIC_SF || queue->queueType == QUEUE_STATIC) {
+			for (uint i = 0; i < scene->meshes.size(); ++i) {
+				Mesh* mesh = scene->meshes[i]->mesh;
+				Object* object = scene->meshes[i]->object;
+				InstanceData* insData = new InstanceData(mesh, object, scene->queryMeshCount(mesh));
+				queue->instanceQueue.insert(pair<Mesh*, InstanceData*>(mesh, insData));
+			}
+		}
+		queue->firstFlush = false;
+	}
+
 	if (node->checkInCamera(camera)) {
 		for (unsigned int i = 0; i<node->children.size(); ++i) {
 			Node* child = node->children[i];
@@ -174,20 +198,6 @@ void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camer
 				PushNodeToQueue(queue, scene, child, camera, mainCamera);
 			else {
 				if (child->shadowLevel < queue->shadowLevel) continue;
-
-				InstanceNode* insChild = NULL;
-				if (child->type == TYPE_INSTANCE) {
-					insChild = (InstanceNode*)child;
-					if (insChild->getGroup()) {
-						if (queue->shadowLevel > 0) {
-							if (mainCamera->frustumNear && !insChild->checkInFrustum(mainCamera->frustumNear))
-								continue;
-						} else {
-							if (mainCamera->frustumSub && !insChild->checkInFrustum(mainCamera->frustumSub))
-								continue;
-						}
-					}
-				}
 
 				if (child->checkInCamera(camera)) {
 					if (child->type != TYPE_INSTANCE && child->type != TYPE_STATIC)
@@ -210,50 +220,18 @@ void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camer
 								}
 							}
 						}
-					} else if (child->type == TYPE_INSTANCE && insChild) {
-						if (!insChild->dynamic) {
-							queue->push(insChild);
-							continue;
-						}
+					} else if (child->type == TYPE_INSTANCE) {
+						child->needCreateDrawcall = false;
+						child->needUpdateDrawcall = false;
 						
-						insChild->needCreateDrawcall = false;
-						insChild->needUpdateDrawcall = false;
-
-						static map<Mesh*, InstanceData*>::iterator itres;
-						
-						if (insChild->getGroup()) {
-							Object* object = insChild->objects[0];
-							Mesh* mesh = object->mesh;
-
-							InstanceData* insData = NULL;
-							itres = queue->instanceQueue.find(mesh);
-							if (itres != queue->instanceQueue.end())
-								insData = itres->second;
-							else {
-								insData = new InstanceData(mesh, object, scene->queryMeshCount(mesh));
-								queue->instanceQueue.insert(pair<Mesh*, InstanceData*>(mesh, insData));
-							}
-
-							if (!insChild->groupBuffer)
-								insChild->prepareGroup();
-							insData->merge(insChild->groupBuffer);
-						} else {
-							for (uint j = 0; j < insChild->objects.size(); ++j) {
-								Object* object = insChild->objects[j];
-								if (queue->shadowLevel > 0 && !object->genShadow) continue;
-								if (object->checkInCamera(camera)) {
-									Mesh* mesh = queue->queryLodMesh(object, mainCamera->position);
-									if (!mesh) continue;
-									InstanceData* insData = NULL;
-									itres = queue->instanceQueue.find(mesh);
-									if (itres != queue->instanceQueue.end())
-										insData = itres->second;
-									else {
-										insData = new InstanceData(mesh, object, scene->queryMeshCount(mesh));
-										queue->instanceQueue.insert(pair<Mesh*, InstanceData*>(mesh, insData));
-									}
-									insData->addInstance(object);
-								}
+						for (uint j = 0; j < child->objects.size(); ++j) {
+							Object* object = child->objects[j];
+							if (queue->shadowLevel > 0 && !object->genShadow) continue;
+							if (object->checkInCamera(camera)) {
+								Mesh* mesh = queue->queryLodMesh(object, mainCamera->position);
+								if (!mesh) continue;
+								InstanceData* insData = queue->instanceQueue[mesh];
+								insData->addInstance(object);
 							}
 						}
 					}

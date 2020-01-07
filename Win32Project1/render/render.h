@@ -72,6 +72,7 @@ public:
 
 	void initShaders() { SetupShaders(shaders); }
 	void setShaderInt(Shader* shader, const char* param, int value) {  shader->setInt(param, value); }
+	void setShaderUintv(Shader* shader, const char* param, int count, uint* arr) { shader->setUintv(param, count, arr); }
 	void setShaderSampler(Shader* shader, const char* param, int value) { shader->setSampler(param, value); }
 	void setShaderFloat(Shader* shader, const char* param, float value) { shader->setFloat(param, value); }
 	void setShaderVec2(Shader* shader, const char* param, float x, float y) { shader->setVector2(param, x, y); }

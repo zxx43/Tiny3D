@@ -17,7 +17,6 @@ private:
 	Instance* instance;
 	bool isGroup;
 public:
-	bool dynamic;
 	InstanceData* groupBuffer;
 public:
 	InstanceNode(const vec3& position);

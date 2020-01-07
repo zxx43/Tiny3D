@@ -6,7 +6,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../instance/instance.h"
+#include "../instance/multiInstance.h"
 #include "../batch/batch.h"
+
+#ifndef QUEUE_STATIC
+#define QUEUE_STATIC_SN 0
+#define QUEUE_STATIC_SM 1
+#define QUEUE_STATIC_SF 2
+#define QUEUE_ANIMATE_SN 3
+#define QUEUE_ANIMATE_SM 4
+#define QUEUE_ANIMATE_SF 5
+#define QUEUE_STATIC 6
+#define QUEUE_ANIMATE 7
+#endif
 
 struct Queue {
 	Node** data;
@@ -48,13 +60,16 @@ private:
 	void pushDatasToInstance(Scene* scene, InstanceData* data, bool copy);
 	void pushDatasToBatch(BatchData* data, int pass);
 public:
+	int queueType;
 	float midDistSqr, lowDistSqr;
 	std::map<Mesh*, InstanceData*> instanceQueue;
+	MultiInstance* multiInstance;
 	BatchData* batchData;
 	bool dual;
 	int shadowLevel;
+	bool firstFlush;
 public:
-	RenderQueue(float midDis, float lowDis);
+	RenderQueue(int type, float midDis, float lowDis);
 	~RenderQueue();
 	void push(Node* node);
 	void flush();

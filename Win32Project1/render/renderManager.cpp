@@ -142,6 +142,8 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	static Shader* phongShadowLowShader = render->findShader("phong_sl");
 	static Shader* phongShadowLowInsShader = render->findShader("phong_sl_ins");
 	static Shader* cullShader = render->findShader("cull");
+	static Shader* multiShader = render->findShader("multi");
+	static Shader* flushShader = render->findShader("flush");
 
 	state->reset();
 	state->eyePos = &(scene->mainCamera->position);
@@ -158,6 +160,8 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	state->shaderIns = phongShadowInsShader;
 	state->shaderBillboard = billboardShadowShader;
 	state->shaderCompute = cullShader;
+	state->shaderMulti = multiShader;
+	state->shaderFlush = flushShader;
 	currentQueue->queues[QUEUE_STATIC_SN]->draw(scene, cameraNear, render, state);
 	state->shader = boneShadowShader;
 	currentQueue->queues[QUEUE_ANIMATE_SN]->draw(scene, cameraNear, render, state);
@@ -234,6 +238,8 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	static Shader* boneShader = render->findShader("bone");
 	static Shader* skyShader = render->findShader("sky");
 	static Shader* cullShader = render->findShader("cull");
+	static Shader* multiShader = render->findShader("multi");
+	static Shader* flushShader = render->findShader("flush");
 
 	state->reset();
 	state->eyePos = &(scene->mainCamera->position);
@@ -264,6 +270,8 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	state->shaderIns = phongInsShader;
 	state->shaderBillboard = billboardShader;
 	state->shaderCompute = cullShader;
+	state->shaderMulti = multiShader;
+	state->shaderFlush = flushShader;
 	
 	render->useTexture(TEXTURE_2D, 0, occluderDepth->id);
 	currentQueue->queues[QUEUE_STATIC]->draw(scene, camera, render, state);

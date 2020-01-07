@@ -15,6 +15,7 @@ class Instance {
 public:
 	static std::map<Mesh*, int> instanceTable;
 public:
+	int insId, insSingleId;
 	Mesh* instanceMesh;
 	int vertexCount,indexCount;
 	float* vertexBuffer;
@@ -26,17 +27,15 @@ public:
 	unsigned short* indexBuffer;
 
 	int instanceCount, maxInstanceCount;
-	float* modelMatrices;
 	buff* modelTransform;
 	bill* billboards;
 
 	InstanceDrawcall* drawcall;
 	bool isBillboard;
-	bool isDynamic;
 	bool copyData;
 
-	Instance(InstanceData* data, bool dyn);
-	Instance(Mesh* mesh, bool dyn);
+	Instance(InstanceData* data);
+	Instance(Mesh* mesh);
 	~Instance();
 	void releaseInstanceData();
 	void initInstanceBuffers(Object* object,int vertices,int indices,int cnt,bool copy);
@@ -44,7 +43,7 @@ public:
 	void addObject(Object* object, int index);
 	void createDrawcall();
 private:
-	void create(Mesh* mesh, bool dyn);
+	void create(Mesh* mesh);
 	void initMatrices(int cnt);
 	void initBillboards(int cnt);
 };

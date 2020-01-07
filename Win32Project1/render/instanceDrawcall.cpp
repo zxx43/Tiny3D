@@ -34,14 +34,12 @@ const uint IndirectBufIndex = 9;
 
 InstanceDrawcall::InstanceDrawcall(Instance* instance) :Drawcall() {
 	instanceRef = instance;
-	dynDC = instanceRef->isDynamic;
 	vertexCount = instanceRef->vertexCount;
 	indexCount = instanceRef->indexCount;
 	setBillboard(instanceRef->isBillboard);
 
-	objectCount = dynDC ? instanceRef->maxInstanceCount : instanceRef->instanceCount;
+	objectCount = instanceRef->maxInstanceCount;
 	objectToPrepare = 0;
-	if (!dynDC) objectToPrepare = instanceRef->instanceCount;
 
 	indirectBuf = (Indirect*)malloc(sizeof(Indirect));
 	indirectBuf->count = indexCount;
@@ -53,7 +51,7 @@ InstanceDrawcall::InstanceDrawcall(Instance* instance) :Drawcall() {
 	readBuf = (Indirect*)malloc(sizeof(Indirect));
 	memset(readBuf, 0, sizeof(Indirect));
 
-	dataBuffer = createBuffers(instanceRef, dynDC, vertexCount, indexCount);
+	dataBuffer = createBuffers(instanceRef, vertexCount, indexCount);
 
 	setType(INSTANCE_DC);
 	instanceRef->releaseInstanceData();
@@ -64,9 +62,9 @@ InstanceDrawcall::~InstanceDrawcall() {
 	free(readBuf);
 }
 
-RenderBuffer* InstanceDrawcall::createBuffers(Instance* instance, bool dyn, int vertexCount, int indexCount) {
+RenderBuffer* InstanceDrawcall::createBuffers(Instance* instance, int vertexCount, int indexCount) {
 	RenderBuffer* buffer = NULL;
-	GLenum draw = dyn ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
+	GLenum draw = GL_DYNAMIC_DRAW;
 	if (isBillboard()) {
 		buffer = new RenderBuffer(4);
 		buffer->setAttribData(GL_ARRAY_BUFFER, BillboardVertexIndex, BillboardVertexSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->vertexBuffer);
@@ -83,7 +81,7 @@ RenderBuffer* InstanceDrawcall::createBuffers(Instance* instance, bool dyn, int 
 		buffer->setAttribData(GL_ARRAY_BUFFER, TangentIndex, TangentSlot, GL_HALF_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, instanceRef->tangentBuffer);
 		buffer->setBufferData(GL_ELEMENT_ARRAY_BUFFER, Index, GL_UNSIGNED_SHORT, indexCount, GL_STATIC_DRAW, instanceRef->indexBuffer);
 		
-		buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, PositionIndex, GL_FLOAT, objectCount, 12, draw, instanceRef->modelTransform);
+		buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, PositionIndex, GL_FLOAT, objectCount, 16, draw, instanceRef->modelTransform);
 		buffer->setAttribData(GL_SHADER_STORAGE_BUFFER, PositionOutIndex, PositionSlot, GL_FLOAT, objectCount, 4, 4, false, GL_STREAM_DRAW, 1, NULL);
 		buffer->useAs(PositionOutIndex, GL_ARRAY_BUFFER);
 		buffer->setAttrib(PositionOutIndex);
@@ -128,8 +126,6 @@ void InstanceDrawcall::draw(Render* render, RenderState* state, Shader* shader) 
 }
 
 void InstanceDrawcall::updateInstances(Instance* instance, int pass) {
-	if (!dynDC) return;
-
 	if (isBillboard()) 
 		dataBuffer->updateBufferData(BillboardInfoIndex, objectToPrepare, (void*)(instance->billboards));
 	else {

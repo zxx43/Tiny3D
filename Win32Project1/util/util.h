@@ -267,4 +267,12 @@ struct TBuffer {
 	}
 };
 
+struct Indirect {
+	uint count;
+	uint primCount;
+	uint firstIndex;
+	uint baseVertex;
+	uint baseInstance;
+};
+
 #endif /* UTIL_H_ */

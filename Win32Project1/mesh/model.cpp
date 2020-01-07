@@ -161,4 +161,28 @@ void Model::initFaces() {
 		else singleFaces.push_back(new FaceBuf(startlst[i], countlst[i]));
 	}
 	vertexCount = dupIndex;
+
+	if (normalFaces.size() > 0 && singleFaces.size() > 0) {
+		int* tmp = (int*)malloc(indexCount * sizeof(int));
+		int curIndex = 0, normalStart = 0, singleCount = 0, normalCount = 0;
+		for (uint i = 0; i < singleFaces.size(); i++) {
+			FaceBuf* buf = singleFaces[i];
+			memcpy(tmp + curIndex, indices + buf->start, buf->count * sizeof(int));
+			curIndex += buf->count;
+			singleCount += buf->count;
+		}
+		normalStart = curIndex;
+		for (uint i = 0; i < normalFaces.size(); i++) {
+			FaceBuf* buf = normalFaces[i];
+			memcpy(tmp + curIndex, indices + buf->start, buf->count * sizeof(int));
+			curIndex += buf->count;
+			normalCount += buf->count;
+		}
+		free(indices);
+		indices = tmp;
+
+		clearFaceBuf();
+		singleFaces.push_back(new FaceBuf(0, singleCount));
+		normalFaces.push_back(new FaceBuf(normalStart, normalCount));
+	}
 }

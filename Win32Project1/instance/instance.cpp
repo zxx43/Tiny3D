@@ -4,16 +4,18 @@
 
 std::map<Mesh*, int> Instance::instanceTable;
 
-Instance::Instance(InstanceData* data, bool dyn) {
-	create(data->insMesh, dyn);
+Instance::Instance(InstanceData* data) {
+	create(data->insMesh);
 	maxInstanceCount = data->maxInsCount;
 }
 
-Instance::Instance(Mesh* mesh, bool dyn) {
-	create(mesh, dyn);
+Instance::Instance(Mesh* mesh) {
+	create(mesh);
 }
 
-void Instance::create(Mesh* mesh, bool dyn) {
+void Instance::create(Mesh* mesh) {
+	insId = -1;
+	insSingleId = -1;
 	instanceMesh = mesh;
 	vertexCount = 0;
 	indexCount = 0;
@@ -28,9 +30,7 @@ void Instance::create(Mesh* mesh, bool dyn) {
 	instanceCount = 0, maxInstanceCount = 0;
 	drawcall = NULL;
 	isBillboard = instanceMesh->isBillboard;
-	isDynamic = dyn;
 
-	modelMatrices = NULL;
 	modelTransform = NULL;
 	billboards = NULL;
 	copyData = true;
@@ -46,7 +46,6 @@ Instance::~Instance() {
 	if (indexBuffer) free(indexBuffer); indexBuffer = NULL;
 
 	if (copyData) {
-		if (modelMatrices) free(modelMatrices); modelMatrices = NULL;
 		if (modelTransform) free(modelTransform); modelTransform = NULL;
 		if (billboards) free(billboards); billboards = NULL;
 	}
@@ -62,8 +61,7 @@ void Instance::releaseInstanceData() {
 	if (colorBuffer) free(colorBuffer); colorBuffer = NULL;
 	if (indexBuffer) free(indexBuffer); indexBuffer = NULL;
 
-	if (!isDynamic && copyData) {
-		if (modelMatrices) free(modelMatrices); modelMatrices = NULL;
+	if (copyData) {
 		if (modelTransform) free(modelTransform); modelTransform = NULL;
 		if (billboards) free(billboards); billboards = NULL;
 	}
@@ -149,8 +147,8 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 
 
 void Instance::initMatrices(int cnt) {
-	modelTransform = (buff*)malloc(cnt * 12 * sizeof(buff));
-	memset(modelTransform, 0, cnt * 12 * sizeof(buff));
+	modelTransform = (buff*)malloc(cnt * 16 * sizeof(buff));
+	memset(modelTransform, 0, cnt * 16 * sizeof(buff));
 }
 
 void Instance::initBillboards(int cnt) {
@@ -164,17 +162,13 @@ void Instance::setRenderData(InstanceData* data) {
 
 	if (copyData) {
 		if (data->transformsFull)
-			memcpy(modelTransform, data->transformsFull, instanceCount * 12 * sizeof(buff));
-		else if (data->matrices)
-			memcpy(modelMatrices, data->matrices, instanceCount * 12 * sizeof(float));
-		else 
+			memcpy(modelTransform, data->transformsFull, instanceCount * 16 * sizeof(buff));
+		else if (data->billboards)
 			memcpy(billboards, data->billboards, instanceCount * 6 * sizeof(bill));
 	} else {
 		if (data->transformsFull) {
 			if (modelTransform != data->transformsFull) modelTransform = data->transformsFull;
-		} else if (data->matrices) {
-			if (modelMatrices != data->matrices) modelMatrices = data->matrices;
-		} else {
+		} else if (data->billboards) {
 			if (billboards != data->billboards) billboards = data->billboards;
 		}
 	}
@@ -188,12 +182,7 @@ void Instance::addObject(Object* object, int index) {
 	instanceCount++;
 	if (!billboards) {
 		if (modelTransform)
-			memcpy(modelTransform + (index * 12), object->transformsFull, 12 * sizeof(buff));
-		else if (modelMatrices) {
-			memcpy(modelMatrices + (index * 12) + 0, object->transforms, 4 * sizeof(float));
-			memcpy(modelMatrices + (index * 12) + 4, object->rotateQuat, 4 * sizeof(float));
-			memcpy(modelMatrices + (index * 12) + 8, object->boundInfo, 4 * sizeof(float));
-		}
+			memcpy(modelTransform + (index * 16), object->transformsFull, 16 * sizeof(buff));
 	} else {
 		Material* mat = NULL;
 		if (MaterialManager::materials)
