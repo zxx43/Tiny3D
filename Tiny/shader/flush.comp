@@ -4,7 +4,7 @@ layout(binding = 1) buffer IndirectBuffer {
 	Indirect indirects[];
 };
 
-uniform uint uBases[64];
+uniform uint uBases[128];
 
 void main() {
 	uint curIndex = gl_GlobalInvocationID.x;

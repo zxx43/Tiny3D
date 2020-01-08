@@ -36,8 +36,8 @@ MultiDrawcall::MultiDrawcall(MultiInstance* multi) :Drawcall() {
 	dataBuffer = createBuffers(multiRef, vertexCount, indexCount, maxObjectCount);
 	
 	indirectBuffer = new RenderBuffer(2, false);
-	indirectBuffer->setBufferData(GL_SHADER_STORAGE_BUFFER, IndirectNormalIndex, GL_ONE, multiRef->normalCount * sizeof(Indirect), GL_DYNAMIC_DRAW, NULL);
-	indirectBuffer->setBufferData(GL_SHADER_STORAGE_BUFFER, IndirectSingleIndex, GL_ONE, multiRef->singleCount * sizeof(Indirect), GL_DYNAMIC_DRAW, NULL);
+	indirectBuffer->setBufferData(GL_SHADER_STORAGE_BUFFER, IndirectNormalIndex, GL_ONE, multiRef->normalCount * sizeof(Indirect), GL_STREAM_DRAW, multiRef->indirectsNormal);
+	indirectBuffer->setBufferData(GL_SHADER_STORAGE_BUFFER, IndirectSingleIndex, GL_ONE, multiRef->singleCount * sizeof(Indirect), GL_STREAM_DRAW, multiRef->indirectsSingle);
 
 	setType(MULTI_DC);
 	multiRef->releaseInstanceData();
@@ -67,11 +67,6 @@ RenderBuffer* MultiDrawcall::createBuffers(MultiInstance* multi, int vertexCount
 }
 
 void MultiDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
-	indirectBuffer->updateBufferMap(GL_SHADER_STORAGE_BUFFER, IndirectNormalIndex, multiRef->normalCount * sizeof(Indirect), (void*)multiRef->indirectsNormal);
-	indirectBuffer->updateBufferMap(GL_SHADER_STORAGE_BUFFER, IndirectSingleIndex, multiRef->singleCount * sizeof(Indirect), (void*)multiRef->indirectsSingle);
-	//updateNormal(render, state);
-	//updateSingle(render, state);
-
 	if (frame < DELAY_FRAME) frame++;
 	else {
 		dataBuffer->use();
@@ -81,7 +76,7 @@ void MultiDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
 		indirectBuffer->setShaderBase(IndirectSingleIndex, 4);
 		
 		render->useShader(state->shaderMulti);
-		glDispatchCompute(objectCount, 1, 1);
+		glDispatchCompute(ceilf((float)objectCount / WORKGROUPE_SIZE), 1, 1);
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
 		render->useShader(shader);
@@ -99,10 +94,14 @@ void MultiDrawcall::update(Render* render, RenderState* state) {
 	multiRef->updateTransform();
 	objectCount = multiRef->instanceCount;
 	dataBuffer->updateBufferData(PositionIndex, objectCount, (void*)(multiRef->transforms));
+
+	//indirectBuffer->updateBufferMap(GL_SHADER_STORAGE_BUFFER, IndirectNormalIndex, multiRef->normalCount * sizeof(Indirect), (void*)multiRef->indirectsNormal);
+	//indirectBuffer->updateBufferMap(GL_SHADER_STORAGE_BUFFER, IndirectSingleIndex, multiRef->singleCount * sizeof(Indirect), (void*)multiRef->indirectsSingle);
+	updateNormal(render, state);
+	updateSingle(render, state);
 }
 
 void MultiDrawcall::updateNormal(Render* render, RenderState* state) {
-	indirectBuffer->useAs(IndirectNormalIndex, GL_SHADER_STORAGE_BUFFER);
 	indirectBuffer->setShaderBase(IndirectNormalIndex, 1);
 	render->useShader(state->shaderFlush);
 	render->setShaderUintv(state->shaderFlush, "uBases", multiRef->normalCount, multiRef->normalBases);
@@ -111,7 +110,6 @@ void MultiDrawcall::updateNormal(Render* render, RenderState* state) {
 }
 
 void MultiDrawcall::updateSingle(Render* render, RenderState* state) {
-	indirectBuffer->useAs(IndirectSingleIndex, GL_SHADER_STORAGE_BUFFER);
 	indirectBuffer->setShaderBase(IndirectSingleIndex, 1);
 	render->useShader(state->shaderFlush);
 	render->setShaderUintv(state->shaderFlush, "uBases", multiRef->singleCount, multiRef->singleBases);

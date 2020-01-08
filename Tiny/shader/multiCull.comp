@@ -1,4 +1,4 @@
-layout(local_size_x = 1) in;
+layout(local_size_x = WORKGROUP_SIZE) in;
 
 struct Transform {
 	vec4 trans;
