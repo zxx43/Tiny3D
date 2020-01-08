@@ -12,10 +12,10 @@ private:
 	Indirect* readBuf;
 private:
 	RenderBuffer* indirectBuffer;
+	int meshCount;
 private:
 	RenderBuffer* createBuffers(MultiInstance* multi, int vertexCount, int indexCount, int objectCount);
-	void updateNormal(Render* render, RenderState* state);
-	void updateSingle(Render* render, RenderState* state);
+	void updateIndirect(Render* render, RenderState* state);
 public:
 	MultiDrawcall(MultiInstance* multi);
 	virtual ~MultiDrawcall();

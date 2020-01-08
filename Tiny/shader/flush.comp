@@ -1,14 +1,26 @@
 layout(local_size_x = 1) in;
 
-layout(binding = 1) buffer IndirectBuffer {
-	Indirect indirects[];
+layout(binding = 1) buffer IndirectNormalBuffer {
+	Indirect indirectsNormal[];
 };
 
-uniform uint uBases[128];
+layout(binding = 2) buffer IndirectSingleBuffer {
+	Indirect indirectsSingle[];
+};
+
+uniform uint uBasesNormal[64], uBasesSingle[32];
+uniform vec2 uCount;
 
 void main() {
 	uint curIndex = gl_GlobalInvocationID.x;
+	uvec2 iCount = uvec2(uCount);
 	
-	indirects[curIndex].primCount = 0;
-	indirects[curIndex].baseInstance = uBases[curIndex];
+	if(curIndex + 1 <= iCount.x) {
+		indirectsNormal[curIndex].primCount = 0;
+		indirectsNormal[curIndex].baseInstance = uBasesNormal[curIndex];
+	}
+	if(curIndex + 1 <= iCount.y) {
+		indirectsSingle[curIndex].primCount = 0;
+		indirectsSingle[curIndex].baseInstance = uBasesSingle[curIndex];
+	}
 }
