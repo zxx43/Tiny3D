@@ -14,8 +14,7 @@ Instance::Instance(Mesh* mesh) {
 }
 
 void Instance::create(Mesh* mesh) {
-	insId = -1;
-	insSingleId = -1;
+	insId = -1, insSingleId = -1, insBillId = -1;
 	instanceMesh = mesh;
 	vertexCount = 0;
 	indexCount = 0;
@@ -28,11 +27,9 @@ void Instance::create(Mesh* mesh) {
 	indexBuffer = NULL;
 
 	instanceCount = 0, maxInstanceCount = 0;
-	drawcall = NULL;
 	isBillboard = instanceMesh->isBillboard;
 
 	modelTransform = NULL;
-	billboards = NULL;
 	copyData = true;
 }
 
@@ -46,10 +43,9 @@ Instance::~Instance() {
 	if (indexBuffer) free(indexBuffer); indexBuffer = NULL;
 
 	if (copyData) {
-		if (modelTransform) free(modelTransform); modelTransform = NULL;
-		if (billboards) free(billboards); billboards = NULL;
+		if (modelTransform) free(modelTransform); 
+		modelTransform = NULL;
 	}
-	if (drawcall) delete drawcall;
 }
 
 void Instance::releaseInstanceData() {
@@ -62,8 +58,8 @@ void Instance::releaseInstanceData() {
 	if (indexBuffer) free(indexBuffer); indexBuffer = NULL;
 
 	if (copyData) {
-		if (modelTransform) free(modelTransform); modelTransform = NULL;
-		if (billboards) free(billboards); billboards = NULL;
+		if (modelTransform) free(modelTransform); 
+		modelTransform = NULL;
 	}
 }
 
@@ -135,12 +131,8 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 	}
 
 	copyData = copy;
-	if (copyData) {
-		if (isBillboard)
-			initBillboards(cnt);
-		else
-			initMatrices(cnt);
-	}
+	if (copyData) 
+		initMatrices(cnt);
 
 	maxInstanceCount = cnt;
 }
@@ -151,48 +143,14 @@ void Instance::initMatrices(int cnt) {
 	memset(modelTransform, 0, cnt * 16 * sizeof(buff));
 }
 
-void Instance::initBillboards(int cnt) {
-	billboards = (bill*)malloc(cnt * 6 * sizeof(bill));
-	memset(billboards, 0, cnt * 6 * sizeof(bill));
-}
-
 void Instance::setRenderData(InstanceData* data) {
 	instanceCount = data->count;
-	if (drawcall) drawcall->objectToPrepare = instanceCount;
 
 	if (copyData) {
 		if (data->transformsFull)
 			memcpy(modelTransform, data->transformsFull, instanceCount * 16 * sizeof(buff));
-		else if (data->billboards)
-			memcpy(billboards, data->billboards, instanceCount * 6 * sizeof(bill));
 	} else {
-		if (data->transformsFull) {
-			if (modelTransform != data->transformsFull) modelTransform = data->transformsFull;
-		} else if (data->billboards) {
-			if (billboards != data->billboards) billboards = data->billboards;
-		}
-	}
-}
-
-void Instance::createDrawcall() {
-	drawcall = new InstanceDrawcall(this);
-}
-
-void Instance::addObject(Object* object, int index) {
-	instanceCount++;
-	if (!billboards) {
-		if (modelTransform)
-			memcpy(modelTransform + (index * 16), object->transformsFull, 16 * sizeof(buff));
-	} else {
-		Material* mat = NULL;
-		if (MaterialManager::materials)
-			mat = MaterialManager::materials->find(object->billboard->material);
-
-		billboards[index * 6 + 0] = Float2Half(object->billboard->data[0]);
-		billboards[index * 6 + 1] = Float2Half(object->billboard->data[1]);
-		billboards[index * 6 + 2] = Float2Half(mat ? mat->texids.x : 0.0);
-		billboards[index * 6 + 3] = Float2Half(object->transformMatrix.entries[12]);
-		billboards[index * 6 + 4] = Float2Half(object->transformMatrix.entries[13]);
-		billboards[index * 6 + 5] = Float2Half(object->transformMatrix.entries[14]);
+		if (data->transformsFull && modelTransform != data->transformsFull) 
+			modelTransform = data->transformsFull;
 	}
 }

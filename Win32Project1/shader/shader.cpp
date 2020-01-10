@@ -107,6 +107,17 @@ void Shader::setInt(const char* param,int value) {
 		printf("value is: %d\n", value);
 }
 
+void Shader::setUint(const char* param, uint value) {
+	int location = findParamLocation(param);
+	if (location == INVALID_LOCATION) {
+		addParam(param);
+		location = findParamLocation(param);
+	}
+	if (location != INVALID_LOCATION && program)
+		glProgramUniform1ui(program->shaderProg, location, value);
+	getError(param, location);
+}
+
 void Shader::setUintv(const char* param, int count, uint* arr) {
 	int location = findParamLocation(param);
 	if (location == INVALID_LOCATION) {

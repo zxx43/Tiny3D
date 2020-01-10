@@ -9,7 +9,6 @@ Drawcall::Drawcall() {
 	setFullStatic(false);
 	objectCount = 0;
 	dataBuffer = NULL;
-	billboardDC = false;
 	frame = 0;
 }
 
@@ -34,12 +33,4 @@ void Drawcall::setFullStatic(bool stat) {
 
 bool Drawcall::isFullStatic() {
 	return fullStatic;
-}
-
-void Drawcall::setBillboard(bool billboard) {
-	billboardDC = billboard;
-}
-
-bool Drawcall::isBillboard() {
-	return billboardDC;
 }

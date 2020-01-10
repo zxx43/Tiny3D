@@ -210,9 +210,6 @@
     <ClCompile Include="render\animationDrawcall.cpp">
       <Filter>Source Files\render</Filter>
     </ClCompile>
-    <ClCompile Include="render\instanceDrawcall.cpp">
-      <Filter>Source Files\render</Filter>
-    </ClCompile>
     <ClCompile Include="render\render.cpp">
       <Filter>Source Files\render</Filter>
     </ClCompile>
@@ -435,9 +432,6 @@
       <Filter>Source Files\render</Filter>
     </ClInclude>
     <ClInclude Include="render\glheader.h">
-      <Filter>Source Files\render</Filter>
-    </ClInclude>
-    <ClInclude Include="render\instanceDrawcall.h">
       <Filter>Source Files\render</Filter>
     </ClInclude>
     <ClInclude Include="render\render.h">

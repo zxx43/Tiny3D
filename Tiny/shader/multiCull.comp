@@ -23,6 +23,10 @@ layout(binding = 4) buffer IndirectSingle {
 	Indirect singles[];
 };
 
+layout(binding = 5) buffer IndirectBill {
+	Indirect bills[];
+};
+
 layout(binding = 0) uniform sampler2D texDepth;
 uniform mat4 viewProjectMatrix;
 uniform float isColor;
@@ -33,13 +37,19 @@ void main() {
 	ivec4 meshid = ivec4(transform.mesh);
 
 	vec3 translate = transform.trans.xyz;
-	float scale = transform.trans.w;
-	vec4 rotate = transform.rotat;
-	mat4 outMat = Translate(translate) * QuatToMat4(rotate) * Scale(scale);
+	mat4 outMat;
+	if(meshid.z >= 0)
+		outMat = mat4(transform.trans, transform.rotat, transform.bound, transform.mesh);
+	else {
+		float scale = transform.trans.w;
+		vec4 rotate = transform.rotat;
+		outMat = Translate(translate) * QuatToMat4(rotate) * Scale(scale);
+	}
 
 	if(isColor < 0.1) {
 		if(meshid.x >= 0) outMatrices[normals[meshid.x].baseInstance + atomicAdd(normals[meshid.x].primCount, 1)] = outMat;
 		if(meshid.y >= 0) outMatrices[singles[meshid.y].baseInstance + atomicAdd(singles[meshid.y].primCount, 1)] = outMat;
+		if(meshid.z >= 0) outMatrices[bills[meshid.z].baseInstance + atomicAdd(bills[meshid.z].primCount, 1)] = outMat;
 	} else {
 		vec4 bound = transform.bound;
 		vec3 size = bound.xyz;
@@ -71,6 +81,7 @@ void main() {
 		else {
 			if(meshid.x >= 0) outMatrices[normals[meshid.x].baseInstance + atomicAdd(normals[meshid.x].primCount, 1)] = outMat;
 			if(meshid.y >= 0) outMatrices[singles[meshid.y].baseInstance + atomicAdd(singles[meshid.y].primCount, 1)] = outMat;
+			if(meshid.z >= 0) outMatrices[bills[meshid.z].baseInstance + atomicAdd(bills[meshid.z].primCount, 1)] = outMat;
 		}
 	}
 }

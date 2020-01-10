@@ -24,14 +24,17 @@ private:
 private:
 	std::vector<Indirect*> normals;
 	std::vector<Indirect*> singles;
+	std::vector<Indirect*> bills;
 public:
 	Indirect* indirects;
 	uint indirectCount;
 	Indirect* indirectsNormal;
 	Indirect* indirectsSingle;
-	uint normalCount, singleCount;
+	Indirect* indirectsBill;
+	uint normalCount, singleCount, billCount;
 	uint* normalBases;
 	uint* singleBases;
+	uint* billBases;
 	MultiDrawcall* drawcall;
 public:
 	MultiInstance();

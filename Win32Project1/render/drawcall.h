@@ -33,24 +33,21 @@ class Drawcall {
 private:
 	int type;
 	bool fullStatic;
-	bool billboardDC;
 public:
 	float* uModelMatrix;
 	float* uNormalMatrix;
 	int objectCount;
 	RenderBuffer* dataBuffer;
 	int frame;
-
+public:
 	Drawcall();
 	virtual ~Drawcall();
-
+public:
 	virtual void draw(Render* render, RenderState* state, Shader* shader) = 0;
 	void setType(int typ);
 	int getType();
 	void setFullStatic(bool stat);
 	bool isFullStatic();
-	void setBillboard(bool billboard);
-	bool isBillboard();
 };
 
 #endif /* DRAWCALL_H_ */

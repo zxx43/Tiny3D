@@ -8,14 +8,13 @@
 #ifndef INSTANCE_H_
 #define INSTANCE_H_
 
-#include "../render/instanceDrawcall.h"
 #include "instanceData.h"
 
 class Instance {
 public:
 	static std::map<Mesh*, int> instanceTable;
 public:
-	int insId, insSingleId;
+	int insId, insSingleId, insBillId;
 	Mesh* instanceMesh;
 	int vertexCount,indexCount;
 	float* vertexBuffer;
@@ -28,9 +27,7 @@ public:
 
 	int instanceCount, maxInstanceCount;
 	buff* modelTransform;
-	bill* billboards;
 
-	InstanceDrawcall* drawcall;
 	bool isBillboard;
 	bool copyData;
 
@@ -40,12 +37,9 @@ public:
 	void releaseInstanceData();
 	void initInstanceBuffers(Object* object,int vertices,int indices,int cnt,bool copy);
 	void setRenderData(InstanceData* data);
-	void addObject(Object* object, int index);
-	void createDrawcall();
 private:
 	void create(Mesh* mesh);
 	void initMatrices(int cnt);
-	void initBillboards(int cnt);
 };
 
 #endif /* INSTANCE_H_ */

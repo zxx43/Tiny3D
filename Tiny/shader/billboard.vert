@@ -2,14 +2,16 @@ uniform mat4 viewProjectMatrix;
 uniform vec3 viewRight;
 
 layout (location = 0) in vec3 vertex;
-layout (location = 1) in vec4 texcoord;
-layout (location = 2) in vec3 board;
-layout (location = 3) in vec3 position;
+layout (location = 2) in vec4 texcoord;
+layout (location = 6) in mat4 modelMatrix;
 
 out vec2 vTexcoord;
 flat out vec4 vTexid;
 
 void main() {
+	vec3 position = modelMatrix[0].xyz;
+	vec3 board = modelMatrix[1].xyz;
+
 	vec2 size = vertex.xy * board.xy;
 	vec3 right = size.x * viewRight;
 #ifdef ShadowPass

@@ -14,7 +14,6 @@
 
 typedef ushort half;
 typedef float buff;
-typedef half bill;
 
 mat4 lookAt(float eyeX, float eyeY, float eyeZ,
 		float centerX, float centerY, float centerZ,

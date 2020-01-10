@@ -1,6 +1,6 @@
 #include "multiInstance.h"
 
-const int MaxInstance = 1024;
+const int MaxInstance = 4096;
 
 MultiInstance::MultiInstance() {
 	vertexBuffer = NULL;
@@ -16,10 +16,10 @@ MultiInstance::MultiInstance() {
 	indirects = NULL;
 	indirectCount = 0;
 
-	normals.clear(), singles.clear();
-	indirectsNormal = NULL, indirectsSingle = NULL;
-	normalCount = 0, singleCount = 0;
-	normalBases = NULL, singleBases = NULL;
+	normals.clear(), singles.clear(), bills.clear();
+	indirectsNormal = NULL, indirectsSingle = NULL, indirectsBill = NULL;
+	normalCount = 0, singleCount = 0, billCount = 0;
+	normalBases = NULL, singleBases = NULL, billBases = NULL;
 
 	vertexCount = 0;
 	indexCount = 0;
@@ -45,7 +45,14 @@ void MultiInstance::releaseInstanceData() {
 	for (uint i = 0; i < singles.size(); i++)
 		free(singles[i]);
 	singles.clear();
+	for (uint i = 0; i < bills.size(); i++)
+		free(bills[i]);
+	bills.clear();
 	if (indirects) free(indirects); indirects = NULL;
+
+	if (indirectsNormal) free(indirectsNormal); indirectsNormal = NULL;
+	if (indirectsSingle) free(indirectsSingle); indirectsSingle = NULL;
+	if (indirectsBill) free(indirectsBill); indirectsBill = NULL;
 }
 
 MultiInstance::~MultiInstance() {
@@ -54,11 +61,9 @@ MultiInstance::~MultiInstance() {
 
 	insDatas.clear();
 
-	if (indirectsNormal) free(indirectsNormal);
-	if (indirectsSingle) free(indirectsSingle);
-
 	if (normalBases) free(normalBases);
 	if (singleBases) free(singleBases);
+	if (billBases) free(billBases);
 	
 	if (drawcall) delete drawcall;
 }
@@ -80,42 +85,53 @@ void MultiInstance::initBuffers() {
 		indirects[i].primCount = 0;
 		indirects[i].baseInstance = 0;
 
-		if (ins->instanceMesh->normalFaces.size() > 0) {
-			Indirect* idNorm = (Indirect*)malloc(sizeof(Indirect));
-			memcpy(idNorm, indirects + i, sizeof(Indirect));
-			
-			FaceBuf* buf = ins->instanceMesh->normalFaces[0];
-			idNorm->count = buf->count;
-			idNorm->firstIndex = indexCount + buf->start;
-			normals.push_back(idNorm);
-			ins->insId = normals.size() - 1;
-		}
-		if (ins->instanceMesh->singleFaces.size() > 0) {
-			Indirect* idSing = (Indirect*)malloc(sizeof(Indirect));
-			memcpy(idSing, indirects + i, sizeof(Indirect));
+		if (ins->isBillboard) {
+			Indirect* idBill = (Indirect*)malloc(sizeof(Indirect));
+			memcpy(idBill, indirects + i, sizeof(Indirect));
 
-			FaceBuf* buf = ins->instanceMesh->singleFaces[0];
-			idSing->count = buf->count;
-			idSing->firstIndex = indexCount + buf->start;
-			singles.push_back(idSing);
-			ins->insSingleId = singles.size() - 1;
+			bills.push_back(idBill);
+			ins->insBillId = bills.size() - 1;
+		} else {
+			if (ins->instanceMesh->normalFaces.size() > 0) {
+				Indirect* idNorm = (Indirect*)malloc(sizeof(Indirect));
+				memcpy(idNorm, indirects + i, sizeof(Indirect));
+
+				FaceBuf* buf = ins->instanceMesh->normalFaces[0];
+				idNorm->count = buf->count;
+				idNorm->firstIndex = indexCount + buf->start;
+				normals.push_back(idNorm);
+				ins->insId = normals.size() - 1;
+			}
+			if (ins->instanceMesh->singleFaces.size() > 0) {
+				Indirect* idSing = (Indirect*)malloc(sizeof(Indirect));
+				memcpy(idSing, indirects + i, sizeof(Indirect));
+
+				FaceBuf* buf = ins->instanceMesh->singleFaces[0];
+				idSing->count = buf->count;
+				idSing->firstIndex = indexCount + buf->start;
+				singles.push_back(idSing);
+				ins->insSingleId = singles.size() - 1;
+			}
 		}
 
 		vertexCount += ins->vertexCount;
 		indexCount += ins->indexCount;
 		maxInstance += ins->maxInstanceCount > MaxInstance ? MaxInstance : ins->maxInstanceCount;
 	}
-	normalCount = normals.size();
-	singleCount = singles.size();
+	normalCount = normals.size(), singleCount = singles.size(), billCount = bills.size();
 	indirectsNormal = (Indirect*)malloc(normalCount * sizeof(Indirect));
 	indirectsSingle = (Indirect*)malloc(singleCount * sizeof(Indirect));
+	indirectsBill = (Indirect*)malloc(billCount * sizeof(Indirect));
 	for (uint i = 0; i < normalCount; i++)
 		memcpy(indirectsNormal + i, normals[i], sizeof(Indirect));
 	for (uint i = 0; i < singleCount; i++)
 		memcpy(indirectsSingle + i, singles[i], sizeof(Indirect));
+	for (uint i = 0; i < billCount; i++)
+		memcpy(indirectsBill + i, bills[i], sizeof(Indirect));
 
 	normalBases = (uint*)malloc(normalCount * sizeof(uint));
 	singleBases = (uint*)malloc(singleCount * sizeof(uint));
+	billBases = (uint*)malloc(billCount * sizeof(uint));
 
 	vertexBuffer = (float*)malloc(vertexCount * 3 * sizeof(float));
 	normalBuffer = (half*)malloc(vertexCount * 3 * sizeof(half));
@@ -144,24 +160,21 @@ void MultiInstance::initBuffers() {
 
 void MultiInstance::updateTransform() {
 	instanceCount = 0;
-	int curNorm = 0, curSing = 0;
+	int curNorm = 0, curSing = 0, curBill = 0;
 	for (uint i = 0; i < indirectCount; i++) {
 		Instance* ins = insDatas[i];
-		if (ins->instanceMesh->normalFaces.size() > 0) {
-			indirectsNormal[curNorm].primCount = 0;
-			indirectsNormal[curNorm].baseInstance = instanceCount;
-			normalBases[curNorm] = instanceCount;
-			curNorm++;
-		}
-		if (ins->instanceMesh->singleFaces.size() > 0) {
-			indirectsSingle[curSing].primCount = 0;
-			indirectsSingle[curSing].baseInstance = instanceCount;
-			singleBases[curSing] = instanceCount;
-			curSing++;
+		if (ins->isBillboard)
+			billBases[curBill++] = instanceCount;
+		else {
+			if (ins->instanceMesh->normalFaces.size() > 0)
+				normalBases[curNorm++] = instanceCount;
+			if (ins->instanceMesh->singleFaces.size() > 0)
+				singleBases[curSing++] = instanceCount;
 		}
 
-		if (ins->instanceCount > 0) 
+		if (ins->instanceCount > 0) {
 			memcpy(transforms + instanceCount * 16, ins->modelTransform, ins->instanceCount * 16 * sizeof(buff));
-		instanceCount += ins->instanceCount;
+			instanceCount += ins->instanceCount;
+		}
 	}
 }

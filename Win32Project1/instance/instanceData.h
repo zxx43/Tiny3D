@@ -10,7 +10,6 @@ class InstanceData {
 public:
 	Mesh* insMesh;
 	buff* transformsFull;
-	bill* billboards;
 	int count, maxInsCount;
 	Object* object;
 	Instance* instance;

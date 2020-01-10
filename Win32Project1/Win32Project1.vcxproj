@@ -207,7 +207,6 @@
     <ClCompile Include="render\animationDrawcall.cpp" />
     <ClCompile Include="render\computeDrawcall.cpp" />
     <ClCompile Include="render\drawcall.cpp" />
-    <ClCompile Include="render\instanceDrawcall.cpp" />
     <ClCompile Include="render\multiDrawcall.cpp" />
     <ClCompile Include="render\render.cpp" />
     <ClCompile Include="render\renderManager.cpp" />
@@ -283,7 +282,6 @@
     <ClInclude Include="render\computeDrawcall.h" />
     <ClInclude Include="render\drawcall.h" />
     <ClInclude Include="render\glheader.h" />
-    <ClInclude Include="render\instanceDrawcall.h" />
     <ClInclude Include="render\multiDrawcall.h" />
     <ClInclude Include="render\render.h" />
     <ClInclude Include="render\renderBuffer.h" />

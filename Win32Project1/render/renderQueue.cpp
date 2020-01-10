@@ -118,13 +118,7 @@ void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState
 		InstanceData* data = itData->second;
 		pushDatasToInstance(scene, data, false);
 		Instance* instance = data->instance;
-		if (instance && instance->isBillboard) {
-			if (!instance->drawcall) instance->createDrawcall();
-			if (data->count > 0 && (instance->modelTransform || instance->billboards)) {
-				instance->drawcall->updateInstances(instance, state->pass);
-				render->draw(camera, instance->drawcall, state);
-			}
-		} else if (instance && !instance->isBillboard) {
+		if (instance) {
 			if (!multiInstance) multiInstance = new MultiInstance();
 			if (!multiInstance->inited()) multiInstance->add(instance);
 		}
@@ -202,7 +196,21 @@ void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camer
 				if (child->checkInCamera(camera)) {
 					if (child->type != TYPE_INSTANCE && child->type != TYPE_STATIC)
 						queue->push(child);
-					else if (child->type == TYPE_STATIC) {
+					else if (child->type == TYPE_INSTANCE) {
+						child->needCreateDrawcall = false;
+						child->needUpdateDrawcall = false;
+
+						for (uint j = 0; j < child->objects.size(); ++j) {
+							Object* object = child->objects[j];
+							if (queue->shadowLevel > 0 && !object->genShadow) continue;
+							if (object->checkInCamera(camera)) {
+								Mesh* mesh = queue->queryLodMesh(object, mainCamera->position);
+								if (!mesh) continue;
+								InstanceData* insData = queue->instanceQueue[mesh];
+								insData->addInstance(object);
+							}
+						}
+					} else if (child->type == TYPE_STATIC) {
 						if (!((StaticNode*)child)->isDynamicBatch())
 							queue->push(child);
 						else {
@@ -218,20 +226,6 @@ void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camer
 										queue->batchData = new BatchData();
 									queue->batchData->addObject(object, mesh);
 								}
-							}
-						}
-					} else if (child->type == TYPE_INSTANCE) {
-						child->needCreateDrawcall = false;
-						child->needUpdateDrawcall = false;
-						
-						for (uint j = 0; j < child->objects.size(); ++j) {
-							Object* object = child->objects[j];
-							if (queue->shadowLevel > 0 && !object->genShadow) continue;
-							if (object->checkInCamera(camera)) {
-								Mesh* mesh = queue->queryLodMesh(object, mainCamera->position);
-								if (!mesh) continue;
-								InstanceData* insData = queue->instanceQueue[mesh];
-								insData->addInstance(object);
 							}
 						}
 					}

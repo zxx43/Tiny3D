@@ -63,6 +63,7 @@ public:
 	int findParamLocation(const char* param);
 	bool getError(const char* param, int location);
 	void setInt(const char* param,int value);
+	void setUint(const char* param, uint value);
 	void setUintv(const char* param, int count, uint* arr);
 	void setSampler(const char* param,int value);
 	void setFloat(const char* param,float value);
