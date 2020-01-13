@@ -145,7 +145,6 @@ void main() {
 	vec3 ndcPos = vec3(vTexcoord, depth) * 2.0 - 1.0;
 	vec4 tex = texture2D(texBuffer, vTexcoord);
 	vec3 albedo = tex.rgb;
-	if(useCartoon > 0.5) albedo *= 2.0;
 	vec3 sceneColor = albedo;
 	vec3 bright = vec3(0.0);
 
@@ -170,26 +169,28 @@ void main() {
 		ndotl = max(ndotl, 0.0);
 
 		float shadowFactor = (useShadow != 0) ? tex.a * genShadowFactor(worldPos, depthView, bias) : 1.0;
-
-		//sceneColor *= dot(material, vec3(1.0, shadowFactor * ndotl, 0.0));
-
-		// SSG
-		float grassFlag = normalGrass.a;
-		//albedo = Smudge(albedo, grassFlag, depthView);
-
-		// Cook-Torrance BRDF	
-		vec3 F0 = mix(vec3(0.04), albedo, roughMetal.g);	
-        float NDF = DistributionGGX(normal, h, roughMetal.r);   
-        float G   = GeometrySmith(normal, v, ndotl, roughMetal.r);      
-        vec3 kS   = FresnelSchlick(max(dot(h, v), 0.0), F0);
-		vec3 kD   = (vec3(1.0) - kS) * (1.0 - roughMetal.g);	 
-
-        float specular = (NDF * G) / (4.0 * max(dot(normal, v), 0.0) * ndotl + 0.001);
-
-		vec3 Lo = (kD * albedo * INV_PI + kS * specular) * radiance * ndotl;
 		vec3 ambient = material.r * albedo;
 
-		sceneColor = ambient + shadowFactor * Lo;
+		if(useCartoon < 0.5) { // PBR
+			// Cook-Torrance BRDF	
+			vec3 F0 = mix(vec3(0.04), albedo, roughMetal.g);	
+			float NDF = DistributionGGX(normal, h, roughMetal.r);   
+			float G   = GeometrySmith(normal, v, ndotl, roughMetal.r);      
+			vec3 kS   = FresnelSchlick(max(dot(h, v), 0.0), F0);
+			vec3 kD   = (vec3(1.0) - kS) * (1.0 - roughMetal.g);	 
+
+			float specular = (NDF * G) / (4.0 * max(dot(normal, v), 0.0) * ndotl + 0.001);
+			vec3 Lo = (kD * albedo * INV_PI + kS * specular) * radiance * ndotl;
+
+			sceneColor = ambient + shadowFactor * Lo;
+		} else { // Cartoon
+			float darkness = ndotl * shadowFactor;
+			vec3 kCool = vec3(0.01, 0.01, 0.1), kWarm = vec3(0.9, 0.9, 0.25);
+			float threshold = 0.1;
+			vec3 kd = darkness < threshold ? kCool : kWarm;
+
+			sceneColor = ambient + kd * albedo * material.g;
+		}
 	} else {
 		bright = sceneColor * 1.5;
 	}

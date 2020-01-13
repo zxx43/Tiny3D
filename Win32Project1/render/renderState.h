@@ -30,7 +30,6 @@ struct RenderState {
 	vec3* eyePos;
 	Shader* shader;
 	Shader* shaderIns;
-	Shader* shaderBillboard;
 	Shader* shaderCompute;
 	Shader* shaderMulti;
 	Shader* shaderFlush;
@@ -69,7 +68,6 @@ struct RenderState {
 		eyePos = rhs->eyePos;
 		shader = rhs->shader;
 		shaderIns = rhs->shaderIns;
-		shaderBillboard = rhs->shaderBillboard;
 		shaderCompute = rhs->shaderCompute;
 		shaderMulti = rhs->shaderMulti;
 		shaderFlush = rhs->shaderFlush;
@@ -98,7 +96,6 @@ struct RenderState {
 		shadow = NULL;
 		shader = NULL;
 		shaderIns = NULL;
-		shaderBillboard = NULL;
 		shaderCompute = NULL;
 		shaderMulti = NULL;
 		shaderFlush = NULL;

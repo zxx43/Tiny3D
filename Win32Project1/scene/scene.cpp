@@ -12,7 +12,7 @@ using namespace std;
 
 Scene::Scene() {
 	inited = false;
-	mainCamera = new Camera(20.0);
+	mainCamera = new Camera(25.0);
 	reflectCamera = NULL;
 	skyBox = NULL;
 	water = NULL;

@@ -49,10 +49,6 @@ void MultiInstance::releaseInstanceData() {
 		free(bills[i]);
 	bills.clear();
 	if (indirects) free(indirects); indirects = NULL;
-
-	if (indirectsNormal) free(indirectsNormal); indirectsNormal = NULL;
-	if (indirectsSingle) free(indirectsSingle); indirectsSingle = NULL;
-	if (indirectsBill) free(indirectsBill); indirectsBill = NULL;
 }
 
 MultiInstance::~MultiInstance() {
@@ -64,6 +60,10 @@ MultiInstance::~MultiInstance() {
 	if (normalBases) free(normalBases);
 	if (singleBases) free(singleBases);
 	if (billBases) free(billBases);
+
+	if (indirectsNormal) free(indirectsNormal); indirectsNormal = NULL;
+	if (indirectsSingle) free(indirectsSingle); indirectsSingle = NULL;
+	if (indirectsBill) free(indirectsBill); indirectsBill = NULL;
 	
 	if (drawcall) delete drawcall;
 }
@@ -163,13 +163,21 @@ void MultiInstance::updateTransform() {
 	int curNorm = 0, curSing = 0, curBill = 0;
 	for (uint i = 0; i < indirectCount; i++) {
 		Instance* ins = insDatas[i];
-		if (ins->isBillboard)
+		if (ins->isBillboard) {
+			indirectsBill[curBill].primCount = 0;
+			indirectsBill[curBill].baseInstance = instanceCount;
 			billBases[curBill++] = instanceCount;
-		else {
-			if (ins->instanceMesh->normalFaces.size() > 0)
+		} else {
+			if (ins->instanceMesh->normalFaces.size() > 0) {
+				indirectsNormal[curNorm].primCount = 0;
+				indirectsNormal[curNorm].baseInstance = instanceCount;
 				normalBases[curNorm++] = instanceCount;
-			if (ins->instanceMesh->singleFaces.size() > 0)
+			}
+			if (ins->instanceMesh->singleFaces.size() > 0) {
+				indirectsSingle[curSing].primCount = 0;
+				indirectsSingle[curSing].baseInstance = instanceCount;
 				singleBases[curSing++] = instanceCount;
+			}
 		}
 
 		if (ins->instanceCount > 0) {

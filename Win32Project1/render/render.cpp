@@ -229,9 +229,8 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 
 				// Billboard drawcall
 				if (drawcall->getType() == MULTI_DC) {
-					state->shaderBillboard->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
 					if (state->pass != COLOR_PASS)
-						state->shaderBillboard->setVector3("viewRight", state->light.z, 0.0, -state->light.x);
+						shader->setVector3("viewRight", state->light.z, 0.0, -state->light.x);
 					else if (state->pass == COLOR_PASS) {
 						static vec3 upVec(0.0, 1.0, 0.0);
 						vec3 viewRight(camera->viewMatrix.entries[0], camera->viewMatrix.entries[4], camera->viewMatrix.entries[8]);
@@ -239,8 +238,8 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 						normal.x = normal.x * 0.5 + 0.5;
 						normal.y = normal.y * 0.5 + 0.5;
 						normal.z = normal.z * 0.5 + 0.5;
-						state->shaderBillboard->setVector3v("uNormal", normal);
-						state->shaderBillboard->setVector3v("viewRight", viewRight);
+						shader->setVector3v("uNormal", normal);
+						shader->setVector3v("viewRight", viewRight);
 					} 
 				}
 

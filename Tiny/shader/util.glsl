@@ -13,6 +13,8 @@ const vec4 CenterPosition = vec4(0.0, 0.0, 0.0, 1.0);
 const vec4 FAIL_COLOR = vec4(1.0, 1.0, 1.0, 0.0);
 const vec3 UP_VEC3 = vec3(0.0, 1.0, 0.0);
 const vec3 ZERO_VEC3 = vec3(0.0);
+const vec4 BoardMat = vec4(0.3, 0.0, 0.0, 1.0);
+const vec4 BoardRM = vec4(0.0, 0.0, 0.0, 1.0);
 
 #define MAX_TEX 128
 #define MAX_BONE 100

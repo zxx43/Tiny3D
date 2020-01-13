@@ -10,6 +10,8 @@ private:
 	int vertexCount, indexCount, maxObjectCount;
 	MultiInstance* multiRef;
 	Indirect* readBuf;
+	bool mapIndirect;
+	GLbitfield barrier;
 private:
 	RenderBuffer* indirectBuffer;
 	int meshCount;

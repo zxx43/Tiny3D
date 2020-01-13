@@ -158,7 +158,6 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	state->pass = NEAR_SHADOW_PASS;
 	state->shader = phongShadowShader;
 	state->shaderIns = phongShadowInsShader;
-	state->shaderBillboard = billboardShadowShader;
 	state->shaderCompute = cullShader;
 	state->shaderMulti = multiShader;
 	state->shaderFlush = flushShader;
@@ -268,7 +267,6 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 
 	state->shader = phongShader;
 	state->shaderIns = phongInsShader;
-	state->shaderBillboard = billboardShader;
 	state->shaderCompute = cullShader;
 	state->shaderMulti = multiShader;
 	state->shaderFlush = flushShader;
