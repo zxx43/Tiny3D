@@ -78,6 +78,7 @@ public:
 	void setShaderFloat(Shader* shader, const char* param, float value) { shader->setFloat(param, value); }
 	void setShaderVec2(Shader* shader, const char* param, float x, float y) { shader->setVector2(param, x, y); }
 	void setShaderVec3(Shader* shader, const char* param, float x, float y, float z) { shader->setVector3(param, x, y, z); }
+	void setShaderUVec3(Shader* shader, const char* param, uint x, uint y, uint z) { shader->setUVector3(param, x, y, z); }
 	void setShaderVec4(Shader* shader, const char* param, float x, float y, float z, float w) { shader->setVector4(param, x, y, z, w); }
 	void setShaderVec2v(Shader* shader, const char* param, float* arr) { shader->setVector2v(param, arr); }
 	void setShaderVec3v(Shader* shader, const char* param, float* arr) { shader->setVector3v(param, arr); }

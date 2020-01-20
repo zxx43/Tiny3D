@@ -4,6 +4,9 @@
 AnimationObject::AnimationObject(Animation* anim):Object() {
 	animation=anim; // no mesh!
 	anglex=0; angley=0; anglez=0;
+
+	transforms = (float*)malloc(4 * sizeof(float));
+	transformsFull = (buff*)malloc(16 * sizeof(buff));
 }
 
 AnimationObject::AnimationObject(const AnimationObject& rhs) {
@@ -31,9 +34,22 @@ AnimationObject::AnimationObject(const AnimationObject& rhs) {
 
 	if (rhs.billboard)
 		setBillboard(rhs.billboard->data[0], rhs.billboard->data[1], rhs.billboard->material);
+	if (rhs.transforms) {
+		transforms = (float*)malloc(4 * sizeof(float));
+		memcpy(transforms, rhs.transforms, 4 * sizeof(float));
+	}
+	if (rhs.transformsFull) {
+		transformsFull = (buff*)malloc(16 * sizeof(buff));
+		memcpy(transformsFull, rhs.transformsFull, 16 * sizeof(buff));
+	}
 }
 
-AnimationObject::~AnimationObject() {}
+AnimationObject::~AnimationObject() {
+	if (transforms) free(transforms);
+	transforms = NULL;
+	if (transformsFull) free(transformsFull);
+	transformsFull = NULL;
+}
 
 AnimationObject* AnimationObject::clone() {
 	return new AnimationObject(*this);

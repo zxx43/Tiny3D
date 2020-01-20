@@ -33,20 +33,12 @@ MultiDrawcall::MultiDrawcall(MultiInstance* multi) :Drawcall() {
 	indexCount = multiRef->indexCount;
 	maxObjectCount = multiRef->maxInstance;
 
-	readBuf = (Indirect*)malloc(multiRef->indirectCount * sizeof(Indirect));
 	dataBuffer = createBuffers(multiRef, vertexCount, indexCount, maxObjectCount);
-	
-	mapIndirect = true;
-	barrier = mapIndirect ? GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT : GL_SHADER_STORAGE_BARRIER_BIT;
-	void* normBuf = mapIndirect ? NULL : multiRef->indirectsNormal;
-	void* singBuf = mapIndirect ? NULL : multiRef->indirectsSingle;
-	void* billBuf = mapIndirect ? NULL : multiRef->indirectsBill;
-	GLenum bufDraw = mapIndirect ? GL_DYNAMIC_DRAW : GL_STREAM_DRAW;
 
 	indirectBuffer = new RenderBuffer(3, false);
-	indirectBuffer->setBufferData(GL_SHADER_STORAGE_BUFFER, IndirectNormalIndex, GL_ONE, multiRef->normalCount * sizeof(Indirect), bufDraw, normBuf);
-	indirectBuffer->setBufferData(GL_SHADER_STORAGE_BUFFER, IndirectSingleIndex, GL_ONE, multiRef->singleCount * sizeof(Indirect), bufDraw, singBuf);
-	indirectBuffer->setBufferData(GL_SHADER_STORAGE_BUFFER, IndirectBillIndex, GL_ONE, multiRef->billCount * sizeof(Indirect), bufDraw, billBuf);
+	indirectBuffer->setBufferData(GL_SHADER_STORAGE_BUFFER, IndirectNormalIndex, GL_ONE, multiRef->normalCount * sizeof(Indirect), GL_STREAM_DRAW, multiRef->indirectsNormal);
+	indirectBuffer->setBufferData(GL_SHADER_STORAGE_BUFFER, IndirectSingleIndex, GL_ONE, multiRef->singleCount * sizeof(Indirect), GL_STREAM_DRAW, multiRef->indirectsSingle);
+	indirectBuffer->setBufferData(GL_SHADER_STORAGE_BUFFER, IndirectBillIndex, GL_ONE, multiRef->billCount * sizeof(Indirect), GL_STREAM_DRAW, multiRef->indirectsBill);
 	meshCount = multiRef->normalCount > multiRef->singleCount ? multiRef->normalCount : multiRef->singleCount;
 	meshCount = meshCount > multiRef->billCount ? meshCount : multiRef->billCount;
 
@@ -55,7 +47,6 @@ MultiDrawcall::MultiDrawcall(MultiInstance* multi) :Drawcall() {
 }
 
 MultiDrawcall::~MultiDrawcall() {
-	if (readBuf) free(readBuf);
 	if (indirectBuffer) free(indirectBuffer);
 }
 
@@ -69,7 +60,7 @@ RenderBuffer* MultiDrawcall::createBuffers(MultiInstance* multi, int vertexCount
 	buffer->setAttribData(GL_ARRAY_BUFFER, TangentIndex, TangentSlot, GL_HALF_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, multi->tangentBuffer);
 	buffer->setBufferData(GL_ELEMENT_ARRAY_BUFFER, Index, GL_UNSIGNED_SHORT, indexCount, GL_STATIC_DRAW, multi->indexBuffer);
 
-	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, PositionIndex, GL_FLOAT, objectCount, 16, GL_DYNAMIC_DRAW, NULL);
+	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, PositionIndex, GL_FLOAT, objectCount, 16, GL_STREAM_DRAW, NULL);
 	buffer->setAttribData(GL_SHADER_STORAGE_BUFFER, PositionOutIndex, PositionSlot, GL_FLOAT, objectCount, 4, 4, false, GL_STREAM_DRAW, 1, NULL);
 	buffer->useAs(PositionOutIndex, GL_ARRAY_BUFFER);
 	buffer->setAttrib(PositionOutIndex);
@@ -86,29 +77,42 @@ void MultiDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
 		indirectBuffer->setShaderBase(IndirectNormalIndex, 3);
 		indirectBuffer->setShaderBase(IndirectSingleIndex, 4);
 		indirectBuffer->setShaderBase(IndirectBillIndex, 5);
-		
+
 		render->useShader(state->shaderMulti);
-		glDispatchCompute(ceilf((float)objectCount / WORKGROUPE_SIZE), 1, 1);
-		glMemoryBarrier(barrier);
+		int dispatch = objectCount > MAX_DISPATCH ? MAX_DISPATCH : objectCount;
+		render->setShaderUint(state->shaderMulti, "pass", 0);
+		glDispatchCompute(dispatch, 1, 1);
+		if (objectCount > MAX_DISPATCH) {
+			dispatch = objectCount - MAX_DISPATCH;
+			render->setShaderUint(state->shaderMulti, "pass", 1);
+			glDispatchCompute(dispatch, 1, 1);
+		}
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
 		render->useShader(shader);
 
 		// Draw normal faces
 		render->setShaderFloat(shader, "billboardPass", 0.0);
-		indirectBuffer->useAs(IndirectNormalIndex, GL_DRAW_INDIRECT_BUFFER);
-		glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, 0, multiRef->normalCount, 0);
+		if (multiRef->normalCount > 0) {
+			indirectBuffer->useAs(IndirectNormalIndex, GL_DRAW_INDIRECT_BUFFER);
+			glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, 0, multiRef->normalCount, 0);
+		}
 
 		// Draw single faces
-		if (state->pass < COLOR_PASS) render->setCullMode(CULL_BACK);
-		else render->setCullState(false);
-		indirectBuffer->useAs(IndirectSingleIndex, GL_DRAW_INDIRECT_BUFFER);
-		glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, 0, multiRef->singleCount, 0);
+		if (multiRef->singleCount > 0) {
+			if (state->pass < COLOR_PASS) render->setCullMode(CULL_BACK);
+			else render->setCullState(false);
+			indirectBuffer->useAs(IndirectSingleIndex, GL_DRAW_INDIRECT_BUFFER);
+			glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, 0, multiRef->singleCount, 0);
+		}
 
 		// Draw billboard faces
-		render->setShaderFloat(shader, "billboardPass", 1.0);
-		if (state->pass < COLOR_PASS) render->setCullState(false);
-		indirectBuffer->useAs(IndirectBillIndex, GL_DRAW_INDIRECT_BUFFER);
-		glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, 0, multiRef->billCount, 0);
+		if (multiRef->billCount > 0) {
+			render->setShaderFloat(shader, "billboardPass", 1.0);
+			if (state->pass < COLOR_PASS) render->setCullState(false);
+			indirectBuffer->useAs(IndirectBillIndex, GL_DRAW_INDIRECT_BUFFER);
+			glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, 0, multiRef->billCount, 0);
+		}
 	}
 }
 
@@ -116,26 +120,24 @@ void MultiDrawcall::update(Render* render, RenderState* state) {
 	multiRef->updateTransform();
 	objectCount = multiRef->instanceCount;
 	dataBuffer->updateBufferData(PositionIndex, objectCount, (void*)(multiRef->transforms));
+	//dataBuffer->updateBufferMap(GL_SHADER_STORAGE_BUFFER, PositionIndex, objectCount, (void*)multiRef->transforms);
 	updateIndirect(render, state);
 }
 
 void MultiDrawcall::updateIndirect(Render* render, RenderState* state) {
-	if (!mapIndirect) {
-		indirectBuffer->setShaderBase(IndirectNormalIndex, 1);
-		indirectBuffer->setShaderBase(IndirectSingleIndex, 2);
-		indirectBuffer->setShaderBase(IndirectBillIndex, 3);
-
-		render->useShader(state->shaderFlush);
+	indirectBuffer->setShaderBase(IndirectNormalIndex, 1);
+	indirectBuffer->setShaderBase(IndirectSingleIndex, 2);
+	indirectBuffer->setShaderBase(IndirectBillIndex, 3);
+	
+	render->useShader(state->shaderFlush);
+	render->setShaderUVec3(state->shaderFlush, "uCount", multiRef->normalCount, multiRef->singleCount, multiRef->billCount);
+	if (multiRef->normalCount > 0)
 		render->setShaderUintv(state->shaderFlush, "uBasesNormal", multiRef->normalCount, multiRef->normalBases);
+	if (multiRef->singleCount > 0)
 		render->setShaderUintv(state->shaderFlush, "uBasesSingle", multiRef->singleCount, multiRef->singleBases);
+	if (multiRef->billCount > 0)
 		render->setShaderUintv(state->shaderFlush, "uBasesBill", multiRef->billCount, multiRef->billBases);
-		render->setShaderVec3(state->shaderFlush, "uCount", (float)multiRef->normalCount, (float)multiRef->singleCount, (float)multiRef->billCount);
-		glDispatchCompute(meshCount, 1, 1);
-		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-	} else {
-		indirectBuffer->updateBufferMap(GL_SHADER_STORAGE_BUFFER, IndirectNormalIndex, multiRef->normalCount * sizeof(Indirect), (void*)multiRef->indirectsNormal);
-		indirectBuffer->updateBufferMap(GL_SHADER_STORAGE_BUFFER, IndirectSingleIndex, multiRef->singleCount * sizeof(Indirect), (void*)multiRef->indirectsSingle);
-		indirectBuffer->updateBufferMap(GL_SHADER_STORAGE_BUFFER, IndirectBillIndex, multiRef->billCount * sizeof(Indirect), (void*)multiRef->indirectsBill);
-	}
+	glDispatchCompute(meshCount, 1, 1);
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 

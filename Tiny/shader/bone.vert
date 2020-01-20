@@ -1,6 +1,5 @@
 uniform mat4 viewProjectMatrix;
 uniform mat4 uModelMatrix;
-uniform mat3 uNormalMatrix;
 uniform mat3x4 boneMats[MAX_BONE];
 
 layout (location = 0) in vec3 vertex;
@@ -28,15 +27,21 @@ void main() {
     
     vec4 position = boneMat * vec4(vertex, 1.0);
 
+	vec3 translate = uModelMatrix[0].xyz;
+	float scale = uModelMatrix[0].w;
+	vec4 rotate = uModelMatrix[1];
+	mat4 modelMat = Translate(translate) * QuatToMat4(rotate) * Scale(scale);
+
 #ifndef ShadowPass
 	vColor = MatScale * color * 0.005;
-	mat3 normalMat = uNormalMatrix * mat3(boneMat);
+	mat3 matRot = mat3(modelMat);
+	mat3 normalMat = matRot * mat3(boneMat);
 	vNormal = normalMat * normal;
 	vTBN = normalMat * GetTBN(normal, tangent);
 	vTexcoord = texcoord.xy;
 	vTexid = vec4(texcoord.zw, texid);
 #endif
 
-	vec4 modelPosition = uModelMatrix * position;
+	vec4 modelPosition = modelMat * position;
 	gl_Position = viewProjectMatrix * modelPosition;
 }

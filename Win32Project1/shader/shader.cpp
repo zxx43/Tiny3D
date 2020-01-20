@@ -168,6 +168,18 @@ void Shader::setVector3(const char* param,float x,float y,float z) {
 		printf("vec3 is: %f,%f,%f\n", x, y, z);
 }
 
+void Shader::setUVector3(const char* param, uint x, uint y, uint z) {
+	int location = findParamLocation(param);
+	if (location == INVALID_LOCATION) {
+		addParam(param);
+		location = findParamLocation(param);
+	}
+	if (location != INVALID_LOCATION && program)
+		glProgramUniform3ui(program->shaderProg, location, x, y, z);
+	if (getError(param, location))
+		printf("vec3 is: %d,%d,%d\n", x, y, z);
+}
+
 void Shader::setVector4(const char* param,float x,float y,float z,float w) {
 	int location = findParamLocation(param);
 	if (location == INVALID_LOCATION) {

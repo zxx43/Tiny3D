@@ -13,12 +13,14 @@ RenderQueue::RenderQueue(int type, float midDis, float lowDis) {
 	queue = new Queue(1);
 	instanceQueue.clear();
 	multiInstance = NULL;
+	billboards = NULL;
 	batchData = NULL;
 	midDistSqr = powf(midDis, 2);
 	lowDistSqr = powf(lowDis, 2);
 	dual = true;
 	shadowLevel = 0;
 	firstFlush = true;
+	dualInstances = true;
 }
 
 RenderQueue::~RenderQueue() {
@@ -26,6 +28,7 @@ RenderQueue::~RenderQueue() {
 
 	if (batchData) delete batchData;
 	if (multiInstance) delete multiInstance;
+	if (billboards) delete billboards;
 
 	map<Mesh*, InstanceData*>::iterator itIns;
 	for (itIns = instanceQueue.begin(); itIns != instanceQueue.end(); ++itIns)
@@ -93,15 +96,10 @@ void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState
 		if (node->type == TYPE_STATIC) 
 			render->draw(camera, node->drawcall, state);
 		else if (node->type == TYPE_ANIMATE) {
-			node->drawcall->uModelMatrix = node->uTransformMatrix->entries;
-
-			if (!node->drawcall->uNormalMatrix)
-				node->drawcall->uNormalMatrix = (float*)malloc(9 * sizeof(float));
-			memcpy(node->drawcall->uNormalMatrix, node->uNormalMatrix->entries, 3 * sizeof(float));
-			memcpy(node->drawcall->uNormalMatrix + 3, node->uNormalMatrix->entries + 4, 3 * sizeof(float));
-			memcpy(node->drawcall->uNormalMatrix + 6, node->uNormalMatrix->entries + 8, 3 * sizeof(float));
-
-			render->draw(camera, node->drawcall, state);
+			if (node->drawcall) {
+				node->drawcall->uModelMatrix = node->objects[0]->transformsFull;
+				render->draw(camera, node->drawcall, state);
+			}
 		} else if (node->type == TYPE_TERRAIN) {
 			if (state->pass == COLOR_PASS) {
 				static Shader* terrainShader = render->findShader("terrain");
@@ -119,8 +117,18 @@ void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState
 		pushDatasToInstance(scene, data, false);
 		Instance* instance = data->instance;
 		if (instance) {
-			if (!multiInstance) multiInstance = new MultiInstance();
-			if (!multiInstance->inited()) multiInstance->add(instance);
+			if (!dualInstances) {
+				if (!multiInstance) multiInstance = new MultiInstance();
+				if (!multiInstance->inited()) multiInstance->add(instance);
+			} else {
+				if (!instance->isBillboard) {
+					if (!multiInstance) multiInstance = new MultiInstance();
+					if (!multiInstance->inited()) multiInstance->add(instance);
+				} else {
+					if (!billboards) billboards = new MultiInstance();
+					if (!billboards->inited()) billboards->add(instance);
+				}
+			}
 		}
 		++itData;
 		//if (instance && Instance::instanceTable[instance->instanceMesh] == 0)
@@ -134,6 +142,15 @@ void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState
 		}
 		multiInstance->drawcall->update(render, state);
 		render->draw(camera, multiInstance->drawcall, state);
+	}
+
+	if (billboards) {
+		if (!billboards->inited()) {
+			billboards->initBuffers();
+			billboards->createDrawcall();
+		}
+		billboards->drawcall->update(render, state);
+		render->draw(camera, billboards->drawcall, state);
 	}
 	
 	if (batchData) {
@@ -206,6 +223,7 @@ void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camer
 							if (object->checkInCamera(camera)) {
 								Mesh* mesh = queue->queryLodMesh(object, mainCamera->position);
 								if (!mesh) continue;
+								if (queue->shadowLevel > 0 && !mesh->drawShadow) continue;
 								InstanceData* insData = queue->instanceQueue[mesh];
 								insData->addInstance(object);
 							}
@@ -222,6 +240,7 @@ void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camer
 								if (object->checkInCamera(camera)) {
 									Mesh* mesh = queue->queryLodMesh(object, mainCamera->position);
 									if (!mesh) continue;
+									if (queue->shadowLevel > 0 && !mesh->drawShadow) continue;
 									if (!queue->batchData)
 										queue->batchData = new BatchData();
 									queue->batchData->addObject(object, mesh);

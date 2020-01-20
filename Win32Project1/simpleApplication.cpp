@@ -243,11 +243,12 @@ void SimpleApplication::updateMovement() {
 
 void SimpleApplication::act(long startTime, long currentTime) {
 	Application::act(startTime, currentTime);
-	/*
+	///*
 		Node* node = scene->animationRoot->children[0];
 		AnimationNode* animNode = (AnimationNode*)node->children[0];
-		animNode->rotateNodeObject(0, 45, 0);
-		animNode->translateNode(animNode->position.x + 0.01, animNode->position.y, animNode->position.z + 0.01);
+		//animNode->rotateNodeObject(0, ((AnimationObject*)animNode->objects[0])->angley + 0.1, 0);
+		animNode->rotateNodeObject(0, 225, 0);
+		animNode->translateNode(animNode->position.x - 0.025, animNode->position.y, animNode->position.z - 0.025);
 		scene->terrainNode->standObjectsOnGround(animNode);
 	//*/
 	/*
@@ -437,7 +438,7 @@ void SimpleApplication::initScene() {
 	objectRock->setSize(0.1, 0.1, 0.1);
 	node3->addObject(scene, objectRock);
 
-	int treeScale = 12;
+	int treeScale = 13;
 	int treeSpace = 180;
 	int treePerc = 80;
 	
@@ -547,6 +548,22 @@ void SimpleApplication::initScene() {
 		}
 	}
 
+	InstanceNode* stoneNode = new InstanceNode(vec3(0, 0, 0));
+	stoneNode->detailLevel = 3;
+	int stoneSize = 10, stoneSpace = 200;
+	for (int i = -stoneSize; i < stoneSize; i++) {
+		for (int j = -stoneSize; j < stoneSize; j++) {
+			StaticObject* stone = model9.clone();
+			float baseSize = 0.05;
+			float size = (rand() % 100 * 0.01) * 0.2 + baseSize;
+
+			stone->setSize(size, size, size);
+			stone->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
+			stone->setPosition(j * stoneSpace + stoneSpace * (rand() % 100) * 0.01, 0, i * stoneSpace + stoneSpace * (rand() % 100) * 0.01);
+			stoneNode->addObject(scene, stone);
+		}
+	}
+
 	InstanceNode* instanceNode7 = new InstanceNode(vec3(903, 0, -608));
 	StaticObject* oil1 = model6.clone();
 	oil1->setPosition(30, 0, 30);
@@ -589,6 +606,7 @@ void SimpleApplication::initScene() {
 	scene->staticRoot->attachChild(instanceNode5);
 	scene->staticRoot->attachChild(instanceNode6);
 	scene->staticRoot->attachChild(instanceNode7);
+	scene->staticRoot->attachChild(stoneNode);
 
 	AnimationNode* animNode1 = new AnimationNode(vec3(5, 10, 5));
 	animNode1->setAnimation(scene, animations["army"]);

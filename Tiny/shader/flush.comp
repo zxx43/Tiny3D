@@ -15,21 +15,20 @@ layout(binding = 3) buffer IndirectBillBuffer {
 uniform uint uBasesNormal[32];
 uniform uint uBasesSingle[16];
 uniform uint uBasesBill[4];
-uniform vec3 uCount;
+uniform uvec3 uCount;
 
 void main() {
 	uint curIndex = gl_GlobalInvocationID.x;
-	uvec3 iCount = uvec3(uCount);
 	
-	if(curIndex + 1 <= iCount.x) {
+	if(curIndex + 1 <= uCount.x) {
 		indirectsNormal[curIndex].primCount = 0;
 		indirectsNormal[curIndex].baseInstance = uBasesNormal[curIndex];
 	}
-	if(curIndex + 1 <= iCount.y) {
+	if(curIndex + 1 <= uCount.y) {
 		indirectsSingle[curIndex].primCount = 0;
 		indirectsSingle[curIndex].baseInstance = uBasesSingle[curIndex];
 	}
-	if(curIndex + 1 <= iCount.z) {
+	if(curIndex + 1 <= uCount.z) {
 		indirectsBill[curIndex].primCount = 0;
 		indirectsBill[curIndex].baseInstance = uBasesBill[curIndex];
 	}

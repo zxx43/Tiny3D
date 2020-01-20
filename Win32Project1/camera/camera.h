@@ -23,11 +23,8 @@ private:
 	float xrot,yrot,height;
 	mat4 rotXMat, rotYMat, transMat;
 	vec4 lookDir4;
-	mat4 projectMatrixSub, projectMatrixNear;
 public:
 	Frustum* frustum;
-	Frustum* frustumSub;
-	Frustum* frustumNear;
 	vec3 position, lookDir, up;
 	float fovy,aspect,zNear,zFar;
 	float velocity;
@@ -37,8 +34,6 @@ public:
 	Camera(float height);
 	~Camera();
 	void initPerspectCamera(float fovy,float aspect,float zNear,float zFar);
-	void initPerspectSub(float far);
-	void initPerspectNear(float far);
 	void initOrthoCamera(float left,float right,float bottom,float top,float near,float far);
 	void setView(const vec3& pos, const vec3& dir);
 	void updateLook(const vec3& pos, const vec3& dir);

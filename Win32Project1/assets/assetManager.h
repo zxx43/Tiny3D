@@ -27,7 +27,7 @@ private:
 	AssetManager();
 	~AssetManager();
 public:
-	void addMesh(const char* name, Mesh* mesh, bool billboard = false);
+	void addMesh(const char* name, Mesh* mesh, bool billboard = false, bool drawShadow = true);
 	void addAnimation(const char* name, Animation* animation);
 	void addTextureBindless(const char* name, bool srgb);
 	void initTextureBindless(MaterialManager* mtls);

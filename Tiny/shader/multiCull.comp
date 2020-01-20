@@ -1,4 +1,4 @@
-layout(local_size_x = WORKGROUP_SIZE) in;
+layout(local_size_x = 1) in;
 
 struct Transform {
 	vec4 trans;
@@ -30,9 +30,10 @@ layout(binding = 5) buffer IndirectBill {
 layout(binding = 0) uniform sampler2D texDepth;
 uniform mat4 viewProjectMatrix;
 uniform float isColor;
+uniform uint pass;
 
 void main() {
-	uint curIndex = gl_GlobalInvocationID.x;
+	uint curIndex = gl_GlobalInvocationID.x + pass * MAX_DISPATCH;
 	Transform transform = inTrans[curIndex];
 	ivec4 meshid = ivec4(transform.mesh);
 

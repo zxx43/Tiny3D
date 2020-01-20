@@ -141,7 +141,7 @@ void TerrainNode::standObjectsOnGround(Node* node) {
 			int bx, bz;
 			this->caculateBlock(worldCenter.x, worldCenter.z, bx, bz);
 			this->cauculateY(bx, bz, worldCenter.x, worldCenter.z, worldCenter.y);
-			worldCenter.y += ((AABB*)animNode->boundingBox)->sizey * 0.5;
+			worldCenter.y += ((AABB*)animNode->boundingBox)->sizey * 0.45;
 			animNode->translateNodeCenterAtWorld(worldCenter.x, worldCenter.y, worldCenter.z);
 		} else {
 			for (uint i = 0; i < node->objects.size(); i++) {
@@ -150,7 +150,7 @@ void TerrainNode::standObjectsOnGround(Node* node) {
 				int bx, bz;
 				this->caculateBlock(worldCenter.x, worldCenter.z, bx, bz);
 				this->cauculateY(bx, bz, worldCenter.x, worldCenter.z, worldCenter.y);
-				worldCenter.y += ((AABB*)obj->bounding)->sizey * 0.47;
+				worldCenter.y += ((AABB*)obj->bounding)->sizey * 0.45;
 				node->translateNodeObjectCenterAtWorld(i, worldCenter.x, worldCenter.y, worldCenter.z);
 			}
 		}

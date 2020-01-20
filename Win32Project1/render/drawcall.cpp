@@ -4,7 +4,6 @@
 
 Drawcall::Drawcall() {
 	uModelMatrix = NULL;
-	uNormalMatrix = NULL; 
 	setType(NULL_DC);
 	setFullStatic(false);
 	objectCount = 0;
@@ -15,8 +14,6 @@ Drawcall::Drawcall() {
 Drawcall::~Drawcall() {
 	if (dataBuffer) delete dataBuffer;
 	dataBuffer = NULL;
-	if (uNormalMatrix) free(uNormalMatrix);
-	uNormalMatrix = NULL;
 }
 
 void Drawcall::setType(int typ) {

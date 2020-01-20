@@ -137,10 +137,8 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 
 	static Shader* phongShadowShader = render->findShader("phong_s");
 	static Shader* phongShadowInsShader = render->findShader("phong_s_ins");
-	static Shader* billboardShadowShader = render->findShader("billboard_s");
 	static Shader* boneShadowShader = render->findShader("bone_s");
 	static Shader* phongShadowLowShader = render->findShader("phong_sl");
-	static Shader* phongShadowLowInsShader = render->findShader("phong_sl_ins");
 	static Shader* cullShader = render->findShader("cull");
 	static Shader* multiShader = render->findShader("multi");
 	static Shader* flushShader = render->findShader("flush");
@@ -175,22 +173,27 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 
 	///*
 	static ushort flushCount = 1;
-	if (flushCount % 3 == 0) 
-		flushCount = 1;
-	else {
-		if (flushCount % 3 == 1) {
-			render->setFrameBuffer(farBuffer);
-			if (graphicQuality > 5) {
-				Camera* cameraFar = shadow->lightCameraFar;
-				state->pass = FAR_SHADOW_PASS;
-				state->shader = phongShadowLowShader;
-				state->shaderIns = phongShadowLowInsShader;
-				currentQueue->queues[QUEUE_STATIC_SF]->draw(scene, cameraFar, render, state);
-				state->shader = boneShadowShader;
-				currentQueue->queues[QUEUE_ANIMATE_SF]->draw(scene, cameraFar, render, state);
+	static bool flushed = false;
+	if (!flushed) {
+		if (flushCount % 3 == 0)
+			flushCount = 1;
+		else {
+			if (flushCount % 3 == 1) {
+				render->setFrameBuffer(farBuffer);
+				if (true)
+					flushed = true;
+				else {
+					Camera* cameraFar = shadow->lightCameraFar;
+					state->pass = FAR_SHADOW_PASS;
+					state->shader = phongShadowLowShader;
+					state->shaderIns = phongShadowInsShader;
+					currentQueue->queues[QUEUE_STATIC_SF]->draw(scene, cameraFar, render, state);
+					state->shader = boneShadowShader;
+					currentQueue->queues[QUEUE_ANIMATE_SF]->draw(scene, cameraFar, render, state);
+				}
 			}
+			flushCount++;
 		}
-		flushCount++;
 	}
 	//*/
 }
@@ -233,7 +236,6 @@ void RenderManager::drawGrass(Render* render, RenderState* state, Scene* scene, 
 void RenderManager::renderScene(Render* render, Scene* scene) {
 	static Shader* phongShader = render->findShader("phong");
 	static Shader* phongInsShader = render->findShader("phong_ins");
-	static Shader* billboardShader = render->findShader("billboard");
 	static Shader* boneShader = render->findShader("bone");
 	static Shader* skyShader = render->findShader("sky");
 	static Shader* cullShader = render->findShader("cull");
@@ -259,7 +261,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 
 		occluderDepth->copyDataFrom(render->getFrameBuffer()->getDepthBuffer());
 
-		if (!enableCartoon) {
+		if (!enableCartoon && !drawBounding) {
 			render->useTexture(TEXTURE_2D, 0, occluderDepth->id);
 			drawGrass(render, state, scene, camera);
 		}
@@ -291,14 +293,16 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 			boxInit = true;
 		}
 
-		if (boxInit) {
-			static Shader* debugShader = render->findShader("debug");
-			state->enableCull = false;
-			state->drawLine = true;
-			state->enableAlphaTest = false;
-			state->shader = debugShader;
-			drawBoundings(render, state, scene, camera);
-		}
+		static Shader* debugShader = render->findShader("debug");
+		state->enableCull = false;
+		state->drawLine = true;
+		state->enableAlphaTest = false;
+		state->shader = debugShader;
+		drawBoundings(render, state, scene, camera);
+
+		static int frame = 0;
+		if (frame % 40 == 0) boxInit = false;
+		frame++;
 	}
 
 	scene->flushNodes();

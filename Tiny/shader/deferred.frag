@@ -185,8 +185,8 @@ void main() {
 			sceneColor = ambient + shadowFactor * Lo;
 		} else { // Cartoon
 			float darkness = ndotl * shadowFactor;
-			vec3 kCool = vec3(0.01, 0.01, 0.1), kWarm = vec3(0.9, 0.9, 0.25);
-			float threshold = 0.1;
+			vec3 kCool = vec3(0.15, 0.15, 0.35), kWarm = vec3(0.9, 0.9, 0.25);
+			float threshold = 0.45;
 			vec3 kd = darkness < threshold ? kCool : kWarm;
 
 			sceneColor = ambient + kd * albedo * material.g;

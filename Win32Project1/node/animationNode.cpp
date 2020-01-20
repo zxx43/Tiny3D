@@ -7,8 +7,6 @@
 AnimationNode::AnimationNode(const vec3& boundingSize):
 		Node(vec3(0, 0, 0), boundingSize) {
 	animation = NULL;
-	uTransformMatrix = new mat4();
-	uNormalMatrix = new mat4();
 	type = TYPE_ANIMATE;
 }
 
@@ -42,20 +40,20 @@ AnimationObject* AnimationNode::getObject() {
 	return NULL;
 }
 
-void AnimationNode::translateNode(float x,float y,float z) {
-	position.x=x; position.y=y; position.z=z;
+void AnimationNode::translateNodeCenterAtWorld(float x, float y, float z) {
+	vec3 beforeWorldCenter = boundingBox->position;
+	vec3 offset = vec3(x, y, z) - beforeWorldCenter;
+	vec3 dPosition = position + offset;
+	translateNode(dPosition.x, dPosition.y, dPosition.z);
+}
+
+void AnimationNode::translateNode(float x, float y, float z) {
+	position.x = x, position.y = y, position.z = z;
 
 	recursiveTransform(nodeTransform);
-	mat4 transform = nodeTransform * objects[0]->localTransformMatrix;
-	mat4 nTransform = objects[0]->normalMatrix;
-	memcpy(uTransformMatrix->entries, transform.entries, 16 * sizeof(float));
-	memcpy(uNormalMatrix->entries, nTransform.entries, 16 * sizeof(float));
+	updateNodeObject(objects[0], true, false);
 
-	vec4 final4 = nodeTransform * vec4(0, 0, 0, 1);
-	float invw = 1.0 / final4.w;
-	vec3 final3(final4.x * invw, final4.y * invw, final4.z * invw);
-	boundingBox->update(final3);
-
+	boundingBox->update(GetTranslate(nodeTransform));
 	Node* superior = parent;
 	while (superior) {
 		superior->updateBounding();
@@ -63,15 +61,8 @@ void AnimationNode::translateNode(float x,float y,float z) {
 	}
 }
 
-void AnimationNode::translateNodeCenterAtWorld(float x, float y, float z) {
-	vec3 beforeWorldCenter = boundingBox->position;
-	vec3 offset = vec3(x, y, z) - beforeWorldCenter;
-	translateNode(position.x + offset.x, position.y + offset.y, position.z + offset.z);
-}
-
 void AnimationNode::rotateNodeObject(float ax, float ay, float az) {
 	AnimationObject* object = (AnimationObject*)objects[0];
 	object->setRotation(ax, ay, az);
-	memcpy(uNormalMatrix->entries, object->normalMatrix.entries, 16 * sizeof(float));
+	updateNodeObject(objects[0], false, true);
 }
-

@@ -33,10 +33,7 @@ private:
 	void moveSelfAndDownwardNodesBounding(float dx,float dy,float dz);
 	void updateSelfAndDownwardNodesDrawcall(bool updateNormal);
 public:
-	mat4* uTransformMatrix;
-	mat4* uNormalMatrix;
-public:
-	vec4 position;
+	vec3 position;
 	vec3 size;
 	int type;
 	int shadowLevel, detailLevel;
@@ -64,6 +61,7 @@ public:
 	virtual void updateRenderData() = 0;
 	virtual void updateDrawcall() = 0;
 	void updateNode();
+	void updateNodeObject(Object* object, bool translate, bool rotate);
 	void pushToUpdate();
 
 	void updateBounding();

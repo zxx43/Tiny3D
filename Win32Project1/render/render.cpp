@@ -168,8 +168,6 @@ void Render::resize(int width, int height, Camera* mainCamera, Camera* reflectCa
 	setViewPort(width, height);
 	float fAspect = (float)width / height;
 	mainCamera->initPerspectCamera(60.0, fAspect, 1.0, 2000.0);
-	mainCamera->initPerspectSub(1000.0);
-	mainCamera->initPerspectNear(300.0);
 	if (reflectCamera) 
 		reflectCamera->initPerspectCamera(60.0, fAspect, 0.1, 2000.0);
 }

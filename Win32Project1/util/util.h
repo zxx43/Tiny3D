@@ -229,6 +229,35 @@ inline void PushVec4(const vec4& v, float* array, uint& index) {
 	array[index++] = v.w;
 }
 
+inline void SetVec2(const vec2& v, float* array, uint index) {
+	array[index * 2 + 0] = v.x;
+	array[index * 2 + 1] = v.y;
+}
+
+inline void SetVec3(const vec3& v, float* array, uint index) {
+	array[index * 3 + 0] = v.x;
+	array[index * 3 + 1] = v.y;
+	array[index * 3 + 2] = v.z;
+}
+
+inline void SetVec4(const vec4& v, float* array, uint index) {
+	array[index * 4 + 0] = v.x;
+	array[index * 4 + 1] = v.y;
+	array[index * 4 + 2] = v.z;
+	array[index * 4 + 3] = v.w;
+}
+
+inline void SetUVec4(const vec4& v, byte* array, uint index) {
+	array[index * 4 + 0] = (byte)v.x;
+	array[index * 4 + 1] = (byte)v.y;
+	array[index * 4 + 2] = (byte)v.z;
+	array[index * 4 + 3] = (byte)v.w;
+}
+
+inline vec3 GetTranslate(const mat4& mat) {
+	return vec3(mat.entries[12], mat.entries[13], mat.entries[14]);
+}
+
 template <typename T>
 struct TBuffer {
 	T* tdata;

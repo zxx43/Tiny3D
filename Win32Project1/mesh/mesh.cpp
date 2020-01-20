@@ -16,6 +16,7 @@ Mesh::Mesh() {
 	materialids = NULL;
 	indices = NULL;
 	isBillboard = false;
+	drawShadow = true;
 	bounding = NULL;
 
 	singleFaces.clear();

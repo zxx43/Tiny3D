@@ -32,10 +32,7 @@ AnimationDrawcall::~AnimationDrawcall() {
 
 void AnimationDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
 	render->useShader(shader);
-	if (uModelMatrix)
-		shader->setMatrix4("uModelMatrix", uModelMatrix);
-	if (uNormalMatrix && state->pass == COLOR_PASS)
-		shader->setMatrix3("uNormalMatrix", uNormalMatrix);
+	render->setShaderMat4(shader, "uModelMatrix", uModelMatrix);
 	if (animData->animation->boneTransformMats)
 		shader->setMatrix3x4("boneMats", animData->boneCount, animData->animation->boneTransformMats);
 	dataBuffer->use();

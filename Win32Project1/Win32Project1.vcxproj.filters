@@ -571,9 +571,6 @@
     <None Include="..\Tiny\shader\instance.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\Tiny\shader\instance_simp.vert">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="..\Tiny\shader\mean.frag">
       <Filter>Shaders</Filter>
     </None>

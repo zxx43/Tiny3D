@@ -11,7 +11,8 @@
 #include "../shader/shadermanager.h"
 
 #define WORKGROUPE_SIZE 1
-#define COMP_GROUPE_SIZE 16
+#define COMP_GROUPE_SIZE 4
+#define MAX_DISPATCH 1024
 
 void SetupShaders(ShaderManager* shaders);
 

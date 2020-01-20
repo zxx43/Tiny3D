@@ -7,13 +7,8 @@ std::vector<Node*> Node::nodesToUpdate;
 std::vector<Node*> Node::nodesToRemove;
 
 Node::Node(const vec3& position,const vec3& size) {
-	this->position.x=position.x;
-	this->position.y=position.y;
-	this->position.z=position.z;
-	this->position.w=1;
-	this->size.x=size.x;
-	this->size.y=size.y;
-	this->size.z=size.z;
+	this->position = position;
+	this->size = size;
 	boundingBox=new AABB(position,size.x,size.y,size.z);
 	objects.clear();
 	objectsBBs.clear();
@@ -22,8 +17,6 @@ Node::Node(const vec3& position,const vec3& size) {
 	needCreateDrawcall = false;
 	needUpdateNormal = false;
 	needUpdateNode = false;
-	uTransformMatrix = NULL;
-	uNormalMatrix = NULL;
 
 	parent=NULL;
 	children.clear();
@@ -35,11 +28,6 @@ Node::Node(const vec3& position,const vec3& size) {
 }
 
 Node::~Node() {
-	if (uTransformMatrix) delete uTransformMatrix; 
-	uTransformMatrix = NULL;
-	if (uNormalMatrix) delete uNormalMatrix; 
-	uNormalMatrix = NULL;
-
 	if(boundingBox)
 		delete boundingBox;
 	boundingBox=NULL;
@@ -84,7 +72,8 @@ void Node::updateObjectBoundingInNode(Object* object) {
 		recursiveTransform(nodeMat);
 		vec4 localBB4(object->localBoundPosition.x, object->localBoundPosition.y, object->localBoundPosition.z, 1.0);
 		vec4 bb4 = nodeMat * localBB4;
-		objectBB->update(vec3(bb4.x / bb4.w, bb4.y / bb4.w, bb4.z / bb4.w));
+		float invw = 1.0 / bb4.w;
+		objectBB->update(vec3(bb4.x * invw, bb4.y * invw, bb4.z * invw));
 	}
 }
 
@@ -146,7 +135,8 @@ void Node::updateBaseNodeBounding() {
 		else if (objectsBBs.size() <= 0) { // Base Node and without object boundings
 			mat4 nodeTransform; nodeTransform.LoadIdentity();
 			recursiveTransform(nodeTransform);
-			boundingBox->update(nodeTransform * vec4(0, 0, 0, 1));
+			boundingBox->update(GetTranslate(nodeTransform));
+			//boundingBox->update(nodeTransform * vec4(0, 0, 0, 1));
 		}
 	}
 
@@ -362,36 +352,51 @@ void Node::pushToUpdate() {
 	}
 }
 
+void Node::updateNodeObject(Object* object, bool translate, bool rotate) {
+	if (translate) {
+		object->transformMatrix = nodeTransform * object->localTransformMatrix;
+		object->transformTransposed = object->transformMatrix.GetTranspose();
+	}
+	if(rotate) object->rotateQuat = MatrixToQuat(object->rotateMat);
+	if (translate || rotate) {
+		AABB* bbox = (AABB*)object->bounding;
+		if (!bbox) bbox = (AABB*)boundingBox;
+		object->boundInfo = vec4(bbox->sizex, bbox->sizey, bbox->sizez, bbox->position.y);
+	}
+	if (object->transforms && translate) {
+		object->transforms[0] = object->transformMatrix.entries[12];
+		object->transforms[1] = object->transformMatrix.entries[13];
+		object->transforms[2] = object->transformMatrix.entries[14];
+		object->transforms[3] = object->size.x;
+	}
+	if (object->transformsFull) {
+		if (translate) {
+			object->transformsFull[0] = (object->transforms[0]);
+			object->transformsFull[1] = (object->transforms[1]);
+			object->transformsFull[2] = (object->transforms[2]);
+			object->transformsFull[3] = (object->transforms[3]);
+		}
+		if (rotate) {
+			object->transformsFull[4] = (object->rotateQuat.x);
+			object->transformsFull[5] = (object->rotateQuat.y);
+			object->transformsFull[6] = (object->rotateQuat.z);
+			object->transformsFull[7] = (object->rotateQuat.w);
+		}
+		if (translate || rotate) {
+			object->transformsFull[8] = (object->boundInfo.x);
+			object->transformsFull[9] = (object->boundInfo.y);
+			object->transformsFull[10] = (object->boundInfo.z);
+			object->transformsFull[11] = (object->boundInfo.w);
+		}
+	}
+}
+
 void Node::updateNode() {
 	if (type != TYPE_ANIMATE) {
 		recursiveTransform(nodeTransform);
 		for (unsigned int i = 0; i < objects.size(); i++) {
 			Object* object = objects[i];
-			object->transformMatrix = nodeTransform * object->localTransformMatrix;
-			object->transformTransposed = object->transformMatrix.GetTranspose();
-			object->rotateQuat = MatrixToQuat(object->rotateMat);
-			AABB* bbox = (AABB*)object->bounding;
-			object->boundInfo = vec4(bbox->sizex, bbox->sizey, bbox->sizez, bbox->position.y);
-			if (object->transforms) {
-				object->transforms[0] = object->transformMatrix.entries[12];
-				object->transforms[1] = object->transformMatrix.entries[13];
-				object->transforms[2] = object->transformMatrix.entries[14];
-				object->transforms[3] = object->size.x;
-			}
-			if (object->transformsFull) {
-				object->transformsFull[0] = (object->transforms[0]);
-				object->transformsFull[1] = (object->transforms[1]);
-				object->transformsFull[2] = (object->transforms[2]);
-				object->transformsFull[3] = (object->transforms[3]);
-				object->transformsFull[4] = (object->rotateQuat.x);
-				object->transformsFull[5] = (object->rotateQuat.y);
-				object->transformsFull[6] = (object->rotateQuat.z);
-				object->transformsFull[7] = (object->rotateQuat.w);
-				object->transformsFull[8] = (object->boundInfo.x);
-				object->transformsFull[9] = (object->boundInfo.y);
-				object->transformsFull[10] = (object->boundInfo.z);
-				object->transformsFull[11] = (object->boundInfo.w);
-			}
+			updateNodeObject(object, true, true);
 		}
 	}
 	needUpdateNode = false;

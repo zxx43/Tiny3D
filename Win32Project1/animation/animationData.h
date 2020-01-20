@@ -32,25 +32,15 @@ struct AnimationData {
 		indices = (ushort*)malloc(indexCount * sizeof(ushort));
 
 		for (uint i = 0; i < (uint)vertexCount; i++) {
-			vertices[i * 3 + 0] = anim->aVertices[i].x;
-			vertices[i * 3 + 1] = anim->aVertices[i].y;
-			vertices[i * 3 + 2] = anim->aVertices[i].z;
-
-			normals[i * 3 + 0] = anim->aNormals[i].x;
-			normals[i * 3 + 1] = anim->aNormals[i].y;
-			normals[i * 3 + 2] = anim->aNormals[i].z;
-
-			if (anim->aTangents.size() > 0) {
-				tangents[i * 3 + 0] = anim->aTangents[i].x;
-				tangents[i * 3 + 1] = anim->aTangents[i].y;
-				tangents[i * 3 + 2] = anim->aTangents[i].z;
-			}
+			SetVec3(anim->aVertices[i], vertices, i);
+			SetVec3(anim->aNormals[i], normals, i);
+			if (anim->aTangents.size() > 0) 
+				SetVec3(anim->aTangents[i], tangents, i);
 
 			texcoords[i * 4 + 0] = anim->aTexcoords[i].x;
 			texcoords[i * 4 + 1] = anim->aTexcoords[i].y;
 			texcoords[i * 4 + 2] = anim->aTextures[i]->texids.x;
 			texcoords[i * 4 + 3] = anim->aTextures[i]->texids.y;
-
 			texids[i * 2 + 0] = anim->aTextures[i]->texids.z;
 			texids[i * 2 + 1] = anim->aTextures[i]->texids.w;
 
@@ -58,15 +48,8 @@ struct AnimationData {
 			colors[i * 3 + 1] = (byte)(anim->aDiffuses[i].x * 255);
 			colors[i * 3 + 2] = (byte)(anim->aSpeculars[i].x * 255);
 
-			boneids[i * 4 + 0] = (byte)(anim->aBoneids[i].x);
-			boneids[i * 4 + 1] = (byte)(anim->aBoneids[i].y);
-			boneids[i * 4 + 2] = (byte)(anim->aBoneids[i].z);
-			boneids[i * 4 + 3] = (byte)(anim->aBoneids[i].w);
-			
-			weights[i * 4 + 0] = anim->aWeights[i].x;
-			weights[i * 4 + 1] = anim->aWeights[i].y;
-			weights[i * 4 + 2] = anim->aWeights[i].z;
-			weights[i * 4 + 3] = anim->aWeights[i].w;
+			SetUVec4(anim->aBoneids[i], boneids, i);
+			SetVec4(anim->aWeights[i], weights, i);
 		}
 		for (uint i = 0; i < (uint)indexCount; i++)
 			indices[i] = (ushort)(anim->aIndices[i]);

@@ -35,7 +35,7 @@ public:
 	vec2* texcoords;
 	int* materialids;
 	int* indices;
-	bool isBillboard;
+	bool isBillboard, drawShadow;
 	float* bounding;
 	std::vector<FaceBuf*> singleFaces;
 	std::vector<FaceBuf*> normalFaces;

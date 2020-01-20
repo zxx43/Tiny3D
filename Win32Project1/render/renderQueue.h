@@ -64,6 +64,8 @@ public:
 	float midDistSqr, lowDistSqr;
 	std::map<Mesh*, InstanceData*> instanceQueue;
 	MultiInstance* multiInstance;
+	MultiInstance* billboards;
+	bool dualInstances;
 	BatchData* batchData;
 	bool dual;
 	int shadowLevel;

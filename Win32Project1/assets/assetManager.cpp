@@ -100,10 +100,11 @@ void AssetManager::createHeightTex() {
 	heightTexture = new Texture2D(MAP_SIZE, MAP_SIZE, TEXTURE_TYPE_COLOR, HIGH_PRE, 1, true, heightData);
 }
 
-void AssetManager::addMesh(const char* name, Mesh* mesh, bool billboard) {
+void AssetManager::addMesh(const char* name, Mesh* mesh, bool billboard, bool drawShadow) {
 	mesh->setName(name);
 	meshes[name] = mesh;
 	meshes[name]->setIsBillboard(billboard);
+	meshes[name]->drawShadow = drawShadow;
 }
 
 void AssetManager::addAnimation(const char* name, Animation* animation) {
@@ -119,7 +120,7 @@ void AssetManager::Init() {
 		AssetManager::assetManager->addMesh("sphere", new Sphere(16, 16));
 		AssetManager::assetManager->addMesh("board", new Board());
 		AssetManager::assetManager->addMesh("quad", new Quad());
-		AssetManager::assetManager->addMesh("billboard", new Board(1, 1, 1, 0, 0.5), true);
+		AssetManager::assetManager->addMesh("billboard", new Board(1, 1, 1, 0, 0.5), true, false);
 	}
 }
 

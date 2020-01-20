@@ -35,7 +35,6 @@ private:
 	bool fullStatic;
 public:
 	float* uModelMatrix;
-	float* uNormalMatrix;
 	int objectCount;
 	RenderBuffer* dataBuffer;
 	int frame;

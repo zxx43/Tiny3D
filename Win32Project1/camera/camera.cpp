@@ -2,26 +2,20 @@
 #include "../util/util.h"
 
 Camera::Camera(float height) {
-	position.x = 0; position.y = 0; position.z = 0;
+	position = vec3(0.0, 0.0, 0.0);
 	lookDir = vec3();
 	lookDir4 = vec4();
-	up.x = 0; up.y = 1; up.z = 0;
+	up = vec3(0.0, 1.0, 0.0);
 
 	xrot = 0; yrot = 0;
 	this->height = height;
 	velocity = 1.0;
 
 	frustum = new Frustum();
-	frustumSub = NULL;
-	frustumNear = NULL; 
 }
 
 Camera::~Camera() {
 	delete frustum; frustum = NULL;
-	if (frustumSub) delete frustumSub;
-	frustumSub = NULL;
-	if (frustumNear) delete frustumNear;
-	frustumNear = NULL;
 }
 
 void Camera::initPerspectCamera(float fovy, float aspect, float zNear, float zFar) {
@@ -31,16 +25,6 @@ void Camera::initPerspectCamera(float fovy, float aspect, float zNear, float zFa
 	this->zFar = zFar;
 	projectMatrix = perspective(fovy, aspect, zNear, zFar);
 	invProjMatrix = projectMatrix.GetInverse();
-}
-
-void Camera::initPerspectSub(float far) {
-	projectMatrixSub = perspective(fovy, aspect, zNear, far);
-	frustumSub = new Frustum();
-}
-
-void Camera::initPerspectNear(float far) {
-	projectMatrixNear = perspective(fovy, aspect, zNear, far);
-	frustumNear = new Frustum();
 }
 
 void Camera::initOrthoCamera(float left, float right, float bottom, float top, float near, float far) {
@@ -83,9 +67,6 @@ void Camera::updateFrustum() {
 	invViewProjectMatrix = viewProjectMatrix.GetInverse();
 	lookDir.Normalize();
 	frustum->update(invViewProjectMatrix, lookDir);
-
-	if (frustumSub) frustumSub->update((projectMatrixSub * viewMatrix).GetInverse(), lookDir);
-	if (frustumNear) frustumNear->update((projectMatrixNear * viewMatrix).GetInverse(), lookDir);
 }
 
 void Camera::turnX(int lr) {
@@ -164,9 +145,7 @@ void Camera::move(int dir,float speed) {
 }
 
 void Camera::moveTo(const vec3& pos) {
-	position.x = pos.x; 
-	position.y = pos.y; 
-	position.z = pos.z;
+	position = pos;
 	updateMoveable(TRANS_TRANSLATE);
 }
 

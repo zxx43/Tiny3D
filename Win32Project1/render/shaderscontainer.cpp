@@ -7,7 +7,6 @@ using namespace std;
 #define PHONG_VERT "shader/phong.vert"
 #define PHONG_FRAG "shader/phong.frag"
 #define INSTANCE_VERT "shader/instance.vert"
-#define INSTANCE_SIMPLE_VERT "shader/instance_simp.vert"
 #define CULL_COMP "shader/cull.comp"
 #define MULTI_COMP "shader/multiCull.comp"
 #define FLUSH_COMP "shader/flush.comp"
@@ -189,6 +188,7 @@ void SetupShaders(ShaderManager* shaders) {
 
 	Shader* multi = shaders->addShader("multi", MULTI_COMP);
 	multi->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());
+	multi->attachDef("MAX_DISPATCH", to_string(MAX_DISPATCH).data());
 	multi->attachEx(shaderUtil);
 
 	Shader* flush = shaders->addShader("flush", FLUSH_COMP);

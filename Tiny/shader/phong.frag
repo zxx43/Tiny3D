@@ -14,10 +14,9 @@ layout (location = 2) out vec4 FragNormalGrass;
 layout (location = 3) out vec4 FragRoughMetal;
 
 void main() {
-	if(billboardPass < 0.5) {
-		vec4 textureColor = texture2D(texBlds[int(vTexid.x)], vTexcoord);
-		if(textureColor.a < 0.25) discard;
-
+	vec4 textureColor = texture2D(texBlds[int(vTexid.x)], vTexcoord);
+	if(textureColor.a < 0.3) discard;
+	if(billboardPass < 0.5) {	
 		vec3 normal = vNormal;
 		if(vTexid.y >= 0.0) {
 			vec3 texNorm = texture2D(texBlds[int(vTexid.y)], vTexcoord).rgb;
@@ -25,21 +24,17 @@ void main() {
 			normal = vTBN * texNorm;
 		}
 
-		FragTex = textureColor;
 		FragMat = vec4(vColor, 1.0);
 		FragNormalGrass = vec4(normalize(normal) * 0.5 + 0.5, 0.0);
-
 		FragRoughMetal = DefaultRM;
 		if(vTexid.z >= 0.0) 
 			FragRoughMetal.r = texture2D(texBlds[int(vTexid.z)], vTexcoord).r;
 		if(vTexid.w >= 0.0) 
 			FragRoughMetal.g = texture2D(texBlds[int(vTexid.w)], vTexcoord).r;
 	} else {
-		vec4 textureColor = texture2D(texBlds[int(vTexid.x)], vTexcoord.xy);
-		if(textureColor.a < 0.4) discard;
-		FragTex = textureColor;
 		FragMat = BoardMat;
 		FragNormalGrass = vec4(uNormal, 0.0);
 		FragRoughMetal = BoardRM;
 	}
+	FragTex = textureColor;
 }
