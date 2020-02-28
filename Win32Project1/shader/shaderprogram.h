@@ -27,6 +27,7 @@ public:
 	GLuint shaderProg;
 private:
 	std::string attach(const char* version, const char* shaderStr);
+	std::string handleInclude(const char* shaderStr);
 public:
 	ShaderProgram(const char* vert, const char* frag, const char* tesc = NULL, const char* tese = NULL, const char* geom = NULL);
 	ShaderProgram(const char* comp);

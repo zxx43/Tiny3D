@@ -25,11 +25,11 @@ public:
 	unsigned char* colorBuffer;
 	unsigned short* indexBuffer;
 
-	int instanceCount, maxInstanceCount;
-	buff* modelTransform;
+	int maxInstanceCount;
 
 	bool isBillboard;
-	bool copyData;
+
+	InstanceData* insData;
 
 	Instance(InstanceData* data);
 	Instance(Mesh* mesh);
@@ -39,7 +39,6 @@ public:
 	void setRenderData(InstanceData* data);
 private:
 	void create(Mesh* mesh);
-	void initMatrices(int cnt);
 };
 
 #endif /* INSTANCE_H_ */

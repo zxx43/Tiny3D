@@ -2,7 +2,7 @@
 #include "../constants/constants.h"
 using namespace std;
 
-//#define DEBUG_SHADER 1
+#define DEBUG_SHADER 1
 
 Shader::Shader(const char* vert, const char* frag, const char* tesc, const char* tese, const char* geom) {
 	vertName = vert, fragName = frag, compName = "";
@@ -119,6 +119,7 @@ void Shader::setUint(const char* param, uint value) {
 }
 
 void Shader::setUintv(const char* param, int count, uint* arr) {
+	if (count <= 0) return;
 	int location = findParamLocation(param);
 	if (location == INVALID_LOCATION) {
 		addParam(param);
@@ -178,6 +179,29 @@ void Shader::setUVector3(const char* param, uint x, uint y, uint z) {
 		glProgramUniform3ui(program->shaderProg, location, x, y, z);
 	if (getError(param, location))
 		printf("vec3 is: %d,%d,%d\n", x, y, z);
+}
+
+void Shader::setUVector4(const char* param, uint x, uint y, uint z, uint w) {
+	int location = findParamLocation(param);
+	if (location == INVALID_LOCATION) {
+		addParam(param);
+		location = findParamLocation(param);
+	}
+	if (location != INVALID_LOCATION && program)
+		glProgramUniform4ui(program->shaderProg, location, x, y, z, w);
+	if (getError(param, location))
+		printf("vec4 is: %d,%d,%d,%d\n", x, y, z, w);
+}
+
+void Shader::setUVector4v(const char* param, int count, uint* arr) {
+	int location = findParamLocation(param);
+	if (location == INVALID_LOCATION) {
+		addParam(param);
+		location = findParamLocation(param);
+	}
+	if (location != INVALID_LOCATION && program)
+		glProgramUniform4uiv(program->shaderProg, location, count, arr);
+	getError(param, location);
 }
 
 void Shader::setVector4(const char* param,float x,float y,float z,float w) {
@@ -241,6 +265,7 @@ void Shader::setMatrix4(const char* param,float* matrix) {
 }
 
 void Shader::setMatrix4(const char* param,int count,float* matrices) {
+	if (count <= 0) return;
 	int location = findParamLocation(param);
 	if (location == INVALID_LOCATION) {
 		addParam(param);
@@ -252,6 +277,7 @@ void Shader::setMatrix4(const char* param,int count,float* matrices) {
 }
 
 void Shader::setMatrix3x4(const char* param, int count, float* matrices) {
+	if (count <= 0) return;
 	int location = findParamLocation(param);
 	if (location == INVALID_LOCATION) {
 		addParam(param);
@@ -274,6 +300,7 @@ void Shader::setMatrix3(const char* param, float* matrix) {
 }
 
 void Shader::setMatrix3(const char* param, int count, float* matrices) {
+	if (count <= 0) return;
 	int location = findParamLocation(param);
 	if (location == INVALID_LOCATION) {
 		addParam(param);
@@ -299,6 +326,7 @@ void Shader::setHandle64(const char* param, u64 value) {
 }
 
 void Shader::setHandle64v(const char* param, int count, u64* arr) {
+	if (count <= 0) return;
 	int location = findParamLocation(param);
 	if (location == INVALID_LOCATION) {
 		addParam(param);

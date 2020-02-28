@@ -1,9 +1,11 @@
+#include "shader/util.glsl"
+
 uniform mat4 viewProjectMatrix;
 uniform vec3 viewRight;
 
 layout (location = 0) in vec3 vertex;
 layout (location = 2) in vec4 texcoord;
-layout (location = 6) in mat4 modelMatrix;
+layout (location = 8) in mat4 modelMatrix;
 
 out vec2 vTexcoord;
 flat out vec4 vTexid;

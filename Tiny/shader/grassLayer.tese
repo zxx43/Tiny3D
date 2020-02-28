@@ -1,3 +1,5 @@
+#include "shader/util.glsl"
+
 layout(triangles, equal_spacing, ccw, point_mode) in;
 
 uniform mat4 viewProjectMatrix;

@@ -1,3 +1,5 @@
+#include "shader/util.glsl"
+
 uniform mat4 viewMatrix;
 uniform vec3 eyePos;
 

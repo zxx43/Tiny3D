@@ -194,6 +194,10 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 	Shader* shader = state->shader;
 	if (drawcall->getType() == INSTANCE_DC || drawcall->getType() == MULTI_DC)
 		shader = state->shaderIns;
+	else if (drawcall->getType() == ANIMATE_DC) {
+		shader->setHandle64v("boneTex", AssetManager::assetManager->frames->animCount, AssetManager::assetManager->frames->datas);
+		shader->setFloat("time", state->time * 2.5);
+	}
 	
 	if (camera) {
 		if (state->pass < DEFERRED_PASS) {
@@ -220,25 +224,26 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 					}
 				}
 
-				if (state->shaderMulti) {
+				if (state->shaderMulti) 
 					state->shaderMulti->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
-					state->shaderMulti->setFloat("isColor", state->pass >= COLOR_PASS ? 1.0 : 0.0);
-				}
 
 				// Billboard drawcall
 				if (drawcall->getType() == MULTI_DC) {
-					if (state->pass != COLOR_PASS)
-						shader->setVector3("viewRight", state->light.z, 0.0, -state->light.x);
-					else if (state->pass == COLOR_PASS) {
-						static vec3 upVec(0.0, 1.0, 0.0);
-						vec3 viewRight(camera->viewMatrix.entries[0], camera->viewMatrix.entries[4], camera->viewMatrix.entries[8]);
-						vec3 normal = (viewRight.CrossProduct(upVec)).GetNormalized();
-						normal.x = normal.x * 0.5 + 0.5;
-						normal.y = normal.y * 0.5 + 0.5;
-						normal.z = normal.z * 0.5 + 0.5;
-						shader->setVector3v("uNormal", normal);
-						shader->setVector3v("viewRight", viewRight);
-					} 
+					if (state->shaderBill) {
+						state->shaderBill->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
+						if (state->pass != COLOR_PASS)
+							state->shaderBill->setVector3("viewRight", state->light.z, 0.0, -state->light.x);
+						else if (state->pass == COLOR_PASS) {
+							static vec3 upVec(0.0, 1.0, 0.0);
+							vec3 viewRight(camera->viewMatrix.entries[0], camera->viewMatrix.entries[4], camera->viewMatrix.entries[8]);
+							vec3 normal = (viewRight.CrossProduct(upVec)).GetNormalized();
+							normal.x = normal.x * 0.5 + 0.5;
+							normal.y = normal.y * 0.5 + 0.5;
+							normal.z = normal.z * 0.5 + 0.5;
+							state->shaderBill->setVector3v("uNormal", normal);
+							state->shaderBill->setVector3v("viewRight", viewRight);
+						}
+					}
 				}
 
 				if (state->waterPass) {

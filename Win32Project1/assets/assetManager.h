@@ -4,7 +4,7 @@
 #define COMMON_TEXTURE "texture/common"
 
 #include "../mesh/mesh.h"
-#include "../animation/animation.h"
+#include "../animation/frameMgr.h"
 #include "../texture/texturebindless.h"
 #include "../texture/cubemap.h"
 #include "../texture/texture2d.h"
@@ -18,6 +18,7 @@ public:
 public:
 	std::map<std::string, Mesh*> meshes;
 	std::map<std::string, Animation*> animations;
+	FrameMgr* frames;
 	TextureBindless* texBld;
 	CubeMap* skyTexture;
 	Texture2D* reflectTexture;
@@ -29,6 +30,7 @@ private:
 public:
 	void addMesh(const char* name, Mesh* mesh, bool billboard = false, bool drawShadow = true);
 	void addAnimation(const char* name, Animation* animation);
+	void initFrames();
 	void addTextureBindless(const char* name, bool srgb);
 	void initTextureBindless(MaterialManager* mtls);
 	int findTextureBindless(const char* name);

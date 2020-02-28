@@ -7,10 +7,12 @@ std::map<Mesh*, int> Instance::instanceTable;
 Instance::Instance(InstanceData* data) {
 	create(data->insMesh);
 	maxInstanceCount = data->maxInsCount;
+	insData = NULL;
 }
 
 Instance::Instance(Mesh* mesh) {
 	create(mesh);
+	insData = NULL;
 }
 
 void Instance::create(Mesh* mesh) {
@@ -26,11 +28,8 @@ void Instance::create(Mesh* mesh) {
 	colorBuffer = NULL;
 	indexBuffer = NULL;
 
-	instanceCount = 0, maxInstanceCount = 0;
+	maxInstanceCount = 0;
 	isBillboard = instanceMesh->isBillboard;
-
-	modelTransform = NULL;
-	copyData = true;
 }
 
 Instance::~Instance() {
@@ -41,11 +40,6 @@ Instance::~Instance() {
 	if (texidBuffer) free(texidBuffer); texidBuffer = NULL;
 	if (colorBuffer) free(colorBuffer); colorBuffer = NULL;
 	if (indexBuffer) free(indexBuffer); indexBuffer = NULL;
-
-	if (copyData) {
-		if (modelTransform) free(modelTransform); 
-		modelTransform = NULL;
-	}
 }
 
 void Instance::releaseInstanceData() {
@@ -56,11 +50,6 @@ void Instance::releaseInstanceData() {
 	if (texidBuffer) free(texidBuffer); texidBuffer = NULL;
 	if (colorBuffer) free(colorBuffer); colorBuffer = NULL;
 	if (indexBuffer) free(indexBuffer); indexBuffer = NULL;
-
-	if (copyData) {
-		if (modelTransform) free(modelTransform); 
-		modelTransform = NULL;
-	}
 }
 
 void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int cnt,bool copy) {
@@ -130,27 +119,9 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 		}
 	}
 
-	copyData = copy;
-	if (copyData) 
-		initMatrices(cnt);
-
 	maxInstanceCount = cnt;
 }
 
-
-void Instance::initMatrices(int cnt) {
-	modelTransform = (buff*)malloc(cnt * 16 * sizeof(buff));
-	memset(modelTransform, 0, cnt * 16 * sizeof(buff));
-}
-
 void Instance::setRenderData(InstanceData* data) {
-	instanceCount = data->count;
-
-	if (copyData) {
-		if (data->transformsFull)
-			memcpy(modelTransform, data->transformsFull, instanceCount * 16 * sizeof(buff));
-	} else {
-		if (data->transformsFull && modelTransform != data->transformsFull) 
-			modelTransform = data->transformsFull;
-	}
+	insData = data;
 }

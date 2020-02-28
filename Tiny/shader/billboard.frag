@@ -1,3 +1,5 @@
+#include "shader/util.glsl"
+
 layout(bindless_sampler) uniform sampler2D texBlds[MAX_TEX];
 uniform vec3 uNormal;
 

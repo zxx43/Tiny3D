@@ -303,4 +303,19 @@ struct Indirect {
 	uint baseInstance;
 };
 
+struct ConfigArg {
+	int width;
+	int height;
+	bool fullscreen;
+	bool dualthread;
+	int graphQuality;
+	int shadowQuality;
+	bool ssr;
+	bool dof;
+	bool fxaa;
+	bool bloom;
+	bool cartoon;
+	bool debug;
+};
+
 #endif /* UTIL_H_ */

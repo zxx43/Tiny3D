@@ -18,7 +18,8 @@ private:
 public:
 	float anglex,angley,anglez;
 	Animation* animation;
-
+	int aid, fid;
+public:
 	AnimationObject(Animation* anim);
 	AnimationObject(const AnimationObject& rhs);
 	virtual ~AnimationObject();
@@ -26,6 +27,7 @@ public:
 	virtual void setPosition(float x, float y, float z);
 	virtual void setRotation(float ax, float ay, float az);
 	virtual void setSize(float sx, float sy, float sz);
+	void setCurAnim(int aid);
 };
 
 

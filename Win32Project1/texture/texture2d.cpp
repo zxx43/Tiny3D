@@ -9,12 +9,16 @@ Texture2D::Texture2D(float w,float h,int t,int p,int c,bool clampBorder,void* in
 	precision = p;
 	channel = c;
 	if (type == TEXTURE_TYPE_DEPTH) channel = 1;
+	else if (type == TEXTURE_TYPE_ANIME) channel = 4;
 
 	glGenTextures(1,&id);
 	glBindTexture(GL_TEXTURE_2D,id);
+
 	GLint filterParam = precision >= HIGH_PRE ? GL_LINEAR : GL_NEAREST;
+	if (type == TEXTURE_TYPE_ANIME) filterParam = GL_NEAREST;
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterParam);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterParam);
+	
 	if (clampBorder) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
@@ -57,7 +61,7 @@ Texture2D::Texture2D(float w,float h,int t,int p,int c,bool clampBorder,void* in
 	depthType = precision >= HIGH_PRE ? GL_FLOAT : GL_UNSIGNED_BYTE;
 
 	GLenum dataType;
-	if (type == TEXTURE_TYPE_COLOR) dataType = texType;
+	if (type == TEXTURE_TYPE_COLOR || type == TEXTURE_TYPE_ANIME) dataType = texType;
 	else if (type == TEXTURE_TYPE_DEPTH) dataType = depthType;
 	if (dataType == GL_FLOAT) buffSize = width * height * channel * sizeof(GL_FLOAT);
 	else if (dataType == GL_UNSIGNED_BYTE) buffSize = width * height * channel * sizeof(GL_UNSIGNED_BYTE);
@@ -65,6 +69,7 @@ Texture2D::Texture2D(float w,float h,int t,int p,int c,bool clampBorder,void* in
 	void* data = initData ? initData : texData;
 	switch(type) {
 		case TEXTURE_TYPE_COLOR:
+		case TEXTURE_TYPE_ANIME:
 			glTexImage2D(GL_TEXTURE_2D, 0, preColor, width, height, 0, format, texType, data);
 			break;
 		case TEXTURE_TYPE_DEPTH:
@@ -92,6 +97,7 @@ void Texture2D::readData(int bitSize, void* ret) {
 	GLenum readType;
 	switch (type) {
 		case TEXTURE_TYPE_COLOR:
+		case TEXTURE_TYPE_ANIME:
 			readType = texType;
 			break;
 		case TEXTURE_TYPE_DEPTH:

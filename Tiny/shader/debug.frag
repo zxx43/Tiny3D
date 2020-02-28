@@ -1,3 +1,5 @@
+#include "shader/util.glsl"
+
 flat in vec3 vColor;
 in vec3 vNormal;
 

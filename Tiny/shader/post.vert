@@ -1,3 +1,5 @@
+#include "shader/util.glsl"
+
 layout (location = 0) in vec3 vertex;
 layout (location = 2) in vec4 texcoord;
 

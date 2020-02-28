@@ -1,5 +1,4 @@
 #include "animationNode.h"
-#include "../render/animationDrawcall.h"
 #include "../util/util.h"
 #include "../scene/scene.h"
 #include <string.h>
@@ -14,12 +13,12 @@ AnimationNode::~AnimationNode() {}
 
 void AnimationNode::setAnimation(Scene* scene, Animation* anim) {
 	animation = anim;
-	addObject(scene, new AnimationObject(animation));
+	AnimationObject* object = new AnimationObject(animation);
+	Node::addObject(scene, object);
+	scene->addObject(object);
 }
 
 void AnimationNode::prepareDrawcall() {
-	if(drawcall) delete drawcall;
-	drawcall = new AnimationDrawcall(animation);
 	needCreateDrawcall = false;
 }
 
@@ -51,9 +50,9 @@ void AnimationNode::translateNode(float x, float y, float z) {
 	position.x = x, position.y = y, position.z = z;
 
 	recursiveTransform(nodeTransform);
+	boundingBox->update(GetTranslate(nodeTransform));
 	updateNodeObject(objects[0], true, false);
 
-	boundingBox->update(GetTranslate(nodeTransform));
 	Node* superior = parent;
 	while (superior) {
 		superior->updateBounding();

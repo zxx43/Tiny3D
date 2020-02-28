@@ -13,8 +13,18 @@ private:
 	RenderBuffer* indirectBuffer;
 	int meshCount;
 private:
-	RenderBuffer* createBuffers(MultiInstance* multi, int vertexCount, int indexCount, int objectCount);
+	RenderBuffer* dataBuffer2;
+	RenderBuffer* indirectBuffer2;
+	RenderBuffer* dataBufferDraw;
+	RenderBuffer* indirectBufferDraw;
+	RenderBuffer* dataBufferPrepare;
+	RenderBuffer* indirectBufferPrepare;
+private:
+	RenderBuffer* createBuffers(MultiInstance* multi, int vertexCount, int indexCount, int maxObjects, RenderBuffer* ref = NULL);
+	RenderBuffer* createIndirects(MultiInstance* multi);
+	void swapBuffers();
 	void updateIndirect(Render* render, RenderState* state);
+	void prepareRenderData(Render* render, RenderState* state);
 public:
 	MultiDrawcall(MultiInstance* multi);
 	virtual ~MultiDrawcall();

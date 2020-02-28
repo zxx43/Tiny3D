@@ -1,3 +1,5 @@
+#include "shader/util.glsl"
+
 uniform mat4 viewMatrix;
 uniform mat4 projectMatrix, invProjMatrix;
 layout(bindless_sampler) uniform sampler2D lightBuffer, matBuffer, normalBuffer, depthBuffer;

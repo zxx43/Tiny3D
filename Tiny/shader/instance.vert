@@ -1,6 +1,9 @@
+#include "shader/util.glsl"
+
 uniform mat4 viewProjectMatrix;
+#ifdef BillPass
 uniform vec3 viewRight;
-uniform float billboardPass;
+#endif
 
 layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 normal;
@@ -8,7 +11,7 @@ layout (location = 2) in vec4 texcoord;
 layout (location = 3) in vec2 texid;
 layout (location = 4) in vec3 color;
 layout (location = 5) in vec3 tangent;
-layout (location = 6) in mat4 modelMatrix;
+layout (location = 8) in mat4 modelMatrix;
 
 #ifndef LowPass
 out vec2 vTexcoord;
@@ -21,7 +24,7 @@ out mat3 vTBN;
 #endif
 
 void main() {
-	if(billboardPass < 0.5) {
+#ifndef BillPass
 		mat3 matRot = mat3(modelMatrix);
 		#ifndef ShadowPass
 			vNormal = matRot * normal;
@@ -34,7 +37,7 @@ void main() {
 		#endif
 		vec4 worldVertex = modelMatrix * vec4(vertex, 1.0);
 		gl_Position = viewProjectMatrix * worldVertex;
-	} else {
+#else
 		vec3 position = modelMatrix[0].xyz;
 		vec3 board = modelMatrix[1].xyz;
 		vec2 size = vertex.xy * board.xy;
@@ -50,5 +53,5 @@ void main() {
 		#endif
 		vec4 worldVertex = vec4(position + right + top, 1.0);
 		gl_Position = viewProjectMatrix * worldVertex;
-	}
+#endif
 }

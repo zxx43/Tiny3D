@@ -1,3 +1,5 @@
+#include "shader/util.glsl"
+
 uniform mat4 invProjMatrix;
 uniform vec2 screenSize, pixelSize;
 uniform float time;

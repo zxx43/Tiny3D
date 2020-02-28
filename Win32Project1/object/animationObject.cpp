@@ -4,6 +4,7 @@
 AnimationObject::AnimationObject(Animation* anim):Object() {
 	animation=anim; // no mesh!
 	anglex=0; angley=0; anglez=0;
+	setCurAnim(0);
 
 	transforms = (float*)malloc(4 * sizeof(float));
 	transformsFull = (buff*)malloc(16 * sizeof(buff));
@@ -16,6 +17,7 @@ AnimationObject::AnimationObject(const AnimationObject& rhs) {
 	else
 		bounding=NULL;
 	anglex=rhs.anglex; angley=rhs.angley; anglez=rhs.anglez;
+	fid = rhs.fid;
 
 	position = rhs.position;
 	size = rhs.size;
@@ -89,4 +91,9 @@ void AnimationObject::setSize(float sx,float sy,float sz) {
 		billboard->data[0] *= size.x;
 		billboard->data[1] *= size.y;
 	}
+}
+
+void AnimationObject::setCurAnim(int aid) {
+	this->aid = aid;
+	fid = animation->getFrameIndex(aid);
 }

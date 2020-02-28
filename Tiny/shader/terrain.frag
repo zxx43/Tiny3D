@@ -1,3 +1,5 @@
+#include "shader/util.glsl"
+
 layout(early_fragment_tests) in;
 
 layout(bindless_sampler) uniform sampler2D texBlds[MAX_TEX];

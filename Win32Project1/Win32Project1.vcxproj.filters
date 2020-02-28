@@ -37,9 +37,6 @@
     <Filter Include="Source Files\util">
       <UniqueIdentifier>{1704d7c7-9155-4a55-aea4-3e3e0e3be54d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\animation">
-      <UniqueIdentifier>{19062215-9bdc-475d-bfe9-b394b324be5a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\batch">
       <UniqueIdentifier>{8b8563ba-9c72-45ac-9fb6-1870b6be4e52}</UniqueIdentifier>
     </Filter>
@@ -97,11 +94,11 @@
     <Filter Include="config">
       <UniqueIdentifier>{4c8bf68f-c859-4112-901a-1d6ae67fc83f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\animation">
+      <UniqueIdentifier>{821d9ac3-4543-4fd6-8b64-10f51051c610}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="animation\animation.cpp">
-      <Filter>Source Files\animation</Filter>
-    </ClCompile>
     <ClCompile Include="batch\batch.cpp">
       <Filter>Source Files\batch</Filter>
     </ClCompile>
@@ -207,9 +204,6 @@
     <ClCompile Include="scene\scene.cpp">
       <Filter>Source Files\scene</Filter>
     </ClCompile>
-    <ClCompile Include="render\animationDrawcall.cpp">
-      <Filter>Source Files\render</Filter>
-    </ClCompile>
     <ClCompile Include="render\render.cpp">
       <Filter>Source Files\render</Filter>
     </ClCompile>
@@ -303,11 +297,14 @@
     <ClCompile Include="render\multiDrawcall.cpp">
       <Filter>Source Files\render</Filter>
     </ClCompile>
+    <ClCompile Include="animation\animation.cpp">
+      <Filter>Source Files\animation</Filter>
+    </ClCompile>
+    <ClCompile Include="animation\frameMgr.cpp">
+      <Filter>Source Files\animation</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="animation\animation.h">
-      <Filter>Source Files\animation</Filter>
-    </ClInclude>
     <ClInclude Include="batch\batch.h">
       <Filter>Source Files\batch</Filter>
     </ClInclude>
@@ -425,9 +422,6 @@
     <ClInclude Include="scene\scene.h">
       <Filter>Source Files\scene</Filter>
     </ClInclude>
-    <ClInclude Include="render\animationDrawcall.h">
-      <Filter>Source Files\render</Filter>
-    </ClInclude>
     <ClInclude Include="render\drawcall.h">
       <Filter>Source Files\render</Filter>
     </ClInclude>
@@ -497,9 +491,6 @@
     <ClInclude Include="render\renderBuffer.h">
       <Filter>Source Files\render</Filter>
     </ClInclude>
-    <ClInclude Include="animation\animationData.h">
-      <Filter>Source Files\animation</Filter>
-    </ClInclude>
     <ClInclude Include="billboard\billboard.h">
       <Filter>Source Files\billboard</Filter>
     </ClInclude>
@@ -532,6 +523,15 @@
     </ClInclude>
     <ClInclude Include="render\multiDrawcall.h">
       <Filter>Source Files\render</Filter>
+    </ClInclude>
+    <ClInclude Include="animation\animation.h">
+      <Filter>Source Files\animation</Filter>
+    </ClInclude>
+    <ClInclude Include="animation\animationData.h">
+      <Filter>Source Files\animation</Filter>
+    </ClInclude>
+    <ClInclude Include="animation\frameMgr.h">
+      <Filter>Source Files\animation</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -653,6 +653,9 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Tiny\shader\multiCull.comp">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Tiny\shader\vtf.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

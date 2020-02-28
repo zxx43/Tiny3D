@@ -23,12 +23,16 @@ struct MeshObject {
 class Scene {
 public:
 	std::vector<MeshObject*> meshes;
+	std::vector<Animation*> anims;
+public:
+	std::map<Animation*, uint> animCount;
 private:
 	std::map<Mesh*, uint> meshCount;
 	bool inited;
 private:
 	void initNodes();
 public:
+	float time;
 	Camera* mainCamera;
 	Camera* reflectCamera;
 	Sky* skyBox;
@@ -54,6 +58,7 @@ public:
 	uint queryMeshCount(Mesh* mesh);
 	void finishInit() { inited = true; }
 	bool isInited() { return inited; }
+	void act(float dTime) { time = dTime * 0.025; }
 public: // Just for debugging
 	void createNodeAABB(Node* node);
 	void clearAllAABB();

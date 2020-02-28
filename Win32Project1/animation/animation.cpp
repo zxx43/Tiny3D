@@ -28,6 +28,8 @@ Animation::Animation(const char* path) {
 		animFrames[ai] = new AnimFrame();
 		prepareFrameData(ai);
 	}
+
+	frameIndex.clear();
 }
 
 Animation::~Animation() {
@@ -59,6 +61,8 @@ Animation::~Animation() {
 	for (int i = 0; i < animCount; i++)
 		delete animFrames[i];
 	delete[] animFrames;
+
+	frameIndex.clear();
 }
 
 void Animation::loadModel() {
@@ -148,6 +152,19 @@ void Animation::pushWeightToVertex(int vertexid,int boneid,float weight) {
 	}
 }
 
+std::string Animation::convertTexPath(const std::string& path) {
+	int lc = path.find_last_of('/');
+	int ld = path.find_last_of('\\');
+	lc = lc > ld ? lc : ld;
+	if (lc == std::string::npos) lc = 0;
+	else lc += 1;
+	int ln = path.find_last_of('.');
+	std::string res = path.substr(lc, ln - lc);
+	res += ".bmp";
+	printf("convert %s\n", res.data());
+	return res;
+}
+
 void Animation::loadMaterials() {
 	int matCount=scene->mNumMaterials;
 	for(int i=0;i<matCount;i++) {
@@ -157,13 +174,13 @@ void Animation::loadMaterials() {
 		if(mat->Get(AI_MATKEY_NAME, name)!=AI_SUCCESS) name="animation_mat";
 		Material* mtl = new Material(name.data);
 		if (mat->GetTexture(aiTextureType_DIFFUSE, 0, &path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) 
-			mtl->tex1 = path.data;
+			mtl->tex1 = convertTexPath(path.data).data();
 		if (mat->GetTexture(aiTextureType_NORMALS, 0, &path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
-			mtl->tex2 = path.data;
+			mtl->tex2 = convertTexPath(path.data).data();
 		if (mat->GetTexture(aiTextureType_SPECULAR, 0, &path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
-			mtl->tex3 = path.data;
+			mtl->tex3 = convertTexPath(path.data).data();
 		if (mat->GetTexture(aiTextureType_AMBIENT, 0, &path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
-			mtl->tex4 = path.data;
+			mtl->tex4 = convertTexPath(path.data).data();
 		aiGetMaterialColor(mat, AI_MATKEY_COLOR_AMBIENT, &ambent);
 		aiGetMaterialColor(mat, AI_MATKEY_COLOR_DIFFUSE, &diffuse);
 		aiGetMaterialColor(mat, AI_MATKEY_COLOR_SPECULAR, &specular);
@@ -242,28 +259,29 @@ int Animation::findScaleIndex(aiNodeAnim* anim,float animTime) {
 	return 0;
 }
 
-void Animation::calcPosition(aiNodeAnim* anim,float animTime, aiVector3D& position) {
-	if(anim->mNumPositionKeys==1) {
-		position=anim->mPositionKeys[0].mValue;
+void Animation::calcPosition(aiNodeAnim* anim, float animTime, aiVector3D& position) {
+	if (anim->mNumPositionKeys == 1) {
+		position = anim->mPositionKeys[0].mValue;
 		return;
 	}
 
-	int startId=findPositionIndex(anim,animTime);
-	int endId=startId+1;
-	aiVectorKey startKey=anim->mPositionKeys[startId];
-	aiVectorKey endKey=anim->mPositionKeys[endId];
-	float dKeyTime=(float)(endKey.mTime-startKey.mTime);
-	float dTime=animTime-(float)startKey.mTime;
-	float factor=dTime/dKeyTime;
-	aiVector3D startPosition=startKey.mValue;
-	aiVector3D endPosition=endKey.mValue;
-	aiVector3D dPosition=endPosition-startPosition;
-	position=startPosition+factor*dPosition;
+	int startId = findPositionIndex(anim, animTime);
+	int endId = startId + 1;
+	aiVectorKey startKey = anim->mPositionKeys[startId];
+	aiVectorKey endKey = anim->mPositionKeys[endId];
+	double dKeyTime = (endKey.mTime - startKey.mTime);
+	double dTime = (double)animTime - startKey.mTime;
+	double factor = dTime / dKeyTime;
+	aiVector3D startPosition = startKey.mValue;
+	aiVector3D endPosition = endKey.mValue;
+	aiVector3D dPosition = endPosition - startPosition;
+	aiVector3D sPosition(factor * dPosition.x, factor * dPosition.y, factor * dPosition.z);
+	position = startPosition + sPosition;
 }
 
 void Animation::calcRotation(aiNodeAnim* anim,float animTime,aiQuaternion& rotation) {
 	if(anim->mNumRotationKeys==1) {
-		rotation=anim->mRotationKeys[0].mValue;
+		rotation = anim->mRotationKeys[0].mValue.Normalize();
 		return;
 	}
 
@@ -271,32 +289,33 @@ void Animation::calcRotation(aiNodeAnim* anim,float animTime,aiQuaternion& rotat
 	int endId=startId+1;
 	aiQuatKey startKey=anim->mRotationKeys[startId];
 	aiQuatKey endKey=anim->mRotationKeys[endId];
-	float dKeyTime=(float)(endKey.mTime-startKey.mTime);
-	float dTime=animTime-(float)startKey.mTime;
-	float factor=dTime/dKeyTime;
+	double dKeyTime=endKey.mTime-startKey.mTime;
+	double dTime=(double)animTime-startKey.mTime;
+	double factor=dTime/dKeyTime;
 	aiQuaternion startRotation=startKey.mValue;
 	aiQuaternion endRotation=endKey.mValue;
 	aiQuaternion::Interpolate(rotation,startRotation,endRotation,factor);
 	rotation=rotation.Normalize();
 }
 
-void Animation::calcScale(aiNodeAnim* anim,float animTime, aiVector3D& scale) {
-	if(anim->mNumScalingKeys==1) {
-		scale=anim->mScalingKeys[0].mValue;
+void Animation::calcScale(aiNodeAnim* anim, float animTime, aiVector3D& scale) {
+	if (anim->mNumScalingKeys == 1) {
+		scale = anim->mScalingKeys[0].mValue;
 		return;
 	}
 
-	int startId=findScaleIndex(anim,animTime);
-	int endId=startId+1;
-	aiVectorKey startKey=anim->mScalingKeys[startId];
-	aiVectorKey endKey=anim->mScalingKeys[endId];
-	float dKeyTime=(float)(endKey.mTime-startKey.mTime);
-	float dTime=animTime-(float)startKey.mTime;
-	float factor=dTime/dKeyTime;
-	aiVector3D startScale=startKey.mValue;
-	aiVector3D endScale=endKey.mValue;
-	aiVector3D dScale=endScale-startScale;
-	scale=startScale+factor*dScale;
+	int startId = findScaleIndex(anim, animTime);
+	int endId = startId + 1;
+	aiVectorKey startKey = anim->mScalingKeys[startId];
+	aiVectorKey endKey = anim->mScalingKeys[endId];
+	double dKeyTime = endKey.mTime - startKey.mTime;
+	double dTime = (double)animTime - startKey.mTime;
+	double factor = dTime / dKeyTime;
+	aiVector3D startScale = startKey.mValue;
+	aiVector3D endScale = endKey.mValue;
+	aiVector3D dScale = endScale - startScale;
+	aiVector3D sScale(factor * dScale.x, factor * dScale.y, factor * dScale.z);
+	scale = startScale + sScale;
 }
 
 aiNodeAnim* Animation::findNodeAnim(int animIndex,std::string boneName) {
@@ -349,7 +368,8 @@ void Animation::prepareFrameData(int animIndex) {
 	MATRIX4X4 mat4;
 	aiAnimation* animation = scene->mAnimations[animIndex];
 	AnimFrame* animFrame = animFrames[animIndex];
-	for (float tick = 0; tick < animation->mDuration; tick += 0.01) {
+
+	for (float tick = 0.0; tick < animation->mDuration; tick += 0.01) {
 		Frame* frame = new Frame(boneCount);
 		int currIndex = 0;
 		readNode(animIndex, tick, scene->mRootNode, mat);
@@ -371,22 +391,24 @@ void Animation::prepareFrameData(int animIndex) {
 			mat4.entries[14] = boneInfos[bi]->transformation.c4;
 			mat4.entries[15] = boneInfos[bi]->transformation.d4;
 			mat4.Transpose();
-			for (int m = 0; m < 12; m++) {
-				frame->data[currIndex] = mat4.entries[m];
-				currIndex++;
-			}
+			for (int m = 0; m < 12; m++) 
+				frame->data[currIndex++] = mat4.entries[m];
 		}
 		animFrame->frames.push_back(frame);
 	}
 }
 
-void Animation::bonesTransform(int animIndex,float time) {
-	aiAnimation* animation=scene->mAnimations[animIndex];
-	float ticksPerSecond=(float)animation->mTicksPerSecond;
-	float ticks=time*ticksPerSecond;
-	float animTime=fmodf(ticks,animation->mDuration);
+float Animation::getBoneFrame(int animIndex, float time) {
+	aiAnimation* animation = scene->mAnimations[animIndex];
+	float ticksPerSecond = (float)animation->mTicksPerSecond;
+	float ticks = time * ticksPerSecond;
+	float animTime = fmodf(ticks, animation->mDuration);
+	return animTime * 100.0;
+}
 
+void Animation::bonesTransform(int animIndex,float time) {
+	int animTime = (int)getBoneFrame(animIndex, time);
 	AnimFrame* animFrame = animFrames[animIndex];
-	Frame* frame = animFrame->frames[(int)(animTime*100)];
+	Frame* frame = animFrame->frames[animTime];
 	boneTransformMats = frame->data;
 }

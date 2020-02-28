@@ -1,3 +1,5 @@
+#include "shader/util.glsl"
+
 layout(vertices = 3) out;
 
 in vec4 vPosition[];

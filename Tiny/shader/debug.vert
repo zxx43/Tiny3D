@@ -1,3 +1,5 @@
+#include "shader/util.glsl"
+
 uniform mat3x4 modelMatrices[100];
 uniform mat4 viewProjectMatrix;
 

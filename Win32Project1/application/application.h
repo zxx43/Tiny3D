@@ -18,8 +18,7 @@ public:
 	int windowWidth, windowHeight;
 	float fps;
 	bool willExit;
-	float graphQuality, useDof, useFxaa;
-	bool dualThread;
+	ConfigArg* cfgs;
 public:
 	Application();
 	virtual ~Application();

@@ -11,6 +11,7 @@
 #ifndef TEXTURE_TYPE_COLOR
 #define TEXTURE_TYPE_COLOR 1
 #define TEXTURE_TYPE_DEPTH 2
+#define TEXTURE_TYPE_ANIME 3
 #define LOW_PRE 0
 #define HIGH_PRE 1
 #define FLOAT_PRE 2

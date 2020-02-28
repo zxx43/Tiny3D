@@ -24,9 +24,24 @@ Config::~Config() {
 	data.clear();
 }
 
-bool Config::get(const char* key, float& value) {
+bool Config::getFloat(const char* key, float& value) {
 	map<string, float>::iterator itor = data.find(key);
 	if (itor == data.end()) return false;
 	value = itor->second;
+	return true;
+}
+
+bool Config::getInt(const char* key, int& value) {
+	map<string, float>::iterator itor = data.find(key);
+	if (itor == data.end()) return false;
+	value = (int)itor->second;
+	return true;
+}
+
+bool Config::getBool(const char* key, bool& value) {
+	map<string, float>::iterator itor = data.find(key);
+	if (itor == data.end()) return false;
+	float fValue = itor->second;
+	value = fValue > 0.1 ? true : false;
 	return true;
 }

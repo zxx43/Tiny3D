@@ -11,6 +11,7 @@
 using namespace std;
 
 Scene::Scene() {
+	time = 0.0;
 	inited = false;
 	mainCamera = new Camera(25.0);
 	reflectCamera = NULL;
@@ -26,6 +27,8 @@ Scene::Scene() {
 	boundingNodes.clear();
 	meshCount.clear();
 	meshes.clear();
+	animCount.clear();
+	anims.clear();
 	Node::nodesToUpdate.clear();
 	Node::nodesToRemove.clear();
 	Instance::instanceTable.clear();
@@ -46,6 +49,8 @@ Scene::~Scene() {
 	for (uint i = 0; i < meshes.size(); ++i)
 		delete meshes[i];
 	meshes.clear();
+	anims.clear();
+	animCount.clear();
 }
 
 void Scene::initNodes() {
@@ -190,6 +195,18 @@ void Scene::addObject(Object* object) {
 			meshes.push_back(new MeshObject(cur, object));
 		}
 		meshCount[cur]++;
+	}
+	// Animation object
+	if (!object->mesh) {
+		AnimationObject* animObj = (AnimationObject*)object;
+		if (animObj) {
+			Animation* curAnim = animObj->animation;
+			if (animCount.find(curAnim) == animCount.end()) {
+				animCount[curAnim] = 0;
+				anims.push_back(curAnim);
+			}
+			animCount[curAnim]++;
+		}
 	}
 }
 

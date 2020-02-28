@@ -1,3 +1,6 @@
+#include "shader/util.glsl"
+#include "shader/triangle.glsl"
+
 layout(local_size_x = WORKGROUP_SIZE, local_size_y = WORKGROUP_SIZE) in;
 
 layout(bindless_sampler) uniform sampler2D distortionTex;

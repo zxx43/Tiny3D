@@ -3,19 +3,19 @@
 #include "../mesh/board.h"
 #include "../object/staticObject.h"
 
-RenderManager::RenderManager(int quality, Camera* view, float distance1, float distance2, bool copyData, const vec3& light) {
-	graphicQuality = quality;
+RenderManager::RenderManager(ConfigArg* cfg, Camera* view, float distance1, float distance2, const vec3& light) {
 	int precision = LOW_PRE;
+	cfgs = cfg;
 	shadow = new Shadow(view);
 	float nearSize = 1024;
 	float midSize = 1024;
 	float farSize = 512;
-	if (graphicQuality > 6.0) {
+	if (cfgs->shadowQuality > 2) {
 		nearSize = 4096;
 		midSize = 1024;
 		farSize = 512;
 		precision = HIGH_PRE;
-	} else if (graphicQuality > 4.0) {
+	} else if (cfgs->shadowQuality > 1) {
 		nearSize = 2048;
 		midSize = 1024;
 		farSize = 512;
@@ -29,19 +29,13 @@ RenderManager::RenderManager(int quality, Camera* view, float distance1, float d
 	farBuffer = new FrameBuffer(farSize, farSize, LOW_PRE);
 	lightDir = light.GetNormalized();
 
-	queue1 = new Renderable(distance1, distance2, copyData); 
-	queue2 = new Renderable(distance1, distance2, copyData); 
+	queue1 = new Renderable(distance1, distance2, cfgs->dualthread);
+	queue2 = new Renderable(distance1, distance2, cfgs->dualthread);
 	currentQueue = queue1;
 	nextQueue = queue2;
 
-	useShadow = false;
-	drawBounding = true;
 	state = new RenderState();
 
-	time = 0.0;
-	enableSsr = false;
-	enableBloom = false;
-	enableCartoon = false;
 	reflectBuffer = NULL;
 	occluderDepth = NULL;
 	needResize = true;
@@ -64,13 +58,9 @@ RenderManager::~RenderManager() {
 	if (grassDrawcall) delete grassDrawcall; grassDrawcall = NULL;
 }
 
-void RenderManager::act(float dTime) {
-	time = dTime * 0.025;
-}
-
 void RenderManager::resize(float width, float height) {
 	if (reflectBuffer) delete reflectBuffer; reflectBuffer = NULL;
-	if (!enableSsr) {
+	if (!cfgs->ssr) {
 		reflectBuffer = new FrameBuffer(width, height, LOW_PRE, 4, false);
 		reflectBuffer->addColorBuffer(LOW_PRE, 4);
 		reflectBuffer->addColorBuffer(LOW_PRE, 3);
@@ -133,21 +123,25 @@ void RenderManager::swapRenderQueues(Scene* scene, bool swapQueue) {
 }
 
 void RenderManager::renderShadow(Render* render, Scene* scene) {
-	if (!useShadow) return;
+	if (cfgs->shadowQuality < 1) return;
 
 	static Shader* phongShadowShader = render->findShader("phong_s");
 	static Shader* phongShadowInsShader = render->findShader("phong_s_ins");
 	static Shader* boneShadowShader = render->findShader("bone_s");
 	static Shader* phongShadowLowShader = render->findShader("phong_sl");
+	static Shader* billShadowInsShader = render->findShader("bill_s_ins");
+	static Shader* billShadowLowShader = render->findShader("bill_sl_ins");
 	static Shader* cullShader = render->findShader("cull");
-	static Shader* multiShader = render->findShader("multi");
+	static Shader* multiShader = render->findShader("multi_s");
 	static Shader* flushShader = render->findShader("flush");
+	static Shader* animMultiShader = render->findShader("animMulti_s");
+	static Shader* animFlushShader = render->findShader("animFlush");
 
 	state->reset();
 	state->eyePos = &(scene->mainCamera->position);
 	state->cullMode = CULL_FRONT;
 	state->light = lightDir;
-	state->time = time;
+	state->time = scene->time;
 
 	Camera* mainCamera = scene->mainCamera;
 
@@ -156,19 +150,26 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	state->pass = NEAR_SHADOW_PASS;
 	state->shader = phongShadowShader;
 	state->shaderIns = phongShadowInsShader;
+	state->shaderBill = billShadowInsShader;
 	state->shaderCompute = cullShader;
 	state->shaderMulti = multiShader;
 	state->shaderFlush = flushShader;
 	currentQueue->queues[QUEUE_STATIC_SN]->draw(scene, cameraNear, render, state);
 	state->shader = boneShadowShader;
+	state->shaderMulti = animMultiShader;
+	state->shaderFlush = animFlushShader;
 	currentQueue->queues[QUEUE_ANIMATE_SN]->draw(scene, cameraNear, render, state);
 
 	render->setFrameBuffer(midBuffer);
 	Camera* cameraMid=shadow->lightCameraMid;
 	state->pass = MID_SHADOW_PASS;
 	state->shader = phongShadowShader;
+	state->shaderMulti = multiShader;
+	state->shaderFlush = flushShader;
 	currentQueue->queues[QUEUE_STATIC_SM]->draw(scene, cameraMid, render, state);
 	state->shader = boneShadowShader;
+	state->shaderMulti = animMultiShader;
+	state->shaderFlush = animFlushShader;
 	currentQueue->queues[QUEUE_ANIMATE_SM]->draw(scene, cameraMid, render, state);
 
 	///*
@@ -180,15 +181,19 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 		else {
 			if (flushCount % 3 == 1) {
 				render->setFrameBuffer(farBuffer);
-				if (true)
-					flushed = true;
+				if (true) flushed = true;
 				else {
 					Camera* cameraFar = shadow->lightCameraFar;
 					state->pass = FAR_SHADOW_PASS;
 					state->shader = phongShadowLowShader;
 					state->shaderIns = phongShadowInsShader;
+					state->shaderBill = billShadowLowShader;
+					state->shaderMulti = multiShader;
+					state->shaderFlush = flushShader;
 					currentQueue->queues[QUEUE_STATIC_SF]->draw(scene, cameraFar, render, state);
 					state->shader = boneShadowShader;
+					state->shaderMulti = animMultiShader;
+					state->shaderFlush = animFlushShader;
 					currentQueue->queues[QUEUE_ANIMATE_SF]->draw(scene, cameraFar, render, state);
 				}
 			}
@@ -236,18 +241,21 @@ void RenderManager::drawGrass(Render* render, RenderState* state, Scene* scene, 
 void RenderManager::renderScene(Render* render, Scene* scene) {
 	static Shader* phongShader = render->findShader("phong");
 	static Shader* phongInsShader = render->findShader("phong_ins");
+	static Shader* billInsShader = render->findShader("bill_ins");
 	static Shader* boneShader = render->findShader("bone");
 	static Shader* skyShader = render->findShader("sky");
 	static Shader* cullShader = render->findShader("cull");
 	static Shader* multiShader = render->findShader("multi");
 	static Shader* flushShader = render->findShader("flush");
+	static Shader* animMultiShader = render->findShader("animMulti");
+	static Shader* animFlushShader = render->findShader("animFlush");
 
 	state->reset();
 	state->eyePos = &(scene->mainCamera->position);
 	state->light = lightDir;
-	state->time = time;
-	state->enableSsr = enableSsr;
-	state->quality = graphicQuality;
+	state->time = scene->time;
+	state->enableSsr = cfgs->ssr;
+	state->quality = cfgs->graphQuality;
 
 	Camera* camera = scene->mainCamera;
 
@@ -261,7 +269,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 
 		occluderDepth->copyDataFrom(render->getFrameBuffer()->getDepthBuffer());
 
-		if (!enableCartoon && !drawBounding) {
+		if (!cfgs->cartoon && !cfgs->debug) {
 			render->useTexture(TEXTURE_2D, 0, occluderDepth->id);
 			drawGrass(render, state, scene, camera);
 		}
@@ -269,14 +277,16 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 
 	state->shader = phongShader;
 	state->shaderIns = phongInsShader;
+	state->shaderBill = billInsShader;
 	state->shaderCompute = cullShader;
 	state->shaderMulti = multiShader;
 	state->shaderFlush = flushShader;
-	
 	render->useTexture(TEXTURE_2D, 0, occluderDepth->id);
 	currentQueue->queues[QUEUE_STATIC]->draw(scene, camera, render, state);
 
 	state->shader = boneShader;
+	state->shaderMulti = animMultiShader;
+	state->shaderFlush = animFlushShader;
 	currentQueue->queues[QUEUE_ANIMATE]->draw(scene, camera, render, state);
 
 	// Draw sky
@@ -284,7 +294,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 		scene->skyBox->draw(render, skyShader, camera);
 
 	// Debug mode
-	if (drawBounding) {
+	if (cfgs->debug) {
 		static bool boxInit = false;
 		if (!boxInit && scene->isInited()) {
 			scene->clearAllAABB();
@@ -316,8 +326,8 @@ void RenderManager::renderWater(Render* render, Scene* scene) {
 		state->reset();
 		state->eyePos = &(scene->mainCamera->position);
 		state->light = lightDir;
-		state->time = time;
-		state->enableSsr = enableSsr;
+		state->time = scene->time;
+		state->enableSsr = cfgs->ssr;
 		state->waterPass = true;
 		state->shader = waterShader;
 
@@ -358,8 +368,8 @@ void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* scre
 	state->shader = deferredShader;
 	state->shadow = shadow;
 	state->light = lightDir;
-	state->time = time;
-	state->quality = graphicQuality;
+	state->time = scene->time;
+	state->quality = cfgs->graphQuality;
 
 	uint baseSlot = screenBuff->colorBuffers.size() + 1; // Color buffers + Depth buffer
 	if(!deferredShader->isTexBinded(nearBuffer->getDepthBuffer()->hnd))
@@ -368,8 +378,8 @@ void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* scre
 		deferredShader->setHandle64("depthBufferMid", midBuffer->getDepthBuffer()->hnd);
 	if(!deferredShader->isTexBinded(farBuffer->getDepthBuffer()->hnd))
 		deferredShader->setHandle64("depthBufferFar", farBuffer->getDepthBuffer()->hnd);
-	render->setShaderInt(deferredShader, "useShadow", useShadow ? 1 : 0);
-	render->setShaderFloat(deferredShader, "useCartoon", enableCartoon ? 1.0 : 0.0);
+	render->setShaderInt(deferredShader, "useShadow", cfgs->shadowQuality > 0 ? 1 : 0);
+	render->setShaderFloat(deferredShader, "useCartoon", cfgs->cartoon ? 1.0 : 0.0);
 	filter->draw(scene->mainCamera, render, state, screenBuff->colorBuffers, screenBuff->depthBuffer);
 }
 
@@ -381,10 +391,10 @@ void RenderManager::drawCombined(Render* render, Scene* scene, const std::vector
 	state->enableDepthTest = false;
 	state->pass = DEFERRED_PASS;
 	state->shader = combinedShader;
-	state->quality = graphicQuality;
+	state->quality = cfgs->graphQuality;
 
-	state->shader->setFloat("useBloom", enableBloom ? 1.0 : 0.0);
-	state->shader->setFloat("useCartoon", enableCartoon ? 1.0 : 0.0);
+	state->shader->setFloat("useBloom", cfgs->bloom ? 1.0 : 0.0);
+	state->shader->setFloat("useCartoon", cfgs->cartoon ? 1.0 : 0.0);
 	filter->draw(scene->mainCamera, render, state, inputTextures, NULL);
 }
 
@@ -409,7 +419,7 @@ void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* s
 	state->pass = POST_PASS;
 	state->shader = shader;
 
-	state->shader->setFloat("useCartoon", enableCartoon ? 1.0 : 0.0);
+	state->shader->setFloat("useCartoon", cfgs->cartoon ? 1.0 : 0.0);
 	filter->draw(scene->mainCamera, render, state, inputTextures, NULL);
 }
 
@@ -483,12 +493,4 @@ void RenderManager::drawBoundings(Render* render, RenderState* state, Scene* sce
 		Node* node = scene->boundingNodes[i];
 		render->draw(camera, node->drawcall, state);
 	}
-}
-
-void RenderManager::showShadow(bool enable) {
-	useShadow = enable;
-}
-
-void RenderManager::showBounding(bool enable) {
-	drawBounding = enable;
 }

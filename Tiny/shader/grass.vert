@@ -1,3 +1,5 @@
+#include "shader/util.glsl"
+
 uniform mat4 viewProjectMatrix;
 
 layout (location = 0) in vec2 vertex;

@@ -1,3 +1,5 @@
+#include "shader/util.glsl"
+
 layout (points) in;
 layout (triangle_strip, max_vertices = 3) out;
 

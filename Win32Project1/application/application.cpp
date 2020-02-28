@@ -4,12 +4,24 @@
 
 Application::Application() {
 	config = new Config("config/config.txt");
+	cfgs = (ConfigArg*)malloc(sizeof(ConfigArg));
+	memset(cfgs, 0, sizeof(ConfigArg));
 
-	float width = SCR_WIDTH, height = SCR_HEIGHT;
-	config->get("width", width);
-	config->get("height", height);
-	windowWidth = width;
-	windowHeight = height;
+	config->getInt("width", cfgs->width);
+	config->getInt("height", cfgs->height);
+	config->getBool("fullscreen", cfgs->fullscreen);
+	config->getBool("dualthread", cfgs->dualthread);
+	config->getInt("quality", cfgs->graphQuality);
+	config->getInt("shadow", cfgs->shadowQuality);
+	config->getBool("dof", cfgs->dof);
+	config->getBool("fxaa", cfgs->fxaa);
+	config->getBool("ssr", cfgs->ssr);
+	config->getBool("bloom", cfgs->bloom);
+	config->getBool("cartoon", cfgs->cartoon);
+	config->getBool("debug", cfgs->debug);
+
+	windowWidth = cfgs->width;
+	windowHeight = cfgs->height;
 	fps = 0.0;
 
 	willExit = false;
@@ -28,44 +40,14 @@ void Application::init() {
 	scene = new Scene();
 	input = new Input();
 
-	config->get("quality", graphQuality);
-	float lowDist = graphQuality > 4.0 ? 800 : 200;
-	float farDist = graphQuality > 4.0 ? 1500 : 800;
-	float dual = 0.0;
-	config->get("dualthread", dual);
-	dualThread = dual > 0.1 ? true : false;
-	renderMgr = new RenderManager(graphQuality, scene->mainCamera, lowDist, farDist, dual, vec3(-1, -1, -1));
-	if (graphQuality > 1)
-		renderMgr->showShadow(true);
-	else
-		renderMgr->showShadow(false);
+	float lowDist = cfgs->graphQuality > 4 ? 800 : 200;
+	float farDist = cfgs->graphQuality > 4 ? 1500 : 800;
+	renderMgr = new RenderManager(cfgs, scene->mainCamera, lowDist, farDist, vec3(-1, -1, -1));
 
-	config->get("dof", useDof);
-	config->get("fxaa", useFxaa);
-
-	float useSsr = 0.0, useBloom = 0.0, useCartoon, useDebug = 0.0;
-	config->get("ssr", useSsr);
-	config->get("bloom", useBloom);
-	config->get("cartoon", useCartoon);
-
-	if (useSsr > 0.5) 
-		renderMgr->enableSsr = true;
-	else {
+	if (!cfgs->ssr)
 		scene->createReflectCamera();
-		renderMgr->enableSsr = false;
-	}
 
-	renderMgr->enableBloom = useBloom > 0.5 ? true : false;
-	renderMgr->enableCartoon = useCartoon > 0.5 ? true : false;
-
-	config->get("debug", useDebug);
-	if (useDebug > 0.5) {
-		renderMgr->showBounding(true);
-		render->setDebug(true);
-	} else {
-		renderMgr->showBounding(false);
-		render->setDebug(false);
-	}
+	render->setDebug(cfgs->debug);
 }
 
 void Application::initScene() {
@@ -81,12 +63,13 @@ Application::~Application() {
 	delete input; input = NULL;
 	delete renderMgr; renderMgr = NULL;
 	delete config;
+	free(cfgs);
 }
 
 void Application::act(long startTime, long currentTime) {
 	if (renderMgr) {
 		input->updateExtra(renderMgr);
-		renderMgr->act(currentTime - startTime);
+		scene->act(currentTime - startTime);
 	}
 }
 

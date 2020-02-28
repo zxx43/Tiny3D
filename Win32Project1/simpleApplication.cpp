@@ -7,7 +7,7 @@
 #include "constants/constants.h"
 using namespace std;
 
-SimpleApplication::SimpleApplication() {
+SimpleApplication::SimpleApplication() : Application() {
 	screen = NULL;
 	waterFrame = NULL;
 	sceneFilter = NULL;
@@ -42,9 +42,9 @@ SimpleApplication::~SimpleApplication() {
 void SimpleApplication::resize(int width, int height) {
 	if (!render) return;
 
-	int precision = graphQuality > 4.0 ? HIGH_PRE : LOW_PRE;
-	int scrPre = (graphQuality > 4.0 || renderMgr->enableSsr) ? HIGH_PRE : LOW_PRE;
-	int hdrPre = graphQuality > 3.0 ? FLOAT_PRE : precision;
+	int precision = cfgs->graphQuality > 4 ? HIGH_PRE : LOW_PRE;
+	int scrPre = (cfgs->graphQuality > 4 || cfgs->ssr) ? HIGH_PRE : LOW_PRE;
+	int hdrPre = cfgs->graphQuality > 3 ? FLOAT_PRE : precision;
 	int depthPre = LOW_PRE;
 
 	Application::resize(width, height);
@@ -75,24 +75,24 @@ void SimpleApplication::resize(int width, int height) {
 	*/
 
 	if (combinedChain) delete combinedChain;
-	if (!useFxaa && !useDof && !renderMgr->enableSsr)
+	if (!cfgs->fxaa && !cfgs->dof && !cfgs->ssr)
 		combinedChain = new FilterChain(width, height, false, precision, 4);
 	else {
 		combinedChain = new FilterChain(width, height, true, precision, 4);
-		if (useFxaa) {
+		if (cfgs->fxaa) {
 			if (aaFilter) delete aaFilter;
 			aaFilter = new Filter(width, height, false, precision, 4);
 			aaInput.clear();
 		}
-		if (useDof) {
+		if (cfgs->dof) {
 			if (dofBlurFilter) delete dofBlurFilter;
 			dofBlurFilter = new Filter(width * 0.5, height * 0.5, true, LOW_PRE, 4);
 			if (dofChain) delete dofChain;
-			dofChain = new FilterChain(width, height, useFxaa, precision, 4);
+			dofChain = new FilterChain(width, height, cfgs->fxaa, precision, 4);
 			dofChain->addInputTex(dofBlurFilter->getOutput(0));
 			dofChain->addInputTex(combinedChain->getOutputTex(0));
 		}
-		if (renderMgr->enableSsr) {
+		if (cfgs->ssr) {
 			if (ssrChain) delete ssrChain;
 			ssrChain = new FilterChain(width, height, true, LOW_PRE, 4, false);
 			ssrChain->addInputTex(combinedChain->getOutputTex(0));
@@ -100,7 +100,7 @@ void SimpleApplication::resize(int width, int height) {
 			ssrChain->addInputTex(waterFrame->getColorBuffer(2));
 			ssrChain->addInputTex(waterFrame->getDepthBuffer());
 
-			if (!useFxaa && !useDof) {
+			if (!cfgs->fxaa && !cfgs->dof) {
 				if (rawScreenFilter) delete rawScreenFilter;
 				rawScreenFilter = new Filter(width, height, false, precision, 4);
 			}
@@ -168,7 +168,7 @@ void SimpleApplication::draw() {
 	waterFrame->getDepthBuffer()->copyDataFrom(screen->getDepthBuffer());
 	renderMgr->renderWater(render, scene);
 
-	if (renderMgr->enableBloom)
+	if (cfgs->bloom)
 		renderMgr->drawDualFilter(render, scene, "gauss", bloomChain);
 
 	renderMgr->drawCombined(render, scene, combinedChain->input, combinedChain->output);
@@ -181,12 +181,12 @@ void SimpleApplication::draw() {
 	}
 
 	Filter* lastFilter = combinedChain->output;
-	if (useDof) {
+	if (cfgs->dof) {
 		renderMgr->drawScreenFilter(render, scene, "blur", combinedChain->getOutFrameBuffer(), dofBlurFilter);
 		renderMgr->drawScreenFilter(render, scene, "dof", dofChain->input, dofChain->output);
 		lastFilter = dofChain->output;
 	}
-	if (useFxaa) {
+	if (cfgs->fxaa) {
 		if (aaInput.size() == 0) {
 			aaInput.push_back(lastFilter->getFrameBuffer()->getColorBuffer(0));
 			aaInput.push_back(screen->getColorBuffer(2));
@@ -223,7 +223,7 @@ void SimpleApplication::updateMovement() {
 		vec3 cp = scene->mainCamera->position;
 		int bx, bz;
 		scene->terrainNode->caculateBlock(cp.x, cp.z, bx, bz);
-		int visualSize = graphQuality >= 8 ? 60 : 40;
+		int visualSize = cfgs->graphQuality >= 8 ? 60 : 40;
 		scene->updateVisualTerrain(bx, bz, visualSize, visualSize);
 		if (scene->terrainNode->cauculateY(bx, bz, cp.x, cp.z, cp.y)) {
 			if (scene->water) {
@@ -244,12 +244,22 @@ void SimpleApplication::updateMovement() {
 void SimpleApplication::act(long startTime, long currentTime) {
 	Application::act(startTime, currentTime);
 	///*
+		static float dd = 1.0, dr = 1.0;
+
 		Node* node = scene->animationRoot->children[0];
 		AnimationNode* animNode = (AnimationNode*)node->children[0];
 		//animNode->rotateNodeObject(0, ((AnimationObject*)animNode->objects[0])->angley + 0.1, 0);
-		animNode->rotateNodeObject(0, 225, 0);
-		animNode->translateNode(animNode->position.x - 0.025, animNode->position.y, animNode->position.z - 0.025);
+		animNode->rotateNodeObject(0, 135 + 90 * dr, 0);
+		animNode->translateNode(animNode->position.x - 0.01 * dd, animNode->position.y, animNode->position.z - 0.01 * dd);
 		scene->terrainNode->standObjectsOnGround(animNode);
+
+		static float distance = 0.0;
+		distance++;
+		if (distance > 5000.0) {
+			dd *= -1.0;
+			dr *= -1.0;
+			distance = 0.0;
+		}
 	//*/
 	/*
 	static int time = 1;
@@ -259,7 +269,7 @@ void SimpleApplication::act(long startTime, long currentTime) {
 	}
 	//*/
 	scene->updateNodes();
-	if (!renderMgr->enableSsr) scene->updateReflectCamera();
+	if (!cfgs->ssr) scene->updateReflectCamera();
 }
 
 void SimpleApplication::initScene() {
@@ -280,7 +290,11 @@ void SimpleApplication::initScene() {
 	assetMgr->addMesh("rock", new Model("models/sharprockfree.obj", "models/sharprockfree.mtl", 2));
 	assetMgr->addMesh("terrain", new Terrain("terrain/Terrain.raw"));
 	assetMgr->addMesh("water", new Water(1024, 16));
+
+	// Load animations
+	assetMgr->addAnimation("ninja", new Animation("models/ninja.mesh"));
 	assetMgr->addAnimation("army", new Animation("models/ArmyPilot.dae"));
+	assetMgr->initFrames();
 
 	// Load textures
 	assetMgr->addTextureBindless("cube.bmp", true);
@@ -304,8 +318,6 @@ void SimpleApplication::initScene() {
 	assetMgr->addTextureBindless("rustediron2_metallic.bmp", false);
 	assetMgr->addTextureBindless("grass1-albedo3.bmp", true);
 	assetMgr->addTextureBindless("grass1-normal1-dx.bmp", false);
-	//assetMgr->addTextureBindless("grass1-rough.bmp", false);
-	//assetMgr->addTextureBindless("grass1-metalness.bmp", false);
 	assetMgr->addDistortionTex("distortion.bmp");
 	assetMgr->createHeightTex();
 
@@ -339,8 +351,6 @@ void SimpleApplication::initScene() {
 	terrainMat->texids.y = assetMgr->findTextureBindless("ground_r.bmp");
 	terrainMat->texids.z = assetMgr->findTextureBindless("ground_s.bmp");
 	terrainMat->texids.w = assetMgr->findTextureBindless("grass1-normal1-dx.bmp");
-	//terrainMat->exTexids.x = assetMgr->findTextureBindless("grass1-rough.bmp");
-	//terrainMat->exTexids.y = assetMgr->findTextureBindless("grass1-metalness.bmp");
 	mtlMgr->add(terrainMat);
 	
 	Material* billboardTreeMat = new Material("billboard_tree_mat");
@@ -613,23 +623,27 @@ void SimpleApplication::initScene() {
 	animNode1->getObject()->setSize(0.05, 0.05, 0.05);
 	animNode1->getObject()->setPosition(0, -5, -1);
 	animNode1->translateNode(5, 0, 15);
+	animNode1->getObject()->setCurAnim(0);
 	AnimationNode* animNode2 = new AnimationNode(vec3(5, 10, 5));
-	animNode2->setAnimation(scene, animations["army"]);
+	animNode2->setAnimation(scene, animations["ninja"]);
 	animNode2->getObject()->setSize(0.05, 0.05, 0.05);
 	animNode2->getObject()->setPosition(0, -5, -1);
 	animNode2->translateNode(40, 0, 40);
 	animNode2->rotateNodeObject(0, 45, 0);
+	animNode2->getObject()->setCurAnim(19);
 	AnimationNode* animNode3 = new AnimationNode(vec3(5, 10, 5));
-	animNode3->setAnimation(scene, animations["army"]);
+	animNode3->setAnimation(scene, animations["ninja"]);
 	animNode3->getObject()->setSize(0.05, 0.05, 0.05);
 	animNode3->getObject()->setPosition(0, -5, -1);
 	animNode3->translateNode(5, 0, 15);
+	animNode3->getObject()->setCurAnim(11);
 	AnimationNode* animNode4 = new AnimationNode(vec3(5, 10, 5));
-	animNode4->setAnimation(scene, animations["army"]);
+	animNode4->setAnimation(scene, animations["ninja"]);
 	animNode4->getObject()->setSize(0.05, 0.05, 0.05);
 	animNode4->getObject()->setPosition(0, -5, -1);
 	animNode4->translateNode(40, 0, 40);
-	animNode4->rotateNodeObject(0, 90, 0);
+	animNode4->rotateNodeObject(0, 270, 0);
+	animNode4->getObject()->setCurAnim(15);
 
 	Node* animNode = new StaticNode(vec3(0, 0, 0));
 	animNode->attachChild(animNode1);

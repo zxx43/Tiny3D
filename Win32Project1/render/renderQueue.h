@@ -8,6 +8,7 @@
 #include "../instance/instance.h"
 #include "../instance/multiInstance.h"
 #include "../batch/batch.h"
+#include "../animation/animationData.h"
 
 #ifndef QUEUE_STATIC
 #define QUEUE_STATIC_SN 0
@@ -56,6 +57,7 @@ struct Queue {
 class RenderQueue {
 private:
 	Queue* queue;
+	Queue* animQueue;
 private:
 	void pushDatasToInstance(Scene* scene, InstanceData* data, bool copy);
 	void pushDatasToBatch(BatchData* data, int pass);
@@ -63,8 +65,10 @@ public:
 	int queueType;
 	float midDistSqr, lowDistSqr;
 	std::map<Mesh*, InstanceData*> instanceQueue;
+	std::map<Animation*, AnimationData*> animationQueue;
 	MultiInstance* multiInstance;
 	MultiInstance* billboards;
+	MultiInstance* animations;
 	bool dualInstances;
 	BatchData* batchData;
 	bool dual;
@@ -74,6 +78,7 @@ public:
 	RenderQueue(int type, float midDis, float lowDis);
 	~RenderQueue();
 	void push(Node* node);
+	void pushAnim(Node* node);
 	void flush();
 	void deleteInstance(InstanceData* data);
 	void setDual(bool dual);

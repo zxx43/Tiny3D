@@ -2,10 +2,11 @@ width 320
 height 240
 fullscreen 0
 dualthread 1
-quality 7
+quality 10
+shadow 3
 ssr 1
 dof 1
 fxaa 1
 bloom 1
-cartoon 1
+cartoon 0
 debug 0

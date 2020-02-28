@@ -24,9 +24,10 @@ void InstanceData::addInstance(Object* object) {
 	if (transformsFull) {
 		memcpy(transformsFull + (count * 16), object->transformsFull, 12 * sizeof(buff));
 		if (instance) {
-			transformsFull[count * 16 + 12] = instance->insId;
-			transformsFull[count * 16 + 13] = instance->insSingleId;
-			transformsFull[count * 16 + 14] = instance->insBillId;
+			transformsFull[count * 16 + 12] = instance->insId + 0.1;
+			transformsFull[count * 16 + 13] = instance->insSingleId + 0.1;
+			transformsFull[count * 16 + 14] = instance->insBillId + 0.1;
+			transformsFull[count * 16 + 15] = -1;
 			if (instance->isBillboard) {
 				if (object->billboard->data[2] < 0) {
 					Material* mat = NULL;

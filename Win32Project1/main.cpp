@@ -30,7 +30,7 @@ SimpleApplication* app = NULL;
 void CreateApplication();
 void ReleaseApplication();
 
-float fullscreen = 0.0;
+bool fullscreen = false;
 bool inited = false;
 
 void KillWindow() {
@@ -52,7 +52,7 @@ void ResizeWindow(int width,int height) {
 }
 
 void DrawWindow() {
-	if (!app->dualThread) {
+	if (!app->cfgs->dualthread) {
 		actTime = timeGetTime();
 		app->act(startTime, actTime);
 		app->prepare(false);
@@ -65,7 +65,7 @@ void DrawWindow() {
 
 	app->draw();
 	
-	if (app->dualThread) {
+	if (app->cfgs->dualthread) {
 		WaitForSingleObject(mutex, INFINITE);
 		dataPrepared = false;
 		ReleaseMutex(mutex);
@@ -87,12 +87,12 @@ void DrawWindow() {
 }
 
 DWORD WINAPI FrameThreadRun(LPVOID param) {
-	while (!app->willExit && app->dualThread) {
+	while (!app->willExit && app->cfgs->dualthread) {
 		actTime = timeGetTime();
 		if(!dataPrepared && inited) {
 			app->act(startTime, actTime);
 			app->prepare(true);
-			app->animate(startTime, actTime);
+			//app->animate(startTime, actTime);
 
 			WaitForSingleObject(mutex, INFINITE);
 			dataPrepared = true;
@@ -150,7 +150,7 @@ void DeleteMutex() {
 
 void CreateApplication() {
 	app = new SimpleApplication();
-	app->config->get("fullscreen", fullscreen);
+	fullscreen = app->cfgs->fullscreen;
 	startTime = timeGetTime();
 	actTime = startTime;
 	currentTime = startTime;
@@ -198,7 +198,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hPrevInstance,PSTR szCmdLine,int iC
 		dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
 		if (ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL) {
 			MessageBox(NULL, TEXT("Can not full screen!"), szName, MB_ICONERROR);
-			fullscreen = 0.0;
+			fullscreen = false;
 		} else {
 			style = WS_POPUP;
 			styleEX = WS_EX_APPWINDOW;

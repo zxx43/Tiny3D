@@ -42,11 +42,10 @@ class RenderManager {
 public:
 	vec3 lightDir;
 	RenderState* state;
-	bool enableSsr, enableBloom, enableCartoon;
+	ConfigArg* cfgs;
 	Texture2D* occluderDepth;
 private:
 	Shadow* shadow;
-	float time;
 	bool needResize;
 	ComputeDrawcall* grassDrawcall;
 public:
@@ -55,10 +54,6 @@ public:
 	Renderable* queue2;
 	Renderable* currentQueue;
 	Renderable* nextQueue;
-private: // States
-	bool useShadow;
-	bool drawBounding;
-	int graphicQuality;
 private:
 	void drawBoundings(Render* render, RenderState* state, Scene* scene, Camera* camera);
 	void drawGrass(Render* render, RenderState* state, Scene* scene, Camera* camera);
@@ -68,10 +63,9 @@ public:
 	FrameBuffer* farBuffer;
 	FrameBuffer* reflectBuffer;
 
-	RenderManager(int quality, Camera* view, float distance1, float distance2, bool copyData, const vec3& light);
+	RenderManager(ConfigArg* cfg, Camera* view, float distance1, float distance2, const vec3& light);
 	~RenderManager();
 
-	void act(float dTime);
 	void resize(float width, float height);
 	void updateShadowCamera(Camera* mainCamera);
 	void updateMainLight();
@@ -83,8 +77,6 @@ public:
 	void renderScene(Render* render,Scene* scene);
 	void renderWater(Render* render, Scene* scene);
 	void renderReflect(Render* render, Scene* scene);
-	void showShadow(bool enable);
-	void showBounding(bool enable);
 
 	void drawDeferred(Render* render, Scene* scene, FrameBuffer* screenBuff, Filter* filter);
 	void drawCombined(Render* render, Scene* scene, const std::vector<Texture2D*>& inputTextures, Filter* filter);

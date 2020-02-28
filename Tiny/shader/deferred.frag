@@ -1,4 +1,6 @@
-﻿layout(bindless_sampler) uniform sampler2D texBuffer, matBuffer, normalGrassBuffer, roughMetalBuffer, depthBuffer;
+﻿#include "shader/util.glsl"
+
+layout(bindless_sampler) uniform sampler2D texBuffer, matBuffer, normalGrassBuffer, roughMetalBuffer, depthBuffer;
 uniform vec2 pixelSize;
 
 uniform mat4 invViewProjMatrix, invProjMatrix;

@@ -1,0 +1,20 @@
+// Materials copied from the Ogre3D SDK
+// from location Samples/Media/materials/scripts
+
+// ninja.mesh
+
+material Examples/Ninja
+{
+	technique
+	{
+		pass
+		{
+			ambient 0.25 0.25 0.25
+            			diffuse 0.75 0.75 0.75
+			texture_unit
+			{
+				texture assets/texture/ninja.jpg
+			}
+		}
+	}
+}

@@ -1,3 +1,5 @@
+#include "shader/util.glsl"
+
 layout(bindless_sampler) uniform sampler2D colorBuffer;
 layout(bindless_sampler) uniform sampler2D normalBuffer;
 layout(bindless_sampler) uniform sampler2D depthBuffer;

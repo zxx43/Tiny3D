@@ -17,6 +17,7 @@ AssetManager::AssetManager() {
 	distortionTex = -1;
 	meshes.clear();
 	animations.clear();
+	frames = new FrameMgr();
 }
 
 AssetManager::~AssetManager() {
@@ -28,6 +29,7 @@ AssetManager::~AssetManager() {
 	for (iter = animations.begin(); iter != animations.end(); iter++)
 		delete iter->second;
 	animations.clear();
+	delete frames;
 	if (texBld) delete texBld;
 	texBld = NULL;
 	if (skyTexture) delete skyTexture;
@@ -109,6 +111,12 @@ void AssetManager::addMesh(const char* name, Mesh* mesh, bool billboard, bool dr
 
 void AssetManager::addAnimation(const char* name, Animation* animation) {
 	animations[name] = animation;
+	animation->setName(name);
+	frames->addAnimation(animation);
+}
+
+void AssetManager::initFrames() {
+	frames->init();
 }
 
 void AssetManager::Init() {

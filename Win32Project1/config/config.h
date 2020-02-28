@@ -10,7 +10,9 @@ private:
 public:
 	Config(const char* path);
 	~Config();
-	bool get(const char* key, float& value);
+	bool getFloat(const char* key, float& value);
+	bool getInt(const char* key, int& value);
+	bool getBool(const char* key, bool& value);
 };
 
 #endif

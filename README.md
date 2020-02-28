@@ -9,7 +9,8 @@ A Small OpenGL Based Renderer
 - .obj model file    
 - .bmp texture file  
 - Skeleton animation  
-- Cascaded shadow map
+- Vertex texture fetch  
+- Cascaded shadow map  
 - Sky dome  
 - Multi-thread support  
 - Deferred shading  

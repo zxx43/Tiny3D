@@ -18,6 +18,7 @@
 #include "../material/materialManager.h"
 #include <stdlib.h>
 #include <string.h>
+#include "../constants/constants.h"
 
 struct Entry {
 	aiMesh* mesh;
@@ -63,8 +64,9 @@ private:
 	std::vector<BoneInfo*> boneInfos;
 	aiMatrix4x4 rootToModelMat;
 	std::map<std::string,aiNodeAnim*>* channelMaps;
-
+private:
 	void loadModel();
+	std::string convertTexPath(const std::string& path);
 	void loadMaterials();
 	void loadMeshes(Entry* entry);
 	void loadBones(aiMesh* mesh,int meshIndex);
@@ -78,7 +80,9 @@ private:
 	void calcScale(aiNodeAnim* anim, float animTime, aiVector3D& scale);
 	aiNodeAnim* findNodeAnim(int animIndex,std::string boneName);
 	void readNode(int animIndex,float animTime,aiNode* node,const aiMatrix4x4& parentTransform);
-
+private:
+	std::string name;
+	std::map<int, int> frameIndex;
 public:
 	int faceCount,vertCount,boneCount;
 	std::vector<vec3> aVertices;
@@ -97,10 +101,15 @@ public:
 
 	int animCount;
 	AnimFrame** animFrames;
-
+public:
 	Animation(const char* path);
 	~Animation();
 	void bonesTransform(int animIndex,float time);
+	float getBoneFrame(int animIndex, float time);
+	std::string getName() { return name; }
+	void setName(std::string value) { name = value; }
+	void setFrameIndex(int aid, int fid) { frameIndex[aid] = fid; }
+	int getFrameIndex(int aid) { return frameIndex[aid]; }
 private:
 	void prepareFrameData(int animIndex);
 };

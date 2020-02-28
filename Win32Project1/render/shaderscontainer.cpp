@@ -40,8 +40,6 @@ using namespace std;
 #define GRASS_LAYER_TESE "shader/grassLayer.tese"
 #define GRASS_COMP "shader/grass.comp"
 #define GRASS_VERT "shader/grass.vert"
-#define UTIL_GLSL "shader/util.glsl" 
-#define TRIANGLE_GLSL "shader/triangle.glsl"
 
 string LoadExShader(char* name) {
 	char* fileStr = textFileRead(name);
@@ -51,78 +49,69 @@ string LoadExShader(char* name) {
 }
 
 void SetupShaders(ShaderManager* shaders) {
-	string shaderUtil = LoadExShader(UTIL_GLSL);
-
 	Shader* phong = shaders->addShader("phong", PHONG_VERT, PHONG_FRAG);
-	phong->attachEx(shaderUtil);
 	shaders->addShaderBindTex(phong);
 
 	Shader* phongIns = shaders->addShader("phong_ins", INSTANCE_VERT, PHONG_FRAG);
-	phongIns->attachEx(shaderUtil);
 	shaders->addShaderBindTex(phongIns);
 
+	Shader* billIns = shaders->addShader("bill_ins", INSTANCE_VERT, PHONG_FRAG);
+	billIns->attachDef("BillPass", "1.0");
+	shaders->addShaderBindTex(billIns);
+
 	Shader* bone = shaders->addShader("bone", BONE_VERT, BONE_FRAG);
-	bone->attachEx(shaderUtil);
 	shaders->addShaderBindTex(bone);
 
 	Shader* billboard = shaders->addShader("billboard", BILLBOARD_VERT, BILLBOARD_FRAG);
-	billboard->attachEx(shaderUtil);
 	shaders->addShaderBindTex(billboard);
 
 	Shader* terrain = shaders->addShader("terrain", TERRAIN_VERT, TERRAIN_FRAG);
-	terrain->attachEx(shaderUtil);
 	shaders->addShaderBindTex(terrain);
 
 	Shader* grassLayer = shaders->addShader("grassLayer", GRASS_LAYER_VERT, GRASS_LAYER_FRAG, GRASS_LAYER_TESC, GRASS_LAYER_TESE, GRASS_LAYER_GEOM);
-	grassLayer->attachEx(shaderUtil);
 	shaders->addShaderBindTex(grassLayer);
 
-	string shaderTriangle = LoadExShader(TRIANGLE_GLSL);
 	Shader* grassComp = shaders->addShader("grassComp", GRASS_COMP);
 	grassComp->attachDef("WORKGROUP_SIZE", to_string(COMP_GROUPE_SIZE).data());
-	grassComp->attachEx(shaderUtil);
-	grassComp->attachEx(shaderTriangle);
 
 	Shader* grass = shaders->addShader("grass", GRASS_VERT, GRASS_LAYER_FRAG);
-	grass->attachEx(shaderUtil);
-
 	Shader* sky = shaders->addShader("sky", SKY_VERT, SKY_FRAG);
-	sky->attachEx(shaderUtil);
-
 	Shader* water = shaders->addShader("water", WATER_VERT, WATER_FRAG);
-	water->attachEx(shaderUtil);
 
 	Shader* phongShadow = shaders->addShader("phong_s", PHONG_VERT, SHADOW_TEX_FRAG);
-	phongShadow->attachEx(shaderUtil);
 	phongShadow->attachDef("ShadowPass", "1.0");
 	shaders->addShaderBindTex(phongShadow);
 
 	Shader* phongShadowIns = shaders->addShader("phong_s_ins", INSTANCE_VERT, SHADOW_TEX_FRAG);
-	phongShadowIns->attachEx(shaderUtil);
 	phongShadowIns->attachDef("ShadowPass", "1.0");
 	shaders->addShaderBindTex(phongShadowIns);
 
+	Shader* billShadowIns = shaders->addShader("bill_s_ins", INSTANCE_VERT, SHADOW_TEX_FRAG);
+	billShadowIns->attachDef("ShadowPass", "1.0");
+	billShadowIns->attachDef("BillPass", "1.0");
+	shaders->addShaderBindTex(billShadowIns);
+
 	Shader* phongShadowLow = shaders->addShader("phong_sl", PHONG_VERT, SHADOW_NONTEX_FRAG);
-	phongShadowLow->attachEx(shaderUtil);
 	phongShadowLow->attachDef("ShadowPass", "1.0");
 	phongShadowLow->attachDef("LowPass", "1.0");
 
 	Shader* phongSimpShadowLow = shaders->addShader("phong_sl_ins", INSTANCE_VERT, SHADOW_NONTEX_FRAG);
-	phongSimpShadowLow->attachEx(shaderUtil);
 	phongSimpShadowLow->attachDef("ShadowPass", "1.0");
 	phongSimpShadowLow->attachDef("LowPass", "1.0");
 
+	Shader* billSimpShadowLow = shaders->addShader("bill_sl_ins", INSTANCE_VERT, SHADOW_NONTEX_FRAG);
+	billSimpShadowLow->attachDef("ShadowPass", "1.0");
+	billSimpShadowLow->attachDef("LowPass", "1.0");
+	billSimpShadowLow->attachDef("BillPass", "1.0");
+
 	Shader* boneShadow = shaders->addShader("bone_s", BONE_VERT, SHADOW_NONTEX_FRAG);
-	boneShadow->attachEx(shaderUtil);
 	boneShadow->attachDef("ShadowPass", "1.0");
 
 	Shader* billboardShadow = shaders->addShader("billboard_s", BILLBOARD_VERT, SHADOW_TEX_FRAG);
-	billboardShadow->attachEx(shaderUtil);
 	billboardShadow->attachDef("ShadowPass", "1.0");
 	shaders->addShaderBindTex(billboardShadow);
 
 	Shader* deferred = shaders->addShader("deferred", POST_VERT, DEFERRED_FRAG);
-	deferred->attachEx(shaderUtil);
 	deferred->setSlot("texBuffer", 0);
 	deferred->setSlot("matBuffer", 1);
 	deferred->setSlot("normalGrassBuffer", 2);
@@ -130,44 +119,35 @@ void SetupShaders(ShaderManager* shaders) {
 	deferred->setSlot("depthBuffer", 4);
 
 	Shader* fxaa = shaders->addShader("fxaa", POST_VERT, AA_FRAG);
-	fxaa->attachEx(shaderUtil);
 	fxaa->setSlot("colorBuffer", 0);
 	fxaa->setSlot("normalBuffer", 1);
 	fxaa->setSlot("depthBuffer", 2);
 
 	Shader* blur = shaders->addShader("blur", POST_VERT, BLUR_FRAG);
-	blur->attachEx(shaderUtil);
 	blur->setSlot("colorBuffer", 0);
 
 	Shader* mean = shaders->addShader("mean", POST_VERT, MEAN_FRAG);
-	mean->attachEx(shaderUtil);
 	mean->setSlot("colorBuffer", 0);
 
 	Shader* gauss = shaders->addShader("gauss", POST_VERT, GAUSS_FRAG);
-	gauss->attachEx(shaderUtil);
 	gauss->setSlot("colorBuffer", 0);
 
 	Shader* dof = shaders->addShader("dof", POST_VERT, DOF_FRAG);
-	dof->attachEx(shaderUtil);
 	dof->setSlot("colorBufferLow", 0);
 	dof->setSlot("colorBufferHigh", 1);
 
 	Shader* debug = shaders->addShader("debug", DEBUG_VERT, DEBUG_FRAG);
-	debug->attachEx(shaderUtil);
 	
 	Shader* screen = shaders->addShader("screen", POST_VERT, SCREEN_FRAG);
-	screen->attachEx(shaderUtil);
 	screen->setSlot("tex", 0);
 
 	Shader* ssr = shaders->addShader("ssr", POST_VERT, SSR_FRAG);
-	ssr->attachEx(shaderUtil);
 	ssr->setSlot("lightBuffer", 0);
 	ssr->setSlot("matBuffer", 1);
 	ssr->setSlot("normalBuffer", 2);
 	ssr->setSlot("depthBuffer", 3);
 
 	Shader* combined = shaders->addShader("combined", POST_VERT, COMBINE_FRAG);
-	combined->attachEx(shaderUtil);
 	combined->setSlot("sceneBuffer", 0);
 	combined->setSlot("sceneDepthBuffer", 1);
 	combined->setSlot("waterBuffer", 2);
@@ -177,22 +157,37 @@ void SetupShaders(ShaderManager* shaders) {
 	combined->setSlot("bloomBuffer", 6);
 
 	Shader* ssg = shaders->addShader("ssg", POST_VERT, SSG_FRAG);
-	ssg->attachEx(shaderUtil);
 	ssg->setSlot("colorBuffer", 0);
 	ssg->setSlot("normalGrassBuffer", 1);
 	ssg->setSlot("depthBuffer", 2);
 
 	Shader* cull = shaders->addShader("cull", CULL_COMP);
 	cull->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());
-	cull->attachEx(shaderUtil);
 
 	Shader* multi = shaders->addShader("multi", MULTI_COMP);
 	multi->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());
 	multi->attachDef("MAX_DISPATCH", to_string(MAX_DISPATCH).data());
-	multi->attachEx(shaderUtil);
+
+	Shader* animMulti = shaders->addShader("animMulti", MULTI_COMP);
+	animMulti->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());
+	animMulti->attachDef("MAX_DISPATCH", to_string(MAX_DISPATCH).data());
+	animMulti->attachDef("AnimPass", "1.0");
+
+	Shader* multiShadow = shaders->addShader("multi_s", MULTI_COMP);
+	multiShadow->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());
+	multiShadow->attachDef("MAX_DISPATCH", to_string(MAX_DISPATCH).data());
+	multiShadow->attachDef("ShadowPass", "1.0");
+
+	Shader* animMultiShadow = shaders->addShader("animMulti_s", MULTI_COMP);
+	animMultiShadow->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());
+	animMultiShadow->attachDef("MAX_DISPATCH", to_string(MAX_DISPATCH).data());
+	animMultiShadow->attachDef("AnimPass", "1.0");
+	animMultiShadow->attachDef("ShadowPass", "1.0");
 
 	Shader* flush = shaders->addShader("flush", FLUSH_COMP);
-	flush->attachEx(shaderUtil);
+
+	Shader* animFlush = shaders->addShader("animFlush", FLUSH_COMP);
+	animFlush->attachDef("AnimPass", "1.0");
 
 	shaders->compile();
 }

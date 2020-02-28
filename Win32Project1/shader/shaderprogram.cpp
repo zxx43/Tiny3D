@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
+#include <vector>
 using namespace std;
 
 //Got this from http://www.lighthouse3d.com/opengl/glsl/index.php?oglinfo
@@ -55,7 +56,7 @@ void printProgramInfoLog(GLuint obj, const char* vsStr, const char* fsStr)
 }
 
 std::string ShaderProgram::attach(const char* version, const char* shaderStr) {
-	if (!shaderStr) return "";
+	if (!shaderStr || strlen(shaderStr) == 0) return "";
 	string shstr = string(version) + string("\n");
 	if (exStr.length() > 0) shstr += exStr + string("\n");
 	shstr += string(shaderStr);
@@ -97,13 +98,42 @@ void ShaderProgram::attachEx(const char* ex) {
 void ShaderProgram::compose() {
 	const char* version = "#version 450";
 	if (vs && fs) {
-		vStr = attach(version, vs);
-		fStr = attach(version, fs);
-		cStr = attach(version, tc);
-		eStr = attach(version, te);
-		gStr = attach(version, gs);
+		vStr = attach(version, handleInclude(vs).data());
+		fStr = attach(version, handleInclude(fs).data());
+		cStr = attach(version, handleInclude(tc).data());
+		eStr = attach(version, handleInclude(te).data());
+		gStr = attach(version, handleInclude(gs).data());
 	}
-	if(cs) pStr = attach(version, cs);
+	if(cs) pStr = attach(version, handleInclude(cs).data());
+}
+
+string ShaderProgram::handleInclude(const char* shaderStr) {
+	if (!shaderStr) return "";
+	vector<string> incs; incs.clear();
+	string res(shaderStr);
+	int fs = 0, fe = 0;
+	int fi = res.find("#include");
+	while (fi != string::npos) {
+		res = res.replace(fi, strlen("#include"), string(""));
+		
+		fs = res.find_first_of('"');
+		string path = res.substr(fs + 1);
+		fe = path.find_first_of('"');
+		path = path.substr(0, fe);
+		
+		res = res.replace(fs, strlen(path.data()) + 2, "");
+
+		char* fileStr = textFileRead((char*)path.data());
+		incs.push_back(string(fileStr) + string("\n"));
+		free(fileStr);
+
+		fi = res.find("#include");
+	}
+	string incStr("");
+	for (int i = 0; i < incs.size(); ++i)
+		incStr += incs[i];
+	res = incStr + res;
+	return res;
 }
 
 void ShaderProgram::compile(bool preload) {
