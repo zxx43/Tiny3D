@@ -133,12 +133,14 @@ void SimpleApplication::resize(int width, int height) {
 
 void SimpleApplication::keyDown(int key) {
 	Application::keyDown(key);
-	if (key == 'C')
-		printf("pos: %f,%f\n", scene->mainCamera->position.x, scene->mainCamera->position.z);
+	scene->player->keyDown(input);
+	if (input->getControl() >= 0) 
+		scene->player->setNode(scene->animPlayers[input->getControl()]);
 }
 
 void SimpleApplication::keyUp(int key) {
 	Application::keyUp(key);
+	scene->player->keyUp(input);
 }
 
 void SimpleApplication::draw() {
@@ -243,6 +245,7 @@ void SimpleApplication::updateMovement() {
 
 void SimpleApplication::act(long startTime, long currentTime) {
 	Application::act(startTime, currentTime);
+	scene->player->keyAct(input, scene);
 	///*
 		static float dd = 1.0, dr = 1.0;
 
@@ -624,19 +627,21 @@ void SimpleApplication::initScene() {
 	animNode1->getObject()->setPosition(0, -5, -1);
 	animNode1->translateNode(5, 0, 15);
 	animNode1->getObject()->setCurAnim(0);
+	animNode1->getObject()->setLoop(true);
 	AnimationNode* animNode2 = new AnimationNode(vec3(5, 10, 5));
 	animNode2->setAnimation(scene, animations["ninja"]);
 	animNode2->getObject()->setSize(0.05, 0.05, 0.05);
 	animNode2->getObject()->setPosition(0, -5, -1);
 	animNode2->translateNode(40, 0, 40);
 	animNode2->rotateNodeObject(0, 45, 0);
-	animNode2->getObject()->setCurAnim(19);
+	animNode2->getObject()->setDefaultAnim(11);
 	AnimationNode* animNode3 = new AnimationNode(vec3(5, 10, 5));
 	animNode3->setAnimation(scene, animations["ninja"]);
 	animNode3->getObject()->setSize(0.05, 0.05, 0.05);
 	animNode3->getObject()->setPosition(0, -5, -1);
 	animNode3->translateNode(5, 0, 15);
 	animNode3->getObject()->setCurAnim(11);
+	animNode3->getObject()->setDefaultAnim(11);
 	AnimationNode* animNode4 = new AnimationNode(vec3(5, 10, 5));
 	animNode4->setAnimation(scene, animations["ninja"]);
 	animNode4->getObject()->setSize(0.05, 0.05, 0.05);
@@ -644,6 +649,7 @@ void SimpleApplication::initScene() {
 	animNode4->translateNode(40, 0, 40);
 	animNode4->rotateNodeObject(0, 270, 0);
 	animNode4->getObject()->setCurAnim(15);
+	animNode4->getObject()->setDefaultAnim(12);
 
 	Node* animNode = new StaticNode(vec3(0, 0, 0));
 	animNode->attachChild(animNode1);

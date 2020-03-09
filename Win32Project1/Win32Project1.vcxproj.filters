@@ -303,6 +303,9 @@
     <ClCompile Include="animation\frameMgr.cpp">
       <Filter>Source Files\animation</Filter>
     </ClCompile>
+    <ClCompile Include="scene\player.cpp">
+      <Filter>Source Files\scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="batch\batch.h">
@@ -532,6 +535,9 @@
     </ClInclude>
     <ClInclude Include="animation\frameMgr.h">
       <Filter>Source Files\animation</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\player.h">
+      <Filter>Source Files\scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

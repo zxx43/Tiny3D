@@ -13,6 +13,7 @@
 #include "../node/animationNode.h"
 #include "../node/instanceNode.h"
 #include "../sky/sky.h"
+#include "player.h"
 
 struct MeshObject {
 	Mesh* mesh;
@@ -41,8 +42,10 @@ public:
 	Node* staticRoot;
 	Node* billboardRoot;
 	Node* animationRoot;
+	Player* player;
 	StaticNode* textureNode; // Use it to draw texture for debugging
 	std::vector<Node*> boundingNodes; // Used for debugging
+	std::vector<AnimationNode*> animPlayers;
 public:
 	Scene();
 	~Scene();
@@ -55,6 +58,7 @@ public:
 	void flushNodes();
 	void updateReflectCamera();
 	void addObject(Object* object);
+	void addPlay(AnimationNode* node);
 	uint queryMeshCount(Mesh* mesh);
 	void finishInit() { inited = true; }
 	bool isInited() { return inited; }

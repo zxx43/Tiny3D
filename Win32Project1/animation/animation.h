@@ -104,8 +104,7 @@ public:
 public:
 	Animation(const char* path);
 	~Animation();
-	void bonesTransform(int animIndex,float time);
-	float getBoneFrame(int animIndex, float time);
+	float getBoneFrame(int animIndex, float time, bool& end);
 	std::string getName() { return name; }
 	void setName(std::string value) { name = value; }
 	void setFrameIndex(int aid, int fid) { frameIndex[aid] = fid; }

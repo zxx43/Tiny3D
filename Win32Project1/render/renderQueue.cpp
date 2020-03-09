@@ -204,10 +204,9 @@ void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState
 }
 
 void RenderQueue::animate(long startTime, long currentTime) {
-	return;
 	for (int it = 0; it < animQueue->size; it++) {
 		AnimationNode* animateNode = (AnimationNode*)animQueue->get(it);
-		animateNode->animate(0, startTime, currentTime);
+		animateNode->animate();
 	}
 }
 

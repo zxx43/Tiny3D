@@ -3,7 +3,6 @@
 
 uniform mat4 viewProjectMatrix;
 layout(bindless_sampler) uniform sampler2D boneTex[MAX_BONE_TEX];
-uniform float time;
 
 layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 normal;
@@ -28,7 +27,7 @@ void main() {
 	sampler2D bone = boneTex[aid];
 	vec2 boneSize = vec2(textureSize(bone, 0));
 	vec4 size = vec4(boneSize, vec2(0.25) / boneSize);
-	float curr = mod(time, size.y) / size.y;
+	float curr = floor(modelMatrix[3].y) / size.y;
 	size.x = 1.0 / size.x;
 
 	mat3x4 m0 = GetBoneTex(bone, boneids.x, size, curr);

@@ -20,6 +20,10 @@ public:
 	Animation* animation;
 	int aid, fid;
 public:
+	int defaultAid;
+	bool loop;
+	float time, curFrame;
+public:
 	AnimationObject(Animation* anim);
 	AnimationObject(const AnimationObject& rhs);
 	virtual ~AnimationObject();
@@ -27,7 +31,15 @@ public:
 	virtual void setPosition(float x, float y, float z);
 	virtual void setRotation(float ax, float ay, float az);
 	virtual void setSize(float sx, float sy, float sz);
-	void setCurAnim(int aid);
+	bool setCurAnim(int aid);
+	void resetTime() { time = 0.0; }
+	float getTime() { return time; }
+	void setLoop(float lp) { loop = lp; }
+	bool isLoop() { return loop; }
+	void setDefaultAnim(int aid) { defaultAid = aid; }
+	bool isDefaultAnim() { return aid == defaultAid; }
+	void animate();
+	float getCurFrame() { return curFrame; }
 };
 
 

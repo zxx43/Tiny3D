@@ -16,6 +16,7 @@ void AnimationNode::setAnimation(Scene* scene, Animation* anim) {
 	AnimationObject* object = new AnimationObject(animation);
 	Node::addObject(scene, object);
 	scene->addObject(object);
+	scene->addPlay(this);
 }
 
 void AnimationNode::prepareDrawcall() {
@@ -29,8 +30,9 @@ void AnimationNode::updateDrawcall() {
 void AnimationNode::updateRenderData() {
 }
 
-void AnimationNode::animate(int animIndex,long startTime,long currentTime) {
-	animation->bonesTransform(animIndex, (float)(currentTime - startTime)*0.001f);
+void AnimationNode::animate() {
+	AnimationObject* object = getObject();
+	if (object) object->animate();
 }
 
 AnimationObject* AnimationNode::getObject() {

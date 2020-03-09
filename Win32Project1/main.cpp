@@ -92,7 +92,7 @@ DWORD WINAPI FrameThreadRun(LPVOID param) {
 		if(!dataPrepared && inited) {
 			app->act(startTime, actTime);
 			app->prepare(true);
-			//app->animate(startTime, actTime);
+			app->animate(startTime, actTime);
 
 			WaitForSingleObject(mutex, INFINITE);
 			dataPrepared = true;
@@ -227,6 +227,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hPrevInstance,PSTR szCmdLine,int iC
 	SetFocus(hWnd);
 	UpdateWindow(hWnd);
 
+	//LoadKeyboardLayout(L"00000409", KLF_ACTIVATE);
 	//SendMessage(hWnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
 
 	while(!app->willExit) {
@@ -239,8 +240,8 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hPrevInstance,PSTR szCmdLine,int iC
 			}
 		} 
 	}
-	while (!threadEnd)
-		Sleep(0);
+
+	while (!threadEnd) Sleep(0);
 	KillWindow();
 	return msg.wParam;
 }

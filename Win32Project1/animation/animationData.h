@@ -91,7 +91,7 @@ struct AnimationData {
 
 			AnimationObject* animObj = (AnimationObject*)object;
 			transformsFull[animCount * 16 + 12] = animObj->fid + 0.1;
-			transformsFull[animCount * 16 + 13] = 0.0;
+			transformsFull[animCount * 16 + 13] = animObj->getCurFrame();
 			transformsFull[animCount * 16 + 14] = 0.0;
 			transformsFull[animCount * 16 + 15] = animId + 0.1;
 			animCount++;

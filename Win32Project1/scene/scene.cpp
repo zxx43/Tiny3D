@@ -13,6 +13,7 @@ using namespace std;
 Scene::Scene() {
 	time = 0.0;
 	inited = false;
+	player = new Player();
 	mainCamera = new Camera(25.0);
 	reflectCamera = NULL;
 	skyBox = NULL;
@@ -29,12 +30,14 @@ Scene::Scene() {
 	meshes.clear();
 	animCount.clear();
 	anims.clear();
+	animPlayers.clear();
 	Node::nodesToUpdate.clear();
 	Node::nodesToRemove.clear();
 	Instance::instanceTable.clear();
 }
 
 Scene::~Scene() {
+	delete player;
 	if (mainCamera) delete mainCamera; mainCamera = NULL;
 	if (reflectCamera) delete reflectCamera; reflectCamera = NULL;
 	if (skyBox) delete skyBox; skyBox = NULL;
@@ -50,6 +53,7 @@ Scene::~Scene() {
 		delete meshes[i];
 	meshes.clear();
 	anims.clear();
+	animPlayers.clear();
 	animCount.clear();
 }
 
@@ -208,6 +212,10 @@ void Scene::addObject(Object* object) {
 			animCount[curAnim]++;
 		}
 	}
+}
+
+void Scene::addPlay(AnimationNode* node) {
+	animPlayers.push_back(node);
 }
 
 uint Scene::queryMeshCount(Mesh* mesh) {

@@ -1,125 +1,67 @@
 #include "input.h"
 #include <string.h>
+#include <stdlib.h>
 #include "../constants/constants.h"
 
 Input::Input() {
-	turn=new bool[4];
-	move=new bool[6];
-	memset(turn,0,4*sizeof(bool));
-	memset(move,0,6*sizeof(bool));
-	extra = new bool[4];
-	memset(extra, 0, 4 * sizeof(bool));
+	boards = (bool*)malloc(512 * sizeof(bool));
+	memset(boards, 0, 512 * sizeof(bool));
+	setControl(-1);
 }
 
 Input::~Input() {
-	delete[] turn; turn=NULL;
-	delete[] move; move=NULL;
-	delete[] extra; extra = NULL;
+	free(boards);
 }
 
 void Input::keyDown(int key) {
-	if(key=='W')
-		move[0]=true;
-	if(key=='S')
-		move[1]=true;
-	if(key=='A')
-		move[2]=true;
-	if(key=='D')
-		move[3]=true;
-	if(key==KEY_SPACE)
-		move[4]=true;
-	if(key=='Z')
-		move[5]=true;
-	if(key==KEY_UP)
-		turn[0]=true;
-	if(key==KEY_DOWN)
-		turn[1]=true;
-	if(key==KEY_LEFT)
-		turn[2]=true;
-	if(key==KEY_RIGHT)
-		turn[3]=true;
-
-	if (key == KEY_LEFT_EX)
-		extra[0] = true;
-	if (key == KEY_RIGHT_EX)
-		extra[1] = true;
-	if (key == KEY_UP_EX)
-		extra[2] = true;
-	if (key == KEY_DOWN_EX)
-		extra[3] = true;
+	boards[key] = true;
 }
 
 void Input::keyUp(int key) {
-	if(key=='W')
-		move[0]=false;
-	if(key=='S')
-		move[1]=false;
-	if(key=='A')
-		move[2]=false;
-	if(key=='D')
-		move[3]=false;
-	if(key==KEY_SPACE)
-		move[4]=false;
-	if(key=='Z')
-		move[5]=false;
-	if(key==KEY_UP)
-		turn[0]=false;
-	if(key==KEY_DOWN)
-		turn[1]=false;
-	if(key==KEY_LEFT)
-		turn[2]=false;
-	if(key==KEY_RIGHT)
-		turn[3]=false;
-
-	if (key == KEY_LEFT_EX)
-		extra[0] = false;
-	if (key == KEY_RIGHT_EX)
-		extra[1] = false;
-	if (key == KEY_UP_EX)
-		extra[2] = false;
-	if (key == KEY_DOWN_EX)
-		extra[3] = false;
+	boards[key] = false;
 }
 
 void Input::updateCameraByKey(Camera* camera) {
-	if (move[0])
+	if (controlId >= 0) return;
+
+	if (boards[KEY_W])
 		camera->move(MNEAR, camera->velocity);
-	if (move[1])
+	if (boards[KEY_S])
 		camera->move(MFAR, camera->velocity);
-	if (move[2])
+	if (boards[KEY_A])
 		camera->move(LEFT, camera->velocity);
-	if (move[3])
+	if (boards[KEY_D])
 		camera->move(RIGHT, camera->velocity);
-	if (move[4])
+	if (boards[KEY_SPACE])
 		camera->move(UP, camera->velocity);
-	if (move[5])
+	if (boards[KEY_Z])
 		camera->move(DOWN, camera->velocity);
 
-	if(turn[0])
+	if(boards[KEY_UP])
 		camera->turnY(UP);
-	if(turn[1])
+	if(boards[KEY_DOWN])
 		camera->turnY(DOWN);
-	if(turn[2])
+	if(boards[KEY_LEFT])
 		camera->turnX(LEFT);
-	if(turn[3])
+	if(boards[KEY_RIGHT])
 		camera->turnX(RIGHT);
 }
 
 void Input::updateExtra(RenderManager* renderMgr) {
 	bool triggered = false;
-	if (extra[0]) {
+	if (boards[KEY_LEFT_EX]) {
 		renderMgr->lightDir.x -= L_DISTANCE;
 		triggered = true;
 	}
-	if (extra[1]) {
+	if (boards[KEY_RIGHT_EX]) {
 		renderMgr->lightDir.x += L_DISTANCE;
 		triggered = true;
 	}
-	if (extra[2]) {
+	if (boards[KEY_DOWN_EX]) {
 		renderMgr->lightDir.z -= L_DISTANCE;
 		triggered = true;
 	}
-	if (extra[3]) {
+	if (boards[KEY_UP_EX]) {
 		renderMgr->lightDir.z += L_DISTANCE;
 		triggered = true;
 	}

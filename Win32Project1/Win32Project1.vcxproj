@@ -213,6 +213,7 @@
     <ClCompile Include="render\renderQueue.cpp" />
     <ClCompile Include="render\shaderscontainer.cpp" />
     <ClCompile Include="render\staticDrawcall.cpp" />
+    <ClCompile Include="scene\player.cpp" />
     <ClCompile Include="scene\scene.cpp" />
     <ClCompile Include="shader\shader.cpp" />
     <ClCompile Include="shader\shadermanager.cpp" />
@@ -290,6 +291,7 @@
     <ClInclude Include="render\renderState.h" />
     <ClInclude Include="render\shaderscontainer.h" />
     <ClInclude Include="render\staticDrawcall.h" />
+    <ClInclude Include="scene\player.h" />
     <ClInclude Include="scene\scene.h" />
     <ClInclude Include="shader\shader.h" />
     <ClInclude Include="shader\shadermanager.h" />

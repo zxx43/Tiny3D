@@ -33,10 +33,9 @@ void Camera::initOrthoCamera(float left, float right, float bottom, float top, f
 }
 
 void Camera::setView(const vec3& pos, const vec3& dir) {
-	position.x = pos.x; position.y = pos.y; position.z = pos.z;
-	lookDir.x = dir.x; lookDir.y = dir.y; lookDir.z = dir.z;
-
-	vec3 center(lookDir.x + position.x, lookDir.y + position.y, lookDir.z + position.z);
+	position = pos;
+	lookDir = dir;
+	vec3 center = lookDir + position;
 	viewMatrix = lookAt(position, center, up);
 }
 

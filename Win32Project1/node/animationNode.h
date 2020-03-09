@@ -22,7 +22,7 @@ public:
 	virtual void updateDrawcall();
 	void setAnimation(Scene* scene, Animation* anim);
 	AnimationObject* getObject();
-	void animate(int animIndex,long startTime,long currentTime);
+	void animate();
 	virtual void translateNode(float x, float y, float z);
 	void translateNodeCenterAtWorld(float x, float y, float z);
 	void rotateNodeObject(float ax, float ay, float az);

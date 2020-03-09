@@ -2,7 +2,7 @@
 #include "../constants/constants.h"
 using namespace std;
 
-#define DEBUG_SHADER 1
+//#define DEBUG_SHADER 1
 
 Shader::Shader(const char* vert, const char* frag, const char* tesc, const char* tese, const char* geom) {
 	vertName = vert, fragName = frag, compName = "";

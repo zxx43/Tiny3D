@@ -5,7 +5,9 @@ AnimationObject::AnimationObject(Animation* anim):Object() {
 	animation=anim; // no mesh!
 	anglex=0; angley=0; anglez=0;
 	setCurAnim(0);
-
+	setLoop(false);
+	setDefaultAnim(0);
+	time = 0.0, curFrame = 0.0;
 	transforms = (float*)malloc(4 * sizeof(float));
 	transformsFull = (buff*)malloc(16 * sizeof(buff));
 }
@@ -33,6 +35,10 @@ AnimationObject::AnimationObject(const AnimationObject& rhs) {
 
 	genShadow = rhs.genShadow;
 	detailLevel = rhs.detailLevel;
+	time = rhs.time;
+	curFrame = rhs.curFrame;
+	loop = rhs.loop;
+	defaultAid = rhs.defaultAid;
 
 	if (rhs.billboard)
 		setBillboard(rhs.billboard->data[0], rhs.billboard->data[1], rhs.billboard->material);
@@ -81,6 +87,9 @@ void AnimationObject::setPosition(float x,float y,float z) {
 
 void AnimationObject::setRotation(float ax,float ay,float az) {
 	anglex=ax; angley=ay; anglez=az;
+	RestrictAngle(anglex);
+	RestrictAngle(angley);
+	RestrictAngle(anglez);
 	updateLocalMatrices();
 }
 
@@ -93,7 +102,20 @@ void AnimationObject::setSize(float sx,float sy,float sz) {
 	}
 }
 
-void AnimationObject::setCurAnim(int aid) {
+bool AnimationObject::setCurAnim(int aid) {
+	if (aid >= animation->animCount) return false;
 	this->aid = aid;
 	fid = animation->getFrameIndex(aid);
+	return true;
+}
+
+void AnimationObject::animate() {
+	bool animEnd = false;
+	if (animation) curFrame = animation->getBoneFrame(aid, time, animEnd);
+	if(!animEnd) time += 0.0025;
+	else if (animEnd && loop) time = 0.0;
+	else if (animEnd && !loop) {
+		setCurAnim(defaultAid);
+		time = 0.0;
+	}
 }

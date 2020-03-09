@@ -398,17 +398,14 @@ void Animation::prepareFrameData(int animIndex) {
 	}
 }
 
-float Animation::getBoneFrame(int animIndex, float time) {
+float Animation::getBoneFrame(int animIndex, float time, bool& end) {
 	aiAnimation* animation = scene->mAnimations[animIndex];
 	float ticksPerSecond = (float)animation->mTicksPerSecond;
 	float ticks = time * ticksPerSecond;
-	float animTime = fmodf(ticks, animation->mDuration);
+	float animTime = ticks;
+	if (animTime > animation->mDuration - 0.01) {
+		end = true;
+		animTime = animation->mDuration - 0.01;
+	} else end = false;
 	return animTime * 100.0;
-}
-
-void Animation::bonesTransform(int animIndex,float time) {
-	int animTime = (int)getBoneFrame(animIndex, time);
-	AnimFrame* animFrame = animFrames[animIndex];
-	Frame* frame = animFrame->frames[animTime];
-	boneTransformMats = frame->data;
 }
