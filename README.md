@@ -28,6 +28,6 @@ A Small OpenGL Based Renderer
 
 ### Screenshot:  
 
-![screen](grass.gif)   
+![screen](anim.gif)   
 
 ![screen](water.gif)  
