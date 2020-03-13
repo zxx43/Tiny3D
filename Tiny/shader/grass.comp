@@ -66,9 +66,9 @@ void main() {
 	uvec2 cur = gl_GlobalInvocationID.xy;
 	vec2 dPose = vec2(fullSize * 0.5) - vec2(cur);
 	
-	float spread = 0.25 + length(dPose) * 0.005;
+	float spread = 0.25 + length(dPose) * 0.004;
 	vec3 worldPose = vec3(0.0);
-	worldPose.xz = eyePos.xz + dPose * spread;
+	worldPose.xz = floor(eyePos.xz * 0.02) * 50.0 + dPose * spread;
 	
 	vec2 coord = (worldPose.xz - translate.xz) / (scale.xz * mapInfo.zw);
 	if(coord.x < 0.01 || coord.y < 0.01 || coord.x > 0.99 || coord.y > 0.99) return;

@@ -9,7 +9,9 @@ A Small OpenGL Based Renderer
 - .obj model file    
 - .bmp texture file  
 - Skeleton animation  
+- Animation control  
 - Vertex texture fetch  
+- 3rd Person View  
 - Cascaded shadow map  
 - Sky dome  
 - Multi-thread support  
@@ -24,7 +26,15 @@ A Small OpenGL Based Renderer
 - Screen Space Grass  
 - PBR Material  
 - GPU occlusion culling  
+  
+### Control:  
 
+- num-1,num-2,num-3 switch role to control  
+- v cancel role control    
+- wasd move  
+- space jump  
+- mouse-left attack  
+- mouse-right defend  
 
 ### Screenshot:  
 

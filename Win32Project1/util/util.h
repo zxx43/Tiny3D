@@ -91,6 +91,11 @@ inline void RestrictAngle(float& angle) {
 	else if (angle < 0.0) angle += 360.0;
 }
 
+inline void RestrictYAngle(float& angle) {
+	if (angle > 180.0) angle -= 360.0;
+	else if (angle < -180.0) angle += 360.0;
+}
+
 inline float GetVec2(const vec2* vec2, int i) {
 	float ret;
 	switch (i) {

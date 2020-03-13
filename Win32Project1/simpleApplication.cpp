@@ -133,14 +133,34 @@ void SimpleApplication::resize(int width, int height) {
 
 void SimpleApplication::keyDown(int key) {
 	Application::keyDown(key);
-	scene->player->keyDown(input);
-	if (input->getControl() >= 0) 
-		scene->player->setNode(scene->animPlayers[input->getControl()]);
+	scene->player->keyDown(input, scene);
 }
 
 void SimpleApplication::keyUp(int key) {
 	Application::keyUp(key);
 	scene->player->keyUp(input);
+}
+
+void SimpleApplication::keyAct(float velocity) {
+	Application::keyAct(velocity);
+	scene->player->controlAct(input, scene, velocity * 0.05);
+	updateMovement();
+}
+
+void SimpleApplication::wheelAct(int dir) {
+	Application::wheelAct(dir);
+	scene->player->wheelAct(dir == MNEAR ? -1.0 : 1.0);
+	updateMovement();
+}
+
+void SimpleApplication::moveMouse(const float mx, const float my, const float cx, const float cy) {
+	Application::moveMouse(mx, my, cx, cy);
+	scene->player->mouseAct(mx, my, cx, cy);
+}
+
+void SimpleApplication::mouseKey(bool press, bool isMain) {
+	Application::mouseKey(press, isMain);
+	scene->player->mousePress(press, isMain);
 }
 
 void SimpleApplication::draw() {
@@ -208,16 +228,6 @@ void SimpleApplication::init() {
 	render->getError();
 }
 
-void SimpleApplication::moveKey(float velocity) {
-	Application::moveKey(velocity);
-	updateMovement();
-}
-
-void SimpleApplication::moveByDir(int dir) {
-	Application::moveByDir(dir);
-	updateMovement();
-}
-
 void SimpleApplication::updateMovement() {
 	if (scene->water)
 		scene->water->moveWaterWithCamera(scene->mainCamera);
@@ -227,25 +237,26 @@ void SimpleApplication::updateMovement() {
 		scene->terrainNode->caculateBlock(cp.x, cp.z, bx, bz);
 		int visualSize = cfgs->graphQuality >= 8 ? 60 : 40;
 		scene->updateVisualTerrain(bx, bz, visualSize, visualSize);
-		if (scene->terrainNode->cauculateY(bx, bz, cp.x, cp.z, cp.y)) {
-			if (scene->water) {
-				float waterHeight = scene->water->position.y;
-				cp.y = cp.y < waterHeight ? waterHeight : cp.y;
+		if (input->getControl() < 0) {
+			if (scene->terrainNode->cauculateY(bx, bz, cp.x, cp.z, cp.y)) {
+				if (scene->water) {
+					float waterHeight = scene->water->position.y;
+					cp.y = cp.y < waterHeight ? waterHeight : cp.y;
+				}
+				cp.y += scene->mainCamera->getHeight();
 			}
-			cp.y += scene->mainCamera->getHeight();
+			else if (scene->water) {
+				float waterHeight = scene->water->position.y;
+				cp.y = waterHeight;
+				cp.y += scene->mainCamera->getHeight();
+			}
+			scene->mainCamera->moveTo(cp);
 		}
-		else if (scene->water) {
-			float waterHeight = scene->water->position.y;
-			cp.y = waterHeight;
-			cp.y += scene->mainCamera->getHeight();
-		}
-		scene->mainCamera->moveTo(cp);
 	}
 }
 
-void SimpleApplication::act(long startTime, long currentTime) {
-	Application::act(startTime, currentTime);
-	scene->player->keyAct(input, scene);
+void SimpleApplication::act(long startTime, long currentTime, float velocity) {
+	Application::act(startTime, currentTime, velocity);
 	///*
 		static float dd = 1.0, dr = 1.0;
 
@@ -626,29 +637,27 @@ void SimpleApplication::initScene() {
 	animNode1->getObject()->setSize(0.05, 0.05, 0.05);
 	animNode1->getObject()->setPosition(0, -5, -1);
 	animNode1->translateNode(5, 0, 15);
-	animNode1->getObject()->setCurAnim(0);
+	animNode1->getObject()->setCurAnim(0, false);
 	animNode1->getObject()->setLoop(true);
 	AnimationNode* animNode2 = new AnimationNode(vec3(5, 10, 5));
 	animNode2->setAnimation(scene, animations["ninja"]);
 	animNode2->getObject()->setSize(0.05, 0.05, 0.05);
 	animNode2->getObject()->setPosition(0, -5, -1);
 	animNode2->translateNode(40, 0, 40);
-	animNode2->rotateNodeObject(0, 45, 0);
+	//animNode2->rotateNodeObject(0, 45, 0);
 	animNode2->getObject()->setDefaultAnim(11);
 	AnimationNode* animNode3 = new AnimationNode(vec3(5, 10, 5));
 	animNode3->setAnimation(scene, animations["ninja"]);
 	animNode3->getObject()->setSize(0.05, 0.05, 0.05);
 	animNode3->getObject()->setPosition(0, -5, -1);
 	animNode3->translateNode(5, 0, 15);
-	animNode3->getObject()->setCurAnim(11);
 	animNode3->getObject()->setDefaultAnim(11);
 	AnimationNode* animNode4 = new AnimationNode(vec3(5, 10, 5));
 	animNode4->setAnimation(scene, animations["ninja"]);
 	animNode4->getObject()->setSize(0.05, 0.05, 0.05);
 	animNode4->getObject()->setPosition(0, -5, -1);
 	animNode4->translateNode(40, 0, 40);
-	animNode4->rotateNodeObject(0, 270, 0);
-	animNode4->getObject()->setCurAnim(15);
+	//animNode4->rotateNodeObject(0, 270, 0);
 	animNode4->getObject()->setDefaultAnim(12);
 
 	Node* animNode = new StaticNode(vec3(0, 0, 0));

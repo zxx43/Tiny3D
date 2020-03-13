@@ -4,8 +4,9 @@
 AnimationObject::AnimationObject(Animation* anim):Object() {
 	animation=anim; // no mesh!
 	anglex=0; angley=0; anglez=0;
-	setCurAnim(0);
+	setCurAnim(0, false);
 	setLoop(false);
+	setPlayOnce(false);
 	setDefaultAnim(0);
 	time = 0.0, curFrame = 0.0;
 	transforms = (float*)malloc(4 * sizeof(float));
@@ -38,6 +39,7 @@ AnimationObject::AnimationObject(const AnimationObject& rhs) {
 	time = rhs.time;
 	curFrame = rhs.curFrame;
 	loop = rhs.loop;
+	playOnce = rhs.playOnce;
 	defaultAid = rhs.defaultAid;
 
 	if (rhs.billboard)
@@ -102,20 +104,21 @@ void AnimationObject::setSize(float sx,float sy,float sz) {
 	}
 }
 
-bool AnimationObject::setCurAnim(int aid) {
+bool AnimationObject::setCurAnim(int aid, bool once) {
 	if (aid >= animation->animCount) return false;
 	this->aid = aid;
 	fid = animation->getFrameIndex(aid);
+	setPlayOnce(once);
 	return true;
 }
 
-void AnimationObject::animate() {
+void AnimationObject::animate(float velocity) {
 	bool animEnd = false;
 	if (animation) curFrame = animation->getBoneFrame(aid, time, animEnd);
-	if(!animEnd) time += 0.0025;
+	if(!animEnd) time += velocity * 0.0004;
 	else if (animEnd && loop) time = 0.0;
-	else if (animEnd && !loop) {
-		setCurAnim(defaultAid);
+	else if (animEnd && !loop && !playOnce) {
+		setCurAnim(defaultAid, playOnce);
 		time = 0.0;
 	}
 }

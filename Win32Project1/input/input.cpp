@@ -71,6 +71,7 @@ void Input::updateExtra(RenderManager* renderMgr) {
 
 void Input::updateCameraByMouse(Camera* camera, const float mouseX,
 		const float mouseY, const float centerX, const float centerY) {
+	if (controlId >= 0) return;
 	if (mouseX == centerX && mouseY == centerY) return;
 	const static float cosdr = cos(A2R);
 	const static float sindr = sin(A2R);
@@ -85,5 +86,6 @@ void Input::updateCameraByMouse(Camera* camera, const float mouseX,
 }
 
 void Input::moveCamera(Camera* camera, int direction) {
+	if (controlId >= 0) return;
 	camera->move(direction, D_DISTANCE * 10.0);
 }

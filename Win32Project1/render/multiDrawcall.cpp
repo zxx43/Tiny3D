@@ -40,7 +40,7 @@ MultiDrawcall::MultiDrawcall(MultiInstance* multi) :Drawcall() {
 
 	dataBuffer = createBuffers(multiRef, vertexCount, indexCount, maxObjectCount);
 	indirectBuffer = createIndirects(multiRef);
-	bool dualBuffer = true;
+	bool dualBuffer = false;
 	if (dualBuffer) {
 		dataBuffer2 = createBuffers(multiRef, vertexCount, indexCount, maxObjectCount, dataBuffer);
 		indirectBuffer2 = createIndirects(multiRef);
