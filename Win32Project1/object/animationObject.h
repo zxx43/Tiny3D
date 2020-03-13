@@ -21,7 +21,7 @@ public:
 	int aid, fid;
 public:
 	int defaultAid;
-	bool loop;
+	bool loop, playOnce;
 	float time, curFrame;
 public:
 	AnimationObject(Animation* anim);
@@ -31,14 +31,16 @@ public:
 	virtual void setPosition(float x, float y, float z);
 	virtual void setRotation(float ax, float ay, float az);
 	virtual void setSize(float sx, float sy, float sz);
-	bool setCurAnim(int aid);
+	bool setCurAnim(int aid, bool once);
 	void resetTime() { time = 0.0; }
 	float getTime() { return time; }
-	void setLoop(float lp) { loop = lp; }
+	void setLoop(bool lp) { loop = lp; }
 	bool isLoop() { return loop; }
+	void setPlayOnce(bool once) { playOnce = once; }
+	bool isPlayOnce() { return playOnce; }
 	void setDefaultAnim(int aid) { defaultAid = aid; }
 	bool isDefaultAnim() { return aid == defaultAid; }
-	void animate();
+	void animate(float velocity);
 	float getCurFrame() { return curFrame; }
 };
 

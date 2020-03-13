@@ -33,7 +33,7 @@ private:
 private:
 	void initNodes();
 public:
-	float time;
+	float time, velocity;
 	Camera* mainCamera;
 	Camera* reflectCamera;
 	Sky* skyBox;
@@ -63,6 +63,7 @@ public:
 	void finishInit() { inited = true; }
 	bool isInited() { return inited; }
 	void act(float dTime) { time = dTime * 0.025; }
+	void setVelocity(float v) { velocity = v; }
 public: // Just for debugging
 	void createNodeAABB(Node* node);
 	void clearAllAABB();

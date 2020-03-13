@@ -23,6 +23,7 @@ private:
 	float xrot,yrot,height;
 	mat4 rotXMat, rotYMat, transMat;
 	vec4 lookDir4;
+	bool needRefresh;
 public:
 	Frustum* frustum;
 	vec3 position, lookDir, up;

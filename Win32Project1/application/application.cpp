@@ -25,6 +25,7 @@ Application::Application() {
 	fps = 0.0;
 
 	willExit = false;
+	pressed = false;
 	scene = NULL;
 	render = NULL;
 	input = NULL;
@@ -66,24 +67,29 @@ Application::~Application() {
 	free(cfgs);
 }
 
-void Application::act(long startTime, long currentTime) {
+void Application::act(long startTime, long currentTime, float velocity) {
 	if (renderMgr) {
 		input->updateExtra(renderMgr);
 		scene->act(currentTime - startTime);
+		scene->setVelocity(velocity);
 	}
 }
 
-void Application::moveKey(float velocity) {
+void Application::keyAct(float velocity) {
 	scene->mainCamera->velocity = velocity;
 	input->updateCameraByKey(scene->mainCamera);
 }
 
-void Application::moveByDir(int dir) {
+void Application::wheelAct(int dir) {
 	input->moveCamera(scene->mainCamera, dir);
 }
 
 void Application::moveMouse(const float mx, const float my, const float cx, const float cy) {
 	input->updateCameraByMouse(scene->mainCamera, mx, my, cx, cy);
+}
+
+void Application::mouseKey(bool press, bool isMain) {
+	pressed = press;
 }
 
 void Application::prepare(bool swapQueue) {
@@ -92,8 +98,8 @@ void Application::prepare(bool swapQueue) {
 	renderMgr->swapRenderQueues(scene, swapQueue); // Caculate cull result
 }
 
-void Application::animate(long startTime, long currentTime) {
-	renderMgr->animateQueues(startTime, currentTime);
+void Application::animate(float velocity) {
+	renderMgr->animateQueues(velocity);
 }
 
 void Application::resize(int width, int height) {

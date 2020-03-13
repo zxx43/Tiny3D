@@ -12,6 +12,7 @@ Camera::Camera(float height) {
 	velocity = 1.0;
 
 	frustum = new Frustum();
+	needRefresh = true;
 }
 
 Camera::~Camera() {
@@ -25,11 +26,13 @@ void Camera::initPerspectCamera(float fovy, float aspect, float zNear, float zFa
 	this->zFar = zFar;
 	projectMatrix = perspective(fovy, aspect, zNear, zFar);
 	invProjMatrix = projectMatrix.GetInverse();
+	needRefresh = true;
 }
 
 void Camera::initOrthoCamera(float left, float right, float bottom, float top, float near, float far) {
 	projectMatrix = ortho(left, right, bottom, top, near, far);
 	invProjMatrix = projectMatrix.GetInverse();
+	needRefresh = true;
 }
 
 void Camera::setView(const vec3& pos, const vec3& dir) {
@@ -37,6 +40,8 @@ void Camera::setView(const vec3& pos, const vec3& dir) {
 	lookDir = dir;
 	vec3 center = lookDir + position;
 	viewMatrix = lookAt(position, center, up);
+	invViewMatrix = viewMatrix.GetInverse();
+	needRefresh = true;
 }
 
 void Camera::updateLook(const vec3& pos, const vec3& dir) {
@@ -59,13 +64,18 @@ void Camera::updateMoveable(uint transType) {
 	lookDir.x = lookDir4.x;
 	lookDir.y = lookDir4.y;
 	lookDir.z = lookDir4.z;
+
+	needRefresh = true;
 }
 
 void Camera::updateFrustum() {
-	viewProjectMatrix = projectMatrix * viewMatrix;
-	invViewProjectMatrix = viewProjectMatrix.GetInverse();
-	lookDir.Normalize();
-	frustum->update(invViewProjectMatrix, lookDir);
+	if (needRefresh) {
+		viewProjectMatrix = projectMatrix * viewMatrix;
+		invViewProjectMatrix = viewProjectMatrix.GetInverse();
+		lookDir.Normalize();
+		frustum->update(invViewProjectMatrix, lookDir);
+		needRefresh = false;
+	}
 }
 
 void Camera::turnX(int lr) {

@@ -83,7 +83,7 @@ public:
 	void deleteInstance(InstanceData* data);
 	void setDual(bool dual);
 	void draw(Scene* scene, Camera* camera, Render* render, RenderState* state);
-	void animate(long startTime, long currentTime);
+	void animate(float velocity);
 	Mesh* queryLodMesh(Object* object, const vec3& eye);
 };
 

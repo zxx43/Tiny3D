@@ -30,9 +30,9 @@ void AnimationNode::updateDrawcall() {
 void AnimationNode::updateRenderData() {
 }
 
-void AnimationNode::animate() {
+void AnimationNode::animate(float velocity) {
 	AnimationObject* object = getObject();
-	if (object) object->animate();
+	if (object) object->animate(velocity);
 }
 
 AnimationObject* AnimationNode::getObject() {

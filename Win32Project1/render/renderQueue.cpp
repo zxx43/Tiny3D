@@ -203,10 +203,10 @@ void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState
 	}
 }
 
-void RenderQueue::animate(long startTime, long currentTime) {
+void RenderQueue::animate(float velocity) {
 	for (int it = 0; it < animQueue->size; it++) {
 		AnimationNode* animateNode = (AnimationNode*)animQueue->get(it);
-		animateNode->animate();
+		animateNode->animate(velocity);
 	}
 }
 

@@ -18,6 +18,7 @@ public:
 	int windowWidth, windowHeight;
 	float fps;
 	bool willExit;
+	bool pressed;
 	ConfigArg* cfgs;
 public:
 	Application();
@@ -26,12 +27,13 @@ public:
 	virtual void init();
 	virtual void initScene();
 	virtual void draw() = 0;
-	virtual void act(long startTime, long currentTime);
-	virtual void moveKey(float velocity);
-	virtual void moveByDir(int dir);
-	void moveMouse(const float mx, const float my, const float cx, const float cy);
+	virtual void act(long startTime, long currentTime, float velocity);
+	virtual void keyAct(float velocity);
+	virtual void wheelAct(int dir);
+	virtual void moveMouse(const float mx, const float my, const float cx, const float cy);
+	virtual void mouseKey(bool press, bool isMain);
 	void prepare(bool swapQueue);
-	void animate(long startTime, long currentTime);
+	void animate(float velocity);
 	virtual void resize(int width, int height);
 	virtual void keyDown(int key);
 	virtual void keyUp(int key);

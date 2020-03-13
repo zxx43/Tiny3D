@@ -71,7 +71,7 @@ public:
 	void updateMainLight();
 	void flushRenderQueues();
 	void updateRenderQueues(Scene* scene);
-	void animateQueues(long startTime, long currentTime);
+	void animateQueues(float velocity);
 	void swapRenderQueues(Scene* scene, bool swapQueue);
 	void renderShadow(Render* render,Scene* scene);
 	void renderScene(Render* render,Scene* scene);

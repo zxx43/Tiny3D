@@ -11,7 +11,7 @@
 using namespace std;
 
 Scene::Scene() {
-	time = 0.0;
+	time = 0.0, velocity = 0.0;
 	inited = false;
 	player = new Player();
 	mainCamera = new Camera(25.0);

@@ -100,11 +100,11 @@ void RenderManager::updateRenderQueues(Scene* scene) {
 	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE], scene, scene->animationRoot, cameraMain, cameraMain);
 }
 
-void RenderManager::animateQueues(long startTime, long currentTime) {
-	currentQueue->queues[QUEUE_ANIMATE_SN]->animate(startTime, currentTime);
-	currentQueue->queues[QUEUE_ANIMATE_SM]->animate(startTime, currentTime);
-	currentQueue->queues[QUEUE_ANIMATE_SF]->animate(startTime, currentTime);
-	currentQueue->queues[QUEUE_ANIMATE]->animate(startTime, currentTime);
+void RenderManager::animateQueues(float velocity) {
+	currentQueue->queues[QUEUE_ANIMATE_SN]->animate(velocity);
+	currentQueue->queues[QUEUE_ANIMATE_SM]->animate(velocity);
+	currentQueue->queues[QUEUE_ANIMATE_SF]->animate(velocity);
+	currentQueue->queues[QUEUE_ANIMATE]->animate(velocity);
 }
 
 void RenderManager::swapRenderQueues(Scene* scene, bool swapQueue) {
@@ -219,6 +219,7 @@ void RenderManager::drawGrass(Render* render, RenderState* state, Scene* scene, 
 
 		state->shader = grassShader;
 		state->shaderCompute = compShader;
+		state->eyePos = &(camera->position);
 
 		StaticObject* terrain = (StaticObject*)node->objects[0];
 		compShader->setVector3v("translate", terrain->transformMatrix.entries + 12);

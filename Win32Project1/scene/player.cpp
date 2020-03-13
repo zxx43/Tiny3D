@@ -2,50 +2,58 @@
 #include "../constants/constants.h"
 #include "../util/util.h"
 #include "../input/input.h"
+#include "../camera/camera.h"
 
 Player::Player() {
 	node = NULL;
 	moveAnim = false;
-	doRotate = false;
+	doRotate = false, doTurn = false;
 	doMove = false;
-	fAngle = 0.0;
+	fxAngle = 0.0;
+	fyAngle = 0.0;
 	exAngle = 0.0;
-	px = 0.0, py = 0.0, pz = 0.0;
+	position = vec3(0.0, 0.0, 0.0);
+	camera = NULL;
+	zoom = 10.0;
+	speed = 0.0;
+	atkPres = false, defPres = false;
 }
 
-Player::~Player() {
-
-}
-
-void Player::setNode(AnimationNode* n) { 
+void Player::setNode(AnimationNode* n, Camera* cam) { 
 	if (node != n) {
 		node = n;
 		if (node) {
-			fAngle = node->getObject()->angley;
-			px = node->position.x;
-			py = node->position.y;
-			pz = node->position.z;
+			fxAngle = node->getObject()->angley;
+			fyAngle = 0.0;
+			position = node->position;
+			camera = cam;
+			zoom = 10.0;
+			speed = 0.0;
+			atkPres = false, defPres = false;
+			cameraAct();
 		}
 		exAngle = 0.0;
-		doRotate = false;
+		doRotate = false, doTurn = false;
 		doMove = false;
 	}
 }
 
-void Player::run(int dir, Scene* scene) {
+void Player::run(int dir) {
 	if (node) {
 		if (node->getObject()->isDefaultAnim()) {
 			node->getObject()->resetTime();
 			moveAnim = true;
 		}
-		if (moveAnim) node->getObject()->setCurAnim(19);
-		float dr = 0.0, speed = 0.075;
+		if (moveAnim) node->getObject()->setCurAnim(19, false);
+		float dr = 0.0;
 		switch (dir) {
 			case MNEAR:
 				dr = 180.0;
 				break;
 			case MFAR:
 				dr = 0.0;
+				exAngle = 180.0;
+				doRotate = true;
 				break;
 			case LEFT:
 				dr = 270.0;
@@ -58,9 +66,8 @@ void Player::run(int dir, Scene* scene) {
 				doRotate = true;
 				break;
 		}
-		float dir = angleToRadian(fAngle + dr);
-		px += sinf(dir) * speed;
-		pz += cosf(dir) * speed;
+		float dir = angleToRadian(fxAngle + dr);
+		position += vec3(sinf(dir), 0.0, cosf(dir)) * speed;
 		doMove = true;
 	}
 }
@@ -68,43 +75,60 @@ void Player::run(int dir, Scene* scene) {
 void Player::idel() {
 	if (moveAnim) {
 		if (node) {
-			node->getObject()->setCurAnim(node->getObject()->defaultAid);
+			node->getObject()->setCurAnim(node->getObject()->defaultAid, false);
 			node->getObject()->resetTime();
 		}
 		moveAnim = false;
 	}
 }
 
-void Player::switchAct(int target) {
+void Player::switchAct(int target, bool once) {
 	int before = node->getObject()->aid;
-	node->getObject()->setCurAnim(target);
+	node->getObject()->setCurAnim(target, once);
 	if (before != target)
 		node->getObject()->resetTime();
 	moveAnim = false;
 }
 
-void Player::jump() {
-	if (node) switchAct(3);
+void Player::resetPlayOnce() {
+	if (node) node->getObject()->setPlayOnce(false);
 }
 
 void Player::attack() {
-	if (node) switchAct(2);
+	if (node) switchAct(2, false);
+}
+
+void Player::defend() {
+	if (node) switchAct(4, true);
 }
 
 void Player::crit() {
-	if (node) switchAct(17);
+	if (node) switchAct(17, false);
 }
 
 void Player::kick() {
-	if (node) switchAct(16);
+	if (node) switchAct(16, false);
 }
 
-void Player::turn(float angle) {
+void Player::jump() {
+	if (node) switchAct(3, false);
+}
+
+void Player::turn(bool lr, float angle) {
 	if (node) {
-		float dAngle = fAngle + angle;
-		RestrictAngle(dAngle);
-		fAngle = dAngle;
+		if (lr) {
+			float dAngle = fxAngle + angle;
+			RestrictAngle(dAngle);
+			fxAngle = dAngle;
+		} else {
+			float dAngle = fyAngle + angle;
+			RestrictYAngle(dAngle);
+			fyAngle = dAngle;
+			if (fyAngle > 30.0) fyAngle = 30.0;
+			else if (fyAngle < -30.0) fyAngle = -30.0;
+		}
 		doRotate = true;
+		doTurn = true;
 	}
 }
 
@@ -115,83 +139,145 @@ void Player::resetExAngle() {
 	}
 }
 
-void Player::rotateAct() {
+bool Player::rotateAct() {
 	if (doRotate) {
 		if (node)
-			node->rotateNodeObject(node->getObject()->anglex, fAngle + exAngle, node->getObject()->anglez);
+			node->rotateNodeObject(node->getObject()->anglex, fxAngle + exAngle, node->getObject()->anglez);
 		doRotate = false;
+		if(!doTurn) return false;
+		else {
+			doTurn = false;
+			return true;
+		}
 	}
+	return false;
 }
 
-void Player::moveAct(Scene* scene) {
+bool Player::moveAct(const Scene* scene) {
 	if (doMove) {
 		if (node) {
-			node->translateNode(px, py, pz);
+			node->translateNode(position.x, position.y, position.z);
 			scene->terrainNode->standObjectsOnGround(node);
-			px = node->position.x;
-			py = node->position.y;
-			pz = node->position.z;
+			position = node->position;
 		}
 		doMove = false;
+		return true;
 	}
+	return false;
 }
 
-void Player::keyDown(Input* input) {
-	if (input->getBoards()[KEY_V]) {
-		setNode(NULL);
-		input->setControl(-1);
+void Player::cameraAct() {
+	if (!camera || !node) return;
+	vec4 pDir = rotateY(fxAngle) * rotateX(fyAngle) * UNIT_NEG_Z;
+	vec3 dir = vec3(pDir.x, pDir.y, pDir.z).GetNormalized() * zoom;
+	float gx = node->getObject()->transformsFull[0];
+	float gy = node->getObject()->transformsFull[1] + ((AABB*)node->boundingBox)->sizey;
+	float gz = node->getObject()->transformsFull[2];
+	vec3 pos = vec3(gx, gy, gz) - dir;
+	camera->setView(pos, dir);
+}
+
+void Player::keyDown(Input* input, const Scene* scene) { 
+	int cid = -2;
+	if (input->getBoards()[KEY_1]) cid = 1;
+	if (input->getBoards()[KEY_2]) cid = 2;
+	if (input->getBoards()[KEY_3]) cid = 3;
+	if (input->getBoards()[KEY_V]) cid = -1;
+	if (cid > -2) {
+		input->setControl(cid);
+		if(cid < 0) setNode(NULL, NULL);
+		else setNode(scene->animPlayers[cid], scene->mainCamera);
 	}
-	if (input->getBoards()[KEY_1])
-		input->setControl(1);
-	if (input->getBoards()[KEY_2])
-		input->setControl(2);
-	if (input->getBoards()[KEY_3])
-		input->setControl(3);
 }
 
 void Player::keyUp(Input* input) {
 	if (!node) return;
 	if (!input->getBoards()[KEY_W] && !input->getBoards()[KEY_S] && !input->getBoards()[KEY_A] && !input->getBoards()[KEY_D] &&
-		!input->getBoards()[KEY_R] && !input->getBoards()[KEY_F] && !input->getBoards()[KEY_G] && !input->getBoards()[KEY_SPACE])
+		!input->getBoards()[KEY_R] && !input->getBoards()[KEY_F] && !input->getBoards()[KEY_SPACE] && !atkPres && !defPres)
 			idel();
 }
 
-void Player::keyAct(Input* input, Scene* scene) {
+void Player::controlAct(Input* input, const Scene* scene, const float velocity) {
 	if (!node) return;
 
+	speed = velocity;
 	if (input->getBoards()[KEY_W])
-		run(MNEAR, scene);
+		run(MNEAR);
 	if (input->getBoards()[KEY_S])
-		run(MFAR, scene);
+		run(MFAR);
 	if (input->getBoards()[KEY_A])
-		run(LEFT, scene);
+		run(LEFT);
 	if (input->getBoards()[KEY_D])
-		run(RIGHT, scene);
-	moveAct(scene);
+		run(RIGHT);
 
-	if (input->getBoards()[KEY_Q])
-		turn(D_ROTATION);
-	if (input->getBoards()[KEY_E])
-		turn(-D_ROTATION);
+	if (input->getBoards()[KEY_LEFT])
+		turn(true, D_ROTATION);
+	if (input->getBoards()[KEY_RIGHT])
+		turn(true, -D_ROTATION);
+	if (input->getBoards()[KEY_UP])
+		turn(false, D_ROTATION);
+	if (input->getBoards()[KEY_DOWN])
+		turn(false, -D_ROTATION);
 
 	if (input->getBoards()[KEY_W] && input->getBoards()[KEY_A])
 		exAngle = 45.0;
 	if (input->getBoards()[KEY_W] && input->getBoards()[KEY_D])
 		exAngle = 315.0;
 	if (input->getBoards()[KEY_S] && input->getBoards()[KEY_A])
-		exAngle = 315.0;
+		exAngle = 135.0;
 	if (input->getBoards()[KEY_S] && input->getBoards()[KEY_D])
-		exAngle = 45.0;
-	if (!input->getBoards()[KEY_A] && !input->getBoards()[KEY_D])
+		exAngle = 225.0;
+	if (!input->getBoards()[KEY_S] && !input->getBoards()[KEY_A] && !input->getBoards()[KEY_D])
 		resetExAngle();
-	rotateAct();
 
+	bool isMove = moveAct(scene);
+	bool isRotate = rotateAct();
+	if(isMove || isRotate)
+		cameraAct();
+
+	if (atkPres) attack();
+	if (defPres) defend();
 	if (input->getBoards()[KEY_R])
 		kick();
 	if (input->getBoards()[KEY_F])
-		attack();
-	if (input->getBoards()[KEY_G])
 		crit();
 	if (input->getBoards()[KEY_SPACE])
 		jump();
+}
+
+void Player::mousePress(bool press, bool isMain) {
+	if (!node) return;
+	if (press) {
+		if (isMain) atkPres = true;
+		else defPres = true;
+	} else {
+		if (isMain) atkPres = false;
+		else defPres = false;
+	}
+	if (!defPres) resetPlayOnce();
+}
+
+void Player::mouseAct(const float mouseX, const float mouseY, const float centerX, const float centerY) {
+	if (!node) return;
+	if (mouseX == centerX && mouseY == centerY) return;
+
+	const static float cosdr = cos(A2R);
+	const static float sindr = sin(A2R);
+	const static float mag = 0.5 * 0.001f * R2A;
+	float dxr = (centerX - mouseX) * mag;
+	float dyr = (centerY - mouseY) * mag;
+	turn(true, dxr * cosdr);
+	turn(true, -dyr * sindr);
+	turn(false, dxr * sindr);
+	turn(false, dyr * cosdr);
+	if(rotateAct())
+		cameraAct();
+}
+
+void Player::wheelAct(float dz) {
+	if (!node) return;
+	zoom += dz;
+	if (zoom < 5.0) zoom = 5.0;
+	else if (zoom > 20.0) zoom = 20.0;
+	cameraAct();
 }
