@@ -40,11 +40,14 @@ void Player::setNode(AnimationNode* n, Camera* cam) {
 
 void Player::run(int dir) {
 	if (node) {
-		if (node->getObject()->isDefaultAnim()) {
+		if ((node->getObject()->isEnd() && !node->getObject()->isPlayOnce()) || node->getObject()->isDefaultAnim()) {
 			node->getObject()->resetTime();
 			moveAnim = true;
 		}
-		if (moveAnim) node->getObject()->setCurAnim(19, false);
+		if (moveAnim && node->getObject()->getCurAnim() != 19) 
+			node->getObject()->setCurAnim(19, false);
+		if (node->getObject()->getCurAnim() == 19)
+			node->getObject()->setMoving(true);
 		float dr = 0.0;
 		switch (dir) {
 			case MNEAR:
@@ -73,20 +76,24 @@ void Player::run(int dir) {
 }
 
 void Player::idel() {
-	if (moveAnim) {
-		if (node) {
+	if (node) {
+		node->getObject()->setMoving(false);
+		if (moveAnim) {
 			node->getObject()->setCurAnim(node->getObject()->defaultAid, false);
 			node->getObject()->resetTime();
+			moveAnim = false;
 		}
-		moveAnim = false;
 	}
 }
 
 void Player::switchAct(int target, bool once) {
-	int before = node->getObject()->aid;
-	node->getObject()->setCurAnim(target, once);
-	if (before != target)
-		node->getObject()->resetTime();
+	if (node) {
+		int before = node->getObject()->aid;
+		node->getObject()->setMoving(false);
+		node->getObject()->setCurAnim(target, once);
+		if (before != target || (node->getObject()->isEnd() && !node->getObject()->isPlayOnce()))
+			node->getObject()->resetTime();
+	}
 	moveAnim = false;
 }
 

@@ -7,6 +7,8 @@ AnimationObject::AnimationObject(Animation* anim):Object() {
 	setCurAnim(0, false);
 	setLoop(false);
 	setPlayOnce(false);
+	setMoving(false);
+	setEnd(true);
 	setDefaultAnim(0);
 	time = 0.0, curFrame = 0.0;
 	transforms = (float*)malloc(4 * sizeof(float));
@@ -40,6 +42,8 @@ AnimationObject::AnimationObject(const AnimationObject& rhs) {
 	curFrame = rhs.curFrame;
 	loop = rhs.loop;
 	playOnce = rhs.playOnce;
+	moving = rhs.moving;
+	animEnd = rhs.animEnd;
 	defaultAid = rhs.defaultAid;
 
 	if (rhs.billboard)
@@ -113,11 +117,10 @@ bool AnimationObject::setCurAnim(int aid, bool once) {
 }
 
 void AnimationObject::animate(float velocity) {
-	bool animEnd = false;
 	if (animation) curFrame = animation->getBoneFrame(aid, time, animEnd);
 	if(!animEnd) time += velocity * 0.0004;
 	else if (animEnd && loop) time = 0.0;
-	else if (animEnd && !loop && !playOnce) {
+	else if (animEnd && !loop && !playOnce && !moving) {
 		setCurAnim(defaultAid, playOnce);
 		time = 0.0;
 	}
