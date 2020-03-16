@@ -9,8 +9,7 @@ Player::Player() {
 	moveAnim = false;
 	doRotate = false, doTurn = false;
 	doMove = false;
-	fxAngle = 0.0;
-	fyAngle = 0.0;
+	fxAngle = 0.0, fyAngle = 0.0;
 	exAngle = 0.0;
 	position = vec3(0.0, 0.0, 0.0);
 	camera = NULL;

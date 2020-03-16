@@ -23,12 +23,11 @@ out mat3 vTBN;
 #endif
 
 void main() {	
-	int aid = int(floor(modelMatrix[3].x));
-	sampler2D bone = boneTex[aid];
+	sampler2D bone = boneTex[int(floor(modelMatrix[3].x))];
 	vec2 boneSize = vec2(textureSize(bone, 0));
-	vec4 size = vec4(boneSize, vec2(0.25) / boneSize);
-	float curr = floor(modelMatrix[3].y) / size.y;
-	size.x = 1.0 / size.x;
+	vec2 invSize = 1.0 / boneSize;
+	vec4 size = vec4(invSize, vec2(0.25) * invSize);
+	float curr = floor(modelMatrix[3].y) * size.y;
 
 	mat3x4 m0 = GetBoneTex(bone, boneids.x, size, curr);
 	mat3x4 m1 = GetBoneTex(bone, boneids.y, size, curr);
