@@ -23,7 +23,7 @@ RenderQueue::RenderQueue(int type, float midDis, float lowDis) {
 	dual = true;
 	shadowLevel = 0;
 	firstFlush = true;
-	dualInstances = true;
+	dualInstances = false;
 }
 
 RenderQueue::~RenderQueue() {
