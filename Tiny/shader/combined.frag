@@ -4,6 +4,7 @@ layout(bindless_sampler) uniform sampler2D sceneBuffer, sceneDepthBuffer, waterB
 uniform vec2 pixelSize;
 uniform mat4 invViewProjMatrix;
 uniform vec3 light;
+uniform float udotl;
 uniform vec3 eyePos;
 uniform float quality;
 uniform float useBloom;
@@ -13,9 +14,9 @@ in vec2 vTexcoord;
 
 out vec4 FragColor;
 
-#define START_H float(200.0)
+#define START_H float(0.0)
 #define END_H float(1600.0)
-#define FOG_COLOR vec3(0.95)
+#define FOG_COLOR vec3(0.9)
 
 vec3 GenFogColor(vec4 worldPos, float depthView, vec3 sceneColor) {
 	float worldH = worldPos.y / worldPos.w;
@@ -24,7 +25,7 @@ vec3 GenFogColor(vec4 worldPos, float depthView, vec3 sceneColor) {
 
 	fogFactor = mix(fogFactor, 1.0, heightFactor);
 	fogFactor = clamp(fogFactor, 0.0, 1.0);
-	return mix(FOG_COLOR, sceneColor, fogFactor);
+	return mix(FOG_COLOR * udotl, sceneColor, fogFactor);
 }
 
 void main() {

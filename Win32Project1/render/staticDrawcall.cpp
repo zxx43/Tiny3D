@@ -95,7 +95,7 @@ RenderBuffer* StaticDrawcall::createBuffers(Batch* batch, int bufCount, int vert
 
 void StaticDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
 	if (indexCntToDraw <= 0) return;
-	if (frame < DELAY_FRAME) frame++;
+	if (frame < state->delay) frame++;
 	else {
 		render->useShader(shader);
 		if (state->pass < DEFERRED_PASS && !isFullStatic() && objectCntToDraw > 0 && uModelMatrix)

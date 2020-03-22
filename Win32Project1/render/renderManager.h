@@ -41,12 +41,13 @@ struct Renderable {
 class RenderManager {
 public:
 	vec3 lightDir;
+	float udotl;
 	RenderState* state;
 	ConfigArg* cfgs;
 	Texture2D* occluderDepth;
 private:
 	Shadow* shadow;
-	bool needResize;
+	bool needResize, needRefreshSky;
 	ComputeDrawcall* grassDrawcall;
 public:
 	Renderable* renderData;
@@ -69,6 +70,7 @@ public:
 	void resize(float width, float height);
 	void updateShadowCamera(Camera* mainCamera);
 	void updateMainLight();
+	void updateSky();
 	void flushRenderQueues();
 	void updateRenderQueues(Scene* scene);
 	void animateQueues(float velocity);
@@ -77,6 +79,7 @@ public:
 	void renderScene(Render* render,Scene* scene);
 	void renderWater(Render* render, Scene* scene);
 	void renderReflect(Render* render, Scene* scene);
+	void renderSkyTex(Render* render, Scene* scene);
 
 	void drawDeferred(Render* render, Scene* scene, FrameBuffer* screenBuff, Filter* filter);
 	void drawCombined(Render* render, Scene* scene, const std::vector<Texture2D*>& inputTextures, Filter* filter);

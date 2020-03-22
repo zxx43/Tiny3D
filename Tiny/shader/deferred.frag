@@ -11,6 +11,7 @@ uniform vec2 shadowPixSize;
 uniform int useShadow;
 uniform vec2 levels;
 uniform vec3 light;
+uniform float udotl;
 uniform vec3 eyePos;
 uniform float time;
 uniform float useCartoon;
@@ -184,17 +185,17 @@ void main() {
 			float specular = (NDF * G) / (4.0 * max(dot(normal, v), 0.0) * ndotl + 0.001);
 			vec3 Lo = (kD * albedo * INV_PI + kS * specular) * radiance * ndotl;
 
-			sceneColor = ambient + shadowFactor * Lo;
+			sceneColor = (ambient + shadowFactor * Lo) * udotl;
 		} else { // Cartoon
 			float darkness = ndotl * shadowFactor;
 			vec3 kCool = vec3(0.15, 0.15, 0.35), kWarm = vec3(0.9, 0.9, 0.25);
 			float threshold = 0.45;
 			vec3 kd = darkness < threshold ? kCool : kWarm;
 
-			sceneColor = ambient + kd * albedo * material.g;
+			sceneColor = (ambient + kd * albedo * material.g) * udotl;
 		}
 	} else {
-		bright = sceneColor * 1.5;
+		bright = sceneColor * udotl * 2.5;
 	}
 
 	FragColor = vec4(sceneColor, depth);

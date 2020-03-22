@@ -21,6 +21,8 @@ mat4 lookAt(float eyeX, float eyeY, float eyeZ,
 
 mat4 lookAt(const vec3& eye, const vec3& center, const vec3& up);
 
+mat4 viewMat(const vec3& x, const vec3& y, const vec3& z, const vec3& position);
+
 mat4 perspective(float fovy,float aspect,float zNear,float zFar);
 
 mat4 ortho(float left, float right, float bottom, float top, float n, float f);

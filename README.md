@@ -11,7 +11,7 @@ A Small OpenGL Based Renderer
 - Skeleton animation  
 - Animation control  
 - Vertex texture fetch  
-- 3rd Person View  
+- 3rd person view  
 - Cascaded shadow map  
 - Sky dome  
 - Multi-thread support  
@@ -26,10 +26,12 @@ A Small OpenGL Based Renderer
 - Screen Space Grass  
 - PBR Material  
 - GPU occlusion culling  
+- Atmospheric scattering  
   
 ### Control:  
 
 - num-1,num-2,num-3 switch role to control  
+- numpad 2486 to control light direction  
 - v cancel role control    
 - wasd move  
 - space jump  

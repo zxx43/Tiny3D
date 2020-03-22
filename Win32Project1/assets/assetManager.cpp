@@ -12,6 +12,7 @@ AssetManager* AssetManager::assetManager = NULL;
 AssetManager::AssetManager() {
 	texBld = new TextureBindless();
 	skyTexture = NULL;
+	envTexture = NULL;
 	reflectTexture = NULL;
 	heightTexture = NULL;
 	distortionTex = -1;
@@ -32,8 +33,8 @@ AssetManager::~AssetManager() {
 	delete frames;
 	if (texBld) delete texBld;
 	texBld = NULL;
-	if (skyTexture) delete skyTexture;
-	skyTexture = NULL;
+	if (skyTexture) delete skyTexture; skyTexture = NULL;
+	if (envTexture) delete envTexture; envTexture = NULL;
 	if (heightTexture) delete heightTexture;
 	heightTexture = NULL;
 }
@@ -79,6 +80,16 @@ void AssetManager::setSkyTexture(CubeMap* tex) {
 
 CubeMap* AssetManager::getSkyTexture() {
 	return skyTexture;
+}
+
+void AssetManager::setEnvTexture(CubeMap* tex) {
+	if (tex == envTexture) return;
+	if (envTexture) delete envTexture;
+	envTexture = tex;
+}
+
+CubeMap* AssetManager::getEnvTexture() {
+	return envTexture;
 }
 
 void AssetManager::setReflectTexture(Texture2D* tex) {

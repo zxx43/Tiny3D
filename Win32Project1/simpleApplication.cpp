@@ -179,6 +179,7 @@ void SimpleApplication::draw() {
 	///*
 
 	renderMgr->renderShadow(render, scene);
+	renderMgr->renderSkyTex(render, scene);
 	render->setFrameBuffer(screen);
 	renderMgr->renderScene(render, scene);
 

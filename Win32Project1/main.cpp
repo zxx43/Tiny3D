@@ -18,7 +18,7 @@ bool dataPrepared = false;
 HANDLE mutex = NULL;
 void InitMutex();
 void DeleteMutex();
-DWORD currentTime = 0, lastTime = 0, startTime = 0, actTime = 0;
+DWORD currentTime = 0, lastTime = 0, startTime = 0;
 float velocity = 0.0;
 DWORD screenLeft, screenTop;
 int screenHalfX, screenHalfY;
@@ -58,8 +58,7 @@ void DrawWindow() {
 	velocity = D_DISTANCE * 1000.0 / app->getFps();
 
 	if (!app->cfgs->dualthread) {
-		actTime = timeGetTime();
-		app->act(startTime, actTime, velocity);
+		app->act(startTime, timeGetTime(), velocity);
 		app->prepare(false);
 	} else {
 		WaitForSingleObject(mutex, INFINITE);
@@ -88,16 +87,16 @@ void DrawWindow() {
 }
 
 DWORD WINAPI FrameThreadRun(LPVOID param) {
-	DWORD last = 0;
+	DWORD curr = 0, last = 0;
 	float dTime = 0.0, speed = 0.0;
 	while (!app->willExit && app->cfgs->dualthread) {
-		actTime = timeGetTime();
 		if(!dataPrepared && inited) {
-			dTime = (float)(actTime - last);
-			last = actTime;
+			curr = timeGetTime();
+			dTime = (float)(curr - last);
+			last = curr;
 			speed = D_DISTANCE * dTime;
 
-			app->act(startTime, actTime, speed);
+			app->act(startTime, curr, speed);
 			app->prepare(true);
 
 			WaitForSingleObject(mutex, INFINITE);
@@ -158,7 +157,6 @@ void CreateApplication() {
 	app = new SimpleApplication();
 	fullscreen = app->cfgs->fullscreen;
 	startTime = timeGetTime();
-	actTime = startTime;
 	currentTime = startTime;
 	lastTime = startTime;
 }

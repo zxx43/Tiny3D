@@ -2,9 +2,11 @@
 
 layout(early_fragment_tests) in;
 
-layout(bindless_sampler) uniform samplerCube texEnv;
+layout(bindless_sampler) uniform samplerCube texEnv, texSky;
 layout(bindless_sampler) uniform sampler2D texRef;
 uniform vec2 waterBias;
+uniform vec3 light;
+uniform float udotl;
 
 in vec3 vNormal;
 in vec3 vViewNormal;
@@ -23,8 +25,8 @@ void main() {
 	vec2 refCoord = (vProjPos.xy/vProjPos.w) * 0.5 + 0.5;
 	vec4 reflectTex = texture2D(texRef, refCoord + bias);
 
-	vec3 reflectMapTex = texture(texEnv, reflect(eye2Water, normal)).rgb;
-	vec3 refractMapTex = texture(texEnv, refract(eye2Water, normal, 0.750395)).rgb;
+	vec3 reflectMapTex = udotl * texture(texEnv, reflect(eye2Water, normal)).rgb;
+	vec3 refractMapTex = udotl * texture(texEnv, refract(eye2Water, normal, 0.750395)).rgb;
 
 	vec3 reflectedColor = reflectTex.rgb * reflectMapTex;
 	vec3 refractedColor = refractMapTex;

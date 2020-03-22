@@ -1,6 +1,6 @@
 #include "framebuffer.h"
 
-FrameBuffer::FrameBuffer(float width, float height, int precision, int component, bool clampBorder) {
+FrameBuffer::FrameBuffer(float width, float height, int precision, int component, bool clampBorder) :cubeBuffer(NULL) {
 	this->width = width;
 	this->height = height;
 	this->clampBorder = clampBorder;
@@ -15,7 +15,7 @@ FrameBuffer::FrameBuffer(float width, float height, int precision, int component
 	addColorBuffer(precision, component);
 }
 
-FrameBuffer::FrameBuffer(float width, float height, int precision) {
+FrameBuffer::FrameBuffer(float width, float height, int precision) :clampBorder(false), cubeBuffer(NULL) {
 	this->width = width;
 	this->height = height;
 
@@ -29,16 +29,30 @@ FrameBuffer::FrameBuffer(float width, float height, int precision) {
 	attachDepthBuffer(precision);
 }
 
+FrameBuffer::FrameBuffer(const CubeMap* cube) :clampBorder(false) {
+	glGenFramebuffers(1, &fboId);
+
+	colorBuffers.clear();
+	colorBufferCount = 0;
+
+	depthBuffer = NULL;
+	depthOnly = false;
+
+	cubeBuffer = (CubeMap*)cube;
+	width = (float)(cubeBuffer->getWidth());
+	height = (float)(cubeBuffer->getHeight());
+}
+
 FrameBuffer::~FrameBuffer() {
-	for(unsigned int i=0;i<colorBuffers.size();i++)
+	for (unsigned int i = 0; i < colorBuffers.size(); i++)
 		delete colorBuffers[i];
 	colorBuffers.clear();
 
-	if(depthBuffer)
-		delete depthBuffer;
-	depthBuffer=NULL;
+	if (depthBuffer) delete depthBuffer;
+	depthBuffer = NULL;
+	cubeBuffer = NULL;
 
-	glDeleteFramebuffers(1,&fboId);
+	glDeleteFramebuffers(1, &fboId);
 }
 
 void FrameBuffer::attachDepthBuffer(int precision) {
@@ -69,6 +83,10 @@ Texture2D* FrameBuffer::getDepthBuffer() {
 	return depthBuffer;
 }
 
+CubeMap* FrameBuffer::getCubeBuffer() {
+	return cubeBuffer;
+}
+
 void FrameBuffer::use() {
 	glBindFramebuffer(GL_FRAMEBUFFER, fboId);
 	GLbitfield clearMask = GL_COLOR_BUFFER_BIT;
@@ -77,5 +95,16 @@ void FrameBuffer::use() {
 	else if (depthBuffer)
 		clearMask |= GL_DEPTH_BUFFER_BIT;
 	glClear(clearMask);
+	glViewport(0, 0, width, height);
+}
+
+void FrameBuffer::useFbo() {
+	glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+}
+
+void FrameBuffer::useCube(int i) {
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+		GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubeBuffer->id, 0);
+	glClear(GL_COLOR_BUFFER_BIT);
 	glViewport(0, 0, width, height);
 }

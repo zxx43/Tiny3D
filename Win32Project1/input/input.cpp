@@ -65,8 +65,10 @@ void Input::updateExtra(RenderManager* renderMgr) {
 		renderMgr->lightDir.z += L_DISTANCE;
 		triggered = true;
 	}
-	if (triggered)
+	if (triggered) {
 		renderMgr->lightDir.Normalize();
+		renderMgr->updateSky();
+	}
 }
 
 void Input::updateCameraByMouse(Camera* camera, const float mouseX,

@@ -21,6 +21,7 @@ public:
 	FrameMgr* frames;
 	TextureBindless* texBld;
 	CubeMap* skyTexture;
+	CubeMap* envTexture;
 	Texture2D* reflectTexture;
 	Texture2D* heightTexture;
 	int distortionTex;
@@ -36,6 +37,8 @@ public:
 	int findTextureBindless(const char* name);
 	void setSkyTexture(CubeMap* tex);
 	CubeMap* getSkyTexture();
+	void setEnvTexture(CubeMap* tex);
+	CubeMap* getEnvTexture();
 	void setReflectTexture(Texture2D* tex);
 	Texture2D* getReflectTexture();
 	void addDistortionTex(const char* texName);

@@ -40,6 +40,8 @@ using namespace std;
 #define GRASS_LAYER_TESE "shader/grassLayer.tese"
 #define GRASS_COMP "shader/grass.comp"
 #define GRASS_VERT "shader/grass.vert"
+#define ATMOS_VERT "shader/atmosphere.vert"
+#define ATMOS_FRAG "shader/atmosphere.frag"
 
 string LoadExShader(char* name) {
 	char* fileStr = textFileRead(name);
@@ -188,6 +190,8 @@ void SetupShaders(ShaderManager* shaders) {
 
 	Shader* animFlush = shaders->addShader("animFlush", FLUSH_COMP);
 	animFlush->attachDef("AnimPass", "1.0");
+
+	Shader* atmos = shaders->addShader("atmos", ATMOS_VERT, ATMOS_FRAG);
 
 	shaders->compile();
 }

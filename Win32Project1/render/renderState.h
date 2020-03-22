@@ -25,8 +25,10 @@ struct RenderState {
 	int pass;
 	float time;
 	float quality;
+	int delay;
 	Shadow* shadow;
 	vec3 light;
+	float udotl;
 	vec3* eyePos;
 	Shader* shader;
 	Shader* shaderIns;
@@ -38,6 +40,7 @@ struct RenderState {
 	RenderState() {
 		reset();
 		light = vec3(0, 0, 0);
+		udotl = 0.0;
 		eyePos = NULL;
 	}
 	RenderState(const RenderState& rhs) {
@@ -64,8 +67,10 @@ struct RenderState {
 		pass = rhs->pass;
 		time = rhs->time;
 		quality = rhs->quality;
+		delay = rhs->delay;
 		shadow = rhs->shadow;
 		light = rhs->light;
+		udotl = rhs->udotl;
 		eyePos = rhs->eyePos;
 		shader = rhs->shader;
 		shaderIns = rhs->shaderIns;
@@ -95,6 +100,7 @@ struct RenderState {
 		pass = COLOR_PASS;
 		time = 0.0;
 		quality = 1.0;
+		delay = DELAY_FRAME;
 		shadow = NULL;
 		shader = NULL;
 		shaderIns = NULL;

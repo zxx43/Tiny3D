@@ -248,14 +248,18 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 					shader->setFloat("time", state->time);
 					shader->setVector3v("eyePos", *(state->eyePos));
 					shader->setVector3("light", -state->light.x, -state->light.y, -state->light.z);
+					shader->setFloat("udotl", state->udotl);
 					shader->setMatrix4("viewMatrix", camera->viewMatrix);
 					if (state->enableSsr)
 						shader->setVector2("waterBias", 0.0, 0.0);
 					else
 						shader->setVector2("waterBias", 0.05, -0.05);
+					if (AssetManager::assetManager->getEnvTexture() &&
+						!shader->isTexBinded(AssetManager::assetManager->getEnvTexture()->hnd))
+							shader->setHandle64("texEnv", AssetManager::assetManager->getEnvTexture()->hnd);
 					if (AssetManager::assetManager->getSkyTexture() &&
 						!shader->isTexBinded(AssetManager::assetManager->getSkyTexture()->hnd))
-							shader->setHandle64("texEnv", AssetManager::assetManager->getSkyTexture()->hnd);
+							shader->setHandle64("texSky", AssetManager::assetManager->getSkyTexture()->hnd);
 					if (AssetManager::assetManager->getReflectTexture() &&
 						!shader->isTexBinded(AssetManager::assetManager->getReflectTexture()->hnd))
 							shader->setHandle64("texRef", AssetManager::assetManager->getReflectTexture()->hnd);
@@ -277,8 +281,10 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 				shader->setMatrix4("lightViewProjFar", state->shadow->lightFarMat);
 				shader->setVector2("levels", state->shadow->level1, state->shadow->level2);
 			}
-			if (state->lightEffect) 
+			if (state->lightEffect) {
 				shader->setVector3("light", -state->light.x, -state->light.y, -state->light.z);
+				shader->setFloat("udotl", state->udotl);
+			}
 		} else if (state->pass > DEFERRED_PASS && state->ssgPass) {
 			shader->setMatrix4("invProjMatrix", camera->invProjMatrix);
 			shader->setFloat("time", state->time);

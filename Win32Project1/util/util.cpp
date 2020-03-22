@@ -61,17 +61,38 @@ mat4 lookAt(const vec3& eye, const vec3& center, const vec3& up) {
 	return mat;
 }
 
+mat4 viewMat(const vec3& x, const vec3& y, const vec3& z, const vec3& position) {
+	mat4 mat;
+	mat.entries[0] = x.x;
+	mat.entries[1] = y.x;
+	mat.entries[2] = z.x;
+	mat.entries[3] = 0.0f;
+	mat.entries[4] = x.y;
+	mat.entries[5] = y.y;
+	mat.entries[6] = z.y;
+	mat.entries[7] = 0.0f;
+	mat.entries[8] = x.z;
+	mat.entries[9] = y.z;
+	mat.entries[10] = z.z;
+	mat.entries[11] = 0.0f;
+	mat.entries[12] = -(x.DotProduct(position));
+	mat.entries[13] = -(y.DotProduct(position));
+	mat.entries[14] = -(z.DotProduct(position));
+	mat.entries[15] = 1.0f;
+	return mat;
+}
+
 mat4 perspective(float fovy,float aspect,float zNear,float zFar) {
 	float rFovy=fovy*A2R;
 	float tanHalfFovy=tanf(rFovy*0.5);
 
 	mat4 mat;
-	mat.entries[0]=1/(aspect * tanHalfFovy);
-	mat.entries[5]=1/tanHalfFovy;
+	mat.entries[0]=1.0/(aspect * tanHalfFovy);
+	mat.entries[5]=1.0/tanHalfFovy;
 	mat.entries[10]=-(zFar + zNear)/(zFar - zNear);
-	mat.entries[11]=-1;
-	mat.entries[14]=-2*zFar*zNear/(zFar - zNear);
-	mat.entries[15]=0;
+	mat.entries[11]=-1.0;
+	mat.entries[14]=-2.0*zFar*zNear/(zFar - zNear);
+	mat.entries[15]=0.0;
 	return mat;
 }
 

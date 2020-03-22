@@ -18,17 +18,23 @@ Sky::Sky(Scene* scene) {
 	skyNode->updateNode();
 	skyNode->prepareDrawcall();
 
-	/*
-	CubeMap* texture=new CubeMap("texture/sky/sky_ft.bmp","texture/sky/sky_bk.bmp",
-			"texture/sky/sky_dn.bmp","texture/sky/sky_up.bmp",
-			"texture/sky/sky_rt.bmp","texture/sky/sky_lf.bmp");
-	//*/
-	///*
-	CubeMap* texture = new CubeMap("texture/sky/xpos.bmp", "texture/sky/xneg.bmp",
-		"texture/sky/yneg.bmp", "texture/sky/ypos.bmp",
-		"texture/sky/zpos.bmp", "texture/sky/zneg.bmp");
-	//*/
+	
+	CubeMap* env = new CubeMap("texture/sky/xpos.bmp", "texture/sky/xneg.bmp",
+			"texture/sky/yneg.bmp", "texture/sky/ypos.bmp",
+			"texture/sky/zpos.bmp", "texture/sky/zneg.bmp");
+	AssetManager::assetManager->setEnvTexture(env);
+
+	CubeMap* texture = new CubeMap(1024, 1024);
 	AssetManager::assetManager->setSkyTexture(texture);
+	skyBuff = new FrameBuffer(texture);
+
+	mat4 proj = perspective(90.0, 1.0, 0.5, 100.0);
+	matPosx = proj * viewMat(vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 1.0f, 0.0f), vec3(-1.0f, 0.0f, 0.0f), vec3(0.0, 0.0, 0.0));
+	matNegx = proj * viewMat(vec3(0.0f, 0.0f, -1.0f), vec3(0.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(0.0, 0.0, 0.0));
+	matNegy = proj * viewMat(vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, -1.0f, 0.0f), vec3(0.0, 0.0, 0.0));
+	matPosy = proj * viewMat(vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0, 0.0, 0.0));
+	matNegz = proj * viewMat(vec3(-1.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f), vec3(0.0, 0.0, 0.0));
+	matPosz = proj * viewMat(vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0, 0.0, 0.0));
 
 	state = new RenderState();
 	state->cullMode = CULL_FRONT;
@@ -40,9 +46,42 @@ Sky::~Sky() {
 	delete mesh; mesh=NULL;
 	delete skyNode; skyNode=NULL;
 	delete state; state = NULL;
+	delete skyBuff; skyBuff = NULL;
+}
+
+void Sky::update(Render* render, const vec3& sunPos, Shader* shader) {
+	state->delay = 0;
+	state->shader = shader;
+	state->shader->setVector3("light", -sunPos.x, -sunPos.y, -sunPos.z);
+	skyBuff->useFbo();
+	
+	skyBuff->useCube(0);
+	render->setShaderMat4(shader, "viewProjectMatrix", matPosx);
+	render->draw(NULL, skyNode->drawcall, state);
+
+	skyBuff->useCube(1);
+	render->setShaderMat4(shader, "viewProjectMatrix", matNegx);
+	render->draw(NULL, skyNode->drawcall, state);
+
+	skyBuff->useCube(2);
+	render->setShaderMat4(shader, "viewProjectMatrix", matPosy);
+	render->draw(NULL, skyNode->drawcall, state);
+
+	skyBuff->useCube(3);
+	render->setShaderMat4(shader, "viewProjectMatrix", matNegy);
+	render->draw(NULL, skyNode->drawcall, state);
+
+	skyBuff->useCube(4);
+	render->setShaderMat4(shader, "viewProjectMatrix", matPosz);
+	render->draw(NULL, skyNode->drawcall, state);
+
+	skyBuff->useCube(5);
+	render->setShaderMat4(shader, "viewProjectMatrix", matNegz);
+	render->draw(NULL, skyNode->drawcall, state);
 }
 
 void Sky::draw(Render* render,Shader* shader,Camera* camera) {
+	state->delay = DELAY_FRAME;
 	state->shader = shader;
 	if (!shader->isTexBinded(AssetManager::assetManager->getSkyTexture()->hnd))
 		shader->setHandle64("texSky", AssetManager::assetManager->getSkyTexture()->hnd);

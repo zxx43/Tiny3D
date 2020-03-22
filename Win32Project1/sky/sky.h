@@ -17,14 +17,16 @@ class Scene;
 
 class Sky {
 private:
+	StaticNode* skyNode;
 	Sphere* mesh;
 	RenderState* state;
+	FrameBuffer* skyBuff;
+	mat4 matPosx, matNegx, matPosy, matNegy, matPosz, matNegz;
 public:
-	StaticNode* skyNode;
-
 	Sky(Scene* scene);
 	~Sky();
-
+public:
+	void update(Render* render, const vec3& sunPos, Shader* shader);
 	void draw(Render* render,Shader* shader,Camera* camera);
 };
 

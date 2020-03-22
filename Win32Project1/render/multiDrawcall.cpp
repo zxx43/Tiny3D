@@ -115,7 +115,7 @@ RenderBuffer* MultiDrawcall::createIndirects(MultiInstance* multi) {
 }
 
 void MultiDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
-	if (frame < DELAY_FRAME) frame++;
+	if (frame < state->delay) frame++;
 	else {
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 		dataBufferDraw->use();

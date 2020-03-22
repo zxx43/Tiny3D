@@ -10,6 +10,7 @@
 
 #include "../render/glheader.h"
 #include "../texture/texture2d.h"
+#include "../texture/cubemap.h"
 #include <vector>
 
 const GLenum ColorAttachments[] = { GL_COLOR_ATTACHMENT0_EXT, GL_COLOR_ATTACHMENT1_EXT , GL_COLOR_ATTACHMENT2_EXT,
@@ -36,6 +37,13 @@ public:
 	Texture2D* getColorBuffer(int n);
 	Texture2D* getDepthBuffer();
 	void use();
+private:
+	CubeMap* cubeBuffer;
+public:
+	FrameBuffer(const CubeMap* cube);
+	CubeMap* getCubeBuffer();
+	void useFbo();
+	void useCube(int i);
 };
 
 

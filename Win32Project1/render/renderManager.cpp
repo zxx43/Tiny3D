@@ -39,6 +39,7 @@ RenderManager::RenderManager(ConfigArg* cfg, Camera* view, float distance1, floa
 	reflectBuffer = NULL;
 	occluderDepth = NULL;
 	needResize = true;
+	updateSky();
 
 	grassDrawcall = NULL;
 }
@@ -70,6 +71,7 @@ void RenderManager::resize(float width, float height) {
 	if (occluderDepth) delete occluderDepth;
 	occluderDepth = new Texture2D(width, height, TEXTURE_TYPE_DEPTH, LOW_PRE, 1);
 	needResize = true;
+	updateSky();
 }
 
 void RenderManager::updateShadowCamera(Camera* mainCamera) {
@@ -78,6 +80,12 @@ void RenderManager::updateShadowCamera(Camera* mainCamera) {
 
 void RenderManager::updateMainLight() {
 	shadow->update(lightDir);
+}
+
+void RenderManager::updateSky() { 
+	needRefreshSky = true; 
+	udotl = vec3(0.0, 1.0, 0.0).DotProduct(-lightDir);
+	if (udotl < 0.0) udotl = 0.0;
 }
 
 void RenderManager::flushRenderQueues() {
@@ -141,6 +149,7 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	state->eyePos = &(scene->mainCamera->position);
 	state->cullMode = CULL_FRONT;
 	state->light = lightDir;
+	state->udotl = udotl;
 	state->time = scene->time;
 
 	Camera* mainCamera = scene->mainCamera;
@@ -254,6 +263,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	state->reset();
 	state->eyePos = &(scene->mainCamera->position);
 	state->light = lightDir;
+	state->udotl = udotl;
 	state->time = scene->time;
 	state->enableSsr = cfgs->ssr;
 	state->quality = cfgs->graphQuality;
@@ -320,6 +330,14 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	if (needResize) needResize = false;
 }
 
+void RenderManager::renderSkyTex(Render* render, Scene* scene) {
+	if (needRefreshSky && scene->skyBox) {
+		static Shader* atmoShader = render->findShader("atmos");
+		scene->skyBox->update(render, lightDir, atmoShader);
+		needRefreshSky = false;
+	}
+}
+
 void RenderManager::renderWater(Render* render, Scene* scene) {
 	static Shader* waterShader = render->findShader("water");
 	Camera* camera = scene->mainCamera;
@@ -327,6 +345,7 @@ void RenderManager::renderWater(Render* render, Scene* scene) {
 		state->reset();
 		state->eyePos = &(scene->mainCamera->position);
 		state->light = lightDir;
+		state->udotl = udotl;
 		state->time = scene->time;
 		state->enableSsr = cfgs->ssr;
 		state->waterPass = true;
@@ -348,6 +367,7 @@ void RenderManager::renderReflect(Render* render, Scene* scene) {
 				state->eyePos = &(scene->mainCamera->position);
 				state->cullMode = CULL_FRONT;
 				state->light = lightDir;
+				state->udotl = udotl;
 				state->shader = terrainShader;
 				
 				render->setShaderFloat(terrainShader, "isReflect", 1.0);
@@ -369,6 +389,7 @@ void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* scre
 	state->shader = deferredShader;
 	state->shadow = shadow;
 	state->light = lightDir;
+	state->udotl = udotl;
 	state->time = scene->time;
 	state->quality = cfgs->graphQuality;
 

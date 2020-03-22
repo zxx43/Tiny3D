@@ -20,6 +20,8 @@ private:
 	BmpImage* ynegImg;
 	BmpImage* zposImg;
 	BmpImage* znegImg;
+private:
+	int width, height;
 public:
 	unsigned int id;
 	u64 hnd;
@@ -31,7 +33,10 @@ public:
 	CubeMap(const char* xpos,const char* xneg,
 			const char* ypos,const char* yneg,
 			const char* zpos,const char* zneg);
+	CubeMap(int w, int h);
 	~CubeMap();
+	int getWidth() { return width; }
+	int getHeight() { return height; }
 };
 
 #endif /* CUBEMAP_H_ */
