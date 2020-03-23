@@ -39,6 +39,7 @@ public:
 	void setView(const vec3& pos, const vec3& dir);
 	void updateLook(const vec3& pos, const vec3& dir);
 	void updateMoveable(uint transType);
+	void forceRefresh() { needRefresh = true; }
 	void updateFrustum();
 
 	void turnY(int ud);

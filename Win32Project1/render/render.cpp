@@ -315,6 +315,17 @@ void Render::setFrameBuffer(FrameBuffer* framebuffer) {
 	}
 }
 
+void Render::useFrameBuffer(FrameBuffer* framebuffer) {
+	if (framebuffer) {
+		currentFrame = framebuffer;
+		currentFrame->useFbo();
+	}
+}
+
+void Render::useFrameCube(int i) {
+	if (currentFrame) currentFrame->useCube(i);
+}
+
 void Render::setColorMask(bool r, bool g, bool b, bool a) {
 	glColorMask(r, g, b, a);
 }

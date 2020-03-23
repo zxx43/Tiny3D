@@ -31,12 +31,11 @@ AssetManager::~AssetManager() {
 		delete iter->second;
 	animations.clear();
 	delete frames;
-	if (texBld) delete texBld;
-	texBld = NULL;
-	if (skyTexture) delete skyTexture; skyTexture = NULL;
-	if (envTexture) delete envTexture; envTexture = NULL;
-	if (heightTexture) delete heightTexture;
-	heightTexture = NULL;
+	if (texBld) delete texBld; texBld = NULL;
+	if (heightTexture) delete heightTexture; heightTexture = NULL;
+	if (skyTexture) delete skyTexture;
+	if (envTexture && envTexture != skyTexture) delete envTexture;
+	skyTexture = NULL; envTexture = NULL;
 }
 
 void AssetManager::addTextureBindless(const char* name, bool srgb) {

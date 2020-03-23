@@ -61,6 +61,8 @@ public:
 	void draw(Camera* camera, Drawcall* drawcall, RenderState* state);
 	void finishDraw();
 	void setFrameBuffer(FrameBuffer* framebuffer);
+	void useFrameBuffer(FrameBuffer* framebuffer);
+	void useFrameCube(int i);
 	FrameBuffer* getFrameBuffer() { return currentFrame; }
 	void setColorMask(bool r, bool g, bool b, bool a);
 	void useTexture(uint type, uint slot, uint texid);

@@ -86,6 +86,7 @@ void Scene::updateReflectCamera() {
 		reflectCamera->lookDir.x = mainCamera->lookDir.x;
 		reflectCamera->lookDir.y = -mainCamera->lookDir.y;
 		reflectCamera->lookDir.z = mainCamera->lookDir.z;
+		reflectCamera->forceRefresh();
 		reflectCamera->updateFrustum();
 	}
 }

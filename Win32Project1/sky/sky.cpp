@@ -27,6 +27,9 @@ Sky::Sky(Scene* scene) {
 	CubeMap* texture = new CubeMap(1024, 1024);
 	AssetManager::assetManager->setSkyTexture(texture);
 	skyBuff = new FrameBuffer(texture);
+	
+	//AssetManager::assetManager->setSkyTexture(env);
+	//skyBuff = NULL;
 
 	mat4 proj = perspective(90.0, 1.0, 0.5, 100.0);
 	matPosx = proj * viewMat(vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 1.0f, 0.0f), vec3(-1.0f, 0.0f, 0.0f), vec3(0.0, 0.0, 0.0));
@@ -50,32 +53,33 @@ Sky::~Sky() {
 }
 
 void Sky::update(Render* render, const vec3& sunPos, Shader* shader) {
+	if (!skyBuff) return;
 	state->delay = 0;
 	state->shader = shader;
 	state->shader->setVector3("light", -sunPos.x, -sunPos.y, -sunPos.z);
-	skyBuff->useFbo();
+	render->useFrameBuffer(skyBuff);
 	
-	skyBuff->useCube(0);
+	render->useFrameCube(0);
 	render->setShaderMat4(shader, "viewProjectMatrix", matPosx);
 	render->draw(NULL, skyNode->drawcall, state);
 
-	skyBuff->useCube(1);
+	render->useFrameCube(1);
 	render->setShaderMat4(shader, "viewProjectMatrix", matNegx);
 	render->draw(NULL, skyNode->drawcall, state);
 
-	skyBuff->useCube(2);
+	render->useFrameCube(2);
 	render->setShaderMat4(shader, "viewProjectMatrix", matPosy);
 	render->draw(NULL, skyNode->drawcall, state);
 
-	skyBuff->useCube(3);
+	render->useFrameCube(3);
 	render->setShaderMat4(shader, "viewProjectMatrix", matNegy);
 	render->draw(NULL, skyNode->drawcall, state);
 
-	skyBuff->useCube(4);
+	render->useFrameCube(4);
 	render->setShaderMat4(shader, "viewProjectMatrix", matPosz);
 	render->draw(NULL, skyNode->drawcall, state);
 
-	skyBuff->useCube(5);
+	render->useFrameCube(5);
 	render->setShaderMat4(shader, "viewProjectMatrix", matNegz);
 	render->draw(NULL, skyNode->drawcall, state);
 }
