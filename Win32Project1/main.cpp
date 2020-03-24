@@ -52,11 +52,6 @@ void ResizeWindow(int width,int height) {
 }
 
 void DrawWindow() {
-	currentTime = timeGetTime();
-	app->setFps(1000.0 / (currentTime - lastTime));
-	lastTime = currentTime;
-	velocity = D_DISTANCE * 1000.0 / app->getFps();
-
 	if (!app->cfgs->dualthread) {
 		app->act(startTime, timeGetTime(), velocity);
 		app->prepare(false);
@@ -65,6 +60,11 @@ void DrawWindow() {
 		dataPrepared = true;
 		ReleaseMutex(mutex);
 	}
+
+	currentTime = timeGetTime();
+	app->setFps(1000.0 / (currentTime - lastTime));
+	lastTime = currentTime;
+	velocity = D_DISTANCE * 1000.0 / app->getFps();
 
 	if (app->pressed || app->input->getControl() >= 0) {
 		GetCursorPos(&mPoint);
@@ -76,7 +76,6 @@ void DrawWindow() {
 	}
 
 	app->keyAct(velocity);
-	app->animate(velocity);
 	app->draw();
 
 	if (app->cfgs->dualthread) {

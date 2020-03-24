@@ -280,7 +280,7 @@ void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camer
 							Animation* anim = animNode->getObject()->animation;
 							AnimationData* animData = queue->animationQueue[anim];
 							animData->addAnimObject(animNode->getObject());
-							//animNode->animate(scene->velocity);
+							animNode->animate(scene->velocity);
 						}
 					} else if (child->type == TYPE_STATIC) {
 						if (!((StaticNode*)child)->isDynamicBatch())
