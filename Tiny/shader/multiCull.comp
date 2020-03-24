@@ -34,8 +34,11 @@ layout(binding = 2, std430) buffer OutPosition {
 #endif
 
 layout(binding = 0) uniform sampler2D texDepth;
+layout(bindless_sampler) uniform sampler2D roadTex;
 uniform mat4 viewProjectMatrix;
 uniform uint pass;
+uniform vec3 mapTrans, mapScl;
+uniform vec4 mapInfo;
 
 void main() {
 	uint curIndex = gl_GlobalInvocationID.x + pass * MAX_DISPATCH;
@@ -45,6 +48,10 @@ void main() {
 	vec3 translate = transform.trans.xyz;
 	mat4 outMat;
 #ifndef AnimPass
+	vec2 coord = (translate.xz - mapTrans.xz) / (mapScl.xz * mapInfo.zw);
+	vec4 roadMask = texture(roadTex, coord);
+	if(roadMask.r > 0.01) return;
+
 	if(meshid.z >= 0)
 		outMat = mat4(transform.trans, transform.rotat, transform.bound, transform.mesh);
 	else {

@@ -37,11 +37,18 @@ struct RenderState {
 	Shader* shaderMulti;
 	Shader* shaderFlush;
 
+	vec3 mapTrans, mapScl;
+	vec4 mapInfo;
+
 	RenderState() {
 		reset();
 		light = vec3(0, 0, 0);
 		udotl = 0.0;
 		eyePos = NULL;
+
+		mapTrans = vec3(0, 0, 0);
+		mapScl = vec3(0, 0, 0);
+		mapInfo = vec4(0, 0, 0, 0);
 	}
 	RenderState(const RenderState& rhs) {
 		copy(&rhs);
@@ -78,6 +85,9 @@ struct RenderState {
 		shaderCompute = rhs->shaderCompute;
 		shaderMulti = rhs->shaderMulti;
 		shaderFlush = rhs->shaderFlush;
+		mapTrans = rhs->mapTrans;
+		mapScl = rhs->mapScl;
+		mapInfo = rhs->mapInfo;
 	}
 	void reset() {
 		enableCull = true;

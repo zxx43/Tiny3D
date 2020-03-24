@@ -217,6 +217,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 						state->shaderCompute->setVector3v("eyePos", *(state->eyePos));
 						state->shaderCompute->setMatrix4("viewMatrix", camera->viewMatrix);
 						state->shaderCompute->setHandle64("distortionTex", AssetManager::assetManager->getDistortionHnd());
+						state->shaderCompute->setHandle64("roadTex", AssetManager::assetManager->getRoadHnd());
 						state->shaderCompute->setFloat("time", state->time * 0.025);
 						state->shaderCompute->setFloat("quality", state->quality);
 					}

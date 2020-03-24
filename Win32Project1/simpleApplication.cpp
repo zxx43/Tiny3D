@@ -319,6 +319,7 @@ void SimpleApplication::initScene() {
 	assetMgr->addTextureBindless("ground_g.bmp", true);
 	assetMgr->addTextureBindless("ground_r.bmp", true);
 	assetMgr->addTextureBindless("ground_s.bmp", true);
+	assetMgr->addTextureBindless("ground_s2.bmp", true);
 	assetMgr->addTextureBindless("rnormal.bmp", false);
 	assetMgr->addTextureBindless("sand.bmp", true);
 	assetMgr->addTextureBindless("tree.bmp", true);
@@ -334,6 +335,7 @@ void SimpleApplication::initScene() {
 	assetMgr->addTextureBindless("grass1-albedo3.bmp", true);
 	assetMgr->addTextureBindless("grass1-normal1-dx.bmp", false);
 	assetMgr->addDistortionTex("distortion.bmp");
+	assetMgr->addRoadTex("road.bmp");
 	assetMgr->createHeightTex();
 
 	// Create materials
@@ -364,7 +366,7 @@ void SimpleApplication::initScene() {
 	terrainMat->prepared = true;
 	terrainMat->texids.x = assetMgr->findTextureBindless("grass1-albedo3.bmp");
 	terrainMat->texids.y = assetMgr->findTextureBindless("ground_r.bmp");
-	terrainMat->texids.z = assetMgr->findTextureBindless("ground_s.bmp");
+	terrainMat->texids.z = assetMgr->findTextureBindless("ground_s2.bmp");
 	terrainMat->texids.w = assetMgr->findTextureBindless("grass1-normal1-dx.bmp");
 	mtlMgr->add(terrainMat);
 	

@@ -3,7 +3,7 @@
 
 layout(local_size_x = WORKGROUP_SIZE, local_size_y = WORKGROUP_SIZE) in;
 
-layout(bindless_sampler) uniform sampler2D distortionTex;
+layout(bindless_sampler) uniform sampler2D distortionTex, roadTex;
 layout(binding = 0) uniform sampler2D texDepth;
 uniform vec3 translate, scale;
 uniform vec4 mapInfo;
@@ -72,6 +72,8 @@ void main() {
 	
 	vec2 coord = (worldPose.xz - translate.xz) / (scale.xz * mapInfo.zw);
 	if(coord.x < 0.01 || coord.y < 0.01 || coord.x > 0.99 || coord.y > 0.99) return;
+	vec4 roadMask = texture(roadTex, coord);
+	if(roadMask.r > 0.001) return;
 	
 	vec2 dRand = vec2(random(worldPose, 0.1), random(worldPose, 0.2));
 	worldPose.xz += dRand * spread;

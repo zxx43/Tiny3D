@@ -1,5 +1,6 @@
 #include "multiDrawcall.h"
 #include "../instance/multiInstance.h"
+#include "../assets/assetManager.h"
 #include "../render/render.h"
 
 // Attribute slots
@@ -195,6 +196,12 @@ void MultiDrawcall::prepareRenderData(Render* render, RenderState* state) {
 		indirectBufferPrepare->setShaderBase(IndirectBillIndex, 5);
 	}
 	render->useShader(state->shaderMulti);
+
+	state->shaderMulti->setVector3v("mapTrans", state->mapTrans);
+	state->shaderMulti->setVector3v("mapScl", state->mapScl);
+	state->shaderMulti->setVector4v("mapInfo", state->mapInfo);
+	state->shaderMulti->setHandle64("roadTex", AssetManager::assetManager->getRoadHnd());
+
 	int dispatch = objectCount > MAX_DISPATCH ? MAX_DISPATCH : objectCount;
 	render->setShaderUint(state->shaderMulti, "pass", 0);
 	glDispatchCompute(dispatch, 1, 1);

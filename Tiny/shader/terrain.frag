@@ -3,6 +3,7 @@
 layout(early_fragment_tests) in;
 
 layout(bindless_sampler) uniform sampler2D texBlds[MAX_TEX];
+layout(bindless_sampler) uniform sampler2D roadTex;
 uniform float waterHeight, isReflect;
 
 in vec2 vTexcoord;
@@ -11,7 +12,7 @@ flat in vec4 vTexid;
 flat in vec3 vColor;
 in vec3 vNormal;
 in mat3 vTBN;
-in float worldHeight;
+in vec4 vWorldVert;
 
 layout (location = 0) out vec4 FragTex;
 layout (location = 1) out vec4 FragMat;
@@ -19,18 +20,18 @@ layout (location = 2) out vec4 FragNormalGrass;
 layout (location = 3) out vec4 FragRoughMetal;
 
 void main() {
-	if(isReflect > 0.1 && worldHeight < waterHeight - 4.0)
+	if(isReflect > 0.1 && vWorldVert.y < waterHeight - 4.0)
 		discard;
 
 	vec4 tex1 = texture(texBlds[int(vTexid.x)], vTexcoord);
 	vec4 tex2 = texture(texBlds[int(vTexid.y)], vTexcoord);
 	vec4 tex3 = texture(texBlds[int(vTexid.z)], vTexcoord);
 
-	float blendPer = smoothstep(150.0, 250.0, worldHeight);
+	float blendPer = smoothstep(150.0, 250.0, vWorldVert.y);
 	vec4 texColor = mix(tex1, tex2, blendPer);
 
-	blendPer = smoothstep(0.0, 70.0, worldHeight);
-	texColor = mix(tex3, texColor, blendPer);
+	blendPer = texture(roadTex, vWorldVert.xz).x;
+	texColor = mix(texColor, tex3, blendPer);
 
 	vec3 normal = vNormal;
 	if(vTexid.w >= 0.0) {

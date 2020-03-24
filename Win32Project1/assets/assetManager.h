@@ -24,7 +24,7 @@ public:
 	CubeMap* envTexture;
 	Texture2D* reflectTexture;
 	Texture2D* heightTexture;
-	int distortionTex;
+	int distortionTex, roadTex;
 private:
 	AssetManager();
 	~AssetManager();
@@ -44,6 +44,9 @@ public:
 	void addDistortionTex(const char* texName);
 	int getDistortionTex() { return distortionTex; }
 	u64 getDistortionHnd() { return texBld->getHnds()[distortionTex]; }
+	void addRoadTex(const char* texName);
+	int getRoadTex() { return roadTex; }
+	u64 getRoadHnd() { return texBld->getHnds()[roadTex]; }
 	void createHeightTex();
 	Texture2D* getHeightTex() { return heightTexture; }
 };
