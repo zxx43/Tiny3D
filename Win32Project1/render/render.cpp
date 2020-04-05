@@ -199,7 +199,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 	
 	if (camera) {
 		if (state->pass < DEFERRED_PASS) {
-			if (!state->skyPass) {
+			if (!state->skyPass && !state->atmoPass) {
 				shader->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
 				if (state->tess && state->grassPass) {
 					shader->setFloat("time", state->time * 0.025);
@@ -223,8 +223,10 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 					}
 				}
 
-				if (state->shaderMulti) 
+				if (state->shaderMulti) {
 					state->shaderMulti->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
+					state->shaderMulti->setHandle64("roadTex", AssetManager::assetManager->getRoadHnd());
+				}
 
 				// Billboard drawcall
 				if (drawcall->getType() == MULTI_DC) {
@@ -265,9 +267,13 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 						!shader->isTexBinded(AssetManager::assetManager->getReflectTexture()->hnd))
 							shader->setHandle64("texRef", AssetManager::assetManager->getReflectTexture()->hnd);
 				}
-			} else {
+			} else if (state->skyPass) {
 				shader->setMatrix4("viewMatrix", camera->viewMatrix);
 				shader->setMatrix4("projectMatrix", camera->projectMatrix);
+				if (!shader->isTexBinded(AssetManager::assetManager->getSkyTexture()->hnd))
+					shader->setHandle64("texSky", AssetManager::assetManager->getSkyTexture()->hnd);
+			} else if (state->atmoPass) {
+
 			}
 		} else if (state->pass == DEFERRED_PASS) {
 			shader->setMatrix4("invViewProjMatrix", camera->invViewProjectMatrix);

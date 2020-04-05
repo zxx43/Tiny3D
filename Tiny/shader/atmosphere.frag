@@ -11,7 +11,7 @@ const vec3 RlhCof = vec3(5.5e-6, 13.0e-6, 22.4e-6);
 void main() {
 	vec3 color = atmosphere(
         normalize(vViewDir),            // normalized ray direction
-        vec3(0.0,6376e3,0.0),               // ray origin
+        vec3(0.0,6378e3,0.0),               // ray origin
         normalize(light),                        // position of the sun
         22.0,                           // intensity of the sun
         6371.0e3,                         // radius of the planet in meters

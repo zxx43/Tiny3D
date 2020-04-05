@@ -23,10 +23,11 @@ private:
 	ArrayIndirect *indirectBuf, *readBuf;
 	int channelCount;
 	BufferData* exData;
+	int maxCount, dispatchCount;
 private:
 	RenderBuffer* createBuffers(int objCount);
 public:
-	ComputeDrawcall(BufferData* exBuff);
+	ComputeDrawcall(BufferData* exBuff, int max);
 	virtual ~ComputeDrawcall();
 	virtual void draw(Render* render, RenderState* state, Shader* shader);
 	void update();

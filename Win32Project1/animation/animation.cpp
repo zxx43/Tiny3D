@@ -184,6 +184,7 @@ void Animation::loadMaterials() {
 		aiGetMaterialColor(mat, AI_MATKEY_COLOR_AMBIENT, &ambent);
 		aiGetMaterialColor(mat, AI_MATKEY_COLOR_DIFFUSE, &diffuse);
 		aiGetMaterialColor(mat, AI_MATKEY_COLOR_SPECULAR, &specular);
+		if (ambent.r < 0.2) ambent.r = 0.2;
 		mtl->ambient.x = ambent.r; mtl->ambient.y = ambent.g; mtl->ambient.z = ambent.b;
 		mtl->diffuse.x = diffuse.r; mtl->diffuse.y = diffuse.g; mtl->diffuse.z = diffuse.b;
 		mtl->specular.x = specular.r; mtl->specular.y = specular.g; mtl->specular.z = specular.b;

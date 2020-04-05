@@ -1,6 +1,5 @@
 #include "multiDrawcall.h"
 #include "../instance/multiInstance.h"
-#include "../assets/assetManager.h"
 #include "../render/render.h"
 
 // Attribute slots
@@ -163,7 +162,6 @@ void MultiDrawcall::update(Render* render, RenderState* state) {
 	multiRef->updateTransform();
 	objectCount = multiRef->instanceCount;
 	dataBufferPrepare->updateBufferData(PositionIndex, objectCount, (void*)(multiRef->transforms));
-	//dataBufferPrepare->updateBufferMap(GL_SHADER_STORAGE_BUFFER, PositionIndex, objectCount, (void*)multiRef->transforms);
 	updateIndirect(render, state);
 	prepareRenderData(render, state);
 }
@@ -195,12 +193,11 @@ void MultiDrawcall::prepareRenderData(Render* render, RenderState* state) {
 		indirectBufferPrepare->setShaderBase(IndirectSingleIndex, 4);
 		indirectBufferPrepare->setShaderBase(IndirectBillIndex, 5);
 	}
-	render->useShader(state->shaderMulti);
 
-	state->shaderMulti->setVector3v("mapTrans", state->mapTrans);
-	state->shaderMulti->setVector3v("mapScl", state->mapScl);
-	state->shaderMulti->setVector4v("mapInfo", state->mapInfo);
-	state->shaderMulti->setHandle64("roadTex", AssetManager::assetManager->getRoadHnd());
+	render->useShader(state->shaderMulti);
+	render->setShaderVec3v(state->shaderMulti, "mapTrans", state->mapTrans);
+	render->setShaderVec3v(state->shaderMulti, "mapScl", state->mapScl);
+	render->setShaderVec4v(state->shaderMulti, "mapInfo", state->mapInfo);
 
 	int dispatch = objectCount > MAX_DISPATCH ? MAX_DISPATCH : objectCount;
 	render->setShaderUint(state->shaderMulti, "pass", 0);

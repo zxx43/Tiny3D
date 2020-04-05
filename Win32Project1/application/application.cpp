@@ -26,6 +26,7 @@ Application::Application() {
 
 	willExit = false;
 	pressed = false;
+	showMouse();
 	scene = NULL;
 	render = NULL;
 	input = NULL;
@@ -117,4 +118,8 @@ void Application::keyDown(int key) {
 
 void Application::keyUp(int key) {
 	input->keyUp(key);
+}
+
+void Application::setFps(float fv) {
+	fps = fv; 
 }

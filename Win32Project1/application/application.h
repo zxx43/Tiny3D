@@ -8,6 +8,8 @@
 #include "../assets/assetManager.h"
 
 class Application {
+private:
+	bool mouseShow;
 public:
 	Config* config;
 	Scene* scene;
@@ -37,8 +39,11 @@ public:
 	virtual void resize(int width, int height);
 	virtual void keyDown(int key);
 	virtual void keyUp(int key);
-	void setFps(float fv) { fps = fv; }
+	void setFps(float fv);
 	float getFps() { return fps; }
+	void showMouse() { mouseShow = true; }
+	void hideMouse() { mouseShow = false; }
+	bool isMouseShow() { return mouseShow; }
 };
 
 #endif

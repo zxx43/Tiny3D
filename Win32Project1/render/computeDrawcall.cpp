@@ -12,9 +12,7 @@ const uint ExIndex = 1;
 const uint PositionOutIndex = 2;
 const uint IndirectBufIndex = 3;
 
-const uint MaxSize = 768;
-
-ComputeDrawcall::ComputeDrawcall(BufferData* exBuff) :Drawcall() {
+ComputeDrawcall::ComputeDrawcall(BufferData* exBuff, int max) :Drawcall() {
 	setType(COMPUTE_DC);
 	channelCount = 3;
 
@@ -34,7 +32,9 @@ ComputeDrawcall::ComputeDrawcall(BufferData* exBuff) :Drawcall() {
 	Float2Halfv(buf, vertBuf, 6);
 
 	exData = exBuff;
-	dataBuffer = createBuffers(MaxSize * MaxSize);
+	maxCount = max;
+	dispatchCount = maxCount / COMP_GROUPE_SIZE;
+	dataBuffer = createBuffers(maxCount * maxCount);
 }
 
 ComputeDrawcall::~ComputeDrawcall() {
@@ -64,10 +64,9 @@ void ComputeDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
 	dataBuffer->setShaderBase(IndirectBufIndex, 3);
 
 	render->useShader(state->shaderCompute);
-	state->shaderCompute->setFloat("fullSize", MaxSize);
+	state->shaderCompute->setFloat("fullSize", maxCount);
 
-	static int dispatchSize = MaxSize / COMP_GROUPE_SIZE;
-	glDispatchCompute(dispatchSize, dispatchSize, 1);
+	glDispatchCompute(dispatchCount, dispatchCount, 1);
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT);
 
 	render->useShader(shader);

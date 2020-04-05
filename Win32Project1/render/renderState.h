@@ -15,6 +15,7 @@ struct RenderState {
 	float alphaThreshold;
 	bool lightEffect;
 	bool skyPass;
+	bool atmoPass;
 	bool waterPass;
 	bool grassPass;
 	bool ssrPass;
@@ -64,6 +65,7 @@ struct RenderState {
 		alphaThreshold = rhs->alphaThreshold;
 		lightEffect = rhs->lightEffect;
 		skyPass = rhs->skyPass;
+		atmoPass = rhs->atmoPass;
 		waterPass = rhs->waterPass;
 		grassPass = rhs->grassPass;
 		ssrPass = rhs->ssrPass;
@@ -100,6 +102,7 @@ struct RenderState {
 		alphaThreshold = 0;
 		lightEffect = true;
 		skyPass = false;
+		atmoPass = false;
 		waterPass = false;
 		grassPass = false;
 		ssrPass = false;

@@ -24,14 +24,13 @@ Sky::Sky(Scene* scene) {
 			"texture/sky/zpos.bmp", "texture/sky/zneg.bmp");
 	AssetManager::assetManager->setEnvTexture(env);
 
-	CubeMap* texture = new CubeMap(1024, 1024);
+	CubeMap* texture = new CubeMap(512, 512);
 	AssetManager::assetManager->setSkyTexture(texture);
 	skyBuff = new FrameBuffer(texture);
-	
 	//AssetManager::assetManager->setSkyTexture(env);
 	//skyBuff = NULL;
 
-	mat4 proj = perspective(90.0, 1.0, 0.5, 100.0);
+	mat4 proj = perspective(90.0, 1.0, 0.5, 20.0);
 	matPosx = proj * viewMat(vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 1.0f, 0.0f), vec3(-1.0f, 0.0f, 0.0f), vec3(0.0, 0.0, 0.0));
 	matNegx = proj * viewMat(vec3(0.0f, 0.0f, -1.0f), vec3(0.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(0.0, 0.0, 0.0));
 	matNegy = proj * viewMat(vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, -1.0f, 0.0f), vec3(0.0, 0.0, 0.0));
@@ -42,7 +41,6 @@ Sky::Sky(Scene* scene) {
 	state = new RenderState();
 	state->cullMode = CULL_FRONT;
 	state->lightEffect = false;
-	state->skyPass = true;
 }
 
 Sky::~Sky() {
@@ -55,6 +53,8 @@ Sky::~Sky() {
 void Sky::update(Render* render, const vec3& sunPos, Shader* shader) {
 	if (!skyBuff) return;
 	state->delay = 0;
+	state->skyPass = false;
+	state->atmoPass = true;
 	state->shader = shader;
 	state->shader->setVector3("light", -sunPos.x, -sunPos.y, -sunPos.z);
 	render->useFrameBuffer(skyBuff);
@@ -87,8 +87,8 @@ void Sky::update(Render* render, const vec3& sunPos, Shader* shader) {
 void Sky::draw(Render* render,Shader* shader,Camera* camera) {
 	state->delay = DELAY_FRAME;
 	state->shader = shader;
-	if (!shader->isTexBinded(AssetManager::assetManager->getSkyTexture()->hnd))
-		shader->setHandle64("texSky", AssetManager::assetManager->getSkyTexture()->hnd);
+	state->skyPass = true;
+	state->atmoPass = false;
 	render->draw(camera,skyNode->drawcall,state);
 }
 

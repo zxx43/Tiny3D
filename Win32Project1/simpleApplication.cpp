@@ -283,6 +283,7 @@ void SimpleApplication::act(long startTime, long currentTime, float velocity) {
 		time++;
 	}
 	//*/
+
 	scene->updateNodes();
 	if (!cfgs->ssr) scene->updateReflectCamera();
 }
@@ -309,6 +310,7 @@ void SimpleApplication::initScene() {
 	// Load animations
 	assetMgr->addAnimation("ninja", new Animation("models/ninja.mesh"));
 	assetMgr->addAnimation("army", new Animation("models/ArmyPilot.dae"));
+	assetMgr->addAnimation("dog", new Animation("models/Pes.fbx"));
 	assetMgr->initFrames();
 
 	// Load textures
@@ -648,7 +650,7 @@ void SimpleApplication::initScene() {
 	animNode2->getObject()->setPosition(0, -5, -1);
 	animNode2->translateNode(40, 0, 40);
 	//animNode2->rotateNodeObject(0, 45, 0);
-	animNode2->getObject()->setDefaultAnim(11);
+	animNode2->getObject()->setDefaultAnim(10);
 	AnimationNode* animNode3 = new AnimationNode(vec3(5, 10, 5));
 	animNode3->setAnimation(scene, animations["ninja"]);
 	animNode3->getObject()->setSize(0.05, 0.05, 0.05);
@@ -660,8 +662,13 @@ void SimpleApplication::initScene() {
 	animNode4->getObject()->setSize(0.05, 0.05, 0.05);
 	animNode4->getObject()->setPosition(0, -5, -1);
 	animNode4->translateNode(40, 0, 40);
-	//animNode4->rotateNodeObject(0, 270, 0);
 	animNode4->getObject()->setDefaultAnim(12);
+	AnimationNode* animNode5 = new AnimationNode(vec3(7.5, 7.5, 10.5));
+	animNode5->setAnimation(scene, animations["dog"]);
+	animNode5->getObject()->setSize(0.075, 0.075, 0.075);
+	animNode5->getObject()->setPosition(0, -2.6, -1.5);
+	animNode5->translateNode(30, 0, 20);
+	animNode5->rotateNodeObject(0, 90, 0);
 
 	Node* animNode = new StaticNode(vec3(0, 0, 0));
 	animNode->attachChild(animNode1);
@@ -670,6 +677,7 @@ void SimpleApplication::initScene() {
 	Node* animNodeSub = new StaticNode(vec3(0, 0, 0));
 	animNodeSub->attachChild(animNode3);
 	animNodeSub->attachChild(animNode4);
+	animNodeSub->attachChild(animNode5);
 	scene->animationRoot->attachChild(animNodeSub);
 
 	animNode->translateNode(0, 10, 0);

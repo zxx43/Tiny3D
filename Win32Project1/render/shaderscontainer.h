@@ -12,7 +12,7 @@
 
 #define WORKGROUPE_SIZE 1
 #define COMP_GROUPE_SIZE 16
-#define MAX_DISPATCH 2048
+#define MAX_DISPATCH 1024
 
 void SetupShaders(ShaderManager* shaders);
 
