@@ -11,12 +11,15 @@ Application::Application() {
 	config->getInt("height", cfgs->height);
 	config->getBool("fullscreen", cfgs->fullscreen);
 	config->getBool("dualthread", cfgs->dualthread);
+	config->getBool("dualqueue", cfgs->dualqueue);
+	config->getInt("smoothframe", cfgs->smoothframe);
 	config->getInt("quality", cfgs->graphQuality);
 	config->getInt("shadow", cfgs->shadowQuality);
 	config->getBool("dof", cfgs->dof);
 	config->getBool("fxaa", cfgs->fxaa);
 	config->getBool("ssr", cfgs->ssr);
 	config->getBool("bloom", cfgs->bloom);
+	config->getBool("dynsky", cfgs->dynsky);
 	config->getBool("cartoon", cfgs->cartoon);
 	config->getBool("debug", cfgs->debug);
 

@@ -20,10 +20,9 @@ RenderQueue::RenderQueue(int type, float midDis, float lowDis) {
 	batchData = NULL;
 	midDistSqr = powf(midDis, 2);
 	lowDistSqr = powf(lowDis, 2);
-	dual = true;
 	shadowLevel = 0;
 	firstFlush = true;
-	dualInstances = true;
+	cfgArgs = NULL;
 }
 
 RenderQueue::~RenderQueue() {
@@ -44,10 +43,6 @@ RenderQueue::~RenderQueue() {
 	for (itAnim = animationQueue.begin(); itAnim != animationQueue.end(); ++itAnim)
 		delete itAnim->second;
 	animationQueue.clear();
-}
-
-void RenderQueue::setDual(bool dual) {
-	this->dual = dual;
 }
 
 void RenderQueue::push(Node* node) {
@@ -133,7 +128,7 @@ void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState
 			pushDatasToInstance(scene, data, false);
 			Instance* instance = data->instance;
 			if (instance) {
-				if (!dualInstances) {
+				if (!cfgArgs->dualqueue) {
 					if (!multiInstance) multiInstance = new MultiInstance();
 					if (!multiInstance->inited()) multiInstance->add(instance);
 				}
@@ -280,7 +275,8 @@ void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camer
 							Animation* anim = animNode->getObject()->animation;
 							AnimationData* animData = queue->animationQueue[anim];
 							animData->addAnimObject(animNode->getObject());
-							//animNode->animate(scene->velocity);
+							if(!queue->cfgArgs->dualthread)
+								animNode->animate(scene->velocity);
 						}
 					} else if (child->type == TYPE_STATIC) {
 						if (!((StaticNode*)child)->isDynamicBatch())

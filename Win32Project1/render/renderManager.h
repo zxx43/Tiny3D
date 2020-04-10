@@ -15,11 +15,11 @@
 
 struct Renderable {
 	std::vector<RenderQueue*> queues;
-	Renderable(float midDis, float lowDis, bool dual) {
+	Renderable(float midDis, float lowDis, ConfigArg* cfg) {
 		queues.clear();
 		for (uint i = 0; i < 8; i++) {
 			queues.push_back(new RenderQueue(i, midDis, lowDis));
-			queues[i]->setDual(dual);
+			queues[i]->setCfg(cfg);
 		}
 		queues[QUEUE_STATIC_SN]->shadowLevel = 1;
 		queues[QUEUE_STATIC_SM]->shadowLevel = 2;

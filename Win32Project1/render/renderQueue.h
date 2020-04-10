@@ -62,6 +62,7 @@ private:
 	void pushDatasToInstance(Scene* scene, InstanceData* data, bool copy);
 	void pushDatasToBatch(BatchData* data, int pass);
 public:
+	ConfigArg* cfgArgs;
 	int queueType;
 	float midDistSqr, lowDistSqr;
 	std::map<Mesh*, InstanceData*> instanceQueue;
@@ -69,9 +70,7 @@ public:
 	MultiInstance* multiInstance;
 	MultiInstance* billboards;
 	MultiInstance* animations;
-	bool dualInstances;
 	BatchData* batchData;
-	bool dual;
 	int shadowLevel;
 	bool firstFlush;
 public:
@@ -81,10 +80,10 @@ public:
 	void pushAnim(Node* node);
 	void flush();
 	void deleteInstance(InstanceData* data);
-	void setDual(bool dual);
 	void draw(Scene* scene, Camera* camera, Render* render, RenderState* state);
 	void animate(float velocity);
 	Mesh* queryLodMesh(Object* object, const vec3& eye);
+	void setCfg(ConfigArg* cfg) { cfgArgs = cfg; }
 };
 
 void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camera, Camera* mainCamera);

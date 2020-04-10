@@ -19,6 +19,7 @@ HANDLE mutex = NULL;
 void InitMutex();
 void DeleteMutex();
 DWORD currentTime = 0, lastTime = 0, startTime = 0;
+CirQueue<float>* dTimes = NULL;
 float velocity = 0.0;
 DWORD screenLeft, screenTop;
 int screenHalfX, screenHalfY;
@@ -45,6 +46,7 @@ void SwitchMouse() {
 }
 
 void KillWindow() {
+	if (dTimes) delete dTimes;
 	DeleteMutex();
 	ReleaseThreads();
 	ReleaseApplication();
@@ -66,35 +68,38 @@ void DrawWindow() {
 	if (!app->cfgs->dualthread) {
 		app->act(startTime, timeGetTime(), velocity);
 		app->prepare(false);
-	}
-	else {
+	} else {
 		WaitForSingleObject(mutex, INFINITE);
 		dataPrepared = true;
-		ReleaseMutex(mutex);
 	}
 
-	app->draw();
-
 	currentTime = timeGetTime();
-	DWORD dTime = (currentTime - lastTime);
-	app->setFps(1000.0f / dTime);
+	float dTime = (float)(currentTime - lastTime);
 	lastTime = currentTime;
+	if (app->cfgs->dualthread) {
+		dTimes->push(dTime);
+		float dSum = 0.0;
+		for (int i = 0; i < dTimes->size; ++i)
+			dSum += dTimes->data[i];
+		dTime = dSum / dTimes->size;
+	}
+	app->setFps(1000.0f / dTime);
 	velocity = D_DISTANCE * dTime;
 
 	if (app->pressed || app->input->getControl() >= 0) {
 		GetCursorPos(&mPoint);
-		GetWindowRect(hWnd, &winRect);
-		centerX = winRect.left + (LONG)(app->windowWidth >> 1);
-		centerY = winRect.top + (LONG)(app->windowHeight >> 1);
 		app->moveMouse(mPoint.x, mPoint.y, centerX, centerY);
 		SetCursorPos(centerX, centerY);
 		app->hideMouse();
-	} else app->showMouse();
+	}
+	else app->showMouse();
 	app->keyAct(velocity);
-	app->animate(velocity);
+	if (app->cfgs->dualthread)
+		app->animate(velocity);
+
+	app->draw();
 
 	if (app->cfgs->dualthread) {
-		WaitForSingleObject(mutex, INFINITE);
 		dataPrepared = false;
 		ReleaseMutex(mutex);
 	}
@@ -103,14 +108,9 @@ void DrawWindow() {
 }
 
 DWORD WINAPI FrameThreadRun(LPVOID param) {
-	DWORD curr = 0, last = 0, dTime = 0.0;
 	while (!app->willExit && app->cfgs->dualthread) {
 		if(!dataPrepared && inited) {
-			curr = timeGetTime();
-			dTime = (curr - last);
-			last = curr;
-
-			app->act(startTime, curr, D_DISTANCE * dTime);
+			app->act(startTime, timeGetTime(), velocity);
 			app->prepare(true);
 
 			WaitForSingleObject(mutex, INFINITE);
@@ -145,6 +145,7 @@ void InitGL() {
 	mouseShow = false;
 	printf("Init GL\n");
 	app->init();
+	dTimes = new CirQueue<float>(app->cfgs->smoothframe);
 	InitMutex();
 	CreateThreads();
 	inited = true;
@@ -296,6 +297,9 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam) {
 			break;
 		case WM_SIZE:
 			ResizeWindow(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+			GetWindowRect(hWnd, &winRect);
+			centerX = winRect.left + (LONG)(app->windowWidth >> 1);
+			centerY = winRect.top + (LONG)(app->windowHeight >> 1);
 			break;
 		case WM_MOUSEWHEEL:
 			{	

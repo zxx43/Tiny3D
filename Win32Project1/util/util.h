@@ -302,6 +302,33 @@ struct TBuffer {
 	}
 };
 
+template <typename T>
+struct CirQueue {
+	T* data;
+	int size, max;
+	int front, rear;
+	CirQueue(int s) {
+		max = s, size = 0;
+		front = 0, rear = -1;
+		data = (T*)malloc(max * sizeof(T));
+		memset(data, 0, max * sizeof(T));
+	}
+	~CirQueue() {
+		free(data);
+	}
+	void push(T value) {
+		if (size < max) {
+			size++;
+			rear++;
+		} else {
+			size = max;
+			front = (front + 1) % size;
+			rear = (rear + 1) % size;
+		}
+		data[rear] = value;
+	}
+};
+
 struct Indirect {
 	uint count;
 	uint primCount;
@@ -315,12 +342,15 @@ struct ConfigArg {
 	int height;
 	bool fullscreen;
 	bool dualthread;
+	bool dualqueue;
+	int smoothframe;
 	int graphQuality;
 	int shadowQuality;
 	bool ssr;
 	bool dof;
 	bool fxaa;
 	bool bloom;
+	bool dynsky;
 	bool cartoon;
 	bool debug;
 };

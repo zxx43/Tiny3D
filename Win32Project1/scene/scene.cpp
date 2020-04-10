@@ -96,9 +96,9 @@ void Scene::createReflectCamera() {
 	reflectCamera = new Camera(0.0);
 }
 
-void Scene::createSky() {
+void Scene::createSky(bool dyn) {
 	if (skyBox) delete skyBox;
-	skyBox = new Sky(this);
+	skyBox = new Sky(this, dyn);
 }
 
 void Scene::createWater(const vec3& position, const vec3& size) {

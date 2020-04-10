@@ -2,11 +2,14 @@ width 320
 height 240
 fullscreen 0
 dualthread 1
+dualqueue 0
+smoothframe 3
 quality 10
 shadow 3
 ssr 1
 dof 1
 fxaa 1
 bloom 1
+dynsky 1
 cartoon 0
 debug 0

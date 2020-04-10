@@ -236,8 +236,8 @@ void Player::controlAct(Input* input, const Scene* scene, const float velocity) 
 	if (!input->getBoards()[KEY_S] && !input->getBoards()[KEY_A] && !input->getBoards()[KEY_D])
 		resetExAngle();
 
-	bool isMove = moveAct(scene);
 	bool isRotate = rotateAct();
+	bool isMove = moveAct(scene);
 	if(isMove || isRotate)
 		cameraAct();
 

@@ -29,8 +29,8 @@ RenderManager::RenderManager(ConfigArg* cfg, Camera* view, float distance1, floa
 	farBuffer = new FrameBuffer(farSize, farSize, LOW_PRE);
 	lightDir = light.GetNormalized();
 
-	queue1 = new Renderable(distance1, distance2, cfgs->dualthread);
-	queue2 = new Renderable(distance1, distance2, cfgs->dualthread);
+	queue1 = new Renderable(distance1, distance2, cfgs);
+	queue2 = new Renderable(distance1, distance2, cfgs);
 	currentQueue = queue1;
 	nextQueue = queue2;
 

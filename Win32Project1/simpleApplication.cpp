@@ -408,7 +408,7 @@ void SimpleApplication::initScene() {
 	StaticObject model9(meshes["rock"], meshes["rock"], NULL);
 
 	//return;
-	scene->createSky();
+	scene->createSky(cfgs->dynsky);
 	scene->createWater(vec3(-2048, 0, -2048), vec3(6, 1, 6));
 	scene->createTerrain(vec3(-2048, -200, -2048), vec3(6, 2.0, 6));
 

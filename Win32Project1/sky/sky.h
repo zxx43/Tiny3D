@@ -23,7 +23,7 @@ private:
 	FrameBuffer* skyBuff;
 	mat4 matPosx, matNegx, matPosy, matNegy, matPosz, matNegz;
 public:
-	Sky(Scene* scene);
+	Sky(Scene* scene, bool dyn);
 	~Sky();
 public:
 	void update(Render* render, const vec3& sunPos, Shader* shader);

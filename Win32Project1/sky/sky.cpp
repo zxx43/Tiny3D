@@ -4,7 +4,7 @@
 #include "../assets/assetManager.h"
 #include "../scene/scene.h"
 
-Sky::Sky(Scene* scene) {
+Sky::Sky(Scene* scene, bool dyn) {
 	mesh=new Sphere(16,16);
 	StaticObject* skyObject=new StaticObject(mesh);
 	Material* mat = new Material("sky_mat");
@@ -24,11 +24,14 @@ Sky::Sky(Scene* scene) {
 			"texture/sky/zpos.bmp", "texture/sky/zneg.bmp");
 	AssetManager::assetManager->setEnvTexture(env);
 
-	CubeMap* texture = new CubeMap(512, 512);
-	AssetManager::assetManager->setSkyTexture(texture);
-	skyBuff = new FrameBuffer(texture);
-	//AssetManager::assetManager->setSkyTexture(env);
-	//skyBuff = NULL;
+	if (dyn) {
+		CubeMap* texture = new CubeMap(512, 512);
+		AssetManager::assetManager->setSkyTexture(texture);
+		skyBuff = new FrameBuffer(texture);
+	} else {
+		AssetManager::assetManager->setSkyTexture(env);
+		skyBuff = NULL;
+	}
 
 	mat4 proj = perspective(90.0, 1.0, 0.5, 20.0);
 	matPosx = proj * viewMat(vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 1.0f, 0.0f), vec3(-1.0f, 0.0f, 0.0f), vec3(0.0, 0.0, 0.0));
