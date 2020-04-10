@@ -71,6 +71,7 @@ void DrawWindow() {
 	} else {
 		WaitForSingleObject(mutex, INFINITE);
 		dataPrepared = true;
+		ReleaseMutex(mutex);
 	}
 
 	currentTime = timeGetTime();
@@ -100,6 +101,7 @@ void DrawWindow() {
 	app->draw();
 
 	if (app->cfgs->dualthread) {
+		WaitForSingleObject(mutex, INFINITE);
 		dataPrepared = false;
 		ReleaseMutex(mutex);
 	}
