@@ -1,34 +1,28 @@
-const int cSteps = 8;
-const float stepLen = 500.0;
-const float cloudThre = 0.0009;
+const int cSteps = 16;
+const float stepLen = 300.0;
+const float cloudThre = 0.0007;
 
-float mod289(float x) {return x - floor(x * 0.00346) * 289.0;}
-vec4 mod289(vec4 x) {return x - floor(x * 0.00346) * 289.0;}
-vec4 perm(vec4 x) {return mod289(((x * 34.0) + 1.0) * x);}
+float hash( float n ) {
+    return fract(sin(n)*43758.5453);
+}
 
-float noise(sampler2D tex, vec3 p) {
-	vec3 a = floor(p);
-    vec3 d = p - a;
-    d = d * d * (3.0 - 2.0 * d);
+float noise( sampler2D tex, vec3 x ) {
+    vec3 p = floor(x);
+    vec3 f = fract(x);
 
-    vec4 b = a.xxyy + vec4(0.0, 1.0, 0.0, 1.0);
-    vec4 k1 = perm(b.xyxy);
-    vec4 k2 = perm(k1.xyxy + b.zzww);
+    f = f*f*(3.0-2.0*f);
 
-    vec4 c = k2 + a.zzzz;
-    vec4 k3 = perm(c);
-    vec4 k4 = perm(c + 1.0);
+    float n = p.x + p.y* 57.0 + 113.0 * p.z;
 
-    vec4 o1 = fract(k3 * 0.02439);
-    vec4 o2 = fract(k4 * 0.02439);
-
-	vec4 o3 = mix(o1, o2, d.z);
-	vec2 o4 = mix(o3.xz, o3.yw, d.x);
-	return mix(o4.x, o4.y, d.y);
+    float res = mix(mix(mix( hash(n+  0.0), hash(n+  1.0),f.x),
+                        mix( hash(n+ 57.0), hash(n+ 58.0),f.x),f.y),
+                    mix(mix( hash(n+113.0), hash(n+114.0),f.x),
+                        mix( hash(n+170.0), hash(n+171.0),f.x),f.y),f.z);
+    return res;
 }
 
 float fbm(sampler2D tex, vec3 x, float tf) {
-    float tm = tf*0.00008;
+    float tm = tf * 0.00008;
     float v = noise(tex, x*2.0+tm)*0.5;
     v += noise(tex, x*4.0+tm)*0.25;
     v += noise(tex, x*8.0+tm)*0.125;
