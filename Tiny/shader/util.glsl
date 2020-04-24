@@ -15,7 +15,7 @@ const vec3 UP_VEC3 = vec3(0.0, 1.0, 0.0);
 const vec3 ZERO_VEC3 = vec3(0.0);
 const vec4 BoardMat = vec4(0.3, 0.0, 0.0, 1.0);
 const vec4 BoardRM = vec4(0.0, 0.0, 0.0, 1.0);
-const uint MAX_TEX = 50;
+const uint MAX_TEX = 64;
 
 mat3 RotY(float r) {
 	float cosR = cos(r);
