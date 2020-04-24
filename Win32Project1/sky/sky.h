@@ -19,9 +19,10 @@ class Sky {
 private:
 	StaticNode* skyNode;
 	Sphere* mesh;
-	RenderState* state;
 	FrameBuffer* skyBuff;
 	mat4 matPosx, matNegx, matPosy, matNegy, matPosz, matNegz;
+public:
+	RenderState* state;
 public:
 	Sky(Scene* scene, bool dyn);
 	~Sky();

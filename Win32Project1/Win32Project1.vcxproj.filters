@@ -673,6 +673,9 @@
     <None Include="..\Tiny\shader\atmosphere.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\Tiny\shader\cloud.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Tiny\config\config.txt">

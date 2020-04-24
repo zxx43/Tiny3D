@@ -269,6 +269,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	state->time = scene->time;
 	state->enableSsr = cfgs->ssr;
 	state->quality = cfgs->graphQuality;
+	state->dynSky = cfgs->dynsky;
 
 	Camera* camera = scene->mainCamera;
 
@@ -345,8 +346,11 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 }
 
 void RenderManager::renderSkyTex(Render* render, Scene* scene) {
-	if (needRefreshSky && scene->skyBox) {
+	if (!scene->skyBox) return;
+	if (needRefreshSky) {
 		static Shader* atmoShader = render->findShader("atmos");
+		scene->skyBox->state->time = scene->time;
+		scene->skyBox->state->udotl = udotl;
 		scene->skyBox->update(render, lightDir, atmoShader);
 		needRefreshSky = false;
 	}
@@ -406,6 +410,7 @@ void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* scre
 	state->udotl = udotl;
 	state->time = scene->time;
 	state->quality = cfgs->graphQuality;
+	state->dynSky = cfgs->dynsky;
 
 	uint baseSlot = screenBuff->colorBuffers.size() + 1; // Color buffers + Depth buffer
 	if(!deferredShader->isTexBinded(nearBuffer->getDepthBuffer()->hnd))
@@ -428,6 +433,7 @@ void RenderManager::drawCombined(Render* render, Scene* scene, const std::vector
 	state->pass = DEFERRED_PASS;
 	state->shader = combinedShader;
 	state->quality = cfgs->graphQuality;
+	state->dynSky = cfgs->dynsky;
 
 	state->shader->setFloat("useBloom", cfgs->bloom ? 1.0 : 0.0);
 	state->shader->setFloat("useCartoon", cfgs->cartoon ? 1.0 : 0.0);

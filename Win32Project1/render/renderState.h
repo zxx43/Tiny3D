@@ -16,6 +16,8 @@ struct RenderState {
 	bool lightEffect;
 	bool skyPass;
 	bool atmoPass;
+	bool cloudPass;
+	bool dynSky;
 	bool waterPass;
 	bool grassPass;
 	bool ssrPass;
@@ -66,6 +68,8 @@ struct RenderState {
 		lightEffect = rhs->lightEffect;
 		skyPass = rhs->skyPass;
 		atmoPass = rhs->atmoPass;
+		cloudPass = rhs->cloudPass;
+		dynSky = rhs->dynSky;
 		waterPass = rhs->waterPass;
 		grassPass = rhs->grassPass;
 		ssrPass = rhs->ssrPass;
@@ -103,6 +107,8 @@ struct RenderState {
 		lightEffect = true;
 		skyPass = false;
 		atmoPass = false;
+		cloudPass = false;
+		dynSky = false;
 		waterPass = false;
 		grassPass = false;
 		ssrPass = false;

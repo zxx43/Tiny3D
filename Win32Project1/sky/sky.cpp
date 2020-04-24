@@ -33,7 +33,7 @@ Sky::Sky(Scene* scene, bool dyn) {
 		skyBuff = NULL;
 	}
 
-	mat4 proj = perspective(90.0, 1.0, 0.5, 20.0);
+	mat4 proj = perspective(90.0, 1.0, 0.5, 10.0);
 	matPosx = proj * viewMat(vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 1.0f, 0.0f), vec3(-1.0f, 0.0f, 0.0f), vec3(0.0, 0.0, 0.0));
 	matNegx = proj * viewMat(vec3(0.0f, 0.0f, -1.0f), vec3(0.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(0.0, 0.0, 0.0));
 	matNegy = proj * viewMat(vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, -1.0f, 0.0f), vec3(0.0, 0.0, 0.0));
@@ -50,7 +50,7 @@ Sky::~Sky() {
 	delete mesh; mesh=NULL;
 	delete skyNode; skyNode=NULL;
 	delete state; state = NULL;
-	delete skyBuff; skyBuff = NULL;
+	if (skyBuff) delete skyBuff; skyBuff = NULL;
 }
 
 void Sky::update(Render* render, const vec3& sunPos, Shader* shader) {
@@ -58,6 +58,7 @@ void Sky::update(Render* render, const vec3& sunPos, Shader* shader) {
 	state->delay = 0;
 	state->skyPass = false;
 	state->atmoPass = true;
+	state->cloudPass = false;
 	state->shader = shader;
 	state->shader->setVector3("light", -sunPos.x, -sunPos.y, -sunPos.z);
 	render->useFrameBuffer(skyBuff);
@@ -92,6 +93,7 @@ void Sky::draw(Render* render,Shader* shader,Camera* camera) {
 	state->shader = shader;
 	state->skyPass = true;
 	state->atmoPass = false;
+	state->cloudPass = false;
 	render->draw(camera,skyNode->drawcall,state);
 }
 

@@ -16,6 +16,7 @@ AssetManager::AssetManager() {
 	reflectTexture = NULL;
 	heightTexture = NULL;
 	distortionTex = -1;
+	noiseTex = -1;
 	roadTex = -1;
 	meshes.clear();
 	animations.clear();
@@ -104,6 +105,12 @@ void AssetManager::addDistortionTex(const char* texName) {
 	if (distortionTex < 0)
 		addTextureBindless(texName, false);
 	distortionTex = findTextureBindless(texName);
+}
+
+void AssetManager::addNoiseTex(const char* texName) {
+	if (noiseTex < 0)
+		addTextureBindless(texName, false);
+	noiseTex = findTextureBindless(texName);
 }
 
 void AssetManager::addRoadTex(const char* texName) {

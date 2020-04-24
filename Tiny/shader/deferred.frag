@@ -1,6 +1,8 @@
 ﻿#include "shader/util.glsl"
+#include "shader/cloud.glsl"
 
 layout(bindless_sampler) uniform sampler2D texBuffer, matBuffer, normalGrassBuffer, roughMetalBuffer, depthBuffer;
+layout(bindless_sampler) uniform sampler2D texNoise;
 uniform vec2 pixelSize;
 
 uniform mat4 invViewProjMatrix, invProjMatrix;
@@ -15,6 +17,7 @@ uniform float udotl;
 uniform vec3 eyePos;
 uniform float time;
 uniform float useCartoon;
+uniform int dynSky;
 
 in vec2 vTexcoord;
 
@@ -195,6 +198,13 @@ void main() {
 			sceneColor = (ambient + kd * albedo * material.g) * udotl;
 		}
 	} else {
+		if(dynSky > 0) {
+			vec3 start = vec3(0.0,6378e3,0.0);
+			vec4 worldPos = invViewProjMatrix * vec4(ndcPos, 1.0);
+			worldPos /= worldPos.w;
+			vec3 view = normalize(worldPos.xyz - eyePos);
+			sceneColor = cloudRayMarch(texNoise, start, light, view, udotl, sceneColor, time);
+		}
 		bright = sceneColor * udotl * 2.5;
 	}
 

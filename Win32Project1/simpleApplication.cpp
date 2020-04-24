@@ -337,6 +337,7 @@ void SimpleApplication::initScene() {
 	assetMgr->addTextureBindless("grass1-albedo3.bmp", true);
 	assetMgr->addTextureBindless("grass1-normal1-dx.bmp", false);
 	assetMgr->addDistortionTex("distortion.bmp");
+	assetMgr->addNoiseTex("noise.bmp");
 	assetMgr->addRoadTex("road.bmp");
 	assetMgr->createHeightTex();
 

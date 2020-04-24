@@ -1,5 +1,5 @@
 #include "cubemap.h"
-#include "../constants/constants.h"
+#include "../render/render.h"
 
 CubeMap::CubeMap(const char* xpos,const char* xneg,const char* ypos,
 		const char* yneg,const char* zpos,const char* zneg) {

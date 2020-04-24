@@ -1,4 +1,3 @@
-const float PI = 3.141592;
 const int iSteps = 16;
 const int jSteps = 8;
 
@@ -19,9 +18,13 @@ float rsi(vec3 r0, vec3 rd, float sr) {
     return (-b + sqrt(d)) * 0.5 / a;
 }
 
-vec3 atmosphere(vec3 view, vec3 r0, vec3 pSun, float iSun, float rPlanet, float rAtmos, vec3 kRlh, float kMie, float shRlh, float shMie, float g) {
+float getStepSize(vec3 view, vec3 r0, float rAtmos, int steps) {
     // Calculate the step size of the primary ray.
-    float iStepSize = rsi(r0, view, rAtmos) / float(iSteps);
+	return rsi(r0, view, rAtmos) / float(steps);
+}
+
+vec3 atmosphere(vec3 view, vec3 r0, vec3 pSun, float iSun, float rPlanet, float rAtmos, vec3 kRlh, float kMie, float shRlh, float shMie, float g) {
+	float iStepSize = getStepSize(view, r0, rAtmos, iSteps);
 
     // Initialize the primary ray time.
     float iTime = 0.0;
@@ -91,7 +94,6 @@ vec3 atmosphere(vec3 view, vec3 r0, vec3 pSun, float iSun, float rPlanet, float 
 
         // Increment the primary ray time.
         iTime += iStepSize;
-
     }
 
     // Calculate and return the final color.

@@ -320,6 +320,7 @@
     <None Include="..\Tiny\shader\blur.frag" />
     <None Include="..\Tiny\shader\bone.frag" />
     <None Include="..\Tiny\shader\bone.vert" />
+    <None Include="..\Tiny\shader\cloud.glsl" />
     <None Include="..\Tiny\shader\combined.frag" />
     <None Include="..\Tiny\shader\cull.comp" />
     <None Include="..\Tiny\shader\debug.frag" />
