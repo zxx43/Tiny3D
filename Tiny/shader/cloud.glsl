@@ -2,35 +2,31 @@ const int cSteps = 16;
 const float stepLen = 300.0;
 const float cloudThre = 0.0007;
 
+// random/hash function              
 float hash( float n ) {
     return fract(sin(n)*43758.5453);
 }
 
+const vec3 NoiseVec = vec3(1.0, 57.0, 113.0);
 float noise( sampler2D tex, vec3 x ) {
-    vec3 p = floor(x);
-    vec3 f = fract(x);
+	vec3 p  = floor(x);
+	vec3 f  = smoothstep(0.0, 1.0, fract(x));
+	float n = dot(p, NoiseVec);
 
-    f = f*f*(3.0-2.0*f);
-
-    float n = p.x + p.y* 57.0 + 113.0 * p.z;
-
-    float res = mix(mix(mix( hash(n+  0.0), hash(n+  1.0),f.x),
-                        mix( hash(n+ 57.0), hash(n+ 58.0),f.x),f.y),
-                    mix(mix( hash(n+113.0), hash(n+114.0),f.x),
-                        mix( hash(n+170.0), hash(n+171.0),f.x),f.y),f.z);
-    return res;
+	return  mix(mix(mix( hash(n+  0.0), hash(n+  1.0),f.x),
+			mix( hash(n+ 57.0), hash(n+ 58.0),f.x),f.y),
+			mix(mix( hash(n+113.0), hash(n+114.0),f.x),
+			mix( hash(n+170.0), hash(n+171.0),f.x),f.y),f.z);
 }
 
-float fbm(sampler2D tex, vec3 x, float tf) {
-    float tm = tf * 0.00008;
-    float v = noise(tex, x*2.0+tm)*0.5;
-    v += noise(tex, x*4.0+tm)*0.25;
-    v += noise(tex, x*8.0+tm)*0.125;
-    v += noise(tex, x*16.0+tm)*0.0625;
-    v += noise(tex, x*32.0+tm)*0.03125;
-    v += noise(tex, x*64.0+tm)*0.015625;
-    v += noise(tex, x*128.0+tm)*0.0078125;
-    return v;
+const mat3 FbmMat = mat3( 0.00,  1.60,  1.20, -1.60,  0.72, -0.96, -1.20, -0.96,  1.28 );
+float fbm( sampler2D tex, vec3 p, float tf ) {
+	float tm = tf * 0.00008;
+	float f = 0.5000*noise( tex, p+tm ); p = FbmMat*p*2.02;
+	f += 0.2500*noise( tex, p+tm ); p = FbmMat*p*2.03;
+	f += 0.1250*noise( tex, p+tm ); p = FbmMat*p*2.01;
+	f += 0.0625*noise( tex, p+tm );
+	return f;
 }
 
 float cloudFilter(float x) {
