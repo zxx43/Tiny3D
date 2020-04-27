@@ -40,8 +40,8 @@ AssetManager::~AssetManager() {
 	skyTexture = NULL; envTexture = NULL;
 }
 
-void AssetManager::addTextureBindless(const char* name, bool srgb) {
-	texBld->addTexture(name, srgb);
+void AssetManager::addTextureBindless(const char* name, bool srgb, int wrap) {
+	texBld->addTexture(name, srgb, wrap);
 }
 
 void AssetManager::initTextureBindless(MaterialManager* mtls) {
@@ -109,7 +109,7 @@ void AssetManager::addDistortionTex(const char* texName) {
 
 void AssetManager::addNoiseTex(const char* texName) {
 	if (noiseTex < 0)
-		addTextureBindless(texName, false);
+		addTextureBindless(texName, false, WRAP_MIRROR);
 	noiseTex = findTextureBindless(texName);
 }
 

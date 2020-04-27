@@ -16,13 +16,14 @@ private:
 	std::vector<bool> texSrgbs;
 	std::vector<const char*> texnames;
 	std::vector<BmpImage*> imgs;
+	std::vector<int> wraps;
 	int size;
 private:
 	void releaseMemory();
 public:
 	TextureBindless();
 	~TextureBindless();
-	void addTexture(const char* name, bool srgb);
+	void addTexture(const char* name, bool srgb, int wrap = WRAP_REPEAT);
 	int findTexture(const char* name);
 	void initData(std::string dir);
 	int getSize() { return size; }

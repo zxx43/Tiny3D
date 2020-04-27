@@ -6,6 +6,7 @@ TextureBindless::TextureBindless() {
 	texinds.clear();
 	texnames.clear();
 	texSrgbs.clear();
+	wraps.clear();
 	imgs.clear();
 	texids = NULL;
 	texhnds = NULL;
@@ -27,6 +28,7 @@ TextureBindless::~TextureBindless() {
 	texnames.clear();
 	texSrgbs.clear();
 	texinds.clear();
+	wraps.clear();
 }
 
 void TextureBindless::releaseMemory() {
@@ -35,9 +37,10 @@ void TextureBindless::releaseMemory() {
 	imgs.clear();
 }
 
-void TextureBindless::addTexture(const char* name, bool srgb) {
+void TextureBindless::addTexture(const char* name, bool srgb, int wrap) {
 	texnames.push_back(name);
 	texSrgbs.push_back(srgb);
+	wraps.push_back(wrap);
 	texinds[name] = size;
 	size++;
 }
@@ -65,8 +68,8 @@ void TextureBindless::initData(string dir) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, Render::MaxAniso);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wraps[i]);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wraps[i]);
 		GLint interFormat = GL_SRGB_ALPHA;
 		if (texSrgbs[i])
 			interFormat = GL_SRGB_ALPHA;

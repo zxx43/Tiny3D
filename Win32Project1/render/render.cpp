@@ -238,9 +238,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 							static vec3 upVec(0.0, 1.0, 0.0);
 							vec3 viewRight(camera->viewMatrix.entries[0], camera->viewMatrix.entries[4], camera->viewMatrix.entries[8]);
 							vec3 normal = (viewRight.CrossProduct(upVec)).GetNormalized();
-							normal.x = normal.x * 0.5 + 0.5;
-							normal.y = normal.y * 0.5 + 0.5;
-							normal.z = normal.z * 0.5 + 0.5;
+							normal = normal * 0.5 + 0.5;
 							state->shaderBill->setVector3v("uNormal", normal);
 							state->shaderBill->setVector3v("viewRight", viewRight);
 						}

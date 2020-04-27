@@ -32,7 +32,7 @@ public:
 	void addMesh(const char* name, Mesh* mesh, bool billboard = false, bool drawShadow = true);
 	void addAnimation(const char* name, Animation* animation);
 	void initFrames();
-	void addTextureBindless(const char* name, bool srgb);
+	void addTextureBindless(const char* name, bool srgb, int wrap = WRAP_REPEAT);
 	void initTextureBindless(MaterialManager* mtls);
 	int findTextureBindless(const char* name);
 	void setSkyTexture(CubeMap* tex);
