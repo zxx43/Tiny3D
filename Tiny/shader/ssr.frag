@@ -39,17 +39,13 @@ vec4 RayCast(vec3 refDir, vec3 refPos) {
 	float lenStart = 0.0;
 	float lenBefore = lenStart;
 	float lenCurrent = lenStart;
-
-	float border = 0.1;
-	float oneMinBorder = 0.9;
-	float invBorder = 10.0;
+	float border = 0.1, oneMinBorder = 0.9, invBorder = 10.0;
 	
 	vec4 projRef = projectMatrix * vec4(refPos, 1.0);
 	projRef /= projRef.w;
 	
 	for(float i = 0.0; i < 10.0; i += 1.0) {
 		vec3 curPos = refPos + refDir * lenCurrent;
-
 		vec4 projPos = projectMatrix * vec4(curPos, 1.0);
 		projPos /= projPos.w;
 		vec3 projCoord = projPos.xyz * 0.5 + 0.5;
@@ -60,7 +56,7 @@ vec4 RayCast(vec3 refDir, vec3 refPos) {
 
 		float refFlag = texture2D(matBuffer, projCoord.xy).a;
 
-		if(storedDepth >= 1.0)
+		if(storedDepth >= 1.0) 
 			return FAIL_COLOR;
 		else if(curPos.z <= storedView.z + 0.01 && refFlag > 0.9 && refPos.z >= storedView.z - 20.0) {
 			vec2 searchData = BinarySearch(lenBefore, lenCurrent, projCoord.xy, refDir, refPos, projRef);
@@ -68,12 +64,10 @@ vec4 RayCast(vec3 refDir, vec3 refPos) {
 
 			if(searchData.y >= oneMinBorder)
 				storedData = mix(storedData, FAIL_COLOR, (searchData.y - oneMinBorder) * invBorder);
-
 			if(searchData.x >= oneMinBorder)
 				storedData = mix(storedData, FAIL_COLOR, (searchData.x - oneMinBorder) * invBorder);
 			else if(searchData.x <= border)
 				storedData = mix(storedData, FAIL_COLOR, (border - searchData.x) * invBorder);
-
 			return storedData; 
 		} else {
 			lenBefore = lenCurrent;			

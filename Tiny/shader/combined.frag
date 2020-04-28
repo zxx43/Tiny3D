@@ -63,7 +63,8 @@ void main() {
 
 	waterRefract = mix(sceneRefract, waterRefract, depthFactor).rgb;
 
-	vec3 waterColor = mix(waterReflect, waterRefract, ndote);
+	float fresnel = mix(0.25, 1.0, pow(1.0 - ndote, 3.0));
+	vec3 waterColor = mix(waterRefract, waterReflect, fresnel);
 	vec3 finalColor = mix(sceneColor.rgb, waterColor, waterFactor);
 
 	if(useCartoon > 0.5) FragColor = vec4(finalColor, waterFactor);

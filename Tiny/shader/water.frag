@@ -22,11 +22,16 @@ void main() {
 	vec3 eye2Water = normalize(vEye2Water);
 	
 	vec2 bias = normalize(vViewNormal).xz * waterBias;
-	vec2 refCoord = (vProjPos.xy/vProjPos.w) * 0.5 + 0.5;
+	vec2 refCoord = (vProjPos.xy / vProjPos.w) * 0.5 + 0.5;
 	vec4 reflectTex = texture2D(texRef, refCoord + bias);
 
-	vec3 reflectMapTex = udotl * texture(texEnv, reflect(eye2Water, normal)).rgb;
-	vec3 refractMapTex = udotl * texture(texEnv, refract(eye2Water, normal, 0.750395)).rgb;
+	vec3 reflectCoord = reflect(eye2Water, normal);
+	reflectCoord = vec3(reflectCoord.x, -reflectCoord.yz);
+	vec3 reflectMapTex = udotl * texture(texEnv, reflectCoord).rgb;
+
+	vec3 refractCoord = refract(eye2Water, normal, 0.750395);
+	refractCoord = vec3(refractCoord.x, -refractCoord.yz);
+	vec3 refractMapTex = udotl * texture(texEnv, refractCoord).rgb;
 
 	vec3 reflectedColor = reflectTex.rgb * reflectMapTex;
 	vec3 refractedColor = refractMapTex;
