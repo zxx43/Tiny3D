@@ -33,13 +33,7 @@ void Instance::create(Mesh* mesh) {
 }
 
 Instance::~Instance() {
-	if (vertexBuffer) free(vertexBuffer); vertexBuffer = NULL;
-	if (normalBuffer) free(normalBuffer); normalBuffer = NULL;
-	if (tangentBuffer) free(tangentBuffer); tangentBuffer = NULL;
-	if (texcoordBuffer) free(texcoordBuffer); texcoordBuffer = NULL;
-	if (texidBuffer) free(texidBuffer); texidBuffer = NULL;
-	if (colorBuffer) free(colorBuffer); colorBuffer = NULL;
-	if (indexBuffer) free(indexBuffer); indexBuffer = NULL;
+	releaseInstanceData();
 }
 
 void Instance::releaseInstanceData() {
@@ -89,15 +83,6 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 			normalBuffer[i * 3 + v] = Float2Half(GetVec3(&normal, v));
 			tangentBuffer[i * 3 + v] = Float2Half(GetVec3(&tangent, v));
 		}
-
-		if (texcoord.x < 0) 
-			texcoord.x = 1 + texcoord.x - (int)texcoord.x;
-		else if (texcoord.x > 1)
-			texcoord.x = texcoord.x - (int)texcoord.x;
-		if (texcoord.y < 0)
-			texcoord.y = 1 + texcoord.y - (int)texcoord.y;
-		else if (texcoord.y > 1)
-			texcoord.y = texcoord.y - (int)texcoord.y;
 
 		texcoordBuffer[i * 4 + 0] = (texcoord.x);
 		texcoordBuffer[i * 4 + 1] = (texcoord.y);

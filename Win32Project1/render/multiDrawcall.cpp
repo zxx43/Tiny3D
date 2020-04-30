@@ -94,7 +94,7 @@ RenderBuffer* MultiDrawcall::createBuffers(MultiInstance* multi, int vertexCount
 		}
 	}
 
-	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, PositionIndex, GL_FLOAT, maxObjects, 16, GL_STREAM_DRAW, NULL);
+	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, PositionIndex, GL_FLOAT, maxObjects, 16, GL_DYNAMIC_DRAW, NULL);
 	buffer->setAttribData(GL_SHADER_STORAGE_BUFFER, PositionOutIndex, PositionSlot, GL_FLOAT, maxObjects, 4, 4, false, GL_STREAM_DRAW, 1, NULL);
 	buffer->useAs(PositionOutIndex, GL_ARRAY_BUFFER);
 	buffer->setAttrib(PositionOutIndex);
@@ -159,8 +159,7 @@ void MultiDrawcall::swapBuffers() {
 }
 
 void MultiDrawcall::update(Render* render, RenderState* state) {
-	multiRef->updateTransform();
-	objectCount = multiRef->instanceCount;
+	objectCount = multiRef->updateTransform();
 	dataBufferPrepare->updateBufferData(PositionIndex, objectCount, (void*)(multiRef->transforms));
 	updateIndirect(render, state);
 	prepareRenderData(render, state);

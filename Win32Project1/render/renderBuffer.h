@@ -101,6 +101,13 @@ struct RenderData {
 			glUnmapBuffer(target);
 		}
 	}
+	void* getMapBuffer(uint count) {
+		int mapSize = count * channelCount * rowCount;
+		return glMapNamedBufferRange(bufferid, 0, mapSize * bitSize, GL_MAP_WRITE_BIT);
+	}
+	void endMapBuffer() {
+		glUnmapNamedBuffer(bufferid);
+	}
 	void readBufferData(GLenum target, uint count, void* ret) {
 		int mapSize = count * channelCount * rowCount;
 		glBindBuffer(target, bufferid);
@@ -190,6 +197,12 @@ struct RenderBuffer {
 	}
 	void updateBufferMap(GLenum target, uint loc, uint count, void* data) {
 		streamDatas[loc]->updateBufferMap(target, count, data);
+	}
+	void* getBufferMap(uint count, uint loc) {
+		return streamDatas[loc]->getMapBuffer(count);
+	}
+	void endBufferMap(uint loc) {
+		streamDatas[loc]->endMapBuffer();
 	}
 	void readBufferData(GLenum target, uint loc, uint count, void* ret) {
 		streamDatas[loc]->readBufferData(target, count, ret);

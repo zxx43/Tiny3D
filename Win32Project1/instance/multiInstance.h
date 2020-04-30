@@ -48,7 +48,7 @@ public:
 	void add(Instance* instance);
 	void add(AnimationData* animData);
 	void initBuffers();
-	void updateTransform();
+	int updateTransform(buff* targetBuffer = NULL);
 	void createDrawcall() { drawcall = new MultiDrawcall(this); }
 	bool inited() { return bufferInited; }
 };

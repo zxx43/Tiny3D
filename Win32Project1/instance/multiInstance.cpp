@@ -218,9 +218,10 @@ void MultiInstance::initBuffers() {
 	bufferInited = true;
 }
 
-void MultiInstance::updateTransform() {
+int MultiInstance::updateTransform(buff* targetBuffer) {
 	instanceCount = 0;
 	int curNorm = 0, curSing = 0, curBill = 0, curAnim = 0;
+	buff* target = targetBuffer ? targetBuffer : transforms;
 	for (uint i = 0; i < indirectCount; i++) {
 		if (!hasAnim) {
 			Instance* ins = insDatas[i];
@@ -234,16 +235,17 @@ void MultiInstance::updateTransform() {
 			}
 
 			if (ins->insData->count > 0) {
-				memcpy(transforms + instanceCount * 16, ins->insData->transformsFull, ins->insData->count * 16 * sizeof(buff));
+				memcpy(target + instanceCount * 16, ins->insData->transformsFull, ins->insData->count * 16 * sizeof(buff));
 				instanceCount += ins->insData->count;
 			}
 		} else {
 			AnimationData* anim = animDatas[i];
 			bases[(curAnim++) * 4 + 3] = instanceCount;
 			if (anim->animCount > 0) {
-				memcpy(transforms + instanceCount * 16, anim->transformsFull, anim->animCount * 16 * sizeof(buff));
+				memcpy(target + instanceCount * 16, anim->transformsFull, anim->animCount * 16 * sizeof(buff));
 				instanceCount += anim->animCount;
 			}
 		}
 	}
+	return instanceCount;
 }
