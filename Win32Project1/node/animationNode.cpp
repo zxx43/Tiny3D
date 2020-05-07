@@ -7,6 +7,9 @@ AnimationNode::AnimationNode(const vec3& boundingSize):
 		Node(vec3(0, 0, 0), boundingSize) {
 	animation = NULL;
 	type = TYPE_ANIMATE;
+
+	needCreateDrawcall = false;
+	needUpdateDrawcall = false;
 }
 
 AnimationNode::~AnimationNode() {}

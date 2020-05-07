@@ -8,6 +8,9 @@ InstanceNode::InstanceNode(const vec3& position):Node(position, vec3(0, 0, 0)) {
 	instance = NULL;
 	isGroup = false;
 	groupBuffer = NULL;
+
+	needCreateDrawcall = false;
+	needUpdateDrawcall = false;
 }
 
 InstanceNode::~InstanceNode() {

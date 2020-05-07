@@ -251,9 +251,6 @@ void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camer
 					if (child->type != TYPE_INSTANCE && child->type != TYPE_STATIC && child->type != TYPE_ANIMATE)
 						queue->push(child);
 					else if (child->type == TYPE_INSTANCE) {
-						child->needCreateDrawcall = false;
-						child->needUpdateDrawcall = false;
-
 						for (uint j = 0; j < child->objects.size(); ++j) {
 							Object* object = child->objects[j];
 							if (queue->shadowLevel > 0 && !object->genShadow) continue;
@@ -267,9 +264,6 @@ void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camer
 						}
 					} else if (child->type == TYPE_ANIMATE) {
 						if (child->objects.size() > 0) {
-							child->needCreateDrawcall = false;
-							child->needUpdateDrawcall = false;
-
 							queue->pushAnim(child);
 							AnimationNode* animNode = (AnimationNode*)child;
 							Animation* anim = animNode->getObject()->animation;
@@ -278,26 +272,7 @@ void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camer
 							if(!queue->cfgArgs->dualthread)
 								animNode->animate(scene->velocity);
 						}
-					} else if (child->type == TYPE_STATIC) {
-						if (!((StaticNode*)child)->isDynamicBatch())
-							queue->push(child);
-						else {
-							child->needCreateDrawcall = false;
-							child->needUpdateDrawcall = false;
-							for (uint j = 0; j < child->objects.size(); ++j) {
-								Object* object = child->objects[j];
-								if (queue->shadowLevel > 0 && !object->genShadow) continue;
-								if (object->checkInCamera(camera)) {
-									Mesh* mesh = queue->queryLodMesh(object, mainCamera->position);
-									if (!mesh) continue;
-									if (queue->shadowLevel > 0 && !mesh->drawShadow) continue;
-									if (!queue->batchData)
-										queue->batchData = new BatchData();
-									queue->batchData->addObject(object, mesh);
-								}
-							}
-						}
-					}
+					} 
 				}
 			}
 		}
