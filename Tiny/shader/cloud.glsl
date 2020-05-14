@@ -43,21 +43,22 @@ float haveCloud(sampler2D tex, vec3 p, float tf){
 vec3 cloudRayMarch(sampler2D tex, vec3 start, vec3 sun, vec3 dir, float lightness, vec3 astrAtomScat, float tf) {
 	vec3 res = astrAtomScat;
     if(dir.y <= 0.0) return res;
-
-	float deltaHor = 25000.0 - dir.y;
-	float invy = 1.0 / dir.y;
-    float stepDeltaHor = deltaHor * invy;
-    vec3 nvec = start + stepDeltaHor * dir;
-	vec3 deltaStep = dir * (stepLen * invy);
+	else {
+		float deltaHor = 25000.0 - dir.y;
+		float invy = 1.0 / dir.y;
+		float stepDeltaHor = deltaHor * invy;
+		vec3 nvec = start + stepDeltaHor * dir;
+		vec3 deltaStep = dir * (stepLen * invy);
 	
-    for(int i = 0; i < cSteps; ++i) {
-        float den = haveCloud(tex, nvec, tf);
-        if(den > cloudThre) {
-			float beers = exp(-2500.0 * den);
-			float alpha = (den * 200.0) * lightness;
-			res = mix(res, vec3(beers), alpha);
+		for(int i = 0; i < cSteps; ++i) {
+			float den = haveCloud(tex, nvec, tf);
+			if(den > cloudThre) {
+				float beers = exp(-2500.0 * den);
+				float alpha = (den * 200.0) * lightness;
+				res = mix(res, vec3(beers), alpha);
+			}
+			nvec += deltaStep;
 		}
-		nvec += deltaStep;
-    }
-	return res;
+		return res;
+	}
 }

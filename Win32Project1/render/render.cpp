@@ -288,7 +288,6 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 			if (state->lightEffect) {
 				shader->setVector3("light", -state->light.x, -state->light.y, -state->light.z);
 				shader->setFloat("udotl", state->udotl);
-				shader->setInt("dynSky", state->dynSky ? 1 : 0);
 				if (AssetManager::assetManager->getNoiseTex() >= 0 &&
 					!shader->isTexBinded(AssetManager::assetManager->getNoiseHnd()))
 						shader->setHandle64("texNoise", AssetManager::assetManager->getNoiseHnd());

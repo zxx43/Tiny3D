@@ -7,8 +7,6 @@ uniform vec3 light;
 uniform float udotl;
 uniform vec3 eyePos;
 uniform float quality;
-uniform float useBloom;
-uniform float useCartoon;
 
 in vec2 vTexcoord;
 
@@ -31,10 +29,10 @@ vec3 GenFogColor(vec4 worldPos, float depthView, vec3 sceneColor) {
 void main() {
  	vec4 waterRefColor = texture2D(waterBuffer, vTexcoord);	
 	vec4 sceneColor = texture2D(sceneBuffer, vTexcoord);
-	if(useBloom > 0.5) {
+	#ifdef USE_BLOOM
 		vec4 bloomColor = texture2D(bloomBuffer, vTexcoord);
 		sceneColor.rgb += bloomColor.rgb;
-	}
+	#endif
 
 	float sDepth = texture2D(sceneDepthBuffer, vTexcoord).r;
 	float wDepth = texture2D(waterDepthBuffer, vTexcoord).r;
@@ -67,8 +65,11 @@ void main() {
 	vec3 waterColor = mix(waterRefract, waterReflect, fresnel);
 	vec3 finalColor = mix(sceneColor.rgb, waterColor, waterFactor);
 
-	if(useCartoon > 0.5) FragColor = vec4(finalColor, waterFactor);
-	else FragColor = vec4(GenFogColor(waterPos, depthView, finalColor), waterFactor);
+	#ifdef USE_CARTOON
+	FragColor = vec4(finalColor, waterFactor);
+	#else
+	FragColor = vec4(GenFogColor(waterPos, depthView, finalColor), waterFactor);
+	#endif
 
 	if(quality > 3.0) 
 		FragColor.rgb = vec3(1.0) - exp(-FragColor.rgb * 2.5);

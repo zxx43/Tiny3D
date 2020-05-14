@@ -72,7 +72,7 @@ public:
 	void setDebug(bool debug) { debugMode = debug; }
 	bool getDebug() { return debugMode; }
 
-	void initShaders() { SetupShaders(shaders); }
+	void initShaders(const ConfigArg* cfgs) { SetupShaders(shaders, cfgs); }
 	void setShaderInt(Shader* shader, const char* param, int value) {  shader->setInt(param, value); }
 	void setShaderUint(Shader* shader, const char* param, uint value) { shader->setUint(param, value); }
 	void setShaderUintv(Shader* shader, const char* param, int count, uint* arr) { shader->setUintv(param, count, arr); }

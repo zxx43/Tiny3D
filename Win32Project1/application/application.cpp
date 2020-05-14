@@ -39,7 +39,7 @@ Application::Application() {
 void Application::init() {
 	printf("Init app\n");
 	render = new Render();
-	render->initShaders();
+	render->initShaders(cfgs);
 	AssetManager::Init();
 	MaterialManager::Init();
 	scene = new Scene();

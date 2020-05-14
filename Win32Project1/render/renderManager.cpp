@@ -419,8 +419,6 @@ void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* scre
 		deferredShader->setHandle64("depthBufferMid", midBuffer->getDepthBuffer()->hnd);
 	if(!deferredShader->isTexBinded(farBuffer->getDepthBuffer()->hnd))
 		deferredShader->setHandle64("depthBufferFar", farBuffer->getDepthBuffer()->hnd);
-	render->setShaderInt(deferredShader, "useShadow", cfgs->shadowQuality > 0 ? 1 : 0);
-	render->setShaderFloat(deferredShader, "useCartoon", cfgs->cartoon ? 1.0 : 0.0);
 	filter->draw(scene->mainCamera, render, state, screenBuff->colorBuffers, screenBuff->depthBuffer);
 }
 
@@ -434,9 +432,6 @@ void RenderManager::drawCombined(Render* render, Scene* scene, const std::vector
 	state->shader = combinedShader;
 	state->quality = cfgs->graphQuality;
 	state->dynSky = cfgs->dynsky;
-
-	state->shader->setFloat("useBloom", cfgs->bloom ? 1.0 : 0.0);
-	state->shader->setFloat("useCartoon", cfgs->cartoon ? 1.0 : 0.0);
 	filter->draw(scene->mainCamera, render, state, inputTextures, NULL);
 }
 
@@ -460,8 +455,6 @@ void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* s
 	state->enableDepthTest = false;
 	state->pass = POST_PASS;
 	state->shader = shader;
-
-	state->shader->setFloat("useCartoon", cfgs->cartoon ? 1.0 : 0.0);
 	filter->draw(scene->mainCamera, render, state, inputTextures, NULL);
 }
 

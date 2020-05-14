@@ -4,7 +4,6 @@ layout(bindless_sampler) uniform sampler2D colorBuffer;
 layout(bindless_sampler) uniform sampler2D normalBuffer;
 layout(bindless_sampler) uniform sampler2D depthBuffer;
 uniform vec2 pixelSize;
-uniform float useCartoon;
 
 in vec2 vTexcoord;
 
@@ -87,13 +86,14 @@ void main() {
 	float edgeWeight = dot(results, vec4(1.0)) * 0.25;
 	
 	if(edgeWeight > 0.25) {
-		if(useCartoon > 0.5) FragColor = OUTLINE_COLOR;
-		else {
+		#ifdef USE_CARTOON
+			FragColor = OUTLINE_COLOR;
+		#else
 			vec3 sum = ZERO_VEC3;
 			sum += c0.rgb + c1.rgb + c2.rgb + c3.rgb;
 			sum += c4.rgb + c5.rgb + c6.rgb + c7.rgb;
 			FragColor = vec4(mix(color.rgb, sum * 0.125, edgeWeight), 1.0);
-		}
+		#endif
 	} else {
 		FragColor = vec4(color.rgb, 1.0);
 	}	

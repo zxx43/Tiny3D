@@ -10,22 +10,19 @@ uniform mat4 invViewProjMatrix, invProjMatrix;
 layout(bindless_sampler) uniform sampler2D depthBufferNear, depthBufferMid, depthBufferFar;
 uniform mat4 lightViewProjNear, lightViewProjMid, lightViewProjFar;
 uniform vec2 shadowPixSize;
-uniform int useShadow;
 uniform vec2 levels;
 uniform vec3 light;
 uniform float udotl;
 uniform vec3 eyePos;
 uniform float time;
-uniform float useCartoon;
-uniform int dynSky;
 
 in vec2 vTexcoord;
 
 layout (location = 0) out vec4 FragColor;
 layout (location = 1) out vec4 FragBright;
 
-#define GAP float(30.0)
-#define INV2GAP float(0.01667)
+const float GAP = 30.0;
+const float INV2GAP = 0.01667;
 
 float genPCF(sampler2D shadowMap, vec3 shadowCoord, float bias, float pcount, float inv) {
 	float shadowFactor = 0.0;
@@ -158,13 +155,8 @@ void main() {
 		vec4 worldPos = invViewProjMatrix * vec4(ndcPos, 1.0);
 		worldPos /= worldPos.w;
 
-		vec3 radiance = vec3(3.5);
-		vec2 roughMetal = texture2D(roughMetalBuffer, vTexcoord).rg;
-
 		vec3 v = eyePos - worldPos.xyz;
 		float depthView = length(v);
-		v = v / depthView;
-		vec3 h = normalize(v + light);
 
 		vec4 normalGrass = texture2D(normalGrassBuffer, vTexcoord);
 		vec3 normal = normalGrass.xyz * 2.0 - vec3(1.0);
@@ -174,37 +166,52 @@ void main() {
 		float bias = tan(acos(abs(ndotl)));
 		ndotl = max(ndotl, 0.0);
 
-		float shadowFactor = (useShadow != 0) ? tex.a * genShadowFactor(worldPos, depthView, bias) : 1.0;
+		#ifdef USE_SHADOW
+		float shadowFactor = ndotl < 0.01 ? 0.0 : tex.a * genShadowFactor(worldPos, depthView, bias);
+		#else
+		float shadowFactor = 1.0;
+		#endif
 		vec3 ambient = material.r * albedo;
 
-		if(useCartoon < 0.5) { // PBR
-			// Cook-Torrance BRDF	
-			vec3 F0 = mix(vec3(0.04), albedo, roughMetal.g);	
-			float NDF = DistributionGGX(normal, h, roughMetal.r);   
-			float G   = GeometrySmith(normal, v, ndotl, roughMetal.r);      
-			vec3 kS   = FresnelSchlick(max(dot(h, v), 0.0), F0);
-			vec3 kD   = (vec3(1.0) - kS) * (1.0 - roughMetal.g);	 
+		// PBR
+		#ifndef USE_CARTOON
+			if(shadowFactor < 0.01 || udotl < 0.01) 
+				sceneColor = ambient * udotl;
+			else {
+				v = v / depthView;
+				vec3 h = normalize(v + light);
+				vec3 radiance = vec3(3.5);
+				vec2 roughMetal = texture2D(roughMetalBuffer, vTexcoord).rg;
+			
+				// Cook-Torrance BRDF	
+				vec3 F0 = mix(vec3(0.04), albedo, roughMetal.g);	
+				float NDF = DistributionGGX(normal, h, roughMetal.r);   
+				float G   = GeometrySmith(normal, v, ndotl, roughMetal.r);      
+				vec3 kS   = FresnelSchlick(max(dot(h, v), 0.0), F0);
+				vec3 kD   = (vec3(1.0) - kS) * (1.0 - roughMetal.g);	 
 
-			float specular = (NDF * G) / (4.0 * max(dot(normal, v), 0.0) * ndotl + 0.001);
-			vec3 Lo = (kD * albedo * INV_PI + kS * specular) * radiance * ndotl;
+				float specular = (NDF * G) / (4.0 * max(dot(normal, v), 0.0) * ndotl + 0.001);
+				vec3 Lo = (kD * albedo * INV_PI + kS * specular) * radiance * ndotl;
 
-			sceneColor = (ambient + shadowFactor * Lo) * udotl;
-		} else { // Cartoon
+				sceneColor = (ambient + shadowFactor * Lo) * udotl;
+			}
+		// Cartoon
+		#else
 			float darkness = ndotl * shadowFactor;
 			vec3 kCool = vec3(0.15, 0.15, 0.35), kWarm = vec3(0.9, 0.9, 0.25);
 			float threshold = 0.45;
 			vec3 kd = darkness < threshold ? kCool : kWarm;
 
 			sceneColor = (ambient + kd * albedo * material.g) * udotl;
-		}
+		#endif
 	} else {
-		if(dynSky > 0) {
+		#ifdef DYN_SKY
 			vec3 start = vec3(0.0,6378e3,0.0);
 			vec4 worldPos = invViewProjMatrix * vec4(ndcPos, 1.0);
 			worldPos /= worldPos.w;
 			vec3 view = normalize(worldPos.xyz - eyePos);
 			sceneColor = cloudRayMarch(texNoise, start, light, view, udotl, sceneColor, time);
-		}
+		#endif
 		bright = sceneColor * udotl * 2.5;
 	}
 

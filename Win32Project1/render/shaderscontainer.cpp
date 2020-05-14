@@ -50,7 +50,7 @@ string LoadExShader(char* name) {
 	return shaderStr;
 }
 
-void SetupShaders(ShaderManager* shaders) {
+void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	Shader* phong = shaders->addShader("phong", PHONG_VERT, PHONG_FRAG);
 	shaders->addShaderBindTex(phong);
 
@@ -114,6 +114,12 @@ void SetupShaders(ShaderManager* shaders) {
 	shaders->addShaderBindTex(billboardShadow);
 
 	Shader* deferred = shaders->addShader("deferred", POST_VERT, DEFERRED_FRAG);
+	if (cfgs->shadowQuality > 0)
+		deferred->attachDef("USE_SHADOW", "1");
+	if (cfgs->cartoon)
+		deferred->attachDef("USE_CARTOON", "1");
+	if (cfgs->dynsky)
+		deferred->attachDef("DYN_SKY", "1");
 	deferred->setSlot("texBuffer", 0);
 	deferred->setSlot("matBuffer", 1);
 	deferred->setSlot("normalGrassBuffer", 2);
@@ -121,6 +127,8 @@ void SetupShaders(ShaderManager* shaders) {
 	deferred->setSlot("depthBuffer", 4);
 
 	Shader* fxaa = shaders->addShader("fxaa", POST_VERT, AA_FRAG);
+	if (cfgs->cartoon)
+		fxaa->attachDef("USE_CARTOON", "1");
 	fxaa->setSlot("colorBuffer", 0);
 	fxaa->setSlot("normalBuffer", 1);
 	fxaa->setSlot("depthBuffer", 2);
@@ -150,6 +158,10 @@ void SetupShaders(ShaderManager* shaders) {
 	ssr->setSlot("depthBuffer", 3);
 
 	Shader* combined = shaders->addShader("combined", POST_VERT, COMBINE_FRAG);
+	if (cfgs->cartoon)
+		combined->attachDef("USE_CARTOON", "1");
+	if (cfgs->bloom)
+		combined->attachDef("USE_BLOOM", "1");
 	combined->setSlot("sceneBuffer", 0);
 	combined->setSlot("sceneDepthBuffer", 1);
 	combined->setSlot("waterBuffer", 2);
