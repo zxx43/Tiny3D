@@ -27,6 +27,7 @@ A Small OpenGL Based Renderer
 - PBR Material  
 - GPU occlusion culling  
 - Atmospheric scattering  
+- Volumetric cloud  
   
 ### Control:  
 

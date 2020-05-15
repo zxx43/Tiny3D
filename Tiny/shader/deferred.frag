@@ -25,12 +25,28 @@ const float GAP = 30.0;
 const float INV2GAP = 0.01667;
 
 float genPCF(sampler2D shadowMap, vec3 shadowCoord, float bias, float pcount, float inv) {
-	float shadowFactor = 0.0;
-	for(float offx = -pcount; offx <= pcount; offx += 1.0) {
-		for(float offy = -pcount; offy <= pcount; offy += 1.0) 
-			shadowFactor += texture2D(shadowMap, shadowCoord.xy + vec2(offx, offy) * shadowPixSize).r > (shadowCoord.z - bias) ? 1.0 : 0.0;
+	float shadowFactor = 0.0, biasDepth = shadowCoord.z - bias;
+	shadowFactor += texture2D(shadowMap, shadowCoord.xy + vec2(-pcount, -pcount) * shadowPixSize).r > biasDepth ? 1.0 : 0.0;
+	shadowFactor += texture2D(shadowMap, shadowCoord.xy + vec2(pcount, -pcount) * shadowPixSize).r > biasDepth ? 1.0 : 0.0;
+	shadowFactor += texture2D(shadowMap, shadowCoord.xy + vec2(pcount, pcount) * shadowPixSize).r > biasDepth ? 1.0 : 0.0;
+	shadowFactor += texture2D(shadowMap, shadowCoord.xy + vec2(-pcount, pcount) * shadowPixSize).r > biasDepth ? 1.0 : 0.0;
+
+	float preFactor = shadowFactor * 0.25;
+	if(preFactor * (1.0 - preFactor) < 0.01) return preFactor;
+	else {
+		float startInd = -pcount + 1.0;
+		for(float offx = startInd; offx < pcount; offx += 1.0) {
+			for(float offy = startInd; offy < pcount; offy += 1.0) 
+				shadowFactor += texture2D(shadowMap, shadowCoord.xy + vec2(offx, offy) * shadowPixSize).r > biasDepth ? 1.0 : 0.0;
+		}
+
+		shadowFactor += texture2D(shadowMap, shadowCoord.xy + vec2(0.0, -pcount) * shadowPixSize).r > biasDepth ? 1.0 : 0.0;
+		shadowFactor += texture2D(shadowMap, shadowCoord.xy + vec2(0.0, pcount) * shadowPixSize).r > biasDepth ? 1.0 : 0.0;
+		shadowFactor += texture2D(shadowMap, shadowCoord.xy + vec2(pcount, 0.0) * shadowPixSize).r > biasDepth ? 1.0 : 0.0;
+		shadowFactor += texture2D(shadowMap, shadowCoord.xy + vec2(-pcount, 0.0) * shadowPixSize).r > biasDepth ? 1.0 : 0.0;
+
+		return shadowFactor * inv;
 	}
-	return shadowFactor * inv;
 }
 
 
