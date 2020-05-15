@@ -162,6 +162,8 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 		combined->attachDef("USE_CARTOON", "1");
 	if (cfgs->bloom)
 		combined->attachDef("USE_BLOOM", "1");
+	if (cfgs->graphQuality > 3)
+		combined->attachDef("HIGH_QUALITY", "1");
 	combined->setSlot("sceneBuffer", 0);
 	combined->setSlot("sceneDepthBuffer", 1);
 	combined->setSlot("waterBuffer", 2);

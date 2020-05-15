@@ -6,7 +6,6 @@ uniform mat4 invViewProjMatrix;
 uniform vec3 light;
 uniform float udotl;
 uniform vec3 eyePos;
-uniform float quality;
 
 in vec2 vTexcoord;
 
@@ -71,7 +70,8 @@ void main() {
 	FragColor = vec4(GenFogColor(waterPos, depthView, finalColor), waterFactor);
 	#endif
 
-	if(quality > 3.0) 
-		FragColor.rgb = vec3(1.0) - exp(-FragColor.rgb * 2.5);
+	#ifdef HIGH_QUALITY
+	FragColor.rgb = vec3(1.0) - exp(-FragColor.rgb * 2.5);
+	#endif
 	FragColor.rgb = pow(FragColor.rgb, INV_GAMMA);
 }
