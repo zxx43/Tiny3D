@@ -42,6 +42,7 @@ public:
 	Node* staticRoot;
 	Node* billboardRoot;
 	Node* animationRoot;
+	Node* noise3d;
 	Player* player;
 	StaticNode* textureNode; // Use it to draw texture for debugging
 	std::vector<Node*> boundingNodes; // Used for debugging

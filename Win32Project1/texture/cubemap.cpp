@@ -48,7 +48,7 @@ CubeMap::CubeMap(const char* xpos,const char* xneg,const char* ypos,
 #endif
 }
 
-CubeMap::CubeMap(int w, int h) {
+CubeMap::CubeMap(int w, int h, int p) {
 	xposImg = NULL, xnegImg = NULL;
 	yposImg = NULL, ynegImg = NULL;
 	zposImg = NULL, znegImg = NULL;
@@ -63,18 +63,21 @@ CubeMap::CubeMap(int w, int h) {
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_SRGB_ALPHA,
-		width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_SRGB_ALPHA,
-		width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_SRGB_ALPHA,
-		width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_SRGB_ALPHA,
-		width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_SRGB_ALPHA,
-		width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_SRGB_ALPHA,
-		width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	GLenum format = p > HIGH_PRE ? GL_RGBA32F : GL_SRGB_ALPHA;
+	GLenum type = p > HIGH_PRE ? GL_FLOAT : GL_UNSIGNED_BYTE;
+
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, format,
+		width, height, 0, GL_RGBA, type, NULL);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, format,
+		width, height, 0, GL_RGBA, type, NULL);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, format,
+		width, height, 0, GL_RGBA, type, NULL);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, format,
+		width, height, 0, GL_RGBA, type, NULL);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, format,
+		width, height, 0, GL_RGBA, type, NULL);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, format,
+		width, height, 0, GL_RGBA, type, NULL);
 
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	hnd = genBindless();

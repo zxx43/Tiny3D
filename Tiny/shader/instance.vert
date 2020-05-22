@@ -36,7 +36,6 @@ void main() {
 			vTexid = vec4(texcoord.zw, texid);
 		#endif
 		vec4 worldVertex = modelMatrix * vec4(vertex, 1.0);
-		gl_Position = viewProjectMatrix * worldVertex;
 #else
 		vec3 position = modelMatrix[0].xyz;
 		vec3 board = modelMatrix[1].xyz;
@@ -52,6 +51,6 @@ void main() {
 			vTexid = vec4(texcoord.zw, 0.0, 0.0);
 		#endif
 		vec4 worldVertex = vec4(position + right + top, 1.0);
-		gl_Position = viewProjectMatrix * worldVertex;
 #endif
+	gl_Position = viewProjectMatrix * worldVertex;
 }

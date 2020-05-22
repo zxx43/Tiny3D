@@ -13,47 +13,48 @@ const vec4 OUTLINE_COLOR = vec4(0.0, 0.0, 0.0, 1.0);
 
 void main() {
 	float separation = 1.0;
-	float pw = pixelSize.x * separation, ph = pixelSize.y * separation;
+	vec2 off = pixelSize * separation;
 
-	vec2 ld = vTexcoord + vec2(-pw, -ph);
-	vec2 dd = vTexcoord + vec2(0.0, -ph);
-	vec2 rd = vTexcoord + vec2(pw, -ph);
-	vec2 ll = vTexcoord + vec2(-pw, 0.0);
-	vec2 rr = vTexcoord + vec2(pw, 0.0);
-	vec2 lt = vTexcoord + vec2(-pw, ph);
-	vec2 tt = vTexcoord + vec2(0.0, ph);
-	vec2 rt = vTexcoord + vec2(pw, ph);
+	vec2 ld = vTexcoord + vec2(-off.x, -off.y);
+	vec2 dd = vTexcoord + vec2(0.0,    -off.y);
+	vec2 rd = vTexcoord + vec2(off.x,  -off.y);
+	vec2 ll = vTexcoord + vec2(-off.x,    0.0);
+	vec2 rr = vTexcoord + vec2(off.x,     0.0);
+	vec2 lt = vTexcoord + vec2(-off.x,  off.y);
+	vec2 tt = vTexcoord + vec2(0.0,     off.y);
+	vec2 rt = vTexcoord + vec2(off.x,   off.y);
 	vec2 ct = vTexcoord;
 	
-	float d0 = texture2D(depthBuffer, ld).r;
-	float d1 = texture2D(depthBuffer, dd).r;
-	float d2 = texture2D(depthBuffer, rd).r;
-	float d3 = texture2D(depthBuffer, ll).r;
-	float d4 = texture2D(depthBuffer, rr).r;
-	float d5 = texture2D(depthBuffer, lt).r;
-	float d6 = texture2D(depthBuffer, tt).r;
-	float d7 = texture2D(depthBuffer, rt).r;
-	float depth = texture2D(depthBuffer, ct).r;
+	float d0 = texture(depthBuffer, ld).r;
+	float d1 = texture(depthBuffer, dd).r;
+	float d2 = texture(depthBuffer, rd).r;
+	float d3 = texture(depthBuffer, ll).r;
+	float d4 = texture(depthBuffer, rr).r;
+	float d5 = texture(depthBuffer, lt).r;
+	float d6 = texture(depthBuffer, tt).r;
+	float d7 = texture(depthBuffer, rt).r;
+	float depth = texture(depthBuffer, ct).r;
+	depth = 1.0 / depth;
 	
-	vec4 depth1 = vec4(d0, d1, d2, d3);
-	vec4 depth2 = vec4(d4, d5, d6, d7);
+	vec4 depth1 = vec4(1.0) / vec4(d0, d1, d2, d3);
+	vec4 depth2 = vec4(1.0) / vec4(d4, d5, d6, d7);
 	
 	vec4 dDepth1 = abs(depth1 - depth);
 	vec4 dDepth2 = abs(depth2 - depth);
 	
 	vec4 minDDepth = max(min(dDepth1, dDepth2), 0.00001);
 	vec4 maxDDepth = max(dDepth1, dDepth2);
-	vec4 depthResults = step(minDDepth * 50.0, maxDDepth);
+	vec4 depthResults = step(minDDepth * 110.0, maxDDepth);
 
-	vec4 ldn = texture2D(normalBuffer, ld) * 2.0 - 1.0;
-	vec4 ddn = texture2D(normalBuffer, dd) * 2.0 - 1.0;
-	vec4 rdn = texture2D(normalBuffer, rd) * 2.0 - 1.0;
-	vec4 lln = texture2D(normalBuffer, ll) * 2.0 - 1.0;
-	vec4 rrn = texture2D(normalBuffer, rr) * 2.0 - 1.0;
-	vec4 ltn = texture2D(normalBuffer, lt) * 2.0 - 1.0;
-	vec4 ttn = texture2D(normalBuffer, tt) * 2.0 - 1.0;
-	vec4 rtn = texture2D(normalBuffer, rt) * 2.0 - 1.0;
-	vec4 ctn = texture2D(normalBuffer, ct) * 2.0 - 1.0;
+	vec4 ldn = texture(normalBuffer, ld) * 2.0 - 1.0;
+	vec4 ddn = texture(normalBuffer, dd) * 2.0 - 1.0;
+	vec4 rdn = texture(normalBuffer, rd) * 2.0 - 1.0;
+	vec4 lln = texture(normalBuffer, ll) * 2.0 - 1.0;
+	vec4 rrn = texture(normalBuffer, rr) * 2.0 - 1.0;
+	vec4 ltn = texture(normalBuffer, lt) * 2.0 - 1.0;
+	vec4 ttn = texture(normalBuffer, tt) * 2.0 - 1.0;
+	vec4 rtn = texture(normalBuffer, rt) * 2.0 - 1.0;
+	vec4 ctn = texture(normalBuffer, ct) * 2.0 - 1.0;
 
 	vec3 normal = ctn.xyz;
 	vec4 dNormal1 = vec4(dot(normal, ldn.xyz),
@@ -67,15 +68,15 @@ void main() {
 	vec4 dotDeltas = abs(dNormal1 - dNormal2);
     vec4 normalResults = step(0.4, dotDeltas);
 	
-	vec4 c0 = texture2D(colorBuffer, ld);
-	vec4 c1 = texture2D(colorBuffer, dd);
-	vec4 c2 = texture2D(colorBuffer, rd);
-	vec4 c3 = texture2D(colorBuffer, ll);
-	vec4 c4 = texture2D(colorBuffer, rr);
-	vec4 c5 = texture2D(colorBuffer, lt);
-	vec4 c6 = texture2D(colorBuffer, tt);
-	vec4 c7 = texture2D(colorBuffer, rt);
-	vec4 color = texture2D(colorBuffer, ct);
+	vec4 c0 = texture(colorBuffer, ld);
+	vec4 c1 = texture(colorBuffer, dd);
+	vec4 c2 = texture(colorBuffer, rd);
+	vec4 c3 = texture(colorBuffer, ll);
+	vec4 c4 = texture(colorBuffer, rr);
+	vec4 c5 = texture(colorBuffer, lt);
+	vec4 c6 = texture(colorBuffer, tt);
+	vec4 c7 = texture(colorBuffer, rt);
+	vec4 color = texture(colorBuffer, ct);
 	
 	vec4 dWater1 = vec4(color.a) - vec4(c0.a, c1.a, c2.a, c3.a);
 	vec4 dWater2 = vec4(color.a) - vec4(c4.a, c5.a, c6.a, c7.a);

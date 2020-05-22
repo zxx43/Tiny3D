@@ -16,22 +16,22 @@ layout (location = 3) out vec4 FragRoughMetal;
 void main() {
 	vec3 normal = vNormal;
 	if(vTexid.y >= 0.0) {
-		vec3 texNorm = texture2D(texBlds[int(vTexid.y)], vTexcoord).rgb;
+		vec3 texNorm = texture(texBlds[int(vTexid.y)], vTexcoord).rgb;
 		texNorm = 2.0 * texNorm - vec3(1.0);
 		normal = vTBN * texNorm;
 	}
 
-	FragTex = texture2D(texBlds[int(vTexid.x)], vTexcoord);
+	FragTex = texture(texBlds[int(vTexid.x)], vTexcoord);
 	FragMat = vec4(vColor, 1.0);
 	FragNormalGrass = vec4(normalize(normal) * 0.5 + 0.5, 0.0);
 
 	FragRoughMetal = DefaultRM;
 	if(vTexid.z >= 0.0) {
-		float roughness = texture2D(texBlds[int(vTexid.z)], vTexcoord).r;
+		float roughness = texture(texBlds[int(vTexid.z)], vTexcoord).r;
 		FragRoughMetal.r = roughness;
 	}
 	if(vTexid.w >= 0.0) {
-		float metallic = texture2D(texBlds[int(vTexid.w)], vTexcoord).r;
+		float metallic = texture(texBlds[int(vTexid.w)], vTexcoord).r;
 		FragRoughMetal.g = metallic;
 	}
 }

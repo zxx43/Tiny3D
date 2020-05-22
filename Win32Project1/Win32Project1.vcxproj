@@ -340,6 +340,8 @@
     <None Include="..\Tiny\shader\instance.vert" />
     <None Include="..\Tiny\shader\mean.frag" />
     <None Include="..\Tiny\shader\multiCull.comp" />
+    <None Include="..\Tiny\shader\noise.frag" />
+    <None Include="..\Tiny\shader\noise.vert" />
     <None Include="..\Tiny\shader\phong.frag" />
     <None Include="..\Tiny\shader\phong.vert" />
     <None Include="..\Tiny\shader\post.vert" />

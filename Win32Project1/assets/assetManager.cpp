@@ -13,6 +13,7 @@ AssetManager::AssetManager() {
 	texBld = new TextureBindless();
 	skyTexture = NULL;
 	envTexture = NULL;
+	noise3DTexture = NULL;
 	reflectTexture = NULL;
 	heightTexture = NULL;
 	distortionTex = -1;
@@ -38,6 +39,7 @@ AssetManager::~AssetManager() {
 	if (skyTexture) delete skyTexture;
 	if (envTexture && envTexture != skyTexture) delete envTexture;
 	skyTexture = NULL; envTexture = NULL;
+	if (noise3DTexture) delete noise3DTexture; noise3DTexture = NULL;
 }
 
 void AssetManager::addTextureBindless(const char* name, bool srgb, int wrap) {
@@ -91,6 +93,16 @@ void AssetManager::setEnvTexture(CubeMap* tex) {
 
 CubeMap* AssetManager::getEnvTexture() {
 	return envTexture;
+}
+
+void AssetManager::setNoise3D(CubeMap* tex) {
+	if (tex == noise3DTexture) return;
+	if (noise3DTexture) delete noise3DTexture;
+	noise3DTexture = tex;
+}
+
+CubeMap* AssetManager::getNoise3D() {
+	return noise3DTexture;
 }
 
 void AssetManager::setReflectTexture(Texture2D* tex) {

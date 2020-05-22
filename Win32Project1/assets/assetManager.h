@@ -22,6 +22,7 @@ public:
 	TextureBindless* texBld;
 	CubeMap* skyTexture;
 	CubeMap* envTexture;
+	CubeMap* noise3DTexture;
 	Texture2D* reflectTexture;
 	Texture2D* heightTexture;
 	int distortionTex, noiseTex, roadTex;
@@ -39,6 +40,8 @@ public:
 	CubeMap* getSkyTexture();
 	void setEnvTexture(CubeMap* tex);
 	CubeMap* getEnvTexture();
+	void setNoise3D(CubeMap* tex);
+	CubeMap* getNoise3D();
 	void setReflectTexture(Texture2D* tex);
 	Texture2D* getReflectTexture();
 	void addDistortionTex(const char* texName);

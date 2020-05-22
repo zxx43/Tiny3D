@@ -33,7 +33,7 @@ public:
 	CubeMap(const char* xpos,const char* xneg,
 			const char* ypos,const char* yneg,
 			const char* zpos,const char* zneg);
-	CubeMap(int w, int h);
+	CubeMap(int w, int h, int p = LOW_PRE);
 	~CubeMap();
 	int getWidth() { return width; }
 	int getHeight() { return height; }

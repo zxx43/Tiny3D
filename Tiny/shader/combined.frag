@@ -26,15 +26,15 @@ vec3 GenFogColor(vec4 worldPos, float depthView, vec3 sceneColor) {
 }
 
 void main() {
- 	vec4 waterRefColor = texture2D(waterBuffer, vTexcoord);	
-	vec4 sceneColor = texture2D(sceneBuffer, vTexcoord);
+ 	vec4 waterRefColor = texture(waterBuffer, vTexcoord);	
+	vec4 sceneColor = texture(sceneBuffer, vTexcoord);
 	#ifdef USE_BLOOM
-		vec4 bloomColor = texture2D(bloomBuffer, vTexcoord);
+		vec4 bloomColor = texture(bloomBuffer, vTexcoord);
 		sceneColor.rgb += bloomColor.rgb;
 	#endif
 
-	float sDepth = texture2D(sceneDepthBuffer, vTexcoord).r;
-	float wDepth = texture2D(waterDepthBuffer, vTexcoord).r;
+	float sDepth = texture(sceneDepthBuffer, vTexcoord).r;
+	float wDepth = texture(waterDepthBuffer, vTexcoord).r;
 
 	vec3 ndcScene = vec3(vTexcoord, sDepth) * 2.0 - 1.0;
 	vec3 ndcWater = vec3(vTexcoord, wDepth) * 2.0 - 1.0;
@@ -47,11 +47,11 @@ void main() {
 	vec3 eye2Water = waterPos.xyz - eyePos;
 	float depthView = length(eye2Water);
 
-	vec4 waterMatColor = texture2D(matBuffer, vTexcoord);
+	vec4 waterMatColor = texture(matBuffer, vTexcoord);
 	float waterFactor = 1.0 - step(0.2, waterMatColor.w);
 	float depthFactor = clamp((waterPos.y - scenePos.y - 10.0) * 0.01, 0.0, 1.0) * waterFactor;
 
-	vec3 waterNormal = texture2D(waterNormalBuffer, vTexcoord).rgb * 2.0 - 1.0;
+	vec3 waterNormal = texture(waterNormalBuffer, vTexcoord).rgb * 2.0 - 1.0;
 	float ndote = -dot(waterNormal, normalize(eye2Water));
 
 	vec3 sceneRefract = sceneColor.rgb;

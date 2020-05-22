@@ -29,6 +29,10 @@
 #define D_DISTANCE 1.0f
 #define L_DISTANCE 0.0025f
 #define MIN_HEIGHT 10.0f
+
+#define LOW_PRE 0
+#define HIGH_PRE 1
+#define FLOAT_PRE 2
 #endif
 
 #ifndef NULL

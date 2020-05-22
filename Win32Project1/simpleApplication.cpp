@@ -21,6 +21,8 @@ SimpleApplication::SimpleApplication() : Application() {
 	ssgChain = NULL;
 	bloomChain = NULL;
 	aaInput.clear();
+	noiseBuf = NULL;
+	firstFrame = true;
 }
 
 SimpleApplication::~SimpleApplication() {
@@ -37,6 +39,7 @@ SimpleApplication::~SimpleApplication() {
 	if (ssgChain) delete ssgChain; ssgChain = NULL;
 	if (bloomChain) delete bloomChain; bloomChain = NULL;
 	aaInput.clear();
+	if (noiseBuf) delete noiseBuf; noiseBuf = NULL;
 }
 
 void SimpleApplication::resize(int width, int height) {
@@ -45,34 +48,27 @@ void SimpleApplication::resize(int width, int height) {
 	int precision = cfgs->graphQuality > 4 ? HIGH_PRE : LOW_PRE;
 	int scrPre = (cfgs->graphQuality > 4 || cfgs->ssr) ? HIGH_PRE : LOW_PRE;
 	int hdrPre = cfgs->graphQuality > 3 ? FLOAT_PRE : precision;
-	int depthPre = LOW_PRE;
+	int depthPre = LOW_PRE, matPre = LOW_PRE, waterPre = LOW_PRE;
+	int aaPre = LOW_PRE, dofPre = LOW_PRE, rawPre = LOW_PRE;
 
 	Application::resize(width, height);
 
 	if (screen) delete screen;
 	screen = new FrameBuffer(width, height, hdrPre, 4, false); // texBuffer
-	screen->addColorBuffer(precision, 4); // matBuffer
-	screen->addColorBuffer(scrPre, 4); // normal-grassBuffer
-	screen->addColorBuffer(scrPre, 3); // rough-metalBuffer
+	screen->addColorBuffer(matPre, 4); // matBuffer
+	screen->addColorBuffer(matPre, 3); // normal-grassBuffer
+	screen->addColorBuffer(matPre, 3); // rough-metalBuffer
 	screen->attachDepthBuffer(depthPre); // depthBuffer
 
 	if (waterFrame) delete waterFrame;
 	waterFrame = new FrameBuffer(width, height, hdrPre, 4, false);
-	waterFrame->addColorBuffer(precision, 4);
-	waterFrame->addColorBuffer(scrPre, 3);
+	waterFrame->addColorBuffer(waterPre, 4);
+	waterFrame->addColorBuffer(waterPre, 3);
 	waterFrame->attachDepthBuffer(depthPre);
 
 	if (sceneFilter) delete sceneFilter;
 	sceneFilter = new Filter(width, height, true, precision, 4, false);
-	sceneFilter->addOutput(hdrPre, 4);
-
-	/*
-	if (ssgChain) delete ssgChain;
-	ssgChain = new FilterChain(width, height, true, hdrPre, 4, false);
-	ssgChain->addInputTex("colorBuffer", sceneFilter->getOutput(0));
-	ssgChain->addInputTex("normalGrassBuffer", screen->getColorBuffer(2));
-	ssgChain->addInputTex("depthBuffer", screen->getDepthBuffer());
-	*/
+	sceneFilter->addOutput(hdrPre, 3);
 
 	if (combinedChain) delete combinedChain;
 	if (!cfgs->fxaa && !cfgs->dof && !cfgs->ssr)
@@ -81,20 +77,20 @@ void SimpleApplication::resize(int width, int height) {
 		combinedChain = new FilterChain(width, height, true, precision, 4);
 		if (cfgs->fxaa) {
 			if (aaFilter) delete aaFilter;
-			aaFilter = new Filter(width, height, false, precision, 4);
+			aaFilter = new Filter(width, height, false, aaPre, 4);
 			aaInput.clear();
 		}
 		if (cfgs->dof) {
 			if (dofBlurFilter) delete dofBlurFilter;
 			dofBlurFilter = new Filter(width * 0.5, height * 0.5, true, LOW_PRE, 4);
 			if (dofChain) delete dofChain;
-			dofChain = new FilterChain(width, height, cfgs->fxaa, precision, 4);
+			dofChain = new FilterChain(width, height, cfgs->fxaa, dofPre, 4);
 			dofChain->addInputTex(dofBlurFilter->getOutput(0));
 			dofChain->addInputTex(combinedChain->getOutputTex(0));
 		}
 		if (cfgs->ssr) {
 			if (ssrChain) delete ssrChain;
-			ssrChain = new FilterChain(width, height, true, LOW_PRE, 4, false);
+			ssrChain = new FilterChain(width * 0.75, height * 0.75, true, LOW_PRE, 4, false);
 			ssrChain->addInputTex(combinedChain->getOutputTex(0));
 			ssrChain->addInputTex(waterFrame->getColorBuffer(1));
 			ssrChain->addInputTex(waterFrame->getColorBuffer(2));
@@ -102,7 +98,7 @@ void SimpleApplication::resize(int width, int height) {
 
 			if (!cfgs->fxaa && !cfgs->dof) {
 				if (rawScreenFilter) delete rawScreenFilter;
-				rawScreenFilter = new Filter(width, height, false, precision, 4);
+				rawScreenFilter = new Filter(width, height, false, rawPre, 4);
 			}
 
 			//if (ssrBlurFilter) delete ssrBlurFilter;
@@ -112,7 +108,7 @@ void SimpleApplication::resize(int width, int height) {
 
 	float bloomScale = 0.8;
 	if (bloomChain) delete bloomChain;
-	bloomChain = new DualFilter(width * bloomScale, height * bloomScale, true, hdrPre, 4, false);
+	bloomChain = new DualFilter(width * bloomScale, height * bloomScale, true, hdrPre, 3, false);
 	bloomChain->addInputTex(sceneFilter->getOutput(1));
 
 	if (combinedChain) {
@@ -163,8 +159,15 @@ void SimpleApplication::mouseKey(bool press, bool isMain) {
 	scene->player->mousePress(press, isMain);
 }
 
+void SimpleApplication::preDraw() {
+	if (!firstFrame) return;
+	printf("first draw\n");
+	firstFrame = false;
+}
+
 void SimpleApplication::draw() {
 	if (!sceneFilter || !renderMgr || !AssetManager::assetManager) return;
+	else preDraw();
 
 	if (ssrChain) {
 		//AssetManager::assetManager->setReflectTexture(ssrBlurFilter->getOutput(0));

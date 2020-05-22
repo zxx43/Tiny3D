@@ -19,6 +19,8 @@ private:
 	Filter* ssrBlurFilter;
 	Filter* rawScreenFilter;
 	DualFilter* bloomChain;
+	FrameBuffer* noiseBuf;
+	bool firstFrame;
 public:
 	SimpleApplication();
 	virtual ~SimpleApplication();
@@ -36,6 +38,7 @@ public:
 private:
 	virtual void initScene();
 	void updateMovement();
+	void preDraw();
 };
 
 #endif

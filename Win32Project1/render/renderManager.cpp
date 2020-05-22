@@ -100,11 +100,11 @@ void RenderManager::updateRenderQueues(Scene* scene) {
 
 	PushNodeToQueue(renderData->queues[QUEUE_STATIC_SN], scene, scene->staticRoot, cameraNear, cameraMain);
 	PushNodeToQueue(renderData->queues[QUEUE_STATIC_SM], scene, scene->staticRoot, cameraMid, cameraMain);
-	PushNodeToQueue(renderData->queues[QUEUE_STATIC_SF], scene, scene->staticRoot, cameraFar, cameraMain);
+	//PushNodeToQueue(renderData->queues[QUEUE_STATIC_SF], scene, scene->staticRoot, cameraFar, cameraMain);
 	PushNodeToQueue(renderData->queues[QUEUE_STATIC], scene, scene->staticRoot, cameraMain, cameraMain);
 	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE_SN], scene, scene->animationRoot, cameraNear, cameraMain);
 	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE_SM], scene, scene->animationRoot, cameraMid, cameraMain);
-	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE_SF], scene, scene->animationRoot, cameraFar, cameraMain);
+	//PushNodeToQueue(renderData->queues[QUEUE_ANIMATE_SF], scene, scene->animationRoot, cameraFar, cameraMain);
 	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE], scene, scene->animationRoot, cameraMain, cameraMain);
 }
 
@@ -510,13 +510,12 @@ void RenderManager::drawTexture2Screen(Render* render, Scene* scene, u64 texhnd)
 	state->shader->setHandle64("tex", texhnd);
 
 	if (!scene->textureNode) {
-		Board* board = new Board(2, 2, 2);
+		Board board(2, 2, 2);
 		scene->textureNode = new StaticNode(vec3(0, 0, 0));
 		scene->textureNode->setFullStatic(true);
-		StaticObject* boardObject = new StaticObject(board);
+		StaticObject* boardObject = new StaticObject(&board);
 		scene->textureNode->addObject(scene, boardObject);
 		scene->textureNode->prepareDrawcall();
-		delete board;
 	}
 
 	render->setFrameBuffer(NULL);
@@ -528,4 +527,59 @@ void RenderManager::drawBoundings(Render* render, RenderState* state, Scene* sce
 		Node* node = scene->boundingNodes[i];
 		render->draw(camera, node->drawcall, state);
 	}
+}
+
+void RenderManager::drawNoise3d(Render* render, Scene* scene, FrameBuffer* noiseBuf) {
+	mat4 proj = perspective(90.0, 1.0, 0.5, 10.0);
+	mat4 matPosx = proj * viewMat(vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 1.0f, 0.0f), vec3(-1.0f, 0.0f, 0.0f), vec3(0.0, 0.0, 0.0));
+	mat4 matNegx = proj * viewMat(vec3(0.0f, 0.0f, -1.0f), vec3(0.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(0.0, 0.0, 0.0));
+	mat4 matNegy = proj * viewMat(vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, -1.0f, 0.0f), vec3(0.0, 0.0, 0.0));
+	mat4 matPosy = proj * viewMat(vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0, 0.0, 0.0));
+	mat4 matNegz = proj * viewMat(vec3(-1.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f), vec3(0.0, 0.0, 0.0));
+	mat4 matPosz = proj * viewMat(vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0, 0.0, 0.0));
+
+	Sphere mesh(16, 16);
+	StaticObject* object = new StaticObject(&mesh);
+	object->bindMaterial(MaterialManager::materials->add(new Material("noise_mat")));
+	object->setPosition(0, 0, 0);
+	object->setSize(4, 4, 4);
+	StaticNode* node = new StaticNode(vec3(0, 0, 0));
+	node->setFullStatic(true);
+	node->addObject(scene, object);
+	node->updateNode();
+	node->prepareDrawcall();
+	scene->noise3d = node;
+
+	RenderState state;
+	state.reset();
+	state.cullMode = CULL_FRONT;
+	state.lightEffect = false;
+	state.delay = 0;
+	state.shader = render->findShader("noise");
+
+	render->useFrameBuffer(noiseBuf);
+
+	render->useFrameCube(0);
+	render->setShaderMat4(state.shader, "viewProjectMatrix", matPosx);
+	render->draw(NULL, node->drawcall, &state);
+
+	render->useFrameCube(1);
+	render->setShaderMat4(state.shader, "viewProjectMatrix", matNegx);
+	render->draw(NULL, node->drawcall, &state);
+
+	render->useFrameCube(2);
+	render->setShaderMat4(state.shader, "viewProjectMatrix", matPosy);
+	render->draw(NULL, node->drawcall, &state);
+
+	render->useFrameCube(3);
+	render->setShaderMat4(state.shader, "viewProjectMatrix", matNegy);
+	render->draw(NULL, node->drawcall, &state);
+
+	render->useFrameCube(4);
+	render->setShaderMat4(state.shader, "viewProjectMatrix", matPosz);
+	render->draw(NULL, node->drawcall, &state);
+
+	render->useFrameCube(5);
+	render->setShaderMat4(state.shader, "viewProjectMatrix", matNegz);
+	render->draw(NULL, node->drawcall, &state);
 }

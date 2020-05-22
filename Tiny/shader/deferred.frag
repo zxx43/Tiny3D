@@ -23,27 +23,28 @@ layout (location = 1) out vec4 FragBright;
 
 const float GAP = 30.0;
 const float INV2GAP = 0.01667;
+const vec3 KCool = vec3(0.15, 0.15, 0.35);
+const vec3 KWarm = vec3(0.9, 0.9, 0.25);
 
 float genPCF(sampler2D shadowMap, vec3 shadowCoord, float bias, float pcount, float inv) {
 	float shadowFactor = 0.0, biasDepth = shadowCoord.z - bias;
-	shadowFactor += texture2D(shadowMap, shadowCoord.xy + vec2(-pcount, -pcount) * shadowPixSize).r > biasDepth ? 1.0 : 0.0;
-	shadowFactor += texture2D(shadowMap, shadowCoord.xy + vec2(pcount, -pcount) * shadowPixSize).r > biasDepth ? 1.0 : 0.0;
-	shadowFactor += texture2D(shadowMap, shadowCoord.xy + vec2(pcount, pcount) * shadowPixSize).r > biasDepth ? 1.0 : 0.0;
-	shadowFactor += texture2D(shadowMap, shadowCoord.xy + vec2(-pcount, pcount) * shadowPixSize).r > biasDepth ? 1.0 : 0.0;
+	shadowFactor += step(biasDepth, texture(shadowMap, shadowCoord.xy + vec2(-pcount, -pcount) * shadowPixSize).r);
+	shadowFactor += step(biasDepth, texture(shadowMap, shadowCoord.xy + vec2(pcount, -pcount) * shadowPixSize).r);
+	shadowFactor += step(biasDepth, texture(shadowMap, shadowCoord.xy + vec2(pcount, pcount) * shadowPixSize).r);
+	shadowFactor += step(biasDepth, texture(shadowMap, shadowCoord.xy + vec2(-pcount, pcount) * shadowPixSize).r);
 
 	float preFactor = shadowFactor * 0.25;
 	if(preFactor * (1.0 - preFactor) < 0.01) return preFactor;
 	else {
-		float startInd = -pcount + 1.0;
-		for(float offx = startInd; offx < pcount; offx += 1.0) {
-			for(float offy = startInd; offy < pcount; offy += 1.0) 
-				shadowFactor += texture2D(shadowMap, shadowCoord.xy + vec2(offx, offy) * shadowPixSize).r > biasDepth ? 1.0 : 0.0;
+		float pcount2 = pcount * pcount;
+		for(float offx = -pcount; offx <= pcount; offx += 1.0) {
+			for(float offy = -pcount; offy <= pcount; offy += 1.0) {
+				float off2 = abs(offx * offy);
+				if(off2 != pcount2)
+					shadowFactor += step(biasDepth, texture(shadowMap, shadowCoord.xy + vec2(offx, offy) * shadowPixSize).r);
+				else continue;
+			}
 		}
-
-		shadowFactor += texture2D(shadowMap, shadowCoord.xy + vec2(0.0, -pcount) * shadowPixSize).r > biasDepth ? 1.0 : 0.0;
-		shadowFactor += texture2D(shadowMap, shadowCoord.xy + vec2(0.0, pcount) * shadowPixSize).r > biasDepth ? 1.0 : 0.0;
-		shadowFactor += texture2D(shadowMap, shadowCoord.xy + vec2(pcount, 0.0) * shadowPixSize).r > biasDepth ? 1.0 : 0.0;
-		shadowFactor += texture2D(shadowMap, shadowCoord.xy + vec2(-pcount, 0.0) * shadowPixSize).r > biasDepth ? 1.0 : 0.0;
 
 		return shadowFactor * inv;
 	}
@@ -51,7 +52,7 @@ float genPCF(sampler2D shadowMap, vec3 shadowCoord, float bias, float pcount, fl
 
 
 float genShadow(sampler2D shadowMap, vec3 shadowCoord, float bias) {
-	return texture2D(shadowMap, shadowCoord.xy).r > (shadowCoord.z - bias) ? 1.0 : 0.0;
+	return step(shadowCoord.z - bias, texture(shadowMap, shadowCoord.xy).r);
 }
 
 float genShadowFactor(vec4 worldPos, float depthView, float bias) {
@@ -81,45 +82,17 @@ float genShadowFactor(vec4 worldPos, float depthView, float bias) {
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
 		float bs = bias * 0.00001;
 		return genPCF(depthBufferMid, shadowCoord, bs, 1.0, 0.111);
-	} else {
-		vec4 far = lightViewProjFar * worldPos;
-		vec3 lightPosition = far.xyz / far.w;
-		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
-		float bs = bias * 0.00001;
-		return genShadow(depthBufferFar, shadowCoord, bs);
 	}
+	#ifdef DRAW_FAR_SHADOW
+		else {
+			vec4 far = lightViewProjFar * worldPos;
+			vec3 lightPosition = far.xyz / far.w;
+			vec3 shadowCoord = lightPosition * 0.5 + 0.5;
+			float bs = bias * 0.00001;
+			return genShadow(depthBufferFar, shadowCoord, bs);
+		}
+	#endif
 	return 1.0;
-}
-
-vec3 Smudge(vec3 sceneTex, float grassFlag, float viewDist) {
-	if(grassFlag < 1.0) 
-		return sceneTex;
-	else {
-		float xx = vTexcoord.x;
-		float yy = 1.0 - vTexcoord.y;
-
-		float len = viewDist;
-		float d = BlendVal(len, 0.0, 500.0, 100.0, 500.0);
-		float dclose = BlendVal(len, 0.0, 20.0, 30.0, 1.0);
-		d *= dclose;
-		yy += dot(vec3(xx), vec3(1009.0, 1259.0, 2713.0));
-		yy += time * 0.00005;
-		yy += sceneTex.g * 0.4;
-		
-		float yoffset = 1.0 - fract(yy * d) / d;
-		vec2 uvoffset = vTexcoord - vec2(0.0, yoffset);
-		vec4 grassColor = texture2D(texBuffer, uvoffset);
-
-		float depthGrass = texture2D(depthBuffer, uvoffset).r;
-		vec3 ndcGrass = vec3(uvoffset, depthGrass) * 2.0 - 1.0;
-		vec4 viewGrass = invProjMatrix * vec4(ndcGrass, 1.0);
-		viewGrass /= viewGrass.w;
-		
-		if(viewGrass.z >= -viewDist)
-			return sceneTex;
-		else 
-			return mix(sceneTex, grassColor.rgb, saturate(yoffset * d / 3.8));
-	}
 }
 
 // ----------------------------------------------------------------------------
@@ -160,9 +133,9 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0) {
 // ----------------------------------------------------------------------------
 
 void main() {
-	float depth = texture2D(depthBuffer, vTexcoord).r;
+	float depth = texture(depthBuffer, vTexcoord).r;
 	vec3 ndcPos = vec3(vTexcoord, depth) * 2.0 - 1.0;
-	vec4 tex = texture2D(texBuffer, vTexcoord);
+	vec4 tex = texture(texBuffer, vTexcoord);
 	vec3 albedo = tex.rgb;
 	vec3 sceneColor = albedo;
 	vec3 bright = vec3(0.0);
@@ -174,9 +147,8 @@ void main() {
 		vec3 v = eyePos - worldPos.xyz;
 		float depthView = length(v);
 
-		vec4 normalGrass = texture2D(normalGrassBuffer, vTexcoord);
-		vec3 normal = normalGrass.xyz * 2.0 - vec3(1.0);
-		vec3 material = texture2D(matBuffer, vTexcoord).rgb;
+		vec3 normal = texture(normalGrassBuffer, vTexcoord).xyz * 2.0 - vec3(1.0);
+		vec3 material = texture(matBuffer, vTexcoord).rgb;
 
 		float ndotl = dot(light, normal);
 		float bias = tan(acos(abs(ndotl)));
@@ -194,10 +166,10 @@ void main() {
 			if(shadowFactor < 0.01 || udotl < 0.01) 
 				sceneColor = ambient * udotl;
 			else {
-				v = v / depthView;
+				v /= depthView;
 				vec3 h = normalize(v + light);
 				vec3 radiance = vec3(3.5);
-				vec2 roughMetal = texture2D(roughMetalBuffer, vTexcoord).rg;
+				vec2 roughMetal = texture(roughMetalBuffer, vTexcoord).rg;
 			
 				// Cook-Torrance BRDF	
 				vec3 F0 = mix(vec3(0.04), albedo, roughMetal.g);	
@@ -214,9 +186,8 @@ void main() {
 		// Cartoon
 		#else
 			float darkness = ndotl * shadowFactor;
-			vec3 kCool = vec3(0.15, 0.15, 0.35), kWarm = vec3(0.9, 0.9, 0.25);
 			float threshold = 0.45;
-			vec3 kd = darkness < threshold ? kCool : kWarm;
+			vec3 kd = darkness < threshold ? KCool : KWarm;
 
 			sceneColor = (ambient + kd * albedo * material.g) * udotl;
 		#endif

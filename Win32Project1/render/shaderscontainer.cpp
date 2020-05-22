@@ -42,6 +42,8 @@ using namespace std;
 #define GRASS_VERT "shader/grass.vert"
 #define ATMOS_VERT "shader/atmosphere.vert"
 #define ATMOS_FRAG "shader/atmosphere.frag"
+#define NOISE_VERT "shader/noise.vert"
+#define NOISE_FRAG "shader/noise.frag"
 
 string LoadExShader(char* name) {
 	char* fileStr = textFileRead(name);
@@ -78,7 +80,9 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 
 	Shader* grass = shaders->addShader("grass", GRASS_VERT, GRASS_LAYER_FRAG);
 	Shader* sky = shaders->addShader("sky", SKY_VERT, SKY_FRAG);
+
 	Shader* water = shaders->addShader("water", WATER_VERT, WATER_FRAG);
+	if (!cfgs->ssr) water->attachDef("DISABLE_SSR", "1");
 
 	Shader* phongShadow = shaders->addShader("phong_s", PHONG_VERT, SHADOW_TEX_FRAG);
 	phongShadow->attachDef("ShadowPass", "1.0");
@@ -206,6 +210,7 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	animFlush->attachDef("AnimPass", "1.0");
 
 	Shader* atmos = shaders->addShader("atmos", ATMOS_VERT, ATMOS_FRAG);
+	Shader* noise = shaders->addShader("noise", NOISE_VERT, NOISE_FRAG);
 
 	shaders->compile();
 }

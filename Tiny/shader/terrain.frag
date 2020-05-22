@@ -43,7 +43,8 @@ void main() {
 	FragTex = texColor;
 	FragMat = vec4(vColor, 1.0);
 	float grassFlag = 0.0;
-	if(FragTex.g > FragTex.r + 0.01 && FragTex.g > FragTex.b + 0.01) grassFlag = 1.0;
+	// Avoid ssg
+	//if(FragTex.g > FragTex.r + 0.01 && FragTex.g > FragTex.b + 0.01) grassFlag = 1.0;
 	FragNormalGrass = vec4(normalize(normal) * 0.5 + 0.5, grassFlag);
 
 	FragRoughMetal = DefaultRM;

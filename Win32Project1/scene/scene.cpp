@@ -20,6 +20,7 @@ Scene::Scene() {
 	water = NULL;
 	terrainNode = NULL;
 	textureNode = NULL;
+	noise3d = NULL;
 	
 	staticRoot = NULL;
 	billboardRoot = NULL;
@@ -44,6 +45,7 @@ Scene::~Scene() {
 	if (water) delete water; water = NULL;
 	if (terrainNode) delete terrainNode; terrainNode = NULL;
 	if (textureNode) delete textureNode; textureNode = NULL;
+	if (noise3d) delete noise3d; noise3d = NULL;
 	if (staticRoot) delete staticRoot; staticRoot = NULL;
 	if (billboardRoot) delete billboardRoot; billboardRoot = NULL;
 	if (animationRoot) delete animationRoot; animationRoot = NULL;

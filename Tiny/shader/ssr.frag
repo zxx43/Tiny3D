@@ -50,17 +50,17 @@ vec4 RayCast(vec3 refDir, vec3 refPos) {
 		projPos /= projPos.w;
 		vec3 projCoord = projPos.xyz * 0.5 + 0.5;
 
-		float storedDepth = texture2D(depthBuffer, projCoord.xy).r;
+		float storedDepth = texture(depthBuffer, projCoord.xy).r;
 		vec4 storedView = invProjMatrix * vec4(vec3(projCoord.xy, storedDepth) * 2.0 - 1.0, 1.0);
 		storedView /= storedView.w;
 
-		float refFlag = texture2D(matBuffer, projCoord.xy).a;
+		float refFlag = texture(matBuffer, projCoord.xy).a;
 
 		if(storedDepth >= 1.0) 
 			return FAIL_COLOR;
 		else if(curPos.z <= storedView.z + 0.01 && refFlag > 0.9 && refPos.z >= storedView.z - 20.0) {
 			vec2 searchData = BinarySearch(lenBefore, lenCurrent, projCoord.xy, refDir, refPos, projRef);
-			vec4 storedData = texture2D(lightBuffer, searchData);
+			vec4 storedData = texture(lightBuffer, searchData);
 
 			if(searchData.y >= oneMinBorder)
 				storedData = mix(storedData, FAIL_COLOR, (searchData.y - oneMinBorder) * invBorder);
@@ -79,18 +79,18 @@ vec4 RayCast(vec3 refDir, vec3 refPos) {
 }
 
 void main() {
-	float refFlag = texture2D(matBuffer, vTexcoord).a;
+	float refFlag = texture(matBuffer, vTexcoord).a;
 
 	if(refFlag > 0.9)
-		ReflectColor = texture2D(lightBuffer, vTexcoord);
+		ReflectColor = texture(lightBuffer, vTexcoord);
 	else {
-		float depth = texture2D(depthBuffer, vTexcoord).r;
+		float depth = texture(depthBuffer, vTexcoord).r;
 		vec3 ndcPos = vec3(vTexcoord, depth) * 2.0 - 1.0;
 
 		vec4 viewPos = invProjMatrix * vec4(ndcPos, 1.0);
 		viewPos /= viewPos.w;
 		
-		vec3 normal = texture2D(normalBuffer, vTexcoord).xyz * 2.0 - 1.0;
+		vec3 normal = texture(normalBuffer, vTexcoord).xyz * 2.0 - 1.0;
 		vec3 viewNormal = mat3(viewMatrix) * normal;
 		
 		vec3 reflectDir = normalize(reflect(viewPos.xyz, viewNormal));

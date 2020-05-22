@@ -1,14 +1,12 @@
 #include "shader/util.glsl"
 
 uniform mat4 viewProjectMatrix;
-uniform mat4 viewMatrix;
 uniform float time;
 uniform vec3 eyePos;
 
 layout (location = 0) in vec3 vertex;
 
 out vec3 vNormal;
-out vec3 vViewNormal;
 out vec3 vEye2Water;
 out vec4 vProjPos;
 
@@ -92,12 +90,8 @@ void main() {
 
 	vec3 normal = nor0 + nor1 + nor2 + nor3 + nor4 + nor5 + nor6 + nor7;
 	normal = vec3(0.0, 1.0, 0.0) - normal;
-
-	//normal = vec3(0.0,1.0,0.0);
-	//position = worldVertex;
 	
 	vNormal = normal;
-	vViewNormal = mat3(viewMatrix) * normal;
 	vEye2Water = position - eyePos;
 
 	vProjPos = viewProjectMatrix * vec4(position, 1.0);

@@ -12,7 +12,7 @@ layout (location = 2) out vec4 FragNormalGrass;
 layout (location = 3) out vec4 FragRoughMetal;
 
 void main() {
-	vec4 textureColor = texture2D(texBlds[int(vTexid.x)], vTexcoord.xy);
+	vec4 textureColor = texture(texBlds[int(vTexid.x)], vTexcoord.xy);
 	if(textureColor.a < 0.4) discard;
 	
 	FragTex = textureColor;
