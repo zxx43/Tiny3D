@@ -261,7 +261,7 @@ Node* Node::detachChild(Node* child) {
 	return NULL;
 }
 
-void Node::translateNode(float x, float y, float z) {
+void Node::translateNode(float x, float y, float z, bool rotate) {
 	float dx = x - position.x;
 	float dy = y - position.y;
 	float dz = z - position.z;

@@ -132,7 +132,7 @@ void TerrainNode::cauculateBlockIndices(int bx, int bz, int sizex, int sizez) {
 	mesh->visualIndCount = count;
 }
 
-void TerrainNode::standObjectsOnGround(Node* node) {
+void TerrainNode::standObjectsOnGround(Node* node, bool init) {
 	if (node->type == TYPE_TERRAIN) return;
 	if (node->children.size() <= 0) {
 		if (node->type == TYPE_ANIMATE) {
@@ -142,7 +142,7 @@ void TerrainNode::standObjectsOnGround(Node* node) {
 			this->caculateBlock(worldCenter.x, worldCenter.z, bx, bz);
 			this->cauculateY(bx, bz, worldCenter.x, worldCenter.z, worldCenter.y);
 			worldCenter.y += ((AABB*)animNode->boundingBox)->sizey * 0.45;
-			animNode->translateNodeCenterAtWorld(worldCenter.x, worldCenter.y, worldCenter.z);
+			animNode->translateNodeCenterAtWorld(worldCenter.x, worldCenter.y, worldCenter.z, init);
 		} else {
 			for (uint i = 0; i < node->objects.size(); i++) {
 				StaticObject* obj = (StaticObject*)node->objects[i];
