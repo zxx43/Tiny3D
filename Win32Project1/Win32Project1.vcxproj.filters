@@ -297,14 +297,23 @@
     <ClCompile Include="render\multiDrawcall.cpp">
       <Filter>Source Files\render</Filter>
     </ClCompile>
-    <ClCompile Include="animation\animation.cpp">
-      <Filter>Source Files\animation</Filter>
-    </ClCompile>
     <ClCompile Include="animation\frameMgr.cpp">
       <Filter>Source Files\animation</Filter>
     </ClCompile>
     <ClCompile Include="scene\player.cpp">
       <Filter>Source Files\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="animation\fbxloader.cpp">
+      <Filter>Source Files\animation</Filter>
+    </ClCompile>
+    <ClCompile Include="animation\fbxutil.cpp">
+      <Filter>Source Files\animation</Filter>
+    </ClCompile>
+    <ClCompile Include="animation\assanim.cpp">
+      <Filter>Source Files\animation</Filter>
+    </ClCompile>
+    <ClCompile Include="animation\animation.cpp">
+      <Filter>Source Files\animation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -527,9 +536,6 @@
     <ClInclude Include="render\multiDrawcall.h">
       <Filter>Source Files\render</Filter>
     </ClInclude>
-    <ClInclude Include="animation\animation.h">
-      <Filter>Source Files\animation</Filter>
-    </ClInclude>
     <ClInclude Include="animation\animationData.h">
       <Filter>Source Files\animation</Filter>
     </ClInclude>
@@ -538,6 +544,18 @@
     </ClInclude>
     <ClInclude Include="scene\player.h">
       <Filter>Source Files\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="animation\fbxloader.h">
+      <Filter>Source Files\animation</Filter>
+    </ClInclude>
+    <ClInclude Include="animation\fbxutil.h">
+      <Filter>Source Files\animation</Filter>
+    </ClInclude>
+    <ClInclude Include="animation\assanim.h">
+      <Filter>Source Files\animation</Filter>
+    </ClInclude>
+    <ClInclude Include="animation\animation.h">
+      <Filter>Source Files\animation</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

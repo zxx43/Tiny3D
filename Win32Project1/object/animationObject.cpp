@@ -73,7 +73,7 @@ void AnimationObject::vertexTransform() {
 	translateMat = translate(position.x, position.y, position.z);
 	rotateMat = rotateZ(anglez)*rotateY(angley)*rotateX(anglex);
 	scaleMat = scale(size.x, size.y, size.z);
-	localTransformMatrix = translateMat * rotateMat*scaleMat;
+	localTransformMatrix = translateMat * rotateMat * scaleMat;
 }
 
 void AnimationObject::normalTransform() {
@@ -93,6 +93,8 @@ void AnimationObject::setPosition(float x,float y,float z) {
 
 void AnimationObject::setRotation(float ax,float ay,float az) {
 	anglex=ax; angley=ay; anglez=az;
+	if (animation->inverseYZ) // fbxsdk to rotate 90 at z axis
+		anglez += 90;
 	RestrictAngle(anglex);
 	RestrictAngle(angley);
 	RestrictAngle(anglez);

@@ -5,6 +5,8 @@
 
 #include "../mesh/mesh.h"
 #include "../animation/frameMgr.h"
+#include "../animation/assanim.h"
+#include "../animation/fbxloader.h"
 #include "../texture/texturebindless.h"
 #include "../texture/cubemap.h"
 #include "../texture/texture2d.h"

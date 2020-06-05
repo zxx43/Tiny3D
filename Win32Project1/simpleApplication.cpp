@@ -311,9 +311,10 @@ void SimpleApplication::initScene() {
 	assetMgr->addMesh("water", new Water(1024, 16));
 
 	// Load animations
-	assetMgr->addAnimation("ninja", new Animation("models/ninja.mesh"));
-	assetMgr->addAnimation("army", new Animation("models/ArmyPilot.dae"));
-	assetMgr->addAnimation("dog", new Animation("models/Pes.fbx"));
+	assetMgr->addAnimation("ninja", new AssAnim("models/ninja.mesh"));
+	assetMgr->addAnimation("army", new AssAnim("models/ArmyPilot.dae"));
+	assetMgr->addAnimation("dog", new FBXLoader("models/Pes.fbx"));
+	assetMgr->addAnimation("male", new FBXLoader("models/male.fbx"));
 	assetMgr->initFrames();
 
 	// Load textures
@@ -673,6 +674,12 @@ void SimpleApplication::initScene() {
 	animNode5->getObject()->setPosition(0, -2.6, -1.5);
 	animNode5->translateNode(30, 0, 20);
 	animNode5->rotateNodeObject(0, 90, 0);
+	AnimationNode* animNode6 = new AnimationNode(vec3(5.0, 10.0, 5.0));
+	animNode6->setAnimation(scene, animations["male"]);
+	animNode6->getObject()->setSize(0.05, 0.05, 0.05);
+	animNode6->getObject()->setPosition(0.0, -4.0, 0.0);
+	animNode6->translateNode(40, 0, 0);
+	animNode6->rotateNodeObject(0, 270, 180);
 
 	Node* animNode = new StaticNode(vec3(0, 0, 0));
 	animNode->attachChild(animNode1);
@@ -682,6 +689,7 @@ void SimpleApplication::initScene() {
 	animNodeSub->attachChild(animNode3);
 	animNodeSub->attachChild(animNode4);
 	animNodeSub->attachChild(animNode5);
+	animNodeSub->attachChild(animNode6);
 	scene->animationRoot->attachChild(animNodeSub);
 
 	animNode->translateNode(0, 10, 0);

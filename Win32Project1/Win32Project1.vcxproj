@@ -157,12 +157,15 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glew32s.lib;opengl32.lib;assimp.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32s.lib;opengl32.lib;libfbxsdk.lib;assimp.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>WinMainCRTStartup</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="animation\animation.cpp" />
+    <ClCompile Include="animation\assanim.cpp" />
+    <ClCompile Include="animation\fbxloader.cpp" />
+    <ClCompile Include="animation\fbxutil.cpp" />
     <ClCompile Include="animation\frameMgr.cpp" />
     <ClCompile Include="application\application.cpp" />
     <ClCompile Include="assets\assetManager.cpp" />
@@ -234,7 +237,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="animation\animation.h" />
+    <ClInclude Include="animation\assanim.h" />
     <ClInclude Include="animation\animationData.h" />
+    <ClInclude Include="animation\fbxloader.h" />
+    <ClInclude Include="animation\fbxutil.h" />
     <ClInclude Include="animation\frameMgr.h" />
     <ClInclude Include="application\application.h" />
     <ClInclude Include="assets\assetManager.h" />
