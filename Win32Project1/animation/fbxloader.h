@@ -12,8 +12,6 @@ private:
 	FbxNode* root;
 private:
 	FbxTime frameTime;
-public:
-	int indexCount;
 private: // Temp data
 	int baseVertex, curFid;
 	std::map<int, float> durationMap; // aid duration

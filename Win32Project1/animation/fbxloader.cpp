@@ -12,7 +12,6 @@ FBXLoader::FBXLoader(const char* path) : Animation() {
 
 	scene = FbxScene::Create(manager, "FBX Scene");
 
-	indexCount = 0;
 	baseVertex = 0;
 	curFid = 0;
 	durationMap.clear();
@@ -79,8 +78,7 @@ void FBXLoader::loadAnimationData(FbxNode* pNode) {
 		if (lCurrentTakeInfo) {
 			start = lCurrentTakeInfo->mLocalTimeSpan.GetStart();
 			stop = lCurrentTakeInfo->mLocalTimeSpan.GetStop();
-		}
-		else {
+		} else {
 			FbxTimeSpan lTimeLineTimeSpan;
 			scene->GetGlobalSettings().GetTimelineDefaultTimeSpan(lTimeLineTimeSpan);
 			start = lTimeLineTimeSpan.GetStart();
@@ -96,6 +94,13 @@ void FBXLoader::loadAnimationData(FbxNode* pNode) {
 			curFid = 0;
 			parentMatrix.SetIdentity();
 			loadAnimation(pNode, now, frame);
+			animFrames[aid]->frames.push_back(frame);
+		}
+		{
+			Frame* frame = new Frame(boneCount);
+			curFid = 0;
+			parentMatrix.SetIdentity();
+			loadAnimation(pNode, stop, frame);
 			animFrames[aid]->frames.push_back(frame);
 		}
 	}
@@ -303,7 +308,6 @@ void FBXLoader::loadMesh(FbxNode* pNode, std::vector<uint> mats) {
 			vertexId++;
 		}
 	}
-	indexCount += meshIndexCount;
 
 	for (int i = 0; i < dupCount; i++) {
 		aVertices.push_back(innVertices[i]);
