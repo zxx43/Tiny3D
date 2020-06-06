@@ -44,19 +44,19 @@ AnimationObject* AnimationNode::getObject() {
 	return NULL;
 }
 
-void AnimationNode::translateNodeCenterAtWorld(float x, float y, float z) {
+void AnimationNode::translateNodeCenterAtWorld(float x, float y, float z, bool rotate) {
 	vec3 beforeWorldCenter = boundingBox->position;
 	vec3 offset = vec3(x, y, z) - beforeWorldCenter;
 	vec3 dPosition = position + offset;
-	translateNode(dPosition.x, dPosition.y, dPosition.z);
+	translateNode(dPosition.x, dPosition.y, dPosition.z, rotate);
 }
 
-void AnimationNode::translateNode(float x, float y, float z) {
+void AnimationNode::translateNode(float x, float y, float z, bool rotate) {
 	position.x = x, position.y = y, position.z = z;
 
 	recursiveTransform(nodeTransform);
 	boundingBox->update(GetTranslate(nodeTransform));
-	updateNodeObject(objects[0], true, false);
+	updateNodeObject(objects[0], true, true);
 
 	Node* superior = parent;
 	while (superior) {

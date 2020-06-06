@@ -1,6 +1,6 @@
 #include "multiInstance.h"
 
-const int MaxInstance = 4096;
+const int MaxInstance = 8192;
 
 MultiInstance::MultiInstance() {
 	vertexBuffer = NULL;

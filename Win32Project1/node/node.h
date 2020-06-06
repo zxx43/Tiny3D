@@ -69,7 +69,7 @@ public:
 	virtual Object* removeObject(Object* object);
 	void attachChild(Node* child);
 	Node* detachChild(Node* child);
-	virtual void translateNode(float x, float y, float z);
+	virtual void translateNode(float x, float y, float z, bool rotate = false);
 	void translateNodeObject(int i, float x, float y, float z);
 	void translateNodeObjectCenterAtWorld(int i, float x, float y, float z);
 	void rotateNodeObject(int i, float ax, float ay, float az);
