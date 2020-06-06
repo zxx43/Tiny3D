@@ -27,7 +27,7 @@ Object::Object() {
 
 	transforms = NULL;
 	transformsFull = NULL;
-	rotateQuat = vec4(0.0, 0.0, 0.0, 1.0);
+	rotateQuat = MatrixToQuat(rotateMat);
 	boundInfo = vec4(0.0, 0.0, 0.0, 0.0);
 }
 
@@ -36,10 +36,26 @@ Object::Object(const Object& rhs) {
 }
 
 Object::~Object() {
-	if (bounding) delete bounding;
-	bounding = NULL;
-	if (billboard) delete billboard;
-	billboard = NULL;
+	if (bounding) delete bounding; bounding = NULL;
+	if (billboard) delete billboard; billboard = NULL;
+
+	if (transforms) free(transforms); transforms = NULL;
+	if (transformsFull) free(transformsFull); transformsFull = NULL;
+}
+
+void Object::initMatricesData() {
+	transforms = (float*)malloc(4 * sizeof(float));
+	transformsFull = (buff*)malloc(16 * sizeof(buff));
+
+	transforms[0] = 0.0, transforms[1] = 0.0, transforms[2] = 0.0, transforms[3] = 1.0;
+	transformsFull[0] = transforms[0];
+	transformsFull[1] = transforms[1];
+	transformsFull[2] = transforms[2];
+	transformsFull[3] = transforms[3];
+	transformsFull[4] = rotateQuat.x;
+	transformsFull[5] = rotateQuat.y;
+	transformsFull[6] = rotateQuat.z;
+	transformsFull[7] = rotateQuat.w;
 }
 
 void Object::caculateLocalAABB(bool looseWidth, bool looseAll) {

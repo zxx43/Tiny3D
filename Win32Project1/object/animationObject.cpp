@@ -11,8 +11,7 @@ AnimationObject::AnimationObject(Animation* anim):Object() {
 	setEnd(true);
 	setDefaultAnim(0);
 	time = 0.0, curFrame = 0.0;
-	transforms = (float*)malloc(4 * sizeof(float));
-	transformsFull = (buff*)malloc(16 * sizeof(buff));
+	initMatricesData();
 }
 
 AnimationObject::AnimationObject(const AnimationObject& rhs) {
@@ -59,10 +58,7 @@ AnimationObject::AnimationObject(const AnimationObject& rhs) {
 }
 
 AnimationObject::~AnimationObject() {
-	if (transforms) free(transforms);
-	transforms = NULL;
-	if (transformsFull) free(transformsFull);
-	transformsFull = NULL;
+
 }
 
 AnimationObject* AnimationObject::clone() {

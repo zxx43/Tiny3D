@@ -6,9 +6,7 @@ StaticObject::StaticObject(Mesh* mesh) :Object() {
 	this->meshMid = mesh;
 	this->meshLow = mesh;
 	anglex = 0; angley = 0; anglez = 0;
-
-	transforms = (float*)malloc(4 * sizeof(float));
-	transformsFull = (buff*)malloc(16 * sizeof(buff));
+	initMatricesData();
 }
 
 StaticObject::StaticObject(Mesh* mesh, Mesh* meshMid, Mesh* meshLow) :Object() {
@@ -16,9 +14,7 @@ StaticObject::StaticObject(Mesh* mesh, Mesh* meshMid, Mesh* meshLow) :Object() {
 	this->meshMid = meshMid;
 	this->meshLow = meshLow;
 	anglex = 0; angley = 0; anglez = 0;
-
-	transforms = (float*)malloc(4 * sizeof(float));
-	transformsFull = (buff*)malloc(16 * sizeof(buff));
+	initMatricesData();
 }
 
 StaticObject::StaticObject(const StaticObject& rhs) {
@@ -60,10 +56,7 @@ StaticObject::StaticObject(const StaticObject& rhs) {
 }
 
 StaticObject::~StaticObject() {
-	if (transforms) free(transforms);
-	transforms = NULL;
-	if (transformsFull) free(transformsFull);
-	transformsFull = NULL;
+
 }
 
 StaticObject* StaticObject::clone() {

@@ -39,6 +39,7 @@ public:
 	virtual ~Object();
 	virtual Object* clone()=0;
 	virtual void caculateLocalAABB(bool looseWidth,bool looseAll);
+	void initMatricesData();
 	void updateLocalMatrices();
 	virtual void vertexTransform()=0;
 	virtual void normalTransform()=0;
