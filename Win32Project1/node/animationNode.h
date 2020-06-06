@@ -23,8 +23,8 @@ public:
 	void setAnimation(Scene* scene, Animation* anim);
 	AnimationObject* getObject();
 	void animate(float velocity);
-	virtual void translateNode(float x, float y, float z, bool rotate = false);
-	void translateNodeCenterAtWorld(float x, float y, float z, bool rotate);
+	virtual void translateNode(float x, float y, float z);
+	void translateNodeCenterAtWorld(float x, float y, float z);
 	void rotateNodeObject(float ax, float ay, float az);
 };
 

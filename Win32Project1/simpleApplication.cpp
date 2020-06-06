@@ -651,22 +651,23 @@ void SimpleApplication::initScene() {
 	animNode1->getObject()->setLoop(true);
 	AnimationNode* animNode2 = new AnimationNode(vec3(5, 10, 5));
 	animNode2->setAnimation(scene, animations["ninja"]);
-	animNode2->getObject()->setDefaultAnim(10);
 	animNode2->getObject()->setSize(0.05, 0.05, 0.05);
 	animNode2->getObject()->setPosition(0, -5, -1);
 	animNode2->translateNode(40, 0, 40);
+	//animNode2->rotateNodeObject(0, 45, 0);
+	animNode2->getObject()->setDefaultAnim(10);
 	AnimationNode* animNode3 = new AnimationNode(vec3(5, 10, 5));
 	animNode3->setAnimation(scene, animations["ninja"]);
-	animNode3->getObject()->setDefaultAnim(11);
 	animNode3->getObject()->setSize(0.05, 0.05, 0.05);
 	animNode3->getObject()->setPosition(0, -5, -1);
 	animNode3->translateNode(5, 0, 15);
+	animNode3->getObject()->setDefaultAnim(11);
 	AnimationNode* animNode4 = new AnimationNode(vec3(5, 10, 5));
 	animNode4->setAnimation(scene, animations["ninja"]);
-	animNode4->getObject()->setDefaultAnim(12);
 	animNode4->getObject()->setSize(0.05, 0.05, 0.05);
 	animNode4->getObject()->setPosition(0, -5, -1);
 	animNode4->translateNode(40, 0, 40);
+	animNode4->getObject()->setDefaultAnim(12);
 	AnimationNode* animNode5 = new AnimationNode(vec3(7.5, 7.5, 10.5));
 	animNode5->setAnimation(scene, animations["dog"]);
 	animNode5->getObject()->setSize(0.075, 0.075, 0.075);
@@ -696,8 +697,8 @@ void SimpleApplication::initScene() {
 	
 	node1->translateNode(0, 0, 20);
 
-	scene->terrainNode->standObjectsOnGround(scene->staticRoot, true);
-	scene->terrainNode->standObjectsOnGround(scene->animationRoot, true);
+	scene->terrainNode->standObjectsOnGround(scene->staticRoot);
+	scene->terrainNode->standObjectsOnGround(scene->animationRoot);
 	
 	Application::initScene();
 }
