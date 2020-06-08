@@ -45,9 +45,10 @@ std::string Animation::convertTexPath(const std::string& path) {
 	lc = lc > ld ? lc : ld;
 	if (lc == std::string::npos) lc = 0;
 	else lc += 1;
-	int ln = path.find_last_of('.');
-	std::string res = path.substr(lc, ln - lc);
-	res += ".bmp";
+	std::string res = path.substr(lc);
+	//int ln = path.find_last_of('.');
+	//std::string res = path.substr(lc, ln - lc);
+	//res += ".bmp";
 	printf("convert %s\n", res.data());
 	return res;
 }

@@ -37,7 +37,7 @@ int ImageSet::findTexture(const char* name) {
 
 void ImageSet::initTextureArray(string dir) {
 	if (imageNames.size() <= 0) return;
-	images = new BmpImage*[imageNames.size()];
+	images = new ImageLoader*[imageNames.size()];
 
 	glGenTextures(1,&setId);
 	glBindTexture(GL_TEXTURE_2D_ARRAY,setId);
@@ -51,7 +51,7 @@ void ImageSet::initTextureArray(string dir) {
 	string name("");
 	for (unsigned int i = 0; i < imageNames.size(); i++) {
 		name = imageNames[i];
-		images[i] = new BmpImage((path + name).c_str());
+		images[i] = new ImageLoader((path + name).c_str());
 		if (i == 0) {
 			glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_SRGB_ALPHA,
 				images[i]->width, images[i]->height,

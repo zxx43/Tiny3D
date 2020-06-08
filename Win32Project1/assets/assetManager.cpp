@@ -157,6 +157,7 @@ void AssetManager::initFrames() {
 
 void AssetManager::Init() {
 	if (!AssetManager::assetManager) {
+		InitImageLoaders(); // Init freeimage
 		AssetManager::assetManager = new AssetManager();
 
 		// Load some basic meshes
@@ -169,7 +170,9 @@ void AssetManager::Init() {
 }
 
 void AssetManager::Release() {
-	if (AssetManager::assetManager) 
+	if (AssetManager::assetManager) {
+		ReleaseImageLoaders(); // Release freeimage
 		delete AssetManager::assetManager;
+	}
 	AssetManager::assetManager = NULL;
 }

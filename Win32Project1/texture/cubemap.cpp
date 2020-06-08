@@ -3,12 +3,12 @@
 
 CubeMap::CubeMap(const char* xpos,const char* xneg,const char* ypos,
 		const char* yneg,const char* zpos,const char* zneg) {
-	xposImg=new BmpImage(xpos);
-	xnegImg=new BmpImage(xneg);
-	yposImg=new BmpImage(ypos);
-	ynegImg=new BmpImage(yneg);
-	zposImg=new BmpImage(zpos);
-	znegImg=new BmpImage(zneg);
+	xposImg=new ImageLoader(xpos);
+	xnegImg=new ImageLoader(xneg);
+	yposImg=new ImageLoader(ypos);
+	ynegImg=new ImageLoader(yneg);
+	zposImg=new ImageLoader(zpos);
+	znegImg=new ImageLoader(zneg);
 
 	width = xposImg->width;
 	height = xposImg->height;

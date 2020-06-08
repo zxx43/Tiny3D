@@ -315,6 +315,9 @@
     <ClCompile Include="animation\animation.cpp">
       <Filter>Source Files\animation</Filter>
     </ClCompile>
+    <ClCompile Include="texture\imageloader.cpp">
+      <Filter>Source Files\texture</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="batch\batch.h">
@@ -556,6 +559,9 @@
     </ClInclude>
     <ClInclude Include="animation\animation.h">
       <Filter>Source Files\animation</Filter>
+    </ClInclude>
+    <ClInclude Include="texture\imageloader.h">
+      <Filter>Source Files\texture</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -10,14 +10,14 @@
 
 #include "../render/glheader.h"
 #include "../constants/constants.h"
-#include "bmpimage.h"
+#include "imageloader.h"
 #include <map>
 #include <string>
 #include <vector>
 
 class ImageSet {
 private:
-	BmpImage** images;
+	ImageLoader** images;
 	std::map<std::string,int> set;
 	void releaseTextureArray();
 public:

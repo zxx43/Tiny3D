@@ -3,7 +3,7 @@
 
 #include "../render/glheader.h"
 #include "../constants/constants.h"
-#include "bmpimage.h"
+#include "imageloader.h"
 #include <map>
 #include <string>
 #include <vector>
@@ -15,7 +15,7 @@ private:
 	u64* texhnds;
 	std::vector<bool> texSrgbs;
 	std::vector<const char*> texnames;
-	std::vector<BmpImage*> imgs;
+	std::vector<ImageLoader*> imgs;
 	std::vector<int> wraps;
 	int size;
 private:

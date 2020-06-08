@@ -55,13 +55,13 @@ TexOffset* TextureAtlas::findTextureOfs(const char* name) {
 void TextureAtlas::createAtlas(string dir) {
 	int imageCount = imageNames.size();
 	if (imageCount <= 0) return;
-	images = new BmpImage*[imageCount];
+	images = new ImageLoader*[imageCount];
 
 	string path = dir.append("/");
 	string name("");
 	for (unsigned int i = 0; i < imageCount; i++) {
 		name = imageNames[i];
-		images[i] = new BmpImage((path + name).c_str());
+		images[i] = new ImageLoader((path + name).c_str());
 	}
 
 	float sqrtCount = sqrtf((float)imageCount);

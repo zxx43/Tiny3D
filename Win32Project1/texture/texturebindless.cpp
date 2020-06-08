@@ -62,7 +62,7 @@ void TextureBindless::initData(string dir) {
 	memset(texhnds, 0, size * sizeof(u64));
 
 	for (int i = 0; i < size; i++) {
-		BmpImage* img = new BmpImage((path + texnames[i]).data());
+		ImageLoader* img = new ImageLoader((path + texnames[i]).data());
 		imgs.push_back(img);
 		glBindTexture(GL_TEXTURE_2D, texids[i]);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

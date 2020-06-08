@@ -10,16 +10,16 @@
 
 #include "../render/glheader.h"
 #include "../constants/constants.h"
-#include "bmpimage.h"
+#include "imageloader.h"
 
 class CubeMap {
 private:
-	BmpImage* xposImg;
-	BmpImage* xnegImg;
-	BmpImage* yposImg;
-	BmpImage* ynegImg;
-	BmpImage* zposImg;
-	BmpImage* znegImg;
+	ImageLoader* xposImg;
+	ImageLoader* xnegImg;
+	ImageLoader* yposImg;
+	ImageLoader* ynegImg;
+	ImageLoader* zposImg;
+	ImageLoader* znegImg;
 private:
 	int width, height;
 public:

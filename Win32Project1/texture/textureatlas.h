@@ -2,7 +2,7 @@
 #define TEXTURE_ATLAS_H_
 
 #include "../render/glheader.h"
-#include "bmpimage.h"
+#include "imageloader.h"
 #include <map>
 #include <string>
 #include <vector>
@@ -16,7 +16,7 @@ struct TexOffset {
 
 class TextureAtlas {
 private:
-	BmpImage** images;
+	ImageLoader** images;
 	std::vector<std::string> imageNames;
 	unsigned char* data;
 	std::map<std::string, TexOffset*> offsetMap;
