@@ -23,6 +23,7 @@ SimpleApplication::SimpleApplication() : Application() {
 	aaInput.clear();
 	noiseBuf = NULL;
 	firstFrame = true;
+	needUpdateMovement = false;
 }
 
 SimpleApplication::~SimpleApplication() {
@@ -140,13 +141,13 @@ void SimpleApplication::keyUp(int key) {
 void SimpleApplication::keyAct(float velocity) {
 	Application::keyAct(velocity);
 	scene->player->controlAct(input, scene, velocity * 0.05);
-	updateMovement();
+	needUpdateMovement = true;
 }
 
 void SimpleApplication::wheelAct(int dir) {
 	Application::wheelAct(dir);
 	scene->player->wheelAct(dir == MNEAR ? -1.0 : 1.0);
-	updateMovement();
+	needUpdateMovement = true;
 }
 
 void SimpleApplication::moveMouse(const float mx, const float my, const float cx, const float cy) {
@@ -261,6 +262,10 @@ void SimpleApplication::updateMovement() {
 
 void SimpleApplication::act(long startTime, long currentTime, float velocity) {
 	Application::act(startTime, currentTime, velocity);
+	if (needUpdateMovement) {
+		updateMovement();
+		needUpdateMovement = false;
+	}
 	///*
 		static float dd = 1.0, dr = 1.0;
 
@@ -286,7 +291,7 @@ void SimpleApplication::act(long startTime, long currentTime, float velocity) {
 		time++;
 	}
 	//*/
-
+	
 	scene->updateNodes();
 	if (!cfgs->ssr) scene->updateReflectCamera();
 }

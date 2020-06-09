@@ -20,7 +20,7 @@ private:
 	Filter* rawScreenFilter;
 	DualFilter* bloomChain;
 	FrameBuffer* noiseBuf;
-	bool firstFrame;
+	bool firstFrame, needUpdateMovement;
 public:
 	SimpleApplication();
 	virtual ~SimpleApplication();
