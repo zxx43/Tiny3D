@@ -64,16 +64,7 @@ void ResizeWindow(int width,int height) {
 	app->resize(width, height);
 }
 
-void DrawWindow() {
-	if (!app->cfgs->dualthread) {
-		app->act(startTime, timeGetTime(), velocity);
-		app->prepare(false);
-	} else {
-		WaitForSingleObject(mutex, INFINITE);
-		dataPrepared = true;
-		ReleaseMutex(mutex);
-	}
-
+void ActRun() {
 	currentTime = timeGetTime();
 	float dTime = (float)(currentTime - lastTime);
 	lastTime = currentTime;
@@ -95,8 +86,18 @@ void DrawWindow() {
 	}
 	else app->showMouse();
 	app->keyAct(velocity);
-	if (app->cfgs->dualthread)
-		app->animate(velocity);
+	app->act(startTime, currentTime, velocity);
+}
+
+void DrawWindow() {
+	if (!app->cfgs->dualthread) {
+		ActRun();
+		app->prepare(false);
+	} else {
+		WaitForSingleObject(mutex, INFINITE);
+		dataPrepared = true;
+		ReleaseMutex(mutex);
+	}
 
 	app->draw();
 
@@ -112,7 +113,7 @@ void DrawWindow() {
 DWORD WINAPI FrameThreadRun(LPVOID param) {
 	while (!app->willExit && app->cfgs->dualthread) {
 		if(!dataPrepared && inited) {
-			app->act(startTime, timeGetTime(), velocity);
+			ActRun();
 			app->prepare(true);
 
 			WaitForSingleObject(mutex, INFINITE);

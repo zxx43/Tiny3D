@@ -269,8 +269,7 @@ void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camer
 							Animation* anim = animNode->getObject()->animation;
 							AnimationData* animData = queue->animationQueue[anim];
 							animData->addAnimObject(animNode->getObject());
-							if(!queue->cfgArgs->dualthread)
-								animNode->animate(scene->velocity);
+							animNode->animate(scene->velocity);
 						}
 					} 
 				}
