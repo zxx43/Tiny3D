@@ -29,6 +29,7 @@ Application::Application() {
 
 	willExit = false;
 	pressed = false;
+	wheelDir = MNONE;
 	showMouse();
 	scene = NULL;
 	render = NULL;
@@ -84,8 +85,9 @@ void Application::keyAct(float velocity) {
 	input->updateCameraByKey(scene->mainCamera);
 }
 
-void Application::wheelAct(int dir) {
-	input->moveCamera(scene->mainCamera, dir);
+void Application::wheelAct() {
+	if(wheelDir != MNONE)
+		input->moveCamera(scene->mainCamera, wheelDir);
 }
 
 void Application::moveMouse(const float mx, const float my, const float cx, const float cy) {

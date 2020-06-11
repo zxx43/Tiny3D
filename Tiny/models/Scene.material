@@ -13,7 +13,7 @@ material Examples/Ninja
             			diffuse 0.75 0.75 0.75
 			texture_unit
 			{
-				texture assets/texture/ninja.jpg
+				texture assets/texture/ninja.bmp
 			}
 		}
 	}

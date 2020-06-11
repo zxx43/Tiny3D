@@ -16,6 +16,7 @@
 #define DOWN 4
 #define MNEAR 5
 #define MFAR 6
+#define MNONE 7
 
 #define PI 3.1415926f
 #define PI2 6.2831852f

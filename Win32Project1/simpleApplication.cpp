@@ -23,7 +23,6 @@ SimpleApplication::SimpleApplication() : Application() {
 	aaInput.clear();
 	noiseBuf = NULL;
 	firstFrame = true;
-	needUpdateMovement = false;
 }
 
 SimpleApplication::~SimpleApplication() {
@@ -141,13 +140,16 @@ void SimpleApplication::keyUp(int key) {
 void SimpleApplication::keyAct(float velocity) {
 	Application::keyAct(velocity);
 	scene->player->controlAct(input, scene, velocity * 0.05);
-	needUpdateMovement = true;
+	updateMovement();
 }
 
-void SimpleApplication::wheelAct(int dir) {
-	Application::wheelAct(dir);
-	scene->player->wheelAct(dir == MNEAR ? -1.0 : 1.0);
-	needUpdateMovement = true;
+void SimpleApplication::wheelAct() {
+	Application::wheelAct();
+	if (wheelDir != MNONE) {
+		scene->player->wheelAct(wheelDir == MNEAR ? -1.0 : 1.0);
+		updateMovement();
+		wheelDir = MNONE;
+	}
 }
 
 void SimpleApplication::moveMouse(const float mx, const float my, const float cx, const float cy) {
@@ -262,10 +264,6 @@ void SimpleApplication::updateMovement() {
 
 void SimpleApplication::act(long startTime, long currentTime, float velocity) {
 	Application::act(startTime, currentTime, velocity);
-	if (needUpdateMovement) {
-		updateMovement();
-		needUpdateMovement = false;
-	}
 	///*
 		static float dd = 1.0, dr = 1.0;
 

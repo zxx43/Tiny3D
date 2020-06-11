@@ -21,6 +21,7 @@ public:
 	float fps;
 	bool willExit;
 	bool pressed;
+	int wheelDir;
 	ConfigArg* cfgs;
 public:
 	Application();
@@ -31,7 +32,7 @@ public:
 	virtual void draw() = 0;
 	virtual void act(long startTime, long currentTime, float velocity);
 	virtual void keyAct(float velocity);
-	virtual void wheelAct(int dir);
+	virtual void wheelAct();
 	virtual void moveMouse(const float mx, const float my, const float cx, const float cy);
 	virtual void mouseKey(bool press, bool isMain);
 	void prepare(bool swapQueue);
@@ -44,6 +45,7 @@ public:
 	void showMouse() { mouseShow = true; }
 	void hideMouse() { mouseShow = false; }
 	bool isMouseShow() { return mouseShow; }
+	void setWheelDir(int dir) { wheelDir = dir; }
 };
 
 #endif

@@ -85,6 +85,7 @@ void ActRun() {
 		app->hideMouse();
 	}
 	else app->showMouse();
+	app->wheelAct();
 	app->keyAct(velocity);
 	app->act(startTime, currentTime, velocity);
 }
@@ -308,9 +309,9 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam) {
 			{	
 				short dWheel = GET_WHEEL_DELTA_WPARAM(wParam);
 				if (dWheel > 0)
-					app->wheelAct(MNEAR);
+					app->setWheelDir(MNEAR);
 				else if (dWheel < 0)
-					app->wheelAct(MFAR);
+					app->setWheelDir(MFAR);
 			}
 			break;
 		case WM_DESTROY:
