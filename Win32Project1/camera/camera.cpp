@@ -163,10 +163,26 @@ float Camera::getHeight() {
 }
 
 void Camera::copy(Camera* src) {
+	xrot = src->xrot;
+	yrot = src->yrot;
+	height = src->height;
+	rotXMat = src->rotXMat;
+	rotYMat = src->rotYMat;
+	transMat = src->transMat;
+	lookDir4 = src->lookDir4;
+
 	viewMatrix = src->viewMatrix;
 	projectMatrix = src->projectMatrix;
 	viewProjectMatrix = src->viewProjectMatrix;
 	invViewProjectMatrix = src->invViewProjectMatrix;
 	invProjMatrix = src->invProjMatrix;
+	invViewMatrix = src->invViewMatrix;
 	position = src->position;
+	lookDir = src->lookDir; 
+	up = src->up;
+	fovy = src->fovy;
+	aspect = src->aspect;
+	zNear = src->zNear; 
+	zFar = src->zFar;
+	velocity = src->velocity;
 }

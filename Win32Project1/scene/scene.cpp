@@ -14,7 +14,8 @@ Scene::Scene() {
 	time = 0.0, velocity = 0.0;
 	inited = false;
 	player = new Player();
-	mainCamera = new Camera(25.0);
+	actCamera = new Camera(25.0);
+	renderCamera = new Camera(25.0);
 	reflectCamera = NULL;
 	skyBox = NULL;
 	water = NULL;
@@ -39,7 +40,8 @@ Scene::Scene() {
 
 Scene::~Scene() {
 	delete player;
-	if (mainCamera) delete mainCamera; mainCamera = NULL;
+	if (renderCamera && renderCamera != actCamera) delete renderCamera; renderCamera = NULL;
+	if (actCamera) delete actCamera; actCamera = NULL;
 	if (reflectCamera) delete reflectCamera; reflectCamera = NULL;
 	if (skyBox) delete skyBox; skyBox = NULL;
 	if (water) delete water; water = NULL;
@@ -84,10 +86,10 @@ void Scene::flushNodes() {
 void Scene::updateReflectCamera() {
 	if (water && reflectCamera) {
 		static mat4 transMat = scaleY(-1) * translate(0, water->position.y, 0);
-		reflectCamera->viewMatrix = mainCamera->viewMatrix * transMat;
-		reflectCamera->lookDir.x = mainCamera->lookDir.x;
-		reflectCamera->lookDir.y = -mainCamera->lookDir.y;
-		reflectCamera->lookDir.z = mainCamera->lookDir.z;
+		reflectCamera->viewMatrix = actCamera->viewMatrix * transMat;
+		reflectCamera->lookDir.x = actCamera->lookDir.x;
+		reflectCamera->lookDir.y = -actCamera->lookDir.y;
+		reflectCamera->lookDir.z = actCamera->lookDir.z;
 		reflectCamera->forceRefresh();
 		reflectCamera->updateFrustum();
 	}

@@ -35,7 +35,9 @@ public:
 	virtual void wheelAct();
 	virtual void moveMouse(const float mx, const float my, const float cx, const float cy);
 	virtual void mouseKey(bool press, bool isMain);
-	void prepare(bool swapQueue);
+	void updateData();
+	void prepare();
+	void swapData(bool swapQueue);
 	void animate(float velocity);
 	virtual void resize(int width, int height);
 	virtual void keyDown(int key);

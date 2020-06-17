@@ -14,7 +14,6 @@ bool threadEnd;
 DWORD WINAPI FrameThreadRun(LPVOID param);
 void CreateThreads();
 void ReleaseThreads();
-bool dataPrepared = false;
 HANDLE mutex = NULL;
 void InitMutex();
 void DeleteMutex();
@@ -93,32 +92,28 @@ void ActRun() {
 void DrawWindow() {
 	if (!app->cfgs->dualthread) {
 		ActRun();
-		app->prepare(false);
-	} else {
-		WaitForSingleObject(mutex, INFINITE);
-		dataPrepared = true;
-		ReleaseMutex(mutex);
-	}
+		app->updateData();
+		app->prepare();
+		app->swapData(false);
+	} 
 
+	if(app->cfgs->dualthread)
+		WaitForSingleObject(mutex, INFINITE);
 	app->draw();
-
-	if (app->cfgs->dualthread) {
-		WaitForSingleObject(mutex, INFINITE);
-		dataPrepared = false;
+	if (app->cfgs->dualthread) 
 		ReleaseMutex(mutex);
-	}
 
 	SwitchMouse();
 }
 
 DWORD WINAPI FrameThreadRun(LPVOID param) {
 	while (!app->willExit && app->cfgs->dualthread) {
-		if(!dataPrepared && inited) {
+		if(inited) {
 			ActRun();
-			app->prepare(true);
-
+			app->updateData();
+			app->prepare();
 			WaitForSingleObject(mutex, INFINITE);
-			dataPrepared = true;
+			app->swapData(true);
 			ReleaseMutex(mutex);
 		}
 	}

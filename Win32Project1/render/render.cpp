@@ -163,11 +163,13 @@ void Render::setViewPort(int width,int height) {
 	glViewport(0,0,width,height);
 }
 
-void Render::resize(int width, int height, Camera* mainCamera, Camera* reflectCamera) {
+void Render::resize(int width, int height, Camera* camera1, Camera* camera2, Camera* reflectCamera) {
 	if (height == 0) height = 1;
 	setViewPort(width, height);
 	float fAspect = (float)width / height;
-	mainCamera->initPerspectCamera(60.0, fAspect, 1.0, 2000.0);
+	camera1->initPerspectCamera(60.0, fAspect, 1.0, 2000.0);
+	if (camera2 && camera2 != camera1)
+		camera2->initPerspectCamera(60.0, fAspect, 1.0, 2000.0);
 	if (reflectCamera) 
 		reflectCamera->initPerspectCamera(60.0, fAspect, 0.1, 2000.0);
 }
@@ -280,9 +282,9 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 			shader->setFloat("time", state->time);
 
 			if (state->shadow) {
-				shader->setMatrix4("lightViewProjNear", state->shadow->lightNearMat);
-				shader->setMatrix4("lightViewProjMid", state->shadow->lightMidMat);
-				shader->setMatrix4("lightViewProjFar", state->shadow->lightFarMat);
+				shader->setMatrix4("lightViewProjNear", state->shadow->renderLightCameraNear->viewProjectMatrix);
+				shader->setMatrix4("lightViewProjMid", state->shadow->renderLightCameraMid->viewProjectMatrix);
+				shader->setMatrix4("lightViewProjFar", state->shadow->renderLightCameraFar->viewProjectMatrix);
 				shader->setVector2("levels", state->shadow->level1, state->shadow->level2);
 			}
 			if (state->lightEffect) {

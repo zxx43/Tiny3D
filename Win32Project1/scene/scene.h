@@ -34,7 +34,8 @@ private:
 	void initNodes();
 public:
 	float time, velocity;
-	Camera* mainCamera;
+	Camera* actCamera;
+	Camera* renderCamera;
 	Camera* reflectCamera;
 	Sky* skyBox;
 	WaterNode* water;

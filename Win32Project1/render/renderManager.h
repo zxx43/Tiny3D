@@ -47,7 +47,7 @@ public:
 	Texture2D* occluderDepth;
 private:
 	Shadow* shadow;
-	bool needResize, needRefreshSky;
+	bool needResize, needRefreshSky, actShowWater, renderShowWater;
 	ComputeDrawcall* grassDrawcall;
 public:
 	Renderable* renderData;
@@ -58,23 +58,25 @@ public:
 private:
 	void drawBoundings(Render* render, RenderState* state, Scene* scene, Camera* camera);
 	void drawGrass(Render* render, RenderState* state, Scene* scene, Camera* camera);
+	void updateWaterVisible(const Scene* scene);
 public:
 	FrameBuffer* nearBuffer;
 	FrameBuffer* midBuffer;
 	FrameBuffer* farBuffer;
 	FrameBuffer* reflectBuffer;
 
-	RenderManager(ConfigArg* cfg, Camera* view, float distance1, float distance2, const vec3& light);
+	RenderManager(ConfigArg* cfg, Scene* scene, float distance1, float distance2, const vec3& light);
 	~RenderManager();
 
 	void resize(float width, float height);
 	void updateShadowCamera(Camera* mainCamera);
-	void updateMainLight();
+	void updateMainLight(Scene* scene);
 	void updateSky();
 	void flushRenderQueues();
 	void updateRenderQueues(Scene* scene);
 	void animateQueues(float velocity);
 	void swapRenderQueues(Scene* scene, bool swapQueue);
+	void prepareData(Scene* scene);
 	void renderShadow(Render* render,Scene* scene);
 	void renderScene(Render* render,Scene* scene);
 	void renderWater(Render* render, Scene* scene);

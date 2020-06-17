@@ -270,6 +270,11 @@ MATRIX4X4 MATRIX4X4::operator/(const float rhs) const
 	return (*this)*temp;
 }
 
+void MATRIX4X4::operator=(const MATRIX4X4 & rhs) const
+{
+	memcpy((void*)entries, rhs.entries, 16 * sizeof(float));
+}
+
 MATRIX4X4 operator*(float scaleFactor, const MATRIX4X4 & rhs)
 {
 	return rhs*scaleFactor;

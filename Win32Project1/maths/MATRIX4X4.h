@@ -47,6 +47,7 @@ public:
 	MATRIX4X4 operator*(const MATRIX4X4 & rhs) const;
 	MATRIX4X4 operator*(const float rhs) const;
 	MATRIX4X4 operator/(const float rhs) const;
+	void operator=(const MATRIX4X4 & rhs) const;
 	friend MATRIX4X4 operator*(float scaleFactor, const MATRIX4X4 & rhs);
 
 	bool operator==(const MATRIX4X4 & rhs) const;

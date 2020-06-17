@@ -3,10 +3,10 @@
 #include "../mesh/board.h"
 #include "../object/staticObject.h"
 
-RenderManager::RenderManager(ConfigArg* cfg, Camera* view, float distance1, float distance2, const vec3& light) {
+RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, float distance2, const vec3& light) {
 	int precision = LOW_PRE;
 	cfgs = cfg;
-	shadow = new Shadow(view);
+	shadow = new Shadow(scene->actCamera);
 	float nearSize = 1024;
 	float midSize = 1024;
 	float farSize = 512;
@@ -33,6 +33,7 @@ RenderManager::RenderManager(ConfigArg* cfg, Camera* view, float distance1, floa
 	queue2 = new Renderable(distance1, distance2, cfgs);
 	currentQueue = queue1;
 	nextQueue = queue2;
+	renderData = NULL;
 
 	state = new RenderState();
 
@@ -40,6 +41,9 @@ RenderManager::RenderManager(ConfigArg* cfg, Camera* view, float distance1, floa
 	occluderDepth = NULL;
 	needResize = true;
 	updateSky();
+
+	actShowWater = false;
+	renderShowWater = false;
 
 	grassDrawcall = NULL;
 }
@@ -78,8 +82,12 @@ void RenderManager::updateShadowCamera(Camera* mainCamera) {
 	shadow->prepareViewCamera(mainCamera->zFar * 0.25, mainCamera->zFar * 0.75);
 }
 
-void RenderManager::updateMainLight() {
-	shadow->update(lightDir);
+void RenderManager::updateMainLight(Scene* scene) {
+	shadow->update(scene->actCamera, lightDir);
+}
+
+void RenderManager::updateWaterVisible(const Scene* scene) {
+	actShowWater = scene->water && scene->water->checkInCamera(scene->actCamera);
 }
 
 void RenderManager::updateSky() { 
@@ -89,14 +97,16 @@ void RenderManager::updateSky() {
 }
 
 void RenderManager::flushRenderQueues() {
-	renderData->flush();
+	if (renderData) renderData->flush();
 }
 
 void RenderManager::updateRenderQueues(Scene* scene) {
-	Camera* cameraNear = shadow->lightCameraNear;
-	Camera* cameraMid = shadow->lightCameraMid;
-	Camera* cameraFar = shadow->lightCameraFar;
-	Camera* cameraMain = scene->mainCamera;
+	if (!renderData) return;
+
+	Camera* cameraNear = shadow->actLightCameraNear;
+	Camera* cameraMid = shadow->actLightCameraMid;
+	Camera* cameraFar = shadow->actLightCameraFar;
+	Camera* cameraMain = scene->actCamera;
 
 	PushNodeToQueue(renderData->queues[QUEUE_STATIC_SN], scene, scene->staticRoot, cameraNear, cameraMain);
 	PushNodeToQueue(renderData->queues[QUEUE_STATIC_SM], scene, scene->staticRoot, cameraMid, cameraMain);
@@ -119,13 +129,23 @@ void RenderManager::swapRenderQueues(Scene* scene, bool swapQueue) {
 	if (swapQueue) {
 		currentQueue = (currentQueue == queue1) ? queue2 : queue1;
 		nextQueue = (nextQueue == queue1) ? queue2 : queue1;
-
 		renderData = nextQueue;
+		scene->renderCamera->copy(scene->actCamera);
+		shadow->copyCameraData();
 	} else {
 		currentQueue = queue1;
 		renderData = currentQueue;
+		if (scene->renderCamera != scene->actCamera) {
+			delete scene->renderCamera;
+			scene->renderCamera = scene->actCamera;
+		}
+		shadow->mergeCamera();
 	}
+	renderShowWater = actShowWater;
+}
 
+void RenderManager::prepareData(Scene* scene) {
+	updateWaterVisible(scene);
 	flushRenderQueues();
 	updateRenderQueues(scene);
 }
@@ -146,16 +166,16 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	static Shader* animFlushShader = render->findShader("animFlush");
 
 	state->reset();
-	state->eyePos = &(scene->mainCamera->position);
+	state->eyePos = &(scene->renderCamera->position);
 	state->cullMode = CULL_FRONT;
 	state->light = lightDir;
 	state->udotl = udotl;
 	state->time = scene->time;
 
-	Camera* mainCamera = scene->mainCamera;
+	Camera* mainCamera = scene->renderCamera;
 
 	render->setFrameBuffer(nearBuffer);
-	Camera* cameraNear=shadow->lightCameraNear;
+	Camera* cameraNear=shadow->renderLightCameraNear;
 	state->pass = NEAR_SHADOW_PASS;
 	state->shader = phongShadowShader;
 	state->shaderIns = phongShadowInsShader;
@@ -170,7 +190,7 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	currentQueue->queues[QUEUE_ANIMATE_SN]->draw(scene, cameraNear, render, state);
 
 	render->setFrameBuffer(midBuffer);
-	Camera* cameraMid=shadow->lightCameraMid;
+	Camera* cameraMid=shadow->renderLightCameraMid;
 	state->pass = MID_SHADOW_PASS;
 	state->shader = phongShadowShader;
 	state->shaderMulti = multiShader;
@@ -192,7 +212,7 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 				render->setFrameBuffer(farBuffer);
 				if (true) flushed = true;
 				else {
-					Camera* cameraFar = shadow->lightCameraFar;
+					Camera* cameraFar = shadow->renderLightCameraFar;
 					state->pass = FAR_SHADOW_PASS;
 					state->shader = phongShadowLowShader;
 					state->shaderIns = phongShadowInsShader;
@@ -263,7 +283,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	static Shader* animFlushShader = render->findShader("animFlush");
 
 	state->reset();
-	state->eyePos = &(scene->mainCamera->position);
+	state->eyePos = &(scene->renderCamera->position);
 	state->light = lightDir;
 	state->udotl = udotl;
 	state->time = scene->time;
@@ -271,7 +291,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	state->quality = cfgs->graphQuality;
 	state->dynSky = cfgs->dynsky;
 
-	Camera* camera = scene->mainCamera;
+	Camera* camera = scene->renderCamera;
 
 	// Draw terrain & grass
 	TerrainNode* terrainNode = scene->terrainNode;
@@ -358,10 +378,10 @@ void RenderManager::renderSkyTex(Render* render, Scene* scene) {
 
 void RenderManager::renderWater(Render* render, Scene* scene) {
 	static Shader* waterShader = render->findShader("water");
-	Camera* camera = scene->mainCamera;
-	if (scene->water && scene->water->checkInCamera(camera)) {
+	Camera* camera = scene->renderCamera;
+	if (scene->water && renderShowWater) {
 		state->reset();
-		state->eyePos = &(scene->mainCamera->position);
+		state->eyePos = &(scene->renderCamera->position);
 		state->light = lightDir;
 		state->udotl = udotl;
 		state->time = scene->time;
@@ -382,7 +402,7 @@ void RenderManager::renderReflect(Render* render, Scene* scene) {
 			if (scene->terrainNode->drawcall) {
 				static Shader* terrainShader = render->findShader("terrain");
 				state->reset();
-				state->eyePos = &(scene->mainCamera->position);
+				state->eyePos = &(scene->renderCamera->position);
 				state->cullMode = CULL_FRONT;
 				state->light = lightDir;
 				state->udotl = udotl;
@@ -400,7 +420,7 @@ void RenderManager::renderReflect(Render* render, Scene* scene) {
 void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* screenBuff, Filter* filter) {
 	static Shader* deferredShader = render->findShader("deferred");
 	state->reset();
-	state->eyePos = &(scene->mainCamera->position);
+	state->eyePos = &(scene->renderCamera->position);
 	//state->enableCull = false;
 	state->enableDepthTest = false;
 	state->pass = DEFERRED_PASS;
@@ -419,49 +439,49 @@ void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* scre
 		deferredShader->setHandle64("depthBufferMid", midBuffer->getDepthBuffer()->hnd);
 	if(!deferredShader->isTexBinded(farBuffer->getDepthBuffer()->hnd))
 		deferredShader->setHandle64("depthBufferFar", farBuffer->getDepthBuffer()->hnd);
-	filter->draw(scene->mainCamera, render, state, screenBuff->colorBuffers, screenBuff->depthBuffer);
+	filter->draw(scene->renderCamera, render, state, screenBuff->colorBuffers, screenBuff->depthBuffer);
 }
 
 void RenderManager::drawCombined(Render* render, Scene* scene, const std::vector<Texture2D*>& inputTextures, Filter* filter) {
 	static Shader* combinedShader = render->findShader("combined");
 	state->reset();
-	state->eyePos = &(scene->mainCamera->position);
+	state->eyePos = &(scene->renderCamera->position);
 	//state->enableCull = false;
 	state->enableDepthTest = false;
 	state->pass = DEFERRED_PASS;
 	state->shader = combinedShader;
 	state->quality = cfgs->graphQuality;
 	state->dynSky = cfgs->dynsky;
-	filter->draw(scene->mainCamera, render, state, inputTextures, NULL);
+	filter->draw(scene->renderCamera, render, state, inputTextures, NULL);
 }
 
 void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, FrameBuffer* inputBuff, Filter* filter) {
 	Shader* shader = render->findShader(shaderStr);
 	state->reset();
-	state->eyePos = &(scene->mainCamera->position);
+	state->eyePos = &(scene->renderCamera->position);
 	//state->enableCull = false;
 	state->enableDepthTest = false;
 	state->pass = POST_PASS;
 	state->shader = shader;
 
-	filter->draw(scene->mainCamera, render, state, inputBuff->colorBuffers, NULL);
+	filter->draw(scene->renderCamera, render, state, inputBuff->colorBuffers, NULL);
 }
 
 void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter) {
 	Shader* shader = render->findShader(shaderStr);
 	state->reset();
-	state->eyePos = &(scene->mainCamera->position);
+	state->eyePos = &(scene->renderCamera->position);
 	//state->enableCull = false;
 	state->enableDepthTest = false;
 	state->pass = POST_PASS;
 	state->shader = shader;
-	filter->draw(scene->mainCamera, render, state, inputTextures, NULL);
+	filter->draw(scene->renderCamera, render, state, inputTextures, NULL);
 }
 
 void RenderManager::drawDualFilter(Render* render, Scene* scene, const char* shaderStr, DualFilter* filter) {
 	Shader* shader = render->findShader(shaderStr);
 	state->reset();
-	state->eyePos = &(scene->mainCamera->position);
+	state->eyePos = &(scene->renderCamera->position);
 	//state->enableCull = false;
 	state->enableDepthTest = false;
 	state->pass = POST_PASS;
@@ -476,33 +496,33 @@ void RenderManager::drawDualFilter(Render* render, Scene* scene, const char* sha
 void RenderManager::drawSSRFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter) {
 	Shader* shader = render->findShader(shaderStr);
 	state->reset();
-	state->eyePos = &(scene->mainCamera->position);
+	state->eyePos = &(scene->renderCamera->position);
 	//state->enableCull = false;
 	state->enableDepthTest = false;
 	state->pass = POST_PASS;
 	state->shader = shader;
 	state->ssrPass = true;
 
-	filter->draw(scene->mainCamera, render, state, inputTextures, NULL);
+	filter->draw(scene->renderCamera, render, state, inputTextures, NULL);
 }
 
 void RenderManager::drawSSGFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter) {
 	Shader* shader = render->findShader(shaderStr);
 	state->reset();
-	state->eyePos = &(scene->mainCamera->position);
+	state->eyePos = &(scene->renderCamera->position);
 	//state->enableCull = false;
 	state->enableDepthTest = false;
 	state->pass = POST_PASS;
 	state->shader = shader;
 	state->ssgPass = true;
 
-	filter->draw(scene->mainCamera, render, state, inputTextures, NULL);
+	filter->draw(scene->renderCamera, render, state, inputTextures, NULL);
 }
 
 void RenderManager::drawTexture2Screen(Render* render, Scene* scene, u64 texhnd) {
 	static Shader* screenShader = render->findShader("screen");
 	state->reset();
-	state->eyePos = &(scene->mainCamera->position);
+	state->eyePos = &(scene->renderCamera->position);
 	//state->enableCull = false;
 	state->enableDepthTest = false;
 	state->pass = POST_PASS;
@@ -519,7 +539,7 @@ void RenderManager::drawTexture2Screen(Render* render, Scene* scene, u64 texhnd)
 	}
 
 	render->setFrameBuffer(NULL);
-	render->draw(scene->mainCamera, scene->textureNode->drawcall, state);
+	render->draw(scene->renderCamera, scene->textureNode->drawcall, state);
 }
 
 void RenderManager::drawBoundings(Render* render, RenderState* state, Scene* scene, Camera* camera) {

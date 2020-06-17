@@ -55,7 +55,7 @@ public:
 	void setBlend(bool enable);
 	void setClearColor(float r, float g, float b, float a);
 	void setViewPort(int width, int height);
-	void resize(int width, int height, Camera* mainCamera, Camera* reflectCamera);
+	void resize(int width, int height, Camera* camera1, Camera* camera2, Camera* reflectCamera);
 	Shader* findShader(const char* shader);
 	void useShader(Shader* shader);
 	void draw(Camera* camera, Drawcall* drawcall, RenderState* state);

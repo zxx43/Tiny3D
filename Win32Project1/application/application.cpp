@@ -48,7 +48,7 @@ void Application::init() {
 
 	float lowDist = cfgs->graphQuality > 4 ? 800 : 200;
 	float farDist = cfgs->graphQuality > 4 ? 1500 : 800;
-	renderMgr = new RenderManager(cfgs, scene->mainCamera, lowDist, farDist, vec3(-1, -1, -1));
+	renderMgr = new RenderManager(cfgs, scene, lowDist, farDist, vec3(-1, -1, -1));
 
 	if (!cfgs->ssr)
 		scene->createReflectCamera();
@@ -81,26 +81,33 @@ void Application::act(long startTime, long currentTime, float velocity) {
 }
 
 void Application::keyAct(float velocity) {
-	scene->mainCamera->velocity = velocity;
-	input->updateCameraByKey(scene->mainCamera);
+	scene->actCamera->velocity = velocity;
+	input->updateCameraByKey(scene->actCamera);
 }
 
 void Application::wheelAct() {
 	if(wheelDir != MNONE)
-		input->moveCamera(scene->mainCamera, wheelDir);
+		input->moveCamera(scene->actCamera, wheelDir);
 }
 
 void Application::moveMouse(const float mx, const float my, const float cx, const float cy) {
-	input->updateCameraByMouse(scene->mainCamera, mx, my, cx, cy);
+	input->updateCameraByMouse(scene->actCamera, mx, my, cx, cy);
 }
 
 void Application::mouseKey(bool press, bool isMain) {
 	pressed = press;
 }
 
-void Application::prepare(bool swapQueue) {
-	scene->mainCamera->updateFrustum(); // Update main camera's frustum for cull
-	renderMgr->updateMainLight(); // Update shadow cameras' frustum for cull
+void Application::updateData() {
+	scene->actCamera->updateFrustum(); // Update main camera's frustum for cull
+	renderMgr->updateMainLight(scene); // Update shadow cameras' frustum for cull
+}
+
+void Application::prepare() {
+	renderMgr->prepareData(scene);
+}
+
+void Application::swapData(bool swapQueue) {
 	renderMgr->swapRenderQueues(scene, swapQueue); // Caculate cull result
 }
 
@@ -110,9 +117,9 @@ void Application::animate(float velocity) {
 
 void Application::resize(int width, int height) {
 	windowWidth = width; windowHeight = height;
-	render->resize(width, height, scene->mainCamera, scene->reflectCamera);
+	render->resize(width, height, scene->actCamera, scene->renderCamera, scene->reflectCamera);
 	renderMgr->resize(width, height);
-	renderMgr->updateShadowCamera(scene->mainCamera);
+	renderMgr->updateShadowCamera(scene->actCamera);
 }
 
 void Application::keyDown(int key) {

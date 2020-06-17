@@ -31,7 +31,7 @@ public:
 	float velocity;
 	mat4 viewMatrix, projectMatrix, viewProjectMatrix;
 	mat4 invViewProjectMatrix, invProjMatrix, invViewMatrix;
-
+public:
 	Camera(float height);
 	~Camera();
 	void initPerspectCamera(float fovy,float aspect,float zNear,float zFar);

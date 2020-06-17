@@ -192,7 +192,7 @@ void Player::keyDown(Input* input, const Scene* scene) {
 	if (cid > -2) {
 		input->setControl(cid);
 		if(cid < 0) setNode(NULL, NULL);
-		else setNode(scene->animPlayers[cid], scene->mainCamera);
+		else setNode(scene->animPlayers[cid], scene->actCamera);
 	}
 }
 

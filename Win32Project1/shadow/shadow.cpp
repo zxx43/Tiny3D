@@ -11,19 +11,33 @@ Shadow::Shadow(Camera* view) {
 	corners2 = new vec3[4];
 	corners3 = new vec3[4];
 
-	lightCameraNear = new Camera(0); 
-	lightCameraMid = new Camera(0);
-	lightCameraFar = new Camera(0);
+	actLightCameraNear = new Camera(0); 
+	actLightCameraMid = new Camera(0);
+	actLightCameraFar = new Camera(0);
+	renderLightCameraNear = new Camera(0);
+	renderLightCameraMid = new Camera(0);
+	renderLightCameraFar = new Camera(0);
 }
 
 Shadow::~Shadow() {
-	delete[] corners0; corners0=NULL;
-	delete[] corners1; corners1=NULL;
-	delete[] corners2; corners2=NULL;
-	delete[] corners3; corners3=NULL;
-	delete lightCameraNear; lightCameraNear=NULL;
-	delete lightCameraMid; lightCameraMid=NULL;
-	delete lightCameraFar; lightCameraFar=NULL;
+	delete[] corners0; corners0 = NULL;
+	delete[] corners1; corners1 = NULL;
+	delete[] corners2; corners2 = NULL;
+	delete[] corners3; corners3 = NULL;
+
+	if (renderLightCameraNear != actLightCameraNear)
+		delete renderLightCameraNear;
+	renderLightCameraNear = NULL;
+	if (renderLightCameraMid != actLightCameraMid)
+		delete renderLightCameraMid;
+	renderLightCameraMid = NULL;
+	if (renderLightCameraFar != actLightCameraFar)
+		delete renderLightCameraFar;
+	renderLightCameraFar = NULL;
+
+	delete actLightCameraNear; actLightCameraNear = NULL;
+	delete actLightCameraMid; actLightCameraMid = NULL;
+	delete actLightCameraFar; actLightCameraFar = NULL;
 }
 
 void Shadow::prepareViewCamera(float dist1, float dist2) {
@@ -77,23 +91,40 @@ void Shadow::prepareViewCamera(float dist1, float dist2) {
 	radius1=(((vec3)center1) - corners2[0]).GetLength();
 	radius2=(((vec3)center2) - corners3[0]).GetLength();
 
-	lightCameraNear->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.0001 * radius0, 1.0001 * radius0);
-	lightCameraMid->initOrthoCamera(-radius1, radius1, -radius1, radius1, -1.0001 * radius1, 1.0001 * radius1);
-	lightCameraFar->initOrthoCamera(-radius2, radius2, -radius2, radius2, -1.0001 * radius2, 1.0001 * radius2);
+	actLightCameraNear->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.0001 * radius0, 1.0001 * radius0);
+	actLightCameraMid->initOrthoCamera(-radius1, radius1, -radius1, radius1, -1.0001 * radius1, 1.0001 * radius1);
+	actLightCameraFar->initOrthoCamera(-radius2, radius2, -radius2, radius2, -1.0001 * radius2, 1.0001 * radius2);
 }
 
-void Shadow::update(const vec3& light) {
+void Shadow::update(Camera* actCamera, const vec3& light) {
 	lightDir = light;
 
-	updateLightCamera(lightCameraNear, &center0, radius0);
-	updateLightCamera(lightCameraMid, &center1, radius1);
-	updateLightCamera(lightCameraFar, &center2, radius2);
-
-	lightNearMat = lightCameraNear->viewProjectMatrix;
-	lightMidMat = lightCameraMid->viewProjectMatrix;
-	lightFarMat = lightCameraFar->viewProjectMatrix;
+	updateLightCamera(actLightCameraNear, actCamera, &center0, radius0);
+	updateLightCamera(actLightCameraMid, actCamera, &center1, radius1);
+	updateLightCamera(actLightCameraFar, actCamera, &center2, radius2);
 }
 
-void Shadow::updateLightCamera(Camera* lightCamera, const vec4* center, float radius) {
-	lightCamera->updateLook((vec3)(viewCamera->invViewMatrix * (*center)), lightDir);
+void Shadow::copyCameraData() {
+	renderLightCameraNear->copy(actLightCameraNear);
+	renderLightCameraMid->copy(actLightCameraMid);
+	renderLightCameraFar->copy(actLightCameraFar);
+}
+
+void Shadow::mergeCamera() {
+	if (renderLightCameraNear && renderLightCameraNear != actLightCameraNear) {
+		delete renderLightCameraNear;
+		renderLightCameraNear = actLightCameraNear;
+	}
+	if (renderLightCameraMid && renderLightCameraMid != actLightCameraMid) {
+		delete renderLightCameraMid;
+		renderLightCameraMid = actLightCameraMid;
+	}
+	if (renderLightCameraFar && renderLightCameraFar != actLightCameraFar) {
+		delete renderLightCameraFar;
+		renderLightCameraFar = actLightCameraFar;
+	}
+}
+
+void Shadow::updateLightCamera(Camera* lightCamera, Camera* actCamera, const vec4* center, float radius) {
+	lightCamera->updateLook((vec3)(actCamera->invViewMatrix * (*center)), lightDir);
 }

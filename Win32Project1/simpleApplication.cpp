@@ -237,9 +237,9 @@ void SimpleApplication::init() {
 
 void SimpleApplication::updateMovement() {
 	if (scene->water)
-		scene->water->moveWaterWithCamera(scene->mainCamera);
+		scene->water->moveWaterWithCamera(scene->actCamera);
 	if (scene->terrainNode) {
-		vec3 cp = scene->mainCamera->position;
+		vec3 cp = scene->actCamera->position;
 		int bx, bz;
 		scene->terrainNode->caculateBlock(cp.x, cp.z, bx, bz);
 		int visualSize = cfgs->graphQuality >= 8 ? 60 : 40;
@@ -250,14 +250,14 @@ void SimpleApplication::updateMovement() {
 					float waterHeight = scene->water->position.y;
 					cp.y = cp.y < waterHeight ? waterHeight : cp.y;
 				}
-				cp.y += scene->mainCamera->getHeight();
+				cp.y += scene->actCamera->getHeight();
 			}
 			else if (scene->water) {
 				float waterHeight = scene->water->position.y;
 				cp.y = waterHeight;
-				cp.y += scene->mainCamera->getHeight();
+				cp.y += scene->actCamera->getHeight();
 			}
-			scene->mainCamera->moveTo(cp);
+			scene->actCamera->moveTo(cp);
 		}
 	}
 }
