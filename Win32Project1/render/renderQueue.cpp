@@ -99,14 +99,6 @@ void RenderQueue::pushDatasToBatch(BatchData* data, int pass) {
 void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState* state) {
 	for (int it = 0; it < queue->size; it++) {
 		Node* node = queue->get(it);
-		if (!node->needUpdateNode) {
-			if (node->needCreateDrawcall) 
-				node->prepareDrawcall();
-			else if (node->needUpdateDrawcall) {
-				node->updateRenderData();
-				node->updateDrawcall();
-			}
-		}
 
 		if (node->type == TYPE_STATIC) 
 			render->draw(camera, node->drawcall, state);

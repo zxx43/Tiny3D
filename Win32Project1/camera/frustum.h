@@ -12,16 +12,17 @@
 #include "../util/util.h"
 
 class Frustum {
-public:
+private:
 	vec4 ndcVertex[8];
+	Plane planes[6];
+	static uint PlaneVertexIndex[24];
+public:
 	vec3 worldVertex[8];
 	vec3 normals[6];
-	Plane planes[6];
-	uint planeVertexIndex[24];
 	float ds[6];
 	vec3 edgeDir[4];
 	float edgeLength[4];
-
+public:
 	Frustum();
 	~Frustum();
 	void update(const mat4& invViewProjectMatrix, const vec3& lookDir);

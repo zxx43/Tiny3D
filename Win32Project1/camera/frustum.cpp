@@ -1,5 +1,11 @@
 #include "frustum.h"
 
+uint Frustum::PlaneVertexIndex[24] = {
+	0, 4, 6, 2, 3, 7, 5, 6,
+	1, 5, 4, 0, 2, 6, 7, 3,
+	0, 2, 3, 1, 4, 5, 7, 6
+};
+
 Frustum::Frustum() {
 	ndcVertex[0]=vec4(-1.0f, -1.0f, 1.0f, 1.0f);
 	ndcVertex[1]=vec4(1.0f, -1.0f, 1.0f, 1.0f);
@@ -9,13 +15,6 @@ Frustum::Frustum() {
 	ndcVertex[5]=vec4(1.0f, -1.0f, -1.0f, 1.0f);
 	ndcVertex[6]=vec4(-1.0f, 1.0f, -1.0f, 1.0f);
 	ndcVertex[7]=vec4(1.0f, 1.0f, -1.0f, 1.0f);
-
-	planeVertexIndex[0] = 0; planeVertexIndex[1] = 4; planeVertexIndex[2] = 6; planeVertexIndex[3] = 2;
-	planeVertexIndex[4] = 3; planeVertexIndex[5] = 7; planeVertexIndex[6] = 5; planeVertexIndex[7] = 6;
-	planeVertexIndex[8] = 1; planeVertexIndex[9] = 5; planeVertexIndex[10] = 4; planeVertexIndex[11] = 0;
-	planeVertexIndex[12] = 2; planeVertexIndex[13] = 6; planeVertexIndex[14] = 7; planeVertexIndex[15] = 3;
-	planeVertexIndex[16] = 0; planeVertexIndex[17] = 2; planeVertexIndex[18] = 3; planeVertexIndex[19] = 1;
-	planeVertexIndex[20] = 4; planeVertexIndex[21] = 5; planeVertexIndex[22] = 7; planeVertexIndex[23] = 6;
 }
 
 Frustum::~Frustum() {}
@@ -69,10 +68,10 @@ bool Frustum::intersectsWidthRay(const vec3& origin, const vec3& dir, float maxD
 	//for (uint i = 0; i < 5; i++) {
 		bool isInter = CaculateIntersect(&line, &planes[i], maxDistance, interPoint);
 		if (!isInter) continue;
-		uint pi0 = planeVertexIndex[i * 4];
-		uint pi1 = planeVertexIndex[i * 4 + 1];
-		uint pi2 = planeVertexIndex[i * 4 + 2];
-		uint pi3 = planeVertexIndex[i * 4 + 3];
+		uint pi0 = PlaneVertexIndex[i * 4 + 0];
+		uint pi1 = PlaneVertexIndex[i * 4 + 1];
+		uint pi2 = PlaneVertexIndex[i * 4 + 2];
+		uint pi3 = PlaneVertexIndex[i * 4 + 3];
 		vec3 a = worldVertex[pi0];
 		vec3 b = worldVertex[pi1];
 		vec3 c = worldVertex[pi2];
