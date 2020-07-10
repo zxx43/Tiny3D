@@ -10,6 +10,7 @@ class Player {
 private:
 	AnimationNode* node;
 	bool moveAnim, doRotate, doTurn, doMove;
+	bool isMove, isRotate;
 	float fxAngle, fyAngle, exAngle;
 	vec3 position;
 	Camera* camera;
@@ -27,8 +28,8 @@ private:
 	void defend();
 	void turn(bool lr, float angle);
 	void resetExAngle();
-	bool rotateAct();
-	bool moveAct(const Scene* scene);
+	bool rotateAct(Scene* scene);
+	bool moveAct(Scene* scene);
 	void cameraAct();
 public:
 	Player();
@@ -37,8 +38,9 @@ public:
 	AnimationNode* getNode() { return node; }
 	void keyDown(Input* input, const Scene* scene);
 	void keyUp(Input* input);
-	void controlAct(Input* input, const Scene* scene, const float velocity);
-	void mouseAct(const float mouseX, const float mouseY, const float centerX, const float centerY);
+	void controlAct(Input* input, Scene* scene, const float velocity);
+	void updateCamera();
+	void mouseAct(Scene* scene, const float mouseX, const float mouseY, const float centerX, const float centerY);
 	void mousePress(bool press, bool isMain);
 	void wheelAct(float dz);
 };

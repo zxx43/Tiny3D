@@ -12,6 +12,7 @@ AnimationObject::AnimationObject(Animation* anim):Object() {
 	setDefaultAnim(0);
 	time = 0.0, curFrame = 0.0;
 	initMatricesData();
+	// todo create collision shape
 }
 
 AnimationObject::AnimationObject(const AnimationObject& rhs) {
@@ -55,6 +56,7 @@ AnimationObject::AnimationObject(const AnimationObject& rhs) {
 		transformsFull = (buff*)malloc(16 * sizeof(buff));
 		memcpy(transformsFull, rhs.transformsFull, 16 * sizeof(buff));
 	}
+	// todo copy collision shape
 }
 
 AnimationObject::~AnimationObject() {

@@ -261,7 +261,7 @@ Node* Node::detachChild(Node* child) {
 	return NULL;
 }
 
-void Node::translateNode(float x, float y, float z) {
+void Node::translateNode(Scene* scene, float x, float y, float z) {
 	float dx = x - position.x;
 	float dy = y - position.y;
 	float dz = z - position.z;
@@ -397,6 +397,7 @@ void Node::updateNode() {
 		for (unsigned int i = 0; i < objects.size(); i++) {
 			Object* object = objects[i];
 			updateNodeObject(object, true, true);
+			// todo update collision shape
 		}
 	}
 	needUpdateNode = false;

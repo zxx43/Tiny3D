@@ -9,6 +9,7 @@ Player::Player() {
 	moveAnim = false;
 	doRotate = false, doTurn = false;
 	doMove = false;
+	isMove = false, isRotate = false;
 	fxAngle = 0.0, fyAngle = 0.0;
 	exAngle = 0.0;
 	position = vec3(0.0, 0.0, 0.0);
@@ -145,10 +146,10 @@ void Player::resetExAngle() {
 	}
 }
 
-bool Player::rotateAct() {
+bool Player::rotateAct(Scene* scene) {
 	if (doRotate) {
 		if (node)
-			node->rotateNodeObject(node->getObject()->anglex, fxAngle + exAngle, node->getObject()->anglez);
+			node->rotateNodeObject(scene, node->getObject()->anglex, fxAngle + exAngle, node->getObject()->anglez);
 		doRotate = false;
 		if(!doTurn) return false;
 		else {
@@ -159,11 +160,11 @@ bool Player::rotateAct() {
 	return false;
 }
 
-bool Player::moveAct(const Scene* scene) {
+bool Player::moveAct(Scene* scene) {
 	if (doMove) {
 		if (node) {
-			node->translateNode(position.x, position.y, position.z);
-			scene->terrainNode->standObjectsOnGround(node);
+			node->translateNode(scene, position.x, position.y, position.z);
+			scene->terrainNode->standObjectsOnGround(scene, node);
 			position = node->position;
 		}
 		doMove = false;
@@ -203,7 +204,7 @@ void Player::keyUp(Input* input) {
 			idel();
 }
 
-void Player::controlAct(Input* input, const Scene* scene, const float velocity) {
+void Player::controlAct(Input* input, Scene* scene, const float velocity) {
 	if (!node) return;
 
 	speed = velocity;
@@ -236,10 +237,8 @@ void Player::controlAct(Input* input, const Scene* scene, const float velocity) 
 	if (!input->getBoards()[KEY_S] && !input->getBoards()[KEY_A] && !input->getBoards()[KEY_D])
 		resetExAngle();
 
-	bool isRotate = rotateAct();
-	bool isMove = moveAct(scene);
-	if(isMove || isRotate)
-		cameraAct();
+	isRotate = rotateAct(scene);
+	isMove = moveAct(scene);
 
 	if (atkPres) attack();
 	if (defPres) defend();
@@ -249,6 +248,12 @@ void Player::controlAct(Input* input, const Scene* scene, const float velocity) 
 		crit();
 	if (input->getBoards()[KEY_SPACE])
 		jump();
+}
+
+void Player::updateCamera() {
+	if (!node) return;
+	if (isMove || isRotate)
+		cameraAct();
 }
 
 void Player::mousePress(bool press, bool isMain) {
@@ -263,7 +268,7 @@ void Player::mousePress(bool press, bool isMain) {
 	if (!defPres) resetPlayOnce();
 }
 
-void Player::mouseAct(const float mouseX, const float mouseY, const float centerX, const float centerY) {
+void Player::mouseAct(Scene* scene, const float mouseX, const float mouseY, const float centerX, const float centerY) {
 	if (!node) return;
 	if (mouseX == centerX && mouseY == centerY) return;
 
@@ -276,7 +281,7 @@ void Player::mouseAct(const float mouseX, const float mouseY, const float center
 	turn(true, -dyr * sindr);
 	turn(false, dxr * sindr);
 	turn(false, dyr * cosdr);
-	if(rotateAct())
+	if(rotateAct(scene))
 		cameraAct();
 }
 

@@ -57,24 +57,20 @@ AABB::~AABB() {
 }
 
 void AABB::update(const vec3& newMinVertex,const vec3& newMaxVertex) {
-	minVertex.x=newMinVertex.x; minVertex.y=newMinVertex.y; minVertex.z=newMinVertex.z;
-	maxVertex.x=newMaxVertex.x; maxVertex.y=newMaxVertex.y; maxVertex.z=newMaxVertex.z;
-	sizex=maxVertex.x-minVertex.x;
-	sizey=maxVertex.y-minVertex.y;
-	sizez=maxVertex.z-minVertex.z;
-	halfSize = vec3(sizex, sizey, sizez) * 0.5;
-	position.x = minVertex.x + halfSize.x;
-	position.y = minVertex.y + halfSize.y;
-	position.z = minVertex.z + halfSize.z;
+	minVertex = newMinVertex, maxVertex = newMaxVertex;
+	vec3 size = maxVertex - minVertex;
+	sizex = size.x, sizey = size.y, sizez = size.z;
+	halfSize = size * 0.5;
+	position = minVertex + halfSize;
 
-	vertices[0].x=newMinVertex.x; vertices[0].y=newMinVertex.y; vertices[0].z=newMinVertex.z;
-	vertices[1].x=newMaxVertex.x; vertices[1].y=newMinVertex.y; vertices[1].z=newMinVertex.z;
-	vertices[2].x=newMinVertex.x; vertices[2].y=newMaxVertex.y; vertices[2].z=newMinVertex.z;
-	vertices[3].x=newMaxVertex.x; vertices[3].y=newMaxVertex.y; vertices[3].z=newMinVertex.z;
-	vertices[4].x=newMinVertex.x; vertices[4].y=newMinVertex.y; vertices[4].z=newMaxVertex.z;
-	vertices[5].x=newMaxVertex.x; vertices[5].y=newMinVertex.y; vertices[5].z=newMaxVertex.z;
-	vertices[6].x=newMinVertex.x; vertices[6].y=newMaxVertex.y; vertices[6].z=newMaxVertex.z;
-	vertices[7].x=newMaxVertex.x; vertices[7].y=newMaxVertex.y; vertices[7].z=newMaxVertex.z;
+	vertices[0] = vec3(newMinVertex.x, newMinVertex.y, newMinVertex.z);
+	vertices[1] = vec3(newMaxVertex.x, newMinVertex.y, newMinVertex.z);
+	vertices[2] = vec3(newMinVertex.x, newMaxVertex.y, newMinVertex.z);
+	vertices[3] = vec3(newMaxVertex.x, newMaxVertex.y, newMinVertex.z);
+	vertices[4] = vec3(newMinVertex.x, newMinVertex.y, newMaxVertex.z);
+	vertices[5] = vec3(newMaxVertex.x, newMinVertex.y, newMaxVertex.z);
+	vertices[6] = vec3(newMinVertex.x, newMaxVertex.y, newMaxVertex.z);
+	vertices[7] = vec3(newMaxVertex.x, newMaxVertex.y, newMaxVertex.z);
 }
 
 void AABB::update(float sx, float sy, float sz) {

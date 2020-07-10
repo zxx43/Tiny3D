@@ -92,6 +92,7 @@ public:
 	void drawSSGFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter);
 	void drawTexture2Screen(Render* render, Scene* scene, u64 texhnd);
 	void drawNoise3d(Render* render, Scene* scene, FrameBuffer* noiseBuf);
+	bool isWaterShow(const Scene* scene) { return scene->water && renderShowWater; }
 };
 
 

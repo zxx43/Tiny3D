@@ -15,21 +15,21 @@
 
 class Object {
 public:
-	vec3 position;
+	vec3 position; // Object local position
 	vec3 size;
-	mat4 translateMat, rotateMat, scaleMat;
+	mat4 translateMat, rotateMat, scaleMat; // Local transform
 	Mesh* mesh;
 	Mesh* meshMid;
 	Mesh* meshLow;
 	int material;
 	Billboard* billboard;
-	mat4 localTransformMatrix,normalMatrix;
-	mat4 transformMatrix,transformTransposed;
+	mat4 localTransformMatrix,normalMatrix; // Local transform
+	mat4 transformMatrix,transformTransposed; // Global transform
 	vec4 rotateQuat;
 	vec4 boundInfo;
-	float* transforms;
-	buff* transformsFull;
-	BoundingBox* bounding;
+	float* transforms; // Global translate used in GPU
+	buff* transformsFull; // Global transform used in GPU (translate, quat, bounding)
+	BoundingBox* bounding; // Bounding box in world space
 	vec3 localBoundPosition;
 	bool genShadow;
 	int detailLevel;

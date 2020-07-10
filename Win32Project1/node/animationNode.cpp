@@ -10,6 +10,7 @@ AnimationNode::AnimationNode(const vec3& boundingSize):
 
 	needCreateDrawcall = false;
 	needUpdateDrawcall = false;
+	needUpdateNode = false;
 }
 
 AnimationNode::~AnimationNode() {}
@@ -44,29 +45,31 @@ AnimationObject* AnimationNode::getObject() {
 	return NULL;
 }
 
-void AnimationNode::translateNodeCenterAtWorld(float x, float y, float z) {
+void AnimationNode::translateNodeCenterAtWorld(Scene* scene, float x, float y, float z) {
 	vec3 beforeWorldCenter = boundingBox->position;
 	vec3 offset = vec3(x, y, z) - beforeWorldCenter;
 	vec3 dPosition = position + offset;
-	translateNode(dPosition.x, dPosition.y, dPosition.z);
+	translateNode(scene, dPosition.x, dPosition.y, dPosition.z);
 }
 
-void AnimationNode::translateNode(float x, float y, float z) {
-	position.x = x, position.y = y, position.z = z;
-
+void AnimationNode::translateNode(Scene* scene, float x, float y, float z) {
+	position = vec3(x, y, z);
 	recursiveTransform(nodeTransform);
-	boundingBox->update(GetTranslate(nodeTransform));
-	updateNodeObject(objects[0], true, false);
-
-	Node* superior = parent;
-	while (superior) {
-		superior->updateBounding();
-		superior = superior->parent;
+	
+	if (!needUpdateNode) {
+		setUpdate(true);
+		scene->animNodeToUpdate.push_back(this);
 	}
+	// todo update collision shape
 }
 
-void AnimationNode::rotateNodeObject(float ax, float ay, float az) {
+void AnimationNode::rotateNodeObject(Scene* scene, float ax, float ay, float az) {
 	AnimationObject* object = (AnimationObject*)objects[0];
 	object->setRotation(ax, ay, az);
-	updateNodeObject(objects[0], false, true);
+
+	if (!needUpdateNode) {
+		setUpdate(true);
+		scene->animNodeToUpdate.push_back(this);
+	}
+	// todo update collision shape
 }

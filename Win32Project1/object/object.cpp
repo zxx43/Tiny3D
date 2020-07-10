@@ -41,6 +41,7 @@ Object::~Object() {
 
 	if (transforms) free(transforms); transforms = NULL;
 	if (transformsFull) free(transformsFull); transformsFull = NULL;
+	// todo remove collision shape
 }
 
 void Object::initMatricesData() {

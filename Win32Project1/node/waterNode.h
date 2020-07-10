@@ -12,7 +12,7 @@ public:
 	WaterNode(const vec3& position);
 	virtual ~WaterNode();
 	virtual void addObject(Scene* scene, Object* object);
-	void moveWaterWithCamera(const Camera* camera);
+	void moveWaterWithCamera(Scene* scene, const Camera* camera);
 };
 
 #endif

@@ -33,6 +33,7 @@ Scene::Scene() {
 	animCount.clear();
 	anims.clear();
 	animPlayers.clear();
+	animNodeToUpdate.clear();
 	Node::nodesToUpdate.clear();
 	Node::nodesToRemove.clear();
 	Instance::instanceTable.clear();
@@ -59,6 +60,7 @@ Scene::~Scene() {
 	anims.clear();
 	animPlayers.clear();
 	animCount.clear();
+	animNodeToUpdate.clear();
 }
 
 void Scene::initNodes() {
@@ -229,3 +231,19 @@ uint Scene::queryMeshCount(Mesh* mesh) {
 	return meshCount[mesh];
 }
 
+// Update animation nodes' transform & aabb after collision
+void Scene::updateAnimNodes() {
+	for (uint i = 0; i < animNodeToUpdate.size(); ++i) {
+		AnimationNode* node = animNodeToUpdate[i];
+		
+		node->boundingBox->update(GetTranslate(node->nodeTransform));
+		node->updateNodeObject(node->objects[0], true, true);
+		Node* superior = node->parent;
+		while (superior) {
+			superior->updateBounding();
+			superior = superior->parent;
+		}
+		node->setUpdate(false);
+	}
+	animNodeToUpdate.clear();
+}

@@ -17,7 +17,7 @@ public:
 	void caculateBlock(float x, float z, int& bx, int& bz);
 	bool cauculateY(int bx, int bz, float x, float z, float& y);
 	void cauculateBlockIndices(int cx, int cz, int sizex, int sizez);
-	void standObjectsOnGround(Node* node);
+	void standObjectsOnGround(Scene* scene, Node* node);
 	Terrain* getMesh() { return (Terrain*)(objects[0]->mesh); }
 };
 

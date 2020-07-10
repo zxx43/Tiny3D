@@ -379,19 +379,18 @@ void RenderManager::renderSkyTex(Render* render, Scene* scene) {
 void RenderManager::renderWater(Render* render, Scene* scene) {
 	static Shader* waterShader = render->findShader("water");
 	Camera* camera = scene->renderCamera;
-	if (scene->water && renderShowWater) {
-		state->reset();
-		state->eyePos = &(scene->renderCamera->position);
-		state->light = lightDir;
-		state->udotl = udotl;
-		state->time = scene->time;
-		state->enableSsr = cfgs->ssr;
-		state->waterPass = true;
-		state->shader = waterShader;
 
-		waterShader->setVector2("size", scene->water->size.x * 0.5, scene->water->size.y * 0.5);
-		render->draw(camera, scene->water->drawcall, state);
-	}
+	state->reset();
+	state->eyePos = &(scene->renderCamera->position);
+	state->light = lightDir;
+	state->udotl = udotl;
+	state->time = scene->time;
+	state->enableSsr = cfgs->ssr;
+	state->waterPass = true;
+	state->shader = waterShader;
+
+	waterShader->setVector2("size", scene->water->size.x * 0.5, scene->water->size.y * 0.5);
+	render->draw(camera, scene->water->drawcall, state);
 }
 
 void RenderManager::renderReflect(Render* render, Scene* scene) {

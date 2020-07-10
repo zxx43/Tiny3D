@@ -33,12 +33,12 @@ private:
 	void moveSelfAndDownwardNodesBounding(float dx,float dy,float dz);
 	void updateSelfAndDownwardNodesDrawcall(bool updateNormal);
 public:
-	vec3 position;
+	vec3 position; // Local position
 	vec3 size;
 	int type;
 	int shadowLevel, detailLevel;
-	BoundingBox* boundingBox;
-	mat4 nodeTransform;
+	BoundingBox* boundingBox; // Bounding box in world space
+	mat4 nodeTransform; // Global transform
 
 	std::vector<Object*> objects;
 	std::vector<BoundingBox*> objectsBBs;
@@ -69,7 +69,7 @@ public:
 	virtual Object* removeObject(Object* object);
 	void attachChild(Node* child);
 	Node* detachChild(Node* child);
-	virtual void translateNode(float x, float y, float z);
+	virtual void translateNode(Scene* scene, float x, float y, float z);
 	void translateNodeObject(int i, float x, float y, float z);
 	void translateNodeObjectCenterAtWorld(int i, float x, float y, float z);
 	void rotateNodeObject(int i, float ax, float ay, float az);
