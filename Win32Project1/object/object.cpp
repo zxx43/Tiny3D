@@ -35,6 +35,12 @@ Object::Object() {
 
 Object::Object(const Object& rhs) {
 	parent = rhs.parent;
+	if (rhs.billboard)
+		billboard = new Billboard(rhs.billboard->data[0], rhs.billboard->data[1], rhs.billboard->material);
+	else
+		billboard = NULL;
+	transforms = NULL;
+	transformsFull = NULL;
 }
 
 Object::~Object() {

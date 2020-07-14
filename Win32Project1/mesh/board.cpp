@@ -55,7 +55,7 @@ Board::Board(float sizex, float sizey, float sizez, float offx, float offy) :Mes
 	caculateExData();
 }
 
-Board::Board(const Board& rhs) {
+Board::Board(const Board& rhs) :Mesh(rhs) {
 	vertexCount = rhs.vertexCount;
 	vertices = new vec4[vertexCount];
 	normals = new vec3[vertexCount];

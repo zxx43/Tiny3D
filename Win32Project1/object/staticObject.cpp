@@ -20,8 +20,7 @@ StaticObject::StaticObject(Mesh* mesh, Mesh* meshMid, Mesh* meshLow) :Object() {
 	// todo create collision object
 }
 
-StaticObject::StaticObject(const StaticObject& rhs) {
-	parent = rhs.parent;
+StaticObject::StaticObject(const StaticObject& rhs) :Object(rhs) {
 	mesh = rhs.mesh;
 	meshMid = rhs.meshMid;
 	meshLow = rhs.meshLow;
@@ -47,8 +46,6 @@ StaticObject::StaticObject(const StaticObject& rhs) {
 	genShadow = rhs.genShadow;
 	detailLevel = rhs.detailLevel;
 
-	if (rhs.billboard)
-		setBillboard(rhs.billboard->data[0], rhs.billboard->data[1], rhs.billboard->material);
 	if (rhs.transforms) {
 		transforms = (float*)malloc(4 * sizeof(float));
 		memcpy(transforms, rhs.transforms, 4 * sizeof(float));

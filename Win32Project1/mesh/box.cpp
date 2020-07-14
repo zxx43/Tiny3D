@@ -17,7 +17,7 @@ Box::Box():Mesh() {
 	caculateExData();
 }
 
-Box::Box(const Box& rhs) {
+Box::Box(const Box& rhs) :Mesh(rhs) {
 	vertexCount=rhs.vertexCount;
 	vertices=new vec4[vertexCount];
 	normals=new vec3[vertexCount];

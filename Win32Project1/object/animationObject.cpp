@@ -2,9 +2,9 @@
 #include "../node/node.h"
 #include "../util/util.h"
 
-AnimationObject::AnimationObject(Animation* anim):Object() {
-	animation=anim; // no mesh!
-	anglex=0; angley=0; anglez=0;
+AnimationObject::AnimationObject(Animation* anim) :Object() {
+	animation = anim; // no mesh!
+	anglex = 0; angley = 0; anglez = 0;
 	setCurAnim(0, false);
 	setLoop(false);
 	setPlayOnce(false);
@@ -16,8 +16,7 @@ AnimationObject::AnimationObject(Animation* anim):Object() {
 	// todo create collision object
 }
 
-AnimationObject::AnimationObject(const AnimationObject& rhs) {
-	parent = rhs.parent;
+AnimationObject::AnimationObject(const AnimationObject& rhs) :Object(rhs) {
 	animation=rhs.animation;
 	if(rhs.bounding)
 		bounding=rhs.bounding->clone();
@@ -48,8 +47,6 @@ AnimationObject::AnimationObject(const AnimationObject& rhs) {
 	animEnd = rhs.animEnd;
 	defaultAid = rhs.defaultAid;
 
-	if (rhs.billboard)
-		setBillboard(rhs.billboard->data[0], rhs.billboard->data[1], rhs.billboard->material);
 	if (rhs.transforms) {
 		transforms = (float*)malloc(4 * sizeof(float));
 		memcpy(transforms, rhs.transforms, 4 * sizeof(float));

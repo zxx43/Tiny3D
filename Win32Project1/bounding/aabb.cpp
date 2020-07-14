@@ -1,6 +1,6 @@
 #include "aabb.h"
 
-AABB::AABB(const vec3& min,const vec3& max) {
+AABB::AABB(const vec3& min,const vec3& max) :BoundingBox() {
 	minVertex.x=min.x; minVertex.y=min.y; minVertex.z=min.z;
 	maxVertex.x=max.x; maxVertex.y=max.y; maxVertex.z=max.z;
 	sizex=maxVertex.x-minVertex.x;
@@ -21,7 +21,7 @@ AABB::AABB(const vec3& min,const vec3& max) {
 	vertices[7]=vec3(max.x,max.y,max.z);
 }
 
-AABB::AABB(const vec3& pos,float sx,float sy,float sz) {
+AABB::AABB(const vec3& pos,float sx,float sy,float sz) :BoundingBox() {
 	minVertex.x=pos.x-sx*0.5; minVertex.y=pos.y-sy*0.5; minVertex.z=pos.z-sz*0.5;
 	maxVertex.x=pos.x+sx*0.5; maxVertex.y=pos.y+sy*0.5; maxVertex.z=pos.z+sz*0.5;
 	sizex=sx; sizey=sy; sizez=sz;
@@ -38,7 +38,7 @@ AABB::AABB(const vec3& pos,float sx,float sy,float sz) {
 	vertices[7]=vec3(maxVertex.x,maxVertex.y,maxVertex.z);
 }
 
-AABB::AABB(const AABB& rhs) {
+AABB::AABB(const AABB& rhs) :BoundingBox(rhs) {
 	minVertex.x=rhs.minVertex.x; minVertex.y=rhs.minVertex.y; minVertex.z=rhs.minVertex.z;
 	maxVertex.x=rhs.maxVertex.x; maxVertex.y=rhs.maxVertex.y; maxVertex.z=rhs.maxVertex.z;
 	sizex=rhs.sizex;

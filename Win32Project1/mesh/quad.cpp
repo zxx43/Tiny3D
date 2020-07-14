@@ -37,7 +37,7 @@ Quad::Quad(float sizex, float sizey, float sizez) :Mesh() {
 }
 
 
-Quad::Quad(const Quad& rhs) {
+Quad::Quad(const Quad& rhs) :Mesh(rhs) {
 	vertexCount=rhs.vertexCount;
 	vertices=new vec4[vertexCount];
 	normals=new vec3[vertexCount];

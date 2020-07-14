@@ -19,7 +19,7 @@ Sphere::Sphere(int m, int n) :Mesh() {
 	caculateExData();
 }
 
-Sphere::Sphere(const Sphere& rhs) {
+Sphere::Sphere(const Sphere& rhs) :Mesh(rhs) {
 	vertexCount=rhs.vertexCount;
 	vertices=new vec4[vertexCount];
 	normals=new vec3[vertexCount];
