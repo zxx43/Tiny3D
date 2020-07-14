@@ -43,6 +43,7 @@ public:
 	void mouseAct(Scene* scene, const float mouseX, const float mouseY, const float centerX, const float centerY);
 	void mousePress(bool press, bool isMain);
 	void wheelAct(float dz);
+	void setPosition(const vec3& newPos) { if (node) position = newPos; }
 };
 
 #endif

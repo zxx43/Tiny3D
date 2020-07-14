@@ -13,8 +13,11 @@
 #include "../billboard/billboard.h"
 #include "../bounding/aabb.h"
 
+class Node;
+
 class Object {
 public:
+	Node* parent;
 	vec3 position; // Object local position
 	vec3 size;
 	mat4 translateMat, rotateMat, scaleMat; // Local transform
@@ -33,7 +36,7 @@ public:
 	vec3 localBoundPosition;
 	bool genShadow;
 	int detailLevel;
-
+public:
 	Object();
 	Object(const Object& rhs);
 	virtual ~Object();

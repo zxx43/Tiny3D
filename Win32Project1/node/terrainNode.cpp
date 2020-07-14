@@ -151,7 +151,7 @@ void TerrainNode::standObjectsOnGround(Scene* scene, Node* node) {
 				this->caculateBlock(worldCenter.x, worldCenter.z, bx, bz);
 				this->cauculateY(bx, bz, worldCenter.x, worldCenter.z, worldCenter.y);
 				worldCenter.y += ((AABB*)obj->bounding)->sizey * 0.45;
-				node->translateNodeObjectCenterAtWorld(i, worldCenter.x, worldCenter.y, worldCenter.z);
+				node->translateNodeObjectCenterAtWorld(scene, i, worldCenter.x, worldCenter.y, worldCenter.z);
 			}
 		}
 	} else if (node->children.size() > 0) {

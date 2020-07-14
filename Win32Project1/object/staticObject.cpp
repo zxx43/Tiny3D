@@ -1,4 +1,5 @@
 #include "staticObject.h"
+#include "../node/node.h"
 #include "../util/util.h"
 
 StaticObject::StaticObject(Mesh* mesh) :Object() {
@@ -7,7 +8,7 @@ StaticObject::StaticObject(Mesh* mesh) :Object() {
 	this->meshLow = mesh;
 	anglex = 0; angley = 0; anglez = 0;
 	initMatricesData();
-	// todo create collision shape
+	// todo create collision object
 }
 
 StaticObject::StaticObject(Mesh* mesh, Mesh* meshMid, Mesh* meshLow) :Object() {
@@ -16,10 +17,11 @@ StaticObject::StaticObject(Mesh* mesh, Mesh* meshMid, Mesh* meshLow) :Object() {
 	this->meshLow = meshLow;
 	anglex = 0; angley = 0; anglez = 0;
 	initMatricesData();
-	// todo create collision shape
+	// todo create collision object
 }
 
 StaticObject::StaticObject(const StaticObject& rhs) {
+	parent = rhs.parent;
 	mesh = rhs.mesh;
 	meshMid = rhs.meshMid;
 	meshLow = rhs.meshLow;
@@ -55,7 +57,7 @@ StaticObject::StaticObject(const StaticObject& rhs) {
 		transformsFull = (buff*)malloc(16 * sizeof(buff));
 		memcpy(transformsFull, rhs.transformsFull, 16 * sizeof(buff));
 	}
-	// todo copy collision shape
+	// todo copy collision object
 }
 
 StaticObject::~StaticObject() {

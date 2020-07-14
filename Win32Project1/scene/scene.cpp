@@ -235,9 +235,12 @@ uint Scene::queryMeshCount(Mesh* mesh) {
 void Scene::updateAnimNodes() {
 	for (uint i = 0; i < animNodeToUpdate.size(); ++i) {
 		AnimationNode* node = animNodeToUpdate[i];
+		terrainNode->standObjectsOnGround(this, node); // Stand animation nodes on ground after collision (no terrain collision)
+		if(player->getNode() == node)
+			player->setPosition(node->position);
 		
 		node->boundingBox->update(GetTranslate(node->nodeTransform));
-		node->updateNodeObject(node->objects[0], true, true);
+		node->updateNodeObject(node->getObject(), true, true);
 		Node* superior = node->parent;
 		while (superior) {
 			superior->updateBounding();

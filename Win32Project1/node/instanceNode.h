@@ -27,7 +27,7 @@ public:
 	void setGroup(bool group) { isGroup = group; };
 	bool getGroup() { return isGroup; };
 	virtual void addObject(Scene* scene, Object* object);
-	virtual Object* removeObject(Object* object);
+	virtual Object* removeObject(Scene* scene, Object* object);
 	virtual void prepareDrawcall();
 	virtual void updateRenderData() {}
 	virtual void updateDrawcall() { needUpdateDrawcall = false; }

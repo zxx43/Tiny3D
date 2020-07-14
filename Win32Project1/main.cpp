@@ -84,8 +84,6 @@ void ActRun() {
 		app->hideMouse();
 	}
 	else app->showMouse();
-	app->wheelAct();
-	app->keyAct(velocity);
 	app->act(startTime, currentTime, velocity);
 }
 

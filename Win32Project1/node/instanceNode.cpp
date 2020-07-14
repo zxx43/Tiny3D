@@ -42,8 +42,8 @@ void InstanceNode::addObject(Scene* scene, Object* object) {
 	scene->addObject(object);
 }
 
-Object* InstanceNode::removeObject(Object* object) {
-	Object* object2Remove = Node::removeObject(object);
+Object* InstanceNode::removeObject(Scene* scene, Object* object) {
+	Object* object2Remove = Node::removeObject(scene, object);
 	if (object2Remove) {
 		Instance::instanceTable[object2Remove->mesh]--;
 		if (object2Remove->meshMid)

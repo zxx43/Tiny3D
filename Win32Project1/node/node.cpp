@@ -78,6 +78,7 @@ void Node::updateObjectBoundingInNode(Object* object) {
 }
 
 void Node::addObject(Scene* scene, Object* object) {
+	object->parent = this;
 	objects.push_back(object);
 	object->caculateLocalAABB(false, false);
 	BoundingBox* objectBB = object->bounding;
@@ -93,10 +94,10 @@ void Node::addObject(Scene* scene, Object* object) {
 		}
 	}
 	needCreateDrawcall = true;
-	pushToUpdate();
+	pushToUpdate(scene);
 }
 
-Object* Node::removeObject(Object* object) {
+Object* Node::removeObject(Scene* scene, Object* object) {
 	std::vector<Object*>::iterator it;
 	std::vector<BoundingBox*>::iterator itbb;
 	for (it = objects.begin(); it != objects.end(); ++it) {
@@ -117,7 +118,8 @@ Object* Node::removeObject(Object* object) {
 			}
 
 			needCreateDrawcall = true;
-			pushToUpdate();
+			pushToUpdate(scene);
+			object->parent = NULL;
 
 			return object;
 		}
@@ -193,15 +195,15 @@ void Node::updateBounding() {
 }
 
 // Update Node's drawcall & its children's & children's children...
-void Node::updateSelfAndDownwardNodesDrawcall(bool updateNormal) {
+void Node::updateSelfAndDownwardNodesDrawcall(Scene* scene, bool updateNormal) {
 	if (objects.size() > 0) {
 		needUpdateNormal = updateNormal;
 		needUpdateDrawcall = true;
-		pushToUpdate();
+		pushToUpdate(scene);
 	}
 
 	for (unsigned int i = 0; i < children.size(); i++)
-		children[i]->updateSelfAndDownwardNodesDrawcall(updateNormal);
+		children[i]->updateSelfAndDownwardNodesDrawcall(scene, updateNormal);
 }
 
 // Find ancestor of this Node
@@ -215,7 +217,7 @@ Node* Node::getAncestor() {
 	return root;
 }
 
-void Node::attachChild(Node* child) {
+void Node::attachChild(Scene* scene, Node* child) {
 	children.push_back(child);
 	child->parent=this;
 
@@ -228,7 +230,7 @@ void Node::attachChild(Node* child) {
 		superior = superior->parent;
 	}
 
-	updateSelfAndDownwardNodesDrawcall(false);
+	updateSelfAndDownwardNodesDrawcall(scene, false);
 }
 
 Node* Node::detachChild(Node* child) {
@@ -282,10 +284,10 @@ void Node::translateNode(Scene* scene, float x, float y, float z) {
 		superior = superior->parent;
 	}
 
-	updateSelfAndDownwardNodesDrawcall(false);
+	updateSelfAndDownwardNodesDrawcall(scene, false);
 }
 
-void Node::translateNodeObject(int i, float x, float y, float z) {
+void Node::translateNodeObject(Scene* scene, int i, float x, float y, float z) {
 	Object* object = objects[i];
 	object->setPosition(x, y, z);
 	object->caculateLocalAABB(false, false);
@@ -299,18 +301,18 @@ void Node::translateNodeObject(int i, float x, float y, float z) {
 	}
 	needUpdateNormal = false;
 	needUpdateDrawcall = true;
-	pushToUpdate();
+	pushToUpdate(scene);
 }
 
-void Node::translateNodeObjectCenterAtWorld(int i, float x, float y, float z) {
+void Node::translateNodeObjectCenterAtWorld(Scene* scene, int i, float x, float y, float z) {
 	Object* object = objects[i];
 	vec3 worldCenter = object->bounding->position;
 	vec3 offset = vec3(x, y, z) - worldCenter;
 	vec3 localPosition = object->position;
-	translateNodeObject(i, localPosition.x + offset.x, localPosition.y + offset.y, localPosition.z + offset.z);
+	translateNodeObject(scene, i, localPosition.x + offset.x, localPosition.y + offset.y, localPosition.z + offset.z);
 }
 
-void Node::rotateNodeObject(int i, float ax, float ay, float az) {
+void Node::rotateNodeObject(Scene* scene, int i, float ax, float ay, float az) {
 	Object* object = objects[i];
 	object->setRotation(ax,ay,az);
 	object->caculateLocalAABB(false, false);
@@ -324,10 +326,10 @@ void Node::rotateNodeObject(int i, float ax, float ay, float az) {
 	}
 	needUpdateNormal = true;
 	needUpdateDrawcall = true;
-	pushToUpdate();
+	pushToUpdate(scene);
 }
 
-void Node::scaleNodeObject(int i, float sx, float sy, float sz) {
+void Node::scaleNodeObject(Scene* scene, int i, float sx, float sy, float sz) {
 	Object* object = objects[i];
 	object->setSize(sx, sy, sz);
 	object->caculateLocalAABB(false, false);
@@ -342,10 +344,10 @@ void Node::scaleNodeObject(int i, float sx, float sy, float sz) {
 	if (sx == sy && sy == sz) needUpdateNormal = false;
 	else needUpdateNormal = true;
 	needUpdateDrawcall = true;
-	pushToUpdate();
+	pushToUpdate(scene);
 }
 
-void Node::pushToUpdate() {
+void Node::pushToUpdate(Scene* scene) {
 	if (!needUpdateNode) {
 		Node::nodesToUpdate.push_back(this);
 		needUpdateNode = true;
@@ -364,9 +366,10 @@ void Node::updateNodeObject(Object* object, bool translate, bool rotate) {
 		object->boundInfo = vec4(bbox->sizex, bbox->sizey, bbox->sizez, bbox->position.y);
 	}
 	if (object->transforms && translate) {
-		object->transforms[0] = object->transformMatrix.entries[12];
-		object->transforms[1] = object->transformMatrix.entries[13];
-		object->transforms[2] = object->transformMatrix.entries[14];
+		vec3 transPos = GetTranslate(object->transformMatrix);
+		object->transforms[0] = transPos.x;
+		object->transforms[1] = transPos.y;
+		object->transforms[2] = transPos.z;
 		object->transforms[3] = object->size.x;
 	}
 	if (object->transformsFull) {
@@ -397,7 +400,11 @@ void Node::updateNode() {
 		for (unsigned int i = 0; i < objects.size(); i++) {
 			Object* object = objects[i];
 			updateNodeObject(object, true, true);
-			// todo update collision shape
+
+			vec3 gPosition = vec3(object->transformsFull[0], object->transformsFull[1], object->transformsFull[2]);
+			vec4 gQuat = vec4(object->rotateQuat);
+			float gSize = object->transformsFull[3];
+			// todo update collision object
 		}
 	}
 	needUpdateNode = false;

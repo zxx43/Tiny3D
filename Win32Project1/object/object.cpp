@@ -1,8 +1,10 @@
 #include "object.h"
 #include <stdlib.h>
+#include "../node/node.h"
 #include "../constants/constants.h"
 
 Object::Object() {
+	parent = NULL;
 	position = vec3(0, 0, 0);
 	size = vec3(1.0, 1.0, 1.0);
 	localTransformMatrix.LoadIdentity();
@@ -32,7 +34,7 @@ Object::Object() {
 }
 
 Object::Object(const Object& rhs) {
-
+	parent = rhs.parent;
 }
 
 Object::~Object() {
@@ -41,7 +43,7 @@ Object::~Object() {
 
 	if (transforms) free(transforms); transforms = NULL;
 	if (transformsFull) free(transformsFull); transformsFull = NULL;
-	// todo remove collision shape
+	// todo remove collision object
 }
 
 void Object::initMatricesData() {

@@ -137,20 +137,6 @@ void SimpleApplication::keyUp(int key) {
 	scene->player->keyUp(input);
 }
 
-void SimpleApplication::keyAct(float velocity) {
-	Application::keyAct(velocity);
-	scene->player->controlAct(input, scene, velocity * 0.05);
-}
-
-void SimpleApplication::wheelAct() {
-	Application::wheelAct();
-	if (wheelDir != MNONE) {
-		scene->player->wheelAct(wheelDir == MNEAR ? -1.0 : 1.0);
-		updateMovement();
-		wheelDir = MNONE;
-	}
-}
-
 void SimpleApplication::moveMouse(const float mx, const float my, const float cx, const float cy) {
 	Application::moveMouse(mx, my, cx, cy);
 	scene->player->mouseAct(scene, mx, my, cx, cy);
@@ -263,6 +249,14 @@ void SimpleApplication::updateMovement() {
 }
 
 void SimpleApplication::act(long startTime, long currentTime, float velocity) {
+	wheelAct();
+	if (wheelDir != MNONE) {
+		scene->player->wheelAct(wheelDir == MNEAR ? -1.0 : 1.0);
+		wheelDir = MNONE;
+	}
+	keyAct(velocity);
+	scene->player->controlAct(input, scene, velocity * 0.05);
+
 	Application::act(startTime, currentTime, velocity);
 	///*
 		static float dd = 1.0, dr = 1.0;
@@ -272,7 +266,6 @@ void SimpleApplication::act(long startTime, long currentTime, float velocity) {
 		//animNode->rotateNodeObject(scene, 0, ((AnimationObject*)animNode->objects[0])->angley + 0.1, 0);
 		animNode->rotateNodeObject(scene, 0, 135 + 90 * dr, 0);
 		animNode->translateNode(scene, animNode->position.x - 0.01 * dd, animNode->position.y, animNode->position.z - 0.01 * dd);
-		scene->terrainNode->standObjectsOnGround(scene, animNode);
 
 		static float distance = 0.0;
 		distance++;
@@ -289,13 +282,14 @@ void SimpleApplication::act(long startTime, long currentTime, float velocity) {
 		time++;
 	}
 	//*/
-	
+	scene->updateNodes();
+
 	// todo collision act
+	// todo collision feedback
 	scene->updateAnimNodes();
 	scene->player->updateCamera();
 	updateMovement();
 
-	scene->updateNodes();
 	if (!cfgs->ssr) scene->updateReflectCamera();
 }
 
@@ -469,11 +463,11 @@ void SimpleApplication::initScene() {
 
 	Node* node = new StaticNode(vec3(800, 0, -604));
 	Node* modelNode = new StaticNode(vec3(0, 0, 0));
-	modelNode->attachChild(node1);
-	modelNode->attachChild(node2);
-	node->attachChild(modelNode);
-	node->attachChild(node3);
-	scene->staticRoot->attachChild(node);
+	modelNode->attachChild(scene, node1);
+	modelNode->attachChild(scene, node2);
+	node->attachChild(scene, modelNode);
+	node->attachChild(scene, node3);
+	scene->staticRoot->attachChild(scene, node);
 
 	StaticObject* objectRock = model9.clone();
 	objectRock->setPosition(-60, 0, 0);
@@ -641,64 +635,64 @@ void SimpleApplication::initScene() {
 	instanceNode7->addObject(scene, box3);
 	instanceNode7->addObject(scene, box4);
 
-	scene->staticRoot->attachChild(instanceNode1);
-	scene->staticRoot->attachChild(instanceNode2);
-	scene->staticRoot->attachChild(instanceNode3);
-	scene->staticRoot->attachChild(instanceNode4);
-	scene->staticRoot->attachChild(instanceNode5);
-	scene->staticRoot->attachChild(instanceNode6);
-	scene->staticRoot->attachChild(instanceNode7);
-	scene->staticRoot->attachChild(stoneNode);
+	scene->staticRoot->attachChild(scene, instanceNode1);
+	scene->staticRoot->attachChild(scene, instanceNode2);
+	scene->staticRoot->attachChild(scene, instanceNode3);
+	scene->staticRoot->attachChild(scene, instanceNode4);
+	scene->staticRoot->attachChild(scene, instanceNode5);
+	scene->staticRoot->attachChild(scene, instanceNode6);
+	scene->staticRoot->attachChild(scene, instanceNode7);
+	scene->staticRoot->attachChild(scene, stoneNode);
 
 	AnimationNode* animNode1 = new AnimationNode(vec3(5, 10, 5));
 	animNode1->setAnimation(scene, animations["army"]);
-	animNode1->getObject()->setSize(0.05, 0.05, 0.05);
+	animNode1->scaleNodeObject(scene, 0.05, 0.05, 0.05);
 	animNode1->getObject()->setPosition(0, -5, -1);
 	animNode1->translateNode(scene, 5, 0, 15);
 	animNode1->getObject()->setCurAnim(0, false);
 	animNode1->getObject()->setLoop(true);
 	AnimationNode* animNode2 = new AnimationNode(vec3(5, 10, 5));
 	animNode2->setAnimation(scene, animations["ninja"]);
-	animNode2->getObject()->setSize(0.05, 0.05, 0.05);
+	animNode2->scaleNodeObject(scene, 0.05, 0.05, 0.05);
 	animNode2->getObject()->setPosition(0, -5, -1);
 	animNode2->translateNode(scene, 40, 0, 40);
 	//animNode2->rotateNodeObject(0, 45, 0);
 	animNode2->getObject()->setDefaultAnim(10);
 	AnimationNode* animNode3 = new AnimationNode(vec3(5, 10, 5));
 	animNode3->setAnimation(scene, animations["ninja"]);
-	animNode3->getObject()->setSize(0.05, 0.05, 0.05);
+	animNode3->scaleNodeObject(scene, 0.05, 0.05, 0.05);
 	animNode3->getObject()->setPosition(0, -5, -1);
 	animNode3->translateNode(scene, 5, 0, 15);
 	animNode3->getObject()->setDefaultAnim(11);
 	AnimationNode* animNode4 = new AnimationNode(vec3(5, 10, 5));
 	animNode4->setAnimation(scene, animations["ninja"]);
-	animNode4->getObject()->setSize(0.05, 0.05, 0.05);
+	animNode4->scaleNodeObject(scene, 0.05, 0.05, 0.05);
 	animNode4->getObject()->setPosition(0, -5, -1);
 	animNode4->translateNode(scene, 40, 0, 40);
 	animNode4->getObject()->setDefaultAnim(12);
 	AnimationNode* animNode5 = new AnimationNode(vec3(7.5, 7.5, 10.5));
 	animNode5->setAnimation(scene, animations["dog"]);
-	animNode5->getObject()->setSize(0.075, 0.075, 0.075);
+	animNode5->scaleNodeObject(scene, 0.075, 0.075, 0.075);
 	animNode5->getObject()->setPosition(0, -2.6, -1.5);
 	animNode5->translateNode(scene, 30, 0, 20);
 	animNode5->rotateNodeObject(scene, 0, 90, 0);
 	AnimationNode* animNode6 = new AnimationNode(vec3(5.0, 10.0, 5.0));
 	animNode6->setAnimation(scene, animations["male"]);
-	animNode6->getObject()->setSize(0.05, 0.05, 0.05);
+	animNode6->scaleNodeObject(scene, 0.05, 0.05, 0.05);
 	animNode6->getObject()->setPosition(0.0, -4.0, 0.0);
 	animNode6->translateNode(scene, 40, 0, 0);
 	animNode6->rotateNodeObject(scene, 0, 270, 180);
 
 	Node* animNode = new StaticNode(vec3(0, 0, 0));
-	animNode->attachChild(animNode1);
-	animNode->attachChild(animNode2);
-	scene->animationRoot->attachChild(animNode);
+	animNode->attachChild(scene, animNode1);
+	animNode->attachChild(scene, animNode2);
+	scene->animationRoot->attachChild(scene, animNode);
 	Node* animNodeSub = new StaticNode(vec3(0, 0, 0));
-	animNodeSub->attachChild(animNode3);
-	animNodeSub->attachChild(animNode4);
-	animNodeSub->attachChild(animNode5);
-	animNodeSub->attachChild(animNode6);
-	scene->animationRoot->attachChild(animNodeSub);
+	animNodeSub->attachChild(scene, animNode3);
+	animNodeSub->attachChild(scene, animNode4);
+	animNodeSub->attachChild(scene, animNode5);
+	animNodeSub->attachChild(scene, animNode6);
+	scene->animationRoot->attachChild(scene, animNodeSub);
 
 	animNode->translateNode(scene, 0, 10, 0);
 	animNodeSub->translateNode(scene, 10, 0, 0);
@@ -706,7 +700,6 @@ void SimpleApplication::initScene() {
 	node1->translateNode(scene, 0, 0, 20);
 
 	scene->terrainNode->standObjectsOnGround(scene, scene->staticRoot);
-	scene->terrainNode->standObjectsOnGround(scene, scene->animationRoot);
 	
 	Application::initScene();
 }

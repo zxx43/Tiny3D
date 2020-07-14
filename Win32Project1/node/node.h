@@ -31,7 +31,7 @@ private:
 	void updateSelfAndDownwardNodesBounding();
 	void moveBaseObjectsBounding(float dx,float dy,float dz);
 	void moveSelfAndDownwardNodesBounding(float dx,float dy,float dz);
-	void updateSelfAndDownwardNodesDrawcall(bool updateNormal);
+	void updateSelfAndDownwardNodesDrawcall(Scene* scene, bool updateNormal);
 public:
 	vec3 position; // Local position
 	vec3 size;
@@ -62,18 +62,18 @@ public:
 	virtual void updateDrawcall() = 0;
 	void updateNode();
 	void updateNodeObject(Object* object, bool translate, bool rotate);
-	void pushToUpdate();
+	virtual void pushToUpdate(Scene* scene);
 
 	void updateBounding();
 	virtual void addObject(Scene* scene, Object* object);
-	virtual Object* removeObject(Object* object);
-	void attachChild(Node* child);
+	virtual Object* removeObject(Scene* scene, Object* object);
+	void attachChild(Scene* scene, Node* child);
 	Node* detachChild(Node* child);
 	virtual void translateNode(Scene* scene, float x, float y, float z);
-	void translateNodeObject(int i, float x, float y, float z);
-	void translateNodeObjectCenterAtWorld(int i, float x, float y, float z);
-	void rotateNodeObject(int i, float ax, float ay, float az);
-	void scaleNodeObject(int i, float sx, float sy, float sz);
+	void translateNodeObject(Scene* scene, int i, float x, float y, float z);
+	void translateNodeObjectCenterAtWorld(Scene* scene, int i, float x, float y, float z);
+	void rotateNodeObject(Scene* scene, int i, float ax, float ay, float az);
+	void scaleNodeObject(Scene* scene, int i, float sx, float sy, float sz);
 	Node* getAncestor();
 	void clearChildren();
 	void pushToRemove();

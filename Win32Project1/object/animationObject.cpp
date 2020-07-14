@@ -1,4 +1,5 @@
 #include "animationObject.h"
+#include "../node/node.h"
 #include "../util/util.h"
 
 AnimationObject::AnimationObject(Animation* anim):Object() {
@@ -12,10 +13,11 @@ AnimationObject::AnimationObject(Animation* anim):Object() {
 	setDefaultAnim(0);
 	time = 0.0, curFrame = 0.0;
 	initMatricesData();
-	// todo create collision shape
+	// todo create collision object
 }
 
 AnimationObject::AnimationObject(const AnimationObject& rhs) {
+	parent = rhs.parent;
 	animation=rhs.animation;
 	if(rhs.bounding)
 		bounding=rhs.bounding->clone();
@@ -56,7 +58,7 @@ AnimationObject::AnimationObject(const AnimationObject& rhs) {
 		transformsFull = (buff*)malloc(16 * sizeof(buff));
 		memcpy(transformsFull, rhs.transformsFull, 16 * sizeof(buff));
 	}
-	// todo copy collision shape
+	// todo copy collision object
 }
 
 AnimationObject::~AnimationObject() {

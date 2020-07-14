@@ -164,8 +164,6 @@ bool Player::moveAct(Scene* scene) {
 	if (doMove) {
 		if (node) {
 			node->translateNode(scene, position.x, position.y, position.z);
-			scene->terrainNode->standObjectsOnGround(scene, node);
-			position = node->position;
 		}
 		doMove = false;
 		return true;
@@ -281,7 +279,7 @@ void Player::mouseAct(Scene* scene, const float mouseX, const float mouseY, cons
 	turn(true, -dyr * sindr);
 	turn(false, dxr * sindr);
 	turn(false, dyr * cosdr);
-	if(rotateAct(scene))
+	if (rotateAct(scene))
 		cameraAct();
 }
 
