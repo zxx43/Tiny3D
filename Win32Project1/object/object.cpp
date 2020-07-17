@@ -1,5 +1,6 @@
 #include "object.h"
 #include <stdlib.h>
+#include <limits>
 #include "../node/node.h"
 #include "../constants/constants.h"
 
@@ -73,16 +74,18 @@ void Object::caculateLocalAABB(bool looseWidth, bool looseAll) {
 	if (vertexCount <= 0) return;
 	vec4* vertices = mesh->vertices;
 	vec4 first4 = localTransformMatrix * vertices[0];
-	float sx = first4.x / first4.w;
-	float sy = first4.y / first4.w;
-	float sz = first4.z / first4.w;
+	float firstInvw = 1.0 / first4.w;
+	float sx = first4.x * firstInvw;
+	float sy = first4.y * firstInvw;
+	float sz = first4.z * firstInvw;
 	float lx = sx;
 	float ly = sy;
 	float lz = sz;
 	for (int i = 1; i < vertexCount; i++) {
 		vec4 vertex4 = vertices[i];
 		vec4 local4 = localTransformMatrix * vertex4;
-		vec3 local3(local4.x / local4.w, local4.y / local4.w, local4.z / local4.w);
+		float invw = 1.0 / local4.w;
+		vec3 local3(local4.x * invw, local4.y * invw, local4.z * invw);
 		sx = sx > local3.x ? local3.x : sx;
 		sy = sy > local3.y ? local3.y : sy;
 		sz = sz > local3.z ? local3.z : sz;
@@ -111,6 +114,40 @@ void Object::caculateLocalAABB(bool looseWidth, bool looseAll) {
 	localBoundPosition.x=bounding->position.x;
 	localBoundPosition.y=bounding->position.y;
 	localBoundPosition.z=bounding->position.z;
+}
+
+void Object::caculateNormalBounding() {
+	if (!mesh) { // Animation object use node bounding box
+		vec3 halfSize = ((AABB*)parent->boundingBox)->halfSize;
+		vec3 origin(0, 0, 0);
+	} else {
+		float minVal = std::numeric_limits<float>::min();
+		float maxVal = std::numeric_limits<float>::max();
+		float sx = maxVal, sy = maxVal, sz = maxVal;
+		float lx = minVal, ly = minVal, lz = minVal;
+		for (uint n = 0; n < mesh->normalFaces.size(); ++n) {
+			FaceBuf* buf = mesh->normalFaces[n];
+			for (int i = 0; i < buf->count; ++i) {
+				int index = mesh->indices[buf->start + i];
+
+				vec4 vertex = mesh->vertices[index];
+				vertex = scale(size.x, size.y, size.z) * vertex;
+				float invw = 1.0 / vertex.w;
+				vertex.x *= invw;
+				vertex.y *= invw;
+				vertex.z *= invw;
+				
+				sx = sx > vertex.x ? vertex.x : sx;
+				sy = sy > vertex.y ? vertex.y : sy;
+				sz = sz > vertex.z ? vertex.z : sz;
+				lx = lx < vertex.x ? vertex.x : lx;
+				ly = ly < vertex.y ? vertex.y : ly;
+				lz = lz < vertex.z ? vertex.z : lz;
+			}
+		}
+		vec3 halfSize = vec3(lx - sx, ly - sy, lz - sz) * 0.5;
+		vec3 origin = vec3(sx, sy, sz) + halfSize;
+	}
 }
 
 void Object::updateLocalMatrices() {

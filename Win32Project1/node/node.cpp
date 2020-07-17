@@ -135,10 +135,10 @@ void Node::updateBaseNodeBounding() {
 		if (objectsBBs.size() > 0) 
 			boundingBox->merge(objectsBBs);
 		else if (objectsBBs.size() <= 0) { // Base Node and without object boundings
-			mat4 nodeTransform; nodeTransform.LoadIdentity();
-			recursiveTransform(nodeTransform);
-			boundingBox->update(GetTranslate(nodeTransform));
-			//boundingBox->update(nodeTransform * vec4(0, 0, 0, 1));
+			mat4 nodeBBTransform; nodeBBTransform.LoadIdentity();
+			recursiveTransform(nodeBBTransform);
+			boundingBox->update(GetTranslate(nodeBBTransform));
+			//boundingBox->update(nodeBBTransform * vec4(0, 0, 0, 1));
 		}
 	}
 
@@ -223,6 +223,7 @@ void Node::attachChild(Scene* scene, Node* child) {
 
 	child->updateBaseNodeBounding();
 	child->updateSelfAndDownwardNodesBounding();
+	child->updateNodeTransform();
 
 	Node* superior = this;
 	while (superior) {
@@ -285,6 +286,7 @@ void Node::translateNode(Scene* scene, float x, float y, float z) {
 	}
 
 	updateSelfAndDownwardNodesDrawcall(scene, false);
+	updateNodeTransform();
 }
 
 void Node::translateNodeObject(Scene* scene, int i, float x, float y, float z) {
@@ -396,15 +398,19 @@ void Node::updateNodeObject(Object* object, bool translate, bool rotate) {
 
 void Node::updateNode() {
 	if (type != TYPE_ANIMATE) {
-		recursiveTransform(nodeTransform);
+		updateNodeTransform();
 		for (unsigned int i = 0; i < objects.size(); i++) {
 			Object* object = objects[i];
 			updateNodeObject(object, true, true);
 
-			vec3 gPosition = vec3(object->transformsFull[0], object->transformsFull[1], object->transformsFull[2]);
+			vec3 gPosition = GetTranslate(nodeTransform * object->translateMat * object->rotateMat);
 			vec4 gQuat = vec4(object->rotateQuat);
-			float gSize = object->transformsFull[3];
 			// todo update collision object
+			//btTransform trans;
+			//object->collisionObject->getMotionState()->getWorldTransform(trans);
+			//trans.setRotation(gQuat);
+			//trans.setOrigin(gPosition);
+			//object->collisionObject->getMotionState()->setWorldTransform(trans);
 		}
 	}
 	needUpdateNode = false;
@@ -415,10 +421,17 @@ void Node::pushToRemove() {
 }
 
 void Node::recursiveTransform(mat4& finalNodeMatrix) {
-	if(parent) {
+	if (parent) {
 		mat4 parentTransform;
 		parent->recursiveTransform(parentTransform);
-		finalNodeMatrix=parentTransform*translate(position.x,position.y,position.z);
+		finalNodeMatrix = parentTransform * translate(position.x, position.y, position.z);
 	} else
-		finalNodeMatrix=translate(position.x,position.y,position.z);
+		finalNodeMatrix = translate(position.x, position.y, position.z);
+}
+
+// Update node transform & its children's & children's children
+void Node::updateNodeTransform() {
+	recursiveTransform(nodeTransform);
+	for (uint i = 0; i < children.size(); ++i)
+		children[i]->updateNodeTransform();
 }

@@ -41,7 +41,8 @@ public:
 	Object(const Object& rhs);
 	virtual ~Object();
 	virtual Object* clone()=0;
-	virtual void caculateLocalAABB(bool looseWidth,bool looseAll);
+	void caculateLocalAABB(bool looseWidth,bool looseAll);
+	void caculateNormalBounding(); // Caculate collision obb
 	void initMatricesData();
 	void updateLocalMatrices();
 	virtual void vertexTransform()=0;

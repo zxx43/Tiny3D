@@ -17,6 +17,7 @@ private:
 	virtual void normalTransform();
 public:
 	float anglex,angley,anglez;
+	mat4 boundRotateMat;
 	Animation* animation;
 	int aid, fid;
 public:

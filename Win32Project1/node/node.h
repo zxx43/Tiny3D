@@ -32,6 +32,7 @@ private:
 	void moveBaseObjectsBounding(float dx,float dy,float dz);
 	void moveSelfAndDownwardNodesBounding(float dx,float dy,float dz);
 	void updateSelfAndDownwardNodesDrawcall(Scene* scene, bool updateNormal);
+	void recursiveTransform(mat4& finalNodeMatrix);
 public:
 	vec3 position; // Local position
 	vec3 size;
@@ -77,7 +78,7 @@ public:
 	Node* getAncestor();
 	void clearChildren();
 	void pushToRemove();
-	void recursiveTransform(mat4& finalNodeMatrix);
+	void updateNodeTransform();
 };
 
 #endif /* NODE_H_ */

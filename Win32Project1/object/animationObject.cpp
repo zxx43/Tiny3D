@@ -5,6 +5,7 @@
 AnimationObject::AnimationObject(Animation* anim) :Object() {
 	animation = anim; // no mesh!
 	anglex = 0; angley = 0; anglez = 0;
+	boundRotateMat.LoadIdentity();
 	setCurAnim(0, false);
 	setLoop(false);
 	setPlayOnce(false);
@@ -13,7 +14,6 @@ AnimationObject::AnimationObject(Animation* anim) :Object() {
 	setDefaultAnim(0);
 	time = 0.0, curFrame = 0.0;
 	initMatricesData();
-	// todo create collision object
 }
 
 AnimationObject::AnimationObject(const AnimationObject& rhs) :Object(rhs) {
@@ -33,6 +33,7 @@ AnimationObject::AnimationObject(const AnimationObject& rhs) :Object(rhs) {
 	rotateQuat = rhs.rotateQuat;
 	boundInfo = rhs.boundInfo;
 
+	boundRotateMat = rhs.boundRotateMat;
 	rotateMat = rhs.rotateMat;
 	translateMat = rhs.translateMat;
 	scaleMat = rhs.scaleMat;
@@ -55,7 +56,6 @@ AnimationObject::AnimationObject(const AnimationObject& rhs) :Object(rhs) {
 		transformsFull = (buff*)malloc(16 * sizeof(buff));
 		memcpy(transformsFull, rhs.transformsFull, 16 * sizeof(buff));
 	}
-	// todo copy collision object
 }
 
 AnimationObject::~AnimationObject() {
@@ -68,9 +68,15 @@ AnimationObject* AnimationObject::clone() {
 
 void AnimationObject::vertexTransform() {
 	translateMat = translate(position.x, position.y, position.z);
-	rotateMat = rotateZ(anglez)*rotateY(angley)*rotateX(anglex);
+	mat4 zrotMat = animation->inverseYZ ? rotateZ(anglez + 90) : rotateZ(anglez); // fbxsdk to rotate 90 at z axis
+	rotateMat = zrotMat * rotateY(angley) * rotateX(anglex);
 	scaleMat = scale(size.x, size.y, size.z);
 	localTransformMatrix = translateMat * rotateMat * scaleMat;
+
+	if (animation->inverseYZ)
+		boundRotateMat = rotateZ(anglez) * rotateY(angley) * rotateX(anglex);
+	else
+		boundRotateMat = rotateMat;
 }
 
 void AnimationObject::normalTransform() {
@@ -88,17 +94,15 @@ void AnimationObject::setPosition(float x,float y,float z) {
 	updateLocalMatrices();
 }
 
-void AnimationObject::setRotation(float ax,float ay,float az) {
-	anglex=ax; angley=ay; anglez=az;
-	if (animation->inverseYZ) // fbxsdk to rotate 90 at z axis
-		anglez += 90;
+void AnimationObject::setRotation(float ax, float ay, float az) {
+	anglex = ax, angley = ay, anglez = az;
 	RestrictAngle(anglex);
 	RestrictAngle(angley);
 	RestrictAngle(anglez);
 	updateLocalMatrices();
 }
 
-void AnimationObject::setSize(float sx,float sy,float sz) {
+void AnimationObject::setSize(float sx, float sy, float sz) {
 	size = vec3(sx, sy, sz);
 	updateLocalMatrices();
 	if (billboard) {

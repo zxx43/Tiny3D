@@ -285,7 +285,6 @@ void SimpleApplication::act(long startTime, long currentTime, float velocity) {
 	scene->updateNodes();
 
 	// todo collision act
-	// todo collision feedback
 	scene->updateAnimNodes();
 	scene->player->updateCamera();
 	updateMovement();

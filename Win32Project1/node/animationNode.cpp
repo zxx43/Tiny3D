@@ -49,8 +49,9 @@ void AnimationNode::translateNodeCenterAtWorld(Scene* scene, float x, float y, f
 }
 
 void AnimationNode::translateNodeAtWorld(Scene* scene, float x, float y, float z) {
-	mat4 gParentTransform;
-	parent->recursiveTransform(gParentTransform); // Parent node global transform
+	//mat4 gParentTransform;
+	//parent->recursiveTransform(gParentTransform); // Parent node's global transform
+	mat4 gParentTransform = parent->nodeTransform; // Parent node's global transform
 	vec3 gParentPosition = GetTranslate(gParentTransform);
 	vec3 gPosition = vec3(x, y, z);
 	vec3 lPosition = gPosition - gParentPosition;
@@ -63,12 +64,16 @@ void AnimationNode::translateNodeAtWorld(Scene* scene, float x, float y, float z
 
 void AnimationNode::translateNode(Scene* scene, float x, float y, float z) {
 	position = vec3(x, y, z);
-	recursiveTransform(nodeTransform);
+	updateNodeTransform();
 	
 	pushToUpdate(scene);
 
 	vec3 gPosition = GetTranslate(nodeTransform); // Collision object center is node center
 	// todo update collision object
+	//btTransform trans;
+	//getObject()->collisionObject->getMotionState()->getWorldTransform(trans);
+	//trans.setOrigin(gPosition);
+	//getObject()->collisionObject->getMotionState()->setWorldTransform(trans);
 }
 
 void AnimationNode::rotateNodeObject(Scene* scene, float ax, float ay, float az) {
@@ -77,8 +82,12 @@ void AnimationNode::rotateNodeObject(Scene* scene, float ax, float ay, float az)
 
 	pushToUpdate(scene);
 
-	vec4 gQuat = MatrixToQuat(object->rotateMat);
+	vec4 gQuat = MatrixToQuat(object->boundRotateMat);
 	// todo update collision object
+	//btTransform trans;
+	//getObject()->collisionObject->getMotionState()->getWorldTransform(trans);
+	//trans.setRotation(gQuat);
+	//getObject()->collisionObject->getMotionState()->setWorldTransform(trans);
 }
 
 void AnimationNode::scaleNodeObject(Scene* scene, float sx, float sy, float sz) {
@@ -86,7 +95,4 @@ void AnimationNode::scaleNodeObject(Scene* scene, float sx, float sy, float sz) 
 	object->setSize(sx, sy, sz);
 
 	pushToUpdate(scene);
-
-	vec3 gSize = object->size;
-	// todo update collision object
 }

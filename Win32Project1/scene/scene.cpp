@@ -219,6 +219,9 @@ void Scene::addObject(Object* object) {
 			animCount[curAnim]++;
 		}
 	}
+	
+	// todo create collision object
+	object->caculateNormalBounding();
 }
 
 void Scene::addPlay(AnimationNode* node) {
@@ -235,6 +238,19 @@ uint Scene::queryMeshCount(Mesh* mesh) {
 void Scene::updateAnimNodes() {
 	for (uint i = 0; i < animNodeToUpdate.size(); ++i) {
 		AnimationNode* node = animNodeToUpdate[i];
+		AnimationObject* object = node->getObject();
+
+		// todo collision feedback
+		//btTransform trans;
+		//object->collisionObject->getMotionState()->getWorldTransform(trans);
+		//vec3 gPosition = trans.getOrigin();
+		//vec4 gQuat = trans.getRotation();
+		//vec3 gAngle;
+		//gQuat.getEulerZYX(gAngle.z, gAngle.y, gAngle.x);
+		//node->translateNodeAtWorld(this, gPosition.x, gPosition.y, gPosition.z);
+		//node->rotateNodeObject(this, gAngle.x, gAngle.y, gAngle.z);		
+		vec3 gTrans = GetTranslate(node->nodeTransform);
+		node->translateNodeAtWorld(this, gTrans.x, gTrans.y, gTrans.z);
 
 		node->boundingBox->update(GetTranslate(node->nodeTransform));
 		terrainNode->standObjectsOnGround(this, node); // Stand animation nodes on ground after collision (no terrain collision)

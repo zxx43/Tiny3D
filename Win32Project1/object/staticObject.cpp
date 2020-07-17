@@ -8,7 +8,6 @@ StaticObject::StaticObject(Mesh* mesh) :Object() {
 	this->meshLow = mesh;
 	anglex = 0; angley = 0; anglez = 0;
 	initMatricesData();
-	// todo create collision object
 }
 
 StaticObject::StaticObject(Mesh* mesh, Mesh* meshMid, Mesh* meshLow) :Object() {
@@ -17,7 +16,6 @@ StaticObject::StaticObject(Mesh* mesh, Mesh* meshMid, Mesh* meshLow) :Object() {
 	this->meshLow = meshLow;
 	anglex = 0; angley = 0; anglez = 0;
 	initMatricesData();
-	// todo create collision object
 }
 
 StaticObject::StaticObject(const StaticObject& rhs) :Object(rhs) {
@@ -54,7 +52,6 @@ StaticObject::StaticObject(const StaticObject& rhs) :Object(rhs) {
 		transformsFull = (buff*)malloc(16 * sizeof(buff));
 		memcpy(transformsFull, rhs.transformsFull, 16 * sizeof(buff));
 	}
-	// todo copy collision object
 }
 
 StaticObject::~StaticObject() {
@@ -69,7 +66,7 @@ void StaticObject::vertexTransform() {
 	translateMat = translate(position.x, position.y, position.z);
 	rotateMat = rotateZ(anglez)*rotateY(angley)*rotateX(anglex);
 	scaleMat = scale(size.x, size.y, size.z);
-	localTransformMatrix = translateMat * rotateMat*scaleMat;
+	localTransformMatrix = translateMat * rotateMat * scaleMat;
 }
 
 void StaticObject::normalTransform() {
