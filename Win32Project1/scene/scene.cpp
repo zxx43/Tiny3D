@@ -34,6 +34,7 @@ Scene::Scene() {
 	anims.clear();
 	animPlayers.clear();
 	animNodeToUpdate.clear();
+	animationNodes.clear();
 	Node::nodesToUpdate.clear();
 	Node::nodesToRemove.clear();
 	Instance::instanceTable.clear();
@@ -61,6 +62,7 @@ Scene::~Scene() {
 	animPlayers.clear();
 	animCount.clear();
 	animNodeToUpdate.clear();
+	animationNodes.clear();
 }
 
 void Scene::initNodes() {
@@ -217,11 +219,18 @@ void Scene::addObject(Object* object) {
 				anims.push_back(curAnim);
 			}
 			animCount[curAnim]++;
+			if (animObj->parent)
+				animationNodes.push_back((AnimationNode*)(animObj->parent));
 		}
 	}
 	
 	// todo create collision object
 	object->caculateNormalBounding();
+	float mass = object->mesh ? 0 : 1;
+	//btVector3 inertia;
+	//object->collisionShape->calculateLocalInertia(mass, inertia);
+	//collisionObject = new btRigidBody(mass, new btDefaultMotionState(), object->collisionShape, inertia);
+	//dynamicsWorld->addRigidBody(collisionObject);
 }
 
 void Scene::addPlay(AnimationNode* node) {
@@ -234,8 +243,21 @@ uint Scene::queryMeshCount(Mesh* mesh) {
 	return meshCount[mesh];
 }
 
+void Scene::initAnimNodes() {
+	for (uint i = 0; i < animationNodes.size(); ++i)
+		animationNodes[i]->doUpdateNodeTransform(this, true, true);
+}
+
 // Update animation nodes' transform & aabb after collision
 void Scene::updateAnimNodes() {
+	for (uint i = 0; i < animationNodes.size(); ++i) {
+		AnimationObject* object = animationNodes[i]->getObject();
+		// todo do not deal with static or none active objects
+		//if (!object->collisionObject->isActive() || object->collisionObject->isStaticObject())
+		//	continue;
+		animationNodes[i]->pushToUpdate(this);
+	}
+
 	for (uint i = 0; i < animNodeToUpdate.size(); ++i) {
 		AnimationNode* node = animNodeToUpdate[i];
 		AnimationObject* object = node->getObject();
@@ -247,6 +269,7 @@ void Scene::updateAnimNodes() {
 		//vec4 gQuat = trans.getRotation();
 		//vec3 gAngle;
 		//gQuat.getEulerZYX(gAngle.z, gAngle.y, gAngle.x);
+		//gAngle *= R2A;
 		//node->translateNodeAtWorld(this, gPosition.x, gPosition.y, gPosition.z);
 		//node->rotateNodeObject(this, gAngle.x, gAngle.y, gAngle.z);		
 		vec3 gTrans = GetTranslate(node->nodeTransform);

@@ -64,30 +64,36 @@ void AnimationNode::translateNodeAtWorld(Scene* scene, float x, float y, float z
 
 void AnimationNode::translateNode(Scene* scene, float x, float y, float z) {
 	position = vec3(x, y, z);
-	updateNodeTransform();
-	
-	pushToUpdate(scene);
-
-	vec3 gPosition = GetTranslate(nodeTransform); // Collision object center is node center
-	// todo update collision object
-	//btTransform trans;
-	//getObject()->collisionObject->getMotionState()->getWorldTransform(trans);
-	//trans.setOrigin(gPosition);
-	//getObject()->collisionObject->getMotionState()->setWorldTransform(trans);
+	doUpdateNodeTransform(scene, true, false);
 }
 
 void AnimationNode::rotateNodeObject(Scene* scene, float ax, float ay, float az) {
-	AnimationObject* object = getObject();
-	object->setRotation(ax, ay, az);
+	getObject()->setRotation(ax, ay, az);
+	doUpdateNodeTransform(scene, false, true);
+}
 
-	pushToUpdate(scene);
+void AnimationNode::doUpdateNodeTransform(Scene* scene, bool translate, bool rotate) {
+	if (translate) {
+		updateNodeTransform();
+		pushToUpdate(scene);
 
-	vec4 gQuat = MatrixToQuat(object->boundRotateMat);
-	// todo update collision object
-	//btTransform trans;
-	//getObject()->collisionObject->getMotionState()->getWorldTransform(trans);
-	//trans.setRotation(gQuat);
-	//getObject()->collisionObject->getMotionState()->setWorldTransform(trans);
+		vec3 gPosition = GetTranslate(nodeTransform); // Collision object center is node center
+		// todo update collision object
+		//btTransform trans;
+		//getObject()->collisionObject->getMotionState()->getWorldTransform(trans);
+		//trans.setOrigin(gPosition);
+		//getObject()->collisionObject->getMotionState()->setWorldTransform(trans);
+	} 
+	if (rotate) {
+		pushToUpdate(scene);
+
+		vec4 gQuat = MatrixToQuat(getObject()->boundRotateMat);
+		// todo update collision object
+		//btTransform trans;
+		//getObject()->collisionObject->getMotionState()->getWorldTransform(trans);
+		//trans.setRotation(gQuat);
+		//getObject()->collisionObject->getMotionState()->setWorldTransform(trans);
+	}
 }
 
 void AnimationNode::scaleNodeObject(Scene* scene, float sx, float sy, float sz) {

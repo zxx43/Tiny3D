@@ -70,8 +70,10 @@ public: // Just for debugging
 	void createNodeAABB(Node* node);
 	void clearAllAABB();
 public:
+	std::vector<AnimationNode*> animationNodes;
 	std::vector<AnimationNode*> animNodeToUpdate;
 public:
+	void initAnimNodes();
 	void updateAnimNodes();
 };
 

@@ -21,6 +21,7 @@ public:
 	vec3 position; // Object local position
 	vec3 size;
 	mat4 translateMat, rotateMat, scaleMat; // Local transform
+	mat4 obbOffset;
 	Mesh* mesh;
 	Mesh* meshMid;
 	Mesh* meshLow;

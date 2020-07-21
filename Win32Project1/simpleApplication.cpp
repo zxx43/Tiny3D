@@ -263,7 +263,6 @@ void SimpleApplication::act(long startTime, long currentTime, float velocity) {
 
 		Node* node = scene->animationRoot->children[0];
 		AnimationNode* animNode = (AnimationNode*)node->children[0];
-		//animNode->rotateNodeObject(scene, 0, ((AnimationObject*)animNode->objects[0])->angley + 0.1, 0);
 		animNode->rotateNodeObject(scene, 0, 135 + 90 * dr, 0);
 		animNode->translateNode(scene, animNode->position.x - 0.01 * dd, animNode->position.y, animNode->position.z - 0.01 * dd);
 
@@ -699,6 +698,8 @@ void SimpleApplication::initScene() {
 	node1->translateNode(scene, 0, 0, 20);
 
 	scene->terrainNode->standObjectsOnGround(scene, scene->staticRoot);
+	scene->updateNodes();
+	scene->initAnimNodes();
 	
 	Application::initScene();
 }

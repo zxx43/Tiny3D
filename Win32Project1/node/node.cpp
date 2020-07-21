@@ -350,7 +350,7 @@ void Node::scaleNodeObject(Scene* scene, int i, float sx, float sy, float sz) {
 }
 
 void Node::pushToUpdate(Scene* scene) {
-	if (!needUpdateNode) {
+	if (!needUpdateNode && type != TYPE_ANIMATE) {
 		Node::nodesToUpdate.push_back(this);
 		needUpdateNode = true;
 	}
@@ -403,14 +403,16 @@ void Node::updateNode() {
 			Object* object = objects[i];
 			updateNodeObject(object, true, true);
 
-			vec3 gPosition = GetTranslate(nodeTransform * object->translateMat * object->rotateMat);
-			vec4 gQuat = vec4(object->rotateQuat);
 			// todo update collision object
-			//btTransform trans;
-			//object->collisionObject->getMotionState()->getWorldTransform(trans);
-			//trans.setRotation(gQuat);
-			//trans.setOrigin(gPosition);
-			//object->collisionObject->getMotionState()->setWorldTransform(trans);
+			//if (object->collisionObject) {
+			//	vec3 gPosition = GetTranslate(nodeTransform * object->translateMat * object->obbOffset);
+			//	vec4 gQuat = object->rotateQuat;
+			//	btTransform trans;
+			//	object->collisionObject->getMotionState()->getWorldTransform(trans);
+			//	trans.setRotation(gQuat);
+			//	trans.setOrigin(gPosition);
+			//	object->collisionObject->getMotionState()->setWorldTransform(trans);
+			//}
 		}
 	}
 	needUpdateNode = false;
