@@ -21,7 +21,6 @@ public:
 	vec3 position; // Object local position
 	vec3 size;
 	mat4 translateMat, rotateMat, scaleMat; // Local transform
-	mat4 obbOffset;
 	Mesh* mesh;
 	Mesh* meshMid;
 	Mesh* meshLow;
@@ -43,7 +42,7 @@ public:
 	virtual ~Object();
 	virtual Object* clone()=0;
 	void caculateLocalAABB(bool looseWidth,bool looseAll);
-	void caculateNormalBounding(); // Caculate collision obb
+	void caculateCollisionBounding(); // Caculate collision obb
 	void initMatricesData();
 	void updateLocalMatrices();
 	virtual void vertexTransform()=0;

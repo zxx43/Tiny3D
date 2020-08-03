@@ -225,7 +225,7 @@ void Scene::addObject(Object* object) {
 	}
 	
 	// todo create collision object
-	object->caculateNormalBounding();
+	object->caculateCollisionBounding();
 	float mass = object->mesh ? 0 : 1;
 	//btVector3 inertia;
 	//object->collisionShape->calculateLocalInertia(mass, inertia);

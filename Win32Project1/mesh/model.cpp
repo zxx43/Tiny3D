@@ -53,10 +53,50 @@ Model::~Model() {
 }
 
 void Model::loadModel(const char* obj,const char* mtl,int vt) {
-	loader=new ObjLoader(obj,mtl,vt);
+	loader = new ObjLoader(obj,mtl,vt);
 	initFaces();
+	correctVertices(obj);
 	delete loader;
-	loader=NULL;
+}
+
+void Model::correctVertices(const char* obj) {
+	const float minVal = std::numeric_limits<float>::min();
+	const float maxVal = std::numeric_limits<float>::max();
+	float sx = maxVal, sy = maxVal, sz = maxVal;
+	float lx = minVal, ly = minVal, lz = minVal;
+
+	if (normalFaces.size() > 0) {
+		for (uint n = 0; n < normalFaces.size(); ++n) {
+			FaceBuf* buf = normalFaces[n];
+			for (int i = 0; i < buf->count; ++i) {
+				int index = indices[buf->start + i];
+				vec4 vertex = vertices[index];
+				sx = sx > vertex.x ? vertex.x : sx;
+				sy = sy > vertex.y ? vertex.y : sy;
+				sz = sz > vertex.z ? vertex.z : sz;
+				lx = lx < vertex.x ? vertex.x : lx;
+				ly = ly < vertex.y ? vertex.y : ly;
+				lz = lz < vertex.z ? vertex.z : lz;
+			}
+		}
+	} else {
+		for (int i = 0; i < vertexCount; ++i) {
+			vec4 vertex = vertices[i];
+			sx = sx > vertex.x ? vertex.x : sx;
+			sy = sy > vertex.y ? vertex.y : sy;
+			sz = sz > vertex.z ? vertex.z : sz;
+			lx = lx < vertex.x ? vertex.x : lx;
+			ly = ly < vertex.y ? vertex.y : ly;
+			lz = lz < vertex.z ? vertex.z : lz;
+		}
+	}
+
+	vec3 halfSize = vec3(lx - sx, ly - sy, lz - sz) * 0.5;
+	vec3 origin = vec3(sx, sy, sz) + halfSize;
+	vec4 offset = vec4(origin, 0.0);
+	for (int i = 0; i < vertexCount; ++i) 
+		vertices[i] -= offset;
+	printf("mesh %s off %f,%f,%f\n", obj, offset.x, offset.y, offset.z);
 }
 
 void Model::initFaces() {

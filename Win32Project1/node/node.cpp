@@ -405,7 +405,7 @@ void Node::updateNode() {
 
 			// todo update collision object
 			//if (object->collisionObject) {
-			//	vec3 gPosition = GetTranslate(nodeTransform * object->translateMat * object->obbOffset);
+			//	vec3 gPosition = GetTranslate(nodeTransform * object->translateMat);
 			//	vec4 gQuat = object->rotateQuat;
 			//	btTransform trans;
 			//	object->collisionObject->getMotionState()->getWorldTransform(trans);

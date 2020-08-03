@@ -15,7 +15,9 @@
 class Model: public Mesh {
 private:
 	ObjLoader* loader;
-	void initFaces();
+private:
+	virtual void initFaces();
+	void correctVertices(const char* obj);
 public:
 	std::vector<int> mats;
 public:

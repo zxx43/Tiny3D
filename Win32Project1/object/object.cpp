@@ -14,7 +14,6 @@ Object::Object() {
 	translateMat.LoadIdentity();
 	rotateMat.LoadIdentity();
 	scaleMat.LoadIdentity();
-	obbOffset.LoadIdentity();
 
 	mesh = NULL;
 	meshMid = NULL;
@@ -117,12 +116,11 @@ void Object::caculateLocalAABB(bool looseWidth, bool looseAll) {
 	localBoundPosition.z=bounding->position.z;
 }
 
-void Object::caculateNormalBounding() {
+void Object::caculateCollisionBounding() {
 	if (!mesh) { // Animation object use node bounding box
 		vec3 halfSize = ((AABB*)parent->boundingBox)->halfSize;
 		vec3 origin(0, 0, 0);
 		//collisionShape = new btBoxShape(btVector3(halfSize)); // todo
-		obbOffset = translate(origin);
 	} else {
 		const float minVal = std::numeric_limits<float>::min();
 		const float maxVal = std::numeric_limits<float>::max();
@@ -151,7 +149,6 @@ void Object::caculateNormalBounding() {
 		vec3 halfSize = vec3(lx - sx, ly - sy, lz - sz) * 0.5;
 		vec3 origin = vec3(sx, sy, sz) + halfSize;
 		//collisionShape = new btBoxShape(btVector3(halfSize)); // todo
-		obbOffset = translate(origin);
 	}
 }
 
