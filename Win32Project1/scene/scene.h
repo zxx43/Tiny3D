@@ -48,6 +48,7 @@ public:
 	StaticNode* textureNode; // Use it to draw texture for debugging
 	std::vector<Node*> boundingNodes; // Used for debugging
 	std::vector<AnimationNode*> animPlayers;
+	DynamicWorld* collisionWorld;
 public:
 	Scene();
 	~Scene();

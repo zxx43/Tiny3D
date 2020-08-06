@@ -12,6 +12,7 @@
 #include "../material/materialManager.h"
 #include "../billboard/billboard.h"
 #include "../bounding/aabb.h"
+#include "../physics/dynamicWorld.h"
 
 class Node;
 
@@ -36,6 +37,8 @@ public:
 	vec3 localBoundPosition;
 	bool genShadow;
 	int detailLevel;
+	CollisionShape* collisionShape;
+	CollisionObject* collisionObject;
 public:
 	Object();
 	Object(const Object& rhs);

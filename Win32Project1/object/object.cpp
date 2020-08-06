@@ -32,6 +32,9 @@ Object::Object() {
 	transformsFull = NULL;
 	rotateQuat = MatrixToQuat(rotateMat);
 	boundInfo = vec4(0.0, 0.0, 0.0, 0.0);
+
+	collisionShape = NULL;
+	collisionObject = NULL;
 }
 
 Object::Object(const Object& rhs) {
@@ -50,7 +53,8 @@ Object::~Object() {
 
 	if (transforms) free(transforms); transforms = NULL;
 	if (transformsFull) free(transformsFull); transformsFull = NULL;
-	// todo remove collision object
+	
+	if (collisionShape) delete collisionShape;
 }
 
 void Object::initMatricesData() {
@@ -119,8 +123,7 @@ void Object::caculateLocalAABB(bool looseWidth, bool looseAll) {
 void Object::caculateCollisionBounding() {
 	if (!mesh) { // Animation object use node bounding box
 		vec3 halfSize = ((AABB*)parent->boundingBox)->halfSize;
-		vec3 origin(0, 0, 0);
-		//collisionShape = new btBoxShape(btVector3(halfSize)); // todo
+		collisionShape = new CollisionShape(halfSize);
 	} else {
 		const float minVal = std::numeric_limits<float>::min();
 		const float maxVal = std::numeric_limits<float>::max();
@@ -147,8 +150,8 @@ void Object::caculateCollisionBounding() {
 			}
 		}
 		vec3 halfSize = vec3(lx - sx, ly - sy, lz - sz) * 0.5;
-		vec3 origin = vec3(sx, sy, sz) + halfSize;
-		//collisionShape = new btBoxShape(btVector3(halfSize)); // todo
+		halfSize *= mesh->getBoundScale();
+		collisionShape = new CollisionShape(halfSize);
 	}
 }
 

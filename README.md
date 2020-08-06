@@ -28,6 +28,7 @@ A Small OpenGL Based Renderer
 - GPU occlusion culling  
 - Atmospheric scattering  
 - Volumetric cloud  
+- Collision detection  
   
 ### Control:  
 

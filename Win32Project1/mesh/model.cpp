@@ -96,7 +96,6 @@ void Model::correctVertices(const char* obj) {
 	vec4 offset = vec4(origin, 0.0);
 	for (int i = 0; i < vertexCount; ++i) 
 		vertices[i] -= offset;
-	printf("mesh %s off %f,%f,%f\n", obj, offset.x, offset.y, offset.z);
 }
 
 void Model::initFaces() {

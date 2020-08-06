@@ -21,10 +21,13 @@ Mesh::Mesh() {
 
 	singleFaces.clear();
 	normalFaces.clear();
+
+	boundScale = vec3(1.0, 1.0, 1.0);
 }
 
 Mesh::Mesh(const Mesh& rhs) {
 	isBillboard = rhs.isBillboard;
+	boundScale = rhs.boundScale;
 
 	for (uint i = 0; i < rhs.singleFaces.size(); i++)
 		singleFaces.push_back(rhs.singleFaces[i]->copy());

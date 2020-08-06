@@ -148,6 +148,9 @@ public:
 		{	x/=rhs; y/=rhs; z/=rhs;	}
 	}
 
+	void operator*=(const VECTOR3D& rhs)
+	{ x *= rhs.x; y *= rhs.y; z *= rhs.z; }
+
 
 	//unary operators
 	VECTOR3D operator-(void) const {return VECTOR3D(-x, -y, -z);}

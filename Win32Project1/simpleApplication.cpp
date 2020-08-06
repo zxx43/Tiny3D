@@ -264,7 +264,7 @@ void SimpleApplication::act(long startTime, long currentTime, float velocity) {
 		Node* node = scene->animationRoot->children[0];
 		AnimationNode* animNode = (AnimationNode*)node->children[0];
 		animNode->rotateNodeObject(scene, 0, 135 + 90 * dr, 0);
-		animNode->translateNode(scene, animNode->position.x - 0.01 * dd, animNode->position.y, animNode->position.z - 0.01 * dd);
+		animNode->translateNode(scene, animNode->position.x - 0.025 * dd, animNode->position.y, animNode->position.z - 0.025 * dd);
 
 		static float distance = 0.0;
 		distance++;
@@ -283,7 +283,7 @@ void SimpleApplication::act(long startTime, long currentTime, float velocity) {
 	//*/
 	scene->updateNodes();
 
-	// todo collision act
+	scene->collisionWorld->act(1.0 / getFps());
 	scene->updateAnimNodes();
 	scene->player->updateCamera();
 	updateMovement();
@@ -309,6 +309,11 @@ void SimpleApplication::initScene() {
 	assetMgr->addMesh("rock", new Model("models/sharprockfree.obj", "models/sharprockfree.mtl", 2));
 	assetMgr->addMesh("terrain", new Terrain("terrain/Terrain.raw"));
 	assetMgr->addMesh("water", new Water(1024, 16));
+
+	assetMgr->meshes["treeA"]->setBoundScale(vec3(0.2, 1.0, 0.2));
+	assetMgr->meshes["m1a2"]->setBoundScale(vec3(0.6, 1.0, 1.0));
+	assetMgr->meshes["tank"]->setBoundScale(vec3(1.0, 1.0, 0.7));
+	assetMgr->meshes["rock"]->setBoundScale(vec3(0.9, 1.0, 0.9));
 
 	// Load animations
 	assetMgr->addAnimation("ninja", new AssAnim("models/ninja.mesh"));
@@ -699,8 +704,8 @@ void SimpleApplication::initScene() {
 
 	scene->terrainNode->standObjectsOnGround(scene, scene->staticRoot);
 	scene->updateNodes();
-	scene->initAnimNodes();
 	
 	Application::initScene();
+	scene->initAnimNodes();
 }
 

@@ -15,7 +15,7 @@ Sky::Sky(Scene* scene, bool dyn) {
 	skyNode=new StaticNode(vec3(0,0,0));
 	skyNode->setFullStatic(true);
 	skyNode->addObject(scene, skyObject);
-	skyNode->updateNode();
+	skyNode->updateNode(scene);
 	skyNode->prepareDrawcall();
 
 	

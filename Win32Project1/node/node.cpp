@@ -120,6 +120,7 @@ Object* Node::removeObject(Scene* scene, Object* object) {
 			needCreateDrawcall = true;
 			pushToUpdate(scene);
 			object->parent = NULL;
+			scene->collisionWorld->removeObject(object->collisionObject);
 
 			return object;
 		}
@@ -396,23 +397,18 @@ void Node::updateNodeObject(Object* object, bool translate, bool rotate) {
 	}
 }
 
-void Node::updateNode() {
+void Node::updateNode(const Scene* scene) {
 	if (type != TYPE_ANIMATE) {
 		updateNodeTransform();
 		for (unsigned int i = 0; i < objects.size(); i++) {
 			Object* object = objects[i];
 			updateNodeObject(object, true, true);
 
-			// todo update collision object
-			//if (object->collisionObject) {
-			//	vec3 gPosition = GetTranslate(nodeTransform * object->translateMat);
-			//	vec4 gQuat = object->rotateQuat;
-			//	btTransform trans;
-			//	object->collisionObject->getMotionState()->getWorldTransform(trans);
-			//	trans.setRotation(gQuat);
-			//	trans.setOrigin(gPosition);
-			//	object->collisionObject->getMotionState()->setWorldTransform(trans);
-			//}
+			if (object->collisionObject) {
+				vec3 gPosition = GetTranslate(nodeTransform * object->translateMat);
+				vec4 gQuat = object->rotateQuat;
+				object->collisionObject->initTransform(gPosition, gQuat);
+			}
 		}
 	}
 	needUpdateNode = false;

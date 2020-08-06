@@ -97,6 +97,9 @@
     <Filter Include="Source Files\animation">
       <UniqueIdentifier>{821d9ac3-4543-4fd6-8b64-10f51051c610}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\physics">
+      <UniqueIdentifier>{218b7355-c335-4490-b624-78a9b2b6f90b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="batch\batch.cpp">
@@ -317,6 +320,9 @@
     </ClCompile>
     <ClCompile Include="texture\imageloader.cpp">
       <Filter>Source Files\texture</Filter>
+    </ClCompile>
+    <ClCompile Include="physics\dynamicWorld.cpp">
+      <Filter>Source Files\physics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -562,6 +568,9 @@
     </ClInclude>
     <ClInclude Include="texture\imageloader.h">
       <Filter>Source Files\texture</Filter>
+    </ClInclude>
+    <ClInclude Include="physics\dynamicWorld.h">
+      <Filter>Source Files\physics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

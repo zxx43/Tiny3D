@@ -565,7 +565,7 @@ void RenderManager::drawNoise3d(Render* render, Scene* scene, FrameBuffer* noise
 	StaticNode* node = new StaticNode(vec3(0, 0, 0));
 	node->setFullStatic(true);
 	node->addObject(scene, object);
-	node->updateNode();
+	node->updateNode(scene);
 	node->prepareDrawcall();
 	scene->noise3d = node;
 

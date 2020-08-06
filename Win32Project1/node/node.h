@@ -61,7 +61,7 @@ public:
 	virtual void prepareDrawcall() = 0;
 	virtual void updateRenderData() = 0;
 	virtual void updateDrawcall() = 0;
-	void updateNode();
+	void updateNode(const Scene* scene);
 	void updateNodeObject(Object* object, bool translate, bool rotate);
 	virtual void pushToUpdate(Scene* scene);
 

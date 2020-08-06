@@ -52,6 +52,11 @@ public:
 	void clearFaceBuf();
 private:
 	void caculateBounding();
+private:
+	vec3 boundScale;
+public:
+	void setBoundScale(const vec3& size) { boundScale = size; }
+	vec3 getBoundScale() { return boundScale; }
 };
 
 

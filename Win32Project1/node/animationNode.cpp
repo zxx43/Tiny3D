@@ -45,7 +45,9 @@ void AnimationNode::translateNodeCenterAtWorld(Scene* scene, float x, float y, f
 	vec3 beforeWorldCenter = boundingBox->position;
 	vec3 offset = vec3(x, y, z) - beforeWorldCenter;
 	vec3 dPosition = position + offset;
-	translateNode(scene, dPosition.x, dPosition.y, dPosition.z);
+
+	position = vec3(dPosition.x, dPosition.y, dPosition.z);
+	doUpdateNodeTransform(scene, true, false, true);
 }
 
 void AnimationNode::translateNodeAtWorld(Scene* scene, float x, float y, float z) {
@@ -63,36 +65,40 @@ void AnimationNode::translateNodeAtWorld(Scene* scene, float x, float y, float z
 }
 
 void AnimationNode::translateNode(Scene* scene, float x, float y, float z) {
+	positionBefore = GetTranslate(nodeTransform);
 	position = vec3(x, y, z);
-	doUpdateNodeTransform(scene, true, false);
+	if (scene->isInited())
+		doUpdateNodeTransform(scene, true, false, false);
 }
 
 void AnimationNode::rotateNodeObject(Scene* scene, float ax, float ay, float az) {
+	rotationBefore = vec3(getObject()->anglex, getObject()->angley, getObject()->anglez);
 	getObject()->setRotation(ax, ay, az);
-	doUpdateNodeTransform(scene, false, true);
+	if (scene->isInited())
+		doUpdateNodeTransform(scene, false, true, false);
 }
 
-void AnimationNode::doUpdateNodeTransform(Scene* scene, bool translate, bool rotate) {
+void AnimationNode::doUpdateNodeTransform(Scene* scene, bool translate, bool rotate, bool forceTrans) {
 	if (translate) {
 		updateNodeTransform();
 		pushToUpdate(scene);
 
 		vec3 gPosition = GetTranslate(nodeTransform); // Collision object center is node center
-		// todo update collision object
-		//btTransform trans;
-		//getObject()->collisionObject->getMotionState()->getWorldTransform(trans);
-		//trans.setOrigin(gPosition);
-		//getObject()->collisionObject->getMotionState()->setWorldTransform(trans);
+		if (!forceTrans)
+			getObject()->collisionObject->setTranslate(gPosition, positionBefore);
+		else
+			getObject()->collisionObject->initTranslate(gPosition);
 	} 
 	if (rotate) {
 		pushToUpdate(scene);
 
-		vec4 gQuat = MatrixToQuat(getObject()->boundRotateMat);
-		// todo update collision object
-		//btTransform trans;
-		//getObject()->collisionObject->getMotionState()->getWorldTransform(trans);
-		//trans.setRotation(gQuat);
-		//getObject()->collisionObject->getMotionState()->setWorldTransform(trans);
+		vec3 gRotation = vec3(getObject()->anglex, getObject()->angley, getObject()->anglez);
+		if(!forceTrans)
+			getObject()->collisionObject->setRotate(gRotation, rotationBefore);
+		else {
+			vec4 gQuat = MatrixToQuat(getObject()->boundRotateMat);
+			getObject()->collisionObject->initRotate(gQuat);
+		}
 	}
 }
 

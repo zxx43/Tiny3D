@@ -149,7 +149,8 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Precise</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -157,7 +158,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glew32s.lib;opengl32.lib;libfbxsdk.lib;assimp.lib;FreeImage.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32s.lib;opengl32.lib;libfbxsdk.lib;assimp.lib;FreeImage.lib;winmm.lib;BulletDynamics.lib;BulletCollision.lib;LinearMath.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>WinMainCRTStartup</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
@@ -208,6 +209,7 @@
     <ClCompile Include="object\animationObject.cpp" />
     <ClCompile Include="object\object.cpp" />
     <ClCompile Include="object\staticObject.cpp" />
+    <ClCompile Include="physics\dynamicWorld.cpp" />
     <ClCompile Include="render\computeDrawcall.cpp" />
     <ClCompile Include="render\drawcall.cpp" />
     <ClCompile Include="render\multiDrawcall.cpp" />
@@ -287,6 +289,7 @@
     <ClInclude Include="object\animationObject.h" />
     <ClInclude Include="object\object.h" />
     <ClInclude Include="object\staticObject.h" />
+    <ClInclude Include="physics\dynamicWorld.h" />
     <ClInclude Include="render\computeDrawcall.h" />
     <ClInclude Include="render\drawcall.h" />
     <ClInclude Include="render\glheader.h" />

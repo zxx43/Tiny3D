@@ -38,6 +38,8 @@ Scene::Scene() {
 	Node::nodesToUpdate.clear();
 	Node::nodesToRemove.clear();
 	Instance::instanceTable.clear();
+
+	collisionWorld = new DynamicWorld();
 }
 
 Scene::~Scene() {
@@ -63,6 +65,8 @@ Scene::~Scene() {
 	animCount.clear();
 	animNodeToUpdate.clear();
 	animationNodes.clear();
+
+	delete collisionWorld;
 }
 
 void Scene::initNodes() {
@@ -75,7 +79,7 @@ void Scene::updateNodes() {
 	uint size = Node::nodesToUpdate.size();
 	if (size == 0) return;
 	for (uint i = 0; i < size; i++)
-		Node::nodesToUpdate[i]->updateNode();
+		Node::nodesToUpdate[i]->updateNode(this);
 	Node::nodesToUpdate.clear();
 }
 
@@ -117,7 +121,7 @@ void Scene::createWater(const vec3& position, const vec3& size) {
 	waterObject->setPosition(position.x, position.y, position.z);
 	waterObject->setSize(size.x, size.y, size.z);
 	water->addObject(this, waterObject);
-	water->updateNode();
+	water->updateNode(this);
 	water->prepareDrawcall();
 }
 
@@ -130,9 +134,8 @@ void Scene::createTerrain(const vec3& position, const vec3& size) {
 	terrainObject->setSize(size.x, size.y, size.z);
 	terrainNode->addObject(this, terrainObject);
 	terrainNode->prepareCollisionData();
-	terrainNode->updateNode();
+	terrainNode->updateNode(this);
 	terrainNode->prepareDrawcall();
-	//staticRoot->attachChild(terrainNode);
 }
 
 void Scene::updateVisualTerrain(int bx, int bz, int sizex, int sizez) {
@@ -149,7 +152,7 @@ void Scene::createNodeAABB(Node* node) {
 		aabbObject->bindMaterial(MaterialManager::materials->find(BLACK_MAT));
 		aabbObject->setSize(aabb->sizex, aabb->sizey, aabb->sizez);
 		aabbNode->addObject(this, aabbObject);
-		aabbNode->updateNode();
+		aabbNode->updateNode(this);
 		aabbNode->prepareDrawcall();
 		aabbNode->updateRenderData();
 		aabbNode->updateDrawcall();
@@ -168,7 +171,7 @@ void Scene::createNodeAABB(Node* node) {
 				aabbObject->bindMaterial(MaterialManager::materials->find(BLACK_MAT));
 				aabbObject->setSize(aabb->sizex, aabb->sizey, aabb->sizez);
 				aabbNode->addObject(this, aabbObject);
-				aabbNode->updateNode();
+				aabbNode->updateNode(this);
 				aabbNode->prepareDrawcall();
 				aabbNode->updateRenderData();
 				aabbNode->updateDrawcall();
@@ -224,13 +227,13 @@ void Scene::addObject(Object* object) {
 		}
 	}
 	
-	// todo create collision object
 	object->caculateCollisionBounding();
-	float mass = object->mesh ? 0 : 1;
-	//btVector3 inertia;
-	//object->collisionShape->calculateLocalInertia(mass, inertia);
-	//collisionObject = new btRigidBody(mass, new btDefaultMotionState(), object->collisionShape, inertia);
-	//dynamicsWorld->addRigidBody(collisionObject);
+	float mass = object->mesh ? 0.0 : 100.0;
+	object->collisionObject = new CollisionObject(object->collisionShape->shape, mass);
+	object->collisionObject->object->setUserPointer(object);
+	if (!object->mesh) 
+		object->collisionObject->object->setActivationState(DISABLE_DEACTIVATION);
+	collisionWorld->addObject(object->collisionObject);
 }
 
 void Scene::addPlay(AnimationNode* node) {
@@ -244,17 +247,15 @@ uint Scene::queryMeshCount(Mesh* mesh) {
 }
 
 void Scene::initAnimNodes() {
-	for (uint i = 0; i < animationNodes.size(); ++i)
-		animationNodes[i]->doUpdateNodeTransform(this, true, true);
+	for (uint i = 0; i < animationNodes.size(); ++i) 
+		animationNodes[i]->doUpdateNodeTransform(this, true, true, true);
 }
 
 // Update animation nodes' transform & aabb after collision
 void Scene::updateAnimNodes() {
 	for (uint i = 0; i < animationNodes.size(); ++i) {
 		AnimationObject* object = animationNodes[i]->getObject();
-		// todo do not deal with static or none active objects
-		//if (!object->collisionObject->isActive() || object->collisionObject->isStaticObject())
-		//	continue;
+		if (object->collisionObject->isStatic()) continue;
 		animationNodes[i]->pushToUpdate(this);
 	}
 
@@ -262,18 +263,15 @@ void Scene::updateAnimNodes() {
 		AnimationNode* node = animNodeToUpdate[i];
 		AnimationObject* object = node->getObject();
 
-		// todo collision feedback
-		//btTransform trans;
-		//object->collisionObject->getMotionState()->getWorldTransform(trans);
-		//vec3 gPosition = trans.getOrigin();
-		//vec4 gQuat = trans.getRotation();
-		//vec3 gAngle;
-		//gQuat.getEulerZYX(gAngle.z, gAngle.y, gAngle.x);
-		//gAngle *= R2A;
-		//node->translateNodeAtWorld(this, gPosition.x, gPosition.y, gPosition.z);
-		//node->rotateNodeObject(this, gAngle.x, gAngle.y, gAngle.z);		
-		vec3 gTrans = GetTranslate(node->nodeTransform);
-		node->translateNodeAtWorld(this, gTrans.x, gTrans.y, gTrans.z);
+		vec3 gPosition = object->collisionObject->getTranslate();
+		gPosition += object->collisionObject->getLinearVelocity();
+		node->translateNodeAtWorld(this, gPosition.x, gPosition.y, gPosition.z);
+
+		//vec3 gAngle = object->collisionObject->getRotate();
+		//gAngle += object->collisionObject->getAngularVelocity();
+		//node->rotateNodeObject(this, gAngle.x, gAngle.y, gAngle.z);
+
+		object->collisionObject->resetVelocity();
 
 		node->boundingBox->update(GetTranslate(node->nodeTransform));
 		terrainNode->standObjectsOnGround(this, node); // Stand animation nodes on ground after collision (no terrain collision)
