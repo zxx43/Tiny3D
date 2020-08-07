@@ -258,29 +258,20 @@ void SimpleApplication::act(long startTime, long currentTime, float velocity) {
 	scene->player->controlAct(input, scene, velocity * 0.05);
 
 	Application::act(startTime, currentTime, velocity);
-	///*
-		static float dd = 1.0, dr = 1.0;
 
-		Node* node = scene->animationRoot->children[0];
-		AnimationNode* animNode = (AnimationNode*)node->children[0];
-		animNode->rotateNodeObject(scene, 0, 135 + 90 * dr, 0);
-		animNode->translateNode(scene, animNode->position.x - 0.025 * dd, animNode->position.y, animNode->position.z - 0.025 * dd);
-
-		static float distance = 0.0;
-		distance++;
-		if (distance > 5000.0) {
-			dd *= -1.0;
-			dr *= -1.0;
-			distance = 0.0;
-		}
-	//*/
-	/*
-	static int time = 1;
-	if (currentTime - startTime > 10000 * time && scene->staticRoot->children.size() > 1) {
-		scene->staticRoot->detachChild(scene->staticRoot->children[1])->pushToRemove();
-		time++;
+	static float dd = 1.0, dr = 1.0;
+	Node* node = scene->animationRoot->children[0];
+	AnimationNode* animNode = (AnimationNode*)node->children[0];
+	animNode->rotateNodeObject(scene, 0, 135 + 90 * dr, 0);
+	animNode->translateNode(scene, animNode->position.x - 0.025 * dd, animNode->position.y, animNode->position.z - 0.025 * dd);
+	static float distance = 0.0;
+	distance++;
+	if (distance > 5000.0) {
+		dd *= -1.0;
+		dr *= -1.0;
+		distance = 0.0;
 	}
-	//*/
+
 	scene->updateNodes();
 
 	scene->collisionWorld->act(1.0 / getFps());
@@ -704,8 +695,8 @@ void SimpleApplication::initScene() {
 
 	scene->terrainNode->standObjectsOnGround(scene, scene->staticRoot);
 	scene->updateNodes();
+	scene->initAnimNodes();
 	
 	Application::initScene();
-	scene->initAnimNodes();
 }
 

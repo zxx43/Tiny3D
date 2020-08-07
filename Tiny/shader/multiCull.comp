@@ -48,9 +48,9 @@ void main() {
 	vec3 translate = transform.trans.xyz;
 	mat4 outMat;
 #ifndef AnimPass
-	vec2 coord = (translate.xz - mapTrans.xz) / (mapScl.xz * mapInfo.zw);
-	vec4 roadMask = texture(roadTex, coord);
-	if(roadMask.r > 0.0001) return;
+	//vec2 coord = (translate.xz - mapTrans.xz) / (mapScl.xz * mapInfo.zw);
+	//vec4 roadMask = texture(roadTex, coord);
+	//if(roadMask.r > 0.0001) return;
 
 	if(meshid.z >= 0)
 		outMat = mat4(transform.trans, transform.rotat, transform.bound, transform.mesh);

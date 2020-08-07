@@ -51,8 +51,6 @@ void AnimationNode::translateNodeCenterAtWorld(Scene* scene, float x, float y, f
 }
 
 void AnimationNode::translateNodeAtWorld(Scene* scene, float x, float y, float z) {
-	//mat4 gParentTransform;
-	//parent->recursiveTransform(gParentTransform); // Parent node's global transform
 	mat4 gParentTransform = parent->nodeTransform; // Parent node's global transform
 	vec3 gParentPosition = GetTranslate(gParentTransform);
 	vec3 gPosition = vec3(x, y, z);
@@ -69,6 +67,10 @@ void AnimationNode::translateNode(Scene* scene, float x, float y, float z) {
 	position = vec3(x, y, z);
 	if (scene->isInited())
 		doUpdateNodeTransform(scene, true, false, false);
+	else {
+		updateNodeTransform();
+		pushToUpdate(scene);
+	}
 }
 
 void AnimationNode::rotateNodeObject(Scene* scene, float ax, float ay, float az) {
@@ -76,6 +78,8 @@ void AnimationNode::rotateNodeObject(Scene* scene, float ax, float ay, float az)
 	getObject()->setRotation(ax, ay, az);
 	if (scene->isInited())
 		doUpdateNodeTransform(scene, false, true, false);
+	else
+		pushToUpdate(scene);
 }
 
 void AnimationNode::doUpdateNodeTransform(Scene* scene, bool translate, bool rotate, bool forceTrans) {
@@ -95,10 +99,8 @@ void AnimationNode::doUpdateNodeTransform(Scene* scene, bool translate, bool rot
 		vec3 gRotation = vec3(getObject()->anglex, getObject()->angley, getObject()->anglez);
 		if(!forceTrans)
 			getObject()->collisionObject->setRotate(gRotation, rotationBefore);
-		else {
-			vec4 gQuat = MatrixToQuat(getObject()->boundRotateMat);
-			getObject()->collisionObject->initRotate(gQuat);
-		}
+		else 
+			getObject()->collisionObject->initRotate(MatrixToQuat(getObject()->boundRotateMat));
 	}
 }
 
