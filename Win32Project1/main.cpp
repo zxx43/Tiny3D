@@ -84,7 +84,7 @@ void ActRun() {
 		app->hideMouse();
 	}
 	else app->showMouse();
-	app->act(startTime, currentTime, velocity);
+	app->act(startTime, currentTime, dTime * 0.001, velocity);
 }
 
 void DrawWindow() {

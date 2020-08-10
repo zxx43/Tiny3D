@@ -32,7 +32,7 @@ public:
 	virtual void draw() = 0;
 	void keyAct(float velocity);
 	void wheelAct();
-	virtual void act(long startTime, long currentTime, float velocity);
+	virtual void act(long startTime, long currentTime, float dTime, float velocity);
 	virtual void moveMouse(const float mx, const float my, const float cx, const float cy);
 	virtual void mouseKey(bool press, bool isMain);
 	void updateData();

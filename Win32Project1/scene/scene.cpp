@@ -229,7 +229,12 @@ void Scene::addObject(Object* object) {
 	
 	object->caculateCollisionBounding();
 	float mass = object->mesh ? 0.0 : 100.0;
-	object->collisionObject = new CollisionObject(object->collisionShape->shape, mass);
+	if (!object->collisionObject)
+		object->collisionObject = new CollisionObject(object->collisionShape->shape, mass);
+	else {
+		object->collisionObject->setCollisionShape(object->collisionShape->shape);
+		object->collisionObject->setMass(mass);
+	}
 	object->collisionObject->object->setUserPointer(object);
 	if (!object->mesh) 
 		object->collisionObject->object->setActivationState(DISABLE_DEACTIVATION);

@@ -36,6 +36,14 @@ struct CollisionObject {
 		object->setMotionState(NULL);
 		delete object;
 	}
+	void setCollisionShape(btCollisionShape* shape) {
+		object->setCollisionShape(shape);
+	}
+	void setMass(float mass) {
+		btVector3 inertia(0.0, 0.0, 0.0);
+		if (mass > 0.0) object->getCollisionShape()->calculateLocalInertia(mass, inertia);
+		object->setMassProps(mass, inertia);
+	}
 	bool isStatic() {
 		return (!object->isActive() || object->isStaticObject());
 	}

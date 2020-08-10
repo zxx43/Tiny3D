@@ -27,7 +27,7 @@ public:
 public:
 	virtual void init();
 	virtual void draw();
-	virtual void act(long startTime, long currentTime, float velocity);
+	virtual void act(long startTime, long currentTime, float dTime, float velocity);
 	virtual void moveMouse(const float mx, const float my, const float cx, const float cy);
 	virtual void mouseKey(bool press, bool isMain);
 	virtual void resize(int width, int height);

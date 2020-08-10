@@ -248,7 +248,7 @@ void SimpleApplication::updateMovement() {
 	}
 }
 
-void SimpleApplication::act(long startTime, long currentTime, float velocity) {
+void SimpleApplication::act(long startTime, long currentTime, float dTime, float velocity) {
 	wheelAct();
 	if (wheelDir != MNONE) {
 		scene->player->wheelAct(wheelDir == MNEAR ? -1.0 : 1.0);
@@ -257,7 +257,7 @@ void SimpleApplication::act(long startTime, long currentTime, float velocity) {
 	keyAct(velocity);
 	scene->player->controlAct(input, scene, velocity * 0.05);
 
-	Application::act(startTime, currentTime, velocity);
+	Application::act(startTime, currentTime, dTime, velocity);
 
 	static float dd = 1.0, dr = 1.0;
 	Node* node = scene->animationRoot->children[0];
@@ -274,7 +274,7 @@ void SimpleApplication::act(long startTime, long currentTime, float velocity) {
 
 	scene->updateNodes();
 
-	scene->collisionWorld->act(1.0 / getFps());
+	scene->collisionWorld->act(dTime);
 	scene->updateAnimNodes();
 	scene->player->updateCamera();
 	updateMovement();

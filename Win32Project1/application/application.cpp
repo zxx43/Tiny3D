@@ -72,7 +72,7 @@ Application::~Application() {
 	free(cfgs);
 }
 
-void Application::act(long startTime, long currentTime, float velocity) {
+void Application::act(long startTime, long currentTime, float dTime, float velocity) {
 	if (renderMgr) {
 		input->updateExtra(renderMgr);
 		scene->act(currentTime - startTime);

@@ -45,6 +45,9 @@ Object::Object(const Object& rhs) {
 		billboard = NULL;
 	transforms = NULL;
 	transformsFull = NULL;
+
+	collisionShape = NULL;
+	collisionObject = NULL;
 }
 
 Object::~Object() {
@@ -121,6 +124,7 @@ void Object::caculateLocalAABB(bool looseWidth, bool looseAll) {
 }
 
 void Object::caculateCollisionBounding() {
+	if (collisionShape) delete collisionShape;
 	if (!mesh) { // Animation object use node bounding box
 		vec3 halfSize = ((AABB*)parent->boundingBox)->halfSize;
 		collisionShape = new CollisionShape(halfSize);
