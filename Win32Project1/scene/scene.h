@@ -76,6 +76,8 @@ public:
 public:
 	void initAnimNodes();
 	void updateAnimNodes();
+private:
+	void synPhysics2Graphic(AnimationNode* node, AnimationObject* object);
 };
 
 

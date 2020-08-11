@@ -71,7 +71,7 @@ struct CollisionObject {
 		if (fabsf(vel.z) < 0.0001) vel.z = 0.0;
 		object->setLinearVelocity(btVector3(vel.x, vel.y, vel.z));
 	}
-	void setRotate(const vec3& after, const vec3& before) {
+	void setRotateAngle(const vec3& after, const vec3& before) {
 		object->activate();
 		vec3 vel = after - before;
 		if (fabsf(vel.x) < 0.0001) vel.x = 0.0;
@@ -85,7 +85,7 @@ struct CollisionObject {
 		btVector3 res = trans.getOrigin();
 		return vec3(res.getX(), res.getY(), res.getZ());
 	}
-	vec3 getRotate() {
+	vec3 getRotateAngle() {
 		btTransform trans = object->getWorldTransform();
 		btQuaternion quat = trans.getRotation();
 		vec3 angle;

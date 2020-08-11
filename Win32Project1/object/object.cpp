@@ -123,7 +123,7 @@ void Object::caculateLocalAABB(bool looseWidth, bool looseAll) {
 	localBoundPosition.z=bounding->position.z;
 }
 
-void Object::caculateCollisionBounding() {
+void Object::caculateCollisionShape() {
 	if (collisionShape) delete collisionShape;
 	if (!mesh) { // Animation object use node bounding box
 		vec3 halfSize = ((AABB*)parent->boundingBox)->halfSize;
@@ -157,6 +157,24 @@ void Object::caculateCollisionBounding() {
 		halfSize *= mesh->getBoundScale();
 		collisionShape = new CollisionShape(halfSize);
 	}
+}
+
+CollisionObject* Object::initCollisionObject() {
+	float mass = mesh ? 0.0 : 100.0;
+	if (!collisionObject)
+		collisionObject = new CollisionObject(collisionShape->shape, mass);
+	else {
+		collisionObject->setCollisionShape(collisionShape->shape);
+		collisionObject->setMass(mass);
+	}
+	collisionObject->object->setUserPointer(this);
+	if (!mesh)
+		collisionObject->object->setActivationState(DISABLE_DEACTIVATION);
+	return collisionObject;
+}
+
+void Object::removeCollisionObject() {
+	collisionObject = NULL;
 }
 
 void Object::updateLocalMatrices() {

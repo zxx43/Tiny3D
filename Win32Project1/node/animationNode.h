@@ -28,7 +28,7 @@ public:
 	void animate(float velocity);
 	virtual void translateNode(Scene* scene, float x, float y, float z); // Local translate
 	void translateNodeAtWorld(Scene* scene, float x, float y, float z); // Global translate (used in collision feedback)
-	void translateNodeCenterAtWorld(Scene* scene, float x, float y, float z);
+	void translateNodeCenterAtWorld(Scene* scene, const vec3& nowWorldCenter);
 	void rotateNodeObject(Scene* scene, float ax, float ay, float az);
 	void doUpdateNodeTransform(Scene* scene, bool translate, bool rotate, bool forceTrans); // Update node transform & it's collision object
 	void scaleNodeObject(Scene* scene, float sx, float sy, float sz);

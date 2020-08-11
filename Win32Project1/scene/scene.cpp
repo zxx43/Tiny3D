@@ -227,18 +227,9 @@ void Scene::addObject(Object* object) {
 		}
 	}
 	
-	object->caculateCollisionBounding();
-	float mass = object->mesh ? 0.0 : 100.0;
-	if (!object->collisionObject)
-		object->collisionObject = new CollisionObject(object->collisionShape->shape, mass);
-	else {
-		object->collisionObject->setCollisionShape(object->collisionShape->shape);
-		object->collisionObject->setMass(mass);
-	}
-	object->collisionObject->object->setUserPointer(object);
-	if (!object->mesh) 
-		object->collisionObject->object->setActivationState(DISABLE_DEACTIVATION);
-	collisionWorld->addObject(object->collisionObject);
+	object->caculateCollisionShape();
+	CollisionObject* cob = object->initCollisionObject();
+	collisionWorld->addObject(cob);
 }
 
 void Scene::addPlay(AnimationNode* node) {
@@ -256,6 +247,21 @@ void Scene::initAnimNodes() {
 		animationNodes[i]->doUpdateNodeTransform(this, true, true, true);
 }
 
+// Read collision transform to render data
+void Scene::synPhysics2Graphic(AnimationNode* node, AnimationObject* object) {
+	vec3 gPosition = object->collisionObject->getTranslate();
+	gPosition += object->collisionObject->getLinearVelocity();
+	node->translateNodeAtWorld(this, gPosition.x, gPosition.y, gPosition.z);
+
+	//if (player->getNode() != node) { // Player's rotation controlled by mouse instead of bullet
+	//	vec3 gAngle = object->collisionObject->getRotateAngle();
+	//	gAngle += radianToAngle(object->collisionObject->getAngularVelocity());
+	//	node->rotateNodeObject(this, gAngle.x, gAngle.y, gAngle.z);
+	//}
+
+	object->collisionObject->resetVelocity();
+}
+
 // Update animation nodes' transform & aabb after collision
 void Scene::updateAnimNodes() {
 	for (uint i = 0; i < animationNodes.size(); ++i) {
@@ -268,23 +274,13 @@ void Scene::updateAnimNodes() {
 		AnimationNode* node = animNodeToUpdate[i];
 		AnimationObject* object = node->getObject();
 
-		vec3 gPosition = object->collisionObject->getTranslate();
-		gPosition += object->collisionObject->getLinearVelocity();
-		node->translateNodeAtWorld(this, gPosition.x, gPosition.y, gPosition.z);
-
-		//vec3 gAngle = object->collisionObject->getRotate();
-		//gAngle += object->collisionObject->getAngularVelocity();
-		//node->rotateNodeObject(this, gAngle.x, gAngle.y, gAngle.z);
-
-		object->collisionObject->resetVelocity();
-
-		node->boundingBox->update(GetTranslate(node->nodeTransform));
+		synPhysics2Graphic(node, object); // Read back collision transform
 		terrainNode->standObjectsOnGround(this, node); // Stand animation nodes on ground after collision (no terrain collision)
 		if(player->getNode() == node)
 			player->setPosition(node->position);
 		
-		node->boundingBox->update(GetTranslate(node->nodeTransform));
-		node->updateNodeObject(node->getObject(), true, true);
+		node->boundingBox->update(GetTranslate(node->nodeTransform)); // Update bounding box after terrain collision
+		node->updateNodeObject(node->getObject(), true, true); // Send render data for using
 		Node* superior = node->parent;
 		while (superior) {
 			superior->updateBounding();

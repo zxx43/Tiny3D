@@ -56,11 +56,19 @@ vec4 mul(const vec4& a,const vec4& b);
 vec3 mul(const vec3& a, const vec3& b);
 
 inline float angleToRadian(float angle) {
-	return angle*A2R;
+	return angle * A2R;
+}
+
+inline vec3 angleToRadian(const vec3& angle) {
+	return angle * A2R;
 }
 
 inline float radianToAngle(float radian) {
-	return radian*R2A;
+	return radian * R2A;
+}
+
+inline vec3 radianToAngle(const vec3& radian) {
+	return radian * R2A;
 }
 
 struct Line {

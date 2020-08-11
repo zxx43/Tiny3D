@@ -120,7 +120,9 @@ Object* Node::removeObject(Scene* scene, Object* object) {
 			needCreateDrawcall = true;
 			pushToUpdate(scene);
 			object->parent = NULL;
+
 			scene->collisionWorld->removeObject(object->collisionObject);
+			object->removeCollisionObject();
 
 			return object;
 		}

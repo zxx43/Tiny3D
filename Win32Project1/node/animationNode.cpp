@@ -41,9 +41,9 @@ void AnimationNode::pushToUpdate(Scene* scene) {
 	}
 }
 
-void AnimationNode::translateNodeCenterAtWorld(Scene* scene, float x, float y, float z) {
-	vec3 beforeWorldCenter = boundingBox->position;
-	vec3 offset = vec3(x, y, z) - beforeWorldCenter;
+void AnimationNode::translateNodeCenterAtWorld(Scene* scene, const vec3& nowWorldCenter) {
+	vec3 beforeWorldCenter = GetTranslate(nodeTransform);
+	vec3 offset = nowWorldCenter - beforeWorldCenter;
 	vec3 dPosition = position + offset;
 
 	position = vec3(dPosition.x, dPosition.y, dPosition.z);
@@ -98,7 +98,7 @@ void AnimationNode::doUpdateNodeTransform(Scene* scene, bool translate, bool rot
 
 		vec3 gRotation = vec3(getObject()->anglex, getObject()->angley, getObject()->anglez);
 		if(!forceTrans)
-			getObject()->collisionObject->setRotate(gRotation, rotationBefore);
+			getObject()->collisionObject->setRotateAngle(gRotation, rotationBefore);
 		else 
 			getObject()->collisionObject->initRotate(MatrixToQuat(getObject()->boundRotateMat));
 	}

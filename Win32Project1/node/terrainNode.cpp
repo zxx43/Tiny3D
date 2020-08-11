@@ -137,12 +137,12 @@ void TerrainNode::standObjectsOnGround(Scene* scene, Node* node) {
 	if (node->children.size() <= 0) {
 		if (node->type == TYPE_ANIMATE) {
 			AnimationNode* animNode = (AnimationNode*)node;
-			vec3 worldCenter = animNode->boundingBox->position;
+			vec3 worldCenter = GetTranslate(animNode->nodeTransform);
 			int bx, bz;
 			this->caculateBlock(worldCenter.x, worldCenter.z, bx, bz);
 			this->cauculateY(bx, bz, worldCenter.x, worldCenter.z, worldCenter.y);
 			worldCenter.y += ((AABB*)animNode->boundingBox)->sizey * 0.45;
-			animNode->translateNodeCenterAtWorld(scene, worldCenter.x, worldCenter.y, worldCenter.z);
+			animNode->translateNodeCenterAtWorld(scene, worldCenter);
 		} else {
 			for (uint i = 0; i < node->objects.size(); i++) {
 				StaticObject* obj = (StaticObject*)node->objects[i];
