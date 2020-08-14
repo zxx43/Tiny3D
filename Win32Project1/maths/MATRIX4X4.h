@@ -30,6 +30,13 @@ public:
 				float e8, float e9, float e10, float e11,
 				float e12, float e13, float e14, float e15);
 	MATRIX4X4(const float * rhs);
+	MATRIX4X4(const VECTOR4D& v0, const VECTOR4D& v1, const VECTOR4D& v2, const VECTOR4D& v3)
+	{
+		MATRIX4X4(v0.x, v0.y, v0.z, v0.w, 
+				  v1.x, v1.y, v1.z, v1.w, 
+				  v2.x, v2.y, v2.z, v2.w, 
+				  v3.x, v3.y, v3.z, v3.w);
+	}
 	MATRIX4X4(const MATRIX4X4 & rhs);
 	~MATRIX4X4() {}	//empty
 
