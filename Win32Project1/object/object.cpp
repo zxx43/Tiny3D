@@ -168,8 +168,10 @@ CollisionObject* Object::initCollisionObject() {
 		collisionObject->setMass(mass);
 	}
 	collisionObject->object->setUserPointer(this);
-	if (!mesh)
+	if (!mesh) {
+		//collisionObject->object->setAngularFactor(0.0);
 		collisionObject->object->setActivationState(DISABLE_DEACTIVATION);
+	}
 	return collisionObject;
 }
 

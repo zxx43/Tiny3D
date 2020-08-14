@@ -260,9 +260,13 @@ void SimpleApplication::act(long startTime, long currentTime, float dTime, float
 	Application::act(startTime, currentTime, dTime, velocity);
 
 	static float dd = 1.0, dr = 1.0;
+	static bool needRotate = true;
 	Node* node = scene->animationRoot->children[0];
 	AnimationNode* animNode = (AnimationNode*)node->children[0];
-	animNode->rotateNodeObject(scene, 0, 135 + 90 * dr, 0);
+	if (needRotate) {
+		animNode->rotateNodeObject(scene, 0, 135 + 90 * dr, 0);
+		needRotate = false;
+	}
 	animNode->translateNode(scene, animNode->position.x - 0.025 * dd, animNode->position.y, animNode->position.z - 0.025 * dd);
 	static float distance = 0.0;
 	distance++;
@@ -270,6 +274,7 @@ void SimpleApplication::act(long startTime, long currentTime, float dTime, float
 		dd *= -1.0;
 		dr *= -1.0;
 		distance = 0.0;
+		needRotate = true;
 	}
 
 	scene->updateNodes();

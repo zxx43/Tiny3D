@@ -57,6 +57,13 @@ struct CollisionObject {
 		trans.setRotation(btQuaternion(rot.x, rot.y, rot.z, rot.w));
 		object->setWorldTransform(trans);
 	}
+	void setRotateAngle(const vec3& angle) {
+		btTransform trans = object->getWorldTransform();
+		btQuaternion quat;
+		quat.setEulerZYX(angleToRadian(angle.z), angleToRadian(angle.y), angleToRadian(angle.x));
+		trans.setRotation(quat);
+		object->setWorldTransform(trans);
+	}
 	void initTransform(const vec3& pos, const vec4& rot) {
 		btTransform trans = object->getWorldTransform();
 		trans.setOrigin(btVector3(pos.x, pos.y, pos.z));
@@ -71,15 +78,6 @@ struct CollisionObject {
 		if (fabsf(vel.z) < 0.0001) vel.z = 0.0;
 		object->setLinearVelocity(btVector3(vel.x, vel.y, vel.z));
 	}
-	void setRotateAngle(const vec3& after, const vec3& before) {
-		object->activate();
-		vec3 vel = after - before;
-		if (fabsf(vel.x) < 0.0001) vel.x = 0.0;
-		if (fabsf(vel.y) < 0.0001) vel.y = 0.0;
-		if (fabsf(vel.z) < 0.0001) vel.z = 0.0;
-		vel *= A2R;
-		object->setAngularVelocity(btVector3(vel.x, vel.y, vel.z));
-	}
 	vec3 getTranslate() {
 		btTransform trans = object->getWorldTransform();
 		btVector3 res = trans.getOrigin();
@@ -90,7 +88,7 @@ struct CollisionObject {
 		btQuaternion quat = trans.getRotation();
 		vec3 angle;
 		quat.getEulerZYX(angle.z, angle.y, angle.x);
-		angle *= R2A;
+		angle = radianToAngle(angle);
 		return angle;
 	}
 	vec3 getLinearVelocity() {
@@ -99,13 +97,6 @@ struct CollisionObject {
 		if (fabsf(vel.y()) < threhold) vel.setY(0.0);
 		if (fabsf(vel.z()) < threhold) vel.setZ(0.0);
 		return vec3(vel.x(), vel.y(), vel.z());
-	}
-	vec3 getAngularVelocity() {
-		btVector3 ang = object->getAngularVelocity();
-		if (fabsf(ang.x()) < threhold) ang.setX(0.0);
-		if (fabsf(ang.y()) < threhold) ang.setY(0.0);
-		if (fabsf(ang.z()) < threhold) ang.setZ(0.0);
-		return vec3(ang.x(), ang.y(), ang.z());
 	}
 	void resetVelocity() {
 		object->setLinearVelocity(btVector3(0, 0, 0));

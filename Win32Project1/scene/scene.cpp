@@ -253,11 +253,13 @@ void Scene::synPhysics2Graphic(AnimationNode* node, AnimationObject* object) {
 	gPosition += object->collisionObject->getLinearVelocity();
 	node->translateNodeAtWorld(this, gPosition.x, gPosition.y, gPosition.z);
 
-	//if (player->getNode() != node) { // Player's rotation controlled by mouse instead of bullet
-	//	vec3 gAngle = object->collisionObject->getRotateAngle();
-	//	gAngle += radianToAngle(object->collisionObject->getAngularVelocity());
-	//	node->rotateNodeObject(this, gAngle.x, gAngle.y, gAngle.z);
-	//}
+	vec3 gAngle = object->collisionObject->getRotateAngle();
+	// Todo gimbal lock to fix
+	if (fabsf(gAngle.x) > 175.0 && fabsf(gAngle.z) > 175.0) 
+		gAngle.y = -gAngle.y + 180.0;
+	gAngle.x = 0.0;
+	gAngle.z = 0.0;
+	node->rotateNodeAtWorld(this, gAngle);
 
 	object->collisionObject->resetVelocity();
 }

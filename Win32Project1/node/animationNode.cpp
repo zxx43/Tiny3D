@@ -62,6 +62,11 @@ void AnimationNode::translateNodeAtWorld(Scene* scene, float x, float y, float z
 	pushToUpdate(scene);
 }
 
+void AnimationNode::rotateNodeAtWorld(Scene* scene, const vec3& angle) {
+	getObject()->setRotation(angle.x, angle.y, angle.z);
+	pushToUpdate(scene);
+}
+
 void AnimationNode::translateNode(Scene* scene, float x, float y, float z) {
 	positionBefore = GetTranslate(nodeTransform);
 	position = vec3(x, y, z);
@@ -76,8 +81,9 @@ void AnimationNode::translateNode(Scene* scene, float x, float y, float z) {
 void AnimationNode::rotateNodeObject(Scene* scene, float ax, float ay, float az) {
 	rotationBefore = vec3(getObject()->anglex, getObject()->angley, getObject()->anglez);
 	getObject()->setRotation(ax, ay, az);
+	
 	if (scene->isInited())
-		doUpdateNodeTransform(scene, false, true, false);
+		doUpdateNodeTransform(scene, false, true, true);
 	else
 		pushToUpdate(scene);
 }
@@ -97,10 +103,7 @@ void AnimationNode::doUpdateNodeTransform(Scene* scene, bool translate, bool rot
 		pushToUpdate(scene);
 
 		vec3 gRotation = vec3(getObject()->anglex, getObject()->angley, getObject()->anglez);
-		if(!forceTrans)
-			getObject()->collisionObject->setRotateAngle(gRotation, rotationBefore);
-		else 
-			getObject()->collisionObject->initRotate(MatrixToQuat(getObject()->boundRotateMat));
+		getObject()->collisionObject->setRotateAngle(gRotation);
 	}
 }
 

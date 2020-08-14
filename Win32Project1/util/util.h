@@ -97,7 +97,7 @@ inline vec3 CaculateTangent(const vec4& p0, const vec4& p1, const vec4& p2, cons
 }
 
 inline void RestrictAngle(float& angle) {
-	if (angle > 360.0) angle -= 360.0;
+	if (angle >= 360.0) angle -= 360.0;
 	else if (angle < 0.0) angle += 360.0;
 }
 
