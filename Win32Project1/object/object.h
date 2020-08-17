@@ -37,6 +37,7 @@ public:
 	vec3 localBoundPosition;
 	bool genShadow;
 	int detailLevel;
+	vec3 shapeOffset;
 	CollisionShape* collisionShape;
 	CollisionObject* collisionObject;
 public:
@@ -47,6 +48,7 @@ public:
 	void caculateLocalAABB(bool looseWidth,bool looseAll);
 	void caculateCollisionShape(); // Caculate collision obb
 	CollisionObject* initCollisionObject();
+	void setShapeOffset(const vec3& off) { shapeOffset = off; }
 	void removeCollisionObject();
 	void initMatricesData();
 	void updateLocalMatrices();

@@ -5,7 +5,7 @@
 AnimationObject::AnimationObject(Animation* anim) :Object() {
 	animation = anim; // no mesh!
 	anglex = 0; angley = 0; anglez = 0;
-	boundRotateMat.LoadIdentity();
+	quat = vec4(0, 0, 0, 1);
 	setCurAnim(0, false);
 	setLoop(false);
 	setPlayOnce(false);
@@ -23,6 +23,7 @@ AnimationObject::AnimationObject(const AnimationObject& rhs) :Object(rhs) {
 	else
 		bounding=NULL;
 	anglex=rhs.anglex; angley=rhs.angley; anglez=rhs.anglez;
+	quat = rhs.quat;
 	fid = rhs.fid;
 
 	position = rhs.position;
@@ -33,7 +34,6 @@ AnimationObject::AnimationObject(const AnimationObject& rhs) :Object(rhs) {
 	rotateQuat = rhs.rotateQuat;
 	boundInfo = rhs.boundInfo;
 
-	boundRotateMat = rhs.boundRotateMat;
 	rotateMat = rhs.rotateMat;
 	translateMat = rhs.translateMat;
 	scaleMat = rhs.scaleMat;
@@ -68,15 +68,10 @@ AnimationObject* AnimationObject::clone() {
 
 void AnimationObject::vertexTransform() {
 	translateMat = translate(position.x, position.y, position.z);
-	mat4 zrotMat = animation->inverseYZ ? rotateZ(anglez + 90) : rotateZ(anglez); // fbxsdk to rotate 90 at z axis
-	rotateMat = zrotMat * rotateY(angley) * rotateX(anglex);
+	rotateMat = Quat2Mat(quat);
 	scaleMat = scale(size.x, size.y, size.z);
-	localTransformMatrix = translateMat * rotateMat * scaleMat;
 
-	if (animation->inverseYZ)
-		boundRotateMat = rotateZ(anglez) * rotateY(angley) * rotateX(anglex);
-	else
-		boundRotateMat = rotateMat;
+	localTransformMatrix = translateMat * rotateMat * scaleMat;
 }
 
 void AnimationObject::normalTransform() {
@@ -99,6 +94,12 @@ void AnimationObject::setRotation(float ax, float ay, float az) {
 	RestrictAngle(anglex);
 	RestrictAngle(angley);
 	RestrictAngle(anglez);
+	quat = Euler2Quat(vec3(anglex, angley, anglez));
+	updateLocalMatrices();
+}
+
+void AnimationObject::setRotation(const vec4& q) {
+	quat = q;
 	updateLocalMatrices();
 }
 

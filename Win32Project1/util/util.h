@@ -55,6 +55,21 @@ vec4 mul(const vec4& a,const vec4& b);
 
 vec3 mul(const vec3& a, const vec3& b);
 
+inline vec3 GetAxisX(const mat4& mat) {
+	vec3 res = vec3(mat.entries[0], mat.entries[1], mat.entries[2]);
+	return res;
+}
+
+inline vec3 GetAxisY(const mat4& mat) {
+	vec3 res = vec3(mat.entries[4], mat.entries[5], mat.entries[6]);
+	return res;
+}
+
+inline vec3 GetAxisZ(const mat4& mat) {
+	vec3 res = vec3(mat.entries[8], mat.entries[9], mat.entries[10]);
+	return res;
+}
+
 inline float angleToRadian(float angle) {
 	return angle * A2R;
 }
@@ -206,7 +221,8 @@ inline mat4 QuatToMatrix(const vec4& q) {
 		1.0 - 2.0 * q.x * q.x - 2.0 * q.y * q.y,
 		0.0);
 	vec4 m3 = vec4(0.0, 0.0, 0.0, 1.0);
-	return mat4(m0, m1, m2, m3);
+	mat4 mat = mat4(m0, m1, m2, m3);
+	return mat;
 }
 
 #define F16_EXPONENT_BITS 0x1F

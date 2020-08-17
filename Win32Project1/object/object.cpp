@@ -33,6 +33,7 @@ Object::Object() {
 	rotateQuat = MatrixToQuat(rotateMat);
 	boundInfo = vec4(0.0, 0.0, 0.0, 0.0);
 
+	shapeOffset = vec3(0.0, 0.0, 0.0);
 	collisionShape = NULL;
 	collisionObject = NULL;
 }
@@ -46,6 +47,7 @@ Object::Object(const Object& rhs) {
 	transforms = NULL;
 	transformsFull = NULL;
 
+	shapeOffset = rhs.shapeOffset;
 	collisionShape = NULL;
 	collisionObject = NULL;
 }

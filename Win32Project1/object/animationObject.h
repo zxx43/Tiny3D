@@ -17,7 +17,7 @@ private:
 	virtual void normalTransform();
 public:
 	float anglex,angley,anglez;
-	mat4 boundRotateMat;
+	vec4 quat;
 	Animation* animation;
 	int aid, fid;
 public:
@@ -32,6 +32,7 @@ public:
 	virtual void setPosition(float x, float y, float z);
 	virtual void setRotation(float ax, float ay, float az);
 	virtual void setSize(float sx, float sy, float sz);
+	void setRotation(const vec4& q);
 	bool setCurAnim(int aid, bool once);
 	int getCurAnim() { return aid; }
 	void resetTime() { time = 0.0; }

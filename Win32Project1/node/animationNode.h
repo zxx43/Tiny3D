@@ -16,7 +16,7 @@ private:
 	Animation* animation;
 	bool needUpdateAnimNode;
 private:
-	vec3 positionBefore, rotationBefore;
+	vec3 positionBefore;
 public:
 	AnimationNode(const vec3& boundingSize);
 	virtual ~AnimationNode();
@@ -30,7 +30,7 @@ public:
 	void translateNodeAtWorld(Scene* scene, float x, float y, float z); // Global translate (used in collision feedback)
 	void translateNodeCenterAtWorld(Scene* scene, const vec3& nowWorldCenter);
 	void rotateNodeObject(Scene* scene, float ax, float ay, float az);
-	void rotateNodeAtWorld(Scene* scene, const vec3& angle);
+	void rotateNodeAtWorld(Scene* scene, const vec4& quat);
 	void doUpdateNodeTransform(Scene* scene, bool translate, bool rotate, bool forceTrans); // Update node transform & it's collision object
 	void scaleNodeObject(Scene* scene, float sx, float sy, float sz);
 	void setUpdate(bool need) { needUpdateAnimNode = need; }

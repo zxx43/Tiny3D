@@ -5,6 +5,42 @@
 #include "../util/util.h"
 #include <bullet/btBulletDynamicsCommon.h>
 
+inline mat4 Quat2Mat(const vec4& q) {
+	btQuaternion quat(q.x, q.y, q.z, q.w);
+	btTransform tran(quat);
+	mat4 res;
+	tran.getOpenGLMatrix(res);
+	return res;
+}
+
+inline vec3 GetAxis(const btQuaternion& q, const vec3& axis) {
+	btTransform tran(q);
+	mat4 mat;
+	tran.getOpenGLMatrix(mat);
+	vec4 aix = vec4(axis, 0.0);
+	vec3 res = mat * aix;
+	return res;
+}
+
+inline vec4 Euler2Quat(const vec3& angle) {
+	vec3 ax(1, 0, 0), ay(0, 1, 0), az(0, 0, 1);
+	vec3 ang = angleToRadian(angle);
+	btQuaternion quat(0, 0, 0, 1);
+	btQuaternion qx; qx.setRotation(btVector3(ax.x, ax.y, ax.z), ang.x);
+	quat = qx * quat;
+	mat4 m = Quat2Mat(vec4(quat.x(), quat.y(), quat.z(), quat.w()));
+	ay = GetAxisY(m);
+	btQuaternion qy; qy.setRotation(btVector3(ay.x, ay.y, ay.z), ang.y);
+	quat = qy * quat;
+	m = Quat2Mat(vec4(quat.x(), quat.y(), quat.z(), quat.w()));
+	az = GetAxisZ(m);
+	btQuaternion qz; qz.setRotation(btVector3(az.x, az.y, az.z), ang.z);
+	quat = qz * quat;
+
+	vec4 res(quat.x(), quat.y(), quat.z(), quat.w());
+	return res;
+}
+
 struct CollisionShape {
 	btCollisionShape* shape;
 	CollisionShape(const vec3& halfSize) {
@@ -21,20 +57,29 @@ struct CollisionShape {
 struct CollisionObject {
 	btRigidBody* object;
 	btMotionState* motion;
-	float threhold;
+	vec3 ax, ay, az;
 	CollisionObject(btCollisionShape* shape, float mass) {
-		threhold = 0.0;
 		btVector3 inertia(0.0, 0.0, 0.0);
 		if (mass > 0.0) shape->calculateLocalInertia(mass, inertia);
 		btTransform trans; trans.setIdentity();
 		motion = new btDefaultMotionState(trans);
 		object = new btRigidBody(mass, motion, shape, inertia);
 		object->setUserIndex(-1);
+		resetVelocity();
+		ax = vec3(1, 0, 0);
+		ay = vec3(0, 1, 0);
+		az = vec3(0, 0, 1);
 	}
 	~CollisionObject() {
 		if (motion) delete motion;
 		object->setMotionState(NULL);
 		delete object;
+	}
+	void setAxis(const btQuaternion& q) {
+		mat4 m = Quat2Mat(vec4(q.x(), q.y(), q.z(), q.w()));
+		ax = GetAxisX(m);
+		ay = GetAxisY(m);
+		az = GetAxisZ(m);
 	}
 	void setCollisionShape(btCollisionShape* shape) {
 		object->setCollisionShape(shape);
@@ -54,53 +99,62 @@ struct CollisionObject {
 	}
 	void initRotate(const vec4& rot) {
 		btTransform trans = object->getWorldTransform();
-		trans.setRotation(btQuaternion(rot.x, rot.y, rot.z, rot.w));
+		btQuaternion q = btQuaternion(rot.x, rot.y, rot.z, rot.w);
+		trans.setRotation(q);
 		object->setWorldTransform(trans);
-	}
-	void setRotateAngle(const vec3& angle) {
-		btTransform trans = object->getWorldTransform();
-		btQuaternion quat;
-		quat.setEulerZYX(angleToRadian(angle.z), angleToRadian(angle.y), angleToRadian(angle.x));
-		trans.setRotation(quat);
-		object->setWorldTransform(trans);
+		setAxis(q);
 	}
 	void initTransform(const vec3& pos, const vec4& rot) {
 		btTransform trans = object->getWorldTransform();
 		trans.setOrigin(btVector3(pos.x, pos.y, pos.z));
-		trans.setRotation(btQuaternion(rot.x, rot.y, rot.z, rot.w));
+		btQuaternion q = btQuaternion(rot.x, rot.y, rot.z, rot.w);
+		trans.setRotation(q);
 		object->setWorldTransform(trans);
+		setAxis(q);
 	}
 	void setTranslate(const vec3& after, const vec3& before) {
 		object->activate();
 		vec3 vel = after - before;
-		if (fabsf(vel.x) < 0.0001) vel.x = 0.0;
-		if (fabsf(vel.y) < 0.0001) vel.y = 0.0;
-		if (fabsf(vel.z) < 0.0001) vel.z = 0.0;
 		object->setLinearVelocity(btVector3(vel.x, vel.y, vel.z));
+	}
+	void setRotateAngle(const vec3& angle, bool inverseYZ) {
+		btTransform trans = object->getWorldTransform();
+		btQuaternion quat(0, 0, 0, 1);
+		btQuaternion qx; qx.setRotation(btVector3(ax.x, ax.y, ax.z), angleToRadian(angle.x));
+		quat = qx * quat;
+		setAxis(quat);
+		btQuaternion qy; qy.setRotation(btVector3(ay.x, ay.y, ay.z), angleToRadian(angle.y));
+		quat = qy * quat;
+		setAxis(quat);
+		if (inverseYZ) {
+			btQuaternion qex;
+			qex.setRotation(btVector3(ax.x, ax.y, ax.z), angleToRadian(270));
+			quat = qex * quat;
+			setAxis(quat);
+		}
+		btQuaternion qz; qz.setRotation(btVector3(az.x, az.y, az.z), angleToRadian(angle.z));
+		quat = qz * quat;
+		setAxis(quat);
+		trans.setRotation(quat);
+		object->setWorldTransform(trans);
 	}
 	vec3 getTranslate() {
 		btTransform trans = object->getWorldTransform();
 		btVector3 res = trans.getOrigin();
 		return vec3(res.getX(), res.getY(), res.getZ());
 	}
-	vec3 getRotateAngle() {
+	vec4 getRotate() {
 		btTransform trans = object->getWorldTransform();
 		btQuaternion quat = trans.getRotation();
-		vec3 angle;
-		quat.getEulerZYX(angle.z, angle.y, angle.x);
-		angle = radianToAngle(angle);
-		return angle;
+		return vec4(quat.x(), quat.y(), quat.z(), quat.w());
 	}
 	vec3 getLinearVelocity() {
 		btVector3 vel = object->getLinearVelocity();
-		if (fabsf(vel.x()) < threhold) vel.setX(0.0);
-		if (fabsf(vel.y()) < threhold) vel.setY(0.0);
-		if (fabsf(vel.z()) < threhold) vel.setZ(0.0);
 		return vec3(vel.x(), vel.y(), vel.z());
 	}
 	void resetVelocity() {
-		object->setLinearVelocity(btVector3(0, 0, 0));
-		object->setAngularVelocity(btVector3(0, 0, 0));
+		object->setLinearVelocity(btVector3(0.0, 0.0, 0.0));
+		object->setAngularVelocity(btVector3(0.0, 0.0, 0.0));
 	}
 };
 

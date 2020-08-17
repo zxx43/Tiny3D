@@ -277,6 +277,14 @@ void SimpleApplication::act(long startTime, long currentTime, float dTime, float
 		needRotate = true;
 	}
 
+	node = scene->animationRoot->children[1];
+	animNode = (AnimationNode*)node->children[3];
+	animNode->rotateNodeObject(scene, animNode->getObject()->anglex, animNode->getObject()->angley, animNode->getObject()->anglez + 0.1);
+	float radian = angleToRadian(animNode->getObject()->anglez);
+	float rcos = cosf(radian);
+	float rsin = sinf(radian);
+	animNode->translateNode(scene, animNode->position.x + 0.04 * rsin, animNode->position.y, animNode->position.z + 0.04 * rcos);
+
 	scene->updateNodes();
 
 	scene->collisionWorld->act(dTime);
@@ -655,7 +663,7 @@ void SimpleApplication::initScene() {
 	animNode2->scaleNodeObject(scene, 0.05, 0.05, 0.05);
 	animNode2->getObject()->setPosition(0, -5, -1);
 	animNode2->translateNode(scene, 40, 0, 40);
-	//animNode2->rotateNodeObject(0, 45, 0);
+	animNode2->rotateNodeObject(scene, 0, 45, 0);
 	animNode2->getObject()->setDefaultAnim(10);
 	AnimationNode* animNode3 = new AnimationNode(vec3(5, 10, 5));
 	animNode3->setAnimation(scene, animations["ninja"]);
@@ -674,13 +682,11 @@ void SimpleApplication::initScene() {
 	animNode5->scaleNodeObject(scene, 0.075, 0.075, 0.075);
 	animNode5->getObject()->setPosition(0, -2.6, -1.5);
 	animNode5->translateNode(scene, 30, 0, 20);
-	animNode5->rotateNodeObject(scene, 0, 90, 0);
 	AnimationNode* animNode6 = new AnimationNode(vec3(5.0, 10.0, 5.0));
 	animNode6->setAnimation(scene, animations["male"]);
 	animNode6->scaleNodeObject(scene, 0.05, 0.05, 0.05);
 	animNode6->getObject()->setPosition(0.0, -4.0, 0.0);
 	animNode6->translateNode(scene, 40, 0, 0);
-	animNode6->rotateNodeObject(scene, 0, 270, 180);
 
 	Node* animNode = new StaticNode(vec3(0, 0, 0));
 	animNode->attachChild(scene, animNode1);

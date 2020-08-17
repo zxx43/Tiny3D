@@ -62,8 +62,8 @@ void AnimationNode::translateNodeAtWorld(Scene* scene, float x, float y, float z
 	pushToUpdate(scene);
 }
 
-void AnimationNode::rotateNodeAtWorld(Scene* scene, const vec3& angle) {
-	getObject()->setRotation(angle.x, angle.y, angle.z);
+void AnimationNode::rotateNodeAtWorld(Scene* scene, const vec4& quat) {
+	getObject()->setRotation(quat);
 	pushToUpdate(scene);
 }
 
@@ -79,7 +79,6 @@ void AnimationNode::translateNode(Scene* scene, float x, float y, float z) {
 }
 
 void AnimationNode::rotateNodeObject(Scene* scene, float ax, float ay, float az) {
-	rotationBefore = vec3(getObject()->anglex, getObject()->angley, getObject()->anglez);
 	getObject()->setRotation(ax, ay, az);
 	
 	if (scene->isInited())
@@ -103,7 +102,7 @@ void AnimationNode::doUpdateNodeTransform(Scene* scene, bool translate, bool rot
 		pushToUpdate(scene);
 
 		vec3 gRotation = vec3(getObject()->anglex, getObject()->angley, getObject()->anglez);
-		getObject()->collisionObject->setRotateAngle(gRotation);
+		getObject()->collisionObject->setRotateAngle(gRotation, animation->inverseYZ); // fbx inverse obb yz readback to object 
 	}
 }
 

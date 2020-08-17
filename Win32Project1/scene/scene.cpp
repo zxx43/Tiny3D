@@ -253,13 +253,8 @@ void Scene::synPhysics2Graphic(AnimationNode* node, AnimationObject* object) {
 	gPosition += object->collisionObject->getLinearVelocity();
 	node->translateNodeAtWorld(this, gPosition.x, gPosition.y, gPosition.z);
 
-	vec3 gAngle = object->collisionObject->getRotateAngle();
-	// Todo gimbal lock to fix
-	if (fabsf(gAngle.x) > 175.0 && fabsf(gAngle.z) > 175.0) 
-		gAngle.y = -gAngle.y + 180.0;
-	gAngle.x = 0.0;
-	gAngle.z = 0.0;
-	node->rotateNodeAtWorld(this, gAngle);
+	vec4 gQuat = object->collisionObject->getRotate();
+	node->rotateNodeAtWorld(this, gQuat);
 
 	object->collisionObject->resetVelocity();
 }
