@@ -21,6 +21,7 @@ struct MeshObject {
 	MeshObject(Mesh* m, Object* o) :mesh(m), object(o) {}
 };
 
+class StaticObject;
 class Scene {
 public:
 	std::vector<MeshObject*> meshes;
@@ -70,14 +71,19 @@ public:
 public: // Just for debugging
 	void createNodeAABB(Node* node);
 	void clearAllAABB();
+private:
+	std::list<AnimationNode*> animationNodes;
+	std::list<StaticObject*> dynamicObjects;
 public:
-	std::vector<AnimationNode*> animationNodes;
-	std::vector<AnimationNode*> animNodeToUpdate;
+	void removeAnimationNode(AnimationNode* node) { animationNodes.remove(node); }
+	void removeDynamicObject(StaticObject* object) { dynamicObjects.remove(object); }
 public:
 	void initAnimNodes();
 	void updateAnimNodes();
+	void updateDynamicNodes();
 private:
 	void synPhysics2Graphic(AnimationNode* node, AnimationObject* object);
+	void synPhysics2Graphic(StaticObject* object);
 };
 
 

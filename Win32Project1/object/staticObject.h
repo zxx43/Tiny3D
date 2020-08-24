@@ -10,10 +10,14 @@
 
 #include "object.h"
 
+class Scene;
 class StaticObject: public Object {
+private:
+	vec3 positionBefore;
 public:
-	float anglex,angley,anglez;
-
+	vec4 quat;
+	bool dynamic;
+public:
 	StaticObject(Mesh* mesh);
 	StaticObject(Mesh* mesh, Mesh* meshMid, Mesh* meshLow);
 	StaticObject(const StaticObject& rhs);
@@ -24,6 +28,11 @@ public:
 	virtual void setPosition(float x,float y,float z);
 	virtual void setRotation(float ax, float ay, float az);
 	virtual void setSize(float sx, float sy, float sz);
+	void translateAtWorld(const vec3& position);
+	void rotateAtWorld(const vec4& q);
+	void standOnGround(Scene* scene);
+	void setDynamic(bool dyn) { dynamic = dyn; if (dynamic) setMass(100.0); }
+	bool isDynamic() { return dynamic; }
 };
 
 

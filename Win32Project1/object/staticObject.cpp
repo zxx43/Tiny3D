@@ -1,12 +1,15 @@
 #include "staticObject.h"
 #include "../node/node.h"
 #include "../util/util.h"
+#include "../scene/scene.h"
 
 StaticObject::StaticObject(Mesh* mesh) :Object() {
 	this->mesh = mesh;
 	this->meshMid = mesh;
 	this->meshLow = mesh;
-	anglex = 0; angley = 0; anglez = 0;
+	positionBefore = vec3(0, 0, 0);
+	quat = vec4(0, 0, 0, 1);
+	dynamic = false;
 	initMatricesData();
 }
 
@@ -14,7 +17,9 @@ StaticObject::StaticObject(Mesh* mesh, Mesh* meshMid, Mesh* meshLow) :Object() {
 	this->mesh = mesh;
 	this->meshMid = meshMid;
 	this->meshLow = meshLow;
-	anglex = 0; angley = 0; anglez = 0;
+	positionBefore = vec3(0, 0, 0);
+	quat = vec4(0, 0, 0, 1);
+	dynamic = false;
 	initMatricesData();
 }
 
@@ -27,7 +32,9 @@ StaticObject::StaticObject(const StaticObject& rhs) :Object(rhs) {
 		bounding = rhs.bounding->clone();
 	else
 		bounding = NULL;
-	anglex = rhs.anglex; angley = rhs.angley; anglez = rhs.anglez;
+	positionBefore = rhs.positionBefore;
+	quat = rhs.quat;
+	dynamic = rhs.dynamic;
 
 	position = rhs.position;
 	size = rhs.size;
@@ -64,7 +71,7 @@ StaticObject* StaticObject::clone() {
 
 void StaticObject::vertexTransform() {
 	translateMat = translate(position.x, position.y, position.z);
-	rotateMat = rotateZ(anglez)*rotateY(angley)*rotateX(anglex);
+	rotateMat = Quat2Mat(quat);
 	scaleMat = scale(size.x, size.y, size.z);
 	localTransformMatrix = translateMat * rotateMat * scaleMat;
 }
@@ -78,6 +85,7 @@ void StaticObject::normalTransform() {
 }
 
 void StaticObject::setPosition(float x, float y, float z) {
+	positionBefore = GetTranslate(localTransformMatrix);
 	position.x = x;
 	position.y = y;
 	position.z = z;
@@ -85,7 +93,7 @@ void StaticObject::setPosition(float x, float y, float z) {
 }
 
 void StaticObject::setRotation(float ax, float ay, float az) {
-	anglex = ax; angley = ay; anglez = az;
+	quat = Euler2Quat(vec3(ax, ay, az));
 	updateLocalMatrices();
 }
 
@@ -98,6 +106,41 @@ void StaticObject::setSize(float sx, float sy, float sz) {
 	}
 }
 
+void StaticObject::translateAtWorld(const vec3& position) {
+	mat4 gParentTransform = parent->nodeTransform; // Parent node's global transform
+	vec3 gParentPosition = GetTranslate(gParentTransform);
+
+	vec3 lPosition = position - gParentPosition;
+	setPosition(lPosition.x, lPosition.y, lPosition.z);
+}
+
+void StaticObject::rotateAtWorld(const vec4& q) {
+	quat = q;
+	updateLocalMatrices();
+}
+
+void StaticObject::standOnGround(Scene* scene) {
+	localBoundPosition -= positionBefore;
+
+	vec3 worldCenter = GetTranslate(parent->nodeTransform * localTransformMatrix);
+	int bx, bz;
+	scene->terrainNode->caculateBlock(worldCenter.x, worldCenter.z, bx, bz);
+	scene->terrainNode->cauculateY(bx, bz, worldCenter.x, worldCenter.z, worldCenter.y);
+	worldCenter.y += collisionShape->getBox()->getHalfExtentsWithMargin().y();
+
+	translateAtWorld(worldCenter);
+	collisionObject->initTranslate(worldCenter);
+
+	// Update object's aabb
+	localBoundPosition += position;
+	parent->updateObjectBoundingInNode(this, true);
+	parent->boundingBox->merge(parent->objectsBBs);
+	Node* superior = parent->parent;
+	while (superior) {
+		superior->updateBounding();
+		superior = superior->parent;
+	}
+}
 
 
 

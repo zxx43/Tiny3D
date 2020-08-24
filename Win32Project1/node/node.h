@@ -25,8 +25,9 @@ class Node {
 public:
 	static std::vector<Node*> nodesToUpdate;
 	static std::vector<Node*> nodesToRemove;
+public:
+	void updateObjectBoundingInNode(Object* object, bool nodeTransformed = false);
 private:
-	void updateObjectBoundingInNode(Object* object);
 	void updateBaseNodeBounding();
 	void updateSelfAndDownwardNodesBounding();
 	void moveBaseObjectsBounding(float dx,float dy,float dz);
@@ -62,8 +63,7 @@ public:
 	virtual void updateRenderData() = 0;
 	virtual void updateDrawcall() = 0;
 	void updateNode(const Scene* scene);
-	void updateNodeObject(Object* object, bool translate, bool rotate);
-	virtual void pushToUpdate(Scene* scene);
+	void pushToUpdate(Scene* scene);
 
 	void updateBounding();
 	virtual void addObject(Scene* scene, Object* object);

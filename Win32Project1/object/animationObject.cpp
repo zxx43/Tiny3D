@@ -14,6 +14,7 @@ AnimationObject::AnimationObject(Animation* anim) :Object() {
 	setDefaultAnim(0);
 	time = 0.0, curFrame = 0.0;
 	initMatricesData();
+	mass = 100.0;
 }
 
 AnimationObject::AnimationObject(const AnimationObject& rhs) :Object(rhs) {

@@ -52,6 +52,12 @@ struct CollisionShape {
 	~CollisionShape() {
 		delete shape;
 	}
+	btBoxShape* getBox() {
+		return (btBoxShape*)shape;
+	}
+	btConeShape* getCone() {
+		return (btConeShape*)shape;
+	}
 };
 
 struct CollisionObject {

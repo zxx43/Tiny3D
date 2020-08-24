@@ -1,6 +1,7 @@
 #include "node.h"
 #include "../util/util.h"
 #include "../instance/instance.h"
+#include "../object/staticObject.h"
 #include "../scene/scene.h"
 
 std::vector<Node*> Node::nodesToUpdate;
@@ -65,12 +66,15 @@ bool Node::checkInFrustum(Frustum* frustum) {
 }
 
 // Update Object's bounding box from local to world
-void Node::updateObjectBoundingInNode(Object* object) {
+void Node::updateObjectBoundingInNode(Object* object, bool nodeTransformed) {
 	BoundingBox* objectBB = object->bounding;
 	if (objectBB) {
-		mat4 nodeMat; nodeMat.LoadIdentity();
-		recursiveTransform(nodeMat);
-		vec4 localBB4(object->localBoundPosition.x, object->localBoundPosition.y, object->localBoundPosition.z, 1.0);
+		mat4 nodeMat; 
+		if (!nodeTransformed)
+			recursiveTransform(nodeMat);
+		else
+			nodeMat = nodeTransform;
+		vec4 localBB4(object->localBoundPosition, 1.0);
 		vec4 bb4 = nodeMat * localBB4;
 		float invw = 1.0 / bb4.w;
 		objectBB->update(vec3(bb4.x * invw, bb4.y * invw, bb4.z * invw));
@@ -123,7 +127,11 @@ Object* Node::removeObject(Scene* scene, Object* object) {
 
 			scene->collisionWorld->removeObject(object->collisionObject);
 			object->removeCollisionObject();
-
+			if (object->mesh) {
+				StaticObject* staticObj = (StaticObject*)object;
+				if (staticObj->isDynamic())
+					scene->removeDynamicObject(staticObj);
+			}
 			return object;
 		}
 	}
@@ -359,52 +367,12 @@ void Node::pushToUpdate(Scene* scene) {
 	}
 }
 
-void Node::updateNodeObject(Object* object, bool translate, bool rotate) {
-	if (translate) {
-		object->transformMatrix = nodeTransform * object->localTransformMatrix;
-		object->transformTransposed = object->transformMatrix.GetTranspose();
-	}
-	if(rotate) object->rotateQuat = MatrixToQuat(object->rotateMat);
-	if (translate || rotate) {
-		AABB* bbox = (AABB*)object->bounding;
-		if (!bbox) bbox = (AABB*)boundingBox;
-		object->boundInfo = vec4(bbox->sizex, bbox->sizey, bbox->sizez, bbox->position.y);
-	}
-	if (object->transforms && translate) {
-		vec3 transPos = GetTranslate(object->transformMatrix);
-		object->transforms[0] = transPos.x;
-		object->transforms[1] = transPos.y;
-		object->transforms[2] = transPos.z;
-		object->transforms[3] = object->size.x;
-	}
-	if (object->transformsFull) {
-		if (translate) {
-			object->transformsFull[0] = (object->transforms[0]);
-			object->transformsFull[1] = (object->transforms[1]);
-			object->transformsFull[2] = (object->transforms[2]);
-			object->transformsFull[3] = (object->transforms[3]);
-		}
-		if (rotate) {
-			object->transformsFull[4] = (object->rotateQuat.x);
-			object->transformsFull[5] = (object->rotateQuat.y);
-			object->transformsFull[6] = (object->rotateQuat.z);
-			object->transformsFull[7] = (object->rotateQuat.w);
-		}
-		if (translate || rotate) {
-			object->transformsFull[8] = (object->boundInfo.x);
-			object->transformsFull[9] = (object->boundInfo.y);
-			object->transformsFull[10] = (object->boundInfo.z);
-			object->transformsFull[11] = (object->boundInfo.w);
-		}
-	}
-}
-
 void Node::updateNode(const Scene* scene) {
 	if (type != TYPE_ANIMATE) {
 		updateNodeTransform();
 		for (unsigned int i = 0; i < objects.size(); i++) {
 			Object* object = objects[i];
-			updateNodeObject(object, true, true);
+			object->updateObjectTransform(true, true);
 
 			if (object->collisionObject) {
 				vec3 gPosition = GetTranslate(nodeTransform * object->translateMat);

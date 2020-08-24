@@ -288,6 +288,7 @@ void SimpleApplication::act(long startTime, long currentTime, float dTime, float
 	scene->updateNodes();
 
 	scene->collisionWorld->act(dTime);
+	scene->updateDynamicNodes();
 	scene->updateAnimNodes();
 	scene->player->updateCamera();
 	updateMovement();
@@ -599,6 +600,8 @@ void SimpleApplication::initScene() {
 			StaticObject* stone = model9.clone();
 			float baseSize = 0.05;
 			float size = (rand() % 100 * 0.01) * 0.2 + baseSize;
+			if (size < 0.1)
+				stone->setDynamic(true);
 
 			stone->setSize(size, size, size);
 			stone->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
@@ -611,28 +614,36 @@ void SimpleApplication::initScene() {
 	StaticObject* oil1 = model6.clone();
 	oil1->setPosition(30, 0, 30);
 	oil1->setSize(10, 10, 10);
+	oil1->setDynamic(true);
 	StaticObject* oil2 = model6.clone();
 	oil2->setPosition(30, 0, 40);
 	oil2->setSize(10, 10, 10);
+	oil2->setDynamic(true);
 	StaticObject* oil3 = model6.clone();
 	oil3->setPosition(40, 0, 30);
 	oil3->setSize(10, 10, 10);
+	oil3->setDynamic(true);
 	StaticObject* oil4 = model6.clone();
 	oil4->setPosition(40, 0, 40);
 	oil4->setSize(10, 10, 10);
+	oil4->setDynamic(true);
 	StaticObject* box1 = box.clone();
 	box1->setPosition(0, 0, 30);
 	box1->setSize(6, 6, 6);
+	box1->setDynamic(true);
 	StaticObject* box2 = box.clone();
 	box2->setPosition(0, 0, 40);
 	box2->setRotation(0, 45, 0);
 	box2->setSize(6, 6, 6);
+	box2->setDynamic(true);
 	StaticObject* box3 = box.clone();
 	box3->setPosition(-10, 0, 30);
 	box3->setSize(6, 6, 6);
+	box3->setDynamic(true);
 	StaticObject* box4 = box.clone();
 	box4->setPosition(-10, 0, 40);
 	box4->setSize(6, 6, 6);
+	box4->setDynamic(true);
 	instanceNode7->addObject(scene, oil1);
 	instanceNode7->addObject(scene, oil2);
 	instanceNode7->addObject(scene, oil3);

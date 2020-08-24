@@ -33,8 +33,8 @@ Scene::Scene() {
 	animCount.clear();
 	anims.clear();
 	animPlayers.clear();
-	animNodeToUpdate.clear();
 	animationNodes.clear();
+	dynamicObjects.clear();
 	Node::nodesToUpdate.clear();
 	Node::nodesToRemove.clear();
 	Instance::instanceTable.clear();
@@ -63,8 +63,8 @@ Scene::~Scene() {
 	anims.clear();
 	animPlayers.clear();
 	animCount.clear();
-	animNodeToUpdate.clear();
 	animationNodes.clear();
+	dynamicObjects.clear();
 
 	delete collisionWorld;
 }
@@ -212,8 +212,8 @@ void Scene::addObject(Object* object) {
 		}
 		meshCount[cur]++;
 	}
-	// Animation object
-	if (!object->mesh) {
+	
+	if (!object->mesh) { // Animation object
 		AnimationObject* animObj = (AnimationObject*)object;
 		if (animObj) {
 			Animation* curAnim = animObj->animation;
@@ -225,6 +225,10 @@ void Scene::addObject(Object* object) {
 			if (animObj->parent)
 				animationNodes.push_back((AnimationNode*)(animObj->parent));
 		}
+	} else { 
+		StaticObject* obj = (StaticObject*)object;
+		if (obj->parent && obj->isDynamic())
+			dynamicObjects.push_back(obj);
 	}
 	
 	object->caculateCollisionShape();
@@ -243,8 +247,32 @@ uint Scene::queryMeshCount(Mesh* mesh) {
 }
 
 void Scene::initAnimNodes() {
-	for (uint i = 0; i < animationNodes.size(); ++i) 
-		animationNodes[i]->doUpdateNodeTransform(this, true, true, true);
+	list<AnimationNode*>::iterator it;
+	for (it = animationNodes.begin(); it != animationNodes.end(); ++it) 
+		(*it)->doUpdateNodeTransform(this, true, true, true);
+}
+
+// Read collision transform to render data
+void Scene::synPhysics2Graphic(StaticObject* object) {
+	vec3 gPosition = object->collisionObject->getTranslate();
+	gPosition += object->collisionObject->getLinearVelocity();
+	object->translateAtWorld(gPosition);
+
+	vec4 gQuat = object->collisionObject->getRotate();
+	object->rotateAtWorld(gQuat);
+
+	object->collisionObject->resetVelocity();
+}
+
+void Scene::updateDynamicNodes() {
+	list<StaticObject*>::iterator it;
+	for (it = dynamicObjects.begin(); it != dynamicObjects.end(); ++it) {
+		StaticObject* object = *it;
+		if (!object->collisionObject || object->collisionObject->isStatic()) continue;
+		synPhysics2Graphic(object); // Read back collision transform
+		object->standOnGround(this); // Stand object on ground after collision (no terrain collision) & update object's bounding box
+		object->updateObjectTransform(true, true); // Send render data for using
+	}
 }
 
 // Read collision transform to render data
@@ -261,29 +289,23 @@ void Scene::synPhysics2Graphic(AnimationNode* node, AnimationObject* object) {
 
 // Update animation nodes' transform & aabb after collision
 void Scene::updateAnimNodes() {
-	for (uint i = 0; i < animationNodes.size(); ++i) {
-		AnimationObject* object = animationNodes[i]->getObject();
-		if (object->collisionObject->isStatic()) continue;
-		animationNodes[i]->pushToUpdate(this);
-	}
-
-	for (uint i = 0; i < animNodeToUpdate.size(); ++i) {
-		AnimationNode* node = animNodeToUpdate[i];
+	list<AnimationNode*>::iterator it;
+	for (it = animationNodes.begin(); it != animationNodes.end(); ++it) {
+		AnimationNode* node = *it;
 		AnimationObject* object = node->getObject();
+		if (!object->collisionObject || object->collisionObject->isStatic()) continue;
 
 		synPhysics2Graphic(node, object); // Read back collision transform
 		terrainNode->standObjectsOnGround(this, node); // Stand animation nodes on ground after collision (no terrain collision)
-		if(player->getNode() == node)
-			player->setPosition(node->position);
-		
 		node->boundingBox->update(GetTranslate(node->nodeTransform)); // Update bounding box after terrain collision
-		node->updateNodeObject(node->getObject(), true, true); // Send render data for using
 		Node* superior = node->parent;
 		while (superior) {
 			superior->updateBounding();
 			superior = superior->parent;
 		}
-		node->setUpdate(false);
+
+		object->updateObjectTransform(true, true); // Send render data for using
+		if (player->getNode() == node)
+			player->setPosition(node->position);
 	}
-	animNodeToUpdate.clear();
 }

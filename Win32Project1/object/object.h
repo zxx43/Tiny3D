@@ -40,6 +40,7 @@ public:
 	vec3 shapeOffset;
 	CollisionShape* collisionShape;
 	CollisionObject* collisionObject;
+	float mass;
 public:
 	Object();
 	Object(const Object& rhs);
@@ -60,6 +61,8 @@ public:
 	virtual void setRotation(float ax, float ay, float az) = 0;
 	virtual void setSize(float sx, float sy, float sz) = 0;
 	void setBillboard(float sx, float sy, int mid);
+	void updateObjectTransform(bool translate, bool rotate);
+	void setMass(float m) { mass = m; }
 };
 
 

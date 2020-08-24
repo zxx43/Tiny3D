@@ -14,7 +14,6 @@
 class AnimationNode: public Node {
 private:
 	Animation* animation;
-	bool needUpdateAnimNode;
 private:
 	vec3 positionBefore;
 public:
@@ -33,8 +32,6 @@ public:
 	void rotateNodeAtWorld(Scene* scene, const vec4& quat);
 	void doUpdateNodeTransform(Scene* scene, bool translate, bool rotate, bool forceTrans); // Update node transform & it's collision object
 	void scaleNodeObject(Scene* scene, float sx, float sy, float sz);
-	void setUpdate(bool need) { needUpdateAnimNode = need; }
-	virtual void pushToUpdate(Scene* scene);
 };
 
 

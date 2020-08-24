@@ -20,9 +20,7 @@ Object::Object() {
 	meshLow = NULL;
 	bounding = NULL;
 	material = -1;
-	localBoundPosition.x=0;
-	localBoundPosition.y=0;
-	localBoundPosition.z=0;
+	localBoundPosition = vec3(0, 0, 0);
 
 	billboard = NULL;
 	genShadow = true;
@@ -36,6 +34,7 @@ Object::Object() {
 	shapeOffset = vec3(0.0, 0.0, 0.0);
 	collisionShape = NULL;
 	collisionObject = NULL;
+	mass = 0;
 }
 
 Object::Object(const Object& rhs) {
@@ -50,6 +49,7 @@ Object::Object(const Object& rhs) {
 	shapeOffset = rhs.shapeOffset;
 	collisionShape = NULL;
 	collisionObject = NULL;
+	mass = rhs.mass;
 }
 
 Object::~Object() {
@@ -120,9 +120,7 @@ void Object::caculateLocalAABB(bool looseWidth, bool looseAll) {
 		aabb->update(maxSide, maxSide, maxSide);
 	}
 
-	localBoundPosition.x=bounding->position.x;
-	localBoundPosition.y=bounding->position.y;
-	localBoundPosition.z=bounding->position.z;
+	localBoundPosition = bounding->position;
 }
 
 void Object::caculateCollisionShape() {
@@ -162,7 +160,6 @@ void Object::caculateCollisionShape() {
 }
 
 CollisionObject* Object::initCollisionObject() {
-	float mass = mesh ? 0.0 : 100.0;
 	if (!collisionObject)
 		collisionObject = new CollisionObject(collisionShape->shape, mass);
 	else {
@@ -170,10 +167,8 @@ CollisionObject* Object::initCollisionObject() {
 		collisionObject->setMass(mass);
 	}
 	collisionObject->object->setUserPointer(this);
-	if (!mesh) {
-		//collisionObject->object->setAngularFactor(0.0);
+	if (mass > 0) 
 		collisionObject->object->setActivationState(DISABLE_DEACTIVATION);
-	}
 	return collisionObject;
 }
 
@@ -199,4 +194,40 @@ bool Object::checkInCamera(Camera* camera) {
 void Object::setBillboard(float sx, float sy, int mid) {
 	if (billboard) delete billboard;
 	billboard = new Billboard(sx, sy, mid);
+}
+
+void Object::updateObjectTransform(bool translate, bool rotate) {
+	if (translate) {
+		transformMatrix = parent->nodeTransform * localTransformMatrix;
+		transformTransposed = transformMatrix.GetTranspose();
+	}
+	if (rotate) rotateQuat = MatrixToQuat(rotateMat);
+	if (translate || rotate) {
+		AABB* bbox = (AABB*)bounding;
+		if (!bbox) bbox = (AABB*)parent->boundingBox;
+		boundInfo = vec4(bbox->sizex, bbox->sizey, bbox->sizez, bbox->position.y);
+	}
+	if (transforms && translate) {
+		vec3 transPos = GetTranslate(transformMatrix);
+		transforms[0] = transPos.x;
+		transforms[1] = transPos.y;
+		transforms[2] = transPos.z;
+		transforms[3] = size.x;
+	}
+	if (transformsFull) {
+		if (translate) 
+			memcpy(transformsFull, transforms, 4 * sizeof(buff));
+		if (rotate) {
+			transformsFull[4] = (rotateQuat.x);
+			transformsFull[5] = (rotateQuat.y);
+			transformsFull[6] = (rotateQuat.z);
+			transformsFull[7] = (rotateQuat.w);
+		}
+		if (translate || rotate) {
+			transformsFull[8] = (boundInfo.x);
+			transformsFull[9] = (boundInfo.y);
+			transformsFull[10] = (boundInfo.z);
+			transformsFull[11] = (boundInfo.w);
+		}
+	}
 }

@@ -10,7 +10,6 @@ AnimationNode::AnimationNode(const vec3& boundingSize):
 
 	needCreateDrawcall = false;
 	needUpdateDrawcall = false;
-	needUpdateAnimNode = false;
 }
 
 AnimationNode::~AnimationNode() {}
@@ -34,13 +33,6 @@ AnimationObject* AnimationNode::getObject() {
 	return NULL;
 }
 
-void AnimationNode::pushToUpdate(Scene* scene) {
-	if (!needUpdateAnimNode) {
-		setUpdate(true);
-		scene->animNodeToUpdate.push_back(this);
-	}
-}
-
 void AnimationNode::translateNodeCenterAtWorld(Scene* scene, const vec3& nowWorldCenter) {
 	vec3 beforeWorldCenter = GetTranslate(nodeTransform);
 	vec3 offset = nowWorldCenter - beforeWorldCenter;
@@ -54,17 +46,12 @@ void AnimationNode::translateNodeAtWorld(Scene* scene, float x, float y, float z
 	mat4 gParentTransform = parent->nodeTransform; // Parent node's global transform
 	vec3 gParentPosition = GetTranslate(gParentTransform);
 	vec3 gPosition = vec3(x, y, z);
-	vec3 lPosition = gPosition - gParentPosition;
-	
-	position = lPosition;
+	position = gPosition - gParentPosition;
 	nodeTransform = gParentTransform * translate(position.x, position.y, position.z);
-
-	pushToUpdate(scene);
 }
 
 void AnimationNode::rotateNodeAtWorld(Scene* scene, const vec4& quat) {
 	getObject()->setRotation(quat);
-	pushToUpdate(scene);
 }
 
 void AnimationNode::translateNode(Scene* scene, float x, float y, float z) {
@@ -72,10 +59,8 @@ void AnimationNode::translateNode(Scene* scene, float x, float y, float z) {
 	position = vec3(x, y, z);
 	if (scene->isInited())
 		doUpdateNodeTransform(scene, true, false, false);
-	else {
+	else 
 		updateNodeTransform();
-		pushToUpdate(scene);
-	}
 }
 
 void AnimationNode::rotateNodeObject(Scene* scene, float ax, float ay, float az) {
@@ -83,14 +68,11 @@ void AnimationNode::rotateNodeObject(Scene* scene, float ax, float ay, float az)
 	
 	if (scene->isInited())
 		doUpdateNodeTransform(scene, false, true, true);
-	else
-		pushToUpdate(scene);
 }
 
 void AnimationNode::doUpdateNodeTransform(Scene* scene, bool translate, bool rotate, bool forceTrans) {
 	if (translate) {
 		updateNodeTransform();
-		pushToUpdate(scene);
 
 		vec3 gPosition = GetTranslate(nodeTransform); // Collision object center is node center
 		if (!forceTrans)
@@ -99,8 +81,6 @@ void AnimationNode::doUpdateNodeTransform(Scene* scene, bool translate, bool rot
 			getObject()->collisionObject->initTranslate(gPosition);
 	} 
 	if (rotate) {
-		pushToUpdate(scene);
-
 		vec3 gRotation = vec3(getObject()->anglex, getObject()->angley, getObject()->anglez);
 		getObject()->collisionObject->setRotateAngle(gRotation, animation->inverseYZ); // fbx inverse obb yz readback to object 
 	}
@@ -109,6 +89,4 @@ void AnimationNode::doUpdateNodeTransform(Scene* scene, bool translate, bool rot
 void AnimationNode::scaleNodeObject(Scene* scene, float sx, float sy, float sz) {
 	AnimationObject* object = getObject();
 	object->setSize(sx, sy, sz);
-
-	pushToUpdate(scene);
 }
