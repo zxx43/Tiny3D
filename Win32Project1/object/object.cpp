@@ -20,6 +20,7 @@ Object::Object() {
 	meshLow = NULL;
 	bounding = NULL;
 	material = -1;
+	boundCenter = vec3(0, 0, 0);
 	localBoundPosition = vec3(0, 0, 0);
 
 	billboard = NULL;
@@ -50,6 +51,8 @@ Object::Object(const Object& rhs) {
 	collisionShape = NULL;
 	collisionObject = NULL;
 	mass = rhs.mass;
+	boundCenter = rhs.boundCenter;
+	localBoundPosition = rhs.localBoundPosition;
 }
 
 Object::~Object() {
@@ -82,7 +85,8 @@ void Object::caculateLocalAABB(bool looseWidth, bool looseAll) {
 	int vertexCount = mesh->vertexCount;
 	if (vertexCount <= 0) return;
 	vec4* vertices = mesh->vertices;
-	vec4 first4 = localTransformMatrix * vertices[0];
+	mat4 localRotateMatrix = GetRotateAndScale(localTransformMatrix);
+	vec4 first4 = localRotateMatrix * vertices[0];
 	float firstInvw = 1.0 / first4.w;
 	float sx = first4.x * firstInvw;
 	float sy = first4.y * firstInvw;
@@ -92,7 +96,7 @@ void Object::caculateLocalAABB(bool looseWidth, bool looseAll) {
 	float lz = sz;
 	for (int i = 1; i < vertexCount; i++) {
 		vec4 vertex4 = vertices[i];
-		vec4 local4 = localTransformMatrix * vertex4;
+		vec4 local4 = localRotateMatrix * vertex4;
 		float invw = 1.0 / local4.w;
 		vec3 local3(local4.x * invw, local4.y * invw, local4.z * invw);
 		sx = sx > local3.x ? local3.x : sx;
@@ -119,8 +123,9 @@ void Object::caculateLocalAABB(bool looseWidth, bool looseAll) {
 		maxSide = maxSide < aabb->sizez ? aabb->sizez : maxSide;
 		aabb->update(maxSide, maxSide, maxSide);
 	}
-
-	localBoundPosition = bounding->position;
+	boundCenter = bounding->position;
+	localBoundPosition = boundCenter + GetTranslate(localTransformMatrix);
+	bounding->update(localBoundPosition);
 }
 
 void Object::caculateCollisionShape() {

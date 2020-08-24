@@ -40,7 +40,6 @@ StaticObject::StaticObject(const StaticObject& rhs) :Object(rhs) {
 	size = rhs.size;
 	localTransformMatrix = rhs.localTransformMatrix;
 	normalMatrix = rhs.normalMatrix;
-	localBoundPosition = rhs.localBoundPosition;
 	rotateQuat = rhs.rotateQuat;
 	boundInfo = rhs.boundInfo;
 
@@ -120,8 +119,6 @@ void StaticObject::rotateAtWorld(const vec4& q) {
 }
 
 void StaticObject::standOnGround(Scene* scene) {
-	localBoundPosition -= positionBefore;
-
 	vec3 worldCenter = GetTranslate(parent->nodeTransform * localTransformMatrix);
 	int bx, bz;
 	scene->terrainNode->caculateBlock(worldCenter.x, worldCenter.z, bx, bz);
@@ -132,7 +129,7 @@ void StaticObject::standOnGround(Scene* scene) {
 	collisionObject->initTranslate(worldCenter);
 
 	// Update object's aabb
-	localBoundPosition += position;
+	localBoundPosition = boundCenter + GetTranslate(localTransformMatrix);
 	parent->updateObjectBoundingInNode(this, true);
 	parent->boundingBox->merge(parent->objectsBBs);
 	Node* superior = parent->parent;

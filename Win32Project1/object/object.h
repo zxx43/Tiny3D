@@ -34,7 +34,8 @@ public:
 	float* transforms; // Global translate used in GPU
 	buff* transformsFull; // Global transform used in GPU (translate, quat, bounding)
 	BoundingBox* bounding; // Bounding box in world space
-	vec3 localBoundPosition;
+	vec3 boundCenter; // Bounding center in model space
+	vec3 localBoundPosition; // Bounding position in node
 	bool genShadow;
 	int detailLevel;
 	vec3 shapeOffset;

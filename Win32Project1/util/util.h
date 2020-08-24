@@ -309,6 +309,12 @@ inline vec3 GetTranslate(const mat4& mat) {
 	return vec3(mat.entries[12], mat.entries[13], mat.entries[14]);
 }
 
+inline mat4 GetRotateAndScale(const mat4& mat) {
+	mat4 res = mat;
+	res.entries[12] = 0.0, res.entries[13] = 0.0, res.entries[14] = 0.0;
+	return res;
+}
+
 template <typename T>
 struct TBuffer {
 	T* tdata;

@@ -31,7 +31,6 @@ AnimationObject::AnimationObject(const AnimationObject& rhs) :Object(rhs) {
 	size = rhs.size;
 	localTransformMatrix = rhs.localTransformMatrix;
 	normalMatrix = rhs.normalMatrix;
-	localBoundPosition = rhs.localBoundPosition;
 	rotateQuat = rhs.rotateQuat;
 	boundInfo = rhs.boundInfo;
 
