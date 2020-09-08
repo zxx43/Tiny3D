@@ -293,6 +293,7 @@ void SimpleApplication::act(long startTime, long currentTime, float dTime, float
 	scene->player->updateCamera();
 	updateMovement();
 
+	scene->updateListenerPosition();
 	if (!cfgs->ssr) scene->updateReflectCamera();
 }
 
@@ -358,7 +359,6 @@ void SimpleApplication::initScene() {
 	// Create materials
 	Material* boxMat = new Material("box_mat");
 	boxMat->tex1 = "cube.bmp";
-	boxMat->tex2 = "ground_n.bmp";
 	boxMat->ambient = vec3(0.4, 0.4, 0.4); 
 	boxMat->diffuse = vec3(0.6, 0.6, 0.6);
 	mtlMgr->add(boxMat);
@@ -404,6 +404,7 @@ void SimpleApplication::initScene() {
 
 	StaticObject box(meshes["box"]); 
 	box.bindMaterial(mtlMgr->find("box_mat"));
+	box.setSound("push", "sounds/box.wav");
 	StaticObject sphere(meshes["sphere"]); 
 	sphere.bindMaterial(mtlMgr->find("iron_mat"));
 	StaticObject board(meshes["board"]);
@@ -420,6 +421,7 @@ void SimpleApplication::initScene() {
 	model4.setBillboard(13, 14, mtlMgr->find("billboard_treeA_mat"));
 	StaticObject model5(meshes["house"]);
 	StaticObject model6(meshes["oildrum"]);
+	model6.setSound("push", "sounds/box.wav");
 	StaticObject model9(meshes["rock"], meshes["rock"], NULL);
 
 	//return;
@@ -600,8 +602,10 @@ void SimpleApplication::initScene() {
 			StaticObject* stone = model9.clone();
 			float baseSize = 0.05;
 			float size = (rand() % 100 * 0.01) * 0.2 + baseSize;
-			if (size < 0.1)
+			if (size < 0.1) {
 				stone->setDynamic(true);
+				stone->setSound("push", "sounds/stone.wav");
+			}
 
 			stone->setSize(size, size, size);
 			stone->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
@@ -693,6 +697,9 @@ void SimpleApplication::initScene() {
 	animNode5->scaleNodeObject(scene, 0.075, 0.075, 0.075);
 	animNode5->getObject()->setPosition(0, -2.6, -1.5);
 	animNode5->translateNode(scene, 30, 0, 20);
+	animNode5->getObject()->setSound("bark", "sounds/dog.wav");
+	animNode5->getObject()->getSound("bark")->setLoop(true);
+	animNode5->getObject()->getSound("bark")->play();
 	AnimationNode* animNode6 = new AnimationNode(vec3(5.0, 10.0, 5.0));
 	animNode6->setAnimation(scene, animations["male"]);
 	animNode6->scaleNodeObject(scene, 0.05, 0.05, 0.05);
@@ -718,6 +725,7 @@ void SimpleApplication::initScene() {
 	scene->terrainNode->standObjectsOnGround(scene, scene->staticRoot);
 	scene->updateNodes();
 	scene->initAnimNodes();
+	scene->playSounds();
 	
 	Application::initScene();
 }

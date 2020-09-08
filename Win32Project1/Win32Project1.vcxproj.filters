@@ -100,6 +100,9 @@
     <Filter Include="Source Files\physics">
       <UniqueIdentifier>{218b7355-c335-4490-b624-78a9b2b6f90b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\sound">
+      <UniqueIdentifier>{ad9f5aed-d25d-4182-ae8f-9b98e103c002}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="batch\batch.cpp">
@@ -323,6 +326,12 @@
     </ClCompile>
     <ClCompile Include="physics\dynamicWorld.cpp">
       <Filter>Source Files\physics</Filter>
+    </ClCompile>
+    <ClCompile Include="sound\CWaves.cpp">
+      <Filter>Source Files\sound</Filter>
+    </ClCompile>
+    <ClCompile Include="sound\soundManager.cpp">
+      <Filter>Source Files\sound</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -571,6 +580,12 @@
     </ClInclude>
     <ClInclude Include="physics\dynamicWorld.h">
       <Filter>Source Files\physics</Filter>
+    </ClInclude>
+    <ClInclude Include="sound\CWaves.h">
+      <Filter>Source Files\sound</Filter>
+    </ClInclude>
+    <ClInclude Include="sound\soundManager.h">
+      <Filter>Source Files\sound</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

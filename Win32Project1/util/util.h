@@ -11,6 +11,7 @@
 #include "../maths/Maths.h"
 #include "../constants/constants.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 typedef ushort half;
 typedef float buff;
@@ -404,5 +405,8 @@ struct ConfigArg {
 	bool cartoon;
 	bool debug;
 };
+
+#define MIN_VAL 1.175494351e-38f;
+#define MAX_VAL 3.402823466e+38f;
 
 #endif /* UTIL_H_ */

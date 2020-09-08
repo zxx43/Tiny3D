@@ -109,8 +109,13 @@ void StaticObject::translateAtWorld(const vec3& position) {
 	mat4 gParentTransform = parent->nodeTransform; // Parent node's global transform
 	vec3 gParentPosition = GetTranslate(gParentTransform);
 
+	vec3 positionBefore = this->position;
 	vec3 lPosition = position - gParentPosition;
 	setPosition(lPosition.x, lPosition.y, lPosition.z);
+
+	static float pushThrehold = 0.15;
+	if (fabsf(this->position.x - positionBefore.x) > pushThrehold || fabsf(this->position.z - positionBefore.z) > pushThrehold)
+		playEffect("push");
 }
 
 void StaticObject::rotateAtWorld(const vec4& q) {

@@ -1,6 +1,5 @@
 #include "object.h"
 #include <stdlib.h>
-#include <limits>
 #include "../node/node.h"
 #include "../constants/constants.h"
 
@@ -36,6 +35,8 @@ Object::Object() {
 	collisionShape = NULL;
 	collisionObject = NULL;
 	mass = 0;
+
+	sounds.clear();
 }
 
 Object::Object(const Object& rhs) {
@@ -53,6 +54,12 @@ Object::Object(const Object& rhs) {
 	mass = rhs.mass;
 	boundCenter = rhs.boundCenter;
 	localBoundPosition = rhs.localBoundPosition;
+
+	sounds.clear();
+	std::map<std::string, SoundObject*>::iterator it;
+	std::map<std::string, SoundObject*> soundsToCopy = rhs.sounds;
+	for (it = soundsToCopy.begin(); it != soundsToCopy.end(); ++it)
+		sounds[it->first] = new SoundObject(*it->second);
 }
 
 Object::~Object() {
@@ -63,6 +70,11 @@ Object::~Object() {
 	if (transformsFull) free(transformsFull); transformsFull = NULL;
 	
 	if (collisionShape) delete collisionShape;
+
+	std::map<std::string, SoundObject*>::iterator it;
+	for (it = sounds.begin(); it != sounds.end(); ++it)
+		delete it->second;
+	sounds.clear();
 }
 
 void Object::initMatricesData() {
@@ -134,10 +146,8 @@ void Object::caculateCollisionShape() {
 		vec3 halfSize = ((AABB*)parent->boundingBox)->halfSize;
 		collisionShape = new CollisionShape(halfSize);
 	} else {
-		const float minVal = std::numeric_limits<float>::min();
-		const float maxVal = std::numeric_limits<float>::max();
-		float sx = maxVal, sy = maxVal, sz = maxVal;
-		float lx = minVal, ly = minVal, lz = minVal;
+		float sx = MAX_VAL; float sy = MAX_VAL; float sz = MAX_VAL;
+		float lx = MIN_VAL; float ly = MIN_VAL; float lz = MIN_VAL;
 		for (uint n = 0; n < mesh->normalFaces.size(); ++n) {
 			FaceBuf* buf = mesh->normalFaces[n];
 			for (int i = 0; i < buf->count; ++i) {
@@ -218,6 +228,7 @@ void Object::updateObjectTransform(bool translate, bool rotate) {
 		transforms[1] = transPos.y;
 		transforms[2] = transPos.z;
 		transforms[3] = size.x;
+		updateSoundsPosition(transPos);
 	}
 	if (transformsFull) {
 		if (translate) 
@@ -235,4 +246,23 @@ void Object::updateObjectTransform(bool translate, bool rotate) {
 			transformsFull[11] = (boundInfo.w);
 		}
 	}
+}
+
+void Object::updateSoundsPosition(const vec3& position) {
+	std::map<std::string, SoundObject*>::iterator it;
+	for (it = sounds.begin(); it != sounds.end(); ++it)
+		it->second->setPosition(position);
+}
+
+void Object::setSound(const char* name, const char* path) {
+	std::map<std::string, SoundObject*>::iterator it = sounds.find(name);
+	if (it != sounds.end())
+		delete it->second;
+	else
+		sounds[name] = new SoundObject(path);
+}
+
+SoundObject* Object::getSound(const char* name) { 
+	std::map<std::string, SoundObject*>::iterator it = sounds.find(name);
+	return (it == sounds.end()) ? NULL : it->second;
 }

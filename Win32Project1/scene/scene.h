@@ -50,6 +50,8 @@ public:
 	std::vector<Node*> boundingNodes; // Used for debugging
 	std::vector<AnimationNode*> animPlayers;
 	DynamicWorld* collisionWorld;
+	SoundManager* soundMgr;
+	std::vector<SoundObject*> sounds;
 public:
 	Scene();
 	~Scene();
@@ -68,6 +70,9 @@ public:
 	bool isInited() { return inited; }
 	void act(float dTime) { time = dTime * 0.025; }
 	void setVelocity(float v) { velocity = v; }
+	void addSound(SoundObject* sound) { sounds.push_back(sound); }
+	void playSounds();
+	void updateListenerPosition() { soundMgr->setListenerPosition(actCamera->position); }
 public: // Just for debugging
 	void createNodeAABB(Node* node);
 	void clearAllAABB();

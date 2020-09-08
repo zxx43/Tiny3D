@@ -40,6 +40,8 @@ Scene::Scene() {
 	Instance::instanceTable.clear();
 
 	collisionWorld = new DynamicWorld();
+	soundMgr = new SoundManager();
+	sounds.clear();
 }
 
 Scene::~Scene() {
@@ -67,6 +69,10 @@ Scene::~Scene() {
 	dynamicObjects.clear();
 
 	delete collisionWorld;
+	for (uint i = 0; i < sounds.size(); ++i)
+		delete sounds[i];
+	sounds.clear();
+	delete soundMgr;
 }
 
 void Scene::initNodes() {
@@ -308,4 +314,9 @@ void Scene::updateAnimNodes() {
 		if (player->getNode() == node)
 			player->setPosition(node->position);
 	}
+}
+
+void Scene::playSounds() {
+	for (uint i = 0; i < sounds.size(); ++i)
+		sounds[i]->play();
 }

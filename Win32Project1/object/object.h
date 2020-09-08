@@ -13,6 +13,7 @@
 #include "../billboard/billboard.h"
 #include "../bounding/aabb.h"
 #include "../physics/dynamicWorld.h"
+#include "../sound/soundManager.h"
 
 class Node;
 
@@ -42,6 +43,7 @@ public:
 	CollisionShape* collisionShape;
 	CollisionObject* collisionObject;
 	float mass;
+	std::map<std::string, SoundObject*> sounds;
 public:
 	Object();
 	Object(const Object& rhs);
@@ -64,6 +66,11 @@ public:
 	void setBillboard(float sx, float sy, int mid);
 	void updateObjectTransform(bool translate, bool rotate);
 	void setMass(float m) { mass = m; }
+	void setSound(const char* name, const char* path);
+	SoundObject* getSound(const char* name);
+	void playEffect(const char* name) { SoundObject* sound = getSound(name); if (sound) sound->play(); }
+private:
+	void updateSoundsPosition(const vec3& position);
 };
 
 
