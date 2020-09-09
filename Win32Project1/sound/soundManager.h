@@ -22,6 +22,7 @@ public:
 	void stop();
 	void setLoop(bool loop);
 	void setPosition(const vec3& position);
+	void setGain(float gain);
 };
 
 class SoundManager {

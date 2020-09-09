@@ -729,6 +729,7 @@ void SimpleApplication::initScene() {
 
 	SoundObject* ambSound = new SoundObject("sounds/amb.wav");
 	ambSound->setLoop(true);
+	ambSound->setGain(50.0);
 	ambSound->setPosition(vec3(0, 50, 0));
 	scene->addSound(ambSound);
 	scene->playSounds();

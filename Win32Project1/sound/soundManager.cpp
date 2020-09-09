@@ -49,6 +49,10 @@ void SoundObject::setPosition(const vec3& position) {
 	alSource3f(alSource, AL_POSITION, position.x, position.y, position.z);
 }
 
+void SoundObject::setGain(float gain) {
+	alSourcef(alSource, AL_GAIN, gain);
+}
+
 SoundManager::SoundManager() {
 	context = NULL;
 	device = alcOpenDevice((const ALCchar*)"DirectSound3D");
