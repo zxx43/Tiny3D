@@ -12,7 +12,7 @@ private:
 	uint alSource;  
 	uint alSampleSet;
 	const char* filePath;
-	bool isLoop;
+	bool isLoop, isPlay;
 public:
 	SoundObject(const char* path);
 	SoundObject(const SoundObject& rhs);

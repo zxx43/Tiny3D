@@ -293,6 +293,9 @@ void SimpleApplication::act(long startTime, long currentTime, float dTime, float
 	scene->player->updateCamera();
 	updateMovement();
 
+	animNode = (AnimationNode*)node->children[2];
+	animNode->getObject()->playEffect("bark");
+
 	scene->updateListenerPosition();
 	if (!cfgs->ssr) scene->updateReflectCamera();
 }
@@ -698,19 +701,17 @@ void SimpleApplication::initScene() {
 	animNode5->getObject()->setPosition(0, -2.6, -1.5);
 	animNode5->translateNode(scene, 30, 0, 20);
 	animNode5->getObject()->setSound("bark", "sounds/dog.wav");
-	animNode5->getObject()->getSound("bark")->setLoop(true);
-	animNode5->getObject()->getSound("bark")->play();
 	AnimationNode* animNode6 = new AnimationNode(vec3(5.0, 10.0, 5.0));
 	animNode6->setAnimation(scene, animations["male"]);
 	animNode6->scaleNodeObject(scene, 0.05, 0.05, 0.05);
 	animNode6->getObject()->setPosition(0.0, -4.0, 0.0);
 	animNode6->translateNode(scene, 40, 0, 0);
 
-	Node* animNode = new StaticNode(vec3(0, 0, 0));
+	Node* animNode = new StaticNode(vec3(0.0));
 	animNode->attachChild(scene, animNode1);
 	animNode->attachChild(scene, animNode2);
 	scene->animationRoot->attachChild(scene, animNode);
-	Node* animNodeSub = new StaticNode(vec3(0, 0, 0));
+	Node* animNodeSub = new StaticNode(vec3(0.0));
 	animNodeSub->attachChild(scene, animNode3);
 	animNodeSub->attachChild(scene, animNode4);
 	animNodeSub->attachChild(scene, animNode5);
@@ -725,6 +726,11 @@ void SimpleApplication::initScene() {
 	scene->terrainNode->standObjectsOnGround(scene, scene->staticRoot);
 	scene->updateNodes();
 	scene->initAnimNodes();
+
+	SoundObject* ambSound = new SoundObject("sounds/amb.wav");
+	ambSound->setLoop(true);
+	ambSound->setPosition(vec3(0, 50, 0));
+	scene->addSound(ambSound);
 	scene->playSounds();
 	
 	Application::initScene();

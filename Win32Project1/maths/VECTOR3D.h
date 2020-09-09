@@ -23,6 +23,9 @@ public:
 	VECTOR3D(void)	:	x(0.0f), y(0.0f), z(0.0f)
 	{}
 
+	VECTOR3D(float value) : x(value), y(value), z(value)
+	{}
+
 	VECTOR3D(float newX, float newY, float newZ)	:	x(newX), y(newY), z(newZ)
 	{}
 

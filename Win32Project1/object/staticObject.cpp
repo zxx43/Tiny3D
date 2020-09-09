@@ -7,8 +7,7 @@ StaticObject::StaticObject(Mesh* mesh) :Object() {
 	this->mesh = mesh;
 	this->meshMid = mesh;
 	this->meshLow = mesh;
-	positionBefore = vec3(0, 0, 0);
-	quat = vec4(0, 0, 0, 1);
+	positionBefore = vec3(0.0);
 	dynamic = false;
 	initMatricesData();
 }
@@ -17,8 +16,7 @@ StaticObject::StaticObject(Mesh* mesh, Mesh* meshMid, Mesh* meshLow) :Object() {
 	this->mesh = mesh;
 	this->meshMid = meshMid;
 	this->meshLow = meshLow;
-	positionBefore = vec3(0, 0, 0);
-	quat = vec4(0, 0, 0, 1);
+	positionBefore = vec3(0.0);
 	dynamic = false;
 	initMatricesData();
 }
@@ -33,15 +31,12 @@ StaticObject::StaticObject(const StaticObject& rhs) :Object(rhs) {
 	else
 		bounding = NULL;
 	positionBefore = rhs.positionBefore;
-	quat = rhs.quat;
 	dynamic = rhs.dynamic;
 
 	position = rhs.position;
 	size = rhs.size;
 	localTransformMatrix = rhs.localTransformMatrix;
 	normalMatrix = rhs.normalMatrix;
-	rotateQuat = rhs.rotateQuat;
-	boundInfo = rhs.boundInfo;
 
 	rotateMat = rhs.rotateMat;
 	translateMat = rhs.translateMat;
@@ -70,7 +65,7 @@ StaticObject* StaticObject::clone() {
 
 void StaticObject::vertexTransform() {
 	translateMat = translate(position.x, position.y, position.z);
-	rotateMat = Quat2Mat(quat);
+	rotateMat = Quat2Mat(rotateQuat);
 	scaleMat = scale(size.x, size.y, size.z);
 	localTransformMatrix = translateMat * rotateMat * scaleMat;
 }
@@ -92,7 +87,7 @@ void StaticObject::setPosition(float x, float y, float z) {
 }
 
 void StaticObject::setRotation(float ax, float ay, float az) {
-	quat = Euler2Quat(vec3(ax, ay, az));
+	rotateQuat = Euler2Quat(vec3(ax, ay, az));
 	updateLocalMatrices();
 }
 
@@ -113,13 +108,13 @@ void StaticObject::translateAtWorld(const vec3& position) {
 	vec3 lPosition = position - gParentPosition;
 	setPosition(lPosition.x, lPosition.y, lPosition.z);
 
-	static float pushThrehold = 0.15;
+	static float pushThrehold = 0.1;
 	if (fabsf(this->position.x - positionBefore.x) > pushThrehold || fabsf(this->position.z - positionBefore.z) > pushThrehold)
 		playEffect("push");
 }
 
 void StaticObject::rotateAtWorld(const vec4& q) {
-	quat = q;
+	rotateQuat = q;
 	updateLocalMatrices();
 }
 

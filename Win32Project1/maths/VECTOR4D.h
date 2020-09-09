@@ -23,6 +23,9 @@ public:
 	VECTOR4D(void)	:	x(0.0f), y(0.0f), z(0.0f), w(0.0f)
 	{}
 
+	VECTOR4D(float value) : x(value), y(value), z(value), w(value)
+	{}
+
 	VECTOR4D(float newX, float newY, float newZ, float newW)	
 		:	x(newX), y(newY), z(newZ), w(newW)
 	{}

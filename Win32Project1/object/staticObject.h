@@ -15,7 +15,6 @@ class StaticObject: public Object {
 private:
 	vec3 positionBefore;
 public:
-	vec4 quat;
 	bool dynamic;
 public:
 	StaticObject(Mesh* mesh);

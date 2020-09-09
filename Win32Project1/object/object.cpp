@@ -5,8 +5,8 @@
 
 Object::Object() {
 	parent = NULL;
-	position = vec3(0, 0, 0);
-	size = vec3(1.0, 1.0, 1.0);
+	position = vec3(0.0);
+	size = vec3(1.0);
 	localTransformMatrix.LoadIdentity();
 	normalMatrix.LoadIdentity();
 
@@ -19,8 +19,8 @@ Object::Object() {
 	meshLow = NULL;
 	bounding = NULL;
 	material = -1;
-	boundCenter = vec3(0, 0, 0);
-	localBoundPosition = vec3(0, 0, 0);
+	boundCenter = vec3(0.0);
+	localBoundPosition = vec3(0.0);
 
 	billboard = NULL;
 	genShadow = true;
@@ -29,9 +29,9 @@ Object::Object() {
 	transforms = NULL;
 	transformsFull = NULL;
 	rotateQuat = MatrixToQuat(rotateMat);
-	boundInfo = vec4(0.0, 0.0, 0.0, 0.0);
+	boundInfo = vec4(0.0);
 
-	shapeOffset = vec3(0.0, 0.0, 0.0);
+	shapeOffset = vec3(0.0);
 	collisionShape = NULL;
 	collisionObject = NULL;
 	mass = 0;
@@ -47,6 +47,8 @@ Object::Object(const Object& rhs) {
 		billboard = NULL;
 	transforms = NULL;
 	transformsFull = NULL;
+	rotateQuat = rhs.rotateQuat;
+	boundInfo = rhs.boundInfo;
 
 	shapeOffset = rhs.shapeOffset;
 	collisionShape = NULL;
@@ -216,7 +218,6 @@ void Object::updateObjectTransform(bool translate, bool rotate) {
 		transformMatrix = parent->nodeTransform * localTransformMatrix;
 		transformTransposed = transformMatrix.GetTranspose();
 	}
-	if (rotate) rotateQuat = MatrixToQuat(rotateMat);
 	if (translate || rotate) {
 		AABB* bbox = (AABB*)bounding;
 		if (!bbox) bbox = (AABB*)parent->boundingBox;

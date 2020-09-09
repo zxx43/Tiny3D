@@ -17,7 +17,6 @@ private:
 	virtual void normalTransform();
 public:
 	float anglex,angley,anglez;
-	vec4 quat;
 	Animation* animation;
 	int aid, fid;
 public:

@@ -20,6 +20,9 @@ public:
 	VECTOR2D(void)	:	x(0.0f), y(0.0f)
 	{}
 
+	VECTOR2D(float value) : x(value), y(value)
+	{}
+
 	VECTOR2D(float newX, float newY):	x(newX), y(newY)
 	{}
 

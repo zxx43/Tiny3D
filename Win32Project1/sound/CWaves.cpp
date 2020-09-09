@@ -43,11 +43,11 @@ bool CWaves::loadWavFile(const char* filename, ALuint* source, ALuint* buffer,
         //Read in the the last byte of data before the sound file  
         fread(&wave_data, sizeof(WAVE_Data), 1, soundFile);
         //check for data tag in memory  
-        if (wave_data.subChunkID[0] != 'd' ||
-            wave_data.subChunkID[1] != 'a' ||
-            wave_data.subChunkID[2] != 't' ||
-            wave_data.subChunkID[3] != 'a')
-            throw ("Invalid data header");
+        //if (wave_data.subChunkID[0] != 'd' ||
+        //    wave_data.subChunkID[1] != 'a' ||
+        //    wave_data.subChunkID[2] != 't' ||
+        //    wave_data.subChunkID[3] != 'a')
+        //    throw ("Invalid data header");
 
         //Allocate memory for data  
 		byte* data = (byte*)malloc(wave_data.subChunk2Size * sizeof(byte));

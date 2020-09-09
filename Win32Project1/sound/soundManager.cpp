@@ -7,8 +7,9 @@ SoundObject::SoundObject(const char* path) {
 	alGenSources(1, &alSource);
 	CWaves file;
 	file.loadWavFile(filePath, &alSource, &alSampleSet, &alBufferLen, &alFreqBuffer, &alFormatBuffer);
+	isPlay = false;
 	setLoop(false);
-	setPosition(vec3(0, 0, 0));
+	setPosition(vec3(0.0));
 }
 
 SoundObject::SoundObject(const SoundObject& rhs) {
@@ -17,6 +18,7 @@ SoundObject::SoundObject(const SoundObject& rhs) {
 	alGenSources(1, &alSource);
 	CWaves file;
 	file.loadWavFile(filePath, &alSource, &alSampleSet, &alBufferLen, &alFreqBuffer, &alFormatBuffer);
+	isPlay = rhs.isPlay;
 	setLoop(rhs.isLoop);
 	setPosition(vec3(0, 0, 0));
 }
@@ -30,10 +32,12 @@ void SoundObject::play() {
 	ALint state;
 	alGetSourcei(alSource, AL_SOURCE_STATE, &state);
 	if (state != AL_PLAYING) alSourcePlay(alSource);
+	isPlay = true;
 }
 
 void SoundObject::stop() {
 	alSourceStop(alSource);
+	isPlay = false;
 }
 
 void SoundObject::setLoop(bool loop) {
