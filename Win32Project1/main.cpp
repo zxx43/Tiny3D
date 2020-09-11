@@ -18,8 +18,10 @@ HANDLE mutex = NULL;
 void InitMutex();
 void DeleteMutex();
 DWORD currentTime = 0, lastTime = 0, startTime = 0;
+float dTime = 0.0;
 CirQueue<float>* dTimes = NULL;
 float velocity = 0.0;
+bool dataPrepared = false;
 DWORD screenLeft, screenTop;
 int screenHalfX, screenHalfY;
 int centerX, centerY;
@@ -63,9 +65,9 @@ void ResizeWindow(int width,int height) {
 	app->resize(width, height);
 }
 
-void ActRun() {
+void TimeRun() {
 	currentTime = timeGetTime();
-	float dTime = (float)(currentTime - lastTime);
+	dTime = (float)(currentTime - lastTime);
 	lastTime = currentTime;
 	if (app->cfgs->dualthread) {
 		dTimes->push(dTime);
@@ -76,7 +78,10 @@ void ActRun() {
 	}
 	app->setFps(1000.0f / dTime);
 	velocity = D_DISTANCE * dTime;
+}
 
+void ActRun() {
+	TimeRun();
 	if (app->pressed || app->input->getControl() >= 0) {
 		GetCursorPos(&mPoint);
 		app->moveMouse(mPoint.x, mPoint.y, centerX, centerY);
@@ -93,11 +98,15 @@ void DrawWindow() {
 		app->updateData();
 		app->prepare();
 		app->swapData(false);
+		dataPrepared = true;
 	} 
 
 	if(app->cfgs->dualthread)
 		WaitForSingleObject(mutex, INFINITE);
-	app->draw();
+	if (dataPrepared) {
+		app->draw();
+		dataPrepared = false;
+	}
 	if (app->cfgs->dualthread) 
 		ReleaseMutex(mutex);
 
@@ -106,14 +115,14 @@ void DrawWindow() {
 
 DWORD WINAPI FrameThreadRun(LPVOID param) {
 	while (!app->willExit && app->cfgs->dualthread) {
-		if(inited) {
-			ActRun();
-			app->updateData();
-			app->prepare();
-			WaitForSingleObject(mutex, INFINITE);
-			app->swapData(true);
-			ReleaseMutex(mutex);
-		}
+		if (!inited) continue;
+		ActRun();
+		WaitForSingleObject(mutex, INFINITE);
+		app->updateData();
+		app->prepare();
+		app->swapData(true);
+		dataPrepared = true;
+		ReleaseMutex(mutex);
 	}
 	threadEnd = true;
 	return 1;
