@@ -257,10 +257,8 @@ void Object::updateSoundsPosition(const vec3& position) {
 
 void Object::setSound(const char* name, const char* path) {
 	std::map<std::string, SoundObject*>::iterator it = sounds.find(name);
-	if (it != sounds.end())
-		delete it->second;
-	else
-		sounds[name] = new SoundObject(path);
+	if (it != sounds.end()) delete it->second;
+	else sounds[name] = new SoundObject(path);
 }
 
 SoundObject* Object::getSound(const char* name) { 
