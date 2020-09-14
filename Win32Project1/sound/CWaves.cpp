@@ -1,96 +1,110 @@
 #include "CWaves.h"
 
 bool CWaves::loadWavFile(const char* filename, ALuint* source, ALuint* buffer,
-        ALsizei* size, ALsizei* frequency,
-        ALenum* format) {
-    //Local Declarations  
-    FILE* soundFile = NULL;
-    WAVE_Format wave_format;
-    RIFF_Header riff_header;
-    WAVE_Data wave_data;
+        ALsizei* aSize, ALsizei* aFrequency,
+        ALenum* aFormat) {
+	// First: we open the file and copy it into a single large memory buffer for processing.
 
-    try {
-        soundFile = fopen(filename, "rb");
-        if (!soundFile) throw (filename);
+	FILE* fi = fopen(filename, "rb");
+	if (fi == NULL) return false;
 
-        // Read in the first chunk into the struct  
-        fread(&riff_header, sizeof(RIFF_Header), 1, soundFile);
+	fseek(fi, 0, SEEK_END);
+	int file_size = ftell(fi);
+	fseek(fi, 0, SEEK_SET);
+	char* mem = (char*)malloc(file_size);
+	if (mem == NULL) {
+		fclose(fi);
+		return false;
+	}
+	if (fread(mem, 1, file_size, fi) != file_size) {
+		free(mem);
+		fclose(fi);
+		return false;
+	}
+	fclose(fi);
+	char* mem_end = mem + file_size;
 
-        //check for RIFF and WAVE tag in memeory  
-        if ((riff_header.chunkID[0] != 'R' ||
-            riff_header.chunkID[1] != 'I' ||
-            riff_header.chunkID[2] != 'F' ||
-            riff_header.chunkID[3] != 'F') ||
-            (riff_header.format[0] != 'W' ||
-                riff_header.format[1] != 'A' ||
-                riff_header.format[2] != 'V' ||
-                riff_header.format[3] != 'E'))
-            throw ("Invalid RIFF or WAVE Header");
+	// Second: find the RIFF chunk.  Note that by searching for RIFF both normal
+	// and reversed, we can automatically determine the endian swap situation for
+	// this file regardless of what machine we are on.
 
-        //Read in the 2nd chunk for the wave info  
-        fread(&wave_format, sizeof(WAVE_Format), 1, soundFile);
-        //check for fmt tag in memory  
-        if (wave_format.subChunkID[0] != 'f' ||
-            wave_format.subChunkID[1] != 'm' ||
-            wave_format.subChunkID[2] != 't' ||
-            wave_format.subChunkID[3] != ' ')
-            throw ("Invalid Wave Format");
+	int swapped = 0;
+	char* riff = find_chunk(mem, mem_end, RIFF_ID, 0);
+	if (riff == NULL) {
+		riff = find_chunk(mem, mem_end, RIFF_ID, 1);
+		if (riff)
+			swapped = 1;
+		else
+			printf("Could not find RIFF chunk in wave file.\n");
+	}
 
-        //check for extra parameters;  
-        if (wave_format.subChunkSize > 16)
-            fseek(soundFile, sizeof(short), SEEK_CUR);
+	// The wave chunk isn't really a chunk at all. :-(  It's just a "WAVE" tag 
+	// followed by more chunks.  This strikes me as totally inconsistent, but
+	// anyway, confirm the WAVE ID and move on.
 
-        //Read in the the last byte of data before the sound file  
-        fread(&wave_data, sizeof(WAVE_Data), 1, soundFile);
-        //check for data tag in memory  
-        //if (wave_data.subChunkID[0] != 'd' ||
-        //    wave_data.subChunkID[1] != 'a' ||
-        //    wave_data.subChunkID[2] != 't' ||
-        //    wave_data.subChunkID[3] != 'a')
-        //    throw ("Invalid data header");
+	if (riff[0] != 'W' ||
+		riff[1] != 'A' ||
+		riff[2] != 'V' ||
+		riff[3] != 'E')
+		printf("Could not find WAVE signature in wave file.\n");
 
-        //Allocate memory for data  
-		byte* data = (byte*)malloc(wave_data.subChunk2Size * sizeof(byte));
+	char* format = find_chunk(riff + 4, chunk_end(riff, swapped), FMT_ID, swapped);
+	if (format == NULL)
+		printf("Could not find FMT  chunk in wave file.\n");
 
-        // Read in the sound data into the soundData variable  
-        if (!fread(data, wave_data.subChunk2Size, 1, soundFile))
-            throw ("error loading WAVE data into struct!");
+	// Find the format chunk, and swap the values if needed.  This gives us our real format.
 
-        //Now we set the variables that we passed in with the  
-        //data from the structs  
-        *size = wave_data.subChunk2Size;
-        *frequency = wave_format.sampleRate;
-        //The format is worked out by looking at the number of  
-        //channels and the bits per sample.  
-        if (wave_format.numChannels == 1) {
-            if (wave_format.bitsPerSample == 8)
-                *format = AL_FORMAT_MONO8;
-            else if (wave_format.bitsPerSample == 16)
-                *format = AL_FORMAT_MONO16;
-        }
-        else if (wave_format.numChannels == 2) {
-            if (wave_format.bitsPerSample == 8)
-                *format = AL_FORMAT_STEREO8;
-            else if (wave_format.bitsPerSample == 16)
-                *format = AL_FORMAT_STEREO16;
-        }
-        //now we put our data into the openAL buffer and  
-        //check for success  
-        alBufferData(*buffer, *format, (void*)data,
-            *size, *frequency);
-        alSourcei(*source, AL_BUFFER, *buffer);
-        //clean up and return true if successful  
-        fclose(soundFile);
-		free(data);
-        if (wave_format.bitsPerSample > 16)
-            printf("do not support %d bit sound!\n", wave_format.bitsPerSample);
-        return true;
-    } catch (const char* error) {
-        //our catch statement for if we throw a string  
-		printf("%s : trying to load %s\n", error, filename);
-        //clean up memory if wave loading fails  
-        if (soundFile != NULL) fclose(soundFile);
-        //return false to indicate the failure to load wave  
-        return false;
-    }
+	format_info * fmt = (format_info *)format;
+	if (swapped) {
+		fmt->format = SWAP_16(fmt->format);
+		fmt->num_channels = SWAP_16(fmt->num_channels);
+		fmt->sample_rate = SWAP_32(fmt->sample_rate);
+		fmt->byte_rate = SWAP_32(fmt->byte_rate);
+		fmt->block_align = SWAP_16(fmt->block_align);
+		fmt->bits_per_sample = SWAP_16(fmt->bits_per_sample);
+	}
+
+	// Reject things we don't understand...expand this code to support weirder audio formats.
+
+	if (fmt->format != 1) printf("Wave file is not PCM format data.\n");
+	if (fmt->num_channels != 1 && fmt->num_channels != 2) printf("Must have mono or stereo sound.\n");
+	if (fmt->bits_per_sample != 8 && fmt->bits_per_sample != 16) printf("Must have 8 or 16 bit sounds.\n");
+
+	char* data = find_chunk(riff + 4, chunk_end(riff, swapped), DATA_ID, swapped);
+	if (data == NULL)
+		printf("I could not find the DATA chunk.\n");
+
+	int sample_size = fmt->num_channels * fmt->bits_per_sample / 8;
+	int data_bytes = chunk_end(data, swapped) - data;
+	int data_samples = data_bytes / sample_size;
+
+	// If the file is swapped and we have 16-bit audio, we need to endian-swap the audio too or we'll 
+	// get something that sounds just astoundingly bad!
+
+	if (fmt->bits_per_sample == 16 && swapped)
+	{
+		short* ptr = (short*)data;
+		int words = data_samples * fmt->num_channels;
+		while (words--)
+		{
+			*ptr = SWAP_16(*ptr);
+			++ptr;
+		}
+	}
+
+	*aFormat = fmt->bits_per_sample == 16 ?
+		(fmt->num_channels == 2 ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16) :
+		(fmt->num_channels == 2 ? AL_FORMAT_STEREO8 : AL_FORMAT_MONO8);
+	*aSize = data_bytes;
+	*aFrequency = fmt->sample_rate;
+
+	//now we put our data into the openAL buffer and  
+	//check for success  
+	alBufferData(*buffer, *aFormat, (void*)data,
+		*aSize, *aFrequency);
+	alSourcei(*source, AL_BUFFER, *buffer);
+
+	//clean up and return true if successful  
+	free(mem);
+	return true;
 }
