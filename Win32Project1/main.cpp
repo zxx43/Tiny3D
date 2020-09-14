@@ -21,7 +21,6 @@ DWORD currentTime = 0, lastTime = 0, startTime = 0;
 float dTime = 0.0;
 CirQueue<float>* dTimes = NULL;
 float velocity = 0.0;
-bool dataPrepared = false;
 DWORD screenLeft, screenTop;
 int screenHalfX, screenHalfY;
 int centerX, centerY;
@@ -98,18 +97,13 @@ void DrawWindow() {
 		app->updateData();
 		app->prepare();
 		app->swapData(false);
-		dataPrepared = true;
-	} 
-
-	if(app->cfgs->dualthread)
-		WaitForSingleObject(mutex, INFINITE);
-	if (dataPrepared) {
-		app->draw();
-		dataPrepared = false;
 	}
-	if (app->cfgs->dualthread) 
+	
+	if (app->cfgs->dualthread)
+		WaitForSingleObject(mutex, INFINITE);
+	app->draw();
+	if (app->cfgs->dualthread)
 		ReleaseMutex(mutex);
-
 	SwitchMouse();
 }
 
@@ -121,7 +115,6 @@ DWORD WINAPI FrameThreadRun(LPVOID param) {
 		app->updateData();
 		app->prepare();
 		app->swapData(true);
-		dataPrepared = true;
 		ReleaseMutex(mutex);
 	}
 	threadEnd = true;
@@ -253,9 +246,6 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hPrevInstance,PSTR szCmdLine,int iC
 	SetFocus(hWnd);
 	UpdateWindow(hWnd);
 
-	//LoadKeyboardLayout(L"00000409", KLF_ACTIVATE);
-	//SendMessage(hWnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
-
 	while(!app->willExit) {
 		if(PeekMessage(&msg,NULL,0,0,PM_REMOVE)) {
 			if(msg.message==WM_QUIT) {
@@ -282,6 +272,8 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam) {
 			SwapBuffers(hdc);
 			EndPaint(hWnd, &ps);
 			InvalidateRect(hWnd, NULL, FALSE);
+			if (app->cfgs->dualthread)
+				SwitchToThread();
 			break;
 		case WM_KEYDOWN:
 			app->keyDown(wParam);
