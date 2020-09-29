@@ -12,14 +12,14 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 	float farSize = 512;
 	if (cfgs->shadowQuality > 2) {
 		nearSize = 4096;
-		midSize = 1024;
+		midSize = 2048;
 		farSize = 512;
-		precision = HIGH_PRE;
+		precision = LOW_PRE;
 	} else if (cfgs->shadowQuality > 1) {
 		nearSize = 2048;
 		midSize = 1024;
 		farSize = 512;
-		precision = HIGH_PRE;
+		precision = LOW_PRE;
 	}
 	shadow->shadowMapSize = nearSize;
 	shadow->shadowPixSize = 0.4 / nearSize;
