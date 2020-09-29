@@ -19,6 +19,7 @@ void InitMutex();
 void DeleteMutex();
 DWORD currentTime = 0, lastTime = 0, startTime = 0;
 float dTime = 0.0;
+bool dataPrepared = false;
 CirQueue<float>* dTimes = NULL;
 float velocity = 0.0;
 DWORD screenLeft, screenTop;
@@ -80,7 +81,6 @@ void TimeRun() {
 }
 
 void ActRun() {
-	TimeRun();
 	if (app->pressed || app->input->getControl() >= 0) {
 		GetCursorPos(&mPoint);
 		app->moveMouse(mPoint.x, mPoint.y, centerX, centerY);
@@ -91,31 +91,44 @@ void ActRun() {
 	app->act(startTime, currentTime, dTime * 0.001, velocity);
 }
 
-void DrawWindow() {
+bool DrawWindow() {
 	if (!app->cfgs->dualthread) {
+		TimeRun();
 		ActRun();
 		app->updateData();
 		app->prepare();
 		app->swapData(false);
+	} else {
+		if (dataPrepared) {
+			TimeRun();
+			WaitForSingleObject(mutex, INFINITE);
+			{
+				app->swapData(true);
+				dataPrepared = false;
+			}
+			ReleaseMutex(mutex);
+		}
+		else return false;
 	}
-	
-	if (app->cfgs->dualthread)
-		WaitForSingleObject(mutex, INFINITE);
 	app->draw();
-	if (app->cfgs->dualthread)
-		ReleaseMutex(mutex);
 	SwitchMouse();
+
+	return true;
 }
 
 DWORD WINAPI FrameThreadRun(LPVOID param) {
 	while (!app->willExit && app->cfgs->dualthread) {
 		if (!inited) continue;
-		ActRun();
-		WaitForSingleObject(mutex, INFINITE);
-		app->updateData();
-		app->prepare();
-		app->swapData(true);
-		ReleaseMutex(mutex);
+		if (!dataPrepared) {
+			WaitForSingleObject(mutex, INFINITE);
+			{
+				ActRun();
+				app->updateData();
+				app->prepare();
+				dataPrepared = true;
+			}
+			ReleaseMutex(mutex);
+		}
 	}
 	threadEnd = true;
 	return 1;
@@ -249,12 +262,15 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hPrevInstance,PSTR szCmdLine,int iC
 	while(!app->willExit) {
 		if(PeekMessage(&msg,NULL,0,0,PM_REMOVE)) {
 			if(msg.message==WM_QUIT) {
-				app->willExit=true;
+				app->willExit = true;
 			} else {
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 			}
-		} 
+		}
+		if (inited) {
+			if (DrawWindow()) SwapBuffers(hdc);
+		}
 	}
 
 	while (!threadEnd) Sleep(0);
@@ -263,18 +279,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hPrevInstance,PSTR szCmdLine,int iC
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam) {
-	static PAINTSTRUCT ps;
 	switch(msg) {
-		case WM_PAINT:
-			BeginPaint(hWnd, &ps);
-			if (!app->willExit && inited)
-				DrawWindow();
-			SwapBuffers(hdc);
-			EndPaint(hWnd, &ps);
-			InvalidateRect(hWnd, NULL, FALSE);
-			if (app->cfgs->dualthread)
-				SwitchToThread();
-			break;
 		case WM_KEYDOWN:
 			app->keyDown(wParam);
 			break;
