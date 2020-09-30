@@ -316,6 +316,7 @@ void SimpleApplication::initScene() {
 	assetMgr->addMesh("house", new Model("models/house.obj", "models/house.mtl", 2));
 	assetMgr->addMesh("oildrum", new Model("models/oildrum.obj", "models/oildrum.mtl", 3));
 	assetMgr->addMesh("rock", new Model("models/sharprockfree.obj", "models/sharprockfree.mtl", 2));
+	assetMgr->addMesh("rock_low", new Model("models/sharprockfree_low.obj", "models/sharprockfree_low.mtl", 2));
 	assetMgr->addMesh("terrain", new Terrain("terrain/Terrain.raw"));
 	assetMgr->addMesh("water", new Water(1024, 16));
 
@@ -425,7 +426,7 @@ void SimpleApplication::initScene() {
 	StaticObject model5(meshes["house"]);
 	StaticObject model6(meshes["oildrum"]);
 	model6.setSound("push", "sounds/box.wav");
-	StaticObject model9(meshes["rock"], meshes["rock"], NULL);
+	StaticObject model9(meshes["rock"], meshes["rock_low"], NULL);
 
 	//return;
 	scene->createSky(cfgs->dynsky);

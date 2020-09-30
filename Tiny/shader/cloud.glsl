@@ -1,5 +1,5 @@
 const int cSteps = 16;
-const float stepLen = 300.0;
+const float stepLen = 250.0;
 const float cloudThre = 0.0007;
 
 // random/hash function              
@@ -56,7 +56,8 @@ vec3 cloudRayMarch(sampler2D tex, vec3 start, vec3 sun, vec3 dir, float lightnes
 		float invy = 1.0 / dir.y;
 		float stepDeltaHor = deltaHor * invy;
 		vec3 nvec = start + stepDeltaHor * dir;
-		vec3 deltaStep = dir * (stepLen * invy);
+		float len = (random(astrAtomScat, dir.x) + 3.0) * 0.25;
+		vec3 deltaStep = dir * (len * stepLen * invy);
 	
 		for(int i = 0; i < cSteps; ++i) {
 			float den = haveCloud(tex, nvec, tf);

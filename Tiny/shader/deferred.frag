@@ -25,9 +25,12 @@ const float GAP = 30.0;
 const float INV2GAP = 0.01667;
 const vec3 KCool = vec3(0.15, 0.15, 0.35);
 const vec3 KWarm = vec3(0.9, 0.9, 0.25);
+#ifdef DYN_SKY
+const vec3 Start = vec3(0.0,6378e3,0.0);
+#endif
 
 float genPCF(sampler2D shadowMap, vec3 shadowCoord, float bias, float pcount, float inv) {
-	float shadowFactor = 0.0, biasDepth = shadowCoord.z - bias;
+	float shadowFactor = 0.0, biasDepth = shadowCoord.z + bias;
 	shadowFactor += step(biasDepth, texture(shadowMap, shadowCoord.xy + vec2(-pcount, -pcount) * shadowPixSize).r);
 	shadowFactor += step(biasDepth, texture(shadowMap, shadowCoord.xy + vec2(pcount, -pcount) * shadowPixSize).r);
 	shadowFactor += step(biasDepth, texture(shadowMap, shadowCoord.xy + vec2(pcount, pcount) * shadowPixSize).r);
@@ -52,7 +55,7 @@ float genPCF(sampler2D shadowMap, vec3 shadowCoord, float bias, float pcount, fl
 
 
 float genShadow(sampler2D shadowMap, vec3 shadowCoord, float bias) {
-	return step(shadowCoord.z - bias, texture(shadowMap, shadowCoord.xy).r);
+	return step(shadowCoord.z + bias, texture(shadowMap, shadowCoord.xy).r);
 }
 
 float genShadowFactor(vec4 worldPos, float depthView, float bias) {
@@ -60,18 +63,18 @@ float genShadowFactor(vec4 worldPos, float depthView, float bias) {
 		vec4 near = lightViewProjNear * worldPos;
 		vec3 lightPosition = near.xyz / near.w;
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
-		float bs = bias * 0.00001;
+		float bs = bias * 0.0005;
 		return genPCF(depthBufferNear, shadowCoord, bs, 2.0, 0.04);
 	} else if(depthView > levels.x - GAP && depthView < levels.x + GAP) {
 		vec4 near = lightViewProjNear * worldPos;
 		vec3 lightPositionNear = near.xyz / near.w;
 		vec3 shadowCoordNear = lightPositionNear * 0.5 + 0.5;
-		float bsNear = bias * 0.00001;
+		float bsNear = bias * 0.0005;
 
 		vec4 mid = lightViewProjMid * worldPos;
 		vec3 lightPositionMid = mid.xyz / mid.w;
 		vec3 shadowCoordMid = lightPositionMid * 0.5 + 0.5;
-		float bsMid = bias * 0.00001;
+		float bsMid = bias * 0.0005;
 
 		float factorNear = genPCF(depthBufferNear, shadowCoordNear, bsNear, 2.0, 0.04);
 		float factorMid = genPCF(depthBufferMid, shadowCoordMid, bsMid, 1.0, 0.111);
@@ -80,7 +83,7 @@ float genShadowFactor(vec4 worldPos, float depthView, float bias) {
 		vec4 mid = lightViewProjMid * worldPos;
 		vec3 lightPosition = mid.xyz / mid.w;
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
-		float bs = bias * 0.00001;
+		float bs = bias * 0.0005;
 		return genPCF(depthBufferMid, shadowCoord, bs, 1.0, 0.111);
 	}
 	#ifdef DRAW_FAR_SHADOW
@@ -88,7 +91,7 @@ float genShadowFactor(vec4 worldPos, float depthView, float bias) {
 			vec4 far = lightViewProjFar * worldPos;
 			vec3 lightPosition = far.xyz / far.w;
 			vec3 shadowCoord = lightPosition * 0.5 + 0.5;
-			float bs = bias * 0.00001;
+			float bs = bias * 0.0005;
 			return genShadow(depthBufferFar, shadowCoord, bs);
 		}
 	#endif
@@ -187,17 +190,17 @@ void main() {
 		#else
 			float darkness = ndotl * shadowFactor;
 			float threshold = 0.45;
-			vec3 kd = darkness < threshold ? KCool : KWarm;
+			float cwFactor = step(darkness, threshold);
+			vec3 kd = KCool * cwFactor + KWarm * (1.0 - cwFactor);
 
 			sceneColor = (ambient + kd * albedo * material.g) * udotl;
 		#endif
 	} else {
 		#ifdef DYN_SKY
-			vec3 start = vec3(0.0,6378e3,0.0);
 			vec4 worldPos = invViewProjMatrix * vec4(ndcPos, 1.0);
 			worldPos /= worldPos.w;
 			vec3 view = normalize(worldPos.xyz - eyePos);
-			sceneColor = cloudRayMarch(texNoise, start, light, view, udotl, sceneColor, time);
+			sceneColor = cloudRayMarch(texNoise, Start, light, view, udotl, sceneColor, time);
 		#endif
 		bright = sceneColor * udotl * 2.5;
 	}

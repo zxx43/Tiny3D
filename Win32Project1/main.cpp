@@ -100,9 +100,10 @@ bool DrawWindow() {
 		app->swapData(false);
 	} else {
 		if (dataPrepared) {
-			TimeRun();
 			WaitForSingleObject(mutex, INFINITE);
 			{
+				app->updateData();
+				app->prepare();
 				app->swapData(true);
 				dataPrepared = false;
 			}
@@ -110,6 +111,7 @@ bool DrawWindow() {
 		}
 		else return false;
 	}
+
 	app->draw();
 	SwitchMouse();
 
@@ -122,9 +124,8 @@ DWORD WINAPI FrameThreadRun(LPVOID param) {
 		if (!dataPrepared) {
 			WaitForSingleObject(mutex, INFINITE);
 			{
+				TimeRun();
 				ActRun();
-				app->updateData();
-				app->prepare();
 				dataPrepared = true;
 			}
 			ReleaseMutex(mutex);
