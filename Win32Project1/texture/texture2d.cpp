@@ -25,7 +25,7 @@ Texture2D::Texture2D(float w,float h,int t,int p,int c,bool clampBorder,void* in
 		float borderColor[4] = { 1, 1, 1, 1 };
 		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 	} 
-	preDepth = precision >= HIGH_PRE ? GL_DEPTH_COMPONENT32 : GL_DEPTH_COMPONENT24;
+	preDepth = precision >= HIGH_PRE ? GL_DEPTH_COMPONENT24 : GL_DEPTH_COMPONENT16;
 	if (precision == FLOAT_PRE) preDepth = GL_DEPTH_COMPONENT32F;
 	format = GL_RGBA;
 	
