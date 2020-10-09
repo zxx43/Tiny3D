@@ -12,7 +12,7 @@ in vec2 vTexcoord;
 out vec4 FragColor;
 
 #define START_H float(0.0)
-#define END_H float(1000.0)
+#define END_H float(1500.0)
 #define FOG_COLOR vec3(0.9)
 
 vec3 GenFogColor(vec4 worldPos, float depthView, vec3 sceneColor) {

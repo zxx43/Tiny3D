@@ -2,6 +2,9 @@
 #include <windowsx.h>
 #include "simpleApplication.h"
 
+typedef void (APIENTRY *PFNWGLEXTSWAPCONTROLPROC) (int);
+PFNWGLEXTSWAPCONTROLPROC wglSwapIntervalEXT = NULL;
+
 LRESULT CALLBACK WndProc(HWND,UINT,WPARAM,LPARAM);
 HWND hWnd;
 HDC hdc;
@@ -77,7 +80,10 @@ void TimeRun() {
 		dTime = dSum / dTimes->size;
 	}
 	app->setFps(1000.0f / dTime);
-	velocity = D_DISTANCE * dTime;
+
+	float velo = dTime;
+	if (dTime > 6.5 && !app->cfgs->vsync) velo = 6.5;
+	velocity = D_DISTANCE * velo;
 }
 
 void ActRun() {
@@ -102,8 +108,6 @@ bool DrawWindow() {
 		if (dataPrepared) {
 			WaitForSingleObject(mutex, INFINITE);
 			{
-				app->updateData();
-				app->prepare();
 				app->swapData(true);
 				dataPrepared = false;
 			}
@@ -126,6 +130,8 @@ DWORD WINAPI FrameThreadRun(LPVOID param) {
 			{
 				TimeRun();
 				ActRun();
+				app->updateData();
+				app->prepare();
 				dataPrepared = true;
 			}
 			ReleaseMutex(mutex);
@@ -151,6 +157,10 @@ void InitGLWin() {
 	SetPixelFormat(hdc,pixelFormat,&pfd);
 	hrc=wglCreateContext(hdc);
 	wglMakeCurrent(hdc,hrc);
+
+	char* extensions = (char*)glGetString(GL_EXTENSIONS);
+	if (strstr(extensions, "WGL_EXT_swap_control"))
+		wglSwapIntervalEXT = (PFNWGLEXTSWAPCONTROLPROC)wglGetProcAddress("wglSwapIntervalEXT");
 }
 
 void InitGL() {
@@ -158,6 +168,8 @@ void InitGL() {
 	mouseShow = false;
 	printf("Init GL\n");
 	app->init();
+	if (wglSwapIntervalEXT) 
+		wglSwapIntervalEXT(app->cfgs->vsync ? 1 : 0);
 	dTimes = new CirQueue<float>(app->cfgs->smoothframe);
 	InitMutex();
 	CreateThreads();
@@ -268,8 +280,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hPrevInstance,PSTR szCmdLine,int iC
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 			}
-		}
-		if (inited) {
+		} else if (inited) {
 			if (DrawWindow()) SwapBuffers(hdc);
 		}
 	}

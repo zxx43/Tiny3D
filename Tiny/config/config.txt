@@ -1,9 +1,10 @@
 width 1920
 height 1080
 fullscreen 0
+vsync 0
 dualthread 1
-dualqueue 1
-smoothframe 3
+dualqueue 0
+smoothframe 1
 quality 10
 shadow 3
 ssr 1

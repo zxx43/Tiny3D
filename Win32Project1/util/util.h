@@ -392,6 +392,7 @@ struct ConfigArg {
 	int width;
 	int height;
 	bool fullscreen;
+	bool vsync;
 	bool dualthread;
 	bool dualqueue;
 	int smoothframe;

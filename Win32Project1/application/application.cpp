@@ -10,6 +10,7 @@ Application::Application() {
 	config->getInt("width", cfgs->width);
 	config->getInt("height", cfgs->height);
 	config->getBool("fullscreen", cfgs->fullscreen);
+	config->getBool("vsync", cfgs->vsync);
 	config->getBool("dualthread", cfgs->dualthread);
 	config->getBool("dualqueue", cfgs->dualqueue);
 	config->getInt("smoothframe", cfgs->smoothframe);
