@@ -185,4 +185,6 @@ void Camera::copy(Camera* src) {
 	zNear = src->zNear; 
 	zFar = src->zFar;
 	velocity = src->velocity;
+
+	needRefresh = src->needRefresh;
 }

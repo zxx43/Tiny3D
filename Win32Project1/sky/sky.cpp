@@ -61,6 +61,8 @@ void Sky::update(Render* render, const vec3& sunPos, Shader* shader) {
 	state->cloudPass = false;
 	state->shader = shader;
 	state->shader->setVector3("light", -sunPos.x, -sunPos.y, -sunPos.z);
+	state->shader->setFloat("udotl", state->udotl);
+	state->shader->setFloat("time", state->time);
 	render->useFrameBuffer(skyBuff);
 	
 	render->useFrameCube(0);

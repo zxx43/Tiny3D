@@ -83,6 +83,8 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 
 	Shader* water = shaders->addShader("water", WATER_VERT, WATER_FRAG);
 	if (!cfgs->ssr) water->attachDef("DISABLE_SSR", "1");
+	if (cfgs->dynsky)
+		water->attachDef("DYN_SKY", "1");
 
 	Shader* phongShadow = shaders->addShader("phong_s", PHONG_VERT, SHADOW_TEX_FRAG);
 	phongShadow->attachDef("ShadowPass", "1.0");
@@ -143,8 +145,13 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	Shader* mean = shaders->addShader("mean", POST_VERT, MEAN_FRAG);
 	mean->setSlot("colorBuffer", 0);
 
-	Shader* gauss = shaders->addShader("gauss", POST_VERT, GAUSS_FRAG);
-	gauss->setSlot("colorBuffer", 0);
+	Shader* gaussv = shaders->addShader("gaussv", POST_VERT, GAUSS_FRAG);
+	gaussv->attachDef("PASS_V", "1");
+	gaussv->setSlot("colorBuffer", 0);
+
+	Shader* gaussh = shaders->addShader("gaussh", POST_VERT, GAUSS_FRAG);
+	gaussh->attachDef("PASS_H", "1");
+	gaussh->setSlot("colorBuffer", 0);
 
 	Shader* dof = shaders->addShader("dof", POST_VERT, DOF_FRAG);
 	dof->setSlot("colorBufferLow", 0);

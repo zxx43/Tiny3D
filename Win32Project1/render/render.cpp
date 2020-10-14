@@ -273,6 +273,10 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 				if (AssetManager::assetManager->getSkyTexture() &&
 					!shader->isTexBinded(AssetManager::assetManager->getSkyTexture()->hnd))
 						shader->setHandle64("texSky", AssetManager::assetManager->getSkyTexture()->hnd);
+			} else if (state->atmoPass) {
+				if (AssetManager::assetManager->getNoiseTex() >= 0 &&
+					!shader->isTexBinded(AssetManager::assetManager->getNoiseHnd()))
+						shader->setHandle64("texNoise", AssetManager::assetManager->getNoiseHnd());
 			}
 		} else if (state->pass == DEFERRED_PASS) {
 			shader->setMatrix4("invViewProjMatrix", camera->invViewProjectMatrix);
@@ -290,9 +294,6 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 			if (state->lightEffect) {
 				shader->setVector3("light", -state->light.x, -state->light.y, -state->light.z);
 				shader->setFloat("udotl", state->udotl);
-				if (AssetManager::assetManager->getNoiseTex() >= 0 &&
-					!shader->isTexBinded(AssetManager::assetManager->getNoiseHnd()))
-						shader->setHandle64("texNoise", AssetManager::assetManager->getNoiseHnd());
 			}
 		} else if (state->pass > DEFERRED_PASS && state->ssgPass) {
 			shader->setMatrix4("invProjMatrix", camera->invProjMatrix);

@@ -23,19 +23,27 @@ void main() {
 	
 	vec2 refCoord = (vProjPos.xy / vProjPos.w) * 0.5 + 0.5;
 	#ifdef DISABLE_SSR
-	vec2 bias = normalize(mat3(viewMatrix) * normal).xz * waterBias;
-	vec4 reflectTex = texture(texRef, refCoord + bias);
+		vec2 bias = normalize(mat3(viewMatrix) * normal).xz * waterBias;
+		vec4 reflectTex = texture(texRef, refCoord + bias);
 	#else
-	vec4 reflectTex = texture(texRef, refCoord);
+		vec4 reflectTex = texture(texRef, refCoord);
 	#endif
 
 	vec3 reflectCoord = reflect(eye2Water, normal);
 	reflectCoord = vec3(reflectCoord.x, -reflectCoord.yz);
-	vec3 reflectMapTex = udotl * texture(texEnv, reflectCoord).rgb;
+	#ifndef DYN_SKY
+		vec3 reflectMapTex = udotl * texture(texEnv, reflectCoord).rgb;
+	#else
+		vec3 reflectMapTex = udotl * pow(texture(texSky, reflectCoord).rgb, INV_GAMMA);
+	#endif
 
 	vec3 refractCoord = refract(eye2Water, normal, 0.750395);
 	refractCoord = vec3(refractCoord.x, -refractCoord.yz);
-	vec3 refractMapTex = udotl * texture(texEnv, refractCoord).rgb;
+	#ifndef DYN_SKY
+		vec3 refractMapTex = udotl * texture(texEnv, refractCoord).rgb;
+	#else
+		vec3 refractMapTex = udotl * pow(texture(texSky, reflectCoord).rgb, INV_GAMMA);
+	#endif
 
 	vec3 reflectedColor = reflectTex.rgb * reflectMapTex;
 	vec3 refractedColor = refractMapTex;

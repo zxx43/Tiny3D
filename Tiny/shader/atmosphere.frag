@@ -1,9 +1,13 @@
 #include "shader/util.glsl"
 #include "shader/atmosphere.glsl"
+#include "shader/cloud.glsl"
 
 layout(early_fragment_tests) in;
 
+layout(bindless_sampler) uniform sampler2D texNoise;
 uniform vec3 light;
+uniform float udotl;
+uniform float time;
 
 in vec3 vViewDir;
 
@@ -30,6 +34,8 @@ void main() {
         0.758            // Mie preferred scattering direction
     );
 
-	color = 1.0 - exp(-1.0 * color);
+    color = cloudRayMarch(texNoise, start, sun, view, udotl, color, time);
+    color = 1.0 - exp(-1.0 * color);
+
 	FragColor = vec4(color, 1.0);
 }

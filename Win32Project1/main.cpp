@@ -82,7 +82,7 @@ void TimeRun() {
 	app->setFps(1000.0f / dTime);
 
 	float velo = dTime;
-	if (dTime > 6.5 && !app->cfgs->vsync) velo = 6.5;
+	if (dTime >= 6.5 && !app->cfgs->vsync) velo = 6.5;
 	velocity = D_DISTANCE * velo;
 }
 
@@ -112,6 +112,7 @@ bool DrawWindow() {
 				dataPrepared = false;
 			}
 			ReleaseMutex(mutex);
+			TimeRun();
 		}
 		else return false;
 	}
@@ -128,7 +129,6 @@ DWORD WINAPI FrameThreadRun(LPVOID param) {
 		if (!dataPrepared) {
 			WaitForSingleObject(mutex, INFINITE);
 			{
-				TimeRun();
 				ActRun();
 				app->updateData();
 				app->prepare();

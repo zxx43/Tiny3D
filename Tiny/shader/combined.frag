@@ -29,8 +29,7 @@ void main() {
  	vec4 waterRefColor = texture(waterBuffer, vTexcoord);	
 	vec4 sceneColor = texture(sceneBuffer, vTexcoord);
 	#ifdef USE_BLOOM
-		vec4 bloomColor = texture(bloomBuffer, vTexcoord);
-		sceneColor.rgb += bloomColor.rgb;
+		sceneColor.rgb += texture(bloomBuffer, vTexcoord).rgb;
 	#endif
 
 	float sDepth = texture(sceneDepthBuffer, vTexcoord).r;

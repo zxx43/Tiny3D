@@ -12,7 +12,7 @@
 #include "../util/util.h"
 
 #define WORKGROUPE_SIZE 1
-#define COMP_GROUPE_SIZE 16
+#define COMP_GROUPE_SIZE 4
 #define MAX_DISPATCH 4096
 
 void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs);

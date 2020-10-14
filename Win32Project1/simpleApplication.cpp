@@ -90,7 +90,7 @@ void SimpleApplication::resize(int width, int height) {
 		}
 		if (cfgs->ssr) {
 			if (ssrChain) delete ssrChain;
-			ssrChain = new FilterChain(width * 0.75, height * 0.75, true, LOW_PRE, 4, false);
+			ssrChain = new FilterChain(width * 0.7, height * 0.7, true, LOW_PRE, 4, false);
 			ssrChain->addInputTex(combinedChain->getOutputTex(0));
 			ssrChain->addInputTex(waterFrame->getColorBuffer(1));
 			ssrChain->addInputTex(waterFrame->getColorBuffer(2));
@@ -106,7 +106,7 @@ void SimpleApplication::resize(int width, int height) {
 		}
 	}
 
-	float bloomScale = 0.8;
+	float bloomScale = 0.5;
 	if (bloomChain) delete bloomChain;
 	bloomChain = new DualFilter(width * bloomScale, height * bloomScale, true, hdrPre, 3, false);
 	bloomChain->addInputTex(sceneFilter->getOutput(1));
@@ -184,7 +184,7 @@ void SimpleApplication::draw() {
 		renderMgr->renderWater(render, scene);
 
 	if (cfgs->bloom)
-		renderMgr->drawDualFilter(render, scene, "gauss", bloomChain);
+		renderMgr->drawDualFilter(render, scene, "gaussv", "gaussh", bloomChain);
 
 	renderMgr->drawCombined(render, scene, combinedChain->input, combinedChain->output);
 

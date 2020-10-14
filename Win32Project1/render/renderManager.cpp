@@ -14,7 +14,7 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 		nearSize = 4096;
 		midSize = 2048;
 		farSize = 512;
-		precision = LOW_PRE;
+		precision = HIGH_PRE;
 	} else if (cfgs->shadowQuality > 1) {
 		nearSize = 2048;
 		midSize = 1024;
@@ -22,7 +22,7 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 		precision = LOW_PRE;
 	}
 	shadow->shadowMapSize = nearSize;
-	shadow->shadowPixSize = 0.4 / nearSize;
+	shadow->shadowPixSize = 0.3 / nearSize;
 
 	nearBuffer = new FrameBuffer(nearSize, nearSize, precision);
 	midBuffer = new FrameBuffer(midSize, midSize, precision);
@@ -241,7 +241,7 @@ void RenderManager::drawGrass(Render* render, RenderState* state, Scene* scene, 
 	if (computeGrass) {
 		if (!grassDrawcall) {
 			BufferData terrainData(mesh->visualPoints, mesh->visualPointsSize, 4, 4);
-			static int grassCount = cfgs->graphQuality > 5 ? 1024 : 512;
+			static int grassCount = cfgs->graphQuality > 5 ? 1000 : 512;
 			grassDrawcall = new ComputeDrawcall(&terrainData, grassCount);
 		}
 		static Shader* grassShader = render->findShader("grass");
@@ -477,19 +477,9 @@ void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* s
 	filter->draw(scene->renderCamera, render, state, inputTextures, NULL);
 }
 
-void RenderManager::drawDualFilter(Render* render, Scene* scene, const char* shaderStr, DualFilter* filter) {
-	Shader* shader = render->findShader(shaderStr);
-	state->reset();
-	state->eyePos = &(scene->renderCamera->position);
-	//state->enableCull = false;
-	state->enableDepthTest = false;
-	state->pass = POST_PASS;
-	state->shader = shader;
-
-	shader->setFloat("pass", 1.0);
-	drawScreenFilter(render, scene, "gauss", filter->getInput1(), filter->getOutput1());
-	shader->setFloat("pass", 2.0);
-	drawScreenFilter(render, scene, "gauss", filter->getInput2(), filter->getOutput2());
+void RenderManager::drawDualFilter(Render* render, Scene* scene, const char* shader1, const char* shader2, DualFilter* filter) {
+	drawScreenFilter(render, scene, shader1, filter->getInput1(), filter->getOutput1());
+	drawScreenFilter(render, scene, shader2, filter->getInput2(), filter->getOutput2());
 }
 
 void RenderManager::drawSSRFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter) {
