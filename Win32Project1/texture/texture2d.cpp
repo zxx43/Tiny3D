@@ -15,7 +15,7 @@ Texture2D::Texture2D(float w,float h,int t,int p,int c,bool clampBorder,void* in
 	glBindTexture(GL_TEXTURE_2D,id);
 
 	GLint filterParam = precision >= HIGH_PRE ? GL_LINEAR : GL_NEAREST;
-	if (type == TEXTURE_TYPE_ANIME) filterParam = GL_NEAREST;
+	if (type == TEXTURE_TYPE_ANIME || type == TEXTURE_TYPE_DEPTH) filterParam = GL_NEAREST;
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterParam);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterParam);
 	
@@ -58,7 +58,7 @@ Texture2D::Texture2D(float w,float h,int t,int p,int c,bool clampBorder,void* in
 		memset(texData, 0, (width*height*channel)*sizeof(float));
 		texType = GL_FLOAT;
 	}
-	depthType = precision >= HIGH_PRE ? GL_FLOAT : GL_UNSIGNED_BYTE;
+	depthType = precision > HIGH_PRE ? GL_FLOAT : GL_UNSIGNED_BYTE;
 
 	GLenum dataType;
 	if (type == TEXTURE_TYPE_COLOR || type == TEXTURE_TYPE_ANIME) dataType = texType;

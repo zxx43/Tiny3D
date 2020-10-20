@@ -48,7 +48,7 @@ void SimpleApplication::resize(int width, int height) {
 	int precision = cfgs->graphQuality > 4 ? HIGH_PRE : LOW_PRE;
 	int scrPre = (cfgs->graphQuality > 4 || cfgs->ssr) ? HIGH_PRE : LOW_PRE;
 	int hdrPre = cfgs->graphQuality > 3 ? FLOAT_PRE : precision;
-	int depthPre = LOW_PRE, matPre = LOW_PRE, waterPre = LOW_PRE;
+	int matPre = LOW_PRE, waterPre = LOW_PRE;
 	int aaPre = LOW_PRE, dofPre = LOW_PRE, rawPre = LOW_PRE;
 
 	Application::resize(width, height);
@@ -58,13 +58,13 @@ void SimpleApplication::resize(int width, int height) {
 	screen->addColorBuffer(matPre, 4); // matBuffer
 	screen->addColorBuffer(matPre, 3); // normal-grassBuffer
 	screen->addColorBuffer(matPre, 3); // rough-metalBuffer
-	screen->attachDepthBuffer(depthPre); // depthBuffer
+	screen->attachDepthBuffer(renderMgr->getDepthPre()); // depthBuffer
 
 	if (waterFrame) delete waterFrame;
 	waterFrame = new FrameBuffer(width, height, hdrPre, 4, false);
 	waterFrame->addColorBuffer(waterPre, 4);
 	waterFrame->addColorBuffer(waterPre, 3);
-	waterFrame->attachDepthBuffer(depthPre);
+	waterFrame->attachDepthBuffer(renderMgr->getDepthPre());
 
 	if (sceneFilter) delete sceneFilter;
 	sceneFilter = new Filter(width, height, true, precision, 4, false);
@@ -82,7 +82,7 @@ void SimpleApplication::resize(int width, int height) {
 		}
 		if (cfgs->dof) {
 			if (dofBlurFilter) delete dofBlurFilter;
-			dofBlurFilter = new Filter(width * 0.5, height * 0.5, true, LOW_PRE, 4);
+			dofBlurFilter = new Filter(width * 0.75, height * 0.75, true, LOW_PRE, 4);
 			if (dofChain) delete dofChain;
 			dofChain = new FilterChain(width, height, cfgs->fxaa, dofPre, 4);
 			dofChain->addInputTex(dofBlurFilter->getOutput(0));

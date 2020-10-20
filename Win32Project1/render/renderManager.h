@@ -45,6 +45,7 @@ public:
 	RenderState* state;
 	ConfigArg* cfgs;
 	Texture2D* occluderDepth;
+	int depthPre;
 private:
 	Shadow* shadow;
 	bool needResize, needRefreshSky, actShowWater, renderShowWater;
@@ -64,10 +65,10 @@ public:
 	FrameBuffer* midBuffer;
 	FrameBuffer* farBuffer;
 	FrameBuffer* reflectBuffer;
-
+public:
 	RenderManager(ConfigArg* cfg, Scene* scene, float distance1, float distance2, const vec3& light);
 	~RenderManager();
-
+public:
 	void resize(float width, float height);
 	void updateShadowCamera(Camera* mainCamera);
 	void updateMainLight(Scene* scene);
@@ -93,6 +94,7 @@ public:
 	void drawTexture2Screen(Render* render, Scene* scene, u64 texhnd);
 	void drawNoise3d(Render* render, Scene* scene, FrameBuffer* noiseBuf);
 	bool isWaterShow(const Scene* scene) { return scene->water && renderShowWater; }
+	int getDepthPre() { return depthPre; }
 };
 
 

@@ -4,28 +4,28 @@
 #include "../object/staticObject.h"
 
 RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, float distance2, const vec3& light) {
-	int precision = LOW_PRE;
+	depthPre = LOW_PRE;
 	cfgs = cfg;
 	shadow = new Shadow(scene->actCamera);
 	float nearSize = 1024;
 	float midSize = 1024;
-	float farSize = 512;
+	float farSize = 2;
 	if (cfgs->shadowQuality > 2) {
 		nearSize = 4096;
 		midSize = 2048;
-		farSize = 512;
-		precision = HIGH_PRE;
+		farSize = 2;
+		depthPre = HIGH_PRE;
 	} else if (cfgs->shadowQuality > 1) {
 		nearSize = 2048;
 		midSize = 1024;
-		farSize = 512;
-		precision = LOW_PRE;
+		farSize = 2;
+		depthPre = HIGH_PRE;
 	}
 	shadow->shadowMapSize = nearSize;
-	shadow->shadowPixSize = 0.3 / nearSize;
+	shadow->shadowPixSize = 0.65 / nearSize;
 
-	nearBuffer = new FrameBuffer(nearSize, nearSize, precision);
-	midBuffer = new FrameBuffer(midSize, midSize, precision);
+	nearBuffer = new FrameBuffer(nearSize, nearSize, depthPre);
+	midBuffer = new FrameBuffer(midSize, midSize, depthPre);
 	farBuffer = new FrameBuffer(farSize, farSize, LOW_PRE);
 	lightDir = light.GetNormalized();
 
@@ -73,7 +73,7 @@ void RenderManager::resize(float width, float height) {
 	}
 
 	if (occluderDepth) delete occluderDepth;
-	occluderDepth = new Texture2D(width, height, TEXTURE_TYPE_DEPTH, LOW_PRE, 1);
+	occluderDepth = new Texture2D(width, height, TEXTURE_TYPE_DEPTH, depthPre, 1);
 	needResize = true;
 	updateSky();
 }

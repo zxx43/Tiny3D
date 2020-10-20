@@ -24,15 +24,42 @@ const vec3 KCool = vec3(0.15, 0.15, 0.35);
 const vec3 KWarm = vec3(0.9, 0.9, 0.25);
 
 float genPCF(sampler2D shadowMap, vec3 shadowCoord, float bias, float pcount, float inv) {
-	float shadowFactor = 0.0, biasDepth = shadowCoord.z + bias;
+	float shadowFactor = 0.0, biasDepth = shadowCoord.z + bias, i = 0.0, rand = 0.0;
 
-	float pcount2 = pcount * pcount;
-	for(float offx = -pcount; offx <= pcount; offx += 1.0) {
-		for(float offy = -pcount; offy <= pcount; offy += 1.0) 
-				shadowFactor += step(biasDepth, texture(shadowMap, shadowCoord.xy + vec2(offx, offy) * shadowPixSize).r);
+	i += 1.0;
+	rand = random(vec3(shadowCoord.xy + vec2(-pcount, -pcount), i), i);
+	shadowFactor += step(biasDepth, texture(shadowMap, shadowCoord.xy + vec2(-pcount, -pcount) * shadowPixSize * rand).r);
+	
+	i += 1.0;
+	rand = random(vec3(shadowCoord.xy + vec2(pcount, -pcount), i), i);
+	shadowFactor += step(biasDepth, texture(shadowMap, shadowCoord.xy + vec2(pcount, -pcount) * shadowPixSize * rand).r);
+
+	i += 1.0;
+	rand = random(vec3(shadowCoord.xy + vec2(pcount, pcount), i), i);
+	shadowFactor += step(biasDepth, texture(shadowMap, shadowCoord.xy + vec2(pcount, pcount) * shadowPixSize * rand).r);
+	
+	i += 1.0;
+	rand = random(vec3(shadowCoord.xy + vec2(-pcount, pcount), i), i);
+	shadowFactor += step(biasDepth, texture(shadowMap, shadowCoord.xy + vec2(-pcount, pcount) * shadowPixSize * rand).r);
+
+	float preFactor = shadowFactor * 0.25;
+	if(preFactor * (1.0 - preFactor) < 0.01) return preFactor;
+	else {
+		float pcount2 = pcount * pcount;
+		for(float offx = -pcount; offx <= pcount; offx += 1.0) {
+			for(float offy = -pcount; offy <= pcount; offy += 1.0) {
+				float off2 = abs(offx * offy);
+				if(off2 != pcount2) {
+					i += 1.0;
+					rand = random(vec3(shadowCoord.xy + vec2(offx, offy), i), i);
+					shadowFactor += step(biasDepth, texture(shadowMap, shadowCoord.xy + vec2(offx, offy) * shadowPixSize * rand).r);
+				}
+				else continue;
+			}
+		}
+
+		return shadowFactor * inv;
 	}
-
-	return shadowFactor * inv;
 }
 
 
@@ -45,8 +72,8 @@ float genShadowFactor(vec4 worldPos, float depthView, float bias) {
 		vec4 near = lightViewProjNear * worldPos;
 		vec3 lightPosition = near.xyz / near.w;
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
-		float bs = bias * 0.0005;
-		return genPCF(depthBufferNear, shadowCoord, bs, 2.0, 0.04);
+		float bs = bias * 0.00025;
+		return genPCF(depthBufferNear, shadowCoord, bs, 3.0, 0.0205);
 	} else if(depthView > levels.x - GAP && depthView < levels.x + GAP) {
 		vec4 near = lightViewProjNear * worldPos;
 		vec3 lightPositionNear = near.xyz / near.w;
@@ -56,16 +83,17 @@ float genShadowFactor(vec4 worldPos, float depthView, float bias) {
 		vec3 lightPositionMid = mid.xyz / mid.w;
 		vec3 shadowCoordMid = lightPositionMid * 0.5 + 0.5;
 
-		float bs = bias * 0.0005;
-		float factorNear = genPCF(depthBufferNear, shadowCoordNear, bs, 2.0, 0.04);
-		float factorMid = genPCF(depthBufferMid, shadowCoordMid, bs, 1.0, 0.111);
+		float bsNear = bias * 0.00025;
+		float bsMid = -bias * 0.005;
+		float factorNear = genPCF(depthBufferNear, shadowCoordNear, bsNear, 3.0, 0.0205);
+		float factorMid = genPCF(depthBufferMid, shadowCoordMid, bsMid, 1.0, 0.1112);
 		return mix(factorNear, factorMid, (depthView - (levels.x - GAP)) * INV2GAP);
 	} else if(depthView <= levels.y) {
 		vec4 mid = lightViewProjMid * worldPos;
 		vec3 lightPosition = mid.xyz / mid.w;
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
-		float bs = bias * 0.0005;
-		return genPCF(depthBufferMid, shadowCoord, bs, 1.0, 0.111);
+		float bs = -bias * 0.005;
+		return genPCF(depthBufferMid, shadowCoord, bs, 1.0, 0.1112);
 	}
 	#ifdef DRAW_FAR_SHADOW
 		else {
@@ -176,7 +204,7 @@ void main() {
 			sceneColor = (ambient + kd * albedo * material.g) * udotl;
 		#endif
 	} else {
-		bright = sceneColor * udotl * 2.5;
+		bright = sceneColor * udotl * 2.5; // Bloom
 	}
 
 	FragColor = vec4(sceneColor, depth);
