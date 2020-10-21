@@ -72,7 +72,7 @@ float genShadowFactor(vec4 worldPos, float depthView, float bias) {
 		vec4 near = lightViewProjNear * worldPos;
 		vec3 lightPosition = near.xyz / near.w;
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
-		float bs = bias * 0.00025;
+		float bs = bias * 0.00035;
 		return genPCF(depthBufferNear, shadowCoord, bs, 3.0, 0.0205);
 	} else if(depthView > levels.x - GAP && depthView < levels.x + GAP) {
 		vec4 near = lightViewProjNear * worldPos;
@@ -83,24 +83,26 @@ float genShadowFactor(vec4 worldPos, float depthView, float bias) {
 		vec3 lightPositionMid = mid.xyz / mid.w;
 		vec3 shadowCoordMid = lightPositionMid * 0.5 + 0.5;
 
-		float bsNear = bias * 0.00025;
-		float bsMid = -bias * 0.005;
+		float bsNear = bias * 0.00035;
+		float bsMid = -bias * 0.00;
 		float factorNear = genPCF(depthBufferNear, shadowCoordNear, bsNear, 3.0, 0.0205);
-		float factorMid = genPCF(depthBufferMid, shadowCoordMid, bsMid, 1.0, 0.1112);
+		float factorMid = genShadow(depthBufferMid, shadowCoordMid, bsMid);
+		//float factorMid = genPCF(depthBufferMid, shadowCoordMid, bsMid, 1.0, 0.1112);
 		return mix(factorNear, factorMid, (depthView - (levels.x - GAP)) * INV2GAP);
 	} else if(depthView <= levels.y) {
 		vec4 mid = lightViewProjMid * worldPos;
 		vec3 lightPosition = mid.xyz / mid.w;
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
-		float bs = -bias * 0.005;
-		return genPCF(depthBufferMid, shadowCoord, bs, 1.0, 0.1112);
+		float bs = -bias * 0.00;
+		return genShadow(depthBufferMid, shadowCoord, bs);
+		//return genPCF(depthBufferMid, shadowCoord, bs, 1.0, 0.1112);
 	}
 	#ifdef DRAW_FAR_SHADOW
 		else {
 			vec4 far = lightViewProjFar * worldPos;
 			vec3 lightPosition = far.xyz / far.w;
 			vec3 shadowCoord = lightPosition * 0.5 + 0.5;
-			float bs = bias * 0.0005;
+			float bs = bias * 0.0;
 			return genShadow(depthBufferFar, shadowCoord, bs);
 		}
 	#endif
@@ -167,9 +169,9 @@ void main() {
 		ndotl = max(ndotl, 0.0);
 
 		#ifdef USE_SHADOW
-		float shadowFactor = ndotl < 0.01 ? 0.0 : tex.a * genShadowFactor(worldPos, depthView, bias);
+			float shadowFactor = ndotl < 0.01 ? 0.0 : tex.a * genShadowFactor(worldPos, depthView, bias);
 		#else
-		float shadowFactor = 1.0;
+			float shadowFactor = 1.0;
 		#endif
 		vec3 ambient = material.r * albedo;
 
@@ -204,7 +206,9 @@ void main() {
 			sceneColor = (ambient + kd * albedo * material.g) * udotl;
 		#endif
 	} else {
-		bright = sceneColor * udotl * 2.5; // Bloom
+		#ifdef USE_BLOOM
+			bright = sceneColor * udotl * 2.5; // Bloom
+		#endif
 	}
 
 	FragColor = vec4(sceneColor, depth);

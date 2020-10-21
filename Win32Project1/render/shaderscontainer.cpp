@@ -126,6 +126,8 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 		deferred->attachDef("USE_CARTOON", "1");
 	if (cfgs->dynsky)
 		deferred->attachDef("DYN_SKY", "1");
+	if (cfgs->bloom)
+		deferred->attachDef("USE_BLOOM", "1");
 	deferred->setSlot("texBuffer", 0);
 	deferred->setSlot("matBuffer", 1);
 	deferred->setSlot("normalGrassBuffer", 2);

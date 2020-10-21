@@ -82,7 +82,7 @@ void TimeRun() {
 	app->setFps(1000.0f / dTime);
 
 	float velo = dTime;
-	if (dTime >= 6.5 && !app->cfgs->vsync) velo = 6.5;
+	if (dTime > 7.5 && !app->cfgs->vsync) velo = 7.5;
 	velocity = D_DISTANCE * velo;
 }
 

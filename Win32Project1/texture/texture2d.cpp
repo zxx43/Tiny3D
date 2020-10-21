@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-Texture2D::Texture2D(float w,float h,int t,int p,int c,bool clampBorder,void* initData) {
+Texture2D::Texture2D(uint w,uint h,int t,int p,int c,int filter,bool clampBorder,void* initData) {
 	width = w, height = h;
 	type = t;
 	precision = p;
@@ -14,8 +14,8 @@ Texture2D::Texture2D(float w,float h,int t,int p,int c,bool clampBorder,void* in
 	glGenTextures(1,&id);
 	glBindTexture(GL_TEXTURE_2D,id);
 
-	GLint filterParam = precision >= HIGH_PRE ? GL_LINEAR : GL_NEAREST;
-	if (type == TEXTURE_TYPE_ANIME || type == TEXTURE_TYPE_DEPTH) filterParam = GL_NEAREST;
+	GLint filterParam = filter == LINEAR ? GL_LINEAR : GL_NEAREST;
+	if (type == TEXTURE_TYPE_ANIME) filterParam = GL_NEAREST;
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterParam);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterParam);
 	
@@ -50,8 +50,8 @@ Texture2D::Texture2D(float w,float h,int t,int p,int c,bool clampBorder,void* in
 	void* texData = NULL;
 	texType = GL_UNSIGNED_BYTE;
 	if (precision < FLOAT_PRE) {
-		texData = malloc((width*height*channel)*sizeof(unsigned char));
-		memset(texData, 255, (width*height*channel)*sizeof(unsigned char));
+		texData = malloc((width*height*channel)*sizeof(byte));
+		memset(texData, 255, (width*height*channel)*sizeof(byte));
 		texType = GL_UNSIGNED_BYTE;
 	} else {
 		texData = malloc((width*height*channel)*sizeof(float));

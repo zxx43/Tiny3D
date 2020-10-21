@@ -4,7 +4,7 @@ Shadow::Shadow(Camera* view) {
 	viewCamera=view;
 	distance1 = 0.0;
 	distance2 = 0.0;
-	shadowMapSize = 0, shadowPixSize = 0;
+	shadowMapSize = 0, shadowPixSize = 0, pixSize = 0;
 
 	corners0 = new vec3[4];
 	corners1 = new vec3[4];
@@ -99,15 +99,15 @@ void Shadow::prepareViewCamera(float dist1, float dist2) {
 void Shadow::update(Camera* actCamera, const vec3& light) {
 	lightDir = light;
 
-	updateLightCamera(actLightCameraNear, actCamera, &center0, radius0);
-	updateLightCamera(actLightCameraMid, actCamera, &center1, radius1);
-	updateLightCamera(actLightCameraFar, actCamera, &center2, radius2);
+	updateLightCamera(actLightCameraNear, actCamera, center0, radius0);
+	updateLightCamera(actLightCameraMid, actCamera, center1, radius1);
+	//updateLightCamera(actLightCameraFar, actCamera, center2, radius2);
 }
 
 void Shadow::copyCameraData() {
 	renderLightCameraNear->copy(actLightCameraNear);
 	renderLightCameraMid->copy(actLightCameraMid);
-	renderLightCameraFar->copy(actLightCameraFar);
+	//renderLightCameraFar->copy(actLightCameraFar);
 }
 
 void Shadow::mergeCamera() {
@@ -125,6 +125,14 @@ void Shadow::mergeCamera() {
 	}
 }
 
-void Shadow::updateLightCamera(Camera* lightCamera, Camera* actCamera, const vec4* center, float radius) {
-	lightCamera->updateLook((vec3)(actCamera->invViewMatrix * (*center)), lightDir);
+void Shadow::updateLightCamera(Camera* lightCamera, Camera* actCamera, const vec4& center, float radius) {
+	vec3 viewPos = GetTranslate(actCamera->viewMatrix);
+	float x = (int)(viewPos.x * 0.005) * 200.0;
+	float y = (int)(viewPos.y * 0.005) * 200.0;
+	float z = (int)(viewPos.z * 0.005) * 200.0;
+	mat4 invViewMat = actCamera->viewMatrix;
+	invViewMat.entries[12] = x, invViewMat.entries[13] = y, invViewMat.entries[14] = z;
+	invViewMat = invViewMat.GetInverse();
+
+	lightCamera->updateLook((vec3)(invViewMat * center), lightDir);
 }

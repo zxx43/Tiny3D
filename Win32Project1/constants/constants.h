@@ -34,6 +34,8 @@
 #define LOW_PRE 0
 #define HIGH_PRE 1
 #define FLOAT_PRE 2
+#define NEAREST 0
+#define LINEAR 1
 #endif
 
 #ifndef NULL

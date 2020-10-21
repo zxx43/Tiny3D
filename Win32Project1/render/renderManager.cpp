@@ -23,6 +23,7 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 	}
 	shadow->shadowMapSize = nearSize;
 	shadow->shadowPixSize = 0.65 / nearSize;
+	shadow->pixSize = 1.0 / nearSize;
 
 	nearBuffer = new FrameBuffer(nearSize, nearSize, depthPre);
 	midBuffer = new FrameBuffer(midSize, midSize, depthPre);
@@ -73,7 +74,7 @@ void RenderManager::resize(float width, float height) {
 	}
 
 	if (occluderDepth) delete occluderDepth;
-	occluderDepth = new Texture2D(width, height, TEXTURE_TYPE_DEPTH, depthPre, 1);
+	occluderDepth = new Texture2D(width, height, TEXTURE_TYPE_DEPTH, depthPre, 1, LINEAR);
 	needResize = true;
 	updateSky();
 }

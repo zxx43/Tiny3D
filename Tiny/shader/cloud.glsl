@@ -62,7 +62,7 @@ vec3 cloudRayMarch(sampler2D tex, vec3 start, vec3 sun, vec3 dir, float lightnes
 		for(int i = 0; i < cSteps; ++i) {
 			float den = haveCloud(tex, nvec, tf);
 			if(den > cloudThre) {
-				float beers = exp(-1000.0 * den);
+				float beers = exp(-1200.0 * den);
 				float alpha = (den * 200.0) * lightness;
 				res = mix(res, vec3(beers), alpha);
 			}

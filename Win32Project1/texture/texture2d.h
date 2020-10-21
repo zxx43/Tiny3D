@@ -25,11 +25,11 @@ private:
 public:
 	uint id;
 	u64 hnd;
-	float width, height, channel;
+	uint width, height, channel;
 	GLenum preColor, preDepth, format;
 	int type, precision;
 public:
-	Texture2D(float w,float h,int t,int p,int c,bool clampBorder=true,void* initData=NULL);
+	Texture2D(uint w,uint h,int t,int p,int c,int filter,bool clampBorder=true,void* initData=NULL);
 	~Texture2D();
 public:
 	void copyDataFrom(Texture2D* src);

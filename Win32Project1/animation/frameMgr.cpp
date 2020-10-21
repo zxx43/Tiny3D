@@ -26,7 +26,7 @@ int FrameMgr::addFrame(AnimFrame* data) {
 	}
 
 	uint curTex = frames.size();
-	frames.push_back(new Texture2D(imgWidth, imgHeight, TEXTURE_TYPE_ANIME, FLOAT_PRE, 4, false, texData));
+	frames.push_back(new Texture2D(imgWidth, imgHeight, TEXTURE_TYPE_ANIME, FLOAT_PRE, 4, NEAREST, false, texData));
 	free(texData);
 	return curTex;
 }

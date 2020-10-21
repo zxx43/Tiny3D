@@ -56,7 +56,10 @@ FrameBuffer::~FrameBuffer() {
 }
 
 void FrameBuffer::attachDepthBuffer(int precision) {
-	depthBuffer = new Texture2D((int)(width), (int)(height), TEXTURE_TYPE_DEPTH, precision, 4);
+	if (depthOnly)
+		depthBuffer = new Texture2D((int)(width), (int)(height), TEXTURE_TYPE_DEPTH, precision, 4, NEAREST);
+	else
+		depthBuffer = new Texture2D((int)(width), (int)(height), TEXTURE_TYPE_DEPTH, precision, 4, LINEAR);
 	glNamedFramebufferTexture2DEXT(fboId, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthBuffer->id, 0);
 
 	if (depthOnly) {
@@ -67,7 +70,7 @@ void FrameBuffer::attachDepthBuffer(int precision) {
 
 void FrameBuffer::addColorBuffer(int precision, int component) {
 	colorBufferCount++;
-	colorBuffers.push_back(new Texture2D((int)(width), (int)(height), TEXTURE_TYPE_COLOR, precision, component, clampBorder));
+	colorBuffers.push_back(new Texture2D((int)(width), (int)(height), TEXTURE_TYPE_COLOR, precision, component, LINEAR, clampBorder));
 	glNamedFramebufferTexture2DEXT(fboId, GL_COLOR_ATTACHMENT0 + (colorBufferCount - 1), GL_TEXTURE_2D,
 		colorBuffers[colorBufferCount - 1]->id, 0);
 	glNamedFramebufferDrawBuffers(fboId, colorBufferCount, ColorAttachments);
