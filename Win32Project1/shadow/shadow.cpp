@@ -126,13 +126,12 @@ void Shadow::mergeCamera() {
 }
 
 void Shadow::updateLightCamera(Camera* lightCamera, Camera* actCamera, const vec4& center, float radius) {
-	vec3 viewPos = GetTranslate(actCamera->viewMatrix);
+	vec3 viewPos = GetTranslate(actCamera->invViewMatrix);
 	float x = (int)(viewPos.x * 0.005) * 200.0;
 	float y = (int)(viewPos.y * 0.005) * 200.0;
 	float z = (int)(viewPos.z * 0.005) * 200.0;
-	mat4 invViewMat = actCamera->viewMatrix;
+	mat4 invViewMat = actCamera->invViewMatrix;
 	invViewMat.entries[12] = x, invViewMat.entries[13] = y, invViewMat.entries[14] = z;
-	invViewMat = invViewMat.GetInverse();
 
 	lightCamera->updateLook((vec3)(invViewMat * center), lightDir);
 }
