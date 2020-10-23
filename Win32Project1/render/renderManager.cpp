@@ -242,7 +242,7 @@ void RenderManager::drawGrass(Render* render, RenderState* state, Scene* scene, 
 	if (computeGrass) {
 		if (!grassDrawcall) {
 			BufferData terrainData(mesh->visualPoints, mesh->visualPointsSize, 4, 4);
-			static int grassCount = cfgs->graphQuality > 5 ? 1000 : 512;
+			static int grassCount = cfgs->graphQuality > 5 ? 1024 : 512;
 			grassDrawcall = new ComputeDrawcall(&terrainData, grassCount);
 		}
 		static Shader* grassShader = render->findShader("grass");
