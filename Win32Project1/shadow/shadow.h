@@ -20,8 +20,10 @@ private:
 	vec3* corners3;
 	vec4 center0,center1,center2;
 	float radius0,radius1,radius2;
-
-	void updateLightCamera(Camera* lightCamera,Camera* actCamera,const vec4& center,float radius);
+	mat4 invViewMat;
+private:
+	void updateViewCamera(Camera* actCamera);
+	void updateLightCamera(Camera* lightCamera, const vec4& center, float radius);
 public:
 	float distance1, distance2;
 	Camera* actLightCameraNear;
@@ -33,10 +35,10 @@ public:
 	float level1,level2;
 	float shadowMapSize,shadowPixSize,pixSize;
 	vec3 lightDir;
-
+public:
 	Shadow(Camera* view);
 	~Shadow();
-
+public:
 	void prepareViewCamera(float dist1, float dist2);
 	void update(Camera* actCamera, const vec3& light);
 	void copyCameraData();

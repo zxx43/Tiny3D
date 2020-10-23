@@ -5,6 +5,7 @@ Shadow::Shadow(Camera* view) {
 	distance1 = 0.0;
 	distance2 = 0.0;
 	shadowMapSize = 0, shadowPixSize = 0, pixSize = 0;
+	invViewMat.LoadIdentity();
 
 	corners0 = new vec3[4];
 	corners1 = new vec3[4];
@@ -99,9 +100,22 @@ void Shadow::prepareViewCamera(float dist1, float dist2) {
 void Shadow::update(Camera* actCamera, const vec3& light) {
 	lightDir = light;
 
-	updateLightCamera(actLightCameraNear, actCamera, center0, radius0);
-	updateLightCamera(actLightCameraMid, actCamera, center1, radius1);
-	//updateLightCamera(actLightCameraFar, actCamera, center2, radius2);
+	updateViewCamera(actCamera);
+	updateLightCamera(actLightCameraNear, center0, radius0);
+	updateLightCamera(actLightCameraMid, center1, radius1);
+	//updateLightCamera(actLightCameraFar, center2, radius2);
+}
+
+void Shadow::updateViewCamera(Camera* actCamera) {
+	invViewMat = mat4(actCamera->invViewMatrix);
+	for (int i = 0; i < 3; ++i) {
+		invViewMat.entries[i * 4 + 0] = (int)(invViewMat.entries[i * 4 + 0] * 0.1) * 10.0;
+		invViewMat.entries[i * 4 + 1] = (int)(invViewMat.entries[i * 4 + 1] * 0.1) * 10.0;
+		invViewMat.entries[i * 4 + 2] = (int)(invViewMat.entries[i * 4 + 2] * 0.1) * 10.0;
+	}
+	invViewMat.entries[12] = (int)(invViewMat.entries[12] * 0.005) * 200.0;
+	invViewMat.entries[13] = (int)(invViewMat.entries[13] * 0.005) * 200.0;
+	invViewMat.entries[14] = (int)(invViewMat.entries[14] * 0.005) * 200.0;
 }
 
 void Shadow::copyCameraData() {
@@ -125,16 +139,6 @@ void Shadow::mergeCamera() {
 	}
 }
 
-void Shadow::updateLightCamera(Camera* lightCamera, Camera* actCamera, const vec4& center, float radius) {
-	mat4 invViewMat = mat4(actCamera->invViewMatrix);
-	for (int i = 0; i < 3; ++i) {
-		invViewMat.entries[i * 4 + 0] = (int)(invViewMat.entries[i * 4 + 0] * 0.1) * 10.0;
-		invViewMat.entries[i * 4 + 1] = (int)(invViewMat.entries[i * 4 + 1] * 0.1) * 10.0;
-		invViewMat.entries[i * 4 + 2] = (int)(invViewMat.entries[i * 4 + 2] * 0.1) * 10.0;
-	}
-	invViewMat.entries[12] = (int)(invViewMat.entries[12] * 0.005) * 200.0;
-	invViewMat.entries[13] = (int)(invViewMat.entries[13] * 0.005) * 200.0;
-	invViewMat.entries[14] = (int)(invViewMat.entries[14] * 0.005) * 200.0;
-
+void Shadow::updateLightCamera(Camera* lightCamera, const vec4& center, float radius) {
 	lightCamera->updateLook((vec3)(invViewMat * center), lightDir);
 }
