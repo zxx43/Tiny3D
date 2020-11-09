@@ -18,8 +18,6 @@ using namespace std;
 #define DEFERRED_FRAG "shader/deferred.frag"
 #define TERRAIN_VERT "shader/terrain.vert"
 #define TERRAIN_FRAG "shader/terrain.frag"
-#define BILLBOARD_VERT "shader/billboard.vert"
-#define BILLBOARD_FRAG "shader/billboard.frag"
 #define WATER_VERT "shader/water.vert"
 #define WATER_FRAG "shader/water.frag"
 #define AA_FRAG "shader/fxaa.frag"
@@ -66,9 +64,6 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	Shader* bone = shaders->addShader("bone", BONE_VERT, BONE_FRAG);
 	shaders->addShaderBindTex(bone);
 
-	Shader* billboard = shaders->addShader("billboard", BILLBOARD_VERT, BILLBOARD_FRAG);
-	shaders->addShaderBindTex(billboard);
-
 	Shader* terrain = shaders->addShader("terrain", TERRAIN_VERT, TERRAIN_FRAG);
 	shaders->addShaderBindTex(terrain);
 
@@ -114,10 +109,6 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 
 	Shader* boneShadow = shaders->addShader("bone_s", BONE_VERT, SHADOW_NONTEX_FRAG);
 	boneShadow->attachDef("ShadowPass", "1.0");
-
-	Shader* billboardShadow = shaders->addShader("billboard_s", BILLBOARD_VERT, SHADOW_TEX_FRAG);
-	billboardShadow->attachDef("ShadowPass", "1.0");
-	shaders->addShaderBindTex(billboardShadow);
 
 	Shader* deferred = shaders->addShader("deferred", POST_VERT, DEFERRED_FRAG);
 	if (cfgs->shadowQuality > 0)

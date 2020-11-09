@@ -30,6 +30,8 @@ void Camera::initPerspectCamera(float fovy, float aspect, float zNear, float zFa
 }
 
 void Camera::initOrthoCamera(float left, float right, float bottom, float top, float near, float far) {
+	zNear = near;
+	zFar = far;
 	projectMatrix = ortho(left, right, bottom, top, near, far);
 	invProjMatrix = projectMatrix.GetInverse();
 	needRefresh = true;

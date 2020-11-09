@@ -226,6 +226,17 @@ void Shader::setVector2v(const char* param, float* arr) {
 	getError(param, location);
 }
 
+void Shader::setVector2v(const char* param, int count, float* arr) {
+	int location = findParamLocation(param);
+	if (location == INVALID_LOCATION) {
+		addParam(param);
+		location = findParamLocation(param);
+	}
+	if (location != INVALID_LOCATION && program)
+		glProgramUniform2fv(program->shaderProg, location, count, arr);
+	getError(param, location);
+}
+
 void Shader::setVector3v(const char* param, float* arr) {
 	int location = findParamLocation(param);
 	if (location == INVALID_LOCATION) {

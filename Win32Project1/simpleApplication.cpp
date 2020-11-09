@@ -90,7 +90,7 @@ void SimpleApplication::resize(int width, int height) {
 		}
 		if (cfgs->ssr) {
 			if (ssrChain) delete ssrChain;
-			ssrChain = new FilterChain(width * 0.7, height * 0.7, true, LOW_PRE, 4, false);
+			ssrChain = new FilterChain(width * 0.75, height * 0.75, true, LOW_PRE, 4, false);
 			ssrChain->addInputTex(combinedChain->getOutputTex(0));
 			ssrChain->addInputTex(waterFrame->getColorBuffer(1));
 			ssrChain->addInputTex(waterFrame->getColorBuffer(2));

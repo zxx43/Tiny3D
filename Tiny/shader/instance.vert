@@ -5,6 +5,11 @@ uniform mat4 viewProjectMatrix;
 uniform vec3 viewRight;
 #endif
 
+#ifdef ShadowPass
+uniform mat4 projectMatrix, viewMatrix;
+uniform vec2 camPara;
+#endif
+
 layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec4 texcoord;
@@ -52,5 +57,10 @@ void main() {
 		#endif
 		vec4 worldVertex = vec4(position + right + top, 1.0);
 #endif
+
+#ifdef ShadowPass
+	gl_Position = DepthToLinear(viewProjectMatrix, projectMatrix, viewMatrix, camPara.x, camPara.y, worldVertex);
+#else
 	gl_Position = viewProjectMatrix * worldVertex;
+#endif
 }

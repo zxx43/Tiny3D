@@ -330,8 +330,6 @@
     <None Include="..\Tiny\shader\atmosphere.frag" />
     <None Include="..\Tiny\shader\atmosphere.glsl" />
     <None Include="..\Tiny\shader\atmosphere.vert" />
-    <None Include="..\Tiny\shader\billboard.frag" />
-    <None Include="..\Tiny\shader\billboard.vert" />
     <None Include="..\Tiny\shader\blur.frag" />
     <None Include="..\Tiny\shader\bone.frag" />
     <None Include="..\Tiny\shader\bone.vert" />

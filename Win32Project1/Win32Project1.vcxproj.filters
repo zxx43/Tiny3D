@@ -589,12 +589,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Tiny\shader\billboard.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Tiny\shader\billboard.vert">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="..\Tiny\shader\blur.frag">
       <Filter>Shaders</Filter>
     </None>
