@@ -129,8 +129,7 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	if (cfgs->cartoon)
 		fxaa->attachDef("USE_CARTOON", "1");
 	fxaa->setSlot("colorBuffer", 0);
-	fxaa->setSlot("normalBuffer", 1);
-	fxaa->setSlot("depthBuffer", 2);
+	fxaa->setSlot("normalWaterBuffer", 1);
 
 	Shader* blur = shaders->addShader("blur", POST_VERT, BLUR_FRAG);
 	blur->setSlot("colorBuffer", 0);
@@ -156,6 +155,8 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	screen->setSlot("tex", 0);
 
 	Shader* ssr = shaders->addShader("ssr", POST_VERT, SSR_FRAG);
+	if (cfgs->graphQuality > 3)
+		ssr->attachDef("HIGH_QUALITY", "1");
 	ssr->setSlot("lightBuffer", 0);
 	ssr->setSlot("matBuffer", 1);
 	ssr->setSlot("normalBuffer", 2);
@@ -169,12 +170,13 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	if (cfgs->graphQuality > 3)
 		combined->attachDef("HIGH_QUALITY", "1");
 	combined->setSlot("sceneBuffer", 0);
-	combined->setSlot("sceneDepthBuffer", 1);
-	combined->setSlot("waterBuffer", 2);
-	combined->setSlot("waterDepthBuffer", 3);
-	combined->setSlot("matBuffer", 4);
+	combined->setSlot("sceneNormalBuffer", 1);
+	combined->setSlot("sceneDepthBuffer", 2);
+	combined->setSlot("waterBuffer", 3);
+	combined->setSlot("waterMatBuffer", 4);
 	combined->setSlot("waterNormalBuffer", 5);
-	combined->setSlot("bloomBuffer", 6);
+	combined->setSlot("waterDepthBuffer", 6);
+	combined->setSlot("bloomBuffer", 7);
 
 	Shader* ssg = shaders->addShader("ssg", POST_VERT, SSG_FRAG);
 	ssg->setSlot("colorBuffer", 0);

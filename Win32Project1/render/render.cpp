@@ -268,8 +268,9 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 							shader->setHandle64("texRef", AssetManager::assetManager->getReflectTexture()->hnd);
 				}
 			} else if (state->skyPass) {
-				shader->setMatrix4("viewMatrix", camera->viewMatrix);
-				shader->setMatrix4("projectMatrix", camera->projectMatrix);
+				mat4 viewMat = camera->viewMatrix;
+				viewMat.entries[12] = 0.0, viewMat.entries[13] = 0.0, viewMat.entries[14] = 0.0;
+				shader->setMatrix4("viewProjectMatrix", camera->projectMatrix * viewMat);
 				if (AssetManager::assetManager->getSkyTexture() &&
 					!shader->isTexBinded(AssetManager::assetManager->getSkyTexture()->hnd))
 						shader->setHandle64("texSky", AssetManager::assetManager->getSkyTexture()->hnd);

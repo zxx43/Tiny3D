@@ -2,8 +2,9 @@
 
 layout(early_fragment_tests) in;
 
-layout(bindless_sampler) uniform samplerCube texEnv, texSky;
-layout(bindless_sampler) uniform sampler2D texRef;
+uniform BindlessSamplerCube texEnv, texSky;
+uniform BindlessSampler2D texRef;
+
 uniform mat4 viewMatrix;
 uniform vec2 waterBias;
 uniform vec3 light;
@@ -21,12 +22,13 @@ void main() {
 	vec3 normal = normalize(vNormal);
 	vec3 eye2Water = normalize(vEye2Water);
 	
-	vec2 refCoord = (vProjPos.xy / vProjPos.w) * 0.5 + 0.5;
+	vec3 refCoord = (vProjPos.xyz / vProjPos.w) * 0.5 + 0.5;
+	float depth = refCoord.z;
 	#ifdef DISABLE_SSR
 		vec2 bias = normalize(mat3(viewMatrix) * normal).xz * waterBias;
-		vec4 reflectTex = texture(texRef, refCoord + bias);
+		vec4 reflectTex = texture(texRef, refCoord.xy + bias);
 	#else
-		vec4 reflectTex = texture(texRef, refCoord);
+		vec4 reflectTex = texture(texRef, refCoord.xy);
 	#endif
 
 	vec3 reflectCoord = reflect(eye2Water, normal);
@@ -48,7 +50,7 @@ void main() {
 	vec3 reflectedColor = reflectTex.rgb * reflectMapTex;
 	vec3 refractedColor = refractMapTex;
 
-	vec4 surfaceColor = vec4(reflectedColor, 0.5);
+	vec4 surfaceColor = vec4(reflectedColor, depth);
 	vec4 matColor = vec4(refractedColor, 0.0);
 		
 	FragTex = surfaceColor;

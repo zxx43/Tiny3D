@@ -2,7 +2,7 @@
 
 layout(early_fragment_tests) in;
 
-layout(bindless_sampler) uniform samplerCube texSky;
+uniform BindlessSamplerCube texSky;
 
 in vec3 texCoord;
 

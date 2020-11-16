@@ -467,6 +467,17 @@ void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* s
 	filter->draw(scene->renderCamera, render, state, inputBuff->colorBuffers, NULL);
 }
 
+void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, Texture2D* inputTexture, Filter* filter) {
+	Shader* shader = render->findShader(shaderStr);
+	state->reset();
+	state->eyePos = &(scene->renderCamera->position);
+	//state->enableCull = false;
+	state->enableDepthTest = false;
+	state->pass = POST_PASS;
+	state->shader = shader;
+	filter->draw(scene->renderCamera, render, state, inputTexture, NULL);
+}
+
 void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter) {
 	Shader* shader = render->findShader(shaderStr);
 	state->reset();

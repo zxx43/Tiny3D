@@ -21,7 +21,9 @@ private:
 public:
 	Filter(float width, float height, bool useFramebuffer, int precision, int component, bool clampBorder = true);
 	~Filter();
-
+public:
+	void draw(Camera* camera, Render* render, RenderState* state,
+		Texture2D* inputTexture, const Texture2D* depthTexture);
 	void draw(Camera* camera, Render* render, RenderState* state, 
 		const std::vector<Texture2D*>& inputTextures, const Texture2D* depthTexture);
 	void addOutput(int precision, int component);

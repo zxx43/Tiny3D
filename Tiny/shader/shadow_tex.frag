@@ -1,10 +1,15 @@
 #include "shader/util.glsl"
 
-layout(bindless_sampler) uniform sampler2D texBlds[MAX_TEX];
+uniform BindlessSampler2D texBlds[MAX_TEX];
+uniform float uAlpha;
 
 in vec2 vTexcoord;
 flat in vec4 vTexid;
 
 void main() {
-	if(texture(texBlds[int(vTexid.x)], vTexcoord.xy).a < 0.3) discard;
+	if(uAlpha < 0.5) {}
+	else {
+		if(texture(texBlds[int(vTexid.x)], vTexcoord.xy).a < 0.3) 
+			discard;
+	}
 }

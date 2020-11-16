@@ -2,7 +2,7 @@
 #include "shader/vtf.glsl"
 
 uniform mat4 viewProjectMatrix;
-layout(bindless_sampler) uniform sampler2D boneTex[MAX_BONE_TEX];
+uniform BindlessSampler2D boneTex[MAX_BONE_TEX];
 
 #ifdef ShadowPass
 uniform mat4 projectMatrix, viewMatrix;

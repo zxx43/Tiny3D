@@ -47,13 +47,6 @@ void main() {
 	//if(FragTex.g > FragTex.r + 0.01 && FragTex.g > FragTex.b + 0.01) grassFlag = 1.0;
 	FragNormalGrass = vec4(normalize(normal) * 0.5 + 0.5, grassFlag);
 
-	FragRoughMetal = DefaultRM;
-	if(vRMid.x >= 0.0) {
-		float roughness = texture(texBlds[int(vRMid.x)], vTexcoord).r;
-		FragRoughMetal.r = roughness;
-	}
-	if(vRMid.y >= 0.0) {
-		float metallic = texture(texBlds[int(vRMid.y)], vTexcoord).r;
-		FragRoughMetal.g = metallic;
-	}
+	FragRoughMetal.r = vRMid.x >= 0.0 ? texture(texBlds[int(vRMid.x)], vTexcoord).r : DefaultRM.r;
+	FragRoughMetal.g = vRMid.y >= 0.0 ? texture(texBlds[int(vRMid.y)], vTexcoord).r : DefaultRM.g;
 }

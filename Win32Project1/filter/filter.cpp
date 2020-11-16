@@ -28,7 +28,7 @@ Filter::~Filter() {
 
 bool Filter::bindTex(int slot, const Texture2D* tex, Shader* shader) {
 	if (!shader->hasSlot(slot)) {
-		printf("error slot:%d\n", slot);
+		printf("shader: %s error slot:%d\n", shader->name.data(), slot);
 		return false;
 	}
 	int hnd = shader->getSlotHnd(slot);
@@ -37,6 +37,25 @@ bool Filter::bindTex(int slot, const Texture2D* tex, Shader* shader) {
 		return true;
 	}
 	return false;
+}
+
+void Filter::draw(Camera* camera, Render* render, RenderState* state,
+		Texture2D* inputTexture, const Texture2D* depthTexture) {
+	Shader* shader = state->shader;
+	render->setFrameBuffer(framebuffer);
+	render->setShaderVec2(shader, "pixelSize", pixWidth, pixHeight);
+	render->setShaderFloat(shader, "quality", state->quality);
+
+	if (state->shadow) {
+		float shadowPixSize = state->shadow->shadowPixSize;
+		render->setShaderVec2(shader, "shadowPixSize", shadowPixSize, shadowPixSize);
+	}
+	uint bufferid = 0;
+	bindTex(bufferid, inputTexture, shader);
+	++bufferid;
+	if (depthTexture)
+		bindTex(bufferid, depthTexture, shader);
+	render->draw(camera, boardNode->drawcall, state);
 }
 
 void Filter::draw(Camera* camera, Render* render, RenderState* state,

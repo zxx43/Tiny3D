@@ -1,10 +1,18 @@
 ﻿#include "shader/util.glsl"
 
-layout(bindless_sampler) uniform sampler2D texBuffer, matBuffer, normalGrassBuffer, roughMetalBuffer, depthBuffer;
+uniform BindlessSampler2D texBuffer, 
+						matBuffer, 
+						normalGrassBuffer, 
+						roughMetalBuffer, 
+						depthBuffer;
+
 uniform vec2 pixelSize;
 uniform mat4 invViewProjMatrix, invProjMatrix;
 
-layout(bindless_sampler) uniform sampler2D depthBufferNear, depthBufferMid, depthBufferFar;
+uniform BindlessSampler2D depthBufferNear, 
+						depthBufferMid, 
+						depthBufferFar;
+
 uniform mat4 lightViewProjNear, lightViewProjMid, lightViewProjFar;
 uniform vec2 shadowPixSize;
 uniform vec2 levels;
@@ -186,7 +194,7 @@ void main() {
 
 		// PBR
 		#ifndef USE_CARTOON
-			if(shadowFactor < 0.01 || udotl < 0.01) 
+			if(shadowFactor * udotl < 0.0001) 
 				sceneColor = ambient * udotl;
 			else {
 				v /= depthView;

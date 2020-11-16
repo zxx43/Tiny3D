@@ -160,3 +160,6 @@ struct Indirect {
 	uint baseVertex;
 	uint baseInstance;
 };
+
+#define BindlessSampler2D layout(bindless_sampler) sampler2D
+#define BindlessSamplerCube layout(bindless_sampler) samplerCube

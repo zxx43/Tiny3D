@@ -120,17 +120,21 @@ void MultiDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 		dataBufferDraw->use();
 		render->useShader(shader);
+
+		bool shadowPass = state->pass < COLOR_PASS;
 		if (!multiRef->hasAnim) {
 			// Draw normal faces
 			if (multiRef->normalCount > 0) {
+				if (shadowPass) shader->setFloat("uAlpha", 0.0);
 				indirectBufferDraw->useAs(IndirectNormalIndex, GL_DRAW_INDIRECT_BUFFER);
 				glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, 0, multiRef->normalCount, 0);
 			}
 
 			// Draw single faces
 			if (multiRef->singleCount > 0) {
-				if (state->pass < COLOR_PASS) render->setCullMode(CULL_BACK);
+				if (shadowPass) render->setCullMode(CULL_BACK);
 				else render->setCullState(false);
+				if (shadowPass) shader->setFloat("uAlpha", 1.0);
 				indirectBufferDraw->useAs(IndirectSingleIndex, GL_DRAW_INDIRECT_BUFFER);
 				glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, 0, multiRef->singleCount, 0);
 			}
@@ -138,7 +142,8 @@ void MultiDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
 			// Draw billboard faces
 			if (multiRef->billCount > 0) {
 				render->useShader(state->shaderBill);
-				if (state->pass < COLOR_PASS) render->setCullState(false);
+				if (shadowPass) render->setCullState(false);
+				if (shadowPass) shader->setFloat("uAlpha", 1.0);
 				indirectBufferDraw->useAs(IndirectBillIndex, GL_DRAW_INDIRECT_BUFFER);
 				glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, 0, multiRef->billCount, 0);
 			}

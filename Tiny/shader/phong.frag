@@ -1,6 +1,6 @@
 #include "shader/util.glsl"
 
-layout(bindless_sampler) uniform sampler2D texBlds[MAX_TEX];
+uniform BindlessSampler2D texBlds[MAX_TEX];
 #ifdef BillPass
 uniform vec3 uNormal;
 #endif
@@ -26,11 +26,8 @@ void main() {
 
 		FragMat = vec4(vColor, 1.0);
 		FragNormalGrass = vec4(normalize(normal) * 0.5 + 0.5, 0.0);
-		FragRoughMetal = DefaultRM;
-		if(vTexid.z >= 0.0) 
-			FragRoughMetal.r = texture(texBlds[int(vTexid.z)], vTexcoord).r;
-		if(vTexid.w >= 0.0) 
-			FragRoughMetal.g = texture(texBlds[int(vTexid.w)], vTexcoord).r;
+		FragRoughMetal.r = vTexid.z >= 0.0 ? texture(texBlds[int(vTexid.z)], vTexcoord).r : DefaultRM.r;
+		FragRoughMetal.g = vTexid.w >= 0.0 ? texture(texBlds[int(vTexid.w)], vTexcoord).r : DefaultRM.g;
 #else
 		FragMat = BoardMat;
 		FragNormalGrass = vec4(uNormal, 0.0);

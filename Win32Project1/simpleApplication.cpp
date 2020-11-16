@@ -45,30 +45,31 @@ SimpleApplication::~SimpleApplication() {
 void SimpleApplication::resize(int width, int height) {
 	if (!render) return;
 
-	int precision = cfgs->graphQuality > 4 ? HIGH_PRE : LOW_PRE;
-	int scrPre = (cfgs->graphQuality > 4 || cfgs->ssr) ? HIGH_PRE : LOW_PRE;
-	int hdrPre = cfgs->graphQuality > 3 ? FLOAT_PRE : precision;
-	int matPre = LOW_PRE, waterPre = LOW_PRE;
-	int aaPre = LOW_PRE, dofPre = LOW_PRE, rawPre = LOW_PRE;
+	const int precision = cfgs->graphQuality > 4 ? HIGH_PRE : LOW_PRE;
+	const int scrPre = (cfgs->graphQuality > 4 || cfgs->ssr) ? HIGH_PRE : LOW_PRE;
+	const int hdrPre = cfgs->graphQuality > 3 ? FLOAT_PRE : precision;
+	const int matPre = LOW_PRE, waterPre = LOW_PRE;
+	const int aaPre = LOW_PRE, dofPre = precision, rawPre = LOW_PRE;
+	const float bloomScale = 0.75, ssrScale = 0.75, dofScale = 0.5;
 
 	Application::resize(width, height);
 
 	if (screen) delete screen;
 	screen = new FrameBuffer(width, height, hdrPre, 4, false); // texBuffer
-	screen->addColorBuffer(matPre, 4); // matBuffer
-	screen->addColorBuffer(matPre, 3); // normal-grassBuffer
-	screen->addColorBuffer(matPre, 3); // rough-metalBuffer
-	screen->attachDepthBuffer(renderMgr->getDepthPre()); // depthBuffer
+	screen->addColorBuffer(matPre, 4);                         // matBuffer
+	screen->addColorBuffer(matPre, 3);                         // normal-grassBuffer
+	screen->addColorBuffer(matPre, 2);                         // rough-metalBuffer
+	screen->attachDepthBuffer(renderMgr->getDepthPre());       // depthBuffer
 
 	if (waterFrame) delete waterFrame;
 	waterFrame = new FrameBuffer(width, height, hdrPre, 4, false);
-	waterFrame->addColorBuffer(waterPre, 4);
-	waterFrame->addColorBuffer(waterPre, 3);
+	waterFrame->addColorBuffer(waterPre, 4); // FragMat
+	waterFrame->addColorBuffer(waterPre, 3); // FragNormal
 	waterFrame->attachDepthBuffer(renderMgr->getDepthPre());
 
 	if (sceneFilter) delete sceneFilter;
 	sceneFilter = new Filter(width, height, true, precision, 4, false);
-	sceneFilter->addOutput(hdrPre, 3);
+	sceneFilter->addOutput(hdrPre, 3); // FragBright
 
 	if (combinedChain) delete combinedChain;
 	if (!cfgs->fxaa && !cfgs->dof && !cfgs->ssr)
@@ -77,12 +78,12 @@ void SimpleApplication::resize(int width, int height) {
 		combinedChain = new FilterChain(width, height, true, precision, 4);
 		if (cfgs->fxaa) {
 			if (aaFilter) delete aaFilter;
-			aaFilter = new Filter(width, height, false, aaPre, 4);
+			aaFilter = new Filter(width, height, false, aaPre, 3);
 			aaInput.clear();
 		}
 		if (cfgs->dof) {
 			if (dofBlurFilter) delete dofBlurFilter;
-			dofBlurFilter = new Filter(width * 0.75, height * 0.75, true, LOW_PRE, 4);
+			dofBlurFilter = new Filter(width * dofScale, height * dofScale, true, dofPre, 4);
 			if (dofChain) delete dofChain;
 			dofChain = new FilterChain(width, height, cfgs->fxaa, dofPre, 4);
 			dofChain->addInputTex(dofBlurFilter->getOutput(0));
@@ -90,11 +91,11 @@ void SimpleApplication::resize(int width, int height) {
 		}
 		if (cfgs->ssr) {
 			if (ssrChain) delete ssrChain;
-			ssrChain = new FilterChain(width * 0.75, height * 0.75, true, LOW_PRE, 4, false);
-			ssrChain->addInputTex(combinedChain->getOutputTex(0));
-			ssrChain->addInputTex(waterFrame->getColorBuffer(1));
-			ssrChain->addInputTex(waterFrame->getColorBuffer(2));
-			ssrChain->addInputTex(waterFrame->getDepthBuffer());
+			ssrChain = new FilterChain(width * ssrScale, height * ssrScale, true, LOW_PRE, 4, false);
+			ssrChain->addInputTex(combinedChain->getOutputTex(0)); // lightBuffer
+			ssrChain->addInputTex(waterFrame->getColorBuffer(1));  // matBuffer
+			ssrChain->addInputTex(waterFrame->getColorBuffer(2));  // normalBuffer
+			ssrChain->addInputTex(waterFrame->getDepthBuffer());   // depthBuffer
 
 			if (!cfgs->fxaa && !cfgs->dof) {
 				if (rawScreenFilter) delete rawScreenFilter;
@@ -106,22 +107,23 @@ void SimpleApplication::resize(int width, int height) {
 		}
 	}
 
-	float bloomScale = 0.5;
 	if (bloomChain) delete bloomChain;
 	bloomChain = new DualFilter(width * bloomScale, height * bloomScale, true, hdrPre, 3, false);
 	bloomChain->addInputTex(sceneFilter->getOutput(1));
 
 	if (combinedChain) {
+		combinedChain->output->addOutput(precision, 4);            // NormalWaterFlag
 		if (ssgChain)
-			combinedChain->addInputTex(ssgChain->getOutputTex(0));
+			combinedChain->addInputTex(ssgChain->getOutputTex(0)); // sceneBuffer
 		else
-			combinedChain->addInputTex(sceneFilter->getOutput(0));
-		combinedChain->addInputTex(screen->getDepthBuffer());
-		combinedChain->addInputTex(waterFrame->getColorBuffer(0));
-		combinedChain->addInputTex(waterFrame->getDepthBuffer());
-		combinedChain->addInputTex(waterFrame->getColorBuffer(1));
-		combinedChain->addInputTex(waterFrame->getColorBuffer(2));
-		combinedChain->addInputTex(bloomChain->getOutputTex());
+			combinedChain->addInputTex(sceneFilter->getOutput(0)); // sceneBuffer
+		combinedChain->addInputTex(screen->getColorBuffer(2));     // sceneNormalBuffer
+		combinedChain->addInputTex(screen->getDepthBuffer());      // sceneDepthBuffer
+		combinedChain->addInputTex(waterFrame->getColorBuffer(0)); // waterBuffer
+		combinedChain->addInputTex(waterFrame->getColorBuffer(1)); // waterMatBuffer
+		combinedChain->addInputTex(waterFrame->getColorBuffer(2)); // waterNormalBuffer
+		combinedChain->addInputTex(waterFrame->getDepthBuffer());  // waterDepthBuffer
+		combinedChain->addInputTex(bloomChain->getOutputTex());    // bloomBuffer
 	}
 
 	render->clearTextureSlots();
@@ -179,7 +181,8 @@ void SimpleApplication::draw() {
 		renderMgr->drawSSGFilter(render, scene, "ssg", ssgChain->input, ssgChain->output);
 
 	render->setFrameBuffer(waterFrame);
-	waterFrame->getDepthBuffer()->copyDataFrom(screen->getDepthBuffer());
+	if (cfgs->graphQuality <= 3)
+		waterFrame->getDepthBuffer()->copyDataFrom(screen->getDepthBuffer());
 	if (renderMgr->isWaterShow(scene)) 
 		renderMgr->renderWater(render, scene);
 
@@ -197,15 +200,14 @@ void SimpleApplication::draw() {
 
 	Filter* lastFilter = combinedChain->output;
 	if (cfgs->dof) {
-		renderMgr->drawScreenFilter(render, scene, "blur", combinedChain->getOutFrameBuffer(), dofBlurFilter);
+		renderMgr->drawScreenFilter(render, scene, "blur", combinedChain->getOutputTex(0), dofBlurFilter);
 		renderMgr->drawScreenFilter(render, scene, "dof", dofChain->input, dofChain->output);
 		lastFilter = dofChain->output;
 	}
 	if (cfgs->fxaa) {
 		if (aaInput.size() == 0) {
-			aaInput.push_back(lastFilter->getFrameBuffer()->getColorBuffer(0));
-			aaInput.push_back(screen->getColorBuffer(2));
-			aaInput.push_back(waterFrame->getDepthBuffer());
+			aaInput.push_back(lastFilter->getFrameBuffer()->getColorBuffer(0)); // colorBuffer
+			aaInput.push_back(combinedChain->getOutputTex(1));					// normalWaterBuffer
 		}
 		renderMgr->drawScreenFilter(render, scene, "fxaa", aaInput, aaFilter);
 	}
