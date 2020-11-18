@@ -287,9 +287,9 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 			shader->setFloat("time", state->time);
 
 			if (state->shadow) {
-				shader->setMatrix4("lightViewProjNear", state->shadow->renderLightCameraNear->viewProjectMatrix);
-				shader->setMatrix4("lightViewProjMid", state->shadow->renderLightCameraMid->viewProjectMatrix);
-				shader->setMatrix4("lightViewProjFar", state->shadow->renderLightCameraFar->viewProjectMatrix);
+				if (state->shadow->flushNear) shader->setMatrix4("lightViewProjNear", state->shadow->renderLightCameraNear->viewProjectMatrix);
+				if (state->shadow->flushMid) shader->setMatrix4("lightViewProjMid", state->shadow->renderLightCameraMid->viewProjectMatrix);
+				if (state->shadow->flushFar) shader->setMatrix4("lightViewProjFar", state->shadow->renderLightCameraFar->viewProjectMatrix);
 				shader->setVector2("levels", state->shadow->level1, state->shadow->level2);
 			}
 			if (state->lightEffect) {
@@ -322,15 +322,22 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 		} else if (state->pass == DEFERRED_PASS) {
 			if (state->shadow) {
 				float invdNear = 1.0 / (state->shadow->renderLightCameraNear->zFar - state->shadow->renderLightCameraNear->zNear);
-				float invdMid = 1.0 / (state->shadow->renderLightCameraMid->zFar - state->shadow->renderLightCameraMid->zNear);
-				float invdFar = 1.0 / (state->shadow->renderLightCameraFar->zFar - state->shadow->renderLightCameraFar->zNear);
+				if (state->shadow->flushNear) {
+					shader->setMatrix4("lightProjNear", state->shadow->renderLightCameraNear->projectMatrix);
+					shader->setMatrix4("lightViewNear", state->shadow->renderLightCameraNear->viewMatrix);
+				}
 
-				shader->setMatrix4("lightProjNear", state->shadow->renderLightCameraNear->projectMatrix);
-				shader->setMatrix4("lightProjMid", state->shadow->renderLightCameraMid->projectMatrix);
-				shader->setMatrix4("lightProjFar", state->shadow->renderLightCameraFar->projectMatrix);
-				shader->setMatrix4("lightViewNear", state->shadow->renderLightCameraNear->viewMatrix);
-				shader->setMatrix4("lightViewMid", state->shadow->renderLightCameraMid->viewMatrix);
-				shader->setMatrix4("lightViewFar", state->shadow->renderLightCameraFar->viewMatrix);
+				float invdMid = 1.0 / (state->shadow->renderLightCameraMid->zFar - state->shadow->renderLightCameraMid->zNear);
+				if (state->shadow->flushMid) {
+					shader->setMatrix4("lightProjMid", state->shadow->renderLightCameraMid->projectMatrix);
+					shader->setMatrix4("lightViewMid", state->shadow->renderLightCameraMid->viewMatrix);
+				}
+
+				float invdFar = 1.0 / (state->shadow->renderLightCameraFar->zFar - state->shadow->renderLightCameraFar->zNear);
+				if (state->shadow->flushFar) {
+					shader->setMatrix4("lightProjFar", state->shadow->renderLightCameraFar->projectMatrix);
+					shader->setMatrix4("lightViewFar", state->shadow->renderLightCameraFar->viewMatrix);
+				}
 
 				float camParas[6] = { 
 					state->shadow->renderLightCameraNear->zNear, invdNear,

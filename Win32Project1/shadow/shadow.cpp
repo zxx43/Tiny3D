@@ -18,6 +18,10 @@ Shadow::Shadow(Camera* view) {
 	renderLightCameraNear = new Camera(0);
 	renderLightCameraMid = new Camera(0);
 	renderLightCameraFar = new Camera(0);
+
+	flushNear = false;
+	flushMid = false;
+	flushFar = false;
 }
 
 Shadow::~Shadow() {

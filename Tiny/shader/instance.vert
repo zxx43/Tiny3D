@@ -30,8 +30,8 @@ out mat3 vTBN;
 
 void main() {
 #ifndef BillPass
-		mat3 matRot = mat3(modelMatrix);
 		#ifndef ShadowPass
+			mat3 matRot = mat3(modelMatrix);
 			vNormal = matRot * normal;
 			vTBN = matRot * GetTBN(normalize(normal), normalize(tangent));
 			vColor = COLOR_SCALE * color;

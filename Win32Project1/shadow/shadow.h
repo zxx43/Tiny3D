@@ -35,6 +35,7 @@ public:
 	float level1,level2;
 	float shadowMapSize,shadowPixSize,pixSize;
 	vec3 lightDir;
+	bool flushNear, flushMid, flushFar;
 public:
 	Shadow(Camera* view);
 	~Shadow();
@@ -43,6 +44,9 @@ public:
 	void update(Camera* actCamera, const vec3& light);
 	void copyCameraData();
 	void mergeCamera();
+	void setFlushNear(bool f) { flushNear = f; }
+	void setFlushMid(bool f) { flushMid = f; }
+	void setFlushFar(bool f) { flushFar = f; }
 };
 
 

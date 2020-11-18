@@ -30,6 +30,7 @@ public:
 	virtual ~MultiDrawcall();
 	virtual void draw(Render* render, RenderState* state, Shader* shader);
 	void update(Render* render, RenderState* state);
+	MultiInstance* getInstance() { return multiRef; }
 };
 
 #endif

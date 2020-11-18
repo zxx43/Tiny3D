@@ -22,10 +22,10 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 		depthPre = HIGH_PRE;
 	}
 	shadow->shadowMapSize = nearSize;
-	shadow->shadowPixSize = 0.65 / nearSize;
+	shadow->shadowPixSize = 0.8 / nearSize;
 	shadow->pixSize = 1.0 / nearSize;
 
-	nearBuffer = new FrameBuffer(nearSize, nearSize, depthPre);
+	nearBuffer = new FrameBuffer(nearSize, nearSize, LOW_PRE);
 	midBuffer = new FrameBuffer(midSize, midSize, depthPre);
 	farBuffer = new FrameBuffer(farSize, farSize, LOW_PRE);
 	lightDir = light.GetNormalized();
@@ -175,6 +175,7 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 
 	Camera* mainCamera = scene->renderCamera;
 
+	shadow->setFlushNear(true);
 	render->setFrameBuffer(nearBuffer);
 	Camera* cameraNear=shadow->renderLightCameraNear;
 	state->pass = NEAR_SHADOW_PASS;
@@ -190,17 +191,25 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	state->shaderFlush = animFlushShader;
 	currentQueue->queues[QUEUE_ANIMATE_SN]->draw(scene, cameraNear, render, state);
 
-	render->setFrameBuffer(midBuffer);
-	Camera* cameraMid=shadow->renderLightCameraMid;
-	state->pass = MID_SHADOW_PASS;
-	state->shader = phongShadowShader;
-	state->shaderMulti = multiShader;
-	state->shaderFlush = flushShader;
-	currentQueue->queues[QUEUE_STATIC_SM]->draw(scene, cameraMid, render, state);
-	state->shader = boneShadowShader;
-	state->shaderMulti = animMultiShader;
-	state->shaderFlush = animFlushShader;
-	currentQueue->queues[QUEUE_ANIMATE_SM]->draw(scene, cameraMid, render, state);
+	static ushort fm = 10;
+	if (fm % 10 != 0) {
+		++fm;
+		shadow->setFlushMid(false);
+	} else {
+		fm = 1;
+		shadow->setFlushMid(true);
+		render->setFrameBuffer(midBuffer);
+		Camera* cameraMid = shadow->renderLightCameraMid;
+		state->pass = MID_SHADOW_PASS;
+		state->shader = phongShadowShader;
+		state->shaderMulti = multiShader;
+		state->shaderFlush = flushShader;
+		currentQueue->queues[QUEUE_STATIC_SM]->draw(scene, cameraMid, render, state);
+		state->shader = boneShadowShader;
+		state->shaderMulti = animMultiShader;
+		state->shaderFlush = animFlushShader;
+		currentQueue->queues[QUEUE_ANIMATE_SM]->draw(scene, cameraMid, render, state);
+	}
 
 	///*
 	static ushort flushCount = 1;
@@ -211,8 +220,10 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 		else {
 			if (flushCount % 3 == 1) {
 				render->setFrameBuffer(farBuffer);
-				if (true) flushed = true;
-				else {
+				if (true) {
+					flushed = true;
+					shadow->setFlushFar(false);
+				} else {
 					Camera* cameraFar = shadow->renderLightCameraFar;
 					state->pass = FAR_SHADOW_PASS;
 					state->shader = phongShadowLowShader;
