@@ -11,7 +11,7 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 	float midSize = 1024;
 	float farSize = 2;
 	if (cfgs->shadowQuality > 2) {
-		nearSize = 4096;
+		nearSize = 2048;
 		midSize = 2048;
 		farSize = 2;
 		depthPre = HIGH_PRE;
@@ -22,10 +22,10 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 		depthPre = HIGH_PRE;
 	}
 	shadow->shadowMapSize = nearSize;
-	shadow->shadowPixSize = 0.8 / nearSize;
+	shadow->shadowPixSize = 0.65 / nearSize;
 	shadow->pixSize = 1.0 / nearSize;
 
-	nearBuffer = new FrameBuffer(nearSize, nearSize, LOW_PRE);
+	nearBuffer = new FrameBuffer(nearSize, nearSize, depthPre);
 	midBuffer = new FrameBuffer(midSize, midSize, depthPre);
 	farBuffer = new FrameBuffer(farSize, farSize, LOW_PRE);
 	lightDir = light.GetNormalized();
@@ -80,7 +80,7 @@ void RenderManager::resize(float width, float height) {
 }
 
 void RenderManager::updateShadowCamera(Camera* mainCamera) {
-	shadow->prepareViewCamera(mainCamera->zFar * 0.25, mainCamera->zFar * 0.75);
+	shadow->prepareViewCamera(mainCamera->zFar * 0.1, mainCamera->zFar * 0.7);
 }
 
 void RenderManager::updateMainLight(Scene* scene) {
@@ -191,8 +191,8 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	state->shaderFlush = animFlushShader;
 	currentQueue->queues[QUEUE_ANIMATE_SN]->draw(scene, cameraNear, render, state);
 
-	static ushort fm = 10;
-	if (fm % 10 != 0) {
+	static ushort fm = 5;
+	if (fm % 5 != 0) {
 		++fm;
 		shadow->setFlushMid(false);
 	} else {

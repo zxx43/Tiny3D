@@ -24,14 +24,13 @@ uniform float time;
 uniform mat4 lightProjNear, lightProjMid, lightProjFar;
 uniform mat4 lightViewNear, lightViewMid, lightViewFar;
 uniform vec2 camParas[3];
+uniform vec2 gaps;
 
 in vec2 vTexcoord;
 
 layout (location = 0) out vec4 FragColor;
 layout (location = 1) out vec4 FragBright;
 
-const float GAP = 30.0;
-const float INV2GAP = 0.01667;
 const vec3 KCool = vec3(0.15, 0.15, 0.35);
 const vec3 KWarm = vec3(0.9, 0.9, 0.25);
 
@@ -80,7 +79,7 @@ float genShadow(sampler2D shadowMap, vec3 shadowCoord, float bias) {
 }
 
 float genShadowFactor(vec4 worldPos, float depthView, float bias) {
-	if(depthView <= levels.x - GAP) {
+	if(depthView <= levels.x - gaps.x) {
 		vec4 near = DepthToLinear(lightViewProjNear, lightProjNear, lightViewNear, camParas[0].x, camParas[0].y, worldPos);
 		vec3 lightPosition = near.xyz / near.w;
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
@@ -90,7 +89,7 @@ float genShadowFactor(vec4 worldPos, float depthView, float bias) {
 			float bs = bias * 0.00015;
 		#endif
 		return genPCF(depthBufferNear, shadowCoord, bs, 3.0, 0.0205);
-	} else if(depthView > levels.x - GAP && depthView < levels.x + GAP) {
+	} else if(depthView > levels.x - gaps.x && depthView < levels.x + gaps.x) {
 		vec4 near = DepthToLinear(lightViewProjNear, lightProjNear, lightViewNear, camParas[0].x, camParas[0].y, worldPos);
 		vec3 lightPositionNear = near.xyz / near.w;
 		vec3 shadowCoordNear = lightPositionNear * 0.5 + 0.5;
@@ -106,7 +105,7 @@ float genShadowFactor(vec4 worldPos, float depthView, float bias) {
 		#endif
 		float factorNear = genPCF(depthBufferNear, shadowCoordNear, bsNear, 3.0, 0.0205);
 		float factorMid = genShadow(depthBufferMid, shadowCoordMid, bsMid);
-		return mix(factorNear, factorMid, (depthView - (levels.x - GAP)) * INV2GAP);
+		return mix(factorNear, factorMid, (depthView - (levels.x - gaps.x)) * gaps.y);
 	} else if(depthView <= levels.y) {
 		vec4 mid = DepthToLinear(lightViewProjMid, lightProjMid, lightViewMid, camParas[1].x, camParas[1].y, worldPos);
 		vec3 lightPosition = mid.xyz / mid.w;
@@ -217,7 +216,7 @@ void main() {
 		// Cartoon
 		#else
 			float darkness = ndotl * shadowFactor;
-			float threshold = 0.45;
+			float threshold = 0.4;
 			float cwFactor = step(darkness, threshold);
 			vec3 kd = KCool * cwFactor + KWarm * (1.0 - cwFactor);
 			sceneColor = (ambient + kd * albedo * material.g) * udotl;

@@ -47,7 +47,7 @@ void Application::init() {
 	scene = new Scene();
 	input = new Input();
 
-	float lowDist = cfgs->graphQuality > 4 ? 500 : 200;
+	float lowDist = cfgs->graphQuality > 4 ? 600 : 200;
 	float farDist = cfgs->graphQuality > 4 ? 1200 : 800;
 	renderMgr = new RenderManager(cfgs, scene, lowDist, farDist, vec3(-1, -1, -1));
 

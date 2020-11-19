@@ -290,6 +290,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 				if (state->shadow->flushNear) shader->setMatrix4("lightViewProjNear", state->shadow->renderLightCameraNear->viewProjectMatrix);
 				if (state->shadow->flushMid) shader->setMatrix4("lightViewProjMid", state->shadow->renderLightCameraMid->viewProjectMatrix);
 				if (state->shadow->flushFar) shader->setMatrix4("lightViewProjFar", state->shadow->renderLightCameraFar->viewProjectMatrix);
+				shader->setVector2("gaps", state->shadow->gap, state->shadow->inv2Gap);
 				shader->setVector2("levels", state->shadow->level1, state->shadow->level2);
 			}
 			if (state->lightEffect) {

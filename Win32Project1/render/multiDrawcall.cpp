@@ -125,7 +125,7 @@ void MultiDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
 			// Draw normal faces
 			if (multiRef->normalCount > 0) {
 				render->useShader(shader);
-				if (shadowPass) shader->setFloat("uAlpha", 0.0);
+				if (shadowPass) render->setShaderFloat(shader, "uAlpha", 0.0);
 				indirectBufferDraw->useAs(IndirectNormalIndex, GL_DRAW_INDIRECT_BUFFER);
 				glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, 0, multiRef->normalCount, 0);
 			}
@@ -135,7 +135,7 @@ void MultiDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
 				if (shadowPass) render->setCullMode(CULL_BACK);
 				else render->setCullState(false);
 				render->useShader(shader);
-				if (shadowPass) shader->setFloat("uAlpha", 1.0);
+				if (shadowPass) render->setShaderFloat(shader, "uAlpha", 1.0);
 				indirectBufferDraw->useAs(IndirectSingleIndex, GL_DRAW_INDIRECT_BUFFER);
 				glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, 0, multiRef->singleCount, 0);
 			}
@@ -145,13 +145,14 @@ void MultiDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
 				render->useShader(state->shaderBill);
 				if (shadowPass) {
 					render->setCullState(false);
-					state->shaderBill->setFloat("uAlpha", 1.0);
+					render->setShaderFloat(state->shaderBill, "uAlpha", 1.0);
 				}
 				indirectBufferDraw->useAs(IndirectBillIndex, GL_DRAW_INDIRECT_BUFFER);
 				glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, 0, multiRef->billCount, 0);
 			}
 		} else {
 			render->useShader(shader);
+			render->setShaderFloat(shader, "uAlpha", 0.0);
 			indirectBufferDraw->useAs(IndirectAnimIndex, GL_DRAW_INDIRECT_BUFFER);
 			glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, 0, multiRef->animCount, 0);
 		}
