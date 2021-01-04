@@ -189,20 +189,24 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	Shader* multi = shaders->addShader("multi", MULTI_COMP);
 	multi->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());
 	multi->attachDef("MAX_DISPATCH", to_string(MAX_DISPATCH).data());
+	multi->attachDef("InvalidIns", to_string(InvalidInsId).data());
 
 	Shader* animMulti = shaders->addShader("animMulti", MULTI_COMP);
 	animMulti->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());
 	animMulti->attachDef("MAX_DISPATCH", to_string(MAX_DISPATCH).data());
+	animMulti->attachDef("InvalidIns", to_string(InvalidInsId).data());
 	animMulti->attachDef("AnimPass", "1.0");
 
 	Shader* multiShadow = shaders->addShader("multi_s", MULTI_COMP);
 	multiShadow->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());
 	multiShadow->attachDef("MAX_DISPATCH", to_string(MAX_DISPATCH).data());
+	multiShadow->attachDef("InvalidIns", to_string(InvalidInsId).data());
 	multiShadow->attachDef("ShadowPass", "1.0");
 
 	Shader* animMultiShadow = shaders->addShader("animMulti_s", MULTI_COMP);
 	animMultiShadow->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());
 	animMultiShadow->attachDef("MAX_DISPATCH", to_string(MAX_DISPATCH).data());
+	animMultiShadow->attachDef("InvalidIns", to_string(InvalidInsId).data());
 	animMultiShadow->attachDef("AnimPass", "1.0");
 	animMultiShadow->attachDef("ShadowPass", "1.0");
 

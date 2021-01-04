@@ -72,6 +72,7 @@ public:
 	void setUVector3(const char* param, uint x, uint y, uint z);
 	void setUVector4(const char* param, uint x, uint y, uint z, uint w);
 	void setUVector4v(const char* param, int count, uint* arr);
+	void setIVector4(const char* param, int x, int y, int z, int w);
 	void setVector4(const char* param,float x,float y,float z,float w);
 	void setVector2v(const char* param, float* arr);
 	void setVector2v(const char* param, int count, float* arr);

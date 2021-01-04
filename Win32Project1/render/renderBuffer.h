@@ -1,4 +1,4 @@
-#ifndef RENDER_BUFFER_H_
+﻿#ifndef RENDER_BUFFER_H_
 #define RENDER_BUFFER_H_
 
 #include "glheader.h"
@@ -86,6 +86,9 @@ struct RenderData {
 	}
 	void setShaderBase(int base) {
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, base, bufferid);
+	}
+	void unbindShaderBase(int base) {
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, base, 0);
 	}
 	void updateBuffer(uint count, void* data) {
 		dataSize = count * channelCount * rowCount;
@@ -192,6 +195,9 @@ struct RenderBuffer {
 	void setShaderBase(uint ind, int base) {
 		streamDatas[ind]->setShaderBase(base);
 	}
+	void unbindShaderBase(uint ind, int base) {
+		streamDatas[ind]->unbindShaderBase(base);
+	}
 	void updateBufferData(uint loc, uint count, void* data) {
 		streamDatas[loc]->updateBuffer(count, data);
 	}
@@ -214,5 +220,9 @@ struct RenderBuffer {
 		glBindVertexArray(0);
 	}
 };
+
+inline void UnbindShaderBuffers(GLuint first, GLsizei count​) {
+	glBindBuffersBase(GL_SHADER_STORAGE_BUFFER, first, count​, 0);
+}
 
 #endif

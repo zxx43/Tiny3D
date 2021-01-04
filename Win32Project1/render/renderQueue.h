@@ -68,6 +68,7 @@ public:
 	std::map<Mesh*, InstanceData*> instanceQueue;
 	std::map<Animation*, AnimationData*> animationQueue;
 	MultiInstance* multiInstance;
+	MultiInstance* singleInstance;
 	MultiInstance* billboards;
 	MultiInstance* animations;
 	BatchData* batchData;
@@ -80,6 +81,7 @@ public:
 	void pushAnim(Node* node);
 	void flush();
 	void deleteInstance(InstanceData* data);
+	void createInstances(Scene* scene);
 	void draw(Scene* scene, Camera* camera, Render* render, RenderState* state);
 	void animate(float velocity);
 	Mesh* queryLodMesh(Object* object, const vec3& eye);

@@ -27,7 +27,7 @@ public:
 
 	int maxInstanceCount;
 
-	bool isBillboard;
+	bool isBillboard, hasNormal, hasSingle;
 
 	InstanceData* insData;
 

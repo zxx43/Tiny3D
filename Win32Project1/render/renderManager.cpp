@@ -22,7 +22,7 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 		depthPre = HIGH_PRE;
 	}
 	shadow->shadowMapSize = nearSize;
-	shadow->shadowPixSize = 0.65 / nearSize;
+	shadow->shadowPixSize = 0.5 / nearSize;
 	shadow->pixSize = 1.0 / nearSize;
 
 	nearBuffer = new FrameBuffer(nearSize, nearSize, depthPre);

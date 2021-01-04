@@ -204,6 +204,18 @@ void Shader::setUVector4v(const char* param, int count, uint* arr) {
 	getError(param, location);
 }
 
+void Shader::setIVector4(const char* param, int x, int y, int z, int w) {
+	int location = findParamLocation(param);
+	if (location == INVALID_LOCATION) {
+		addParam(param);
+		location = findParamLocation(param);
+	}
+	if (location != INVALID_LOCATION && program)
+		glProgramUniform4i(program->shaderProg, location, x, y, z, w);
+	if (getError(param, location))
+		printf("vec4 is: %d,%d,%d,%d\n", x, y, z, w);
+}
+
 void Shader::setVector4(const char* param,float x,float y,float z,float w) {
 	int location = findParamLocation(param);
 	if (location == INVALID_LOCATION) {

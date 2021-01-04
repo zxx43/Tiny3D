@@ -16,7 +16,7 @@ Instance::Instance(Mesh* mesh) {
 }
 
 void Instance::create(Mesh* mesh) {
-	insId = -1, insSingleId = -1, insBillId = -1;
+	insId = InvalidInsId, insSingleId = InvalidInsId, insBillId = InvalidInsId;
 	instanceMesh = mesh;
 	vertexCount = 0;
 	indexCount = 0;
@@ -30,6 +30,8 @@ void Instance::create(Mesh* mesh) {
 
 	maxInstanceCount = 0;
 	isBillboard = instanceMesh->isBillboard;
+	hasNormal = instanceMesh->normalFaces.size() > 0 && !isBillboard;
+	hasSingle = instanceMesh->singleFaces.size() > 0 && !isBillboard;
 }
 
 Instance::~Instance() {

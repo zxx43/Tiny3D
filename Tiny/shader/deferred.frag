@@ -15,7 +15,7 @@ uniform BindlessSampler2D depthBufferNear,
 
 uniform mat4 lightViewProjNear, lightViewProjMid, lightViewProjFar;
 uniform vec2 shadowPixSize;
-uniform vec2 levels;
+uniform vec3 levels;
 uniform vec3 light;
 uniform float udotl;
 uniform vec3 eyePos;
@@ -25,6 +25,7 @@ uniform mat4 lightProjNear, lightProjMid, lightProjFar;
 uniform mat4 lightViewNear, lightViewMid, lightViewFar;
 uniform vec2 camParas[3];
 uniform vec2 gaps;
+uniform vec3 shadowCenter;
 
 in vec2 vTexcoord;
 
@@ -78,8 +79,11 @@ float genShadow(sampler2D shadowMap, vec3 shadowCoord, float bias) {
 	return step(shadowCoord.z + bias, texture(shadowMap, shadowCoord.xy).r);
 }
 
-float genShadowFactor(vec4 worldPos, float depthView, float bias) {
-	if(depthView <= levels.x - gaps.x) {
+vec4 genShadowFactor(vec4 worldPos, float depthView, float bias) {
+	float lightDepth = depthView;
+	//float lightDepth = length(shadowCenter - worldPos.xyz);
+
+	if(lightDepth <= levels.x - gaps.x) {
 		vec4 near = DepthToLinear(lightViewProjNear, lightProjNear, lightViewNear, camParas[0].x, camParas[0].y, worldPos);
 		vec3 lightPosition = near.xyz / near.w;
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
@@ -88,8 +92,9 @@ float genShadowFactor(vec4 worldPos, float depthView, float bias) {
 		#else
 			float bs = bias * 0.00015;
 		#endif
-		return genPCF(depthBufferNear, shadowCoord, bs, 3.0, 0.0205);
-	} else if(depthView > levels.x - gaps.x && depthView < levels.x + gaps.x) {
+		float sf = genPCF(depthBufferNear, shadowCoord, bs, 3.0, 0.0205);
+		return vec4(1.0, 0.0, 0.0, sf);
+	} else if(lightDepth > levels.x - gaps.x && lightDepth < levels.x + gaps.x) {
 		vec4 near = DepthToLinear(lightViewProjNear, lightProjNear, lightViewNear, camParas[0].x, camParas[0].y, worldPos);
 		vec3 lightPositionNear = near.xyz / near.w;
 		vec3 shadowCoordNear = lightPositionNear * 0.5 + 0.5;
@@ -104,14 +109,16 @@ float genShadowFactor(vec4 worldPos, float depthView, float bias) {
 			float bsNear = bias * 0.00015, bsMid = 0.0;
 		#endif
 		float factorNear = genPCF(depthBufferNear, shadowCoordNear, bsNear, 3.0, 0.0205);
-		float factorMid = genShadow(depthBufferMid, shadowCoordMid, bsMid);
-		return mix(factorNear, factorMid, (depthView - (levels.x - gaps.x)) * gaps.y);
+		float factorMid = genPCF(depthBufferMid, shadowCoordMid, bsMid, 2.0, 0.04);
+		float sf = mix(factorNear, factorMid, (lightDepth - (levels.x - gaps.x)) * gaps.y);
+		return vec4(0.0, 0.0, 1.0, sf);
 	} else if(depthView <= levels.y) {
 		vec4 mid = DepthToLinear(lightViewProjMid, lightProjMid, lightViewMid, camParas[1].x, camParas[1].y, worldPos);
 		vec3 lightPosition = mid.xyz / mid.w;
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
 		float bs = 0.00;
-		return genShadow(depthBufferMid, shadowCoord, bs);
+		float sf = genPCF(depthBufferMid, shadowCoord, bs, 2.0, 0.04);
+		return vec4(0.0, 1.0, 0.0, sf);
 	}
 	#ifdef DRAW_FAR_SHADOW
 		else {
@@ -119,10 +126,11 @@ float genShadowFactor(vec4 worldPos, float depthView, float bias) {
 			vec3 lightPosition = far.xyz / far.w;
 			vec3 shadowCoord = lightPosition * 0.5 + 0.5;
 			float bs = bias * 0.0;
-			return genShadow(depthBufferFar, shadowCoord, bs);
+			float sf = genShadow(depthBufferFar, shadowCoord, bs);
+			return vec4(1.0, 1.0, 1.0, sf);
 		}
 	#endif
-	return 1.0;
+	return vec4(1.0);
 }
 
 // ----------------------------------------------------------------------------
@@ -184,8 +192,11 @@ void main() {
 		float bias = tan(acos(abs(ndotl)));
 		ndotl = max(ndotl, 0.0);
 
+		vec3 shadowLayer = vec3(1.0);
 		#ifdef USE_SHADOW
-			float shadowFactor = ndotl < 0.01 ? 0.0 : tex.a * genShadowFactor(worldPos, depthView, bias);
+			vec4 sf = genShadowFactor(worldPos, depthView, bias);
+			float shadowFactor = ndotl < 0.01 ? 0.0 : tex.a * sf.a;
+			//shadowLayer = sf.rgb; // Used for csm debug
 		#else
 			float shadowFactor = 1.0;
 		#endif
@@ -211,7 +222,7 @@ void main() {
 				float specular = (NDF * G) / (4.0 * max(dot(normal, v), 0.0) * ndotl + 0.001);
 				vec3 Lo = (kD * albedo * INV_PI + kS * specular) * radiance * ndotl;
 
-				sceneColor = (ambient + shadowFactor * Lo) * udotl;
+				sceneColor = shadowLayer * (ambient + shadowFactor * Lo) * udotl;
 			}
 		// Cartoon
 		#else

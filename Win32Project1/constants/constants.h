@@ -42,6 +42,8 @@
 #define NULL 0
 #endif
 
+const int InvalidInsId = 1024;
+
 typedef unsigned int uint;
 typedef unsigned char byte;
 typedef unsigned short ushort;

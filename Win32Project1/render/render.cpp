@@ -227,7 +227,6 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 
 				if (state->shaderMulti) {
 					state->shaderMulti->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
-					state->shaderMulti->setHandle64("roadTex", AssetManager::assetManager->getRoadHnd());
 				}
 
 				// Billboard drawcall
@@ -291,7 +290,8 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 				if (state->shadow->flushMid) shader->setMatrix4("lightViewProjMid", state->shadow->renderLightCameraMid->viewProjectMatrix);
 				if (state->shadow->flushFar) shader->setMatrix4("lightViewProjFar", state->shadow->renderLightCameraFar->viewProjectMatrix);
 				shader->setVector2("gaps", state->shadow->gap, state->shadow->inv2Gap);
-				shader->setVector2("levels", state->shadow->level1, state->shadow->level2);
+				shader->setVector3("levels", state->shadow->level1, state->shadow->level2, state->shadow->radius);
+				shader->setVector3v("shadowCenter", state->shadow->renderLightCameraNear->position);
 			}
 			if (state->lightEffect) {
 				shader->setVector3("light", -state->light.x, -state->light.y, -state->light.z);

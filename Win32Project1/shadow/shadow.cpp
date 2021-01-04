@@ -88,23 +88,25 @@ void Shadow::prepareViewCamera(float dist1, float dist2) {
 	corners3[2] = vec4(x3, -y3, -farDist, 1);
 	corners3[3] = vec4(-x3, -y3, -farDist, 1);
 
-	gap = 15.0;
+	gap = 50.0;
 	inv2Gap = 1.0 / (gap * 2.0);
-	float scaledGap = gap * 10.0;
 
-	vec3 c1 = vec3((level1 + scaledGap)*tanHalfHFov, (level1 + scaledGap)*tanHalfVFov, -level1 - scaledGap);
-
-	center0 = vec4(0, 0, -(nearDist + (level1 + scaledGap - nearDist)*0.5), 1);
-	center1 = vec4(0, 0, -(level1 + (level2 + scaledGap - level1)*0.5), 1);
+	center0 = vec4(0, 0, -(nearDist + (level1 + gap - nearDist) * 0.5), 1);
+	center1 = vec4(0, 0, -(level1 + (level2 + gap - level1) * 0.5), 1);
 	center2 = vec4(0, 0, -(level2 + (farDist - level2)*0.5), 1);
 
+	vec3 c1 = vec3((level1 + gap) * tanHalfHFov, (level1 + gap) * tanHalfVFov, -level1 - gap);
+
 	radius0 = (((vec3)center0) - c1).GetLength();
-	radius1=(((vec3)center1) - corners2[0]).GetLength();
-	radius2=(((vec3)center2) - corners3[0]).GetLength();
+	radius1 = (((vec3)center1) - corners2[0]).GetLength();
+	radius2 = (((vec3)center2) - corners3[0]).GetLength();
+
+	radius = radius0;
+	radius0 *= 1.5;
 
 	actLightCameraNear->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.0 * radius0, 1.0 * radius0);
-	actLightCameraMid->initOrthoCamera(-radius1, radius1, -radius1, radius1, -1.0 * radius1, 1.0 * radius1);
-	actLightCameraFar->initOrthoCamera(-radius2, radius2, -radius2, radius2, -1.0 * radius2, 1.0 * radius2);
+	actLightCameraMid->initOrthoCamera( -radius1, radius1, -radius1, radius1, -1.0 * radius1, 1.0 * radius1);
+	actLightCameraFar->initOrthoCamera( -radius2, radius2, -radius2, radius2, -1.0 * radius2, 1.0 * radius2);
 }
 
 void Shadow::update(Camera* actCamera, const vec3& light) {

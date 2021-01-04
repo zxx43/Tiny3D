@@ -36,7 +36,7 @@ public:
 	float shadowMapSize,shadowPixSize,pixSize;
 	vec3 lightDir;
 	bool flushNear, flushMid, flushFar;
-	float gap, inv2Gap;
+	float gap, inv2Gap, radius;
 public:
 	Shadow(Camera* view);
 	~Shadow();

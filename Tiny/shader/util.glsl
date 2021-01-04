@@ -163,3 +163,8 @@ struct Indirect {
 
 #define BindlessSampler2D layout(bindless_sampler) sampler2D
 #define BindlessSamplerCube layout(bindless_sampler) samplerCube
+
+#define AllBuf    0
+#define NormalBuf 1
+#define SingleBuf 2
+#define BillBuf   3

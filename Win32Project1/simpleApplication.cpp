@@ -102,8 +102,8 @@ void SimpleApplication::resize(int width, int height) {
 				rawScreenFilter = new Filter(width, height, false, rawPre, 4);
 			}
 
-			//if (ssrBlurFilter) delete ssrBlurFilter;
-			//ssrBlurFilter = new Filter(width * 0.5, height * 0.5, true, LOW_PRE, 4);
+			if (ssrBlurFilter) delete ssrBlurFilter;
+			ssrBlurFilter = new Filter(width * 0.5, height * 0.5, true, LOW_PRE, 4);
 		}
 	}
 
@@ -160,8 +160,8 @@ void SimpleApplication::draw() {
 	else preDraw();
 
 	if (ssrChain) {
-		//AssetManager::assetManager->setReflectTexture(ssrBlurFilter->getOutput(0));
-		AssetManager::assetManager->setReflectTexture(ssrChain->getOutputTex(0));
+		AssetManager::assetManager->setReflectTexture(ssrBlurFilter->getOutput(0));
+		//AssetManager::assetManager->setReflectTexture(ssrChain->getOutputTex(0));
 	} else {
 		if (renderMgr->reflectBuffer) {
 			renderMgr->renderReflect(render, scene);
@@ -195,7 +195,7 @@ void SimpleApplication::draw() {
 		if (rawScreenFilter)
 			renderMgr->drawScreenFilter(render, scene, "screen", combinedChain->getOutFrameBuffer(), rawScreenFilter);
 		renderMgr->drawSSRFilter(render, scene, "ssr", ssrChain->input, ssrChain->output);
-		//renderMgr->drawScreenFilter(render, scene, "mean", ssrChain->getOutFrameBuffer(), ssrBlurFilter);
+		renderMgr->drawScreenFilter(render, scene, "mean", ssrChain->getOutFrameBuffer(), ssrBlurFilter);
 	}
 
 	Filter* lastFilter = combinedChain->output;

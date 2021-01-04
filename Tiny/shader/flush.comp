@@ -3,42 +3,43 @@
 layout(local_size_x = 1) in;
 
 #ifndef AnimPass
-layout(binding = 1) buffer IndirectNormalBuffer {
+layout(binding = 1, std430) buffer IndirectNormalBuffer {
 	Indirect indirectsNormal[];
 };
-layout(binding = 2) buffer IndirectSingleBuffer {
+layout(binding = 2, std430) buffer IndirectSingleBuffer {
 	Indirect indirectsSingle[];
 };
-layout(binding = 3) buffer IndirectBillBuffer {
+layout(binding = 3, std430) buffer IndirectBillBuffer {
 	Indirect indirectsBill[];
 };
 #else
-layout(binding = 4) buffer IndirectAnimBuffer {
+layout(binding = 4, std430) buffer IndirectAnimBuffer {
 	Indirect indirectsAnim[];
 };
 #endif
+layout(binding = 5, std140) buffer BaseBuffer {
+	uvec4 baseBuffer[];
+};
 
-uniform uvec4 uBases[32];
 uniform uvec4 uCount;
 
 void main() {
-	uint curIndex = gl_GlobalInvocationID.x;
-	uvec4 bases = uBases[curIndex];
+	uint meshIndex = gl_GlobalInvocationID.x;
 #ifndef AnimPass
-	if(curIndex + 1 <= uCount.x) {
-		indirectsNormal[curIndex].primCount = 0;
-		indirectsNormal[curIndex].baseInstance = bases.x;
+	if(meshIndex + 1 <= uCount.x) {
+		atomicExchange(indirectsNormal[meshIndex].primCount, 0);
+		atomicExchange(indirectsNormal[meshIndex].baseInstance, baseBuffer[meshIndex].x);
 	}
-	if(curIndex + 1 <= uCount.y) {
-		indirectsSingle[curIndex].primCount = 0;
-		indirectsSingle[curIndex].baseInstance = bases.y;
+	if(meshIndex + 1 <= uCount.y) {
+		atomicExchange(indirectsSingle[meshIndex].primCount, 0);
+		atomicExchange(indirectsSingle[meshIndex].baseInstance, baseBuffer[meshIndex].y);
 	}
-	if(curIndex + 1 <= uCount.z) {
-		indirectsBill[curIndex].primCount = 0;
-		indirectsBill[curIndex].baseInstance = bases.z;
+	if(meshIndex + 1 <= uCount.z) {
+		atomicExchange(indirectsBill[meshIndex].primCount, 0);
+		atomicExchange(indirectsBill[meshIndex].baseInstance, baseBuffer[meshIndex].z);
 	}
 #else
-	indirectsAnim[curIndex].primCount = 0;
-	indirectsAnim[curIndex].baseInstance = bases.w;
+	atomicExchange(indirectsAnim[meshIndex].primCount, 0);
+	atomicExchange(indirectsAnim[meshIndex].baseInstance, baseBuffer[meshIndex].w);
 #endif
 }

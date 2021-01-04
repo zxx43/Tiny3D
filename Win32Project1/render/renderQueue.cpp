@@ -15,6 +15,7 @@ RenderQueue::RenderQueue(int type, float midDis, float lowDis) {
 	instanceQueue.clear();
 	animationQueue.clear();
 	multiInstance = NULL;
+	singleInstance = NULL;
 	billboards = NULL;
 	animations = NULL;
 	batchData = NULL;
@@ -31,6 +32,7 @@ RenderQueue::~RenderQueue() {
 
 	if (batchData) delete batchData;
 	if (multiInstance) delete multiInstance;
+	if (singleInstance) delete singleInstance;
 	if (billboards) delete billboards;
 	if (animations) delete animations;
 
@@ -96,6 +98,64 @@ void RenderQueue::pushDatasToBatch(BatchData* data, int pass) {
 	data->batch->setRenderData(pass, data);
 }
 
+void RenderQueue::createInstances(Scene* scene) {
+	if (!multiInstance || !multiInstance->inited()) {
+		map<Mesh*, InstanceData*>::iterator itData = instanceQueue.begin();
+		while (itData != instanceQueue.end()) {
+			InstanceData* data = itData->second;
+			pushDatasToInstance(scene, data, false);
+			Instance* instance = data->instance;
+			if (instance) {
+				if (!cfgArgs->dualqueue) {
+					if (!multiInstance) multiInstance = new MultiInstance();
+					if (!multiInstance->inited()) multiInstance->add(instance);
+				}
+				else {
+					if (!instance->isBillboard) {
+						if (instance->hasNormal) {
+							if (!multiInstance) multiInstance = new MultiInstance();
+							if (!multiInstance->inited()) multiInstance->add(instance);
+						}
+						if (instance->hasSingle) {
+							if (!singleInstance) singleInstance = new MultiInstance();
+							if (!singleInstance->inited()) singleInstance->add(instance);
+						}
+					}
+					else {
+						if (!billboards) billboards = new MultiInstance();
+						if (!billboards->inited()) billboards->add(instance);
+					}
+				}
+			}
+			++itData;
+		}
+	}
+
+	if (multiInstance) {
+		if (!multiInstance->inited()) {
+			int pass = cfgArgs->dualqueue ? NORMAL_PASS : ALL_PASS;
+			multiInstance->initBuffers(pass);
+			multiInstance->createDrawcall();
+		}
+	}
+
+	if (singleInstance) {
+		if (!singleInstance->inited()) {
+			int pass = cfgArgs->dualqueue ? SINGLE_PASS : ALL_PASS;
+			singleInstance->initBuffers(pass);
+			singleInstance->createDrawcall();
+		}
+	}
+
+	if (billboards) {
+		if (!billboards->inited()) {
+			int pass = cfgArgs->dualqueue ? BILL_PASS : ALL_PASS;
+			billboards->initBuffers(pass);
+			billboards->createDrawcall();
+		}
+	}
+}
+
 void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState* state) {
 	for (int it = 0; it < queue->size; it++) {
 		Node* node = queue->get(it);
@@ -113,46 +173,19 @@ void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState
 		}
 	}
 
-	if (!multiInstance || !multiInstance->inited()) {
-		map<Mesh*, InstanceData*>::iterator itData = instanceQueue.begin();
-		while (itData != instanceQueue.end()) {
-			InstanceData* data = itData->second;
-			pushDatasToInstance(scene, data, false);
-			Instance* instance = data->instance;
-			if (instance) {
-				if (!cfgArgs->dualqueue) {
-					if (!multiInstance) multiInstance = new MultiInstance();
-					if (!multiInstance->inited()) multiInstance->add(instance);
-				}
-				else {
-					if (!instance->isBillboard) {
-						if (!multiInstance) multiInstance = new MultiInstance();
-						if (!multiInstance->inited()) multiInstance->add(instance);
-					}
-					else {
-						if (!billboards) billboards = new MultiInstance();
-						if (!billboards->inited()) billboards->add(instance);
-					}
-				}
-			}
-			++itData;
-		}
-	}
+	createInstances(scene);
 
 	if (multiInstance) {
-		if (!multiInstance->inited()) {
-			multiInstance->initBuffers();
-			multiInstance->createDrawcall();
-		}
 		multiInstance->drawcall->update(render, state);
 		render->draw(camera, multiInstance->drawcall, state);
 	}
 
+	if (singleInstance) {
+		singleInstance->drawcall->update(render, state);
+		render->draw(camera, singleInstance->drawcall, state);
+	}
+
 	if (billboards) {
-		if (!billboards->inited()) {
-			billboards->initBuffers();
-			billboards->createDrawcall();
-		}
 		billboards->drawcall->update(render, state);
 		render->draw(camera, billboards->drawcall, state);
 	}

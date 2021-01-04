@@ -3,31 +3,29 @@
 const int MaxInstance = 4096;
 
 MultiInstance::MultiInstance() {
-	vertexBuffer = NULL;
-	normalBuffer = NULL;
-	tangentBuffer = NULL;
-	texcoordBuffer = NULL;
-	texidBuffer = NULL;
-	colorBuffer = NULL;
-	boneidBuffer = NULL;
-	weightBuffer = NULL;
+	vertexBuffer = NULL, normalBuffer = NULL, tangentBuffer = NULL;
+	texcoordBuffer = NULL, texidBuffer = NULL, colorBuffer = NULL;
+	boneidBuffer = NULL, weightBuffer = NULL;
 	indexBuffer = NULL;
 	transforms = NULL;
 
 	insDatas.clear();
 	animDatas.clear();
+
+	normalIns.clear();
+	mixedIns.clear();
+	singleIns.clear();
+	billIns.clear();
+
 	indirects = NULL;
 	indirectCount = 0;
 
 	normals.clear(), singles.clear(), bills.clear(), anims.clear();
 	indirectsNormal = NULL, indirectsSingle = NULL, indirectsBill = NULL, indirectsAnim = NULL;
-	normalCount = 0, singleCount = 0, billCount = 0, animCount = 0, meshCount = 0;
-	bases = NULL;
+	normalCount = 0, singleCount = 0, billCount = 0, animCount = 0;
+	meshCount = 0, bases = NULL;
 
-	vertexCount = 0;
-	indexCount = 0;
-	instanceCount = 0;
-	maxInstance = 0;
+	vertexCount = 0, indexCount = 0, maxInstance = 0, instanceCount = 0;
 
 	hasAnim = false;
 	bufferInited = false;
@@ -45,20 +43,13 @@ void MultiInstance::releaseInstanceData() {
 	if (weightBuffer) free(weightBuffer); weightBuffer = NULL;
 	if (indexBuffer) free(indexBuffer); indexBuffer = NULL;
 
-	for (uint i = 0; i < normals.size(); i++)
-		free(normals[i]);
-	normals.clear();
-	for (uint i = 0; i < singles.size(); i++)
-		free(singles[i]);
-	singles.clear();
-	for (uint i = 0; i < bills.size(); i++)
-		free(bills[i]);
-	bills.clear();
-	for (uint i = 0; i < anims.size(); i++)
-		free(anims[i]);
-	anims.clear();
-	if (indirects) free(indirects); indirects = NULL;
+	for (uint i = 0; i < normals.size(); i++) free(normals[i]);
+	for (uint i = 0; i < singles.size(); i++) free(singles[i]);
+	for (uint i = 0; i < bills.size(); i++) free(bills[i]);
+	for (uint i = 0; i < anims.size(); i++) free(anims[i]);
+	normals.clear(), singles.clear(), bills.clear(), anims.clear();
 
+	if (indirects) free(indirects); indirects = NULL;
 	if (indirectsNormal) free(indirectsNormal); indirectsNormal = NULL;
 	if (indirectsSingle) free(indirectsSingle); indirectsSingle = NULL;
 	if (indirectsBill) free(indirectsBill); indirectsBill = NULL;
@@ -72,12 +63,20 @@ MultiInstance::~MultiInstance() {
 	insDatas.clear();
 	animDatas.clear();
 
+	normalIns.clear();
+	mixedIns.clear();
+	singleIns.clear();
+	billIns.clear();
+
 	if (bases) free(bases);
 	if (drawcall) delete drawcall;
 }
 
 void MultiInstance::add(Instance* instance) {
-	insDatas.push_back(instance);
+	if (instance->hasNormal && !instance->hasSingle) normalIns.push_back(instance);
+	else if (instance->hasNormal && instance->hasSingle) mixedIns.push_back(instance);
+	else if (instance->hasSingle) singleIns.push_back(instance);
+	else if (instance->isBillboard) billIns.push_back(instance);
 }
 
 void MultiInstance::add(AnimationData* animData) {
@@ -85,7 +84,22 @@ void MultiInstance::add(AnimationData* animData) {
 	hasAnim = true;
 }
 
-void MultiInstance::initBuffers() {
+void MultiInstance::initBuffers(int pass) {
+	if (!hasAnim) {
+		uint n = 0, m = 0, s = 0, b = 0;
+		for (; n < normalIns.size() && (pass == ALL_PASS || pass == NORMAL_PASS); ++n)
+			insDatas.push_back(normalIns[n]);
+		for (; m < mixedIns.size() && (pass == ALL_PASS || pass == NORMAL_PASS || pass == SINGLE_PASS); ++m)
+			insDatas.push_back(mixedIns[m]);
+		for (; s < singleIns.size() && (pass == ALL_PASS || pass == SINGLE_PASS); ++s)
+			insDatas.push_back(singleIns[s]);
+		for (; b < billIns.size() && (pass == ALL_PASS || pass == BILL_PASS); ++b)
+			insDatas.push_back(billIns[b]);
+		printf("normal: %d, mixed: %d, single: %d, bill: %d\n", n, m, s, b);
+		normalIns.clear(), mixedIns.clear(), singleIns.clear(), billIns.clear();
+	}
+
+	bufferPass = pass;
 	indirectCount = hasAnim ? animDatas.size() : insDatas.size();
 	indirects = (Indirect*)malloc(indirectCount * sizeof(Indirect));
 
@@ -99,15 +113,16 @@ void MultiInstance::initBuffers() {
 			indirects[i].primCount = 0;
 			indirects[i].baseInstance = 0;
 
-			if (ins->isBillboard) {
+			bool pushed = false;
+			if (ins->isBillboard && (bufferPass == ALL_PASS || bufferPass == BILL_PASS)) {
 				Indirect* idBill = (Indirect*)malloc(sizeof(Indirect));
 				memcpy(idBill, indirects + i, sizeof(Indirect));
 
 				bills.push_back(idBill);
 				ins->insBillId = bills.size() - 1;
-			}
-			else {
-				if (ins->instanceMesh->normalFaces.size() > 0) {
+				pushed = true;
+			} else {
+				if (ins->hasNormal && (bufferPass == ALL_PASS || bufferPass == NORMAL_PASS)) {
 					Indirect* idNorm = (Indirect*)malloc(sizeof(Indirect));
 					memcpy(idNorm, indirects + i, sizeof(Indirect));
 
@@ -116,8 +131,9 @@ void MultiInstance::initBuffers() {
 					idNorm->firstIndex = indexCount + buf->start;
 					normals.push_back(idNorm);
 					ins->insId = normals.size() - 1;
+					pushed = true;
 				}
-				if (ins->instanceMesh->singleFaces.size() > 0) {
+				if (ins->hasSingle && (bufferPass == ALL_PASS || bufferPass == SINGLE_PASS)) {
 					Indirect* idSing = (Indirect*)malloc(sizeof(Indirect));
 					memcpy(idSing, indirects + i, sizeof(Indirect));
 
@@ -126,12 +142,14 @@ void MultiInstance::initBuffers() {
 					idSing->firstIndex = indexCount + buf->start;
 					singles.push_back(idSing);
 					ins->insSingleId = singles.size() - 1;
+					pushed = true;
 				}
 			}
 
-			vertexCount += ins->vertexCount;
-			indexCount += ins->indexCount;
-			maxInstance += ins->maxInstanceCount > MaxInstance ? MaxInstance : ins->maxInstanceCount;
+			if (pushed) {
+				vertexCount += ins->vertexCount, indexCount += ins->indexCount;
+				maxInstance += ins->maxInstanceCount > MaxInstance ? MaxInstance : ins->maxInstanceCount;
+			}
 		} else {
 			AnimationData* anim = animDatas[i];
 			indirects[i].baseVertex = vertexCount;
@@ -145,8 +163,7 @@ void MultiInstance::initBuffers() {
 			anims.push_back(idAnim);
 			anim->animId = anims.size() - 1;
 
-			vertexCount += anim->vertexCount;
-			indexCount += anim->indexCount;
+			vertexCount += anim->vertexCount, indexCount += anim->indexCount;
 			maxInstance += anim->maxAnim > MaxInstance ? MaxInstance : anim->maxAnim;
 		}
 	}
@@ -160,16 +177,16 @@ void MultiInstance::initBuffers() {
 		indirectsNormal = (Indirect*)malloc(normalCount * sizeof(Indirect));
 		indirectsSingle = (Indirect*)malloc(singleCount * sizeof(Indirect));
 		indirectsBill = (Indirect*)malloc(billCount * sizeof(Indirect));
-		for (uint i = 0; i < normalCount; i++)
-			memcpy(indirectsNormal + i, normals[i], sizeof(Indirect));
-		for (uint i = 0; i < singleCount; i++)
-			memcpy(indirectsSingle + i, singles[i], sizeof(Indirect));
-		for (uint i = 0; i < billCount; i++)
-			memcpy(indirectsBill + i, bills[i], sizeof(Indirect));
+		for (uint k = 0; k < normalCount; k++)
+			memcpy(indirectsNormal + k, normals[k], sizeof(Indirect));
+		for (uint k = 0; k < singleCount; k++)
+			memcpy(indirectsSingle + k, singles[k], sizeof(Indirect));
+		for (uint k = 0; k < billCount; k++)
+			memcpy(indirectsBill + k, bills[k], sizeof(Indirect));
 	} else {
 		indirectsAnim = (Indirect*)malloc(animCount * sizeof(Indirect));
-		for (uint i = 0; i < animCount; i++)
-			memcpy(indirectsAnim + i, anims[i], sizeof(Indirect));
+		for (uint k = 0; k < animCount; k++)
+			memcpy(indirectsAnim + k, anims[k], sizeof(Indirect));
 	}
 	bases = (uint*)malloc(meshCount * 4 * sizeof(uint));
 	memset(bases, 0, meshCount * 4 * sizeof(uint));
@@ -198,8 +215,7 @@ void MultiInstance::initBuffers() {
 			memcpy(texidBuffer + curVertex * 2, ins->texidBuffer, ins->vertexCount * 2 * sizeof(float));
 			memcpy(colorBuffer + curVertex * 3, ins->colorBuffer, ins->vertexCount * 3 * sizeof(byte));
 			memcpy(indexBuffer + curIndex, ins->indexBuffer, ins->indexCount * sizeof(ushort));
-			curVertex += ins->vertexCount;
-			curIndex += ins->indexCount;
+			curVertex += ins->vertexCount, curIndex += ins->indexCount;
 		} else {
 			AnimationData* anim = animDatas[i];
 			memcpy(vertexBuffer + curVertex * 3, anim->vertices, anim->vertexCount * 3 * sizeof(float));
@@ -211,8 +227,7 @@ void MultiInstance::initBuffers() {
 			memcpy(boneidBuffer + curVertex * 4, anim->boneids, anim->vertexCount * 4 * sizeof(byte));
 			memcpy(weightBuffer + curVertex * 4, anim->weights, anim->vertexCount * 4 * sizeof(half));
 			memcpy(indexBuffer + curIndex, anim->indices, anim->indexCount * sizeof(ushort));
-			curVertex += anim->vertexCount;
-			curIndex += anim->indexCount;
+			curVertex += anim->vertexCount, curIndex += anim->indexCount;
 		}
 	}
 	bufferInited = true;
@@ -220,27 +235,31 @@ void MultiInstance::initBuffers() {
 
 int MultiInstance::updateTransform(buff* targetBuffer) {
 	instanceCount = 0;
-	int curNorm = 0, curSing = 0, curBill = 0, curAnim = 0;
 	buff* target = targetBuffer ? targetBuffer : transforms;
-	for (uint i = 0; i < indirectCount; i++) {
+	for (uint i = 0; i < indirectCount; ++i) {
 		if (!hasAnim) {
 			Instance* ins = insDatas[i];
-			if (ins->isBillboard)
-				bases[(curBill++) * 4 + 2] = instanceCount;
-			else {
-				if (ins->instanceMesh->normalFaces.size() > 0)
-					bases[(curNorm++) * 4 + 0] = instanceCount;
-				if (ins->instanceMesh->singleFaces.size() > 0)
-					bases[(curSing++) * 4 + 1] = instanceCount;
+			bool pushed = false;
+			if (ins->hasNormal && (bufferPass == ALL_PASS || bufferPass == NORMAL_PASS)) {
+				bases[ins->insId * 4 + 0] = instanceCount;
+				pushed = true;
+			}
+			if (ins->hasSingle && (bufferPass == ALL_PASS || bufferPass == SINGLE_PASS)) {
+				bases[ins->insSingleId * 4 + 1] = instanceCount;
+				pushed = true;
+			}
+			if (ins->isBillboard && (bufferPass == ALL_PASS || bufferPass == BILL_PASS)) {
+				bases[ins->insBillId * 4 + 2] = instanceCount;
+				pushed = true;
 			}
 
-			if (ins->insData->count > 0) {
+			if (ins->insData->count > 0 && pushed) {
 				memcpy(target + instanceCount * 16, ins->insData->transformsFull, ins->insData->count * 16 * sizeof(buff));
 				instanceCount += ins->insData->count;
 			}
 		} else {
 			AnimationData* anim = animDatas[i];
-			bases[(curAnim++) * 4 + 3] = instanceCount;
+			bases[anim->animId * 4 + 3] = instanceCount;
 			if (anim->animCount > 0) {
 				memcpy(target + instanceCount * 16, anim->transformsFull, anim->animCount * 16 * sizeof(buff));
 				instanceCount += anim->animCount;
