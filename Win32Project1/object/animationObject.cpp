@@ -1,16 +1,17 @@
 #include "animationObject.h"
+#include "../assets/assetManager.h"
 #include "../node/node.h"
 #include "../util/util.h"
 
 AnimationObject::AnimationObject(Animation* anim) :Object() {
 	animation = anim; // no mesh!
 	anglex = 0; angley = 0; anglez = 0;
-	setCurAnim(0, false);
+	setCurAnim("", false);
 	setLoop(false);
 	setPlayOnce(false);
 	setMoving(false);
 	setEnd(true);
-	setDefaultAnim(0);
+	setDefaultAnim("");
 	time = 0.0, curFrame = 0.0;
 	initMatricesData();
 	mass = 100.0;
@@ -42,7 +43,7 @@ AnimationObject::AnimationObject(const AnimationObject& rhs) :Object(rhs) {
 	playOnce = rhs.playOnce;
 	moving = rhs.moving;
 	animEnd = rhs.animEnd;
-	defaultAid = rhs.defaultAid;
+	defaultAname = rhs.defaultAname;
 
 	if (rhs.transforms) {
 		transforms = (float*)malloc(4 * sizeof(float));
@@ -108,20 +109,23 @@ void AnimationObject::setSize(float sx, float sy, float sz) {
 	}
 }
 
-bool AnimationObject::setCurAnim(int aid, bool once) {
-	if (aid >= animation->animCount) return false;
-	this->aid = aid;
-	fid = animation->getFrameIndex(aid);
+bool AnimationObject::setCurAnim(const char* name, bool once) {
+	aname = name;
+	fid = AssetManager::assetManager->frames->frameIndex[name];
 	setPlayOnce(once);
 	return true;
 }
 
 void AnimationObject::animate(float velocity) {
-	if (animation) curFrame = animation->getBoneFrame(aid, time, animEnd);
+	if (getCurAnim() == "") setCurAnim(defaultAname.data(), playOnce);
+
+	AnimFrame* curAnimation = AssetManager::assetManager->animationDatas[getCurAnim()];
+	if (!curAnimation) return;
+	if (animation) curFrame = animation->getBoneFrame(curAnimation, time, animEnd);
 	if(!animEnd) time += velocity * 0.0004;
 	else if (animEnd && loop) time = 0.0;
 	else if (animEnd && !loop && !playOnce && !moving) {
-		setCurAnim(defaultAid, playOnce);
+		setCurAnim(defaultAname.data(), playOnce);
 		time = 0.0;
 	}
 }

@@ -21,18 +21,26 @@ AssetManager::AssetManager() {
 	roadTex = -1;
 	meshes.clear();
 	animations.clear();
+	animationDatas.clear();
 	frames = new FrameMgr();
 }
 
 AssetManager::~AssetManager() {
 	map<string, Mesh*>::iterator itor;
-	for (itor = meshes.begin(); itor != meshes.end(); itor++)
+	for (itor = meshes.begin(); itor != meshes.end(); ++itor)
 		delete itor->second;
 	meshes.clear();
+	
 	map<string, Animation*>::iterator iter;
-	for (iter = animations.begin(); iter != animations.end(); iter++)
+	for (iter = animations.begin(); iter != animations.end(); ++iter)
 		delete iter->second;
 	animations.clear();
+
+	map<string, AnimFrame*>::iterator it;
+	for (it = animationDatas.begin(); it != animationDatas.end(); ++it)
+		delete it->second;
+	animationDatas.clear();
+
 	delete frames;
 	if (texBld) delete texBld; texBld = NULL;
 	if (heightTexture) delete heightTexture; heightTexture = NULL;
@@ -145,10 +153,18 @@ void AssetManager::addMesh(const char* name, Mesh* mesh, bool billboard, bool dr
 	meshes[name]->drawShadow = drawShadow;
 }
 
-void AssetManager::addAnimation(const char* name, Animation* animation) {
+Animation* AssetManager::exportAnimation(const char* name, Animation* animation) {
 	animations[name] = animation;
 	animation->setName(name);
-	frames->addAnimation(animation);
+	animation->exportAnims("animation");
+	return animation;
+}
+
+void AssetManager::addAnimationData(const char* name, const char* path, Animation* animation) {
+	AnimFrame* animData = new AnimFrame(name);
+	frames->readAnimationData(path, animData);
+	frames->addAnimationData(animData, animation);
+	animationDatas[animData->getName()] = animData;
 }
 
 void AssetManager::initFrames() {

@@ -1,4 +1,7 @@
 #include "animation.h"
+#include <iostream>
+#include <fstream>
+#include <io.h>
 
 Animation::Animation() {
 	vertCount = 0;
@@ -15,7 +18,7 @@ Animation::Animation() {
 	aIndices.clear();
 	aBoneids.clear();
 	aWeights.clear();
-	frameIndex.clear();
+	datasToExport.clear();
 	inverseYZ = false;
 }
 
@@ -31,12 +34,17 @@ Animation::~Animation() {
 	aIndices.clear();
 	aBoneids.clear();
 	aWeights.clear();
+}
 
-	for (int i = 0; i < animCount; i++)
-		delete animFrames[i];
-	delete[] animFrames;
+float Animation::getBoneFrame(AnimFrame* animation, float time, bool& end) {
+	float ticks = time * animation->ticksPerSecond;
+	float animTime = ticks;
+	if (animTime > animation->duration - 0.01) {
+		end = true;
+		animTime = animation->duration - 0.01;
+	} else end = false;
 
-	frameIndex.clear();
+	return animTime * 100.0;
 }
 
 std::string Animation::convertTexPath(const std::string& path) {
@@ -51,4 +59,36 @@ std::string Animation::convertTexPath(const std::string& path) {
 	//res += ".bmp";
 	printf("convert %s\n", res.data());
 	return res;
+}
+
+void Animation::exportAnims(std::string path) {
+	for (uint i = 0; i < getExportSize(); ++i) {
+		AnimFrame* animation = datasToExport[i];
+		float boneCount = animation->frames[0]->boneCount;
+		float frameCount = animation->frames.size();
+		float duration = animation->duration;
+		float ticksPerSecond = animation->ticksPerSecond;
+
+		const char* savePath = (path + "\\" + getName() + "_" + animation->getName() + ".t3a").data();
+		if (access(savePath, 0) == 0) continue;
+
+		std::ofstream of(savePath, std::ios::binary);
+		of << boneCount << " " << frameCount << " " << duration << " " << ticksPerSecond << std::endl;
+		for (uint f = 0; f < frameCount; ++f) {
+			Frame* frame = animation->frames[f];
+			for (uint b = 0; b < boneCount; ++b) {
+				for (uint inn = 0; inn < 12; ++inn) 
+					of << frame->data[b * 12 + inn] << " ";
+				of << std::endl;
+			}
+		}
+		of.close();
+	}
+	clearExportData();
+}
+
+void Animation::clearExportData() {
+	for (uint i = 0; i < datasToExport.size(); i++)
+		delete datasToExport[i];
+	datasToExport.clear();
 }

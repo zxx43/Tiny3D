@@ -35,7 +35,6 @@ private:
 public:
 	FBXLoader(const char* path);
 	virtual ~FBXLoader();
-	virtual float getBoneFrame(int animIndex, float time, bool& end);
 };
 
 #endif

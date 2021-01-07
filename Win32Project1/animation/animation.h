@@ -23,8 +23,13 @@ struct Frame {
 };
 
 struct AnimFrame {
+	std::string name;
+	float duration, ticksPerSecond;
 	std::vector<Frame*> frames;
-	AnimFrame() {
+	AnimFrame(const char* n) {
+		name = n;
+		duration = 0.0;
+		ticksPerSecond = 0.0;
 		frames.clear();
 	}
 	~AnimFrame() {
@@ -32,12 +37,20 @@ struct AnimFrame {
 			delete frames[i];
 		frames.clear();
 	}
+	std::string getName() {
+		return name;
+	}
+	void setDuration(float d) {
+		duration = d;
+	}
+	void setTicksPerSecond(float t) {
+		ticksPerSecond = t;
+	}
 };
 
 class Animation {
 public:
 	std::string name;
-	std::map<int, int> frameIndex;
 	bool inverseYZ;
 public:
 	int faceCount, vertCount, boneCount;
@@ -52,18 +65,19 @@ public:
 	std::vector<int> aIndices;
 	std::vector<vec4> aBoneids;
 	std::vector<vec4> aWeights;
-	int animCount;
-	AnimFrame** animFrames;
+	std::vector<AnimFrame*> datasToExport;
 public:
 	Animation();
 	virtual ~Animation();
 public:
-	virtual float getBoneFrame(int animIndex, float time, bool& end) = 0;
+	float getBoneFrame(AnimFrame* animation, float time, bool& end);
 	std::string getName() { return name; }
 	void setName(std::string value) { name = value; }
-	void setFrameIndex(int aid, int fid) { frameIndex[aid] = fid; }
-	int getFrameIndex(int aid) { return frameIndex[aid]; }
 	std::string convertTexPath(const std::string& path);
+	uint getExportSize() { return datasToExport.size(); }
+	void exportAnims(std::string path);
+private:
+	void clearExportData();
 };
 
 #endif

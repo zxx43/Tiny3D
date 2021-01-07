@@ -3,18 +3,22 @@
 #include "../assets/assetManager.h"
 
 AssAnim::AssAnim(const char* path) : Animation() {
+	boneMap.clear();
+	boneInfos.clear();
+	materialMap.clear();
+
 	scene=importer.ReadFile(path,
 				aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices);
-
 	loadModel();
-	animCount = scene->mNumAnimations;
-	animFrames = new AnimFrame*[animCount];
-	for (int ai = 0; ai < animCount; ai++) {
-		animFrames[ai] = new AnimFrame();
-		prepareFrameData(ai);
-	}
 
-	materialMap.clear();
+	for (int ai = 0; ai < scene->mNumAnimations; ai++) {
+		aiAnimation* asAnimation = scene->mAnimations[ai];
+
+		AnimFrame* animation = new AnimFrame(asAnimation->mName.C_Str());
+		printf("assmip aname:%s\n", animation->getName().data());
+		datasToExport.push_back(animation);
+		prepareFrameData(ai, asAnimation, animation);
+	}
 }
 
 AssAnim::~AssAnim() {
@@ -319,13 +323,11 @@ void AssAnim::readNode(int animIndex,float animTime,aiNode* node,const aiMatrix4
 	}
 }
 
-void AssAnim::prepareFrameData(int animIndex) {
+void AssAnim::prepareFrameData(int animIndex, aiAnimation* asAnimation, AnimFrame* animation) {
 	aiMatrix4x4 mat;
 	MATRIX4X4 mat4;
-	aiAnimation* animation = scene->mAnimations[animIndex];
-	AnimFrame* animFrame = animFrames[animIndex];
 
-	for (float tick = 0.0; tick < animation->mDuration; tick += 0.01) {
+	for (float tick = 0.0; tick < asAnimation->mDuration; tick += 0.01) {
 		Frame* frame = new Frame(boneCount);
 		int currIndex = 0;
 		readNode(animIndex, tick, scene->mRootNode, mat);
@@ -350,18 +352,8 @@ void AssAnim::prepareFrameData(int animIndex) {
 			for (int m = 0; m < 12; m++) 
 				frame->data[currIndex++] = mat4.entries[m];
 		}
-		animFrame->frames.push_back(frame);
+		animation->frames.push_back(frame);
 	}
-}
-
-float AssAnim::getBoneFrame(int animIndex, float time, bool& end) {
-	aiAnimation* animation = scene->mAnimations[animIndex];
-	float ticksPerSecond = (float)animation->mTicksPerSecond;
-	float ticks = time * ticksPerSecond;
-	float animTime = ticks;
-	if (animTime > animation->mDuration - 0.01) {
-		end = true;
-		animTime = animation->mDuration - 0.01;
-	} else end = false;
-	return animTime * 100.0;
+	animation->setDuration(asAnimation->mDuration);
+	animation->setTicksPerSecond(asAnimation->mTicksPerSecond);
 }

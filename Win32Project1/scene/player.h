@@ -18,7 +18,7 @@ private:
 	bool atkPres, defPres;
 private:
 	void run(int dir);
-	void switchAct(int target, bool once);
+	void switchAct(std::string target, bool once);
 	void resetPlayOnce();
 	void idel();
 	void jump();

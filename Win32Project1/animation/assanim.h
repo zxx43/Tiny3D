@@ -49,11 +49,10 @@ private:
 	void calcScale(aiNodeAnim* anim, float animTime, aiVector3D& scale);
 	aiNodeAnim* findNodeAnim(int animIndex,std::string boneName);
 	void readNode(int animIndex,float animTime,aiNode* node,const aiMatrix4x4& parentTransform);
-	void prepareFrameData(int animIndex);
+	void prepareFrameData(int animIndex, aiAnimation* asAnimation, AnimFrame* animation);
 public:
 	AssAnim(const char* path);
 	virtual ~AssAnim();
-	virtual float getBoneFrame(int animIndex, float time, bool& end);
 
 };
 

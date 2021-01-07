@@ -18,9 +18,10 @@ private:
 public:
 	float anglex,angley,anglez;
 	Animation* animation;
-	int aid, fid;
+	int fid;
+	std::string aname;
 public:
-	int defaultAid;
+	std::string defaultAname;
 	bool loop, playOnce, moving, animEnd;
 	float time, curFrame;
 public:
@@ -32,8 +33,8 @@ public:
 	virtual void setRotation(float ax, float ay, float az);
 	virtual void setSize(float sx, float sy, float sz);
 	void setRotation(const vec4& q);
-	bool setCurAnim(int aid, bool once);
-	int getCurAnim() { return aid; }
+	bool setCurAnim(const char* name, bool once);
+	std::string getCurAnim() { return aname; }
 	void resetTime() { time = 0.0; }
 	float getTime() { return time; }
 	void setLoop(bool lp) { loop = lp; }
@@ -44,8 +45,8 @@ public:
 	bool isMoving() { return moving; }
 	void setEnd(bool ed) { animEnd = ed; }
 	bool isEnd() { return animEnd; }
-	void setDefaultAnim(int aid) { defaultAid = aid; }
-	bool isDefaultAnim() { return aid == defaultAid; }
+	void setDefaultAnim(const char* name) { defaultAname = name; }
+	bool isDefaultAnim() { return aname == defaultAname; }
 	void animate(float velocity);
 	float getCurFrame() { return curFrame; }
 };

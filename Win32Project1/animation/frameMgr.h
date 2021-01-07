@@ -7,12 +7,14 @@
 class FrameMgr {
 public:
 	std::vector<Texture2D*> frames;
+	std::map<std::string, int> frameIndex;
 	u64* datas;
 	uint animCount;
 public:
 	FrameMgr();
 	~FrameMgr();
-	void addAnimation(Animation* anim);
+	void addAnimationData(AnimFrame* data, Animation* anim);
+	void readAnimationData(const char* path, AnimFrame* animation);
 	void init();
 private:
 	int addFrame(AnimFrame* data);

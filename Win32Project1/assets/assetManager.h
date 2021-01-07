@@ -20,6 +20,7 @@ public:
 public:
 	std::map<std::string, Mesh*> meshes;
 	std::map<std::string, Animation*> animations;
+	std::map<std::string, AnimFrame*> animationDatas;
 	FrameMgr* frames;
 	TextureBindless* texBld;
 	CubeMap* skyTexture;
@@ -33,7 +34,8 @@ private:
 	~AssetManager();
 public:
 	void addMesh(const char* name, Mesh* mesh, bool billboard = false, bool drawShadow = true);
-	void addAnimation(const char* name, Animation* animation);
+	Animation* exportAnimation(const char* name, Animation* animation);
+	void addAnimationData(const char* name, const char* path, Animation* animation);
 	void initFrames();
 	void addTextureBindless(const char* name, bool srgb, int wrap = WRAP_REPEAT);
 	void initTextureBindless(MaterialManager* mtls);

@@ -327,11 +327,28 @@ void SimpleApplication::initScene() {
 	assetMgr->meshes["tank"]->setBoundScale(vec3(1.0, 1.0, 0.7));
 	assetMgr->meshes["rock"]->setBoundScale(vec3(0.9, 1.0, 0.9));
 
-	// Load animations
-	assetMgr->addAnimation("ninja", new AssAnim("models/ninja.mesh"));
-	assetMgr->addAnimation("army", new AssAnim("models/ArmyPilot.dae"));
-	assetMgr->addAnimation("dog", new FBXLoader("models/Pes.fbx"));
-	assetMgr->addAnimation("male", new FBXLoader("models/male.fbx"));
+	// Load animation mesh & export animation data
+	Animation* player = assetMgr->exportAnimation("ninja", new AssAnim("models/ninja.mesh"));
+	Animation* army = assetMgr->exportAnimation("army", new AssAnim("models/ArmyPilot.dae"));
+	Animation* dog = assetMgr->exportAnimation("dog", new FBXLoader("models/Pes.fbx"));
+	Animation* male = assetMgr->exportAnimation("male", new FBXLoader("models/male.fbx"));
+
+	// Load animation data & bind to animation mesh
+	assetMgr->addAnimationData("army_run", "animation/army_combinedAnim_0.t3a", army);
+	assetMgr->addAnimationData("male_run", "animation/male_Gun_Walk.t3a", male);
+	assetMgr->addAnimationData("dog_idle", "animation/dog_idle2_CINEMA_4D_Main.t3a", dog);
+	assetMgr->addAnimationData("idle1", "animation/ninja_Idle1.t3a", player);
+	assetMgr->addAnimationData("idle2", "animation/ninja_Idle2.t3a", player);
+	assetMgr->addAnimationData("idle3", "animation/ninja_Idle3.t3a", player);
+	assetMgr->addAnimationData("attack1", "animation/ninja_Attack1.t3a", player);
+	assetMgr->addAnimationData("attack2", "animation/ninja_Attack2.t3a", player);
+	assetMgr->addAnimationData("attack3", "animation/ninja_Attack3.t3a", player);
+	assetMgr->addAnimationData("block", "animation/ninja_Block.t3a", player);
+	assetMgr->addAnimationData("kick", "animation/ninja_Kick.t3a", player);
+	assetMgr->addAnimationData("walk", "animation/ninja_Walk.t3a", player);
+	assetMgr->addAnimationData("jump", "animation/ninja_Backflip.t3a", player);
+
+	// Create animation textures for vtf
 	assetMgr->initFrames();
 
 	// Load textures
@@ -677,7 +694,7 @@ void SimpleApplication::initScene() {
 	animNode1->scaleNodeObject(scene, 0.05, 0.05, 0.05);
 	animNode1->getObject()->setPosition(0, -5, -1);
 	animNode1->translateNode(scene, 5, 0, 15);
-	animNode1->getObject()->setCurAnim(0, false);
+	animNode1->getObject()->setDefaultAnim("army_run");
 	animNode1->getObject()->setLoop(true);
 	AnimationNode* animNode2 = new AnimationNode(vec3(5, 10, 5));
 	animNode2->setAnimation(scene, animations["ninja"]);
@@ -685,30 +702,32 @@ void SimpleApplication::initScene() {
 	animNode2->getObject()->setPosition(0, -5, -1);
 	animNode2->translateNode(scene, 40, 0, 40);
 	animNode2->rotateNodeObject(scene, 0, 45, 0);
-	animNode2->getObject()->setDefaultAnim(10);
+	animNode2->getObject()->setDefaultAnim("idle1");
 	AnimationNode* animNode3 = new AnimationNode(vec3(5, 10, 5));
 	animNode3->setAnimation(scene, animations["ninja"]);
 	animNode3->scaleNodeObject(scene, 0.05, 0.05, 0.05);
 	animNode3->getObject()->setPosition(0, -5, -1);
 	animNode3->translateNode(scene, 5, 0, 15);
-	animNode3->getObject()->setDefaultAnim(11);
+	animNode3->getObject()->setDefaultAnim("idle2");
 	AnimationNode* animNode4 = new AnimationNode(vec3(5, 10, 5));
 	animNode4->setAnimation(scene, animations["ninja"]);
 	animNode4->scaleNodeObject(scene, 0.05, 0.05, 0.05);
 	animNode4->getObject()->setPosition(0, -5, -1);
 	animNode4->translateNode(scene, 40, 0, 40);
-	animNode4->getObject()->setDefaultAnim(12);
+	animNode4->getObject()->setDefaultAnim("idle3");
 	AnimationNode* animNode5 = new AnimationNode(vec3(7.5, 7.5, 10.5));
 	animNode5->setAnimation(scene, animations["dog"]);
 	animNode5->scaleNodeObject(scene, 0.075, 0.075, 0.075);
 	animNode5->getObject()->setPosition(0, -2.6, -1.5);
 	animNode5->translateNode(scene, 30, 0, 20);
+	animNode5->getObject()->setDefaultAnim("dog_idle");
 	animNode5->getObject()->setSound("bark", "sounds/dog.wav");
 	AnimationNode* animNode6 = new AnimationNode(vec3(5.0, 10.0, 5.0));
 	animNode6->setAnimation(scene, animations["male"]);
 	animNode6->scaleNodeObject(scene, 0.05, 0.05, 0.05);
 	animNode6->getObject()->setPosition(0.0, -4.0, 0.0);
 	animNode6->translateNode(scene, 40, 0, 0);
+	animNode6->getObject()->setDefaultAnim("male_run");
 
 	Node* animNode = new StaticNode(vec3(0.0));
 	animNode->attachChild(scene, animNode1);

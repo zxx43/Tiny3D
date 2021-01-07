@@ -38,13 +38,10 @@ void FBXLoader::init(const char* path) {
 		printf("Import fbx error!\n");
 		return;
 	}
-	animCount = importer->GetAnimStackCount();
-	animFrames = new AnimFrame*[animCount];
-	scene->FillAnimStackNameArray(mAnimStackNameArray);
-	frameTime.SetTime(0, 0, 0, 1, 0, scene->GetGlobalSettings().GetTimeMode());
 	
 	root = scene->GetRootNode();
 	loadMeshData(root);
+	
 	loadAnimationData(root);
 }
 
@@ -67,6 +64,10 @@ void FBXLoader::loadMeshData(FbxNode* pNode) {
 }
 
 void FBXLoader::loadAnimationData(FbxNode* pNode) {
+	scene->FillAnimStackNameArray(mAnimStackNameArray);
+	frameTime.SetTime(0, 0, 0, 1, 0, scene->GetGlobalSettings().GetTimeMode());
+	int animCount = importer->GetAnimStackCount();
+
 	for (int aid = 0; aid < animCount; aid++) {
 		FbxString* animName = mAnimStackNameArray[aid];
 		FbxAnimStack* lCurrentAnimationStack = scene->FindMember<FbxAnimStack>(animName->Buffer());
@@ -87,21 +88,26 @@ void FBXLoader::loadAnimationData(FbxNode* pNode) {
 
 		float duration = (stop - start).GetMilliSeconds() * 0.001;
 		durationMap[aid] = duration;
-		animFrames[aid] = new AnimFrame();
+
+		AnimFrame* animation = new AnimFrame(animName->Buffer());
+		animation->setDuration(duration);
+		animation->setTicksPerSecond(15.0 / frameTime.GetMilliSeconds());
+		printf("fbx aname:%s\n", animation->getName().data());
+		datasToExport.push_back(animation);
 
 		for (FbxTime now = start; now < stop; now += frameTime) {
 			Frame* frame = new Frame(boneCount);
 			curFid = 0;
 			parentMatrix.SetIdentity();
 			loadAnimation(pNode, now, frame);
-			animFrames[aid]->frames.push_back(frame);
+			animation->frames.push_back(frame);
 		}
 		{
 			Frame* frame = new Frame(boneCount);
 			curFid = 0;
 			parentMatrix.SetIdentity();
 			loadAnimation(pNode, stop, frame);
-			animFrames[aid]->frames.push_back(frame);
+			animation->frames.push_back(frame);
 		}
 	}
 }
@@ -436,16 +442,4 @@ void FBXLoader::loadFrames(FbxNode* pNode, FbxTime pTime, Frame* frame) {
 				frame->data[curFid++] = r2[ind];
 		}
 	}
-}
-
-float FBXLoader::getBoneFrame(int animIndex, float time, bool& end) {
-	float ticksPerSecond = 15.0 / frameTime.GetMilliSeconds();
-	float ticks = time * ticksPerSecond;
-	float animTime = ticks;
-	if (animTime > durationMap[animIndex]) {
-		end = true;
-		animTime = durationMap[animIndex];
-	} else end = false;
-
-	return animTime * 100.0;
 }

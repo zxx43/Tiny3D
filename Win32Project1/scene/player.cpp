@@ -44,9 +44,9 @@ void Player::run(int dir) {
 			node->getObject()->resetTime();
 			moveAnim = true;
 		}
-		if (moveAnim && node->getObject()->getCurAnim() != 19) 
-			node->getObject()->setCurAnim(19, false);
-		if (node->getObject()->getCurAnim() == 19)
+		if (moveAnim && node->getObject()->getCurAnim() != "walk")
+			node->getObject()->setCurAnim("walk", false);
+		if (node->getObject()->getCurAnim() == "walk")
 			node->getObject()->setMoving(true);
 		float dr = 0.0;
 		switch (dir) {
@@ -79,18 +79,18 @@ void Player::idel() {
 	if (node) {
 		node->getObject()->setMoving(false);
 		if (moveAnim) {
-			node->getObject()->setCurAnim(node->getObject()->defaultAid, false);
+			node->getObject()->setCurAnim(node->getObject()->defaultAname.data(), false);
 			node->getObject()->resetTime();
 			moveAnim = false;
 		}
 	}
 }
 
-void Player::switchAct(int target, bool once) {
+void Player::switchAct(std::string target, bool once) {
 	if (node) {
-		int before = node->getObject()->aid;
+		std::string before = node->getObject()->getCurAnim();
 		node->getObject()->setMoving(false);
-		node->getObject()->setCurAnim(target, once);
+		node->getObject()->setCurAnim(target.data(), once);
 		if (before != target || (node->getObject()->isEnd() && !node->getObject()->isPlayOnce()))
 			node->getObject()->resetTime();
 	}
@@ -102,23 +102,23 @@ void Player::resetPlayOnce() {
 }
 
 void Player::attack() {
-	if (node) switchAct(2, false);
+	if (node) switchAct("attack3", false);
 }
 
 void Player::defend() {
-	if (node) switchAct(4, true);
+	if (node) switchAct("block", true);
 }
 
 void Player::crit() {
-	if (node) switchAct(17, false);
+	if (node) switchAct("attack1", false);
 }
 
 void Player::kick() {
-	if (node) switchAct(16, false);
+	if (node) switchAct("kick", false);
 }
 
 void Player::jump() {
-	if (node) switchAct(3, false);
+	if (node) switchAct("jump", false);
 }
 
 void Player::turn(bool lr, float angle) {
