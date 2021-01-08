@@ -29,8 +29,7 @@ public:
 	bool hasAnim;
 	int bufferPass;
 private:
-	std::vector<Instance*> insDatas;
-	std::vector<AnimationData*> animDatas;
+	std::vector<DataBuffer*> bufferDatas;
 	bool bufferInited;
 private:
 	std::vector<Indirect*> normals;
@@ -56,8 +55,7 @@ public:
 	MultiInstance();
 	~MultiInstance();
 	void releaseInstanceData();
-	void add(Instance* instance);
-	void add(AnimationData* animData);
+	void add(DataBuffer* dataBuffer);
 	void initBuffers(int pass = ALL_PASS);
 	int updateTransform(buff* targetBuffer = NULL);
 	void createDrawcall() { drawcall = new MultiDrawcall(this); }

@@ -333,6 +333,12 @@
     <ClCompile Include="sound\soundManager.cpp">
       <Filter>Source Files\sound</Filter>
     </ClCompile>
+    <ClCompile Include="render\dataBuffer.cpp">
+      <Filter>Source Files\render</Filter>
+    </ClCompile>
+    <ClCompile Include="animation\animationData.cpp">
+      <Filter>Source Files\animation</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="batch\batch.h">
@@ -586,6 +592,9 @@
     </ClInclude>
     <ClInclude Include="sound\soundManager.h">
       <Filter>Source Files\sound</Filter>
+    </ClInclude>
+    <ClInclude Include="render\dataBuffer.h">
+      <Filter>Source Files\render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

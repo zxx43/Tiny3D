@@ -9,8 +9,7 @@ MultiInstance::MultiInstance() {
 	indexBuffer = NULL;
 	transforms = NULL;
 
-	insDatas.clear();
-	animDatas.clear();
+	bufferDatas.clear();
 
 	normalIns.clear();
 	mixedIns.clear();
@@ -60,8 +59,7 @@ MultiInstance::~MultiInstance() {
 	releaseInstanceData();
 	if (transforms) free(transforms);
 
-	insDatas.clear();
-	animDatas.clear();
+	bufferDatas.clear();
 
 	normalIns.clear();
 	mixedIns.clear();
@@ -72,41 +70,43 @@ MultiInstance::~MultiInstance() {
 	if (drawcall) delete drawcall;
 }
 
-void MultiInstance::add(Instance* instance) {
-	if (instance->hasNormal && !instance->hasSingle) normalIns.push_back(instance);
-	else if (instance->hasNormal && instance->hasSingle) mixedIns.push_back(instance);
-	else if (instance->hasSingle) singleIns.push_back(instance);
-	else if (instance->isBillboard) billIns.push_back(instance);
-}
-
-void MultiInstance::add(AnimationData* animData) {
-	animDatas.push_back(animData);
-	hasAnim = true;
+void MultiInstance::add(DataBuffer* dataBuffer) {
+	if (dataBuffer->type == STATICS_BUFFER) {
+		Instance* instance = (Instance*)dataBuffer;
+		if (instance->hasNormal && !instance->hasSingle) normalIns.push_back(instance);
+		else if (instance->hasNormal && instance->hasSingle) mixedIns.push_back(instance);
+		else if (instance->hasSingle) singleIns.push_back(instance);
+		else if (instance->isBillboard) billIns.push_back(instance);
+		hasAnim = false;
+	} else {
+		bufferDatas.push_back(dataBuffer);
+		hasAnim = true;
+	}
 }
 
 void MultiInstance::initBuffers(int pass) {
 	if (!hasAnim) {
 		uint n = 0, m = 0, s = 0, b = 0;
 		for (; n < normalIns.size() && (pass == ALL_PASS || pass == NORMAL_PASS); ++n)
-			insDatas.push_back(normalIns[n]);
+			bufferDatas.push_back(normalIns[n]);
 		for (; m < mixedIns.size() && (pass == ALL_PASS || pass == NORMAL_PASS || pass == SINGLE_PASS); ++m)
-			insDatas.push_back(mixedIns[m]);
+			bufferDatas.push_back(mixedIns[m]);
 		for (; s < singleIns.size() && (pass == ALL_PASS || pass == SINGLE_PASS); ++s)
-			insDatas.push_back(singleIns[s]);
+			bufferDatas.push_back(singleIns[s]);
 		for (; b < billIns.size() && (pass == ALL_PASS || pass == BILL_PASS); ++b)
-			insDatas.push_back(billIns[b]);
+			bufferDatas.push_back(billIns[b]);
 		printf("normal: %d, mixed: %d, single: %d, bill: %d\n", n, m, s, b);
 		normalIns.clear(), mixedIns.clear(), singleIns.clear(), billIns.clear();
 	}
 
 	bufferPass = pass;
-	indirectCount = hasAnim ? animDatas.size() : insDatas.size();
+	indirectCount = bufferDatas.size();
 	indirects = (Indirect*)malloc(indirectCount * sizeof(Indirect));
 
 	vertexCount = 0, indexCount = 0, maxInstance = 0;
 	for (uint i = 0; i < indirectCount; ++i) {
 		if (!hasAnim) {
-			Instance* ins = insDatas[i];
+			Instance* ins = (Instance*)bufferDatas[i];
 			indirects[i].baseVertex = vertexCount;
 			indirects[i].count = ins->indexCount;
 			indirects[i].firstIndex = indexCount;
@@ -148,10 +148,10 @@ void MultiInstance::initBuffers(int pass) {
 
 			if (pushed) {
 				vertexCount += ins->vertexCount, indexCount += ins->indexCount;
-				maxInstance += ins->maxInstanceCount > MaxInstance ? MaxInstance : ins->maxInstanceCount;
+				maxInstance += ins->maxCount > MaxInstance ? MaxInstance : ins->maxCount;
 			}
 		} else {
-			AnimationData* anim = animDatas[i];
+			AnimationData* anim = (AnimationData*)bufferDatas[i];
 			indirects[i].baseVertex = vertexCount;
 			indirects[i].count = anim->indexCount;
 			indirects[i].firstIndex = indexCount;
@@ -164,7 +164,7 @@ void MultiInstance::initBuffers(int pass) {
 			anim->animId = anims.size() - 1;
 
 			vertexCount += anim->vertexCount, indexCount += anim->indexCount;
-			maxInstance += anim->maxAnim > MaxInstance ? MaxInstance : anim->maxAnim;
+			maxInstance += anim->maxCount > MaxInstance ? MaxInstance : anim->maxCount;
 		}
 	}
 
@@ -206,29 +206,20 @@ void MultiInstance::initBuffers(int pass) {
 
 	uint curVertex = 0, curIndex = 0;
 	for (uint i = 0; i < indirectCount; ++i) {
-		if (!hasAnim) {
-			Instance* ins = insDatas[i];
-			memcpy(vertexBuffer + curVertex * 3, ins->vertexBuffer, ins->vertexCount * 3 * sizeof(float));
-			memcpy(normalBuffer + curVertex * 3, ins->normalBuffer, ins->vertexCount * 3 * sizeof(half));
-			memcpy(tangentBuffer + curVertex * 3, ins->tangentBuffer, ins->vertexCount * 3 * sizeof(half));
-			memcpy(texcoordBuffer + curVertex * 4, ins->texcoordBuffer, ins->vertexCount * 4 * sizeof(float));
-			memcpy(texidBuffer + curVertex * 2, ins->texidBuffer, ins->vertexCount * 2 * sizeof(float));
-			memcpy(colorBuffer + curVertex * 3, ins->colorBuffer, ins->vertexCount * 3 * sizeof(byte));
-			memcpy(indexBuffer + curIndex, ins->indexBuffer, ins->indexCount * sizeof(ushort));
-			curVertex += ins->vertexCount, curIndex += ins->indexCount;
-		} else {
-			AnimationData* anim = animDatas[i];
-			memcpy(vertexBuffer + curVertex * 3, anim->vertices, anim->vertexCount * 3 * sizeof(float));
-			memcpy(normalBuffer + curVertex * 3, anim->normals, anim->vertexCount * 3 * sizeof(half));
-			memcpy(tangentBuffer + curVertex * 3, anim->tangents, anim->vertexCount * 3 * sizeof(half));
-			memcpy(texcoordBuffer + curVertex * 4, anim->texcoords, anim->vertexCount * 4 * sizeof(float));
-			memcpy(texidBuffer + curVertex * 2, anim->texids, anim->vertexCount * 2 * sizeof(float));
-			memcpy(colorBuffer + curVertex * 3, anim->colors, anim->vertexCount * 3 * sizeof(byte));
+		DataBuffer* db = bufferDatas[i];
+		memcpy(vertexBuffer + curVertex * 3, db->vertexBuffer, db->vertexCount * 3 * sizeof(float));
+		memcpy(normalBuffer + curVertex * 3, db->normalBuffer, db->vertexCount * 3 * sizeof(half));
+		memcpy(tangentBuffer + curVertex * 3, db->tangentBuffer, db->vertexCount * 3 * sizeof(half));
+		memcpy(texcoordBuffer + curVertex * 4, db->texcoordBuffer, db->vertexCount * 4 * sizeof(float));
+		memcpy(texidBuffer + curVertex * 2, db->texidBuffer, db->vertexCount * 2 * sizeof(float));
+		memcpy(colorBuffer + curVertex * 3, db->colorBuffer, db->vertexCount * 3 * sizeof(byte));
+		memcpy(indexBuffer + curIndex, db->indexBuffer, db->indexCount * sizeof(ushort));
+		if (hasAnim) {
+			AnimationData* anim = (AnimationData*)db;
 			memcpy(boneidBuffer + curVertex * 4, anim->boneids, anim->vertexCount * 4 * sizeof(byte));
 			memcpy(weightBuffer + curVertex * 4, anim->weights, anim->vertexCount * 4 * sizeof(half));
-			memcpy(indexBuffer + curIndex, anim->indices, anim->indexCount * sizeof(ushort));
-			curVertex += anim->vertexCount, curIndex += anim->indexCount;
 		}
+		curVertex += db->vertexCount, curIndex += db->indexCount;
 	}
 	bufferInited = true;
 }
@@ -238,7 +229,7 @@ int MultiInstance::updateTransform(buff* targetBuffer) {
 	buff* target = targetBuffer ? targetBuffer : transforms;
 	for (uint i = 0; i < indirectCount; ++i) {
 		if (!hasAnim) {
-			Instance* ins = insDatas[i];
+			Instance* ins = (Instance*)bufferDatas[i];
 			bool pushed = false;
 			if (ins->hasNormal && (bufferPass == ALL_PASS || bufferPass == NORMAL_PASS)) {
 				bases[ins->insId * 4 + 0] = instanceCount;
@@ -258,7 +249,7 @@ int MultiInstance::updateTransform(buff* targetBuffer) {
 				instanceCount += ins->insData->count;
 			}
 		} else {
-			AnimationData* anim = animDatas[i];
+			AnimationData* anim = (AnimationData*)bufferDatas[i];
 			bases[anim->animId * 4 + 3] = instanceCount;
 			if (anim->animCount > 0) {
 				memcpy(target + instanceCount * 16, anim->transformsFull, anim->animCount * 16 * sizeof(buff));

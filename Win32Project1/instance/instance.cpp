@@ -4,13 +4,13 @@
 
 std::map<Mesh*, int> Instance::instanceTable;
 
-Instance::Instance(InstanceData* data) {
+Instance::Instance(InstanceData* data) : DataBuffer(STATICS_BUFFER) {
 	create(data->insMesh);
-	maxInstanceCount = data->maxInsCount;
+	maxCount = data->maxInsCount;
 	insData = NULL;
 }
 
-Instance::Instance(Mesh* mesh) {
+Instance::Instance(Mesh* mesh) : DataBuffer(STATICS_BUFFER) {
 	create(mesh);
 	insData = NULL;
 }
@@ -18,34 +18,18 @@ Instance::Instance(Mesh* mesh) {
 void Instance::create(Mesh* mesh) {
 	insId = InvalidInsId, insSingleId = InvalidInsId, insBillId = InvalidInsId;
 	instanceMesh = mesh;
-	vertexCount = 0;
-	indexCount = 0;
-	vertexBuffer = NULL;
-	normalBuffer = NULL;
-	tangentBuffer = NULL;
-	texcoordBuffer = NULL;
-	texidBuffer = NULL;
-	colorBuffer = NULL;
-	indexBuffer = NULL;
 
-	maxInstanceCount = 0;
 	isBillboard = instanceMesh->isBillboard;
 	hasNormal = instanceMesh->normalFaces.size() > 0 && !isBillboard;
 	hasSingle = instanceMesh->singleFaces.size() > 0 && !isBillboard;
 }
 
 Instance::~Instance() {
-	releaseInstanceData();
+	releaseDatas();
 }
 
-void Instance::releaseInstanceData() {
-	if (vertexBuffer) free(vertexBuffer); vertexBuffer = NULL;
-	if (normalBuffer) free(normalBuffer); normalBuffer = NULL;
-	if (tangentBuffer) free(tangentBuffer); tangentBuffer = NULL;
-	if (texcoordBuffer) free(texcoordBuffer); texcoordBuffer = NULL;
-	if (texidBuffer) free(texidBuffer); texidBuffer = NULL;
-	if (colorBuffer) free(colorBuffer); colorBuffer = NULL;
-	if (indexBuffer) free(indexBuffer); indexBuffer = NULL;
+void Instance::releaseDatas() {
+	DataBuffer::releaseDatas();
 }
 
 void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int cnt,bool copy) {
@@ -106,7 +90,7 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 		}
 	}
 
-	maxInstanceCount = cnt;
+	maxCount = cnt;
 }
 
 void Instance::setRenderData(InstanceData* data) {

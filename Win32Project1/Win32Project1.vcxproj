@@ -164,6 +164,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="animation\animation.cpp" />
+    <ClCompile Include="animation\animationData.cpp" />
     <ClCompile Include="animation\assanim.cpp" />
     <ClCompile Include="animation\fbxloader.cpp" />
     <ClCompile Include="animation\fbxutil.cpp" />
@@ -211,6 +212,7 @@
     <ClCompile Include="object\staticObject.cpp" />
     <ClCompile Include="physics\dynamicWorld.cpp" />
     <ClCompile Include="render\computeDrawcall.cpp" />
+    <ClCompile Include="render\dataBuffer.cpp" />
     <ClCompile Include="render\drawcall.cpp" />
     <ClCompile Include="render\multiDrawcall.cpp" />
     <ClCompile Include="render\render.cpp" />
@@ -293,6 +295,7 @@
     <ClInclude Include="object\staticObject.h" />
     <ClInclude Include="physics\dynamicWorld.h" />
     <ClInclude Include="render\computeDrawcall.h" />
+    <ClInclude Include="render\dataBuffer.h" />
     <ClInclude Include="render\drawcall.h" />
     <ClInclude Include="render\glheader.h" />
     <ClInclude Include="render\multiDrawcall.h" />
