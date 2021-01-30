@@ -102,10 +102,10 @@ void Shadow::prepareViewCamera(float dist1, float dist2) {
 	radius2 = (((vec3)center2) - corners3[0]).GetLength();
 
 	radius = radius0;
-	radius0 *= 1.5;
+	radius0 *= 1.2;
 
-	actLightCameraNear->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.2 * radius0, 1.0 * radius0);
-	actLightCameraMid->initOrthoCamera( -radius1, radius1, -radius1, radius1, -1.0 * radius1, 1.2 * radius1);
+	actLightCameraNear->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.4 * radius0, 1.0 * radius0);
+	actLightCameraMid->initOrthoCamera( -radius1, radius1, -radius1, radius1, -1.0 * radius1, 1.4 * radius1);
 	actLightCameraFar->initOrthoCamera( -radius2, radius2, -radius2, radius2, -1.0 * radius2, 1.0 * radius2);
 }
 
