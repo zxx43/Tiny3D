@@ -1,0 +1,39 @@
+# Blender MTL File: 'cottage_blender.blend'
+# Material Count: 3
+
+newmtl cottage_texture
+Ns 96.078431
+Kd 0.800000 0.800000 0.800000
+Ka 0.200000 0.200000 0.200000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+map_Ka cottage_diffuse.png
+map_Kd cottage_diffuse.png
+map_Kn cottage_normal.png
+illum 2
+
+newmtl ground
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+map_Kd cottage_diffuse.png
+map_Kn cottage_normal.png
+illum 2
+
+newmtl light_1
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+map_Kd cottage_diffuse.png
+map_Kn cottage_normal.png
+illum 2

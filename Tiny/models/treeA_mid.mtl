@@ -25,6 +25,7 @@ Tr 1.000000
 illum 2
 Ns 0.000000
 map_Kd Treebranch01.bmp
+single 1
 
 newmtl material_2
 Ns 9.803922
