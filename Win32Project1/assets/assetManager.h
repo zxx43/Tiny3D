@@ -27,8 +27,10 @@ public:
 	CubeMap* envTexture;
 	CubeMap* noise3DTexture;
 	Texture2D* reflectTexture;
-	Texture2D* heightTexture;
 	int distortionTex, noiseTex, roadTex;
+private:
+	Texture2D* heightTexture;
+	Texture2D* heightNormalTex;
 private:
 	AssetManager();
 	~AssetManager();
@@ -59,6 +61,9 @@ public:
 	u64 getRoadHnd() { return texBld->getHnds()[roadTex]; }
 	void createHeightTex();
 	Texture2D* getHeightTex() { return heightTexture; }
+	u64 getHeightHnd() { return heightTexture->hnd; }
+	Texture2D* getHeightNormal() { return heightNormalTex; }
+	u64 getHeightNormalHnd() { return heightNormalTex->hnd; }
 };
 
 #endif

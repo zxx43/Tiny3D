@@ -31,6 +31,7 @@ int centerX, centerY;
 RECT winRect;
 POINT mPoint;
 bool mouseShow = false;
+bool windowResized = false;
 
 SimpleApplication* app = NULL;
 void CreateApplication();
@@ -66,6 +67,7 @@ void KillWindow() {
 
 void ResizeWindow(int width,int height) {
 	app->resize(width, height);
+	windowResized = true;
 }
 
 void TimeRun() {
@@ -117,6 +119,7 @@ bool DrawWindow() {
 		else return false;
 	}
 
+	if (windowResized) windowResized = false;
 	app->draw();
 	SwitchMouse();
 

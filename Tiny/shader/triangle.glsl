@@ -64,3 +64,20 @@ vec3 CaculateBary(vec3 point, vec3 pa, vec3 pb, vec3 pc) {
 	float v = (dot00 * dot12 - dot01 * dot02) * inverDeno;
 	return vec3(u, v, 1.0 - (u + v));
 }
+
+vec3 CaculateBary(vec2 point, vec2 pa, vec2 pb, vec2 pc) {
+	vec2 v0 = pc - pb;
+	vec2 v1 = pa - pb;
+	vec2 v2 = point - pb;
+
+	float dot00 = dot(v0, v0);
+	float dot01 = dot(v0, v1);
+	float dot02 = dot(v0, v2);
+	float dot11 = dot(v1, v1);
+	float dot12 = dot(v1, v2);
+	float inverDeno = 1.0 / (dot00 * dot11 - dot01 * dot01);
+	
+	float u = (dot11 * dot02 - dot01 * dot12) * inverDeno;
+	float v = (dot00 * dot12 - dot01 * dot02) * inverDeno;
+	return vec3(u, v, 1.0 - (u + v));
+}

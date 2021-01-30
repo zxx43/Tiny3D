@@ -3,7 +3,7 @@
 uniform mat4 viewProjectMatrix;
 
 layout (location = 0) in vec2 vertex;
-layout (location = 2) in mat4 trans;
+layout (location = 1) in mat4 trans;
 
 out vec4 vNormalHeight;
 

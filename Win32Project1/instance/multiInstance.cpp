@@ -89,10 +89,10 @@ void MultiInstance::initBuffers(int pass) {
 		uint n = 0, m = 0, s = 0, b = 0;
 		for (; n < normalIns.size() && (pass == ALL_PASS || pass == NORMAL_PASS); ++n)
 			bufferDatas.push_back(normalIns[n]);
-		for (; m < mixedIns.size() && (pass == ALL_PASS || pass == NORMAL_PASS || pass == SINGLE_PASS); ++m)
-			bufferDatas.push_back(mixedIns[m]);
 		for (; s < singleIns.size() && (pass == ALL_PASS || pass == SINGLE_PASS); ++s)
 			bufferDatas.push_back(singleIns[s]);
+		for (; m < mixedIns.size() && (pass == ALL_PASS || pass == NORMAL_PASS || pass == SINGLE_PASS); ++m)
+			bufferDatas.push_back(mixedIns[m]);
 		for (; b < billIns.size() && (pass == ALL_PASS || pass == BILL_PASS); ++b)
 			bufferDatas.push_back(billIns[b]);
 		printf("normal: %d, mixed: %d, single: %d, bill: %d\n", n, m, s, b);
@@ -114,14 +114,7 @@ void MultiInstance::initBuffers(int pass) {
 			indirects[i].baseInstance = 0;
 
 			bool pushed = false;
-			if (ins->isBillboard && (bufferPass == ALL_PASS || bufferPass == BILL_PASS)) {
-				Indirect* idBill = (Indirect*)malloc(sizeof(Indirect));
-				memcpy(idBill, indirects + i, sizeof(Indirect));
-
-				bills.push_back(idBill);
-				ins->insBillId = bills.size() - 1;
-				pushed = true;
-			} else {
+			if(!ins->isBillboard) {
 				if (ins->hasNormal && (bufferPass == ALL_PASS || bufferPass == NORMAL_PASS)) {
 					Indirect* idNorm = (Indirect*)malloc(sizeof(Indirect));
 					memcpy(idNorm, indirects + i, sizeof(Indirect));
@@ -144,6 +137,13 @@ void MultiInstance::initBuffers(int pass) {
 					ins->insSingleId = singles.size() - 1;
 					pushed = true;
 				}
+			} else if (ins->isBillboard && (bufferPass == ALL_PASS || bufferPass == BILL_PASS)) {
+				Indirect* idBill = (Indirect*)malloc(sizeof(Indirect));
+				memcpy(idBill, indirects + i, sizeof(Indirect));
+
+				bills.push_back(idBill);
+				ins->insBillId = bills.size() - 1;
+				pushed = true;
 			}
 
 			if (pushed) {

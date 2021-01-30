@@ -299,6 +299,12 @@ inline void SetVec4(const vec4& v, float* array, uint index) {
 	array[index * 4 + 3] = v.w;
 }
 
+inline void SetUVec3(const vec3& v, byte* array, uint index) {
+	array[index * 3 + 0] = (byte)v.x;
+	array[index * 3 + 1] = (byte)v.y;
+	array[index * 3 + 2] = (byte)v.z;
+}
+
 inline void SetUVec4(const vec4& v, byte* array, uint index) {
 	array[index * 4 + 0] = (byte)v.x;
 	array[index * 4 + 1] = (byte)v.y;

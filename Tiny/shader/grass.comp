@@ -3,9 +3,9 @@
 
 layout(local_size_x = WORKGROUP_SIZE, local_size_y = WORKGROUP_SIZE) in;
 
-layout(bindless_sampler) uniform sampler2D distortionTex, roadTex;
 layout(binding = 0) uniform sampler2D texDepth;
-uniform vec3 translate, scale;
+uniform BindlessSampler2D distortionTex, roadTex, heightTex, heightNormal;
+uniform vec3 mapTrans, mapScale;
 uniform vec4 mapInfo;
 uniform float time;
 uniform vec3 eyePos;
@@ -16,22 +16,11 @@ uniform float fullSize;
 const float WindStrength = 0.65;
 const vec2 WindFrequency = vec2(0.05, 0.05);
 
-struct VertexPoint {
-	vec4 vert;
-	vec4 norm;
-	vec4 planA;
-	vec4 planB;
-};
-
-layout(binding = 1, std140) buffer OutPose {
+layout(binding = 1, std430) buffer OutPose {
 	mat4 outPose[];
 };
 
-layout(binding = 2, std140) buffer TerrainData {
-	VertexPoint terrainData[];
-};
-
-layout(binding = 3) buffer IndirectBuff {
+layout(binding = 2, std430) buffer IndirectBuff {
 	uint  count;
 	uint  instanceCount;
 	uint  first;
@@ -69,33 +58,48 @@ void main() {
 	float spread = 0.25 + length(dPose) * 0.004;
 	vec3 worldPose = vec3(0.0);
 	worldPose.xz = floor(eyePos.xz * 0.02) * 50.0 + dPose * spread;
-	
+	// Random grass xz position
 	vec2 dRand = vec2(random(worldPose, 0.1), random(worldPose, 0.2));
 	worldPose.xz += dRand * spread;
 
-	vec2 coord = (worldPose.xz - translate.xz) / (scale.xz * mapInfo.zw);
-	if(coord.x < 0.01 || coord.y < 0.01 || coord.x > 0.99 || coord.y > 0.99) return;
-	vec4 roadMask = texture(roadTex, coord);
-	if(roadMask.r > 0.0001) return;
+	vec2 coord = (worldPose.xz - mapTrans.xz) / (mapScale.xz * mapInfo.zw);
+	if(coord.x < 0.0 || coord.y < 0.0 || 
+		coord.x > 1.0 || coord.y > 1.0 || 
+		texture(roadTex, coord).r > 0.0001) 
+			return;
 
-	ivec2 block = CaculateBlock(worldPose.xz, translate.xz, scale.xz, 1.0 / mapInfo.x);
-	int tra = CauculateTrIndex(block, mapInfo.y), trb = tra + 1, trp = tra;
-	
-	VertexPoint pa = terrainData[trp * 3 + 0];
-	VertexPoint pb = terrainData[trp * 3 + 1];
-	VertexPoint pc = terrainData[trp * 3 + 2];
-	vec4 plan = pa.planA;
-	
-	bool inTr = CheckIn(worldPose.xz, pa.vert.xyz, pb.vert.xyz, pc.vert.xyz);
-	if(!inTr) {
-		trp = trb;
-		pa = terrainData[trp * 3 + 0];
-		pb = terrainData[trp * 3 + 1];
-		pc = terrainData[trp * 3 + 2];
-		plan = pa.planB;
+	// Caculate grass pos y;
+	vec2 texSize = mapInfo.zw / mapInfo.x;
+	vec2 texPos = coord * texSize;
+	vec2 texLD = floor(texPos), texRT = ceil(texPos);
+	if(abs(texLD.x - texRT.x) < 0.0001) {
+		if(texLD.x > 0.0001) texLD.x -= 1.0;
+		else texRT.x += 1.0;
 	}
-	worldPose.y = CaculateY(worldPose.xz, plan);
+	if(abs(texLD.y - texRT.y) < 0.0001) {
+		if(texLD.y > 0.0001) texLD.y -= 1.0;
+		else texRT.y += 1.0;
+	}
 	
+	vec2 invTexSize = vec2(1.0) / texSize;
+	vec2 coord1 = texLD * invTexSize;
+	vec2 coord2 = texRT * invTexSize;
+	vec2 coord3 = vec2(texLD.x, texRT.y) * invTexSize;
+	vec2 coord4 = vec2(texRT.x, texLD.y) * invTexSize;
+
+	vec3 p1 = vec3(coord1.x, texture(heightTex, coord1).x, coord1.y);
+	vec3 p2 = vec3(coord2.x, texture(heightTex, coord2).x, coord2.y);
+	vec3 p3 = vec3(coord3.x, texture(heightTex, coord3).x, coord3.y);
+
+	if(CheckIn(coord, p1, p2, p3)) 
+		worldPose.y = CaculateY(coord, p1, p2, p3);
+	else {
+		vec3 p4 = vec3(coord4.x, texture(heightTex, coord4).x, coord4.y);
+		worldPose.y = CaculateY(coord, p1, p4, p2);
+	}
+	worldPose.y = worldPose.y * 255.0 * mapScale.y + mapTrans.y;
+
+	// Caculate occlusion
 	float viewz = (viewMatrix * vec4(worldPose, 1.0)).z;
 	if(viewz > 0.0) return;
 	vec4 projPose = viewProjectMatrix * vec4(worldPose, 1.0);
@@ -112,17 +116,17 @@ void main() {
 	vec3 tp = topPose.xyz / topPose.w * 0.5 + 0.5;
 	float ocDepth = texture(texDepth, tp.xy).x;
 	if((tp.z - ocDepth) > 0.0001) return;
-	
+
+	// Wind effect
 	mat3 rotMat = RotY(rand * PI);
 	mat3 windMat = GetWindMat(worldPose.xz + vec2(viewz));
 	rotMat = rotMat * windMat;
 	
+	// Caculate transform & normal
 	mat4 trans = Translate(worldPose) * M3ToM4(rotMat) * Scale(vec3(size, 1.0));
 	trans = transpose(trans);
+	trans[3] = vec4((texture(heightNormal, coord).xyz - 0.5) * 2.0, 1.0); // normal
 
-	vec3 bary = CaculateBary(worldPose, pa.vert.xyz, pb.vert.xyz, pc.vert.xyz);
-	vec3 normal = pa.norm.xyz * bary.x + pb.norm.xyz * bary.y + pc.norm.xyz * bary.z;
-	trans[3] = vec4(normal, 1.0);
-
+	// Output result & add grass instance count
 	outPose[atomicAdd(indirect.instanceCount, 1)] = trans;
 }

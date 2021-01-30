@@ -4,7 +4,7 @@
 #include "../mesh/board.h"
 #include "../mesh/quad.h"
 #include "../mesh/terrain.h"
-#include "../constants/constants.h"
+#include "../util/util.h"
 using namespace std;
 
 AssetManager* AssetManager::assetManager = NULL;
@@ -16,6 +16,7 @@ AssetManager::AssetManager() {
 	noise3DTexture = NULL;
 	reflectTexture = NULL;
 	heightTexture = NULL;
+	heightNormalTex = NULL;
 	distortionTex = -1;
 	noiseTex = -1;
 	roadTex = -1;
@@ -44,6 +45,7 @@ AssetManager::~AssetManager() {
 	delete frames;
 	if (texBld) delete texBld; texBld = NULL;
 	if (heightTexture) delete heightTexture; heightTexture = NULL;
+	if (heightNormalTex) delete heightNormalTex; heightNormalTex = NULL;
 	if (skyTexture) delete skyTexture;
 	if (envTexture && envTexture != skyTexture) delete envTexture;
 	skyTexture = NULL; envTexture = NULL;
@@ -140,10 +142,22 @@ void AssetManager::addRoadTex(const char* texName) {
 }
 
 void AssetManager::createHeightTex() {
-	if (meshes.count("terrain") <= 0) return;
-	Terrain* mesh = (Terrain*)meshes["terrain"];
-	byte* heightData = mesh->getHeightMap();
-	heightTexture = new Texture2D(MAP_SIZE, MAP_SIZE, TEXTURE_TYPE_COLOR, HIGH_PRE, 1, LINEAR, true, heightData);
+	map<string, Mesh*>::iterator it = meshes.find("terrain");
+	if (it == meshes.end()) return;
+	Terrain* mesh = (Terrain*)it->second;
+
+	int size = MAP_SIZE / STEP_SIZE;
+	byte* heightData = (byte*)malloc(size * size * 1 * sizeof(byte));
+	byte* normalData = (byte*)malloc(size * size * 3 * sizeof(byte));
+	for (uint i = 0; i < size * size; ++i) {
+		heightData[i] = (byte)mesh->vertices3[i].GetY();
+		vec3 normal = (mesh->normals[i].GetNormalized() + 1.0) * 0.5 * 255.0;
+		SetUVec3(normal, normalData, i);
+	}
+	heightTexture = new Texture2D(size, size, TEXTURE_TYPE_COLOR, LOW_PRE, 1, NEAREST, true, heightData);
+	heightNormalTex = new Texture2D(size, size, TEXTURE_TYPE_COLOR, LOW_PRE, 3, LINEAR, true, normalData);
+	free(heightData);
+	free(normalData);
 }
 
 void AssetManager::addMesh(const char* name, Mesh* mesh, bool billboard, bool drawShadow) {

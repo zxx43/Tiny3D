@@ -18,7 +18,7 @@ layout (location = 3) out vec4 FragRoughMetal;
 
 void main() {
 	vec4 textureColor = texture(texBlds[int(vTexid.x)], vTexcoord);
-	if(textureColor.a < 0.3) discard;
+	if(textureColor.a < 0.25) discard;
 #ifndef BillPass
 		vec3 normal = vNormal;
 		if(vTexid.y >= 0.0) 

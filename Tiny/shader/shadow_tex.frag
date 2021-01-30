@@ -9,7 +9,7 @@ flat in vec4 vTexid;
 void main() {
 	if(uAlpha < 0.5) {}
 	else {
-		if(texture(texBlds[int(vTexid.x)], vTexcoord.xy).a < 0.3) 
+		if(texture(texBlds[int(vTexid.x)], vTexcoord.xy).a < 0.25) 
 			discard;
 	}
 }

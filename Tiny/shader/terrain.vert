@@ -1,7 +1,7 @@
 #include "shader/util.glsl"
 
 uniform mat4 viewProjectMatrix;
-uniform vec3 translate, scale;
+uniform vec3 mapTrans, mapScale;
 uniform vec4 mapInfo;
 
 layout (location = 0) in vec3 vertex;
@@ -23,7 +23,7 @@ void main() {
 	vColor = vec3(0.1, 1.8, 1.0) * color * 0.005;
 	
 	vec4 worldVertex = vec4(vertex, 1.0);
-	vec2 coord = (worldVertex.xz - translate.xz) / (scale.xz * mapInfo.zw);
+	vec2 coord = (worldVertex.xz - mapTrans.xz) / (mapScale.xz * mapInfo.zw);
 
 	vWorldVert = vec4(coord.x, worldVertex.y, coord.y, worldVertex.w);
 	vNormal = normal;

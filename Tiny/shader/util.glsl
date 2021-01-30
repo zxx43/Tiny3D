@@ -141,7 +141,7 @@ mat4 Translate(vec3 t) {
 }
 
 // ivd = 1 / (f - n)
-#define USE_LINEAR_DEPTH 1.0
+//#define USE_LINEAR_DEPTH 1.0
 vec4 DepthToLinear(mat4 vpp, mat4 lpp, mat4 lvp, float n, float ivd, vec4 mv) {
 #ifndef USE_LINEAR_DEPTH
 	return vpp * mv;

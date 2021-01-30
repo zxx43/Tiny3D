@@ -9,11 +9,11 @@ struct Transform {
 	vec4 mesh;
 };
 
-layout(binding = 1, std140) buffer InPosition {
+layout(binding = 1, std430) buffer InPosition {
 	Transform inTrans[];
 };
 
-layout(binding = 2, std140) buffer OutPosition {
+layout(binding = 2, std430) buffer OutPosition {
 	mat4 outMatrices[];
 };
 

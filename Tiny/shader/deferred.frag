@@ -9,9 +9,7 @@ uniform BindlessSampler2D texBuffer,
 uniform vec2 pixelSize;
 uniform mat4 invViewProjMatrix, invProjMatrix;
 
-uniform BindlessSampler2D depthBufferNear, 
-						depthBufferMid, 
-						depthBufferFar;
+uniform BindlessSampler2D shadowBuffers[3];
 
 uniform mat4 lightViewProjNear, lightViewProjMid, lightViewProjFar;
 uniform vec2 shadowPixSize;
@@ -92,7 +90,7 @@ vec4 genShadowFactor(vec4 worldPos, float depthView, float bias) {
 		#else
 			float bs = bias * 0.00015;
 		#endif
-		float sf = genPCF(depthBufferNear, shadowCoord, bs, 3.0, 0.0205);
+		float sf = genPCF(shadowBuffers[0], shadowCoord, bs, 3.0, 0.0205);
 		return vec4(1.0, 0.0, 0.0, sf);
 	} else if(lightDepth > levels.x - gaps.x && lightDepth < levels.x + gaps.x) {
 		vec4 near = DepthToLinear(lightViewProjNear, lightProjNear, lightViewNear, camParas[0].x, camParas[0].y, worldPos);
@@ -108,8 +106,8 @@ vec4 genShadowFactor(vec4 worldPos, float depthView, float bias) {
 		#else
 			float bsNear = bias * 0.00015, bsMid = 0.0;
 		#endif
-		float factorNear = genPCF(depthBufferNear, shadowCoordNear, bsNear, 3.0, 0.0205);
-		float factorMid = genPCF(depthBufferMid, shadowCoordMid, bsMid, 2.0, 0.04);
+		float factorNear = genPCF(shadowBuffers[0], shadowCoordNear, bsNear, 3.0, 0.0205);
+		float factorMid = genPCF(shadowBuffers[1], shadowCoordMid, bsMid, 2.0, 0.04);
 		float sf = mix(factorNear, factorMid, (lightDepth - (levels.x - gaps.x)) * gaps.y);
 		return vec4(0.0, 0.0, 1.0, sf);
 	} else if(depthView <= levels.y) {
@@ -117,7 +115,7 @@ vec4 genShadowFactor(vec4 worldPos, float depthView, float bias) {
 		vec3 lightPosition = mid.xyz / mid.w;
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
 		float bs = 0.00;
-		float sf = genPCF(depthBufferMid, shadowCoord, bs, 2.0, 0.04);
+		float sf = genPCF(shadowBuffers[1], shadowCoord, bs, 2.0, 0.04);
 		return vec4(0.0, 1.0, 0.0, sf);
 	}
 	#ifdef DRAW_FAR_SHADOW
@@ -126,7 +124,7 @@ vec4 genShadowFactor(vec4 worldPos, float depthView, float bias) {
 			vec3 lightPosition = far.xyz / far.w;
 			vec3 shadowCoord = lightPosition * 0.5 + 0.5;
 			float bs = bias * 0.0;
-			float sf = genShadow(depthBufferFar, shadowCoord, bs);
+			float sf = genShadow(shadowBuffers[2], shadowCoord, bs);
 			return vec4(1.0, 1.0, 1.0, sf);
 		}
 	#endif
@@ -227,7 +225,7 @@ void main() {
 		// Cartoon
 		#else
 			float darkness = ndotl * shadowFactor;
-			float threshold = 0.4;
+			float threshold = 0.15;
 			float cwFactor = step(darkness, threshold);
 			vec3 kd = KCool * cwFactor + KWarm * (1.0 - cwFactor);
 			sceneColor = (ambient + kd * albedo * material.g) * udotl;

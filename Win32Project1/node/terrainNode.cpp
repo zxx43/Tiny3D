@@ -150,7 +150,7 @@ void TerrainNode::standObjectsOnGround(Scene* scene, Node* node) {
 				int bx, bz;
 				this->caculateBlock(worldCenter.x, worldCenter.z, bx, bz);
 				this->cauculateY(bx, bz, worldCenter.x, worldCenter.z, worldCenter.y);
-				worldCenter.y += ((AABB*)obj->bounding)->sizey * 0.45;
+				worldCenter.y += ((AABB*)obj->bounding)->sizey * 0.4;
 				node->translateNodeObjectCenterAtWorld(scene, i, worldCenter.x, worldCenter.y, worldCenter.z);
 			}
 		}

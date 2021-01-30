@@ -132,6 +132,9 @@ void SimpleApplication::resize(int width, int height) {
 void SimpleApplication::keyDown(int key) {
 	Application::keyDown(key);
 	scene->player->keyDown(input, scene);
+	
+	if(key == 67)
+		printf("pos: %f, %f\n", scene->actCamera->position.x, scene->actCamera->position.z);
 }
 
 void SimpleApplication::keyUp(int key) {
@@ -313,19 +316,25 @@ void SimpleApplication::initScene() {
 	assetMgr->addMesh("treeA", new Model("models/treeA.obj", "models/treeA.mtl", 2));
 	assetMgr->addMesh("treeAMid", new Model("models/treeA_mid.obj", "models/treeA_mid.mtl", 2));
 	assetMgr->addMesh("treeALow", new Model("models/treeA_low.obj", "models/treeA_low.mtl", 2));
+	assetMgr->addMesh("birch", new Model("models/birchB.obj", "models/birchB.mtl", 2));
+	assetMgr->addMesh("bigtree", new Model("models/bigtreeC.obj", "models/bigtreeC.mtl", 3));
 	assetMgr->addMesh("tank", new Model("models/tank.obj", "models/tank.mtl", 3));
 	assetMgr->addMesh("m1a2", new Model("models/m1a2.obj", "models/m1a2.mtl", 2));
 	assetMgr->addMesh("house", new Model("models/house.obj", "models/house.mtl", 2));
 	assetMgr->addMesh("oildrum", new Model("models/oildrum.obj", "models/oildrum.mtl", 3));
 	assetMgr->addMesh("rock", new Model("models/sharprockfree.obj", "models/sharprockfree.mtl", 2));
 	assetMgr->addMesh("rock_low", new Model("models/sharprockfree_low.obj", "models/sharprockfree_low.mtl", 2));
+	assetMgr->addMesh("cottage", new Model("models/cottage_obj.obj", "models/cottage_obj.mtl", 2));
 	assetMgr->addMesh("terrain", new Terrain("terrain/Terrain.raw"));
 	assetMgr->addMesh("water", new Water(1024, 16));
 
 	assetMgr->meshes["treeA"]->setBoundScale(vec3(0.2, 1.0, 0.2));
+	assetMgr->meshes["birch"]->setBoundScale(vec3(0.3, 1.0, 0.3));
+	assetMgr->meshes["bigtree"]->setBoundScale(vec3(0.3, 1.0, 0.3));
 	assetMgr->meshes["m1a2"]->setBoundScale(vec3(0.6, 1.0, 1.0));
 	assetMgr->meshes["tank"]->setBoundScale(vec3(1.0, 1.0, 0.7));
 	assetMgr->meshes["rock"]->setBoundScale(vec3(0.9, 1.0, 0.9));
+	assetMgr->meshes["cottage"]->setBoundScale(vec3(0.9, 1.0, 0.8));
 
 	// Load animation mesh & export animation data
 	Animation* player = assetMgr->exportAnimation("ninja", new AssAnim("models/ninja.mesh"));
@@ -446,6 +455,13 @@ void SimpleApplication::initScene() {
 	StaticObject model6(meshes["oildrum"]);
 	model6.setSound("push", "sounds/box.wav");
 	StaticObject model9(meshes["rock"], meshes["rock_low"], NULL);
+	StaticObject model10(meshes["cottage"]);
+	StaticObject model11(meshes["birch"], meshes["birch"], meshes["billboard"]);
+	model11.detailLevel = 4;
+	model11.setBillboard(13, 14, mtlMgr->find("billboard_treeA_mat"));
+	StaticObject model12(meshes["bigtree"], meshes["bigtree"], meshes["billboard"]);
+	model12.detailLevel = 4;
+	model12.setBillboard(13, 14, mtlMgr->find("billboard_treeA_mat"));
 
 	//return;
 	scene->createSky(cfgs->dynsky);
@@ -494,12 +510,56 @@ void SimpleApplication::initScene() {
 	objectSphere->setSize(10, 10, 10);
 	node3->addObject(scene, objectSphere);
 
+	InstanceNode* node4 = new InstanceNode(vec3(2553, 0, 1450));
+	StaticObject* objectCottage = model10.clone();
+	objectCottage->setPosition(-20, 0, -20);
+	objectCottage->setSize(3, 3, 3);
+	objectCottage->setRotation(0, 90, 0);
+	node4->addObject(scene, objectCottage);
+	StaticObject* boxObj1 = box.clone();
+	boxObj1->setPosition(0, 0, 50);
+	boxObj1->setSize(6, 6, 6);
+	boxObj1->setDynamic(true);
+	StaticObject* boxObj2 = box.clone();
+	boxObj2->setPosition(0, 0, 60);
+	boxObj2->setRotation(0, 30, 0);
+	boxObj2->setSize(6, 6, 6);
+	boxObj2->setDynamic(true);
+	StaticObject* boxObj3 = box.clone();
+	boxObj3->setPosition(-10, 0, 50);
+	boxObj3->setSize(6, 6, 6);
+	boxObj3->setDynamic(true);
+	StaticObject* boxObj4 = box.clone();
+	boxObj4->setPosition(-10, 0, 70);
+	boxObj4->setSize(6, 6, 6);
+	boxObj4->setDynamic(true);
+	StaticObject* oilObj1 = model6.clone();
+	oilObj1->setPosition(30, 0, 50);
+	oilObj1->setSize(10, 10, 10);
+	oilObj1->setDynamic(true);
+	StaticObject* oilObj2 = model6.clone();
+	oilObj2->setPosition(35, 0, 60);
+	oilObj2->setSize(10, 10, 10);
+	oilObj2->setDynamic(true);
+	StaticObject* oilObj3 = model6.clone();
+	oilObj3->setPosition(40, 0, 50);
+	oilObj3->setSize(10, 10, 10);
+	oilObj3->setDynamic(true);
+	node4->addObject(scene, boxObj1);
+	node4->addObject(scene, boxObj2);
+	node4->addObject(scene, boxObj3);
+	node4->addObject(scene, boxObj4);
+	node4->addObject(scene, oilObj1);
+	node4->addObject(scene, oilObj2);
+	node4->addObject(scene, oilObj3);
+
 	Node* node = new StaticNode(vec3(800, 0, -604));
 	Node* modelNode = new StaticNode(vec3(0, 0, 0));
 	modelNode->attachChild(scene, node1);
 	modelNode->attachChild(scene, node2);
 	node->attachChild(scene, modelNode);
 	node->attachChild(scene, node3);
+	node->attachChild(scene, node4);
 	scene->staticRoot->attachChild(scene, node);
 
 	StaticObject* objectRock = model9.clone();
@@ -537,7 +597,7 @@ void SimpleApplication::initScene() {
 			//StaticObject* tree = model1->clone();
 			//float baseSize = 2;
 			bool changeTree = (rand() % 100) > treePerc;
-			StaticObject* tree = changeTree ? model4.clone() : model1.clone();
+			StaticObject* tree = changeTree ? model11.clone() : model1.clone();
 			float baseSize = changeTree ? 3 : 5;
 			float size = (rand() % 100 * 0.01) * 2 + baseSize;
 
@@ -554,7 +614,7 @@ void SimpleApplication::initScene() {
 			//StaticObject* tree = model1->clone();
 			//float baseSize = 2;
 			bool changeTree = (rand() % 100) > treePerc;
-			StaticObject* tree = changeTree ? model4.clone() : model1.clone();
+			StaticObject* tree = changeTree ? model12.clone() : model1.clone();
 			float baseSize = changeTree ? 3 : 5;
 			float size = (rand() % 100 * 0.01) * 2 + baseSize;
 
@@ -588,7 +648,7 @@ void SimpleApplication::initScene() {
 			//StaticObject* tree = model1->clone();
 			//float baseSize = 2;
 			bool changeTree = (rand() % 100) > treePerc;
-			StaticObject* tree = changeTree ? model4.clone() : model1.clone();
+			StaticObject* tree = changeTree ? model12.clone() : model1.clone();
 			float baseSize = changeTree ? 3 : 5;
 			float size = (rand() % 100 * 0.01) * 2 + baseSize;
 

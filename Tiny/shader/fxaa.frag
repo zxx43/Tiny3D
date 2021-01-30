@@ -65,7 +65,7 @@ void main() {
 						 dot(normal, ttn.xyz),
 						 dot(normal, rtn.xyz));
 	vec4 dotDeltas = abs(dNormal1 - dNormal2);
-    vec4 normalResults = step(0.4, dotDeltas);
+    vec4 normalResults = step(0.35, dotDeltas);
 
 	vec4 wfs1 = vec4(ldn.w, ddn.w, rdn.w, lln.w) * 0.5 + 0.5;
 	vec4 wfs2 = vec4(rrn.w, ltn.w, ttn.w, rtn.w) * 0.5 + 0.5;

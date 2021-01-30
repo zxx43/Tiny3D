@@ -220,6 +220,8 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 						state->shaderCompute->setMatrix4("viewMatrix", camera->viewMatrix);
 						state->shaderCompute->setHandle64("distortionTex", AssetManager::assetManager->getDistortionHnd());
 						state->shaderCompute->setHandle64("roadTex", AssetManager::assetManager->getRoadHnd());
+						state->shaderCompute->setHandle64("heightTex", AssetManager::assetManager->getHeightHnd());
+						state->shaderCompute->setHandle64("heightNormal", AssetManager::assetManager->getHeightNormalHnd());
 						state->shaderCompute->setFloat("time", state->time * 0.025);
 						state->shaderCompute->setFloat("quality", state->quality);
 					}
