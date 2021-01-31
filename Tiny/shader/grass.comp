@@ -63,10 +63,7 @@ void main() {
 	worldPose.xz += dRand * spread;
 
 	vec2 coord = (worldPose.xz - mapTrans.xz) / (mapScale.xz * mapInfo.zw);
-	if(coord.x < 0.0 || coord.y < 0.0 || 
-		coord.x > 1.0 || coord.y > 1.0 || 
-		texture(roadTex, coord).r > 0.0001) 
-			return;
+	if(any(bvec3(any(lessThan(coord, vec2(0.0))), any(greaterThan(coord, vec2(1.0))), texture(roadTex, coord).r > 0.001))) return;
 
 	// Caculate grass pos y;
 	vec2 texSize = mapInfo.zw / mapInfo.x;
@@ -103,9 +100,7 @@ void main() {
 	float viewz = (viewMatrix * vec4(worldPose, 1.0)).z;
 	if(viewz > 0.0) return;
 	vec4 projPose = viewProjectMatrix * vec4(worldPose, 1.0);
-	if(projPose.x > projPose.w || projPose.x < -projPose.w ||
-		projPose.z > projPose.w ||
-		projPose.y > projPose.w) return;
+	if(any(bvec2(any(greaterThan(projPose.xyz, vec3(projPose.w))), projPose.x < -projPose.w))) return;
 	
 	float rand = (dRand.x + dRand.y) * 0.5;	
 	vec2 size = vec2(rand * 0.5 + 0.5, rand * 2.5 + 2.5);

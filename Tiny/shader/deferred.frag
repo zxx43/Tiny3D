@@ -108,7 +108,7 @@ vec4 genShadowFactor(vec4 worldPos, float depthView, float bias) {
 		#endif
 		float factorMid = genPCF(shadowBuffers[1], shadowCoordMid, bsMid, 2.0, 0.04);
 		float sf = 0.0;
-		if(any(lessThan(shadowCoordNear, vec3(0.001))) || any(greaterThan(shadowCoordNear, vec3(0.999))))
+		if(any(bvec2(any(lessThan(shadowCoordNear, vec3(0.001))), any(greaterThan(shadowCoordNear, vec3(0.999))))))
 			sf = factorMid;
 		else {
 			float factorNear = genPCF(shadowBuffers[0], shadowCoordNear, bsNear, 3.0, 0.0205);
