@@ -20,20 +20,6 @@ in vec2 vTexcoord;
 out vec4 FragColor;
 out vec4 NormalWaterFlag;
 
-#define START_H float(0.0)
-#define END_H float(1500.0)
-#define FOG_COLOR vec3(0.9)
-
-vec3 GenFogColor(vec4 worldPos, float depthView, vec3 sceneColor) {
-	float worldH = worldPos.y / worldPos.w;
-	float heightFactor = smoothstep(START_H, END_H, worldH);
-	float fogFactor = exp2(-0.00000075 * depthView * depthView * LOG2);
-
-	fogFactor = mix(fogFactor, 1.0, heightFactor);
-	fogFactor = clamp(fogFactor, 0.0, 1.0);
-	return mix(FOG_COLOR * udotl, sceneColor, fogFactor);
-}
-
 void main() {
  	vec4 waterRefColor = texture(waterBuffer, vTexcoord);	
 	vec4 sceneColor = texture(sceneBuffer, vTexcoord);
@@ -63,7 +49,7 @@ void main() {
 		#ifdef USE_CARTOON
 			FragColor = vec4(finalColor, sDepth);
 		#else
-			FragColor = vec4(GenFogColor(waterPos, depthView, finalColor), sDepth);
+			FragColor = vec4(GenFogColor(-0.00000075, waterPos, depthView, udotl, finalColor), sDepth);
 		#endif
 
 		#ifdef HIGH_QUALITY
@@ -102,7 +88,7 @@ void main() {
 	#ifdef USE_CARTOON
 		FragColor = vec4(finalColor, wDepth);
 	#else
-		FragColor = vec4(GenFogColor(waterPos, depthView, finalColor), wDepth);
+		FragColor = vec4(GenFogColor(-0.00000075, waterPos, depthView, udotl, finalColor), wDepth);
 	#endif
 
 	#ifdef HIGH_QUALITY

@@ -3,6 +3,9 @@
 uniform BindlessSampler2D colorBuffer;
 uniform BindlessSampler2D normalWaterBuffer;
 uniform vec2 pixelSize;
+uniform mat4 invViewProjMatrix;
+uniform vec3 eyePos;
+uniform float udotl;
 
 in vec2 vTexcoord;
 
@@ -11,7 +14,7 @@ out vec4 FragColor;
 const vec4 OUTLINE_COLOR = vec4(0.0, 0.0, 0.0, 1.0);
 
 void main() {
-	float separation = 1.0;
+	float separation = 1.1;
 	vec2 off = pixelSize * separation;
 
 	vec2 ld = vTexcoord + vec2(-off.x, -off.y);
@@ -43,7 +46,7 @@ void main() {
 	
 	vec4 minDDepth = max(min(dDepth1, dDepth2), 0.00001);
 	vec4 maxDDepth = max(dDepth1, dDepth2);
-	vec4 depthResults = step(minDDepth * 110.0, maxDDepth);
+	vec4 depthResults = step(minDDepth * 100.0, maxDDepth);
 
 	vec4 ldn = texture(normalWaterBuffer, ld) * 2.0 - 1.0;
 	vec4 ddn = texture(normalWaterBuffer, dd) * 2.0 - 1.0;
@@ -65,7 +68,7 @@ void main() {
 						 dot(normal, ttn.xyz),
 						 dot(normal, rtn.xyz));
 	vec4 dotDeltas = abs(dNormal1 - dNormal2);
-    vec4 normalResults = step(0.35, dotDeltas);
+    vec4 normalResults = step(0.25, dotDeltas);
 
 	vec4 wfs1 = vec4(ldn.w, ddn.w, rdn.w, lln.w) * 0.5 + 0.5;
 	vec4 wfs2 = vec4(rrn.w, ltn.w, ttn.w, rtn.w) * 0.5 + 0.5;
@@ -80,16 +83,25 @@ void main() {
 	results = max(waterResulats, results);
 	float edgeWeight = dot(results, vec4(1.0)) * 0.25;
 	
+
+	vec4 finalColor = vec4(color.rgb, 1.0);
 	if(edgeWeight > 0.25) {
 		#ifdef USE_CARTOON
-			FragColor = OUTLINE_COLOR;
+			finalColor = OUTLINE_COLOR;
 		#else
 			vec3 sum = ZERO_VEC3;
 			sum += c0.rgb + c1.rgb + c2.rgb + c3.rgb;
 			sum += c4.rgb + c5.rgb + c6.rgb + c7.rgb;
-			FragColor = vec4(mix(color.rgb, sum * 0.125, edgeWeight), 1.0);
+			finalColor = vec4(mix(color.rgb, sum * 0.125, edgeWeight), 1.0);
 		#endif
-	} else {
-		FragColor = vec4(color.rgb, 1.0);
-	}	
+	} 
+	
+	#ifdef USE_CARTOON
+		vec3 ndc = vec3(vTexcoord, depth) * 2.0 - 1.0;
+		vec4 worldPos = invViewProjMatrix * vec4(ndc, 1.0); worldPos /= worldPos.w;
+		float depthView = length(worldPos.xyz - eyePos);
+		FragColor.rgb = GenFogColor(-0.0000025, worldPos, depthView, udotl * 1.5, finalColor.rgb);
+	#else
+		FragColor = finalColor;
+	#endif
 }

@@ -153,6 +153,23 @@ vec4 DepthToLinear(mat4 vpp, mat4 lpp, mat4 lvp, float n, float ivd, vec4 mv) {
 #endif
 }
 
+#define START_H float(0.0)
+#define END_H float(1500.0)
+#ifndef USE_CARTOON
+	#define FOG_COLOR vec3(0.9)
+#else 
+	#define FOG_COLOR vec3(1.0)
+#endif
+vec3 GenFogColor(float factor, vec4 worldPos, float depthView, float udotl, vec3 sceneColor) {
+	float worldH = worldPos.y / worldPos.w;
+	float heightFactor = smoothstep(START_H, END_H, worldH);
+	float fogFactor = exp2(factor * depthView * depthView * LOG2);
+
+	fogFactor = mix(fogFactor, 1.0, heightFactor);
+	fogFactor = clamp(fogFactor, 0.0, 1.0);
+	return mix(FOG_COLOR * udotl, sceneColor, fogFactor);
+}
+
 struct Indirect {
 	uint count;
 	uint primCount;

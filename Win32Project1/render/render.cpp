@@ -302,6 +302,10 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 		} else if (state->pass > DEFERRED_PASS && state->ssgPass) {
 			shader->setMatrix4("invProjMatrix", camera->invProjMatrix);
 			shader->setFloat("time", state->time);
+		} else if (state->pass == POST_PASS) {
+			shader->setMatrix4("invViewProjMatrix", camera->invViewProjectMatrix);
+			shader->setVector3v("eyePos", *(state->eyePos));
+			shader->setFloat("udotl", state->udotl);
 		}
 		if (state->ssrPass) {
 			shader->setMatrix4("viewMatrix", camera->viewMatrix);
