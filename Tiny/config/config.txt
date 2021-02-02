@@ -3,8 +3,8 @@ height 1080
 fullscreen 0
 vsync 0
 dualthread 1
-dualqueue 0
-smoothframe 1
+dualqueue 1
+smoothframe 60
 quality 10
 shadow 3
 ssr 1
@@ -12,5 +12,5 @@ dof 1
 fxaa 1
 bloom 1
 dynsky 1
-cartoon 0
+cartoon 1
 debug 0

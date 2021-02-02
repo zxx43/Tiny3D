@@ -63,7 +63,8 @@ void main() {
 	worldPose.xz += dRand * spread;
 
 	vec2 coord = (worldPose.xz - mapTrans.xz) / (mapScale.xz * mapInfo.zw);
-	if(any(bvec3(any(lessThan(coord, vec2(0.0))), any(greaterThan(coord, vec2(1.0))), texture(roadTex, coord).r > 0.001))) return;
+	if(any(bvec2(any(lessThan(coord, vec2(0.0))), any(greaterThan(coord, vec2(1.0)))))) return;
+	else if(texture(roadTex, coord).r > 0.001) return;
 
 	// Caculate grass pos y;
 	vec2 texSize = mapInfo.zw / mapInfo.x;

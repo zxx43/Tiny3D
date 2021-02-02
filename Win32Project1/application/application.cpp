@@ -23,9 +23,6 @@ Application::Application() {
 	config->getBool("dynsky", cfgs->dynsky);
 	config->getBool("cartoon", cfgs->cartoon);
 	config->getBool("debug", cfgs->debug);
-	if (cfgs->cartoon) {
-		cfgs->dof = false;
-	}
 
 	windowWidth = cfgs->width;
 	windowHeight = cfgs->height;
