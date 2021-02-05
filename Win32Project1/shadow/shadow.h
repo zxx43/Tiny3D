@@ -26,16 +26,18 @@ private:
 	void updateLightCamera(Camera* lightCamera, const vec4& center, float radius);
 public:
 	float distance1, distance2;
+	Camera* actLightCameraDyn;
 	Camera* actLightCameraNear;
 	Camera* actLightCameraMid;
 	Camera* actLightCameraFar;
+	Camera* renderLightCameraDyn;
 	Camera* renderLightCameraNear;
 	Camera* renderLightCameraMid;
 	Camera* renderLightCameraFar;
 	float level1,level2;
 	float shadowMapSize,shadowPixSize,pixSize;
 	vec3 lightDir;
-	bool flushNear, flushMid, flushFar;
+	bool flushDyn, flushNear, flushMid, flushFar;
 	float gap, inv2Gap, radius;
 public:
 	Shadow(Camera* view);
@@ -45,6 +47,7 @@ public:
 	void update(Camera* actCamera, const vec3& light);
 	void copyCameraData();
 	void mergeCamera();
+	void setFlushDyn(bool f) { flushDyn = f; }
 	void setFlushNear(bool f) { flushNear = f; }
 	void setFlushMid(bool f) { flushMid = f; }
 	void setFlushFar(bool f) { flushFar = f; }

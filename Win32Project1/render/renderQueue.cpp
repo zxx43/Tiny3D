@@ -243,7 +243,8 @@ Mesh* RenderQueue::queryLodMesh(Object* object, const vec3& eye) {
 
 void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camera, Camera* mainCamera) {
 	if (queue->firstFlush) {
-		if (queue->queueType == QUEUE_STATIC_SN || queue->queueType == QUEUE_STATIC_SM || 
+		if (queue->queueType == QUEUE_DYNAMIC_SN ||
+			queue->queueType == QUEUE_STATIC_SN || queue->queueType == QUEUE_STATIC_SM || 
 			queue->queueType == QUEUE_STATIC_SF || queue->queueType == QUEUE_STATIC) {
 			for (uint i = 0; i < scene->meshes.size(); ++i) {
 				Mesh* mesh = scene->meshes[i]->mesh;
@@ -278,6 +279,9 @@ void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camer
 					else if (child->type == TYPE_INSTANCE) {
 						for (uint j = 0; j < child->objects.size(); ++j) {
 							Object* object = child->objects[j];
+							if (queue->queueType == QUEUE_DYNAMIC_SN && !object->isDynamic()) continue;
+							else if (queue->queueType == QUEUE_STATIC_SN && object->isDynamic()) continue;
+
 							if (queue->shadowLevel > 0 && !object->genShadow) continue;
 							if (object->checkInCamera(camera)) {
 								Mesh* mesh = queue->queryLodMesh(object, mainCamera->position);

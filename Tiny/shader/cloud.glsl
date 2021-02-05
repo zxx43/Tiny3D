@@ -1,6 +1,6 @@
 const int cSteps = 64;
 const float stepLen = 50.0;
-const float cloudThre = 0.00065;
+const float cloudThre = 0.00075;
 
 // random/hash function              
 float hash( float n ) {

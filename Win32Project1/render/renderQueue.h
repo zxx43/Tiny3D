@@ -11,14 +11,15 @@
 #include "../animation/animationData.h"
 
 #ifndef QUEUE_STATIC
-#define QUEUE_STATIC_SN 0
-#define QUEUE_STATIC_SM 1
-#define QUEUE_STATIC_SF 2
-#define QUEUE_ANIMATE_SN 3
-#define QUEUE_ANIMATE_SM 4
-#define QUEUE_ANIMATE_SF 5
-#define QUEUE_STATIC 6
-#define QUEUE_ANIMATE 7
+#define QUEUE_DYNAMIC_SN 0
+#define QUEUE_STATIC_SN  1
+#define QUEUE_STATIC_SM  2
+#define QUEUE_STATIC_SF  3
+#define QUEUE_ANIMATE_SN 4
+#define QUEUE_ANIMATE_SM 5
+#define QUEUE_ANIMATE_SF 6
+#define QUEUE_STATIC     7
+#define QUEUE_ANIMATE    8
 #endif
 
 struct Queue {

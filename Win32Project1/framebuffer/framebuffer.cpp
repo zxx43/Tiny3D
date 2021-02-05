@@ -1,6 +1,6 @@
 #include "framebuffer.h"
 
-FrameBuffer::FrameBuffer(float width, float height, int precision, int component, bool clampBorder) :cubeBuffer(NULL) {
+FrameBuffer::FrameBuffer(float width, float height, int precision, int component, bool clampBorder, int filt) :cubeBuffer(NULL) {
 	this->width = width;
 	this->height = height;
 	this->clampBorder = clampBorder;
@@ -12,7 +12,7 @@ FrameBuffer::FrameBuffer(float width, float height, int precision, int component
 
 	depthBuffer = NULL;
 	depthOnly = false;
-	addColorBuffer(precision, component);
+	addColorBuffer(precision, component, filt);
 }
 
 FrameBuffer::FrameBuffer(float width, float height, int precision) :clampBorder(false), cubeBuffer(NULL) {
@@ -68,9 +68,9 @@ void FrameBuffer::attachDepthBuffer(int precision) {
 	}
 }
 
-void FrameBuffer::addColorBuffer(int precision, int component) {
+void FrameBuffer::addColorBuffer(int precision, int component, int filt) {
 	colorBufferCount++;
-	colorBuffers.push_back(new Texture2D((int)(width), (int)(height), TEXTURE_TYPE_COLOR, precision, component, LINEAR, clampBorder));
+	colorBuffers.push_back(new Texture2D((int)(width), (int)(height), TEXTURE_TYPE_COLOR, precision, component, filt, clampBorder));
 	glNamedFramebufferTexture2DEXT(fboId, GL_COLOR_ATTACHMENT0 + (colorBufferCount - 1), GL_TEXTURE_2D,
 		colorBuffers[colorBufferCount - 1]->id, 0);
 	glNamedFramebufferDrawBuffers(fboId, colorBufferCount, ColorAttachments);

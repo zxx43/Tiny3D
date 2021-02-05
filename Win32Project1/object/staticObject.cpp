@@ -8,7 +8,6 @@ StaticObject::StaticObject(Mesh* mesh) :Object() {
 	this->meshMid = mesh;
 	this->meshLow = mesh;
 	positionBefore = vec3(0.0);
-	dynamic = false;
 	initMatricesData();
 }
 
@@ -17,7 +16,6 @@ StaticObject::StaticObject(Mesh* mesh, Mesh* meshMid, Mesh* meshLow) :Object() {
 	this->meshMid = meshMid;
 	this->meshLow = meshLow;
 	positionBefore = vec3(0.0);
-	dynamic = false;
 	initMatricesData();
 }
 
@@ -31,7 +29,6 @@ StaticObject::StaticObject(const StaticObject& rhs) :Object(rhs) {
 	else
 		bounding = NULL;
 	positionBefore = rhs.positionBefore;
-	dynamic = rhs.dynamic;
 
 	position = rhs.position;
 	size = rhs.size;

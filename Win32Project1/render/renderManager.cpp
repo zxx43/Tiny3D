@@ -25,11 +25,12 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 	shadow->shadowPixSize = 0.5 / nearSize;
 	shadow->pixSize = 1.0 / nearSize;
 
-	nearBuffer = new FrameBuffer(nearSize, nearSize, depthPre);
+	nearDynamicBuffer = new FrameBuffer(nearSize, nearSize, depthPre);
+	nearStaticBuffer = new FrameBuffer(nearSize, nearSize, depthPre);
 	midBuffer = new FrameBuffer(midSize, midSize, depthPre);
 	farBuffer = new FrameBuffer(farSize, farSize, LOW_PRE);
-	lightDir = light.GetNormalized();
 
+	lightDir = light.GetNormalized();
 	queue1 = new Renderable(distance1, distance2, cfgs);
 	queue2 = new Renderable(distance1, distance2, cfgs);
 	currentQueue = queue1;
@@ -51,7 +52,8 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 
 RenderManager::~RenderManager() {
 	delete shadow; shadow = NULL;
-	delete nearBuffer; nearBuffer = NULL;
+	delete nearDynamicBuffer; nearDynamicBuffer = NULL;
+	delete nearStaticBuffer; nearStaticBuffer = NULL;
 	delete midBuffer; midBuffer = NULL;
 	delete farBuffer; farBuffer = NULL;
 
@@ -107,16 +109,18 @@ void RenderManager::flushRenderQueues() {
 void RenderManager::updateRenderQueues(Scene* scene) {
 	if (!renderData) return;
 
+	Camera* cameraDyn = shadow->actLightCameraDyn;
 	Camera* cameraNear = shadow->actLightCameraNear;
 	Camera* cameraMid = shadow->actLightCameraMid;
 	Camera* cameraFar = shadow->actLightCameraFar;
 	Camera* cameraMain = scene->actCamera;
 
+	PushNodeToQueue(renderData->queues[QUEUE_DYNAMIC_SN], scene, scene->staticRoot, cameraDyn, cameraMain);
 	PushNodeToQueue(renderData->queues[QUEUE_STATIC_SN], scene, scene->staticRoot, cameraNear, cameraMain);
 	PushNodeToQueue(renderData->queues[QUEUE_STATIC_SM], scene, scene->staticRoot, cameraMid, cameraMain);
 	//PushNodeToQueue(renderData->queues[QUEUE_STATIC_SF], scene, scene->staticRoot, cameraFar, cameraMain);
 	PushNodeToQueue(renderData->queues[QUEUE_STATIC], scene, scene->staticRoot, cameraMain, cameraMain);
-	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE_SN], scene, scene->animationRoot, cameraNear, cameraMain);
+	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE_SN], scene, scene->animationRoot, cameraDyn, cameraMain);
 	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE_SM], scene, scene->animationRoot, cameraMid, cameraMain);
 	//PushNodeToQueue(renderData->queues[QUEUE_ANIMATE_SF], scene, scene->animationRoot, cameraFar, cameraMain);
 	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE], scene, scene->animationRoot, cameraMain, cameraMain);
@@ -176,11 +180,9 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	state->udotl = udotl;
 	state->time = scene->time;
 
+	const static ushort fln = 10, flf = 10;
 	Camera* mainCamera = scene->renderCamera;
 
-	shadow->setFlushNear(true);
-	render->setFrameBuffer(nearBuffer);
-	Camera* cameraNear=shadow->renderLightCameraNear;
 	state->pass = NEAR_SHADOW_PASS;
 	state->shader = phongShadowShader;
 	state->shaderIns = phongShadowInsShader;
@@ -188,14 +190,32 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	state->shaderCompute = cullShader;
 	state->shaderMulti = multiShader;
 	state->shaderFlush = flushShader;
-	currentQueue->queues[QUEUE_STATIC_SN]->draw(scene, cameraNear, render, state);
+
+	static ushort fn = fln;
+	if (fn % fln != 0) {
+		++fn;
+		shadow->setFlushNear(false);
+	} else {
+		fn = 1;
+		shadow->setFlushNear(true);
+		render->setFrameBuffer(nearStaticBuffer);
+		Camera* cameraNear = shadow->renderLightCameraNear;
+		state->dynPass = false;
+		currentQueue->queues[QUEUE_STATIC_SN]->draw(scene, cameraNear, render, state);
+	}
+	
+	shadow->setFlushDyn(true);
+	render->setFrameBuffer(nearDynamicBuffer);
+	Camera* cameraDyn=shadow->renderLightCameraDyn;
+	state->dynPass = true;
+	currentQueue->queues[QUEUE_DYNAMIC_SN]->draw(scene, cameraDyn, render, state);
 	state->shader = boneShadowShader;
 	state->shaderMulti = animMultiShader;
 	state->shaderFlush = animFlushShader;
-	currentQueue->queues[QUEUE_ANIMATE_SN]->draw(scene, cameraNear, render, state);
+	currentQueue->queues[QUEUE_ANIMATE_SN]->draw(scene, cameraDyn, render, state);
 
-	static ushort fm = 5;
-	if (fm % 5 != 0) {
+	static ushort fm = flf;
+	if (fm % flf != 0) {
 		++fm;
 		shadow->setFlushMid(false);
 	} else {
@@ -445,11 +465,13 @@ void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* scre
 	state->quality = cfgs->graphQuality;
 	state->dynSky = cfgs->dynsky;
 
-	if (!deferredShader->isTexBinded(nearBuffer->getDepthBuffer()->hnd) ||
+	if (!deferredShader->isTexBinded(nearDynamicBuffer->getDepthBuffer()->hnd) ||
+		!deferredShader->isTexBinded(nearStaticBuffer->getDepthBuffer()->hnd) ||
 		!deferredShader->isTexBinded(midBuffer->getDepthBuffer()->hnd) ||
 		!deferredShader->isTexBinded(farBuffer->getDepthBuffer()->hnd)) {
-			u64 shadowTexs[3] = { nearBuffer->getDepthBuffer()->hnd, midBuffer->getDepthBuffer()->hnd, farBuffer->getDepthBuffer()->hnd };
-			deferredShader->setHandle64v("shadowBuffers", 3, shadowTexs);
+		u64 shadowTexs[4] = { nearDynamicBuffer->getDepthBuffer()->hnd, nearStaticBuffer->getDepthBuffer()->hnd,
+				midBuffer->getDepthBuffer()->hnd, farBuffer->getDepthBuffer()->hnd };
+			deferredShader->setHandle64v("shadowBuffers", 4, shadowTexs);
 	}
 	filter->draw(scene->renderCamera, render, state, screenBuff->colorBuffers, screenBuff->depthBuffer);
 }

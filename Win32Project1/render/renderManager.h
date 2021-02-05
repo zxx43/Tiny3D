@@ -17,10 +17,11 @@ struct Renderable {
 	std::vector<RenderQueue*> queues;
 	Renderable(float midDis, float lowDis, ConfigArg* cfg) {
 		queues.clear();
-		for (uint i = 0; i < 8; i++) {
+		for (uint i = 0; i < 9; i++) {
 			queues.push_back(new RenderQueue(i, midDis, lowDis));
 			queues[i]->setCfg(cfg);
 		}
+		queues[QUEUE_DYNAMIC_SN]->shadowLevel = 1;
 		queues[QUEUE_STATIC_SN]->shadowLevel = 1;
 		queues[QUEUE_STATIC_SM]->shadowLevel = 2;
 		queues[QUEUE_STATIC_SF]->shadowLevel = 3;
@@ -60,10 +61,12 @@ private:
 	void drawBoundings(Render* render, RenderState* state, Scene* scene, Camera* camera);
 	void drawGrass(Render* render, RenderState* state, Scene* scene, Camera* camera);
 	void updateWaterVisible(const Scene* scene);
-public:
-	FrameBuffer* nearBuffer;
+private:
+	FrameBuffer* nearStaticBuffer;
+	FrameBuffer* nearDynamicBuffer;
 	FrameBuffer* midBuffer;
 	FrameBuffer* farBuffer;
+public:
 	FrameBuffer* reflectBuffer;
 public:
 	RenderManager(ConfigArg* cfg, Scene* scene, float distance1, float distance2, const vec3& light);
@@ -83,7 +86,7 @@ public:
 	void renderWater(Render* render, Scene* scene);
 	void renderReflect(Render* render, Scene* scene);
 	void renderSkyTex(Render* render, Scene* scene);
-
+public:
 	void drawDeferred(Render* render, Scene* scene, FrameBuffer* screenBuff, Filter* filter);
 	void drawCombined(Render* render, Scene* scene, const std::vector<Texture2D*>& inputTextures, Filter* filter);
 	void drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, FrameBuffer* inputBuff, Filter* filter);

@@ -2,12 +2,12 @@
 #include "../object/staticObject.h"
 #include "../mesh/board.h"
 
-Filter::Filter(float width, float height, bool useFramebuffer, int precision, int component, bool clampBorder) {
+Filter::Filter(float width, float height, bool useFramebuffer, int precision, int component, int filt, bool clampBorder) {
 	this->width=width;
 	this->height=height;
 	pixWidth = 1.0 / width;
 	pixHeight = 1.0 / height;
-	framebuffer = useFramebuffer ? new FrameBuffer(width, height, precision, component, clampBorder) : NULL;
+	framebuffer = useFramebuffer ? new FrameBuffer(width, height, precision, component, clampBorder, filt) : NULL;
 
 	Board* board=new Board(2,2,2);
 	boardNode=new StaticNode(vec3(0,0,0));
@@ -77,9 +77,9 @@ void Filter::draw(Camera* camera, Render* render, RenderState* state,
 	render->draw(camera, boardNode->drawcall, state);
 }
 
-void Filter::addOutput(int precision, int component) {
+void Filter::addOutput(int precision, int component, int filt) {
 	if (framebuffer)
-		framebuffer->addColorBuffer(precision, component);
+		framebuffer->addColorBuffer(precision, component, filt);
 }
 
 void Filter::addDepthBuffer(int precision) {

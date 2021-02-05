@@ -231,8 +231,8 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 					state->shaderMulti->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
 				}
 
-				// Billboard drawcall
 				if (drawcall->getType() == MULTI_DC) {
+					// Billboard drawcall
 					if (state->shaderBill) {
 						state->shaderBill->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
 						if (state->pass != COLOR_PASS)
@@ -288,6 +288,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 			shader->setFloat("time", state->time);
 
 			if (state->shadow) {
+				if (state->shadow->flushDyn) shader->setMatrix4("lightViewProjDyn", state->shadow->renderLightCameraDyn->viewProjectMatrix);
 				if (state->shadow->flushNear) shader->setMatrix4("lightViewProjNear", state->shadow->renderLightCameraNear->viewProjectMatrix);
 				if (state->shadow->flushMid) shader->setMatrix4("lightViewProjMid", state->shadow->renderLightCameraMid->viewProjectMatrix);
 				if (state->shadow->flushFar) shader->setMatrix4("lightViewProjFar", state->shadow->renderLightCameraFar->viewProjectMatrix);
@@ -328,6 +329,11 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 			}
 		} else if (state->pass == DEFERRED_PASS) {
 			if (state->shadow) {
+				float invdDyn = 1.0 / (state->shadow->renderLightCameraDyn->zFar - state->shadow->renderLightCameraDyn->zNear);
+				if (state->shadow->flushDyn) {
+					shader->setMatrix4("lightProjDyn", state->shadow->renderLightCameraDyn->projectMatrix);
+					shader->setMatrix4("lightViewDyn", state->shadow->renderLightCameraDyn->viewMatrix);
+				}
 				float invdNear = 1.0 / (state->shadow->renderLightCameraNear->zFar - state->shadow->renderLightCameraNear->zNear);
 				if (state->shadow->flushNear) {
 					shader->setMatrix4("lightProjNear", state->shadow->renderLightCameraNear->projectMatrix);
@@ -346,12 +352,13 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 					shader->setMatrix4("lightViewFar", state->shadow->renderLightCameraFar->viewMatrix);
 				}
 
-				float camParas[6] = { 
+				float camParas[8] = { 
+					state->shadow->renderLightCameraDyn->zNear, invdDyn,
 					state->shadow->renderLightCameraNear->zNear, invdNear,
 					state->shadow->renderLightCameraMid->zNear, invdMid,
 					state->shadow->renderLightCameraFar->zNear, invdFar 
 				};
-				shader->setVector2v("camParas", 3, camParas);
+				shader->setVector2v("camParas", 4, camParas);
 			}
 		}
 	}

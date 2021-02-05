@@ -83,7 +83,6 @@ void main() {
 	vec2 coord1 = texLD * invTexSize;
 	vec2 coord2 = texRT * invTexSize;
 	vec2 coord3 = vec2(texLD.x, texRT.y) * invTexSize;
-	vec2 coord4 = vec2(texRT.x, texLD.y) * invTexSize;
 
 	vec3 p1 = vec3(coord1.x, texture(heightTex, coord1).x, coord1.y);
 	vec3 p2 = vec3(coord2.x, texture(heightTex, coord2).x, coord2.y);
@@ -92,6 +91,7 @@ void main() {
 	if(CheckIn(coord, p1, p2, p3)) 
 		worldPose.y = CaculateY(coord, p1, p2, p3);
 	else {
+		vec2 coord4 = vec2(texRT.x, texLD.y) * invTexSize;
 		vec3 p4 = vec3(coord4.x, texture(heightTex, coord4).x, coord4.y);
 		worldPose.y = CaculateY(coord, p1, p4, p2);
 	}

@@ -9,9 +9,9 @@ uniform BindlessSampler2D texBuffer,
 uniform vec2 pixelSize;
 uniform mat4 invViewProjMatrix, invProjMatrix;
 
-uniform BindlessSampler2D shadowBuffers[3];
+uniform BindlessSampler2D shadowBuffers[4];
 
-uniform mat4 lightViewProjNear, lightViewProjMid, lightViewProjFar;
+uniform mat4 lightViewProjDyn, lightViewProjNear, lightViewProjMid, lightViewProjFar;
 uniform vec2 shadowPixSize;
 uniform vec3 levels;
 uniform vec3 light;
@@ -19,9 +19,9 @@ uniform float udotl;
 uniform vec3 eyePos;
 uniform float time;
 
-uniform mat4 lightProjNear, lightProjMid, lightProjFar;
-uniform mat4 lightViewNear, lightViewMid, lightViewFar;
-uniform vec2 camParas[3];
+uniform mat4 lightProjDyn, lightProjNear, lightProjMid, lightProjFar;
+uniform mat4 lightViewDyn, lightViewNear, lightViewMid, lightViewFar;
+uniform vec2 camParas[4];
 uniform vec2 gaps;
 uniform vec3 shadowCenter;
 
@@ -82,54 +82,69 @@ vec4 genShadowFactor(vec4 worldPos, float depthView, float bias) {
 	//float lightDepth = length(shadowCenter - worldPos.xyz);
 
 	if(lightDepth <= levels.x - gaps.x) {
-		vec4 near = DepthToLinear(lightViewProjNear, lightProjNear, lightViewNear, camParas[0].x, camParas[0].y, worldPos);
-		vec3 lightPosition = near.xyz / near.w;
-		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
 		#ifndef USE_LINEAR_DEPTH
 			float bs = bias * 0.00045;
 		#else
 			float bs = bias * 0.00015;
 		#endif
-		float sf = genPCF(shadowBuffers[0], shadowCoord, bs, 3.0, 0.0205);
+
+		vec4 dyn = DepthToLinear(lightViewProjDyn, lightProjDyn, lightViewDyn, camParas[0].x, camParas[0].y, worldPos);
+		vec3 lightPositionDyn = dyn.xyz / dyn.w;
+		vec3 shadowCoordDyn = lightPositionDyn * 0.5 + 0.5;
+		float sd = genPCF(shadowBuffers[0], shadowCoordDyn, bs, 3.0, 0.0205);
+
+		vec4 near = DepthToLinear(lightViewProjNear, lightProjNear, lightViewNear, camParas[1].x, camParas[1].y, worldPos);
+		vec3 lightPosition = near.xyz / near.w;
+		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
+		float sf = genPCF(shadowBuffers[1], shadowCoord, bs, 3.0, 0.0205);
+		
+		sf = min(sd, sf);
 		return vec4(1.0, 0.0, 0.0, sf);
 	} else if(lightDepth > levels.x - gaps.x && lightDepth < levels.x + gaps.x) {
-		vec4 near = DepthToLinear(lightViewProjNear, lightProjNear, lightViewNear, camParas[0].x, camParas[0].y, worldPos);
-		vec3 lightPositionNear = near.xyz / near.w;
-		vec3 shadowCoordNear = lightPositionNear * 0.5 + 0.5;
-
-		vec4 mid = DepthToLinear(lightViewProjMid, lightProjMid, lightViewMid, camParas[1].x, camParas[1].y, worldPos);
-		vec3 lightPositionMid = mid.xyz / mid.w;
-		vec3 shadowCoordMid = lightPositionMid * 0.5 + 0.5;
-
 		#ifndef USE_LINEAR_DEPTH
 			float bsNear = bias * 0.00045, bsMid = 0.0;
 		#else
 			float bsNear = bias * 0.00015, bsMid = 0.0;
 		#endif
-		float factorMid = genPCF(shadowBuffers[1], shadowCoordMid, bsMid, 2.0, 0.04);
+
+		vec4 dyn = DepthToLinear(lightViewProjDyn, lightProjDyn, lightViewDyn, camParas[0].x, camParas[0].y, worldPos);
+		vec3 lightPositionDyn = dyn.xyz / dyn.w;
+		vec3 shadowCoordDyn = lightPositionDyn * 0.5 + 0.5;
+
+		vec4 near = DepthToLinear(lightViewProjNear, lightProjNear, lightViewNear, camParas[1].x, camParas[1].y, worldPos);
+		vec3 lightPositionNear = near.xyz / near.w;
+		vec3 shadowCoordNear = lightPositionNear * 0.5 + 0.5;
+
+		vec4 mid = DepthToLinear(lightViewProjMid, lightProjMid, lightViewMid, camParas[2].x, camParas[2].y, worldPos);
+		vec3 lightPositionMid = mid.xyz / mid.w;
+		vec3 shadowCoordMid = lightPositionMid * 0.5 + 0.5;
+
+		float factorMid = genPCF(shadowBuffers[2], shadowCoordMid, bsMid, 2.0, 0.04);
 		float sf = 0.0;
 		if(any(bvec2(any(lessThan(shadowCoordNear, vec3(0.001))), any(greaterThan(shadowCoordNear, vec3(0.999))))))
 			sf = factorMid;
 		else {
-			float factorNear = genPCF(shadowBuffers[0], shadowCoordNear, bsNear, 3.0, 0.0205);
+			float factorDyn = genPCF(shadowBuffers[0], shadowCoordDyn, bsNear, 3.0, 0.0205);
+			float factorNear = genPCF(shadowBuffers[1], shadowCoordNear, bsNear, 3.0, 0.0205);
+			factorNear = min(factorNear, factorDyn);
 			sf = mix(factorNear, factorMid, (lightDepth - (levels.x - gaps.x)) * gaps.y);
 		}
 		return vec4(0.0, 0.0, 1.0, sf);
 	} else if(depthView <= levels.y) {
-		vec4 mid = DepthToLinear(lightViewProjMid, lightProjMid, lightViewMid, camParas[1].x, camParas[1].y, worldPos);
+		vec4 mid = DepthToLinear(lightViewProjMid, lightProjMid, lightViewMid, camParas[2].x, camParas[2].y, worldPos);
 		vec3 lightPosition = mid.xyz / mid.w;
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
 		float bs = 0.00;
-		float sf = genPCF(shadowBuffers[1], shadowCoord, bs, 2.0, 0.04);
+		float sf = genPCF(shadowBuffers[2], shadowCoord, bs, 2.0, 0.04);
 		return vec4(0.0, 1.0, 0.0, sf);
 	}
 	#ifdef DRAW_FAR_SHADOW
 		else {
-			vec4 far = DepthToLinear(lightViewProjFar, lightProjFar, lightViewFar, camParas[2].x, camParas[2].y, worldPos);
+			vec4 far = DepthToLinear(lightViewProjFar, lightProjFar, lightViewFar, camParas[3].x, camParas[3].y, worldPos);
 			vec3 lightPosition = far.xyz / far.w;
 			vec3 shadowCoord = lightPosition * 0.5 + 0.5;
 			float bs = bias * 0.0;
-			float sf = genShadow(shadowBuffers[2], shadowCoord, bs);
+			float sf = genShadow(shadowBuffers[3], shadowCoord, bs);
 			return vec4(1.0, 1.0, 1.0, sf);
 		}
 	#endif

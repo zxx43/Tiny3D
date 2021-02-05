@@ -15,8 +15,6 @@ class StaticObject: public Object {
 private:
 	vec3 positionBefore;
 public:
-	bool dynamic;
-public:
 	StaticObject(Mesh* mesh);
 	StaticObject(Mesh* mesh, Mesh* meshMid, Mesh* meshLow);
 	StaticObject(const StaticObject& rhs);
@@ -31,7 +29,6 @@ public:
 	void rotateAtWorld(const vec4& q);
 	void standOnGround(Scene* scene);
 	void setDynamic(bool dyn) { dynamic = dyn; if (dynamic) setMass(100.0); }
-	bool isDynamic() { return dynamic; }
 };
 
 

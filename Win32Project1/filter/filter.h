@@ -19,14 +19,14 @@ private:
 private:
 	bool bindTex(int slot, const Texture2D* tex, Shader* shader);
 public:
-	Filter(float width, float height, bool useFramebuffer, int precision, int component, bool clampBorder = true);
+	Filter(float width, float height, bool useFramebuffer, int precision, int component, int filt, bool clampBorder = true);
 	~Filter();
 public:
 	void draw(Camera* camera, Render* render, RenderState* state,
 		Texture2D* inputTexture, const Texture2D* depthTexture);
 	void draw(Camera* camera, Render* render, RenderState* state, 
 		const std::vector<Texture2D*>& inputTextures, const Texture2D* depthTexture);
-	void addOutput(int precision, int component);
+	void addOutput(int precision, int component, int filt);
 	void addDepthBuffer(int precision);
 	FrameBuffer* getFrameBuffer();
 	Texture2D* getOutput(int i);

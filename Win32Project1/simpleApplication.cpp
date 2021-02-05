@@ -55,7 +55,7 @@ void SimpleApplication::resize(int width, int height) {
 	Application::resize(width, height);
 
 	if (screen) delete screen;
-	screen = new FrameBuffer(width, height, hdrPre, 4, false); // texBuffer
+	screen = new FrameBuffer(width, height, hdrPre, 4, false, NEAREST); // texBuffer
 	screen->addColorBuffer(matPre, 4);                         // matBuffer
 	screen->addColorBuffer(matPre, 3);                         // normal-grassBuffer
 	screen->addColorBuffer(matPre, 2);                         // rough-metalBuffer
@@ -69,7 +69,7 @@ void SimpleApplication::resize(int width, int height) {
 
 	if (sceneFilter) delete sceneFilter;
 	sceneFilter = new Filter(width, height, true, precision, 4, false);
-	sceneFilter->addOutput(hdrPre, 3); // FragBright
+	sceneFilter->addOutput(hdrPre, 3, NEAREST); // FragBright
 
 	if (combinedChain) delete combinedChain;
 	if (!cfgs->fxaa && !cfgs->dof && !cfgs->ssr)
@@ -78,12 +78,12 @@ void SimpleApplication::resize(int width, int height) {
 		combinedChain = new FilterChain(width, height, true, precision, 4);
 		if (cfgs->fxaa) {
 			if (aaFilter) delete aaFilter;
-			aaFilter = new Filter(width, height, false, aaPre, 3);
+			aaFilter = new Filter(width, height, false, aaPre, 3, NEAREST);
 			aaInput.clear();
 		}
 		if (cfgs->dof) {
 			if (dofBlurFilter) delete dofBlurFilter;
-			dofBlurFilter = new Filter(width * dofScale, height * dofScale, true, dofPre, 4);
+			dofBlurFilter = new Filter(width * dofScale, height * dofScale, true, dofPre, 4, NEAREST);
 			if (dofChain) delete dofChain;
 			dofChain = new FilterChain(width, height, cfgs->fxaa, dofPre, 4);
 			dofChain->addInputTex(dofBlurFilter->getOutput(0));
@@ -99,11 +99,11 @@ void SimpleApplication::resize(int width, int height) {
 
 			if (!cfgs->fxaa && !cfgs->dof) {
 				if (rawScreenFilter) delete rawScreenFilter;
-				rawScreenFilter = new Filter(width, height, false, rawPre, 4);
+				rawScreenFilter = new Filter(width, height, false, rawPre, 4, NEAREST);
 			}
 
 			if (ssrBlurFilter) delete ssrBlurFilter;
-			ssrBlurFilter = new Filter(width * 0.5, height * 0.5, true, LOW_PRE, 4);
+			ssrBlurFilter = new Filter(width * 0.5, height * 0.5, true, LOW_PRE, 4, LINEAR);
 		}
 	}
 
@@ -112,7 +112,7 @@ void SimpleApplication::resize(int width, int height) {
 	bloomChain->addInputTex(sceneFilter->getOutput(1));
 
 	if (combinedChain) {
-		combinedChain->output->addOutput(precision, 4);            // NormalWaterFlag
+		combinedChain->output->addOutput(precision, 4, NEAREST);            // NormalWaterFlag
 		if (ssgChain)
 			combinedChain->addInputTex(ssgChain->getOutputTex(0)); // sceneBuffer
 		else

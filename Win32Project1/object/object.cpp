@@ -35,6 +35,7 @@ Object::Object() {
 	collisionShape = NULL;
 	collisionObject = NULL;
 	mass = 0;
+	dynamic = false;
 
 	sounds.clear();
 }
@@ -54,6 +55,7 @@ Object::Object(const Object& rhs) {
 	collisionShape = NULL;
 	collisionObject = NULL;
 	mass = rhs.mass;
+	dynamic = rhs.dynamic;
 	boundCenter = rhs.boundCenter;
 	localBoundPosition = rhs.localBoundPosition;
 
