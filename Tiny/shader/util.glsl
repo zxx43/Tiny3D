@@ -171,7 +171,7 @@ vec3 GenFogColor(float factor, vec4 worldPos, float depthView, float udotl, vec3
 }
 
 vec3 DecodeNormal(vec2 vNormal2) {
-	float z = sqrt(1 - dot(vNormal2, vNormal2));
+	float z = sqrt(1.0 - dot(vNormal2, vNormal2));
 	return vec3(vNormal2, z);
 }
 
