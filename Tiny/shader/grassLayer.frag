@@ -4,8 +4,7 @@ layout(early_fragment_tests) in;
 
 layout (location = 0) out vec4 FragTex;
 layout (location = 1) out vec4 FragMat;
-layout (location = 2) out vec4 FragNormalGrass;
-layout (location = 3) out vec4 FragRoughMetal;
+layout (location = 2) out vec4 FragRoughMetal;
 
 in vec4 vNormalHeight;
 
@@ -17,6 +16,9 @@ in vec4 vNormalHeight;
 void main() {
 	FragTex = mix(BottomColor, TopColor, vNormalHeight.w);
 	FragMat = GrassMat;
-	FragNormalGrass = vec4(normalize(vNormalHeight.xyz) * 0.5 + 0.5, 0.0);
 	FragRoughMetal = GrassRM;
+
+	vec3 normal = normalize(vNormalHeight.xyz) * 0.5 + 0.5;
+	FragRoughMetal.ba = normal.xy;
+	FragMat.z = normal.z;
 }

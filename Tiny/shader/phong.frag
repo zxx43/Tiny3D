@@ -13,23 +13,25 @@ in mat3 vTBN;
 
 layout (location = 0) out vec4 FragTex;
 layout (location = 1) out vec4 FragMat;
-layout (location = 2) out vec4 FragNormalGrass;
-layout (location = 3) out vec4 FragRoughMetal;
+layout (location = 2) out vec4 FragRoughMetal;
 
 void main() {
 	vec4 textureColor = texture(texBlds[int(vTexid.x)], vTexcoord);
 	if(textureColor.a < 0.25) discard;
 #ifndef BillPass
 		vec3 normal = vTexid.y >= 0.0 ? vTBN * (2.0 * normalize(texture(texBlds[int(vTexid.y)], vTexcoord).rgb) - 1.0) : vNormal;
+		normal = normalize(normal) * 0.5 + 0.5;
 
 		FragMat = vec4(vColor, 1.0);
-		FragNormalGrass = vec4(normalize(normal) * 0.5 + 0.5, 0.0);
 		FragRoughMetal.r = vTexid.z >= 0.0 ? texture(texBlds[int(vTexid.z)], vTexcoord).r : DefaultRM.r;
 		FragRoughMetal.g = vTexid.w >= 0.0 ? texture(texBlds[int(vTexid.w)], vTexcoord).r : DefaultRM.g;
 #else
+		vec3 normal = uNormal;
+
 		FragMat = BoardMat;
-		FragNormalGrass = vec4(uNormal, 0.0);
 		FragRoughMetal = BoardRM;
 #endif
 	FragTex = textureColor;
+	FragRoughMetal.ba = normal.xy;
+	FragMat.z = normal.z;
 }

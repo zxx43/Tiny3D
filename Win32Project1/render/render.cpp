@@ -287,6 +287,11 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 			shader->setVector3v("eyePos", *(state->eyePos));
 			shader->setFloat("time", state->time);
 
+			float invViewMat[9] = { camera->invViewMatrix[0], camera->invViewMatrix[1], camera->invViewMatrix[2],
+								camera->invViewMatrix[4], camera->invViewMatrix[5], camera->invViewMatrix[6],
+								camera->invViewMatrix[8], camera->invViewMatrix[9], camera->invViewMatrix[10] };
+			shader->setMatrix3("invViewMatrix", invViewMat);
+
 			if (state->shadow) {
 				if (state->shadow->flushDyn) shader->setMatrix4("lightViewProjDyn", state->shadow->renderLightCameraDyn->viewProjectMatrix);
 				if (state->shadow->flushNear) shader->setMatrix4("lightViewProjNear", state->shadow->renderLightCameraNear->viewProjectMatrix);

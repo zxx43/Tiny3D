@@ -57,8 +57,7 @@ void SimpleApplication::resize(int width, int height) {
 	if (screen) delete screen;
 	screen = new FrameBuffer(width, height, hdrPre, 4, false, NEAREST); // texBuffer
 	screen->addColorBuffer(matPre, 4);                         // matBuffer
-	screen->addColorBuffer(matPre, 3);                         // normal-grassBuffer
-	screen->addColorBuffer(matPre, 2);                         // rough-metalBuffer
+	screen->addColorBuffer(matPre, 4);                         // roughMetalNormalBuffer
 	screen->attachDepthBuffer(renderMgr->getDepthPre());       // depthBuffer
 
 	if (waterFrame) delete waterFrame;
@@ -69,6 +68,7 @@ void SimpleApplication::resize(int width, int height) {
 
 	if (sceneFilter) delete sceneFilter;
 	sceneFilter = new Filter(width, height, true, precision, 4, false);
+	sceneFilter->addOutput(matPre, 3, NEAREST); // FragNormal
 	sceneFilter->addOutput(hdrPre, 3, NEAREST); // FragBright
 
 	if (combinedChain) delete combinedChain;
@@ -109,7 +109,7 @@ void SimpleApplication::resize(int width, int height) {
 
 	if (bloomChain) delete bloomChain;
 	bloomChain = new DualFilter(width * bloomScale, height * bloomScale, true, hdrPre, 3, false);
-	bloomChain->addInputTex(sceneFilter->getOutput(1));
+	bloomChain->addInputTex(sceneFilter->getOutput(2)); // Bright
 
 	if (combinedChain) {
 		combinedChain->output->addOutput(precision, 4, NEAREST);            // NormalWaterFlag
@@ -117,7 +117,7 @@ void SimpleApplication::resize(int width, int height) {
 			combinedChain->addInputTex(ssgChain->getOutputTex(0)); // sceneBuffer
 		else
 			combinedChain->addInputTex(sceneFilter->getOutput(0)); // sceneBuffer
-		combinedChain->addInputTex(screen->getColorBuffer(2));     // sceneNormalBuffer
+		combinedChain->addInputTex(sceneFilter->getOutput(1));     // sceneNormalBuffer
 		combinedChain->addInputTex(screen->getDepthBuffer());      // sceneDepthBuffer
 		combinedChain->addInputTex(waterFrame->getColorBuffer(0)); // waterBuffer
 		combinedChain->addInputTex(waterFrame->getColorBuffer(1)); // waterMatBuffer

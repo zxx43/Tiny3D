@@ -2,12 +2,12 @@
 
 uniform BindlessSampler2D texBuffer, 
 						matBuffer, 
-						normalGrassBuffer, 
 						roughMetalBuffer, 
 						depthBuffer;
 
 uniform vec2 pixelSize;
 uniform mat4 invViewProjMatrix, invProjMatrix;
+uniform mat3 invViewMatrix;
 
 uniform BindlessSampler2D shadowBuffers[4];
 
@@ -28,7 +28,8 @@ uniform vec3 shadowCenter;
 in vec2 vTexcoord;
 
 layout (location = 0) out vec4 FragColor;
-layout (location = 1) out vec4 FragBright;
+layout (location = 1) out vec4 FragNormal;
+layout (location = 2) out vec4 FragBright;
 
 const vec3 KCool = vec3(0.15, 0.15, 0.35);
 const vec3 KWarm = vec3(0.9, 0.9, 0.25);
@@ -195,6 +196,7 @@ void main() {
 	vec3 albedo = tex.rgb;
 	vec3 sceneColor = albedo;
 	vec3 bright = vec3(0.0);
+	vec3 normal = vec3(0.0, 0.0, 1.0);
 
 	if(ndcPos.z < 1.0) {
 		vec4 worldPos = invViewProjMatrix * vec4(ndcPos, 1.0);
@@ -203,8 +205,9 @@ void main() {
 		vec3 v = eyePos - worldPos.xyz;
 		float depthView = length(v);
 
-		vec3 normal = texture(normalGrassBuffer, vTexcoord).xyz * 2.0 - vec3(1.0);
+		vec4 roughMetal = texture(roughMetalBuffer, vTexcoord);
 		vec3 material = texture(matBuffer, vTexcoord).rgb;
+		normal = vec3(roughMetal.ba, material.z) * 2.0 - vec3(1.0);
 
 		float ndotl = dot(light, normal);
 		float bias = tan(acos(abs(ndotl)));
@@ -228,7 +231,6 @@ void main() {
 				v /= depthView;
 				vec3 h = normalize(v + light);
 				vec3 radiance = vec3(3.5);
-				vec2 roughMetal = texture(roughMetalBuffer, vTexcoord).rg;
 			
 				// Cook-Torrance BRDF	
 				vec3 F0 = mix(vec3(0.04), albedo, roughMetal.g);	
@@ -251,11 +253,13 @@ void main() {
 			sceneColor = (ambient + kd * albedo * material.g) * udotl;
 		#endif
 	} else {
+		normal = invViewMatrix * normal;
 		#ifdef USE_BLOOM
 			bright = sceneColor * udotl * 2.5; // Bloom
 		#endif
 	}
 
 	FragColor = vec4(sceneColor, depth);
+	FragNormal = vec4(normal, 0.0);
 	FragBright = vec4(bright, 1.0);
 }

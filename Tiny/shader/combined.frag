@@ -17,8 +17,8 @@ uniform vec3 eyePos;
 
 in vec2 vTexcoord;
 
-out vec4 FragColor;
-out vec4 NormalWaterFlag;
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 NormalWaterFlag;
 
 void main() {
  	vec4 waterRefColor = texture(waterBuffer, vTexcoord);	

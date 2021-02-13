@@ -121,9 +121,8 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 		deferred->attachDef("USE_BLOOM", "1");
 	deferred->setSlot("texBuffer", 0);
 	deferred->setSlot("matBuffer", 1);
-	deferred->setSlot("normalGrassBuffer", 2);
-	deferred->setSlot("roughMetalBuffer", 3);
-	deferred->setSlot("depthBuffer", 4);
+	deferred->setSlot("roughMetalBuffer", 2);
+	deferred->setSlot("depthBuffer", 3);
 
 	Shader* fxaa = shaders->addShader("fxaa", POST_VERT, AA_FRAG);
 	if (cfgs->cartoon)
@@ -177,11 +176,6 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	combined->setSlot("waterNormalBuffer", 5);
 	combined->setSlot("waterDepthBuffer", 6);
 	combined->setSlot("bloomBuffer", 7);
-
-	Shader* ssg = shaders->addShader("ssg", POST_VERT, SSG_FRAG);
-	ssg->setSlot("colorBuffer", 0);
-	ssg->setSlot("normalGrassBuffer", 1);
-	ssg->setSlot("depthBuffer", 2);
 
 	Shader* cull = shaders->addShader("cull", CULL_COMP);
 	cull->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());

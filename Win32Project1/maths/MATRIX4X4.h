@@ -135,6 +135,9 @@ public:
 	
 	//member variables
 	float entries[16];
+
+	//get member
+	float operator[](const int i) { return entries[i]; }
 };
 
 #endif	//MATRIX4X4_H
