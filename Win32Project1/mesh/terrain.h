@@ -10,14 +10,56 @@
 
 #include "mesh.h"
 #include "../constants/constants.h"
+#include "../bounding/aabb.h"
 #include <map>
 
 #define MAP_SIZE 1024
 #define	STEP_SIZE 4
+#define CHUNK_SIZE 5
+#define CHUNK_INDEX_COUNT (CHUNK_SIZE * CHUNK_SIZE * 6)
+
+struct Chunk {
+	std::vector<uint> indices;
+	vec3 boundCenter;
+	vec3 boundSize;
+	AABB* bounding;
+	Chunk() {
+		bounding = NULL;
+		indices.clear();
+	}
+	~Chunk() {
+		if (bounding) delete bounding; bounding = NULL;
+		indices.clear();
+	}
+	void genBounding(const float* vertices) {
+		uint index = indices[0];
+		float vx = vertices[index * 3 + 0];
+		float vy = vertices[index * 3 + 1];
+		float vz = vertices[index * 3 + 2];
+		vec3 minVert = vec3(vx, vy, vz), maxVert = vec3(vx, vy, vz);
+		for (int i = 1; i < CHUNK_INDEX_COUNT; i++) {
+			index = indices[i];
+			vx = vertices[index * 3 + 0];
+			vy = vertices[index * 3 + 1];
+			vz = vertices[index * 3 + 2];
+			vec3 vertex(vx, vy, vz);
+			minVert.x = minVert.x > vertex.x ? vertex.x : minVert.x;
+			minVert.y = minVert.y > vertex.y ? vertex.y : minVert.y;
+			minVert.z = minVert.z > vertex.z ? vertex.z : minVert.z;
+			maxVert.x = maxVert.x < vertex.x ? vertex.x : maxVert.x;
+			maxVert.y = maxVert.y < vertex.y ? vertex.y : maxVert.y;
+			maxVert.z = maxVert.z < vertex.z ? vertex.z : maxVert.z;
+		}
+		bounding = new AABB(minVert, maxVert);
+		boundCenter = bounding->position;
+		boundSize = bounding->halfSize;
+	}
+};
 
 class Terrain: public Mesh {
 private:
 	unsigned char* heightMap;
+	int chunkStep, stepCount;
 private:
 	void loadHeightMap(const char* fileName);
 	float getHeight(int px,int pz);
@@ -26,6 +68,7 @@ private:
 	vec3 getTerrainNormal(float x,float y,float z);
 	vec3 getTerrainTangent(float x, float y, float z, float u, float v, float du, float dv);
 	vec3 getTangent(const vec3& normal);
+	void createChunks();
 	virtual void initFaces();
 public:
 	int blockCount;
@@ -34,6 +77,7 @@ public:
 	uint visualIndCount;
 	float* visualPoints;
 	uint visualPointsSize;
+	std::vector<Chunk*> chunks;
 public:
 	Terrain(const char* fileName);
 	virtual ~Terrain();

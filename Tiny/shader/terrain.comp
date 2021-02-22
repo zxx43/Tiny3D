@@ -1,0 +1,57 @@
+#include "shader/util.glsl"
+
+layout(local_size_x = 1) in;
+
+layout(binding = 1, std430) buffer InCenter {
+	vec4 inBoundCenters[];
+};
+layout(binding = 2, std430) buffer InSize {
+	vec4 inBoundSizes[];
+};
+layout(binding = 3, std430) buffer InIndex {
+	uint inIndices[];
+};
+layout(binding = 4, std430) buffer OutIndirect {
+	uint count;
+	uint primCount;
+	uint firstIndex;
+	uint baseVertex;
+	uint baseInstance;
+} outIndirect;
+layout(binding = 5, std430) buffer OutIndex {
+	uint outIndices[];
+};
+
+uniform mat4 viewProjectMatrix;
+
+void main() {
+	uint curChunk = gl_GlobalInvocationID.x;
+	
+	vec3 bCenter = inBoundCenters[curChunk].xyz;
+	vec3 bSize = inBoundSizes[curChunk].xyz;
+
+	vec4 p0 = vec4(bCenter + vec3( bSize.x,  bSize.y,  bSize.z), 1.0);
+	vec4 p1 = vec4(bCenter + vec3(-bSize.x,  bSize.y,  bSize.z), 1.0);
+	vec4 p2 = vec4(bCenter + vec3(-bSize.x, -bSize.y,  bSize.z), 1.0);
+	vec4 p3 = vec4(bCenter + vec3(-bSize.x, -bSize.y, -bSize.z), 1.0);
+	vec4 p4 = vec4(bCenter + vec3( bSize.x, -bSize.y, -bSize.z), 1.0);
+	vec4 p5 = vec4(bCenter + vec3( bSize.x,  bSize.y, -bSize.z), 1.0);
+	vec4 p6 = vec4(bCenter + vec3(-bSize.x,  bSize.y, -bSize.z), 1.0);
+	vec4 p7 = vec4(bCenter + vec3( bSize.x, -bSize.y,  bSize.z), 1.0);
+	
+	p0 = viewProjectMatrix * p0; p0 /= p0.w;
+	p1 = viewProjectMatrix * p1; p1 /= p1.w;
+	p2 = viewProjectMatrix * p2; p2 /= p2.w;
+	p3 = viewProjectMatrix * p3; p3 /= p3.w;
+	p4 = viewProjectMatrix * p4; p4 /= p4.w;
+	p5 = viewProjectMatrix * p5; p5 /= p5.w;
+	p6 = viewProjectMatrix * p6; p6 /= p6.w;
+	p7 = viewProjectMatrix * p7; p7 /= p7.w;
+	
+	if(CheckCull(p0.xyz, p1.xyz, p2.xyz, p3.xyz, 
+		p4.xyz, p5.xyz, p6.xyz, p7.xyz)) return;
+
+	uint curIndex = atomicAdd(outIndirect.count, CHUNK_INDEX_COUNT);
+	for(uint i = 0; i < CHUNK_INDEX_COUNT; ++i) 
+		outIndices[curIndex + i] = inIndices[curChunk * CHUNK_INDEX_COUNT + i];
+}

@@ -4,6 +4,7 @@
 #include "staticNode.h"
 #include "../mesh/terrain.h"
 #include "../util/triangle.h"
+#include "../render/terrainDrawcall.h"
 
 class TerrainNode: public StaticNode {
 public:

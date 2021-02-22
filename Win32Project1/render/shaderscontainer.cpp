@@ -1,5 +1,6 @@
 #include "shaderscontainer.h"
 #include "../shader/textfile.h"
+#include "../mesh/terrain.h"
 using namespace std;
 
 #define SHADOW_TEX_FRAG "shader/shadow_tex.frag"
@@ -18,6 +19,7 @@ using namespace std;
 #define DEFERRED_FRAG "shader/deferred.frag"
 #define TERRAIN_VERT "shader/terrain.vert"
 #define TERRAIN_FRAG "shader/terrain.frag"
+#define TERRAIN_COMP "shader/terrain.comp"
 #define WATER_VERT "shader/water.vert"
 #define WATER_FRAG "shader/water.frag"
 #define AA_FRAG "shader/fxaa.frag"
@@ -66,6 +68,9 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 
 	Shader* terrain = shaders->addShader("terrain", TERRAIN_VERT, TERRAIN_FRAG);
 	shaders->addShaderBindTex(terrain);
+
+	Shader* terrainComp = shaders->addShader("terrainComp", TERRAIN_COMP);
+	terrainComp->attachDef("CHUNK_INDEX_COUNT", to_string(CHUNK_INDEX_COUNT).data());
 
 	Shader* grassLayer = shaders->addShader("grassLayer", GRASS_LAYER_VERT, GRASS_LAYER_FRAG, GRASS_LAYER_TESC, GRASS_LAYER_TESE, GRASS_LAYER_GEOM);
 	shaders->addShaderBindTex(grassLayer);

@@ -9,7 +9,6 @@ TerrainNode::TerrainNode(const vec3& position) : StaticNode(position) {
 	lineSize = 0;
 	offset = vec3(0, 0, 0);
 	offsize = vec3(1, 1, 1);
-
 	type = TYPE_TERRAIN;
 }
 

@@ -332,10 +332,14 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	TerrainNode* terrainNode = scene->terrainNode;
 	if (terrainNode && terrainNode->checkInCamera(camera)) {
 		static Shader* terrainShader = render->findShader("terrain");
-		state->shader = terrainShader;
-		((StaticDrawcall*)terrainNode->drawcall)->updateBuffers(state->pass);
+		static Shader* terrainCullShader = render->findShader("terrainComp");
 
 		StaticObject* terrain = (StaticObject*)terrainNode->objects[0];
+		state->shaderCompute = terrainCullShader;
+		((TerrainDrawcall*)terrainNode->drawcall)->update(camera, render, state);
+		state->shaderCompute = NULL;
+		
+		state->shader = terrainShader;
 		terrainShader->setVector3v("mapTrans", terrain->transformMatrix.entries + 12);
 		terrainShader->setVector3v("mapScale", terrain->size);
 		terrainShader->setVector4("mapInfo", STEP_SIZE, terrainNode->lineSize, MAP_SIZE, MAP_SIZE);
@@ -379,6 +383,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 		static bool boxInit = false;
 		if (!boxInit && scene->isInited()) {
 			scene->clearAllAABB();
+			scene->createNodeAABB(scene->terrainNode);
 			scene->createNodeAABB(scene->staticRoot);
 			scene->createNodeAABB(scene->animationRoot);
 			boxInit = true;

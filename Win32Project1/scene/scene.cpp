@@ -150,6 +150,26 @@ void Scene::updateVisualTerrain(int bx, int bz, int sizex, int sizez) {
 }
 
 void Scene::createNodeAABB(Node* node) {
+	TerrainNode* tn = dynamic_cast<TerrainNode*>(node);
+	if (tn != NULL) {
+		Terrain* t = tn->getMesh();
+		for (int i = 0; i < t->chunks.size(); ++i) {
+			AABB* aabb = t->chunks[i]->bounding;
+			StaticNode* aabbNode = new StaticNode(aabb->position);
+			StaticObject* aabbObject = new StaticObject(AssetManager::assetManager->meshes["box"]);
+			aabbNode->setDynamicBatch(false);
+			aabbObject->bindMaterial(MaterialManager::materials->find(BLACK_MAT));
+			aabbObject->setSize(aabb->sizex, aabb->sizey, aabb->sizez);
+			aabbNode->addObject(this, aabbObject);
+			aabbNode->updateNode(this);
+			aabbNode->prepareDrawcall();
+			aabbNode->updateRenderData();
+			aabbNode->updateDrawcall();
+			boundingNodes.push_back(aabbNode);
+		}
+		return;
+	}
+
 	AABB* aabb = (AABB*)node->boundingBox;
 	if(aabb) {
 		StaticNode* aabbNode = new StaticNode(aabb->position);

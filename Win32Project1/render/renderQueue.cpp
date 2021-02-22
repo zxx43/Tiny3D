@@ -212,7 +212,7 @@ void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState
 	if (batchData) {
 		pushDatasToBatch(batchData, state->pass);
 		Batch* batch = batchData->batch;
-		if (batch) {
+		if (batch && !batch->hasTerrain) {
 			if (!batch->drawcall) batch->createDrawcall();
 			if (batch->objectCount > 0) {
 				batch->drawcall->updateBuffers(state->pass);

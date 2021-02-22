@@ -413,7 +413,7 @@ struct ConfigArg {
 	bool debug;
 };
 
-#define MIN_VAL 1.175494351e-38f;
-#define MAX_VAL 3.402823466e+38f;
+#define MIN_VAL 1.175494351e-38f
+#define MAX_VAL 3.402823466e+38f
 
 #endif /* UTIL_H_ */

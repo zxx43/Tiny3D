@@ -14,6 +14,7 @@
 #define ANIMATE_DC 3
 #define COMPUTE_DC 4
 #define MULTI_DC 5
+#define TERRAIN_DC 6
 
 #define NEAR_SHADOW_PASS 1
 #define MID_SHADOW_PASS 2

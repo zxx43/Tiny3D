@@ -339,6 +339,9 @@
     <ClCompile Include="animation\animationData.cpp">
       <Filter>Source Files\animation</Filter>
     </ClCompile>
+    <ClCompile Include="render\terrainDrawcall.cpp">
+      <Filter>Source Files\render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="batch\batch.h">
@@ -596,6 +599,9 @@
     <ClInclude Include="render\dataBuffer.h">
       <Filter>Source Files\render</Filter>
     </ClInclude>
+    <ClInclude Include="render\terrainDrawcall.h">
+      <Filter>Source Files\render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Tiny\shader\blur.frag">
@@ -731,6 +737,9 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Tiny\shader\noise.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Tiny\shader\terrain.comp">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

@@ -27,6 +27,7 @@ Terrain::Terrain(const char* fileName):Mesh() {
 	visualPoints = (float*)malloc(visualPointsSize * sizeof(float));
 	memset(visualPoints, 0, visualPointsSize * sizeof(float));
 
+	createChunks();
 	initFaces();
 	caculateExData();
 }
@@ -56,6 +57,10 @@ Terrain::~Terrain() {
 
 	free(visualIndices);
 	free(visualPoints);
+
+	for (uint i = 0; i < chunks.size(); ++i)
+		delete chunks[i];
+	chunks.clear();
 }
 
 float Terrain::getHeight(int px, int pz) {
@@ -144,9 +149,21 @@ vec3 Terrain::getTangent(const vec3& normal) {
 		return c2.GetNormalized();
 }
 
+void Terrain::createChunks() {
+	chunks.clear();
+	stepCount = (MAP_SIZE - STEP_SIZE) / STEP_SIZE;
+	chunkStep = stepCount / CHUNK_SIZE;
+
+	for (int i = 0; i < chunkStep; ++i) {
+		for (int j = 0; j < chunkStep; ++j) {
+			Chunk* chunk = new Chunk();
+			chunks.push_back(chunk);
+		}
+	}
+}
+
 void Terrain::initFaces() {
 	int currentVertex = 0;
-	int stepCount = (MAP_SIZE - STEP_SIZE) / STEP_SIZE;
 
 	float x, y, z, u, v;
 	for (int i = 0, row = 0; row < stepCount + 1; i += STEP_SIZE, row++) {
@@ -189,6 +206,10 @@ void Terrain::initFaces() {
 
 			uint blockIndex = i * stepCount + j;
 			blockIndexMap[blockIndex] = iArray;
+
+			int chunki = floorf(i * 1.0f / CHUNK_SIZE), chunkj = floorf(j * 1.0f / CHUNK_SIZE);
+			for(int c = 0; c < 6; ++c)
+				chunks[chunki * chunkStep + chunkj]->indices.push_back(iArray[c]);
 		}
 	}
 }

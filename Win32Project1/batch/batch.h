@@ -35,7 +35,7 @@ public:
 	unsigned char* objectidBuffer;
 	unsigned int* indexBuffer;
 
-	bool fullStatic;
+	bool fullStatic, hasTerrain;
 	unsigned short objectCount;
 	float* modelMatrices;
 	float* normalMatrices;

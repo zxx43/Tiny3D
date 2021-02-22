@@ -1,5 +1,6 @@
 #include "staticNode.h"
 #include "../render/staticDrawcall.h"
+#include "../render/terrainDrawcall.h"
 #include "../util/util.h"
 #include "../scene/scene.h"
 
@@ -39,7 +40,10 @@ void StaticNode::createBatch() {
 	}
 
 	if (drawcall) delete drawcall;
-	drawcall=new StaticDrawcall(batch);
+	if (!batch->hasTerrain)
+		drawcall = new StaticDrawcall(batch);
+	else
+		drawcall = new TerrainDrawcall((Terrain*)(objects[0]->mesh), batch);
 }
 
 void StaticNode::prepareDrawcall() {
@@ -57,7 +61,7 @@ void StaticNode::updateRenderData() {
 }
 
 void StaticNode::updateDrawcall() {
-	if (!dynamicBatch && drawcall) 
+	if (!dynamicBatch && drawcall && !batch->hasTerrain) 
 		((StaticDrawcall*)drawcall)->updateMatrices();
 	needUpdateDrawcall = false;
 }

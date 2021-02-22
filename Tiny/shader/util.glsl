@@ -175,6 +175,14 @@ vec3 DecodeNormal(vec2 vNormal2) {
 	return vec3(vNormal2, z);
 }
 
+bool CheckCull(vec3 p0, vec3 p1, vec3 p2, vec3 p3, 
+			vec3 p4, vec3 p5, vec3 p6, vec3 p7) {
+	float thr = 1.0, thz = 1.0;
+	vec3 maxP = max(p7, max(p6, max(p5, max(p4, max(p3, max(p2, max(p0, p1)))))));		
+	vec3 minP = min(p7, min(p6, min(p5, min(p4, min(p3, min(p2, min(p0, p1)))))));	
+	return any(greaterThan(minP, vec3(thr, thr, thz))) || any(lessThan(maxP, vec3(-thr, -thr, -thz)));
+}
+
 struct Indirect {
 	uint count;
 	uint primCount;
