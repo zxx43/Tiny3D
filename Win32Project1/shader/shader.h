@@ -67,6 +67,7 @@ public:
 	void setUintv(const char* param, int count, uint* arr);
 	void setSampler(const char* param,int value);
 	void setFloat(const char* param,float value);
+	void setIVector2(const char* param, int x, int y);
 	void setVector2(const char* param,float x,float y);
 	void setVector3(const char* param,float x,float y,float z);
 	void setUVector3(const char* param, uint x, uint y, uint z);

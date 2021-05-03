@@ -45,6 +45,7 @@ void Render::initEnvironment() {
 
 	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &MaxAniso);
 	debugMode = false;
+	debugTerrain = false;
 }
 
 void Render::clearFrame(bool clearColor,bool clearDepth,bool clearStencil) {

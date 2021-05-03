@@ -28,6 +28,7 @@ A Small OpenGL Based Renderer
 - Atmospheric scattering  
 - Volumetric cloud  
 - Collision detection  
+- Terrain LOD  
   
 ### Control:  
 

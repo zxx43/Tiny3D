@@ -13,9 +13,10 @@
 #include "../bounding/aabb.h"
 #include <map>
 
-#define MAP_SIZE 1024
+#define MAP_SIZE 1028
 #define	STEP_SIZE 4
-#define CHUNK_SIZE 5
+#define CHUNK_SIZE 8
+#define LINE_CHUNKS ((MAP_SIZE - STEP_SIZE) / (STEP_SIZE * CHUNK_SIZE))
 #define CHUNK_INDEX_COUNT (CHUNK_SIZE * CHUNK_SIZE * 6)
 
 struct Chunk {

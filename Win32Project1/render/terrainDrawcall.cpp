@@ -119,10 +119,15 @@ void TerrainDrawcall::update(Camera* camera, Render* render, RenderState* state)
 }
 
 void TerrainDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
+	bool drawLine = render->drawLine;
+	if (render->getDebugTerrain()) render->setDrawLine(true);
+
 	if (frame < state->delay) frame++;
 	else {
 		dataBuffer->use();
 		render->useShader(shader);
 		glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0);
 	}
+
+	render->setDrawLine(drawLine);
 }

@@ -112,6 +112,11 @@ public:
 	VECTOR3D operator/(const float rhs) const
 	{	return (rhs==0.0f) ? VECTOR3D(0.0f, 0.0f, 0.0f) : VECTOR3D(x / rhs, y / rhs, z / rhs);	}
 
+	VECTOR3D operator/(const VECTOR3D & rhs) const
+	{
+		return (rhs.x == 0.0f || rhs.y == 0.0f || rhs.z == 0.0f) ? VECTOR3D(0.0f) : VECTOR3D(x / rhs.x, y / rhs.y, z / rhs.z);
+	}
+
 	//multiply by a float, eg 3*v
 	friend VECTOR3D operator*(float scaleFactor, const VECTOR3D & rhs);
 

@@ -287,7 +287,7 @@ void RenderManager::drawGrass(Render* render, RenderState* state, Scene* scene, 
 		state->eyePos = &(camera->position);
 
 		StaticObject* terrain = (StaticObject*)node->objects[0];
-		compShader->setVector3v("mapTrans", terrain->transformMatrix.entries + 12);
+		compShader->setVector3v("mapTrans", GetTranslate(terrain->transformMatrix));
 		compShader->setVector3v("mapScale", terrain->size);
 		compShader->setVector4("mapInfo", STEP_SIZE, node->lineSize, MAP_SIZE, MAP_SIZE);
 
@@ -335,13 +335,21 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 		static Shader* terrainCullShader = render->findShader("terrainComp");
 
 		StaticObject* terrain = (StaticObject*)terrainNode->objects[0];
+		state->mapTrans = GetTranslate(terrain->transformMatrix);
+		state->mapScl = terrain->size;
+		state->mapInfo = vec4(STEP_SIZE, terrainNode->lineSize, MAP_SIZE, MAP_SIZE);
+		
+		vec3 ref = ((camera->position - state->mapTrans) / state->mapScl) / CHUNK_SIZE;
+		terrainCullShader->setIVector2("refChunk", floor(ref.x), floor(ref.z));
+		terrainCullShader->setVector3v("mapTrans", state->mapTrans);
+		terrainCullShader->setVector3v("mapScale", state->mapScl);
 		state->shaderCompute = terrainCullShader;
 		((TerrainDrawcall*)terrainNode->drawcall)->update(camera, render, state);
 		state->shaderCompute = NULL;
 		
 		state->shader = terrainShader;
-		terrainShader->setVector3v("mapTrans", terrain->transformMatrix.entries + 12);
-		terrainShader->setVector3v("mapScale", terrain->size);
+		terrainShader->setVector3v("mapTrans", state->mapTrans);
+		terrainShader->setVector3v("mapScale", state->mapScl);
 		terrainShader->setVector4("mapInfo", STEP_SIZE, terrainNode->lineSize, MAP_SIZE, MAP_SIZE);
 		terrainShader->setHandle64("roadTex", AssetManager::assetManager->getRoadHnd());
 		render->draw(camera, terrainNode->drawcall, state);
@@ -352,12 +360,6 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 			render->useTexture(TEXTURE_2D, 0, occluderDepth->id);
 			drawGrass(render, state, scene, camera);
 		}
-
-		state->mapTrans.x = terrain->transformMatrix.entries[12];
-		state->mapTrans.y = terrain->transformMatrix.entries[13];
-		state->mapTrans.z = terrain->transformMatrix.entries[14];
-		state->mapScl = terrain->size;
-		state->mapInfo = vec4(STEP_SIZE, terrainNode->lineSize, MAP_SIZE, MAP_SIZE);
 	}
 
 	state->shader = phongShader;

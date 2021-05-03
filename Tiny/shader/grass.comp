@@ -62,20 +62,22 @@ void main() {
 	vec2 dRand = vec2(random(worldPose, 0.1), random(worldPose, 0.2));
 	worldPose.xz += dRand * spread;
 
-	vec2 coord = (worldPose.xz - mapTrans.xz) / (mapScale.xz * mapInfo.zw);
+	vec2 infoSize = vec2(floor(mapInfo.zw / mapInfo.x * 0.25) * 4.0) * mapInfo.x;
+
+	vec2 coord = (worldPose.xz - mapTrans.xz) / (mapScale.xz * infoSize);
 	if(any(bvec2(any(lessThan(coord, vec2(0.0))), any(greaterThan(coord, vec2(1.0)))))) return;
 	else if(texture(roadTex, coord).r > 0.001) return;
 
 	// Caculate grass pos y;
-	vec2 texSize = mapInfo.zw / mapInfo.x;
+	vec2 texSize = infoSize / mapInfo.x;
 	vec2 texPos = coord * texSize;
 	vec2 texLD = floor(texPos), texRT = ceil(texPos);
-	if(abs(texLD.x - texRT.x) < 0.0001) {
-		if(texLD.x > 0.0001) texLD.x -= 1.0;
+	if(abs(texLD.x - texRT.x) < 0.00001) {
+		if(texLD.x > 0.00001) texLD.x -= 1.0;
 		else texRT.x += 1.0;
 	}
-	if(abs(texLD.y - texRT.y) < 0.0001) {
-		if(texLD.y > 0.0001) texLD.y -= 1.0;
+	if(abs(texLD.y - texRT.y) < 0.00001) {
+		if(texLD.y > 0.00001) texLD.y -= 1.0;
 		else texRT.y += 1.0;
 	}
 	

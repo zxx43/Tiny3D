@@ -71,6 +71,8 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 
 	Shader* terrainComp = shaders->addShader("terrainComp", TERRAIN_COMP);
 	terrainComp->attachDef("CHUNK_INDEX_COUNT", to_string(CHUNK_INDEX_COUNT).data());
+	terrainComp->attachDef("CHUNK_SIZE", to_string(CHUNK_SIZE).data());
+	terrainComp->attachDef("LINE_CHUNKS", to_string(LINE_CHUNKS).data());
 
 	Shader* grassLayer = shaders->addShader("grassLayer", GRASS_LAYER_VERT, GRASS_LAYER_FRAG, GRASS_LAYER_TESC, GRASS_LAYER_TESE, GRASS_LAYER_GEOM);
 	shaders->addShaderBindTex(grassLayer);

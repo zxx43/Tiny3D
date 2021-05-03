@@ -135,6 +135,10 @@ void SimpleApplication::keyDown(int key) {
 	
 	if(key == 67)
 		printf("pos: %f, %f\n", scene->actCamera->position.x, scene->actCamera->position.z);
+	if (key == 77)
+		render->setDebugTerrain(true);
+	if (key == 78)
+		render->setDebugTerrain(false);
 }
 
 void SimpleApplication::keyUp(int key) {

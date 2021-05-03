@@ -23,6 +23,97 @@ layout(binding = 5, std430) buffer OutIndex {
 };
 
 uniform mat4 viewProjectMatrix;
+uniform ivec2 refChunk;
+uniform vec3 mapTrans, mapScale;
+
+#define INVALID_LEVEL 1024
+
+uint GetLevel(ivec2 ref, int targetChunk) {
+	vec2 targetCenter = inBoundCenters[targetChunk].xz;
+	targetCenter = (targetCenter - mapTrans.xz) / mapScale.xz;
+	targetCenter = floor(targetCenter / CHUNK_SIZE);
+	ivec2 target = ivec2(targetCenter);
+	
+	ivec2 ref2Target = abs(target - ref);
+	if(any(greaterThan(ref2Target, ivec2(16)))) return 8;
+	else if(any(greaterThan(ref2Target, ivec2(8)))) return 4;
+	else if(any(greaterThan(ref2Target, ivec2(4)))) return 2;
+	else return 1;
+}
+
+uint GetIndexByBlock(uint x, uint y, uint inner) {
+	return (y * CHUNK_SIZE + x) * 6 + inner;
+}
+
+void GenLodIndices(uint chunkBase, uint level, bvec4 edge) {
+	uint curIndex = 0;
+	uint lineSize = CHUNK_SIZE / level;
+	if(any(edge)) // Chunk with T crack has (line * 9 + (line - 1) * 6) indices
+		curIndex = atomicAdd(outIndirect.count, lineSize * 9 + lineSize * (lineSize - 1) * 6);
+	else // Chunk without T crack has (line * line * 6) indices
+		curIndex = atomicAdd(outIndirect.count, lineSize * lineSize * 6);
+	for(uint y = 0; y < CHUNK_SIZE; y += level) {
+		for(uint x = 0; x < CHUNK_SIZE; x += level) {
+			uint a = inIndices[chunkBase + GetIndexByBlock(x, y, 0)];
+			uint b = inIndices[chunkBase + GetIndexByBlock(x, y + level - 1, 1)];
+			uint c = inIndices[chunkBase + GetIndexByBlock(x + level - 1, y + level - 1, 2)]; 
+			uint d = inIndices[chunkBase + GetIndexByBlock(x + level - 1, y, 5)]; 
+			
+			if(edge.x && y == 0) { // Up edge T crack
+				uint h = inIndices[chunkBase + GetIndexByBlock(x + level / 2, 0, 0)];
+				outIndices[curIndex++] = a;
+				outIndices[curIndex++] = b;
+				outIndices[curIndex++] = h;
+				outIndices[curIndex++] = h;
+				outIndices[curIndex++] = b;
+				outIndices[curIndex++] = c;
+				outIndices[curIndex++] = c;
+				outIndices[curIndex++] = d;
+				outIndices[curIndex++] = h;
+			} else if(edge.y && y == (CHUNK_SIZE - level)) { // Down edge T crack
+				uint h = inIndices[chunkBase + GetIndexByBlock(x + level / 2, CHUNK_SIZE - 1, 1)];
+				outIndices[curIndex++] = a;
+				outIndices[curIndex++] = b;
+				outIndices[curIndex++] = h;
+				outIndices[curIndex++] = a;
+				outIndices[curIndex++] = h;
+				outIndices[curIndex++] = d;
+				outIndices[curIndex++] = h;
+				outIndices[curIndex++] = c;
+				outIndices[curIndex++] = d;
+			} else if(edge.z && x == 0) { // Left edge T crack
+				uint h = inIndices[chunkBase + GetIndexByBlock(0, y + level / 2, 0)];
+				outIndices[curIndex++] = h;
+				outIndices[curIndex++] = d;
+				outIndices[curIndex++] = a;
+				outIndices[curIndex++] = h;
+				outIndices[curIndex++] = c;
+				outIndices[curIndex++] = d;
+				outIndices[curIndex++] = b;
+				outIndices[curIndex++] = c;
+				outIndices[curIndex++] = h;
+			} else if(edge.w && x == CHUNK_SIZE - level) { // Right edge T crack
+				uint h = inIndices[chunkBase + GetIndexByBlock(CHUNK_SIZE - 1, y + level / 2, 5)];
+				outIndices[curIndex++] = a;
+				outIndices[curIndex++] = b;
+				outIndices[curIndex++] = h;
+				outIndices[curIndex++] = b;
+				outIndices[curIndex++] = c;
+				outIndices[curIndex++] = h;
+				outIndices[curIndex++] = h;
+				outIndices[curIndex++] = d;
+				outIndices[curIndex++] = a;
+			} else { // No T crack
+				outIndices[curIndex++] = a;
+				outIndices[curIndex++] = b;
+				outIndices[curIndex++] = c;
+				outIndices[curIndex++] = a;
+				outIndices[curIndex++] = c;
+				outIndices[curIndex++] = d;
+			}
+		}	
+	}
+}
 
 void main() {
 	uint curChunk = gl_GlobalInvocationID.x;
@@ -50,8 +141,35 @@ void main() {
 	
 	if(CheckCull(p0.xyz, p1.xyz, p2.xyz, p3.xyz, 
 		p4.xyz, p5.xyz, p6.xyz, p7.xyz)) return;
-
-	uint curIndex = atomicAdd(outIndirect.count, CHUNK_INDEX_COUNT);
-	for(uint i = 0; i < CHUNK_INDEX_COUNT; ++i) 
-		outIndices[curIndex + i] = inIndices[curChunk * CHUNK_INDEX_COUNT + i];
+	
+	// Current chunk & adjacent chunks	
+	int iCurChunk = int(curChunk);
+	int upChunk = (iCurChunk - LINE_CHUNKS) >= 0 ? (iCurChunk - LINE_CHUNKS) : -1;
+	int downChunk = (iCurChunk + LINE_CHUNKS) < (LINE_CHUNKS * LINE_CHUNKS) ? (iCurChunk + LINE_CHUNKS) : -1;
+	int leftChunk = (iCurChunk - 1) >= 0 ? (iCurChunk - 1) : -1;
+	int rightChunk = (iCurChunk + 1) < (LINE_CHUNKS * LINE_CHUNKS) ? (iCurChunk + 1) : -1;
+	
+	// Get current chunk level & adjacent chunks level
+	uint levelCurr = GetLevel(refChunk, iCurChunk);
+	uvec4 levelEdge = uvec4(INVALID_LEVEL);
+	if(upChunk >= 0) levelEdge.x = GetLevel(refChunk, upChunk);
+	if(downChunk >= 0) levelEdge.y = GetLevel(refChunk, downChunk);
+	if(leftChunk >= 0) levelEdge.z = GetLevel(refChunk, leftChunk);
+	if(rightChunk >= 0) levelEdge.w = GetLevel(refChunk, rightChunk);
+	
+	uint baseIndex = curChunk * CHUNK_INDEX_COUNT;
+	if(levelCurr == 1) { // No lod
+		uint curIndex = atomicAdd(outIndirect.count, CHUNK_INDEX_COUNT);
+		for(uint i = 0; i < CHUNK_INDEX_COUNT; ++i) 
+			outIndices[curIndex + i] = inIndices[baseIndex + i];
+	} else { // Do lod
+		if(levelCurr > levelEdge.x) GenLodIndices(baseIndex, levelCurr, bvec4(true, false, false, false));
+		else if(levelCurr > levelEdge.y) GenLodIndices(baseIndex, levelCurr, bvec4(false, true, false, false));
+		else if(levelCurr > levelEdge.z) GenLodIndices(baseIndex, levelCurr, bvec4(false, false, true, false));
+		else if(levelCurr > levelEdge.w) GenLodIndices(baseIndex, levelCurr, bvec4(false, false, false, true));
+		else GenLodIndices(baseIndex, levelCurr, bvec4(false)); // Not edge without T crack
+	}
 }
+
+
+

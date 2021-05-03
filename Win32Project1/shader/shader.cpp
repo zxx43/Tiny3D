@@ -146,6 +146,18 @@ void Shader::setFloat(const char* param,float value) {
 		printf("value is: %f\n", value);
 }
 
+void Shader::setIVector2(const char* param, int x, int y) {
+	int location = findParamLocation(param);
+	if (location == INVALID_LOCATION) {
+		addParam(param);
+		location = findParamLocation(param);
+	}
+	if (location != INVALID_LOCATION && program)
+		glProgramUniform2i(program->shaderProg, location, x, y);
+	if (getError(param, location))
+		printf("value is: %d %d\n", x, y);
+}
+
 void Shader::setVector2(const char* param,float x,float y) {
 	int location = findParamLocation(param);
 	if (location == INVALID_LOCATION) {

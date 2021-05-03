@@ -66,6 +66,8 @@ Texture2D::Texture2D(uint w,uint h,int t,int p,int c,int filter,bool clampBorder
 	if (dataType == GL_FLOAT) buffSize = width * height * channel * sizeof(GL_FLOAT);
 	else if (dataType == GL_UNSIGNED_BYTE) buffSize = width * height * channel * sizeof(GL_UNSIGNED_BYTE);
 
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
 	void* data = initData ? initData : texData;
 	switch(type) {
 		case TEXTURE_TYPE_COLOR:
