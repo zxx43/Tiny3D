@@ -44,6 +44,8 @@ using namespace std;
 #define ATMOS_FRAG "shader/atmosphere.frag"
 #define NOISE_VERT "shader/noise.vert"
 #define NOISE_FRAG "shader/noise.frag"
+#define DEPTH_FRAG "shader/depth.frag"
+#define HIZ_FRAG "shader/hizmip.frag"
 
 string LoadExShader(char* name) {
 	char* fileStr = textFileRead(name);
@@ -218,6 +220,8 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 
 	Shader* atmos = shaders->addShader("atmos", ATMOS_VERT, ATMOS_FRAG);
 	Shader* noise = shaders->addShader("noise", NOISE_VERT, NOISE_FRAG);
+	Shader* depth = shaders->addShader("depth", POST_VERT, DEPTH_FRAG);
+	Shader* hiz = shaders->addShader("hiz", POST_VERT, HIZ_FRAG);
 
 	shaders->compile();
 }

@@ -20,6 +20,7 @@
 #define LEQUAL 1
 #define GREATER 2
 #define GEQUAL 3
+#define ALWAYS 4
 
 #define WRAP_REPEAT GL_REPEAT
 #define WRAP_MIRROR GL_MIRRORED_REPEAT

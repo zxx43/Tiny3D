@@ -32,12 +32,14 @@ void Render::initEnvironment() {
 	cullMode=CULL_NONE;
 	drawLine=true;
 	enableBlend = true;
+	enableColor = false;
 	setDepthTest(true,LEQUAL);
 	setAlphaTest(false, GREATER, 0);
 	setCullState(true);
 	setCullMode(CULL_BACK);
 	setDrawLine(false);
 	setBlend(false);
+	setColorWrite(true);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	setClearColor(1,1,1,1);
 	currentShader=NULL;
@@ -85,6 +87,9 @@ void Render::setDepthTest(bool enable,int testMode) {
 				break;
 			case GEQUAL:
 				glDepthFunc(GL_GEQUAL);
+				break;
+			case ALWAYS:
+				glDepthFunc(GL_ALWAYS);
 				break;
 		}
 	}
@@ -151,6 +156,13 @@ void Render::setBlend(bool enable) {
 	enableBlend = enable;
 	if (enable) glEnable(GL_BLEND);
 	else glDisable(GL_BLEND);
+}
+
+void Render::setColorWrite(bool enable) {
+	if (enable == enableColor) return;
+	enableColor = enable;
+	if (enable) glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	else glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 }
 
 void Render::setClearColor(float r,float g,float b,float a) {
@@ -409,7 +421,7 @@ int Render::getError() {
 	return (int)error;
 }
 
-void Render::useTexture(uint type, uint slot, uint texid) {
+uint Render::useTexture(uint type, uint slot, uint texid) {
 	std::map<uint, std::map<uint, uint>*>::iterator typeItor = textureTypeSlots.find(type);
 	std::map<uint, uint>* textureInUse = NULL;
 	if (typeItor != textureTypeSlots.end())
@@ -421,9 +433,12 @@ void Render::useTexture(uint type, uint slot, uint texid) {
 		textureInUse = slotMap;
 	}
 
+	int beforeTex = 0; // Default no texture use
 	std::map<uint, uint>::iterator texItor = textureInUse->find(slot);
-	if (texItor != textureInUse->end() && texItor->second == texid) 
-		return;
+	if (texItor != textureInUse->end()) { // Can find before texture
+		beforeTex = texItor->second;
+		if (beforeTex == texid) return beforeTex;
+	}
 
 	GLenum textureType = GL_TEXTURE_2D;
 	switch (type) {
@@ -439,8 +454,9 @@ void Render::useTexture(uint type, uint slot, uint texid) {
 	}
 	glBindTextureUnit(slot, texid);
 	(*textureInUse)[slot] = texid;
-}
 
+	return beforeTex;
+}
 
 void Render::clearTextureSlots() {
 	std::map<uint, std::map<uint, uint>*>::iterator itor = textureTypeSlots.begin();

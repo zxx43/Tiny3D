@@ -9,13 +9,14 @@ Filter::Filter(float width, float height, bool useFramebuffer, int precision, in
 	pixHeight = 1.0 / height;
 	framebuffer = useFramebuffer ? new FrameBuffer(width, height, precision, component, clampBorder, filt) : NULL;
 
-	Board* board=new Board(2,2,2);
+	Board board(2,2,2);
 	boardNode=new StaticNode(vec3(0,0,0));
 	boardNode->setFullStatic(true);
-	StaticObject* boardObject=new StaticObject(board);
+	StaticObject* boardObject=new StaticObject(&board);
 	boardNode->addObject(NULL, boardObject);
 	boardNode->prepareDrawcall();
-	delete board;
+
+	isDebug = false;
 }
 
 Filter::~Filter() {
@@ -28,7 +29,7 @@ Filter::~Filter() {
 
 bool Filter::bindTex(int slot, const Texture2D* tex, Shader* shader) {
 	if (!shader->hasSlot(slot)) {
-		printf("shader: %s error slot:%d\n", shader->name.data(), slot);
+		if (isDebug) printf("shader: %s error slot:%d\n", shader->name.data(), slot);
 		return false;
 	}
 	int hnd = shader->getSlotHnd(slot);
@@ -60,6 +61,8 @@ void Filter::draw(Camera* camera, Render* render, RenderState* state,
 
 void Filter::draw(Camera* camera, Render* render, RenderState* state,
 		const std::vector<Texture2D*>& inputTextures, const Texture2D* depthTexture) {
+	isDebug = render->getDebug();
+
 	Shader* shader = state->shader;
 	render->setFrameBuffer(framebuffer);
 	render->setShaderVec2(shader, "pixelSize", pixWidth, pixHeight);
@@ -82,9 +85,9 @@ void Filter::addOutput(int precision, int component, int filt) {
 		framebuffer->addColorBuffer(precision, component, filt);
 }
 
-void Filter::addDepthBuffer(int precision) {
+void Filter::addDepthBuffer(int precision, bool useMip) {
 	if (framebuffer)
-		framebuffer->attachDepthBuffer(precision);
+		framebuffer->attachDepthBuffer(precision, useMip);
 }
 
 Texture2D* Filter::getOutput(int i) {

@@ -183,6 +183,10 @@ bool CheckCull(vec3 p0, vec3 p1, vec3 p2, vec3 p3,
 	return any(greaterThan(minP, vec3(thr, thr, thz))) || any(lessThan(maxP, vec3(-thr, -thr, -thz)));
 }
 
+float Linearize(float near, float far, float depth) {
+	return (2.0 * near) / (far + near - depth * (far - near));
+}
+
 struct Indirect {
 	uint count;
 	uint primCount;

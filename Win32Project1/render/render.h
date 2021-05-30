@@ -33,6 +33,7 @@ public: // Global render state
 	int alphaTestMode;
 	float alphaThreshold;
 	bool enableBlend;
+	bool enableColor;
 	COLOR clearColor;
 	Shader* currentShader;
 private:
@@ -54,6 +55,7 @@ public:
 	void setCullMode(int mode);
 	void setDrawLine(bool line);
 	void setBlend(bool enable);
+	void setColorWrite(bool enable);
 	void setClearColor(float r, float g, float b, float a);
 	void setViewPort(int width, int height);
 	void resize(int width, int height, Camera* camera1, Camera* camera2, Camera* reflectCamera);
@@ -66,7 +68,7 @@ public:
 	void useFrameCube(int i);
 	FrameBuffer* getFrameBuffer() { return currentFrame; }
 	void setColorMask(bool r, bool g, bool b, bool a);
-	void useTexture(uint type, uint slot, uint texid);
+	uint useTexture(uint type, uint slot, uint texid);
 	void clearTextureSlots();
 	void setTextureBindless2Shaders(TextureBindless* tex);
 	int getError();

@@ -23,6 +23,8 @@ SimpleApplication::SimpleApplication() : Application() {
 	aaInput.clear();
 	noiseBuf = NULL;
 	firstFrame = true;
+	drawDepth = false;
+	depthLevel = 0;
 }
 
 SimpleApplication::~SimpleApplication() {
@@ -58,13 +60,13 @@ void SimpleApplication::resize(int width, int height) {
 	screen = new FrameBuffer(width, height, hdrPre, 4, false, NEAREST); // texBuffer
 	screen->addColorBuffer(matPre, 4);                         // matBuffer
 	screen->addColorBuffer(matPre, 4);                         // roughMetalNormalBuffer
-	screen->attachDepthBuffer(renderMgr->getDepthPre());       // depthBuffer
+	screen->attachDepthBuffer(renderMgr->getDepthPre(), true);       // depthBuffer
 
 	if (waterFrame) delete waterFrame;
 	waterFrame = new FrameBuffer(width, height, hdrPre, 4, false);
 	waterFrame->addColorBuffer(waterPre, 4); // FragMat
 	waterFrame->addColorBuffer(waterPre, 3); // FragNormal
-	waterFrame->attachDepthBuffer(renderMgr->getDepthPre());
+	waterFrame->attachDepthBuffer(renderMgr->getDepthPre(), false);
 
 	if (sceneFilter) delete sceneFilter;
 	sceneFilter = new Filter(width, height, true, precision, 4, false);
@@ -133,17 +135,18 @@ void SimpleApplication::keyDown(int key) {
 	Application::keyDown(key);
 	scene->player->keyDown(input, scene);
 	
-	if(key == 67)
-		printf("pos: %f, %f\n", scene->actCamera->position.x, scene->actCamera->position.z);
-	if (key == 77)
-		render->setDebugTerrain(true);
-	if (key == 78)
-		render->setDebugTerrain(false);
+	if(key == 67) printf("pos: %f, %f\n", scene->actCamera->position.x, scene->actCamera->position.z);
+	if (key == 187) depthLevel++;
+	if (key == 189) depthLevel = depthLevel >= 1 ? depthLevel - 1 : 0;
+	//printf("key: %d\n", key);
 }
 
 void SimpleApplication::keyUp(int key) {
 	Application::keyUp(key);
 	scene->player->keyUp(input);
+
+	if (key == 66) drawDepth = !drawDepth;
+	if (key == 77) render->setDebugTerrain(!render->getDebugTerrain());
 }
 
 void SimpleApplication::moveMouse(const float mx, const float my, const float cx, const float cy) {
@@ -218,6 +221,9 @@ void SimpleApplication::draw() {
 		}
 		renderMgr->drawScreenFilter(render, scene, "fxaa", aaInput, aaFilter);
 	}
+
+	renderMgr->genHiz(render, scene, screen->getDepthBuffer());
+	if (drawDepth) renderMgr->drawHiz2Screen(render, scene, screen->getDepthBuffer(), depthLevel);
 	//*/
 
 	render->finishDraw();

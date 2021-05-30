@@ -235,6 +235,7 @@
     <ClCompile Include="texture\bmpimage.cpp" />
     <ClCompile Include="texture\bmploader.cpp" />
     <ClCompile Include="texture\cubemap.cpp" />
+    <ClCompile Include="texture\hizGenerator.cpp" />
     <ClCompile Include="texture\imageloader.cpp" />
     <ClCompile Include="texture\imageset.cpp" />
     <ClCompile Include="texture\texture2d.cpp" />
@@ -322,6 +323,7 @@
     <ClInclude Include="texture\bmpimage.h" />
     <ClInclude Include="texture\bmploader.h" />
     <ClInclude Include="texture\cubemap.h" />
+    <ClInclude Include="texture\hizGenerator.h" />
     <ClInclude Include="texture\imageloader.h" />
     <ClInclude Include="texture\imageset.h" />
     <ClInclude Include="texture\texture2d.h" />
@@ -344,6 +346,7 @@
     <None Include="..\Tiny\shader\debug.frag" />
     <None Include="..\Tiny\shader\debug.vert" />
     <None Include="..\Tiny\shader\deferred.frag" />
+    <None Include="..\Tiny\shader\depth.frag" />
     <None Include="..\Tiny\shader\dof.frag" />
     <None Include="..\Tiny\shader\flush.comp" />
     <None Include="..\Tiny\shader\fxaa.frag" />
@@ -355,6 +358,7 @@
     <None Include="..\Tiny\shader\grassLayer.tesc" />
     <None Include="..\Tiny\shader\grassLayer.tese" />
     <None Include="..\Tiny\shader\grassLayer.vert" />
+    <None Include="..\Tiny\shader\hizmip.frag" />
     <None Include="..\Tiny\shader\instance.vert" />
     <None Include="..\Tiny\shader\mean.frag" />
     <None Include="..\Tiny\shader\multiCull.comp" />

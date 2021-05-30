@@ -16,6 +16,7 @@ private:
 	float width,height,pixWidth,pixHeight;
 	FrameBuffer* framebuffer;
 	StaticNode* boardNode;
+	bool isDebug;
 private:
 	bool bindTex(int slot, const Texture2D* tex, Shader* shader);
 public:
@@ -27,7 +28,7 @@ public:
 	void draw(Camera* camera, Render* render, RenderState* state, 
 		const std::vector<Texture2D*>& inputTextures, const Texture2D* depthTexture);
 	void addOutput(int precision, int component, int filt);
-	void addDepthBuffer(int precision);
+	void addDepthBuffer(int precision, bool useMip);
 	FrameBuffer* getFrameBuffer();
 	Texture2D* getOutput(int i);
 };

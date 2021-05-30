@@ -33,7 +33,7 @@ public:
 	~FrameBuffer();
 public:
 	void addColorBuffer(int precision, int component, int filt = LINEAR);
-	void attachDepthBuffer(int precision);
+	void attachDepthBuffer(int precision, bool useMip);
 	Texture2D* getColorBuffer(int n);
 	Texture2D* getDepthBuffer();
 	void use();

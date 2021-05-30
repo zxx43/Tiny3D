@@ -342,6 +342,9 @@
     <ClCompile Include="render\terrainDrawcall.cpp">
       <Filter>Source Files\render</Filter>
     </ClCompile>
+    <ClCompile Include="texture\hizGenerator.cpp">
+      <Filter>Source Files\texture</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="batch\batch.h">
@@ -602,6 +605,9 @@
     <ClInclude Include="render\terrainDrawcall.h">
       <Filter>Source Files\render</Filter>
     </ClInclude>
+    <ClInclude Include="texture\hizGenerator.h">
+      <Filter>Source Files\texture</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Tiny\shader\blur.frag">
@@ -740,6 +746,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Tiny\shader\terrain.comp">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Tiny\shader\depth.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Tiny\shader\hizmip.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

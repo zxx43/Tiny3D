@@ -21,6 +21,8 @@ private:
 	DualFilter* bloomChain;
 	FrameBuffer* noiseBuf;
 	bool firstFrame;
+	bool drawDepth;
+	int depthLevel;
 public:
 	SimpleApplication();
 	virtual ~SimpleApplication();

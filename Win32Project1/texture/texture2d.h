@@ -29,7 +29,7 @@ public:
 	GLenum preColor, preDepth, format;
 	int type, precision;
 public:
-	Texture2D(uint w,uint h,int t,int p,int c,int filter,bool clampBorder=true,void* initData=NULL);
+	Texture2D(uint w,uint h, bool useMip,int t,int p,int c,int filter, bool clampBorder=true, void* initData=NULL);
 	~Texture2D();
 public:
 	void copyDataFrom(Texture2D* src);

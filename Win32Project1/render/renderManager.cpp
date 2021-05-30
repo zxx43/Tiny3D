@@ -48,6 +48,7 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 	renderShowWater = false;
 
 	grassDrawcall = NULL;
+	hiz = new HizGenerator();
 }
 
 RenderManager::~RenderManager() {
@@ -64,6 +65,7 @@ RenderManager::~RenderManager() {
 	if (reflectBuffer) delete reflectBuffer; reflectBuffer = NULL;
 	if (occluderDepth) delete occluderDepth; occluderDepth = NULL;
 	if (grassDrawcall) delete grassDrawcall; grassDrawcall = NULL;
+	if (hiz) delete hiz; hiz = NULL;
 }
 
 void RenderManager::resize(float width, float height) {
@@ -72,11 +74,11 @@ void RenderManager::resize(float width, float height) {
 		reflectBuffer = new FrameBuffer(width, height, LOW_PRE, 4, false);
 		reflectBuffer->addColorBuffer(LOW_PRE, 4);
 		reflectBuffer->addColorBuffer(LOW_PRE, 3);
-		reflectBuffer->attachDepthBuffer(LOW_PRE);
+		reflectBuffer->attachDepthBuffer(LOW_PRE, false);
 	}
 
 	if (occluderDepth) delete occluderDepth;
-	occluderDepth = new Texture2D(width, height, TEXTURE_TYPE_DEPTH, depthPre, 1, LINEAR);
+	occluderDepth = new Texture2D(width, height, false, TEXTURE_TYPE_DEPTH, depthPre, 1, NEAREST);
 	needResize = true;
 	updateSky();
 }
@@ -574,7 +576,42 @@ void RenderManager::drawTexture2Screen(Render* render, Scene* scene, u64 texhnd)
 	}
 
 	render->setFrameBuffer(NULL);
-	render->draw(scene->renderCamera, scene->textureNode->drawcall, state);
+	render->draw(NULL, scene->textureNode->drawcall, state);
+}
+
+void RenderManager::drawDepth2Screen(Render* render, Scene* scene, int texid) {
+	static Shader* screenShader = render->findShader("depth");
+	state->reset();
+	state->eyePos = &(scene->renderCamera->position);
+	state->enableDepthTest = false;
+	state->pass = POST_PASS;
+	state->shader = screenShader;
+	state->shader->setFloat("uLevel", 0);
+	state->shader->setVector2("uCamParam", scene->renderCamera->zNear, scene->renderCamera->zFar);
+
+	if (!scene->textureNode) {
+		Board board(2, 2, 2);
+		scene->textureNode = new StaticNode(vec3(0, 0, 0));
+		scene->textureNode->setFullStatic(true);
+		StaticObject* boardObject = new StaticObject(&board);
+		scene->textureNode->addObject(scene, boardObject);
+		scene->textureNode->prepareDrawcall();
+	}
+
+	render->setFrameBuffer(NULL);
+	uint texBefore = render->useTexture(TEXTURE_2D, 0, texid);
+	render->draw(NULL, scene->textureNode->drawcall, state);
+	render->useTexture(TEXTURE_2D, 0, texBefore);
+}
+
+void RenderManager::genHiz(Render* render, Scene* scene, Texture2D* depth) {
+	static Shader* hizShader = render->findShader("hiz");
+	hiz->genMipmap(render, hizShader, depth);
+}
+
+void RenderManager::drawHiz2Screen(Render* render, Scene* scene, Texture2D* depth, int level) {
+	static Shader* depthShader = render->findShader("depth");
+	hiz->drawDebug(scene->renderCamera, render, depthShader, depth, level);
 }
 
 void RenderManager::drawBoundings(Render* render, RenderState* state, Scene* scene, Camera* camera) {

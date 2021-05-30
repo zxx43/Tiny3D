@@ -12,6 +12,7 @@
 #include "../filter/filter.h"
 #include "../render/renderQueue.h"
 #include "../render/computeDrawcall.h"
+#include "../texture/hizGenerator.h"
 
 struct Renderable {
 	std::vector<RenderQueue*> queues;
@@ -47,6 +48,7 @@ public:
 	ConfigArg* cfgs;
 	Texture2D* occluderDepth;
 	int depthPre;
+	HizGenerator* hiz;
 private:
 	Shadow* shadow;
 	bool needResize, needRefreshSky, actShowWater, renderShowWater;
@@ -96,6 +98,9 @@ public:
 	void drawSSRFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter);
 	void drawSSGFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter);
 	void drawTexture2Screen(Render* render, Scene* scene, u64 texhnd);
+	void drawDepth2Screen(Render* render, Scene* scene, int texid);
+	void genHiz(Render* render, Scene* scene, Texture2D* depth);
+	void drawHiz2Screen(Render* render, Scene* scene, Texture2D* depth, int level);
 	void drawNoise3d(Render* render, Scene* scene, FrameBuffer* noiseBuf);
 	bool isWaterShow(const Scene* scene) { return scene->water && renderShowWater; }
 	int getDepthPre() { return depthPre; }
