@@ -242,6 +242,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 
 				if (state->shaderMulti) {
 					state->shaderMulti->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
+					if (state->prevMat) state->shaderMulti->setMatrix4("prevVPMatrix", *state->prevMat);
 				}
 
 				if (drawcall->getType() == MULTI_DC) {

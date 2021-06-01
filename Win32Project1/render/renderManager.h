@@ -53,6 +53,7 @@ private:
 	Shadow* shadow;
 	bool needResize, needRefreshSky, actShowWater, renderShowWater;
 	ComputeDrawcall* grassDrawcall;
+	mat4 prevCameraMat;
 public:
 	Renderable* renderData;
 	Renderable* queue1;
@@ -104,6 +105,7 @@ public:
 	void drawNoise3d(Render* render, Scene* scene, FrameBuffer* noiseBuf);
 	bool isWaterShow(const Scene* scene) { return scene->water && renderShowWater; }
 	int getDepthPre() { return depthPre; }
+	void retrievePrev(Scene* scene);
 };
 
 

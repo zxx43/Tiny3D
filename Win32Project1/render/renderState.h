@@ -34,6 +34,7 @@ struct RenderState {
 	vec3 light;
 	float udotl;
 	vec3* eyePos;
+	mat4* prevMat;
 	Shader* shader;
 	Shader* shaderIns;
 	Shader* shaderBill;
@@ -49,6 +50,7 @@ struct RenderState {
 		light = vec3(0, 0, 0);
 		udotl = 0.0;
 		eyePos = NULL;
+		prevMat = NULL;
 
 		mapTrans = vec3(0, 0, 0);
 		mapScl = vec3(0, 0, 0);
@@ -87,6 +89,7 @@ struct RenderState {
 		light = rhs->light;
 		udotl = rhs->udotl;
 		eyePos = rhs->eyePos;
+		prevMat = rhs->prevMat;
 		shader = rhs->shader;
 		shaderIns = rhs->shaderIns;
 		shaderBill = rhs->shaderBill;

@@ -222,6 +222,7 @@ void SimpleApplication::draw() {
 		renderMgr->drawScreenFilter(render, scene, "fxaa", aaInput, aaFilter);
 	}
 
+	renderMgr->retrievePrev(scene);
 	renderMgr->genHiz(render, scene, screen->getDepthBuffer());
 	if (drawDepth) renderMgr->drawHiz2Screen(render, scene, screen->getDepthBuffer(), depthLevel);
 	//*/

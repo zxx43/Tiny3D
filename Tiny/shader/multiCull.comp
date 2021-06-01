@@ -35,6 +35,7 @@ layout(binding = 2, std430) buffer OutPosition {
 
 layout(binding = 0) uniform sampler2D texDepth;
 uniform mat4 viewProjectMatrix;
+uniform mat4 prevVPMatrix;
 uniform uint pass;
 uniform uint bufferPass;
 uniform ivec4 uCount;

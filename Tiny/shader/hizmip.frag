@@ -45,35 +45,3 @@ void main() {
 	
 	gl_FragDepth = maxDepth;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
