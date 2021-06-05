@@ -242,11 +242,6 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 
 				if (state->shaderMulti) {
 					state->shaderMulti->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
-					if (state->pass == COLOR_PASS) {
-						state->shaderMulti->setVector2("uSize", (float)viewWidth, (float)viewHeight);
-						state->shaderMulti->setVector2("uCamParam", camera->zNear, camera->zFar);
-						if (state->prevMat) state->shaderMulti->setMatrix4("prevVPMatrix", *state->prevMat);
-					}
 				}
 
 				if (drawcall->getType() == MULTI_DC) {

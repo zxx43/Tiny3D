@@ -20,27 +20,22 @@ bool HizQuery(mat4 viewProjectMat, sampler2D depthTex, vec2 size, vec2 camParam,
 		vec3 ndc6 = b6.xyz * inv2.z;
 		vec3 ndc7 = b7.xyz * inv2.w;
 
-		vec3 maxNDC, minNDC;
-		maxNDC.x = max(ndc7.x, max(ndc6.x, max(ndc5.x, max(ndc4.x, max(ndc3.x, max(ndc2.x, max(ndc0.x, ndc1.x)))))));	
-		maxNDC.y = max(ndc7.y, max(ndc6.y, max(ndc5.y, max(ndc4.y, max(ndc3.y, max(ndc2.y, max(ndc0.y, ndc1.y)))))));		
-		minNDC.x = min(ndc7.x, min(ndc6.x, min(ndc5.x, min(ndc4.x, min(ndc3.x, min(ndc2.x, min(ndc0.x, ndc1.x)))))));	
-		minNDC.y = min(ndc7.y, min(ndc6.y, min(ndc5.y, min(ndc4.y, min(ndc3.y, min(ndc2.y, min(ndc0.y, ndc1.y)))))));	
-		minNDC.z = min(ndc7.z, min(ndc6.z, min(ndc5.z, min(ndc4.z, min(ndc3.z, min(ndc2.z, min(ndc0.z, ndc1.z)))))));
+		vec3 maxNDC = max(ndc7, max(ndc6, max(ndc5, max(ndc4, max(ndc3, max(ndc2, max(ndc0, ndc1)))))));
+		vec3 minNDC = min(ndc7, min(ndc6, min(ndc5, min(ndc4, min(ndc3, min(ndc2, min(ndc0, ndc1)))))));
 		
-		vec3 maxClip, minClip;
-		maxClip.xy = clamp(maxNDC.xy * 0.5 + 0.5, vec2(0.0), vec2(1.0));
-		minClip = clamp(minNDC * 0.5 + 0.5, vec3(0.0), vec3(1.0));
+		vec3 maxClip = clamp(maxNDC * 0.5 + 0.5, vec3(0.0), vec3(1.0));
+		vec3 minClip = clamp(minNDC * 0.5 + 0.5, vec3(0.0), vec3(1.0));
 
-		vec2 bound = maxClip.xy - minClip.xy;
+		vec3 bound = maxClip - minClip;
 		float edge = max(1.0, max(bound.x, bound.y) * max(size.x, size.y));
 		float mip = min(ceil(log2(edge)), maxLevel);
 		
-		float occ1 = textureLod(depthTex, maxClip.xy, mip).x;
-		float occ2 = textureLod(depthTex, minClip.xy, mip).x;
-		float occ3 = textureLod(depthTex, vec2(maxClip.x, minClip.y), mip).x;
-		float occ4 = textureLod(depthTex, vec2(minClip.x, maxClip.y), mip).x;
+		vec4 occ = vec4(textureLod(depthTex, maxClip.xy, mip).x, 
+						textureLod(depthTex, minClip.xy, mip).x, 
+						textureLod(depthTex, vec2(maxClip.x, minClip.y), mip).x, 
+						textureLod(depthTex, vec2(minClip.x, maxClip.y), mip).x);
 
-		float occDepth = max(occ4, max(occ3, max(occ1, occ2)));
+		float occDepth = max(occ.w, max(occ.z, max(occ.x, occ.y)));
 
 		occDepth = Linearize(camParam.x, camParam.y, occDepth);	
 		minClip.z = Linearize(camParam.x, camParam.y, minClip.z);

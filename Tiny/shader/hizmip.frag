@@ -20,11 +20,10 @@ void main() {
       ivec2(-1, 0),
       ivec2(-1, 1));
 	
-	vec4 depths = vec4(
-					textureLodOffset(lastMip, vTexcoord, uLastLevel, offsets[0]).x, 
-					textureLodOffset(lastMip, vTexcoord, uLastLevel, offsets[1]).x, 
-					textureLodOffset(lastMip, vTexcoord, uLastLevel, offsets[2]).x, 
-					textureLodOffset(lastMip, vTexcoord, uLastLevel, offsets[3]).x);
+	vec4 depths = vec4(textureLodOffset(lastMip, vTexcoord, uLastLevel, offsets[0]).x, 
+					   textureLodOffset(lastMip, vTexcoord, uLastLevel, offsets[1]).x, 
+					   textureLodOffset(lastMip, vTexcoord, uLastLevel, offsets[2]).x, 
+					   textureLodOffset(lastMip, vTexcoord, uLastLevel, offsets[3]).x);
 	float maxDepth = OP(OP(depths.x, depths.y), OP(depths.z, depths.w));
 
 	if (uOdd > 0.5) {

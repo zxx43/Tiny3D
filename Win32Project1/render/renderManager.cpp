@@ -182,7 +182,6 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 
 	state->reset();
 	state->eyePos = &(scene->renderCamera->position);
-	state->prevMat = &prevCameraMat;
 	state->cullMode = CULL_FRONT;
 	state->light = lightDir;
 	state->udotl = udotl;
@@ -293,7 +292,6 @@ void RenderManager::drawGrass(Render* render, RenderState* state, Scene* scene, 
 		state->shader = grassShader;
 		state->shaderCompute = compShader;
 		state->eyePos = &(camera->position);
-		state->prevMat = &prevCameraMat;
 
 		StaticObject* terrain = (StaticObject*)node->objects[0];
 		compShader->setVector3v("mapTrans", GetTranslate(terrain->transformMatrix));
@@ -328,7 +326,6 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 
 	state->reset();
 	state->eyePos = &(scene->renderCamera->position);
-	state->prevMat = &prevCameraMat;
 	state->light = lightDir;
 	state->udotl = udotl;
 	state->time = scene->time;
@@ -381,6 +378,9 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	render->useTexture(TEXTURE_2D, 0, hizDepth->id);
 
 	state->shaderMulti->setFloat("uMaxLevel", hiz->getMaxLevel());
+	state->shaderMulti->setMatrix4("prevVPMatrix", prevCameraMat);
+	state->shaderMulti->setVector2("uSize", (float)render->viewWidth, (float)render->viewHeight);
+	state->shaderMulti->setVector2("uCamParam", camera->zNear, camera->zFar);
 	currentQueue->queues[QUEUE_STATIC]->draw(scene, camera, render, state);
 
 	state->shader = boneShader;
@@ -388,6 +388,9 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	state->shaderFlush = animFlushShader;
 
 	state->shaderMulti->setFloat("uMaxLevel", hiz->getMaxLevel());
+	state->shaderMulti->setMatrix4("prevVPMatrix", prevCameraMat);
+	state->shaderMulti->setVector2("uSize", (float)render->viewWidth, (float)render->viewHeight);
+	state->shaderMulti->setVector2("uCamParam", camera->zNear, camera->zFar);
 	currentQueue->queues[QUEUE_ANIMATE]->draw(scene, camera, render, state);
 
 	// Draw sky
@@ -438,7 +441,6 @@ void RenderManager::renderWater(Render* render, Scene* scene) {
 
 	state->reset();
 	state->eyePos = &(scene->renderCamera->position);
-	state->prevMat = &prevCameraMat;
 	state->light = lightDir;
 	state->udotl = udotl;
 	state->time = scene->time;
@@ -459,7 +461,6 @@ void RenderManager::renderReflect(Render* render, Scene* scene) {
 				static Shader* terrainShader = render->findShader("terrain");
 				state->reset();
 				state->eyePos = &(scene->renderCamera->position);
-				state->prevMat = &prevCameraMat;
 				state->cullMode = CULL_FRONT;
 				state->light = lightDir;
 				state->udotl = udotl;
@@ -478,7 +479,6 @@ void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* scre
 	static Shader* deferredShader = render->findShader("deferred");
 	state->reset();
 	state->eyePos = &(scene->renderCamera->position);
-	state->prevMat = &prevCameraMat;
 	state->enableDepthTest = false;
 	state->pass = DEFERRED_PASS;
 	state->shader = deferredShader;
@@ -504,7 +504,6 @@ void RenderManager::drawCombined(Render* render, Scene* scene, const std::vector
 	static Shader* combinedShader = render->findShader("combined");
 	state->reset();
 	state->eyePos = &(scene->renderCamera->position);
-	state->prevMat = &prevCameraMat;
 	state->enableDepthTest = false;
 	state->pass = DEFERRED_PASS;
 	state->shader = combinedShader;
@@ -517,7 +516,6 @@ void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* s
 	Shader* shader = render->findShader(shaderStr);
 	state->reset();
 	state->eyePos = &(scene->renderCamera->position);
-	state->prevMat = &prevCameraMat;
 	state->enableDepthTest = false;
 	state->pass = POST_PASS;
 	state->shader = shader;
@@ -529,7 +527,6 @@ void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* s
 	Shader* shader = render->findShader(shaderStr);
 	state->reset();
 	state->eyePos = &(scene->renderCamera->position);
-	state->prevMat = &prevCameraMat;
 	state->enableDepthTest = false;
 	state->pass = POST_PASS;
 	state->shader = shader;
@@ -540,7 +537,6 @@ void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* s
 	Shader* shader = render->findShader(shaderStr);
 	state->reset();
 	state->eyePos = &(scene->renderCamera->position);
-	state->prevMat = &prevCameraMat;
 	state->enableDepthTest = false;
 	state->pass = POST_PASS;
 	state->shader = shader;
@@ -556,7 +552,6 @@ void RenderManager::drawSSRFilter(Render* render, Scene* scene, const char* shad
 	Shader* shader = render->findShader(shaderStr);
 	state->reset();
 	state->eyePos = &(scene->renderCamera->position);
-	state->prevMat = &prevCameraMat;
 	state->enableDepthTest = false;
 	state->pass = POST_PASS;
 	state->shader = shader;
@@ -569,7 +564,6 @@ void RenderManager::drawSSGFilter(Render* render, Scene* scene, const char* shad
 	Shader* shader = render->findShader(shaderStr);
 	state->reset();
 	state->eyePos = &(scene->renderCamera->position);
-	state->prevMat = &prevCameraMat;
 	state->enableDepthTest = false;
 	state->pass = POST_PASS;
 	state->shader = shader;
@@ -582,7 +576,6 @@ void RenderManager::drawTexture2Screen(Render* render, Scene* scene, u64 texhnd)
 	static Shader* screenShader = render->findShader("screen");
 	state->reset();
 	state->eyePos = &(scene->renderCamera->position);
-	state->prevMat = &prevCameraMat;
 	state->enableDepthTest = false;
 	state->pass = POST_PASS;
 	state->shader = screenShader;
@@ -605,7 +598,6 @@ void RenderManager::drawDepth2Screen(Render* render, Scene* scene, int texid) {
 	static Shader* screenShader = render->findShader("depth");
 	state->reset();
 	state->eyePos = &(scene->renderCamera->position);
-	state->prevMat = &prevCameraMat;
 	state->enableDepthTest = false;
 	state->pass = POST_PASS;
 	state->shader = screenShader;
