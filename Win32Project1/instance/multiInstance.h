@@ -60,6 +60,7 @@ public:
 	int updateTransform(buff* targetBuffer = NULL);
 	void createDrawcall() { drawcall = new MultiDrawcall(this); }
 	bool inited() { return bufferInited; }
+	Instance* getInstance(int i) { return (Instance*)bufferDatas[i]; }
 };
 
 #endif 

@@ -60,7 +60,7 @@ void SimpleApplication::resize(int width, int height) {
 	screen = new FrameBuffer(width, height, hdrPre, 4, false, NEAREST); // texBuffer
 	screen->addColorBuffer(matPre, 4);                         // matBuffer
 	screen->addColorBuffer(matPre, 4);                         // roughMetalNormalBuffer
-	screen->attachDepthBuffer(renderMgr->getDepthPre(), true);       // depthBuffer
+	screen->attachDepthBuffer(renderMgr->getDepthPre(), false);       // depthBuffer
 
 	if (waterFrame) delete waterFrame;
 	waterFrame = new FrameBuffer(width, height, hdrPre, 4, false);
@@ -224,7 +224,7 @@ void SimpleApplication::draw() {
 
 	renderMgr->retrievePrev(scene);
 	renderMgr->genHiz(render, scene, screen->getDepthBuffer());
-	if (drawDepth) renderMgr->drawHiz2Screen(render, scene, screen->getDepthBuffer(), depthLevel);
+	if (drawDepth) renderMgr->drawHiz2Screen(render, scene, depthLevel);
 	//*/
 
 	render->finishDraw();

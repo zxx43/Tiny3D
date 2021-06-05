@@ -38,7 +38,7 @@ void HizGenerator::genMipmap(Render* render, Shader* shader, Texture2D* texDepth
 	render->setColorWrite(false);
 
 	for (int i = 1; i < numLevels; i++) {
-		state->shader->setIVector2("uLastSize", currentWidth, currentHeight);
+		state->shader->setFloat("uOdd", (currentWidth & 1 != 0 || currentHeight & 1 != 0) ? 1.0 : 0.0);
 		state->shader->setFloat("uLastLevel", i - 1);
 
 		currentWidth /= 2, currentHeight /= 2;

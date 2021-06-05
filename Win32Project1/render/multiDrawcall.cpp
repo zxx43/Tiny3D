@@ -230,5 +230,35 @@ void MultiDrawcall::prepareRenderData(Render* render, RenderState* state) {
 		indirectBufferPrepare->unbindShaderBase(IndirectAnimIndex, 7);
 	else 
 		UnbindShaderBuffers(4, 3);
+
+	/*
+	if (!multiRef->hasAnim && state->pass == COLOR_PASS) {
+		Indirect* buf = new Indirect[multiRef->normalCount];
+		indirectBufferPrepare->readBufferData(GL_DRAW_INDIRECT_BUFFER, IndirectNormalIndex, multiRef->normalCount * sizeof(Indirect), buf);
+		int objCulled = 0;
+		for (int i = 0; i < multiRef->normalCount; ++i) 
+			objCulled += multiRef->getInstance(i)->insData->count - buf[i].primCount;
+		if (objCulled > 0) printf("object culled %d\n", objCulled);
+		delete[] buf;
+
+		buf = new Indirect[multiRef->singleCount];
+		indirectBufferPrepare->readBufferData(GL_DRAW_INDIRECT_BUFFER, IndirectSingleIndex, multiRef->singleCount * sizeof(Indirect), buf);
+		int treeCulled = 0;
+		for (int i = 0; i < multiRef->singleCount; ++i)
+			treeCulled += multiRef->getInstance(i)->insData->count - buf[i].primCount;
+		if (treeCulled > 0) printf("tree culled %d\n", treeCulled);
+		delete[] buf;
+
+		buf = new Indirect[multiRef->billCount];
+		indirectBufferPrepare->readBufferData(GL_DRAW_INDIRECT_BUFFER, IndirectBillIndex, multiRef->billCount * sizeof(Indirect), buf);
+		int billCulled = 0;
+		for (int i = 0; i < multiRef->billCount; ++i)
+			billCulled += multiRef->getInstance(i)->insData->count - buf[i].primCount;
+		if (billCulled > 0) printf("billboard culled %d\n", billCulled);
+		delete[] buf;
+
+		if (objCulled > 0 || treeCulled > 0 || billCulled > 0) printf("\n");
+	}
+	//*/
 }
 

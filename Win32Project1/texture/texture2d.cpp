@@ -85,8 +85,8 @@ Texture2D::Texture2D(uint w, uint h, bool useMip, int t, int p, int c, int filte
 		GLint filterParam = filter == LINEAR ? GL_LINEAR_MIPMAP_NEAREST : GL_NEAREST_MIPMAP_NEAREST;
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterParam);
 		if (type == TEXTURE_TYPE_DEPTH) { // mipmap && depth type must be hizMap
-			const float black[4] = { 0, 0, 0, 0 };
-			glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, black);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		}
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}

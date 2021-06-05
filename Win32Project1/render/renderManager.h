@@ -49,6 +49,7 @@ public:
 	Texture2D* occluderDepth;
 	int depthPre;
 	HizGenerator* hiz;
+	Texture2D* hizDepth;
 private:
 	Shadow* shadow;
 	bool needResize, needRefreshSky, actShowWater, renderShowWater;
@@ -101,7 +102,7 @@ public:
 	void drawTexture2Screen(Render* render, Scene* scene, u64 texhnd);
 	void drawDepth2Screen(Render* render, Scene* scene, int texid);
 	void genHiz(Render* render, Scene* scene, Texture2D* depth);
-	void drawHiz2Screen(Render* render, Scene* scene, Texture2D* depth, int level);
+	void drawHiz2Screen(Render* render, Scene* scene, int level);
 	void drawNoise3d(Render* render, Scene* scene, FrameBuffer* noiseBuf);
 	bool isWaterShow(const Scene* scene) { return scene->water && renderShowWater; }
 	int getDepthPre() { return depthPre; }

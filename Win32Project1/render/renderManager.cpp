@@ -50,6 +50,7 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 	grassDrawcall = NULL;
 	hiz = new HizGenerator();
 	prevCameraMat.LoadIdentity();
+	hizDepth = NULL;
 }
 
 RenderManager::~RenderManager() {
@@ -67,6 +68,7 @@ RenderManager::~RenderManager() {
 	if (occluderDepth) delete occluderDepth; occluderDepth = NULL;
 	if (grassDrawcall) delete grassDrawcall; grassDrawcall = NULL;
 	if (hiz) delete hiz; hiz = NULL;
+	if (hizDepth) delete hizDepth; hizDepth = NULL;
 }
 
 void RenderManager::resize(float width, float height) {
@@ -80,6 +82,8 @@ void RenderManager::resize(float width, float height) {
 
 	if (occluderDepth) delete occluderDepth;
 	occluderDepth = new Texture2D(width, height, false, TEXTURE_TYPE_DEPTH, depthPre, 1, NEAREST);
+	if (hizDepth) delete hizDepth;
+	hizDepth = new Texture2D(width, height, true, TEXTURE_TYPE_DEPTH, depthPre, 1, NEAREST);
 	needResize = true;
 	updateSky();
 }
@@ -374,12 +378,16 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	state->shaderCompute = cullShader;
 	state->shaderMulti = multiShader;
 	state->shaderFlush = flushShader;
-	render->useTexture(TEXTURE_2D, 0, occluderDepth->id);
+	render->useTexture(TEXTURE_2D, 0, hizDepth->id);
+
+	state->shaderMulti->setFloat("uMaxLevel", hiz->getMaxLevel());
 	currentQueue->queues[QUEUE_STATIC]->draw(scene, camera, render, state);
 
 	state->shader = boneShader;
 	state->shaderMulti = animMultiShader;
 	state->shaderFlush = animFlushShader;
+
+	state->shaderMulti->setFloat("uMaxLevel", hiz->getMaxLevel());
 	currentQueue->queues[QUEUE_ANIMATE]->draw(scene, camera, render, state);
 
 	// Draw sky
@@ -620,13 +628,14 @@ void RenderManager::drawDepth2Screen(Render* render, Scene* scene, int texid) {
 }
 
 void RenderManager::genHiz(Render* render, Scene* scene, Texture2D* depth) {
+	hizDepth->copyDataFrom(depth);
 	static Shader* hizShader = render->findShader("hiz");
-	hiz->genMipmap(render, hizShader, depth);
+	hiz->genMipmap(render, hizShader, hizDepth);
 }
 
-void RenderManager::drawHiz2Screen(Render* render, Scene* scene, Texture2D* depth, int level) {
+void RenderManager::drawHiz2Screen(Render* render, Scene* scene, int level) {
 	static Shader* depthShader = render->findShader("depth");
-	hiz->drawDebug(scene->renderCamera, render, depthShader, depth, level);
+	hiz->drawDebug(scene->renderCamera, render, depthShader, hizDepth, level);
 }
 
 void RenderManager::retrievePrev(Scene* scene) {
