@@ -1,5 +1,5 @@
 bool HizQuery(mat4 viewProjectMat, sampler2D depthTex, vec2 size, vec2 camParam, float maxLevel, 
-	vec4 bv0, vec4 bv1, vec4 bv2, vec4 bv3, vec4 bv4, vec4 bv5, vec4 bv6, vec4 bv7) {
+	vec4 bv0, vec4 bv1, vec4 bv2, vec4 bv3, vec4 bv4, vec4 bv5, vec4 bv6, vec4 bv7, float zOffset) {
 		vec4 b0 = viewProjectMat * bv0;
 		vec4 b1 = viewProjectMat * bv1;
 		vec4 b2 = viewProjectMat * bv2;
@@ -40,5 +40,5 @@ bool HizQuery(mat4 viewProjectMat, sampler2D depthTex, vec2 size, vec2 camParam,
 		occDepth = Linearize(camParam.x, camParam.y, occDepth);	
 		minClip.z = Linearize(camParam.x, camParam.y, minClip.z);
 
-		return minClip.z > occDepth + 0.01;
+		return minClip.z > occDepth + zOffset;
 }

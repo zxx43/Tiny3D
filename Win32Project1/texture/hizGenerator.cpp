@@ -30,7 +30,7 @@ HizGenerator::~HizGenerator() {
 void HizGenerator::genMipmap(Render* render, Shader* shader, Texture2D* texDepth) {
 	int currentWidth = render->viewWidth, currentHeight = render->viewHeight;
 	numLevels = 1 + (int)floorf(log2f(fmaxf(currentWidth, currentHeight)));
-;
+
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	
 	state->shader = shader;

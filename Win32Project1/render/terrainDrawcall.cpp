@@ -114,8 +114,10 @@ void TerrainDrawcall::update(Camera* camera, Render* render, RenderState* state)
 
 	UnbindShaderBuffers(1, 5);
 
-	//dataBuffer->readBufferData(GL_DRAW_INDIRECT_BUFFER, IndirectIndex, sizeof(Indirect), indirectBuffer);
-	//printf("terrain index cnt: %d\n", indirectBuffer->count);
+	/*
+	dataBuffer->readBufferData(GL_DRAW_INDIRECT_BUFFER, IndirectIndex, sizeof(Indirect), indirectBuffer);
+	printf("terrain index cnt: %d\n", indirectBuffer->count);
+	//*/
 }
 
 void TerrainDrawcall::draw(Render* render, RenderState* state, Shader* shader) {

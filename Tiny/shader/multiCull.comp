@@ -98,7 +98,7 @@ void main() {
 		vec4 bv7 = vec4(pose + size * vec3(-0.5, -0.5,  0.5), 1.0);
 
 		bool occ = HizQuery(prevVPMatrix, texDepth, uSize, uCamParam, uMaxLevel, 
-							bv0, bv1, bv2, bv3, bv4, bv5, bv6, bv7);
+							bv0, bv1, bv2, bv3, bv4, bv5, bv6, bv7, 0.01);
 		
 		if(occ) return;
 		else {

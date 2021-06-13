@@ -16,6 +16,9 @@ Scene::Scene() {
 	player = new Player();
 	actCamera = new Camera(25.0);
 	renderCamera = new Camera(25.0);
+
+	//for (int i = 0; i < 120; ++i) actCamera->turnX(RIGHT);
+
 	reflectCamera = NULL;
 	skyBox = NULL;
 	water = NULL;

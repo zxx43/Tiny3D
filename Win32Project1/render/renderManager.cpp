@@ -346,6 +346,12 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 		state->mapScl = terrain->size;
 		state->mapInfo = vec4(STEP_SIZE, terrainNode->lineSize, MAP_SIZE, MAP_SIZE);
 		
+		render->useTexture(TEXTURE_2D, 0, hizDepth->id);
+		terrainCullShader->setFloat("uMaxLevel", hiz->getMaxLevel());
+		terrainCullShader->setMatrix4("prevVPMatrix", prevCameraMat);
+		terrainCullShader->setVector2("uSize", (float)render->viewWidth, (float)render->viewHeight);
+		terrainCullShader->setVector2("uCamParam", camera->zNear, camera->zFar);
+
 		vec3 ref = ((camera->position - state->mapTrans) / state->mapScl) / CHUNK_SIZE;
 		terrainCullShader->setIVector2("refChunk", floor(ref.x), floor(ref.z));
 		terrainCullShader->setVector3v("mapTrans", state->mapTrans);
