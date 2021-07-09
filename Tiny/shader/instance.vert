@@ -1,6 +1,7 @@
 #include "shader/util.glsl"
 
 uniform mat4 viewProjectMatrix;
+
 #ifdef BillPass
 uniform vec3 viewRight;
 #endif

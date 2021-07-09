@@ -7,7 +7,11 @@ MultiInstance::MultiInstance() {
 	texcoordBuffer = NULL, texidBuffer = NULL, colorBuffer = NULL;
 	boneidBuffer = NULL, weightBuffer = NULL;
 	indexBuffer = NULL;
-	transforms = NULL;
+
+	transformsNormal = NULL;
+	transformsSingle = NULL;
+	transformsBill = NULL;
+	transformsAnim = NULL;
 
 	bufferDatas.clear();
 
@@ -24,7 +28,8 @@ MultiInstance::MultiInstance() {
 	normalCount = 0, singleCount = 0, billCount = 0, animCount = 0;
 	meshCount = 0, bases = NULL;
 
-	vertexCount = 0, indexCount = 0, maxInstance = 0, instanceCount = 0;
+	vertexCount = 0, indexCount = 0;
+	maxNormalInstance = 0, maxSingleInstance = 0, maxBillInstance = 0, maxAnimInstance = 0;
 
 	hasAnim = false;
 	bufferInited = false;
@@ -57,7 +62,10 @@ void MultiInstance::releaseInstanceData() {
 
 MultiInstance::~MultiInstance() {
 	releaseInstanceData();
-	if (transforms) free(transforms);
+	if (transformsNormal) free(transformsNormal);
+	if (transformsSingle) free(transformsSingle);
+	if (transformsBill) free(transformsBill);
+	if (transformsAnim) free(transformsAnim);
 
 	bufferDatas.clear();
 
@@ -103,7 +111,8 @@ void MultiInstance::initBuffers(int pass) {
 	indirectCount = bufferDatas.size();
 	indirects = (Indirect*)malloc(indirectCount * sizeof(Indirect));
 
-	vertexCount = 0, indexCount = 0, maxInstance = 0;
+	vertexCount = 0, indexCount = 0;
+	maxNormalInstance = 0, maxSingleInstance = 0, maxBillInstance = 0, maxAnimInstance = 0;
 	for (uint i = 0; i < indirectCount; ++i) {
 		if (!hasAnim) {
 			Instance* ins = (Instance*)bufferDatas[i];
@@ -125,6 +134,7 @@ void MultiInstance::initBuffers(int pass) {
 					normals.push_back(idNorm);
 					ins->insId = normals.size() - 1;
 					pushed = true;
+					maxNormalInstance += ins->maxCount > MaxInstance ? MaxInstance : ins->maxCount;
 				}
 				if (ins->hasSingle && (bufferPass == ALL_PASS || bufferPass == SINGLE_PASS)) {
 					Indirect* idSing = (Indirect*)malloc(sizeof(Indirect));
@@ -136,6 +146,7 @@ void MultiInstance::initBuffers(int pass) {
 					singles.push_back(idSing);
 					ins->insSingleId = singles.size() - 1;
 					pushed = true;
+					maxSingleInstance += ins->maxCount > MaxInstance ? MaxInstance : ins->maxCount;
 				}
 			} else if (ins->isBillboard && (bufferPass == ALL_PASS || bufferPass == BILL_PASS)) {
 				Indirect* idBill = (Indirect*)malloc(sizeof(Indirect));
@@ -144,11 +155,11 @@ void MultiInstance::initBuffers(int pass) {
 				bills.push_back(idBill);
 				ins->insBillId = bills.size() - 1;
 				pushed = true;
+				maxBillInstance += ins->maxCount > MaxInstance ? MaxInstance : ins->maxCount;
 			}
 
 			if (pushed) {
 				vertexCount += ins->vertexCount, indexCount += ins->indexCount;
-				maxInstance += ins->maxCount > MaxInstance ? MaxInstance : ins->maxCount;
 			}
 		} else {
 			AnimationData* anim = (AnimationData*)bufferDatas[i];
@@ -164,7 +175,7 @@ void MultiInstance::initBuffers(int pass) {
 			anim->animId = anims.size() - 1;
 
 			vertexCount += anim->vertexCount, indexCount += anim->indexCount;
-			maxInstance += anim->maxCount > MaxInstance ? MaxInstance : anim->maxCount;
+			maxAnimInstance += anim->maxCount > MaxInstance ? MaxInstance : anim->maxCount;
 		}
 	}
 
@@ -202,7 +213,10 @@ void MultiInstance::initBuffers(int pass) {
 		weightBuffer = (half*)malloc(vertexCount * 4 * sizeof(half));
 	}
 	indexBuffer = (ushort*)malloc(indexCount * sizeof(ushort));
-	transforms = (buff*)malloc(maxInstance * 16 * sizeof(buff));
+	transformsNormal = (buff*)malloc(maxNormalInstance * 16 * sizeof(buff));
+	transformsSingle = (buff*)malloc(maxSingleInstance * 16 * sizeof(buff));
+	transformsBill = (buff*)malloc(maxBillInstance * 16 * sizeof(buff));
+	transformsAnim = (buff*)malloc(maxAnimInstance * 16 * sizeof(buff));
 
 	uint curVertex = 0, curIndex = 0;
 	for (uint i = 0; i < indirectCount; ++i) {
@@ -224,38 +238,38 @@ void MultiInstance::initBuffers(int pass) {
 	bufferInited = true;
 }
 
-int MultiInstance::updateTransform(buff* targetBuffer) {
-	instanceCount = 0;
-	buff* target = targetBuffer ? targetBuffer : transforms;
+int MultiInstance::updateTransform() {
+	normalInsCount = 0, singleInsCount = 0, billInsCount = 0, animInsCount = 0;
 	for (uint i = 0; i < indirectCount; ++i) {
 		if (!hasAnim) {
 			Instance* ins = (Instance*)bufferDatas[i];
-			bool pushed = false;
 			if (ins->hasNormal && (bufferPass == ALL_PASS || bufferPass == NORMAL_PASS)) {
-				bases[ins->insId * 4 + 0] = instanceCount;
-				pushed = true;
+				bases[ins->insId * 4 + 0] = normalInsCount;
+				memcpy(transformsNormal + normalInsCount * 16, ins->insData->transformsFull, ins->insData->count * 16 * sizeof(buff));
+				normalInsCount += ins->insData->count;
 			}
 			if (ins->hasSingle && (bufferPass == ALL_PASS || bufferPass == SINGLE_PASS)) {
-				bases[ins->insSingleId * 4 + 1] = instanceCount;
-				pushed = true;
+				bases[ins->insSingleId * 4 + 1] = singleInsCount;
+				memcpy(transformsSingle + singleInsCount * 16, ins->insData->transformsFull, ins->insData->count * 16 * sizeof(buff));
+				singleInsCount += ins->insData->count;
 			}
 			if (ins->isBillboard && (bufferPass == ALL_PASS || bufferPass == BILL_PASS)) {
-				bases[ins->insBillId * 4 + 2] = instanceCount;
-				pushed = true;
-			}
-
-			if (ins->insData->count > 0 && pushed) {
-				memcpy(target + instanceCount * 16, ins->insData->transformsFull, ins->insData->count * 16 * sizeof(buff));
-				instanceCount += ins->insData->count;
+				bases[ins->insBillId * 4 + 2] = billInsCount;
+				memcpy(transformsBill + billInsCount * 16, ins->insData->transformsFull, ins->insData->count * 16 * sizeof(buff));
+				billInsCount += ins->insData->count;
 			}
 		} else {
 			AnimationData* anim = (AnimationData*)bufferDatas[i];
-			bases[anim->animId * 4 + 3] = instanceCount;
+			bases[anim->animId * 4 + 3] = animInsCount;
 			if (anim->animCount > 0) {
-				memcpy(target + instanceCount * 16, anim->transformsFull, anim->animCount * 16 * sizeof(buff));
-				instanceCount += anim->animCount;
+				memcpy(transformsAnim + animInsCount * 16, anim->transformsFull, anim->animCount * 16 * sizeof(buff));
+				animInsCount += anim->animCount;
 			}
 		}
 	}
-	return instanceCount;
+
+	int maxInsCount = normalInsCount > singleInsCount ? normalInsCount : singleInsCount;
+	maxInsCount = maxInsCount > billInsCount ? maxInsCount : billInsCount;
+	maxInsCount = maxInsCount > animInsCount ? maxInsCount : animInsCount;
+	return maxInsCount;
 }

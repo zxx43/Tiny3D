@@ -10,29 +10,50 @@ struct Transform {
 	vec4 mesh;
 };
 
-layout(binding = 1, std430) buffer InPosition {
-	Transform inTrans[];
+#ifndef AnimPass
+layout(binding = 1, std430) buffer InNormal {
+	Transform inNormals[];
 };
-
-layout(binding = 2, std430) buffer OutPosition {
-	mat4 outMatrices[];
+layout(binding = 2, std430) buffer InSingle {
+	Transform inSingles[];
 };
+layout(binding = 3, std430) buffer InBill {
+	Transform inBills[];
+};
+#else
+layout(binding = 4, std430) buffer InAnim {
+	Transform inAnims[];
+};
+#endif
 
 #ifndef AnimPass
-	layout(binding = 4, std430) buffer IndirectNormal {
-		Indirect normals[];
-	};
-	layout(binding = 5, std430) buffer IndirectSingle {
-		Indirect singles[];
-	};
-	layout(binding = 6, std430) buffer IndirectBill {
-		Indirect bills[];
-	};
+layout(binding = 5, std430) buffer OutNormal {
+	mat4 outNormals[];
+};
+layout(binding = 6, std430) buffer OutSingle {
+	mat4 outSingles[];
+};
+layout(binding = 7, std430) buffer OutBill {
+	mat4 outBills[];
+};
 #else
-	layout(binding = 7, std430) buffer IndirectAnim {
-		Indirect anims[];
-	};
+layout(binding = 8, std430) buffer OutAnim {
+	mat4 outAnims[];
+};
 #endif
+
+layout(binding = 9, std430) buffer IndirectNormal {
+	Indirect normals[];
+};
+layout(binding = 10, std430) buffer IndirectSingle {
+	Indirect singles[];
+};
+layout(binding = 11, std430) buffer IndirectBill {
+	Indirect bills[];
+};
+layout(binding = 12, std430) buffer IndirectAnim {
+	Indirect anims[];
+};
 
 layout(binding = 0) uniform sampler2D texDepth;
 uniform mat4 viewProjectMatrix;
@@ -43,85 +64,97 @@ uniform float uMaxLevel;
 uniform uint pass;
 uniform uint bufferPass;
 uniform ivec4 uCount;
+uniform uvec4 uInsCount;
 
-#define Comp <
+bool OccQuery(Transform ins, vec3 translate) {
+	vec4 bound = ins.bound;
+	vec3 size = bound.xyz;
+	vec3 pose = vec3(translate.x, bound.w, translate.z);
+
+	vec4 bv0 = vec4(pose + size * vec3( 0.5,  0.5,  0.5), 1.0);
+	vec4 bv1 = vec4(pose + size * vec3( 0.5,  0.5, -0.5), 1.0);
+	vec4 bv2 = vec4(pose + size * vec3(-0.5,  0.5, -0.5), 1.0);
+	vec4 bv3 = vec4(pose + size * vec3(-0.5,  0.5,  0.5), 1.0);
+	vec4 bv4 = vec4(pose + size * vec3( 0.5, -0.5,  0.5), 1.0);
+	vec4 bv5 = vec4(pose + size * vec3( 0.5, -0.5, -0.5), 1.0);
+	vec4 bv6 = vec4(pose + size * vec3(-0.5, -0.5, -0.5), 1.0);
+	vec4 bv7 = vec4(pose + size * vec3(-0.5, -0.5,  0.5), 1.0);
+
+	return HizQuery(prevVPMatrix, texDepth, uSize, uCamParam, uMaxLevel, 
+							bv0, bv1, bv2, bv3, bv4, bv5, bv6, bv7, 0.01);
+}
 
 void main() {
 	uint insIndex = gl_GlobalInvocationID.x + pass * MAX_DISPATCH;
-	Transform transform = inTrans[insIndex];
-	ivec4 meshid = ivec4(transform.mesh);
-	vec3 translate = transform.trans.xyz;
-	mat4 outMat;
+
 #ifndef AnimPass
-	bool isNormal = (meshid.x Comp uCount.x) && (bufferPass == AllBuf || bufferPass == NormalBuf);
-	bool isSingle = (meshid.y Comp uCount.y) && (bufferPass == AllBuf || bufferPass == SingleBuf);
-	bool isBillbd = (meshid.z Comp uCount.z) && (bufferPass == AllBuf || bufferPass == BillBuf);
-#else
-	outMat = Translate(translate) * QuatToMat4(transform.rotat) * Scale(transform.trans.w);
-	outMat = transpose(outMat);
-	outMat[3] = transform.mesh;
-#endif
-	
+	bool hasNormal = insIndex + 1 <= uInsCount.x;
+	bool hasSingle = insIndex + 1 <= uInsCount.y;
+	bool hasBill = insIndex + 1 <= uInsCount.z;
 
-#ifdef ShadowPass
-	#ifndef AnimPass
-		if(isBillbd) {
-			outMat = mat4(transform.trans, transform.rotat, transform.bound, transform.mesh);
-			uint index = atomicAdd(bills[meshid.z].primCount, 1);
-			outMatrices[bills[meshid.z].baseInstance + index] = outMat;
-		} else {
-			outMat = Translate(translate) * QuatToMat4(transform.rotat) * Scale(transform.trans.w);
-			if(isNormal) {
-				uint index = atomicAdd(normals[meshid.x].primCount, 1);
-				outMatrices[normals[meshid.x].baseInstance + index] = outMat;
-			}
-			if(isSingle) {
-				uint index = atomicAdd(singles[meshid.y].primCount, 1);
-				outMatrices[singles[meshid.y].baseInstance + index] = outMat;
-			}
-		} 
-	#else
-		outMatrices[anims[meshid.w].baseInstance + atomicAdd(anims[meshid.w].primCount, 1)] = outMat;
-	#endif
-#else
-		vec4 bound = transform.bound;
-		vec3 size = bound.xyz;
-		vec3 pose = vec3(translate.x, bound.w, translate.z);
-
-		vec4 bv0 = vec4(pose + size * vec3( 0.5,  0.5,  0.5), 1.0);
-		vec4 bv1 = vec4(pose + size * vec3( 0.5,  0.5, -0.5), 1.0);
-		vec4 bv2 = vec4(pose + size * vec3(-0.5,  0.5, -0.5), 1.0);
-		vec4 bv3 = vec4(pose + size * vec3(-0.5,  0.5,  0.5), 1.0);
-		vec4 bv4 = vec4(pose + size * vec3( 0.5, -0.5,  0.5), 1.0);
-		vec4 bv5 = vec4(pose + size * vec3( 0.5, -0.5, -0.5), 1.0);
-		vec4 bv6 = vec4(pose + size * vec3(-0.5, -0.5, -0.5), 1.0);
-		vec4 bv7 = vec4(pose + size * vec3(-0.5, -0.5,  0.5), 1.0);
-
-		bool occ = HizQuery(prevVPMatrix, texDepth, uSize, uCamParam, uMaxLevel, 
-							bv0, bv1, bv2, bv3, bv4, bv5, bv6, bv7, 0.01);
-		
-		if(occ) return;
-		else {
-			#ifndef AnimPass
-				if(isBillbd) {
-					outMat = mat4(transform.trans, transform.rotat, transform.bound, transform.mesh);
-					uint index = atomicAdd(bills[meshid.z].primCount, 1);
-					outMatrices[bills[meshid.z].baseInstance + index] = outMat;
-				} else {
-					outMat = Translate(translate) * QuatToMat4(transform.rotat) * Scale(transform.trans.w);
-					if(isNormal) {
-						uint index = atomicAdd(normals[meshid.x].primCount, 1);
-						outMatrices[normals[meshid.x].baseInstance + index] = outMat;
-					}
-					if(isSingle) {
-						uint index = atomicAdd(singles[meshid.y].primCount, 1);
-						outMatrices[singles[meshid.y].baseInstance + index] = outMat;
-					}
-				}
-			#else
-				outMatrices[anims[meshid.w].baseInstance + atomicAdd(anims[meshid.w].primCount, 1)] = outMat;
+	if(hasNormal) {
+		Transform transNormal = inNormals[insIndex];
+		int meshid = int(transNormal.mesh.x);
+		if(meshid < uCount.x) {
+			vec3 translate = transNormal.trans.xyz;
+			#ifndef ShadowPass
+			if(!OccQuery(transNormal, translate)) 
 			#endif
+			{
+				mat4 outMat = Translate(translate) * QuatToMat4(transNormal.rotat) * Scale(transNormal.trans.w);
+				uint index = atomicAdd(normals[meshid].primCount, 1);
+				outNormals[normals[meshid].baseInstance + index] = outMat;
+			}
 		}
+	}
+
+	if(hasSingle) {
+		Transform transSingle = inSingles[insIndex];
+		int meshid = int(transSingle.mesh.y);
+		if(meshid < uCount.y) {
+			vec3 translate = transSingle.trans.xyz;
+			#ifndef ShadowPass
+			if(!OccQuery(transSingle, translate)) 
+			#endif
+			{
+				mat4 outMat = Translate(translate) * QuatToMat4(transSingle.rotat) * Scale(transSingle.trans.w);
+				uint index = atomicAdd(singles[meshid].primCount, 1);
+				outSingles[singles[meshid].baseInstance + index] = outMat;
+			}
+		}
+	}
+
+	if(hasBill) {
+		Transform transBill = inBills[insIndex];
+		int meshid = int(transBill.mesh.z);
+		if(meshid < uCount.z) {
+			vec3 translate = transBill.trans.xyz;
+			#ifndef ShadowPass
+			if(!OccQuery(transBill, translate)) 
+			#endif
+			{
+				mat4 outMat = mat4(transBill.trans, transBill.rotat, transBill.bound, transBill.mesh);
+				uint index = atomicAdd(bills[meshid].primCount, 1);
+				outBills[bills[meshid].baseInstance + index] = outMat;
+			}
+		}
+	}
+#else
+	bool hasAnim = insIndex + 1 <= uInsCount.w;
+	if(hasAnim) {
+		Transform transAnim = inAnims[insIndex];
+		int meshid = int(transAnim.mesh.w);
+		vec3 translate = transAnim.trans.xyz;
+
+		mat4 outMat = Translate(translate) * QuatToMat4(transAnim.rotat) * Scale(transAnim.trans.w);
+		outMat = transpose(outMat);
+		outMat[3] = transAnim.mesh;
+
+		#ifndef ShadowPass
+		if(!OccQuery(transAnim, translate))
+		#endif
+			outAnims[anims[meshid].baseInstance + atomicAdd(anims[meshid].primCount, 1)] = outMat;
+	}
 #endif
 }
 

@@ -11,7 +11,7 @@ const uint ColorSlot = 4;
 const uint TangentSlot = 5;
 const uint BoneidSlot = 6;
 const uint WeightSlot = 7;
-const uint PositionSlot = 8;
+const uint OutSlot = 8;
 
 // VBO index
 const uint VertexIndex = 0;
@@ -23,8 +23,8 @@ const uint TangentIndex = 5;
 const uint BoneidIndex = 6;
 const uint WeightIndex = 7;
 const uint Index = 8;
-const uint PositionIndex = 9;
-const uint PositionOutIndex = 10;
+const uint InIndex = 9;
+const uint OutIndex = 10;
 const uint BaseIndex = 11;
 
 // Indirect vbo index
@@ -37,23 +37,13 @@ MultiDrawcall::MultiDrawcall(MultiInstance* multi) :Drawcall() {
 	multiRef = multi;
 	vertexCount = multiRef->vertexCount;
 	indexCount = multiRef->indexCount;
-	maxObjectCount = multiRef->maxInstance;
 
-	dataBuffer = createBuffers(multiRef, vertexCount, indexCount, maxObjectCount);
+	dataBuffer = createBuffers(multiRef, vertexCount, indexCount, InIndex, OutIndex, multiRef->maxNormalInstance);
+	singleBuffer = createBuffers(multiRef, vertexCount, indexCount, InIndex, OutIndex, multiRef->maxSingleInstance, dataBuffer);
+	billBuffer = createBuffers(multiRef, vertexCount, indexCount, InIndex, OutIndex, multiRef->maxBillInstance, dataBuffer);
+	animBuffer = createBuffers(multiRef, vertexCount, indexCount, InIndex, OutIndex, multiRef->maxAnimInstance, dataBuffer);
+
 	indirectBuffer = createIndirects(multiRef);
-	bool dualBuffer = false;
-	if (dualBuffer) {
-		dataBuffer2 = createBuffers(multiRef, vertexCount, indexCount, maxObjectCount, dataBuffer);
-		indirectBuffer2 = createIndirects(multiRef);
-	} else {
-		dataBuffer2 = NULL;
-		indirectBuffer2 = NULL;
-	}
-
-	dataBufferPrepare = dataBuffer;
-	indirectBufferPrepare = indirectBuffer;
-	dataBufferDraw = dataBuffer2 ? dataBuffer2 : dataBuffer;
-	indirectBufferDraw = indirectBuffer2 ? indirectBuffer2 : indirectBuffer;
 
 	meshCount = multiRef->meshCount;
 	if (!multiRef->hasAnim) setType(MULTI_DC);
@@ -63,11 +53,12 @@ MultiDrawcall::MultiDrawcall(MultiInstance* multi) :Drawcall() {
 
 MultiDrawcall::~MultiDrawcall() {
 	if (indirectBuffer) delete indirectBuffer;
-	if (dataBuffer2) delete dataBuffer2;
-	if (indirectBuffer2) delete indirectBuffer2;
+	if (singleBuffer) delete singleBuffer;
+	if (billBuffer) delete billBuffer;
+	if (animBuffer) delete animBuffer;
 }
 
-RenderBuffer* MultiDrawcall::createBuffers(MultiInstance* multi, int vertexCount, int indexCount, int maxObjects, RenderBuffer* ref) {
+RenderBuffer* MultiDrawcall::createBuffers(MultiInstance* multi, int vertexCount, int indexCount, uint inIndex, uint outIndex, uint maxCount, RenderBuffer* ref) {
 	RenderBuffer* buffer = new RenderBuffer(12);
 	if (!ref) {
 		buffer->setAttribData(GL_ARRAY_BUFFER, VertexIndex, VertexSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, multi->vertexBuffer);
@@ -81,6 +72,7 @@ RenderBuffer* MultiDrawcall::createBuffers(MultiInstance* multi, int vertexCount
 			buffer->setAttribData(GL_ARRAY_BUFFER, BoneidIndex, BoneidSlot, GL_UNSIGNED_BYTE, vertexCount, 4, 1, false, GL_STATIC_DRAW, 0, multi->boneidBuffer);
 			buffer->setAttribData(GL_ARRAY_BUFFER, WeightIndex, WeightSlot, GL_HALF_FLOAT, vertexCount, 4, 1, false, GL_STATIC_DRAW, 0, multi->weightBuffer);
 		}
+		buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, BaseIndex, GL_UNSIGNED_INT, multi->meshCount, 4, GL_DYNAMIC_DRAW, NULL);
 	} else {
 		buffer->setAttribData(GL_ARRAY_BUFFER, VertexIndex, ref->streamDatas[VertexIndex]);
 		buffer->setAttribData(GL_ARRAY_BUFFER, NormalIndex, ref->streamDatas[NormalIndex]);
@@ -93,127 +85,123 @@ RenderBuffer* MultiDrawcall::createBuffers(MultiInstance* multi, int vertexCount
 			buffer->setAttribData(GL_ARRAY_BUFFER, BoneidIndex, ref->streamDatas[BoneidIndex]);
 			buffer->setAttribData(GL_ARRAY_BUFFER, WeightIndex, ref->streamDatas[WeightIndex]);
 		}
+		buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, BaseIndex, ref->streamDatas[BaseIndex]);
 	}
+	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, inIndex, GL_FLOAT, maxCount, 16, GL_DYNAMIC_DRAW, NULL);
+	buffer->setAttribData(GL_SHADER_STORAGE_BUFFER, outIndex, OutSlot, GL_FLOAT, maxCount, 4, 4, false, GL_STREAM_DRAW, 1, NULL);
+	buffer->useAs(outIndex, GL_ARRAY_BUFFER);
+	buffer->setAttrib(outIndex);
 
-	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, BaseIndex, GL_UNSIGNED_INT, multi->meshCount, 4, GL_DYNAMIC_DRAW, NULL);
-	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, PositionIndex, GL_FLOAT, maxObjects, 16, GL_DYNAMIC_DRAW, NULL);
-	buffer->setAttribData(GL_SHADER_STORAGE_BUFFER, PositionOutIndex, PositionSlot, GL_FLOAT, maxObjects, 4, 4, false, GL_STREAM_DRAW, 1, NULL);
-	buffer->useAs(PositionOutIndex, GL_ARRAY_BUFFER);
-	buffer->setAttrib(PositionOutIndex);
 	buffer->unuse();
 	return buffer;
 }
 
 RenderBuffer* MultiDrawcall::createIndirects(MultiInstance* multi) {
 	RenderBuffer* buffer = new RenderBuffer(4, false);
-	if (multi->hasAnim) {
-		buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, IndirectAnimIndex, GL_ONE, multi->animCount * sizeof(Indirect), GL_STREAM_DRAW, multi->indirectsAnim);
-	} else {
-		buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, IndirectNormalIndex, GL_ONE, multi->normalCount * sizeof(Indirect), GL_STREAM_DRAW, multi->indirectsNormal);
-		buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, IndirectSingleIndex, GL_ONE, multi->singleCount * sizeof(Indirect), GL_STREAM_DRAW, multi->indirectsSingle);
-		buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, IndirectBillIndex, GL_ONE, multi->billCount * sizeof(Indirect), GL_STREAM_DRAW, multi->indirectsBill);
-	}
+	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, IndirectNormalIndex, GL_ONE, multi->normalCount * sizeof(Indirect), GL_STREAM_DRAW, multi->indirectsNormal);
+	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, IndirectSingleIndex, GL_ONE, multi->singleCount * sizeof(Indirect), GL_STREAM_DRAW, multi->indirectsSingle);
+	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, IndirectBillIndex, GL_ONE, multi->billCount * sizeof(Indirect), GL_STREAM_DRAW, multi->indirectsBill);
+	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, IndirectAnimIndex, GL_ONE, multi->animCount * sizeof(Indirect), GL_STREAM_DRAW, multi->indirectsAnim);
 	return buffer;
 }
 
 void MultiDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
 	if (frame < state->delay) frame++;
 	else {
-		dataBufferDraw->use();
-
 		bool shadowPass = state->pass < COLOR_PASS;
 		if (!multiRef->hasAnim) {
 			// Draw normal faces
-			if (multiRef->normalCount > 0) {
+			if (multiRef->normalCount > 0 && multiRef->normalInsCount > 0) {
+				dataBuffer->use();
 				render->useShader(shader);
 				if (shadowPass) render->setShaderFloat(shader, "uAlpha", 0.0);
-				indirectBufferDraw->useAs(IndirectNormalIndex, GL_DRAW_INDIRECT_BUFFER);
+				indirectBuffer->useAs(IndirectNormalIndex, GL_DRAW_INDIRECT_BUFFER);
 				glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, 0, multiRef->normalCount, 0);
 			}
 
 			// Draw single faces
-			if (multiRef->singleCount > 0) {
+			if (multiRef->singleCount > 0 && multiRef->singleInsCount > 0) {
+				singleBuffer->use();
 				if (shadowPass) render->setCullMode(CULL_BACK);
 				else render->setCullState(false);
 				render->useShader(shader);
 				if (shadowPass) render->setShaderFloat(shader, "uAlpha", 1.0);
-				indirectBufferDraw->useAs(IndirectSingleIndex, GL_DRAW_INDIRECT_BUFFER);
+				indirectBuffer->useAs(IndirectSingleIndex, GL_DRAW_INDIRECT_BUFFER);
 				glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, 0, multiRef->singleCount, 0);
 			}
 
 			// Draw billboard faces
-			if (multiRef->billCount > 0) {
+			if (multiRef->billCount > 0 && multiRef->billInsCount > 0) {
+				billBuffer->use();
 				render->useShader(state->shaderBill);
 				if (shadowPass) {
 					render->setCullState(false);
 					render->setShaderFloat(state->shaderBill, "uAlpha", 1.0);
 				}
-				indirectBufferDraw->useAs(IndirectBillIndex, GL_DRAW_INDIRECT_BUFFER);
+				indirectBuffer->useAs(IndirectBillIndex, GL_DRAW_INDIRECT_BUFFER);
 				glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, 0, multiRef->billCount, 0);
 			}
 		} else {
-			render->useShader(shader);
-			render->setShaderFloat(shader, "uAlpha", 0.0);
-			indirectBufferDraw->useAs(IndirectAnimIndex, GL_DRAW_INDIRECT_BUFFER);
-			glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, 0, multiRef->animCount, 0);
+			if (multiRef->animCount > 0 && multiRef->animInsCount > 0) {
+				animBuffer->use();
+				render->useShader(shader);
+				render->setShaderFloat(shader, "uAlpha", 0.0);
+				indirectBuffer->useAs(IndirectAnimIndex, GL_DRAW_INDIRECT_BUFFER);
+				glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, 0, multiRef->animCount, 0);
+			}
 		}
 	}
-
-	if (dataBuffer2) swapBuffers();
-}
-
-void MultiDrawcall::swapBuffers() {
-	indirectBufferPrepare = indirectBufferPrepare == indirectBuffer ? indirectBuffer2 : indirectBuffer;
-	dataBufferPrepare = dataBufferPrepare == dataBuffer ? dataBuffer2 : dataBuffer;
-	indirectBufferDraw = indirectBufferDraw == indirectBuffer ? indirectBuffer2 : indirectBuffer;
-	dataBufferDraw = dataBufferDraw == dataBuffer ? dataBuffer2 : dataBuffer;
 }
 
 void MultiDrawcall::update(Render* render, RenderState* state) {
 	objectCount = multiRef->updateTransform();
-	dataBufferPrepare->updateBufferData(BaseIndex, meshCount, (void*)(multiRef->bases));
-	dataBufferPrepare->updateBufferData(PositionIndex, objectCount, (void*)(multiRef->transforms));
+	dataBuffer->updateBufferData(BaseIndex, meshCount, (void*)(multiRef->bases));
+	if (multiRef->normalInsCount > 0)
+		dataBuffer->updateBufferData(InIndex, multiRef->normalInsCount, (void*)(multiRef->transformsNormal));
+	if (multiRef->singleInsCount > 0)
+		singleBuffer->updateBufferData(InIndex, multiRef->singleInsCount, (void*)(multiRef->transformsSingle));
+	if (multiRef->billInsCount > 0)
+		billBuffer->updateBufferData(InIndex, multiRef->billInsCount, (void*)(multiRef->transformsBill));
+	if (multiRef->animInsCount > 0) 
+		animBuffer->updateBufferData(InIndex, multiRef->animInsCount, (void*)(multiRef->transformsAnim));
+
 	updateIndirect(render, state);
 	prepareRenderData(render, state);
 }
 
 void MultiDrawcall::updateIndirect(Render* render, RenderState* state) {
-	if (multiRef->hasAnim) 
-		indirectBufferPrepare->setShaderBase(IndirectAnimIndex, 4);
-	else {
-		indirectBufferPrepare->setShaderBase(IndirectNormalIndex, 1);
-		indirectBufferPrepare->setShaderBase(IndirectSingleIndex, 2);
-		indirectBufferPrepare->setShaderBase(IndirectBillIndex, 3);
-	}
-	dataBufferPrepare->setShaderBase(BaseIndex, 5);
+	indirectBuffer->setShaderBase(IndirectNormalIndex, 1);
+	indirectBuffer->setShaderBase(IndirectSingleIndex, 2);
+	indirectBuffer->setShaderBase(IndirectBillIndex, 3);
+	indirectBuffer->setShaderBase(IndirectAnimIndex, 4);
+	dataBuffer->setShaderBase(BaseIndex, 5);
 
 	render->useShader(state->shaderFlush);
 	render->setShaderUVec4(state->shaderFlush, "uCount", multiRef->normalCount, multiRef->singleCount, multiRef->billCount, multiRef->animCount);
 	glDispatchCompute(meshCount, 1, 1);
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT);
-
-	if (multiRef->hasAnim)
-		indirectBufferPrepare->unbindShaderBase(IndirectAnimIndex, 4);
-	else 
-		UnbindShaderBuffers(1, 3);
-	dataBufferPrepare->unbindShaderBase(BaseIndex, 5);
 }
 
 void MultiDrawcall::prepareRenderData(Render* render, RenderState* state) {
-	dataBufferPrepare->use();
-	dataBufferPrepare->setShaderBase(PositionIndex, 1);
-	dataBufferPrepare->setShaderBase(PositionOutIndex, 2);
-	if (multiRef->hasAnim)
-		indirectBufferPrepare->setShaderBase(IndirectAnimIndex, 7);
-	else {
-		indirectBufferPrepare->setShaderBase(IndirectNormalIndex, 4);
-		indirectBufferPrepare->setShaderBase(IndirectSingleIndex, 5);
-		indirectBufferPrepare->setShaderBase(IndirectBillIndex, 6);
-	}
+	dataBuffer->setShaderBase(InIndex, 1);
+	singleBuffer->setShaderBase(InIndex, 2);
+	billBuffer->setShaderBase(InIndex, 3);
+	animBuffer->setShaderBase(InIndex, 4);
+
+	dataBuffer->setShaderBase(OutIndex, 5);
+	singleBuffer->setShaderBase(OutIndex, 6);
+	billBuffer->setShaderBase(OutIndex, 7);
+	animBuffer->setShaderBase(OutIndex, 8);
+
+	indirectBuffer->setShaderBase(IndirectNormalIndex, 9);
+	indirectBuffer->setShaderBase(IndirectSingleIndex, 10);
+	indirectBuffer->setShaderBase(IndirectBillIndex, 11);
+	indirectBuffer->setShaderBase(IndirectAnimIndex, 12);
 
 	render->useShader(state->shaderMulti);
 	render->setShaderUint(state->shaderMulti, "bufferPass", multiRef->bufferPass);
 	render->setShaderIVec4(state->shaderMulti, "uCount", multiRef->normalCount, multiRef->singleCount, multiRef->billCount, multiRef->animCount);
+	render->setShaderUVec4(state->shaderMulti, "uInsCount", multiRef->normalInsCount, multiRef->singleInsCount, multiRef->billInsCount, multiRef->animInsCount);
 
 	int dispatch = objectCount > MAX_DISPATCH ? MAX_DISPATCH : objectCount;
 	render->setShaderUint(state->shaderMulti, "pass", 0);
@@ -224,41 +212,5 @@ void MultiDrawcall::prepareRenderData(Render* render, RenderState* state) {
 		glDispatchCompute(dispatch, 1, 1);
 	}
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT);
-
-	UnbindShaderBuffers(1, 2);
-	if (multiRef->hasAnim)
-		indirectBufferPrepare->unbindShaderBase(IndirectAnimIndex, 7);
-	else 
-		UnbindShaderBuffers(4, 3);
-
-	/*
-	if (!multiRef->hasAnim && state->pass == COLOR_PASS) {
-		Indirect* buf = new Indirect[multiRef->normalCount];
-		indirectBufferPrepare->readBufferData(GL_DRAW_INDIRECT_BUFFER, IndirectNormalIndex, multiRef->normalCount * sizeof(Indirect), buf);
-		int objCulled = 0;
-		for (int i = 0; i < multiRef->normalCount; ++i) 
-			objCulled += multiRef->getInstance(i)->insData->count - buf[i].primCount;
-		if (objCulled > 0) printf("object culled %d\n", objCulled);
-		delete[] buf;
-
-		buf = new Indirect[multiRef->singleCount];
-		indirectBufferPrepare->readBufferData(GL_DRAW_INDIRECT_BUFFER, IndirectSingleIndex, multiRef->singleCount * sizeof(Indirect), buf);
-		int treeCulled = 0;
-		for (int i = 0; i < multiRef->singleCount; ++i)
-			treeCulled += multiRef->getInstance(i)->insData->count - buf[i].primCount;
-		if (treeCulled > 0) printf("tree culled %d\n", treeCulled);
-		delete[] buf;
-
-		buf = new Indirect[multiRef->billCount];
-		indirectBufferPrepare->readBufferData(GL_DRAW_INDIRECT_BUFFER, IndirectBillIndex, multiRef->billCount * sizeof(Indirect), buf);
-		int billCulled = 0;
-		for (int i = 0; i < multiRef->billCount; ++i)
-			billCulled += multiRef->getInstance(i)->insData->count - buf[i].primCount;
-		if (billCulled > 0) printf("billboard culled %d\n", billCulled);
-		delete[] buf;
-
-		if (objCulled > 0 || treeCulled > 0 || billCulled > 0) printf("\n");
-	}
-	//*/
 }
 

@@ -7,22 +7,18 @@ class MultiInstance;
 
 class MultiDrawcall: public Drawcall {
 private:
-	int vertexCount, indexCount, maxObjectCount;
+	int vertexCount, indexCount;
 	MultiInstance* multiRef;
+private:
+	RenderBuffer* singleBuffer;
+	RenderBuffer* billBuffer;
+	RenderBuffer* animBuffer;
 private:
 	RenderBuffer* indirectBuffer;
 	int meshCount;
 private:
-	RenderBuffer* dataBuffer2;
-	RenderBuffer* indirectBuffer2;
-	RenderBuffer* dataBufferDraw;
-	RenderBuffer* indirectBufferDraw;
-	RenderBuffer* dataBufferPrepare;
-	RenderBuffer* indirectBufferPrepare;
-private:
-	RenderBuffer* createBuffers(MultiInstance* multi, int vertexCount, int indexCount, int maxObjects, RenderBuffer* ref = NULL);
+	RenderBuffer* createBuffers(MultiInstance* multi, int vertexCount, int indexCount, uint inIndex, uint outIndex, uint maxCount, RenderBuffer* ref = NULL);
 	RenderBuffer* createIndirects(MultiInstance* multi);
-	void swapBuffers();
 	void updateIndirect(Render* render, RenderState* state);
 	void prepareRenderData(Render* render, RenderState* state);
 public:

@@ -24,8 +24,10 @@ public:
 	byte* boneidBuffer;
 	half* weightBuffer;
 	ushort* indexBuffer;
-	buff* transforms;
-	int vertexCount, indexCount, instanceCount, maxInstance;
+	int vertexCount, indexCount;
+	buff *transformsNormal, *transformsSingle, *transformsBill, *transformsAnim;
+	int maxNormalInstance, maxSingleInstance, maxBillInstance, maxAnimInstance;
+	int normalInsCount, singleInsCount, billInsCount, animInsCount;
 	bool hasAnim;
 	int bufferPass;
 private:
@@ -57,7 +59,7 @@ public:
 	void releaseInstanceData();
 	void add(DataBuffer* dataBuffer);
 	void initBuffers(int pass = ALL_PASS);
-	int updateTransform(buff* targetBuffer = NULL);
+	int updateTransform();
 	void createDrawcall() { drawcall = new MultiDrawcall(this); }
 	bool inited() { return bufferInited; }
 	Instance* getInstance(int i) { return (Instance*)bufferDatas[i]; }
