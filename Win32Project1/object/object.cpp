@@ -210,6 +210,12 @@ bool Object::checkInCamera(Camera* camera) {
 	return true;
 }
 
+bool Object::checkSphere(Camera* camera) {
+	if (bounding)
+		return ((AABB*)bounding)->sphereInCamera(camera->frustum);
+	return true;
+}
+
 void Object::setBillboard(float sx, float sy, int mid) {
 	if (billboard) delete billboard;
 	billboard = new Billboard(sx, sy, mid);

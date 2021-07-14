@@ -55,6 +55,10 @@ layout(binding = 12, std430) buffer IndirectAnim {
 	Indirect anims[];
 };
 
+struct Bounding {
+	vec4 bv[8];
+};
+
 layout(binding = 0) uniform sampler2D texDepth;
 uniform mat4 viewProjectMatrix;
 uniform mat4 prevVPMatrix;
@@ -66,22 +70,39 @@ uniform uint bufferPass;
 uniform ivec4 uCount;
 uniform uvec4 uInsCount;
 
-bool OccQuery(Transform ins, vec3 translate) {
+Bounding GetBound(Transform ins, vec3 translate) {
 	vec4 bound = ins.bound;
 	vec3 size = bound.xyz;
 	vec3 pose = vec3(translate.x, bound.w, translate.z);
 
-	vec4 bv0 = vec4(pose + size * vec3( 0.5,  0.5,  0.5), 1.0);
-	vec4 bv1 = vec4(pose + size * vec3( 0.5,  0.5, -0.5), 1.0);
-	vec4 bv2 = vec4(pose + size * vec3(-0.5,  0.5, -0.5), 1.0);
-	vec4 bv3 = vec4(pose + size * vec3(-0.5,  0.5,  0.5), 1.0);
-	vec4 bv4 = vec4(pose + size * vec3( 0.5, -0.5,  0.5), 1.0);
-	vec4 bv5 = vec4(pose + size * vec3( 0.5, -0.5, -0.5), 1.0);
-	vec4 bv6 = vec4(pose + size * vec3(-0.5, -0.5, -0.5), 1.0);
-	vec4 bv7 = vec4(pose + size * vec3(-0.5, -0.5,  0.5), 1.0);
+	Bounding res;
+	res.bv[0] = vec4(pose + size * vec3( 0.5,  0.5,  0.5), 1.0);
+	res.bv[1] = vec4(pose + size * vec3( 0.5,  0.5, -0.5), 1.0);
+	res.bv[2] = vec4(pose + size * vec3(-0.5,  0.5, -0.5), 1.0);
+	res.bv[3] = vec4(pose + size * vec3(-0.5,  0.5,  0.5), 1.0);
+	res.bv[4] = vec4(pose + size * vec3( 0.5, -0.5,  0.5), 1.0);
+	res.bv[5] = vec4(pose + size * vec3( 0.5, -0.5, -0.5), 1.0);
+	res.bv[6] = vec4(pose + size * vec3(-0.5, -0.5, -0.5), 1.0);
+	res.bv[7] = vec4(pose + size * vec3(-0.5, -0.5,  0.5), 1.0);
+	return res;
+}
 
+bool FrustumCull(Bounding ins) {
+	vec4 p0 = viewProjectMatrix * ins.bv[0]; 
+	vec4 p1 = viewProjectMatrix * ins.bv[1];
+	vec4 p2 = viewProjectMatrix * ins.bv[2]; 
+	vec4 p3 = viewProjectMatrix * ins.bv[3]; 
+	vec4 p4 = viewProjectMatrix * ins.bv[4]; 
+	vec4 p5 = viewProjectMatrix * ins.bv[5]; 
+	vec4 p6 = viewProjectMatrix * ins.bv[6]; 
+	vec4 p7 = viewProjectMatrix * ins.bv[7];
+
+	return CheckCull(p0, p1, p2, p3, p4, p5, p6, p7);
+}
+
+bool OccQuery(Bounding ins) {
 	return HizQuery(prevVPMatrix, texDepth, uSize, uCamParam, uMaxLevel, 
-							bv0, bv1, bv2, bv3, bv4, bv5, bv6, bv7, 0.01);
+		ins.bv[0], ins.bv[1], ins.bv[2], ins.bv[3], ins.bv[4], ins.bv[5], ins.bv[6], ins.bv[7], 0.01);
 }
 
 void main() {
@@ -98,7 +119,8 @@ void main() {
 		if(meshid < uCount.x) {
 			vec3 translate = transNormal.trans.xyz;
 			#ifndef ShadowPass
-			if(!OccQuery(transNormal, translate)) 
+			Bounding bound = GetBound(transNormal, translate);
+			if(!FrustumCull(bound) && !OccQuery(bound)) 
 			#endif
 			{
 				mat4 outMat = Translate(translate) * QuatToMat4(transNormal.rotat) * Scale(transNormal.trans.w);
@@ -114,7 +136,8 @@ void main() {
 		if(meshid < uCount.y) {
 			vec3 translate = transSingle.trans.xyz;
 			#ifndef ShadowPass
-			if(!OccQuery(transSingle, translate)) 
+			Bounding bound = GetBound(transSingle, translate);
+			if(!FrustumCull(bound) && !OccQuery(bound)) 
 			#endif
 			{
 				mat4 outMat = Translate(translate) * QuatToMat4(transSingle.rotat) * Scale(transSingle.trans.w);
@@ -130,7 +153,8 @@ void main() {
 		if(meshid < uCount.z) {
 			vec3 translate = transBill.trans.xyz;
 			#ifndef ShadowPass
-			if(!OccQuery(transBill, translate)) 
+			Bounding bound = GetBound(transBill, translate);
+			if(!FrustumCull(bound) && !OccQuery(bound)) 
 			#endif
 			{
 				mat4 outMat = mat4(transBill.trans, transBill.rotat, transBill.bound, transBill.mesh);
@@ -151,7 +175,8 @@ void main() {
 		outMat[3] = transAnim.mesh;
 
 		#ifndef ShadowPass
-		if(!OccQuery(transAnim, translate))
+		Bounding bound = GetBound(transAnim, translate);
+		if(!OccQuery(bound))
 		#endif
 			outAnims[anims[meshid].baseInstance + atomicAdd(anims[meshid].primCount, 1)] = outMat;
 	}

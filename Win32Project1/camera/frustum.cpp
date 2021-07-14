@@ -90,3 +90,11 @@ bool Frustum::intersectsWidthRay(const vec3& origin, const vec3& dir, float maxD
 	}
 	return false;
 }
+
+bool Frustum::checkSphereIn(const vec3& origin, const float radius) {
+	for (int i = 0; i < 6; ++i) {
+		if (planes[i].pointDistance(origin) < -radius)
+			return false;
+	}
+	return true;
+}

@@ -175,8 +175,14 @@ vec3 DecodeNormal(vec2 vNormal2) {
 	return vec3(vNormal2, z);
 }
 
-bool CheckCull(vec3 p0, vec3 p1, vec3 p2, vec3 p3, 
-			vec3 p4, vec3 p5, vec3 p6, vec3 p7) {
+bool CheckCull(vec4 cp0, vec4 cp1, vec4 cp2, vec4 cp3, 
+			vec4 cp4, vec4 cp5, vec4 cp6, vec4 cp7) {
+	if(cp0.w < 0.001 || cp1.w < 0.001 || cp2.w < 0.001 || cp3.w < 0.001 || 
+		cp4.w < 0.001 || cp5.w < 0.001 || cp6.w < 0.001 || cp7.w < 0.001) return false;
+
+	vec3 p0 = cp0.xyz / cp0.w, p1 = cp1.xyz / cp1.w, p2 = cp2.xyz / cp2.w, p3 = cp3.xyz / cp3.w;
+	vec3 p4 = cp4.xyz / cp4.w, p5 = cp5.xyz / cp5.w, p6 = cp6.xyz / cp6.w, p7 = cp7.xyz / cp7.w;
+
 	float thr = 1.0, thz = 1.0;
 	vec3 maxP = max(p7, max(p6, max(p5, max(p4, max(p3, max(p2, max(p0, p1)))))));		
 	vec3 minP = min(p7, min(p6, min(p5, min(p4, min(p3, min(p2, min(p0, p1)))))));	

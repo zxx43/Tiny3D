@@ -99,8 +99,10 @@ struct Plane {
 	Plane() {}
 	Plane(const vec3& pn, const float pd) :normal(pn), d(pd) {}
 	void update(const vec3& pn, const float pd) {
-		normal = pn;
-		d = pd;
+		normal = pn.GetNormalized(), d = pd;
+	}
+	float pointDistance(const vec3& point) {
+		return normal.DotProduct(point) + d;
 	}
 };
 

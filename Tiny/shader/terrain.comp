@@ -136,17 +136,16 @@ void main() {
 	vec4 bv6 = vec4(bCenter + vec3(-bSize.x,  bSize.y, -bSize.z), 1.0);
 	vec4 bv7 = vec4(bCenter + vec3( bSize.x, -bSize.y,  bSize.z), 1.0);
 	
-	vec4 p0 = viewProjectMatrix * bv0; p0 /= p0.w;
-	vec4 p1 = viewProjectMatrix * bv1; p1 /= p1.w;
-	vec4 p2 = viewProjectMatrix * bv2; p2 /= p2.w;
-	vec4 p3 = viewProjectMatrix * bv3; p3 /= p3.w;
-	vec4 p4 = viewProjectMatrix * bv4; p4 /= p4.w;
-	vec4 p5 = viewProjectMatrix * bv5; p5 /= p5.w;
-	vec4 p6 = viewProjectMatrix * bv6; p6 /= p6.w;
-	vec4 p7 = viewProjectMatrix * bv7; p7 /= p7.w;
+	vec4 p0 = viewProjectMatrix * bv0; 
+	vec4 p1 = viewProjectMatrix * bv1;
+	vec4 p2 = viewProjectMatrix * bv2; 
+	vec4 p3 = viewProjectMatrix * bv3; 
+	vec4 p4 = viewProjectMatrix * bv4; 
+	vec4 p5 = viewProjectMatrix * bv5; 
+	vec4 p6 = viewProjectMatrix * bv6; 
+	vec4 p7 = viewProjectMatrix * bv7; 
 	
-	if(CheckCull(p0.xyz, p1.xyz, p2.xyz, p3.xyz, 
-		p4.xyz, p5.xyz, p6.xyz, p7.xyz)) return;
+	if(CheckCull(p0, p1, p2, p3, p4, p5, p6, p7)) return;
 
 	if(HizQuery(prevVPMatrix, texDepth, uSize, uCamParam, uMaxLevel, 
 		bv0, bv1, bv2, bv3, bv4, bv5, bv6, bv7, 0.1)) return;

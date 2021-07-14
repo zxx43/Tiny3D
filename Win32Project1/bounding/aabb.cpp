@@ -19,6 +19,8 @@ AABB::AABB(const vec3& min,const vec3& max) :BoundingBox() {
 	vertices[5]=vec3(max.x,min.y,max.z);
 	vertices[6]=vec3(min.x,max.y,max.z);
 	vertices[7]=vec3(max.x,max.y,max.z);
+
+	caculateRadius();
 }
 
 AABB::AABB(const vec3& pos,float sx,float sy,float sz) :BoundingBox() {
@@ -36,6 +38,8 @@ AABB::AABB(const vec3& pos,float sx,float sy,float sz) :BoundingBox() {
 	vertices[5]=vec3(maxVertex.x,minVertex.y,maxVertex.z);
 	vertices[6]=vec3(minVertex.x,maxVertex.y,maxVertex.z);
 	vertices[7]=vec3(maxVertex.x,maxVertex.y,maxVertex.z);
+
+	caculateRadius();
 }
 
 AABB::AABB(const AABB& rhs) :BoundingBox(rhs) {
@@ -50,10 +54,16 @@ AABB::AABB(const AABB& rhs) :BoundingBox(rhs) {
 	position.z=rhs.position.z;
 	for(int i=0;i<8;i++)
 		vertices[i]=rhs.vertices[i];
+
+	caculateRadius();
 }
 
 AABB::~AABB() {
 
+}
+
+void AABB::caculateRadius() {
+	radius = halfSize.GetLength();
 }
 
 void AABB::update(const vec3& newMinVertex,const vec3& newMaxVertex) {
@@ -71,6 +81,8 @@ void AABB::update(const vec3& newMinVertex,const vec3& newMaxVertex) {
 	vertices[5] = vec3(newMaxVertex.x, newMinVertex.y, newMaxVertex.z);
 	vertices[6] = vec3(newMinVertex.x, newMaxVertex.y, newMaxVertex.z);
 	vertices[7] = vec3(newMaxVertex.x, newMaxVertex.y, newMaxVertex.z);
+
+	caculateRadius();
 }
 
 void AABB::update(float sx, float sy, float sz) {
@@ -84,6 +96,10 @@ void AABB::update(const vec3& pos) {
 
 AABB* AABB::clone() {
 	return new AABB(*this);
+}
+
+bool AABB::sphereInCamera(Frustum* frustum) {
+	return frustum->checkSphereIn(position, radius);
 }
 
 bool AABB::vertexInsideCamera(const vec3& vertex, const Frustum* frustum) {

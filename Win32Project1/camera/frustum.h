@@ -27,6 +27,7 @@ public:
 	~Frustum();
 	void update(const mat4& invViewProjectMatrix, const vec3& lookDir);
 	bool intersectsWidthRay(const vec3& origin, const vec3& dir, float maxDistance);
+	bool checkSphereIn(const vec3& origin, const float radius);
 };
 
 #endif /* FRUSTUM_H_ */

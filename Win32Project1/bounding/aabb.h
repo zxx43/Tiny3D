@@ -16,13 +16,14 @@ private:
 	vec3 vertices[8];
 public:
 	float sizex, sizey, sizez;
+	float radius;
 	vec3 halfSize;
 	vec3 minVertex, maxVertex;
-
 private:
 	bool vertexInsideCamera(const vec3& vertex, const Frustum* frustum);
 	bool intersectsWidthRay(const vec3& origin,const vec3& dir,float maxDistance);
 	bool cameraVertexInside(const vec3& vertex);
+	void caculateRadius();
 public:
 	AABB(const vec3& min,const vec3& max);
 	AABB(const vec3& pos,float sx,float sy,float sz);
@@ -34,6 +35,7 @@ public:
 	void update(float sx, float sy, float sz);
 	virtual void update(const vec3& pos);
 	virtual void merge(const std::vector<BoundingBox*>& others);
+	bool sphereInCamera(Frustum* frustum);
 };
 
 
