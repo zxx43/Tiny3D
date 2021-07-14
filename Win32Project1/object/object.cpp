@@ -205,15 +205,13 @@ void Object::bindMaterial(int mid) {
 }
 
 bool Object::checkInCamera(Camera* camera) {
-	if (bounding)
-		return bounding->checkWithCamera(camera->frustum, detailLevel);
-	return true;
+	if (!bounding) return true;
+	return bounding->checkWithCamera(camera->frustum, detailLevel);
 }
 
-bool Object::checkSphere(Camera* camera) {
-	if (bounding)
-		return ((AABB*)bounding)->sphereInCamera(camera->frustum);
-	return true;
+bool Object::sphereInCamera(Camera* camera) {
+	if (!bounding) return true;
+	return bounding->sphereWithCamera(camera->frustum);
 }
 
 void Object::setBillboard(float sx, float sy, int mid) {

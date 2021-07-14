@@ -283,7 +283,7 @@ void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camer
 							else if (queue->queueType == QUEUE_STATIC_SN && object->isDynamic()) continue;
 
 							if (queue->shadowLevel > 0 && !object->genShadow) continue;
-							if (object->checkSphere(camera)) {
+							if (object->sphereInCamera(camera)) {
 								Mesh* mesh = queue->queryLodMesh(object, mainCamera->position);
 								if (!mesh) continue;
 								if (queue->shadowLevel > 0 && !mesh->drawShadow) continue;

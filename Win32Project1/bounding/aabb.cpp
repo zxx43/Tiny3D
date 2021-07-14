@@ -98,10 +98,6 @@ AABB* AABB::clone() {
 	return new AABB(*this);
 }
 
-bool AABB::sphereInCamera(Frustum* frustum) {
-	return frustum->checkSphereIn(position, radius);
-}
-
 bool AABB::vertexInsideCamera(const vec3& vertex, const Frustum* frustum) {
 	for(int i=0;i<6;i++) {
 		if(frustum->normals[i].DotProduct(vertex)+frustum->ds[i]<0)
@@ -170,6 +166,10 @@ bool AABB::cameraVertexInside(const vec3& vertex) {
 	if(vertex.z>maxVertex.z)
 		return false;
 	return true;
+}
+
+bool AABB::sphereWithCamera(Frustum* frustum) {
+	return frustum->checkSphereIn(position, radius);
 }
 
 bool AABB::checkWithCamera(Frustum* frustum, int checkLevel) {

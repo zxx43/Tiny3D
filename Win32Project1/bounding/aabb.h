@@ -31,11 +31,11 @@ public:
 	virtual ~AABB();
 	virtual AABB* clone();
 	virtual bool checkWithCamera(Frustum* frustum, int checkLevel);
+	virtual bool sphereWithCamera(Frustum* frustum);
 	void update(const vec3& newMinVertex,const vec3& newMaxVertex);
 	void update(float sx, float sy, float sz);
 	virtual void update(const vec3& pos);
 	virtual void merge(const std::vector<BoundingBox*>& others);
-	bool sphereInCamera(Frustum* frustum);
 };
 
 
