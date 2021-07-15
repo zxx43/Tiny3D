@@ -240,10 +240,6 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 					}
 				}
 
-				if (state->shaderMulti) {
-					state->shaderMulti->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
-				}
-
 				if (drawcall->getType() == MULTI_DC) {
 					// Billboard drawcall
 					if (state->shaderBill) {

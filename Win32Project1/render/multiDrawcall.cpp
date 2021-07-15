@@ -153,7 +153,7 @@ void MultiDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
 	}
 }
 
-void MultiDrawcall::update(Render* render, RenderState* state) {
+void MultiDrawcall::update(Camera* camera, Render* render, RenderState* state) {
 	objectCount = multiRef->updateTransform();
 	dataBuffer->updateBufferData(BaseIndex, meshCount, (void*)(multiRef->bases));
 	if (multiRef->normalInsCount > 0)
@@ -166,7 +166,7 @@ void MultiDrawcall::update(Render* render, RenderState* state) {
 		animBuffer->updateBufferData(InIndex, multiRef->animInsCount, (void*)(multiRef->transformsAnim));
 
 	updateIndirect(render, state);
-	prepareRenderData(render, state);
+	prepareRenderData(camera, render, state);
 }
 
 void MultiDrawcall::updateIndirect(Render* render, RenderState* state) {
@@ -182,7 +182,7 @@ void MultiDrawcall::updateIndirect(Render* render, RenderState* state) {
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT);
 }
 
-void MultiDrawcall::prepareRenderData(Render* render, RenderState* state) {
+void MultiDrawcall::prepareRenderData(Camera* camera, Render* render, RenderState* state) {
 	dataBuffer->setShaderBase(InIndex, 1);
 	singleBuffer->setShaderBase(InIndex, 2);
 	billBuffer->setShaderBase(InIndex, 3);
@@ -202,6 +202,7 @@ void MultiDrawcall::prepareRenderData(Render* render, RenderState* state) {
 	render->setShaderUint(state->shaderMulti, "bufferPass", multiRef->bufferPass);
 	render->setShaderIVec4(state->shaderMulti, "uCount", multiRef->normalCount, multiRef->singleCount, multiRef->billCount, multiRef->animCount);
 	render->setShaderUVec4(state->shaderMulti, "uInsCount", multiRef->normalInsCount, multiRef->singleInsCount, multiRef->billInsCount, multiRef->animInsCount);
+	render->setShaderMat4(state->shaderMulti, "viewProjectMatrix", camera->viewProjectMatrix);
 
 	int dispatch = objectCount > MAX_DISPATCH ? MAX_DISPATCH : objectCount;
 	render->setShaderUint(state->shaderMulti, "pass", 0);

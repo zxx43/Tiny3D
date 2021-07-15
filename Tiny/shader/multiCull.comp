@@ -118,14 +118,16 @@ void main() {
 		int meshid = int(transNormal.mesh.x);
 		if(meshid < uCount.x) {
 			vec3 translate = transNormal.trans.xyz;
-			#ifndef ShadowPass
 			Bounding bound = GetBound(transNormal, translate);
-			if(!FrustumCull(bound) && !OccQuery(bound)) 
-			#endif
-			{
-				mat4 outMat = Translate(translate) * QuatToMat4(transNormal.rotat) * Scale(transNormal.trans.w);
-				uint index = atomicAdd(normals[meshid].primCount, 1);
-				outNormals[normals[meshid].baseInstance + index] = outMat;
+			if(!FrustumCull(bound)) {
+				#ifndef ShadowPass
+				if(!OccQuery(bound)) 
+				#endif
+				{
+					mat4 outMat = Translate(translate) * QuatToMat4(transNormal.rotat) * Scale(transNormal.trans.w);
+					uint index = atomicAdd(normals[meshid].primCount, 1);
+					outNormals[normals[meshid].baseInstance + index] = outMat;
+				}
 			}
 		}
 	}
@@ -135,14 +137,16 @@ void main() {
 		int meshid = int(transSingle.mesh.y);
 		if(meshid < uCount.y) {
 			vec3 translate = transSingle.trans.xyz;
-			#ifndef ShadowPass
 			Bounding bound = GetBound(transSingle, translate);
-			if(!FrustumCull(bound) && !OccQuery(bound)) 
-			#endif
-			{
-				mat4 outMat = Translate(translate) * QuatToMat4(transSingle.rotat) * Scale(transSingle.trans.w);
-				uint index = atomicAdd(singles[meshid].primCount, 1);
-				outSingles[singles[meshid].baseInstance + index] = outMat;
+			if(!FrustumCull(bound)) {
+				#ifndef ShadowPass
+				if(!OccQuery(bound)) 
+				#endif
+				{
+					mat4 outMat = Translate(translate) * QuatToMat4(transSingle.rotat) * Scale(transSingle.trans.w);
+					uint index = atomicAdd(singles[meshid].primCount, 1);
+					outSingles[singles[meshid].baseInstance + index] = outMat;
+				}
 			}
 		}
 	}
@@ -152,14 +156,16 @@ void main() {
 		int meshid = int(transBill.mesh.z);
 		if(meshid < uCount.z) {
 			vec3 translate = transBill.trans.xyz;
-			#ifndef ShadowPass
 			Bounding bound = GetBound(transBill, translate);
-			if(!FrustumCull(bound) && !OccQuery(bound)) 
-			#endif
-			{
-				mat4 outMat = mat4(transBill.trans, transBill.rotat, transBill.bound, transBill.mesh);
-				uint index = atomicAdd(bills[meshid].primCount, 1);
-				outBills[bills[meshid].baseInstance + index] = outMat;
+			if(!FrustumCull(bound)) {
+				#ifndef ShadowPass
+				if(!OccQuery(bound)) 
+				#endif
+				{
+					mat4 outMat = mat4(transBill.trans, transBill.rotat, transBill.bound, transBill.mesh);
+					uint index = atomicAdd(bills[meshid].primCount, 1);
+					outBills[bills[meshid].baseInstance + index] = outMat;
+				}
 			}
 		}
 	}

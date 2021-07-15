@@ -176,17 +176,17 @@ void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState
 	createInstances(scene);
 
 	if (multiInstance) {
-		multiInstance->drawcall->update(render, state);
+		multiInstance->drawcall->update(camera, render, state);
 		render->draw(camera, multiInstance->drawcall, state);
 	}
 
 	if (singleInstance) {
-		singleInstance->drawcall->update(render, state);
+		singleInstance->drawcall->update(camera, render, state);
 		render->draw(camera, singleInstance->drawcall, state);
 	}
 
 	if (billboards) {
-		billboards->drawcall->update(render, state);
+		billboards->drawcall->update(camera, render, state);
 		render->draw(camera, billboards->drawcall, state);
 	}
 
@@ -205,7 +205,7 @@ void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState
 			animations->initBuffers();
 			animations->createDrawcall();
 		}
-		animations->drawcall->update(render, state);
+		animations->drawcall->update(camera, render, state);
 		render->draw(camera, animations->drawcall, state);
 	}
 	

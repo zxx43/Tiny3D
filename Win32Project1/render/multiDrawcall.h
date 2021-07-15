@@ -20,12 +20,12 @@ private:
 	RenderBuffer* createBuffers(MultiInstance* multi, int vertexCount, int indexCount, uint inIndex, uint outIndex, uint maxCount, RenderBuffer* ref = NULL);
 	RenderBuffer* createIndirects(MultiInstance* multi);
 	void updateIndirect(Render* render, RenderState* state);
-	void prepareRenderData(Render* render, RenderState* state);
+	void prepareRenderData(Camera* camera, Render* render, RenderState* state);
 public:
 	MultiDrawcall(MultiInstance* multi);
 	virtual ~MultiDrawcall();
 	virtual void draw(Render* render, RenderState* state, Shader* shader);
-	void update(Render* render, RenderState* state);
+	void update(Camera* camera, Render* render, RenderState* state);
 	MultiInstance* getInstance() { return multiRef; }
 };
 
