@@ -193,6 +193,10 @@ float Linearize(float near, float far, float depth) {
 	return (2.0 * near) / (far + near - depth * (far - near));
 }
 
+vec4 Linearize(float near, float far, vec4 depth) {
+	return vec4(2.0 * near) / (vec4(far + near) - depth * (far - near));
+}
+
 struct Indirect {
 	uint count;
 	uint primCount;

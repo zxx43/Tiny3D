@@ -5,6 +5,7 @@ uniform BindlessSampler2D normalWaterBuffer;
 uniform vec2 pixelSize;
 uniform mat4 invViewProjMatrix;
 uniform vec3 eyePos;
+uniform vec2 uCamParam;
 uniform float udotl;
 
 in vec2 vTexcoord;
@@ -14,7 +15,7 @@ out vec4 FragColor;
 const vec4 OUTLINE_COLOR = vec4(0.0, 0.0, 0.0, 1.0);
 
 void main() {
-	float separation = 1.1;
+	float separation = 1.2;
 	vec2 off = pixelSize * separation;
 
 	vec2 ld = vTexcoord + vec2(-off.x, -off.y);
@@ -40,13 +41,17 @@ void main() {
 
 	vec4 depth1 = vec4(c0.w, c1.w, c2.w, c3.w);
 	vec4 depth2 = vec4(c4.w, c5.w, c6.w, c7.w);
+
+	vec4 lDepth1 = Linearize(uCamParam.x, uCamParam.y, depth1);
+	vec4 lDepth2 = Linearize(uCamParam.x, uCamParam.y, depth2);
+	float lDepth = Linearize(uCamParam.x, uCamParam.y, depth);
 	
-	vec4 dDepth1 = abs(depth1 - depth);
-	vec4 dDepth2 = abs(depth2 - depth);
+	vec4 dDepth1 = abs(lDepth1 - lDepth);
+	vec4 dDepth2 = abs(lDepth2 - lDepth);
 	
 	vec4 minDDepth = max(min(dDepth1, dDepth2), 0.00001);
 	vec4 maxDDepth = max(dDepth1, dDepth2);
-	vec4 depthResults = step(minDDepth * 100.0, maxDDepth);
+	vec4 depthResults = step(minDDepth * 1800.0, maxDDepth);
 
 	vec4 ldn = texture(normalWaterBuffer, ld) * 2.0 - 1.0;
 	vec4 ddn = texture(normalWaterBuffer, dd) * 2.0 - 1.0;

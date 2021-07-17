@@ -509,12 +509,12 @@ void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* scre
 void RenderManager::drawCombined(Render* render, Scene* scene, const std::vector<Texture2D*>& inputTextures, Filter* filter) {
 	static Shader* combinedShader = render->findShader("combined");
 	state->reset();
+	state->quality = cfgs->graphQuality;
+	state->dynSky = cfgs->dynsky;
 	state->eyePos = &(scene->renderCamera->position);
 	state->enableDepthTest = false;
 	state->pass = DEFERRED_PASS;
 	state->shader = combinedShader;
-	state->quality = cfgs->graphQuality;
-	state->dynSky = cfgs->dynsky;
 	filter->draw(scene->renderCamera, render, state, inputTextures, NULL);
 }
 
@@ -546,6 +546,7 @@ void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* s
 	state->enableDepthTest = false;
 	state->pass = POST_PASS;
 	state->shader = shader;
+	state->shader->setVector2("uCamParam", scene->renderCamera->zNear, scene->renderCamera->zFar);
 	filter->draw(scene->renderCamera, render, state, inputTextures, NULL);
 }
 
