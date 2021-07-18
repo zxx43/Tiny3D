@@ -19,7 +19,29 @@ void main() {
       ivec2( 1,-1),
       ivec2(-1, 0),
       ivec2(-1, 1));
+
+	int iLastLevel = int(uLastLevel);
+	ivec2 texSize = textureSize(lastMip, iLastLevel);
+
+	float maxDepth = 0.0;
+	if (uOdd < 0.5) {
+		ivec2 coord = ivec2(gl_FragCoord.xy) * 2;
+		for (int i = 0; i < 4; i++) {
+			maxDepth = OP(maxDepth, texelFetch(lastMip, 
+				clamp(coord + offsets[i], ivec2(0), texSize - ivec2(1)), iLastLevel).r);
+		}
+	} else {
+		vec2 coord = vTexcoord;
+		vec2 texel = 1.0 / (vec2(texSize));
+
+		for (int i = 0; i < 9; i++){
+			vec2 pos = coord + offsets[i] * texel;
+			maxDepth = OP(maxDepth, texelFetch(lastMip,
+				clamp(ivec2(pos * texSize), ivec2(0), texSize - ivec2(1)), iLastLevel).r );
+		}
+	}
 	
+	/*
 	vec4 depths = vec4(textureLodOffset(lastMip, vTexcoord, uLastLevel, offsets[0]).x, 
 					   textureLodOffset(lastMip, vTexcoord, uLastLevel, offsets[1]).x, 
 					   textureLodOffset(lastMip, vTexcoord, uLastLevel, offsets[2]).x, 
@@ -35,6 +57,7 @@ void main() {
 		float maxExtra = OP(OP(OP(extra.x, extra.y), OP(extra.z, extra.w)), ex);
 		maxDepth = OP(maxExtra, maxDepth);
 	}
+	*/
 
 	gl_FragDepth = maxDepth;
 }
