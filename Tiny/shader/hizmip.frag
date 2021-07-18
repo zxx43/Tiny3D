@@ -27,17 +27,17 @@ void main() {
 	if (uOdd < 0.5) {
 		ivec2 coord = ivec2(gl_FragCoord.xy) * 2;
 		for (int i = 0; i < 4; i++) {
-			maxDepth = OP(maxDepth, texelFetch(lastMip, 
-				clamp(coord + offsets[i], ivec2(0), texSize - ivec2(1)), iLastLevel).r);
+			ivec2 uv = clamp(coord + offsets[i], ivec2(0), texSize - ivec2(1));
+			maxDepth = OP(maxDepth, texelFetch(lastMip, uv, iLastLevel).r);
 		}
 	} else {
 		vec2 coord = vTexcoord;
 		vec2 texel = 1.0 / (vec2(texSize));
 
-		for (int i = 0; i < 9; i++){
+		for (int i = 0; i < 9; i++) {
 			vec2 pos = coord + offsets[i] * texel;
-			maxDepth = OP(maxDepth, texelFetch(lastMip,
-				clamp(ivec2(pos * texSize), ivec2(0), texSize - ivec2(1)), iLastLevel).r );
+			ivec2 uv = clamp(ivec2(pos * texSize), ivec2(0), texSize - ivec2(1));
+			maxDepth = OP(maxDepth, texelFetch(lastMip, uv, iLastLevel).r);
 		}
 	}
 	

@@ -179,7 +179,7 @@ void MultiDrawcall::updateIndirect(Render* render, RenderState* state) {
 	render->useShader(state->shaderFlush);
 	render->setShaderUVec4(state->shaderFlush, "uCount", multiRef->normalCount, multiRef->singleCount, multiRef->billCount, multiRef->animCount);
 	glDispatchCompute(meshCount, 1, 1);
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT);
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
 void MultiDrawcall::prepareRenderData(Camera* camera, Render* render, RenderState* state) {
@@ -212,6 +212,35 @@ void MultiDrawcall::prepareRenderData(Camera* camera, Render* render, RenderStat
 		render->setShaderUint(state->shaderMulti, "pass", 1);
 		glDispatchCompute(dispatch, 1, 1);
 	}
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT);
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+	/*
+	if (!multiRef->hasAnim && state->pass == COLOR_PASS) {
+		Indirect* buf = new Indirect[multiRef->normalCount];
+		indirectBuffer->readBufferData(GL_DRAW_INDIRECT_BUFFER, IndirectNormalIndex, multiRef->normalCount * sizeof(Indirect), buf);
+		int objCulled = 0;
+		for (int i = 0; i < multiRef->normalCount; ++i) 
+			objCulled += multiRef->getNormalInstance(i)->insData->count - buf[i].primCount;
+		if (objCulled > 0) printf("object culled %d\n", objCulled);
+		delete[] buf;
+
+		buf = new Indirect[multiRef->singleCount];
+		indirectBuffer->readBufferData(GL_DRAW_INDIRECT_BUFFER, IndirectSingleIndex, multiRef->singleCount * sizeof(Indirect), buf);
+		int treeCulled = 0;
+		for (int i = 0; i < multiRef->singleCount; ++i)
+			treeCulled += multiRef->getSingleInstance(i)->insData->count - buf[i].primCount;
+		if (treeCulled > 0) printf("tree culled %d\n", treeCulled);
+		delete[] buf;
+
+		buf = new Indirect[multiRef->billCount];
+		indirectBuffer->readBufferData(GL_DRAW_INDIRECT_BUFFER, IndirectBillIndex, multiRef->billCount * sizeof(Indirect), buf);
+		int billCulled = 0;
+		for (int i = 0; i < multiRef->billCount; ++i)
+			billCulled += multiRef->getBillInstance(i)->insData->count - buf[i].primCount;
+		if (billCulled > 0) printf("billboard culled %d\n", billCulled);
+		delete[] buf;
+		if (objCulled > 0 || treeCulled > 0 || billCulled > 0) printf("\n");
+	}
+	//*/
 }
 

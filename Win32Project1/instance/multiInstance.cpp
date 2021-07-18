@@ -14,6 +14,10 @@ MultiInstance::MultiInstance() {
 	transformsAnim = NULL;
 
 	bufferDatas.clear();
+	normalDatas.clear();
+	singleDatas.clear();
+	billDatas.clear();
+	animDatas.clear();
 
 	normalIns.clear();
 	mixedIns.clear();
@@ -68,6 +72,10 @@ MultiInstance::~MultiInstance() {
 	if (transformsAnim) free(transformsAnim);
 
 	bufferDatas.clear();
+	normalDatas.clear();
+	singleDatas.clear();
+	billDatas.clear();
+	animDatas.clear();
 
 	normalIns.clear();
 	mixedIns.clear();
@@ -135,6 +143,7 @@ void MultiInstance::initBuffers(int pass) {
 					ins->insId = normals.size() - 1;
 					pushed = true;
 					maxNormalInstance += ins->maxCount > MaxInstance ? MaxInstance : ins->maxCount;
+					normalDatas.push_back(ins);
 				}
 				if (ins->hasSingle && (bufferPass == ALL_PASS || bufferPass == SINGLE_PASS)) {
 					Indirect* idSing = (Indirect*)malloc(sizeof(Indirect));
@@ -147,6 +156,7 @@ void MultiInstance::initBuffers(int pass) {
 					ins->insSingleId = singles.size() - 1;
 					pushed = true;
 					maxSingleInstance += ins->maxCount > MaxInstance ? MaxInstance : ins->maxCount;
+					singleDatas.push_back(ins);
 				}
 			} else if (ins->isBillboard && (bufferPass == ALL_PASS || bufferPass == BILL_PASS)) {
 				Indirect* idBill = (Indirect*)malloc(sizeof(Indirect));
@@ -156,6 +166,7 @@ void MultiInstance::initBuffers(int pass) {
 				ins->insBillId = bills.size() - 1;
 				pushed = true;
 				maxBillInstance += ins->maxCount > MaxInstance ? MaxInstance : ins->maxCount;
+				billDatas.push_back(ins);
 			}
 
 			if (pushed) {
@@ -176,6 +187,7 @@ void MultiInstance::initBuffers(int pass) {
 
 			vertexCount += anim->vertexCount, indexCount += anim->indexCount;
 			maxAnimInstance += anim->maxCount > MaxInstance ? MaxInstance : anim->maxCount;
+			animDatas.push_back(anim);
 		}
 	}
 

@@ -32,6 +32,10 @@ public:
 	int bufferPass;
 private:
 	std::vector<DataBuffer*> bufferDatas;
+	std::vector<DataBuffer*> normalDatas;
+	std::vector<DataBuffer*> singleDatas;
+	std::vector<DataBuffer*> billDatas;
+	std::vector<DataBuffer*> animDatas;
 	bool bufferInited;
 private:
 	std::vector<Indirect*> normals;
@@ -63,6 +67,10 @@ public:
 	void createDrawcall() { drawcall = new MultiDrawcall(this); }
 	bool inited() { return bufferInited; }
 	Instance* getInstance(int i) { return (Instance*)bufferDatas[i]; }
+	Instance* getNormalInstance(int i) { return (Instance*)normalDatas[i]; }
+	Instance* getSingleInstance(int i) { return (Instance*)singleDatas[i]; }
+	Instance* getBillInstance(int i) { return (Instance*)billDatas[i]; }
+	AnimationData* getAnimInstance(int i) { return (AnimationData*)animDatas[i]; }
 };
 
 #endif 
