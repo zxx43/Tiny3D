@@ -182,7 +182,7 @@ inline vec4 MatrixToQuat(const mat4& mat) {
 		qx = (mat.entries[6] - mat.entries[9]) * invS;
 		qy = (mat.entries[8] - mat.entries[2]) * invS;
 		qz = (mat.entries[1] - mat.entries[4]) * invS;
-	} else if ((mat.entries[0] > mat.entries[5])&(mat.entries[0] > mat.entries[10])) {
+	} else if ((mat.entries[0] > mat.entries[5])&&(mat.entries[0] > mat.entries[10])) {
 		float S = sqrtf(1.0 + mat.entries[0] - mat.entries[5] - mat.entries[10]) * 2.0; // S=4*qx 
 		float invS = 1.0 / S;
 		qw = (mat.entries[6] - mat.entries[9]) * invS;
