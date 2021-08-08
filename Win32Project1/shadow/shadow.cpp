@@ -1,4 +1,4 @@
-#include "shadow.h"
+﻿#include "shadow.h"
 
 Shadow::Shadow(Camera* view) {
 	viewCamera=view;
@@ -95,7 +95,7 @@ void Shadow::prepareViewCamera(float dist1, float dist2) {
 	corners3[2] = vec4(x3, -y3, -farDist, 1);
 	corners3[3] = vec4(-x3, -y3, -farDist, 1);
 
-	gap = 50.0;
+	gap = 100.0;
 	inv2Gap = 1.0 / (gap * 2.0);
 
 	center0 = vec4(0, 0, -(nearDist + (level1 + gap - nearDist) * 0.5), 1);
@@ -109,12 +109,9 @@ void Shadow::prepareViewCamera(float dist1, float dist2) {
 	radius2 = (((vec3)center2) - corners3[0]).GetLength();
 	radius = radius0;
 
-	radius0 = radius * 1.1;
-	actLightCameraDyn->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.1 * radius0, 1.0 * radius0);
-	
-	radius0 = radius * 1.3;
-	actLightCameraNear->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.4 * radius0, 1.0 * radius0);
-	actLightCameraMid->initOrthoCamera( -radius1, radius1, -radius1, radius1, -1.0 * radius1, 1.4 * radius1);
+	actLightCameraDyn->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.1 * radius0, 1.1 * radius0, 1.5, 1.5, 1.5);
+	actLightCameraNear->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.1 * radius0, 1.1 * radius0, 1.5, 1.5, 1.5);
+	actLightCameraMid->initOrthoCamera( -radius1, radius1, -radius1, radius1, -1.1 * radius1, 1.1 * radius1, 1.5, 1.5, 1.5);
 	actLightCameraFar->initOrthoCamera( -radius2, radius2, -radius2, radius2, -1.0 * radius2, 1.0 * radius2);
 }
 
@@ -131,13 +128,13 @@ void Shadow::update(Camera* actCamera, const vec3& light) {
 void Shadow::updateViewCamera(Camera* actCamera) {
 	invViewMat = mat4(actCamera->invViewMatrix);
 	for (int i = 0; i < 3; ++i) {
-		invViewMat.entries[i * 4 + 0] = (int)(invViewMat.entries[i * 4 + 0] * 0.1) * 10.0;
-		invViewMat.entries[i * 4 + 1] = (int)(invViewMat.entries[i * 4 + 1] * 0.1) * 10.0;
-		invViewMat.entries[i * 4 + 2] = (int)(invViewMat.entries[i * 4 + 2] * 0.1) * 10.0;
+		invViewMat.entries[i * 4 + 0] = (int)(invViewMat.entries[i * 4 + 0] * 1.0) * 1.0;
+		invViewMat.entries[i * 4 + 1] = (int)(invViewMat.entries[i * 4 + 1] * 1.0) * 1.0;
+		invViewMat.entries[i * 4 + 2] = (int)(invViewMat.entries[i * 4 + 2] * 1.0) * 1.0;
 	}
-	invViewMat.entries[12] = (int)(invViewMat.entries[12] * 0.005) * 200.0;
-	invViewMat.entries[13] = (int)(invViewMat.entries[13] * 0.005) * 200.0;
-	invViewMat.entries[14] = (int)(invViewMat.entries[14] * 0.005) * 200.0;
+	invViewMat.entries[12] = (int)(invViewMat.entries[12] * 0.025) * 40.0;
+	invViewMat.entries[13] = (int)(invViewMat.entries[13] * 0.025) * 40.0;
+	invViewMat.entries[14] = (int)(invViewMat.entries[14] * 0.025) * 40.0;
 }
 
 void Shadow::copyCameraData() {

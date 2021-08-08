@@ -21,7 +21,7 @@ const vec4 UNIT_NEG_Z(0,0,-1,0);
 class Camera {
 private:
 	float xrot,yrot,height;
-	mat4 rotXMat, rotYMat, transMat;
+	mat4 rotXMat, rotYMat, transMat, boundMat;
 	vec4 lookDir4;
 	bool needRefresh;
 public:
@@ -36,6 +36,7 @@ public:
 	~Camera();
 	void initPerspectCamera(float fovy,float aspect,float zNear,float zFar);
 	void initOrthoCamera(float left,float right,float bottom,float top,float near,float far);
+	void initOrthoCamera(float left, float right, float bottom, float top, float near, float far, float ex, float ey, float ez);
 	void setView(const vec3& pos, const vec3& dir);
 	void updateLook(const vec3& pos, const vec3& dir);
 	void updateMoveable(uint transType);

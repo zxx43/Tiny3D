@@ -128,7 +128,7 @@ vec4 genShadowFactor(vec4 worldPos, float depthView, float bias) {
 			float factorDyn = genPCF(shadowBuffers[0], shadowCoordDyn, bsNear, 3.0, 0.0205);
 			float factorNear = genPCF(shadowBuffers[1], shadowCoordNear, bsNear, 3.0, 0.0205);
 			factorNear = min(factorNear, factorDyn);
-			factorNear = min(factorNear, factorMid);
+			//factorNear = min(factorNear, factorMid);
 			sf = mix(factorNear, factorMid, (lightDepth - (levels.x - gaps.x)) * gaps.y);
 		}
 		return vec4(0.0, 0.0, 1.0, sf);

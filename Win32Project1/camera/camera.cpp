@@ -26,6 +26,7 @@ void Camera::initPerspectCamera(float fovy, float aspect, float zNear, float zFa
 	this->zFar = zFar;
 	projectMatrix = perspective(fovy, aspect, zNear, zFar);
 	invProjMatrix = projectMatrix.GetInverse();
+	boundMat = projectMatrix;
 	needRefresh = true;
 }
 
@@ -34,6 +35,16 @@ void Camera::initOrthoCamera(float left, float right, float bottom, float top, f
 	zFar = far;
 	projectMatrix = ortho(left, right, bottom, top, near, far);
 	invProjMatrix = projectMatrix.GetInverse();
+	boundMat = projectMatrix;
+	needRefresh = true;
+}
+
+void Camera::initOrthoCamera(float left, float right, float bottom, float top, float near, float far, float ex, float ey, float ez) {
+	zNear = near;
+	zFar = far;
+	projectMatrix = ortho(left, right, bottom, top, near, far);
+	invProjMatrix = projectMatrix.GetInverse();
+	boundMat = ortho(left * ex, right * ex, bottom * ey, top * ey, near * ez, far * ez);
 	needRefresh = true;
 }
 
@@ -75,7 +86,7 @@ void Camera::updateFrustum() {
 		viewProjectMatrix = projectMatrix * viewMatrix;
 		invViewProjectMatrix = viewProjectMatrix.GetInverse();
 		lookDir.Normalize();
-		frustum->update(invViewProjectMatrix, lookDir);
+		frustum->update((boundMat * viewMatrix).GetInverse(), lookDir);
 		needRefresh = false;
 	}
 }
@@ -175,6 +186,7 @@ void Camera::copy(Camera* src) {
 
 	viewMatrix = src->viewMatrix;
 	projectMatrix = src->projectMatrix;
+	boundMat = src->boundMat;
 	viewProjectMatrix = src->viewProjectMatrix;
 	invViewProjectMatrix = src->invViewProjectMatrix;
 	invProjMatrix = src->invProjMatrix;

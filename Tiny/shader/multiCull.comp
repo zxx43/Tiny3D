@@ -119,9 +119,9 @@ void main() {
 		if(meshid < uCount.x) {
 			vec3 translate = transNormal.trans.xyz;
 			Bounding bound = GetBound(transNormal, translate);
-			if(!FrustumCull(bound)) {
+			{
 				#ifndef ShadowPass
-				if(!OccQuery(bound)) 
+				if(!FrustumCull(bound) && !OccQuery(bound)) 
 				#endif
 				{
 					mat4 outMat = Translate(translate) * QuatToMat4(transNormal.rotat) * Scale(transNormal.trans.w);
@@ -138,9 +138,9 @@ void main() {
 		if(meshid < uCount.y) {
 			vec3 translate = transSingle.trans.xyz;
 			Bounding bound = GetBound(transSingle, translate);
-			if(!FrustumCull(bound)) {
+			{
 				#ifndef ShadowPass
-				if(!OccQuery(bound)) 
+				if(!FrustumCull(bound) && !OccQuery(bound)) 
 				#endif
 				{
 					mat4 outMat = Translate(translate) * QuatToMat4(transSingle.rotat) * Scale(transSingle.trans.w);
@@ -157,9 +157,9 @@ void main() {
 		if(meshid < uCount.z) {
 			vec3 translate = transBill.trans.xyz;
 			Bounding bound = GetBound(transBill, translate);
-			if(!FrustumCull(bound)) {
+			{
 				#ifndef ShadowPass
-				if(!OccQuery(bound)) 
+				if(!FrustumCull(bound) && !OccQuery(bound)) 
 				#endif
 				{
 					mat4 outMat = mat4(transBill.trans, transBill.rotat, transBill.bound, transBill.mesh);

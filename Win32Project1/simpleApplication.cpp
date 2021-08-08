@@ -427,7 +427,7 @@ void SimpleApplication::initScene() {
 	terrainMat->texids.x = assetMgr->findTextureBindless("grass1-albedo3.bmp");
 	terrainMat->texids.y = assetMgr->findTextureBindless("ground_r.bmp");
 	terrainMat->texids.z = assetMgr->findTextureBindless("ground_s2.bmp");
-	terrainMat->texids.w = assetMgr->findTextureBindless("grass1-normal1-dx.bmp");
+	//terrainMat->texids.w = assetMgr->findTextureBindless("grass1-normal1-dx.bmp");
 	mtlMgr->add(terrainMat);
 	
 	Material* billboardTreeMat = new Material("billboard_tree_mat");
