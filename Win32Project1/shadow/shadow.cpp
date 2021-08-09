@@ -77,27 +77,27 @@ void Shadow::prepareViewCamera(float dist1, float dist2) {
 	float y2=level2*tanHalfVFov;
 	float y3=farDist*tanHalfVFov;
 
-	corners0[0] = vec4(x0, y0, -nearDist, 1);
-	corners0[1] = vec4(-x0, y0, -nearDist, 1);
-	corners0[2] = vec4(x0, -y0, -nearDist, 1);
-	corners0[3] = vec4(-x0, -y0, -nearDist, 1);
+	corners0[0] = vec3(x0, y0, -nearDist);
+	corners0[1] = vec3(-x0, y0, -nearDist);
+	corners0[2] = vec3(x0, -y0, -nearDist);
+	corners0[3] = vec3(-x0, -y0, -nearDist);
 
-	corners1[0]=vec4(x1,y1,-level1,1);
-	corners1[1]=vec4(-x1,y1,-level1,1);
-	corners1[2]=vec4(x1,-y1,-level1,1);
-	corners1[3]=vec4(-x1,-y1,-level1,1);
+	corners1[0] = vec3(x1, y1, -level1);
+	corners1[1] = vec3(-x1, y1, -level1);
+	corners1[2] = vec3(x1, -y1, -level1);
+	corners1[3] = vec3(-x1, -y1, -level1);
 
-	corners2[0]=vec4(x2,y2,-level2,1);
-	corners2[1]=vec4(-x2,y2,-level2,1);
-	corners2[2]=vec4(x2,-y2,-level2,1);
-	corners2[3]=vec4(-x2,-y2,-level2,1);
+	corners2[0] = vec3(x2, y2, -level2);
+	corners2[1] = vec3(-x2, y2, -level2);
+	corners2[2] = vec3(x2, -y2, -level2);
+	corners2[3] = vec3(-x2, -y2, -level2);
 
-	corners3[0] = vec4(x3, y3, -farDist, 1);
-	corners3[1] = vec4(-x3, y3, -farDist, 1);
-	corners3[2] = vec4(x3, -y3, -farDist, 1);
-	corners3[3] = vec4(-x3, -y3, -farDist, 1);
+	corners3[0] = vec3(x3, y3, -farDist);
+	corners3[1] = vec3(-x3, y3, -farDist);
+	corners3[2] = vec3(x3, -y3, -farDist);
+	corners3[3] = vec3(-x3, -y3, -farDist);
 
-	gap = 30.0f;
+	gap = 50.0f;
 	inv2Gap = 1.0 / (gap * 2.0);
 
 	center0 = vec4(0, 0, -(nearDist + (level1 + gap - nearDist) * 0.5), 1);
@@ -111,9 +111,9 @@ void Shadow::prepareViewCamera(float dist1, float dist2) {
 	radius2 = (((vec3)center2) - corners3[0]).GetLength();
 	radius = radius0;
 
-	actLightCameraDyn->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.1 * radius0, 1.1 * radius0, 1.5, 1.5, 1.5);
-	actLightCameraNear->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.1 * radius0, 1.1 * radius0, 1.5, 1.5, 1.5);
-	actLightCameraMid->initOrthoCamera( -radius1, radius1, -radius1, radius1, -1.1 * radius1, 1.1 * radius1, 1.5, 1.5, 1.5);
+	actLightCameraDyn->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.2 * radius0, 1.2 * radius0, 1.5, 1.5, 1.5);
+	actLightCameraNear->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.2 * radius0, 1.2 * radius0, 1.5, 1.5, 1.5);
+	actLightCameraMid->initOrthoCamera( -radius1, radius1, -radius1, radius1, -1.2 * radius1, 1.2 * radius1, 1.5, 1.5, 1.5);
 	actLightCameraFar->initOrthoCamera( -radius2, radius2, -radius2, radius2, -1.0 * radius2, 1.0 * radius2);
 
 	shadowProjDyn = actLightCameraDyn->projectMatrix;
