@@ -48,6 +48,12 @@ void Camera::initOrthoCamera(float left, float right, float bottom, float top, f
 	needRefresh = true;
 }
 
+void Camera::updateProjectMatrix(const mat4& matrix) {
+	projectMatrix = matrix;
+	invProjMatrix = projectMatrix.GetInverse();
+	needRefresh = true;
+}
+
 void Camera::setView(const vec3& pos, const vec3& dir) {
 	position = pos;
 	lookDir = dir;

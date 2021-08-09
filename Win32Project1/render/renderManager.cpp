@@ -6,7 +6,6 @@
 RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, float distance2, const vec3& light) {
 	depthPre = LOW_PRE;
 	cfgs = cfg;
-	shadow = new Shadow(scene->actCamera);
 	float nearSize = 1024;
 	float midSize = 1024;
 	float farSize = 2;
@@ -21,6 +20,7 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 		farSize = 2;
 		depthPre = HIGH_PRE;
 	}
+	shadow = new Shadow(scene->actCamera, nearSize, midSize, farSize);
 	shadow->shadowMapSize = nearSize;
 	shadow->shadowPixSize = 0.5 / nearSize;
 	shadow->pixSize = 1.0 / nearSize;

@@ -1,6 +1,6 @@
 ﻿#include "shadow.h"
 
-Shadow::Shadow(Camera* view) {
+Shadow::Shadow(Camera* view, float sn, float sm, float sf) {
 	viewCamera=view;
 	distance1 = 0.0;
 	distance2 = 0.0;
@@ -25,6 +25,8 @@ Shadow::Shadow(Camera* view) {
 	flushNear = false;
 	flushMid = false;
 	flushFar = false;
+
+	sizeNear = sn, sizeMid = sm, sizeFar = sf;
 }
 
 Shadow::~Shadow() {
@@ -95,7 +97,7 @@ void Shadow::prepareViewCamera(float dist1, float dist2) {
 	corners3[2] = vec4(x3, -y3, -farDist, 1);
 	corners3[3] = vec4(-x3, -y3, -farDist, 1);
 
-	gap = 100.0;
+	gap = 30.0f;
 	inv2Gap = 1.0 / (gap * 2.0);
 
 	center0 = vec4(0, 0, -(nearDist + (level1 + gap - nearDist) * 0.5), 1);
@@ -113,6 +115,11 @@ void Shadow::prepareViewCamera(float dist1, float dist2) {
 	actLightCameraNear->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.1 * radius0, 1.1 * radius0, 1.5, 1.5, 1.5);
 	actLightCameraMid->initOrthoCamera( -radius1, radius1, -radius1, radius1, -1.1 * radius1, 1.1 * radius1, 1.5, 1.5, 1.5);
 	actLightCameraFar->initOrthoCamera( -radius2, radius2, -radius2, radius2, -1.0 * radius2, 1.0 * radius2);
+
+	shadowProjDyn = actLightCameraDyn->projectMatrix;
+	shadowProjNear = actLightCameraNear->projectMatrix;
+	shadowProjMid = actLightCameraMid->projectMatrix;
+	shadowProjFar = actLightCameraFar->projectMatrix;
 }
 
 void Shadow::update(Camera* actCamera, const vec3& light) {
@@ -122,26 +129,45 @@ void Shadow::update(Camera* actCamera, const vec3& light) {
 	updateLightCamera(actLightCameraDyn, center0, radius0);
 	updateLightCamera(actLightCameraNear, center0, radius0);
 	updateLightCamera(actLightCameraMid, center1, radius1);
-	//updateLightCamera(actLightCameraFar, center2, radius2);
+	updateLightCamera(actLightCameraFar, center2, radius2);
+
+	actLightCameraDyn->updateProjectMatrix(genSnap(shadowProjDyn, actLightCameraDyn, sizeNear));
+	actLightCameraNear->updateProjectMatrix(genSnap(shadowProjNear, actLightCameraNear, sizeNear));
+	actLightCameraMid->updateProjectMatrix(genSnap(shadowProjMid, actLightCameraMid, sizeMid));
+	actLightCameraFar->updateProjectMatrix(genSnap(shadowProjFar, actLightCameraFar, sizeFar));
 }
 
 void Shadow::updateViewCamera(Camera* actCamera) {
 	invViewMat = mat4(actCamera->invViewMatrix);
 	for (int i = 0; i < 3; ++i) {
-		invViewMat.entries[i * 4 + 0] = (int)(invViewMat.entries[i * 4 + 0] * 1.0) * 1.0;
-		invViewMat.entries[i * 4 + 1] = (int)(invViewMat.entries[i * 4 + 1] * 1.0) * 1.0;
-		invViewMat.entries[i * 4 + 2] = (int)(invViewMat.entries[i * 4 + 2] * 1.0) * 1.0;
+		invViewMat.entries[i * 4 + 0] = roundf(invViewMat.entries[i * 4 + 0] * 1.0) * 1.0;
+		invViewMat.entries[i * 4 + 1] = roundf(invViewMat.entries[i * 4 + 1] * 1.0) * 1.0;
+		invViewMat.entries[i * 4 + 2] = roundf(invViewMat.entries[i * 4 + 2] * 1.0) * 1.0;
 	}
-	invViewMat.entries[12] = (int)(invViewMat.entries[12] * 0.025) * 40.0;
-	invViewMat.entries[13] = (int)(invViewMat.entries[13] * 0.025) * 40.0;
-	invViewMat.entries[14] = (int)(invViewMat.entries[14] * 0.025) * 40.0;
+}
+
+void Shadow::updateLightCamera(Camera* lightCamera, const vec4& center, float radius) {
+	lightCamera->updateLook((vec3)(invViewMat * center), lightDir);
+}
+
+mat4 Shadow::genSnap(const mat4& projInit, Camera* lightCamera, float size) {
+	vec4 shadowOrigin = projInit * lightCamera->viewMatrix * vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	shadowOrigin /= shadowOrigin.w;
+	shadowOrigin *= (size) * 0.5f;
+	vec2 roundedOrigin = vec2(roundf(shadowOrigin.x), roundf(shadowOrigin.y));
+	vec2 roundOffset = roundedOrigin - vec2(shadowOrigin.x, shadowOrigin.y);
+	roundOffset *= 2.0f / (size);
+	mat4 snapMat = projInit;
+	snapMat.entries[12] += roundOffset.x;
+	snapMat.entries[13] += roundOffset.y;
+	return snapMat;
 }
 
 void Shadow::copyCameraData() {
 	renderLightCameraDyn->copy(actLightCameraDyn);
 	renderLightCameraNear->copy(actLightCameraNear);
 	renderLightCameraMid->copy(actLightCameraMid);
-	//renderLightCameraFar->copy(actLightCameraFar);
+	renderLightCameraFar->copy(actLightCameraFar);
 }
 
 void Shadow::mergeCamera() {
@@ -161,8 +187,4 @@ void Shadow::mergeCamera() {
 		delete renderLightCameraFar;
 		renderLightCameraFar = actLightCameraFar;
 	}
-}
-
-void Shadow::updateLightCamera(Camera* lightCamera, const vec4& center, float radius) {
-	lightCamera->updateLook((vec3)(invViewMat * center), lightDir);
 }

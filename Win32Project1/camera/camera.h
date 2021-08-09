@@ -37,6 +37,7 @@ public:
 	void initPerspectCamera(float fovy,float aspect,float zNear,float zFar);
 	void initOrthoCamera(float left,float right,float bottom,float top,float near,float far);
 	void initOrthoCamera(float left, float right, float bottom, float top, float near, float far, float ex, float ey, float ez);
+	void updateProjectMatrix(const mat4& matrix);
 	void setView(const vec3& pos, const vec3& dir);
 	void updateLook(const vec3& pos, const vec3& dir);
 	void updateMoveable(uint transType);

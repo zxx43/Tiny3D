@@ -20,10 +20,13 @@ private:
 	vec3* corners3;
 	vec4 center0,center1,center2;
 	float radius0,radius1,radius2;
+	float sizeNear, sizeMid, sizeFar;
+	mat4 shadowProjDyn, shadowProjNear, shadowProjMid, shadowProjFar;
 	mat4 invViewMat;
 private:
 	void updateViewCamera(Camera* actCamera);
 	void updateLightCamera(Camera* lightCamera, const vec4& center, float radius);
+	mat4 genSnap(const mat4& projInit, Camera* lightCamera, float size);
 public:
 	float distance1, distance2;
 	Camera* actLightCameraDyn;
@@ -40,7 +43,7 @@ public:
 	bool flushDyn, flushNear, flushMid, flushFar;
 	float gap, inv2Gap, radius;
 public:
-	Shadow(Camera* view);
+	Shadow(Camera* view, float sn, float sm, float sf);
 	~Shadow();
 public:
 	void prepareViewCamera(float dist1, float dist2);
