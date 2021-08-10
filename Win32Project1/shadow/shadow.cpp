@@ -111,8 +111,8 @@ void Shadow::prepareViewCamera(float dist1, float dist2) {
 	radius2 = (((vec3)center2) - corners3[0]).GetLength();
 	radius = radius0;
 
-	actLightCameraDyn->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.2 * radius0, 1.2 * radius0, 1.5, 1.5, 1.5);
-	actLightCameraNear->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.2 * radius0, 1.2 * radius0, 1.5, 1.5, 1.5);
+	actLightCameraDyn->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.5 * radius0, 1.5 * radius0, 1.5, 1.5, 1.5);
+	actLightCameraNear->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.5 * radius0, 1.5 * radius0, 1.5, 1.5, 1.5);
 	actLightCameraMid->initOrthoCamera( -radius1, radius1, -radius1, radius1, -1.2 * radius1, 1.2 * radius1, 1.5, 1.5, 1.5);
 	actLightCameraFar->initOrthoCamera( -radius2, radius2, -radius2, radius2, -1.0 * radius2, 1.0 * radius2);
 
@@ -153,13 +153,14 @@ void Shadow::updateLightCamera(Camera* lightCamera, const vec4& center, float ra
 mat4 Shadow::genSnap(const mat4& projInit, Camera* lightCamera, float size) {
 	vec4 shadowOrigin = projInit * lightCamera->viewMatrix * vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	shadowOrigin /= shadowOrigin.w;
-	shadowOrigin *= (size) * 0.5f;
-	vec2 roundedOrigin = vec2(roundf(shadowOrigin.x), roundf(shadowOrigin.y));
-	vec2 roundOffset = roundedOrigin - vec2(shadowOrigin.x, shadowOrigin.y);
-	roundOffset *= 2.0f / (size);
+	shadowOrigin = (shadowOrigin + 1.0) * 0.5f * size; // NDC to [0,1] and than mul shadowmap size
+	vec3 roundedOrigin = vec3(roundf(shadowOrigin.x), roundf(shadowOrigin.y), roundf(shadowOrigin.z));
+	vec3 roundOffset = roundedOrigin - vec3(shadowOrigin.x, shadowOrigin.y, shadowOrigin.z);
+	roundOffset = roundOffset * 2.0f / size;
 	mat4 snapMat = projInit;
 	snapMat.entries[12] += roundOffset.x;
 	snapMat.entries[13] += roundOffset.y;
+	snapMat.entries[14] += roundOffset.z;
 	return snapMat;
 }
 
