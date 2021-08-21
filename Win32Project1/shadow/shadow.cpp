@@ -97,7 +97,7 @@ void Shadow::prepareViewCamera(float dist1, float dist2) {
 	corners3[2] = vec3(x3, -y3, -farDist);
 	corners3[3] = vec3(-x3, -y3, -farDist);
 
-	gap = 50.0f;
+	gap = 30.0f;
 	inv2Gap = 1.0 / (gap * 2.0);
 
 	center0 = vec4(0, 0, -(nearDist + (level1 + gap - nearDist) * 0.5), 1);
@@ -139,11 +139,6 @@ void Shadow::update(Camera* actCamera, const vec3& light) {
 
 void Shadow::updateViewCamera(Camera* actCamera) {
 	invViewMat = mat4(actCamera->invViewMatrix);
-	for (int i = 0; i < 3; ++i) {
-		invViewMat.entries[i * 4 + 0] = roundf(invViewMat.entries[i * 4 + 0] * 1.0f) * 1.0f;
-		invViewMat.entries[i * 4 + 1] = roundf(invViewMat.entries[i * 4 + 1] * 1.0f) * 1.0f;
-		invViewMat.entries[i * 4 + 2] = roundf(invViewMat.entries[i * 4 + 2] * 1.0f) * 1.0f;
-	}
 }
 
 void Shadow::updateLightCamera(Camera* lightCamera, const vec4& center, float radius) {
@@ -154,7 +149,7 @@ mat4 Shadow::genSnap(const mat4& projInit, Camera* lightCamera, float size) {
 	vec4 shadowOrigin = projInit * lightCamera->viewMatrix * vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	shadowOrigin /= shadowOrigin.w;
 	shadowOrigin = (shadowOrigin + 1.0) * 0.5f * size; // NDC to [0,1] and than mul shadowmap size
-	vec3 roundedOrigin = vec3((int)(shadowOrigin.x), (int)(shadowOrigin.y), (int)(shadowOrigin.z));
+	vec3 roundedOrigin = vec3(roundf(shadowOrigin.x), roundf(shadowOrigin.y), roundf(shadowOrigin.z));
 	vec3 roundOffset = roundedOrigin - vec3(shadowOrigin.x, shadowOrigin.y, shadowOrigin.z);
 	roundOffset = roundOffset * 2.0f / size;
 	mat4 snapMat = projInit;

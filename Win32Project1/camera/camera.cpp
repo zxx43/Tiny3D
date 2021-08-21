@@ -52,6 +52,7 @@ void Camera::updateProjectMatrix(const mat4& matrix) {
 	projectMatrix = matrix;
 	invProjMatrix = projectMatrix.GetInverse();
 	needRefresh = true;
+	updateFrustum();
 }
 
 void Camera::setView(const vec3& pos, const vec3& dir) {
@@ -65,7 +66,7 @@ void Camera::setView(const vec3& pos, const vec3& dir) {
 
 void Camera::updateLook(const vec3& pos, const vec3& dir) {
 	setView(pos,dir);
-	updateFrustum();
+	//updateFrustum();
 }
 
 void Camera::updateMoveable(uint transType) {
