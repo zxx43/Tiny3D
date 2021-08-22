@@ -111,9 +111,9 @@ void Shadow::prepareViewCamera(float dist1, float dist2) {
 	radius2 = (((vec3)center2) - corners3[0]).GetLength();
 	radius = radius0;
 
-	actLightCameraDyn->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.0 * radius0, 1.0 * radius0, 1.5, 1.5, 1.5);
-	actLightCameraNear->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.3 * radius0, 1.3 * radius0, 1.5, 1.5, 1.5);
-	actLightCameraMid->initOrthoCamera( -radius1, radius1, -radius1, radius1, -1.2 * radius1, 1.2 * radius1, 1.5, 1.5, 1.5);
+	actLightCameraDyn->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.0 * radius0, 1.0 * radius0, 1.0, 1.0, 1.0);
+	actLightCameraNear->initOrthoCamera(-radius0, radius0, -radius0, radius0, -1.3 * radius0, 1.3 * radius0, 1.3, 1.3, 1.3);
+	actLightCameraMid->initOrthoCamera( -radius1, radius1, -radius1, radius1, -1.2 * radius1, 1.2 * radius1, 1.2, 1.2, 1.2);
 	actLightCameraFar->initOrthoCamera( -radius2, radius2, -radius2, radius2, -1.0 * radius2, 1.0 * radius2);
 
 	shadowProjDyn = actLightCameraDyn->projectMatrix;

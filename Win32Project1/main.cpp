@@ -116,7 +116,7 @@ bool DrawWindow() {
 			ReleaseMutex(mutex);
 			TimeRun();
 		}
-		else return false;
+		//else return false;
 	}
 
 	if (windowResized) windowResized = false;
