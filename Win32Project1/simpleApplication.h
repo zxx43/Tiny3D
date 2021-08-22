@@ -22,6 +22,7 @@ private:
 	FrameBuffer* noiseBuf;
 	bool firstFrame;
 	bool drawDepth;
+	bool drawNormal;
 	int depthLevel;
 public:
 	SimpleApplication();

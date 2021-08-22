@@ -247,7 +247,7 @@ void main() {
 			}
 		// Cartoon
 		#else
-			float darkness = ndotl * shadowFactor;
+			float darkness = shadowFactor;
 			float threshold = 0.15;
 			float cwFactor = step(darkness, threshold);
 			vec3 kd = KCool * cwFactor + KWarm * (1.0 - cwFactor);

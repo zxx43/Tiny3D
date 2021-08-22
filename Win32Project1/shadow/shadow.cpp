@@ -97,7 +97,7 @@ void Shadow::prepareViewCamera(float dist1, float dist2) {
 	corners3[2] = vec3(x3, -y3, -farDist);
 	corners3[3] = vec3(-x3, -y3, -farDist);
 
-	gap = 30.0f;
+	gap = 20.0f;
 	inv2Gap = 1.0 / (gap * 2.0);
 
 	center0 = vec4(0, 0, -(nearDist + (level1 + gap - nearDist) * 0.5), 1);

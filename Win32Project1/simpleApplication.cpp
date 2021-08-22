@@ -24,6 +24,7 @@ SimpleApplication::SimpleApplication() : Application() {
 	noiseBuf = NULL;
 	firstFrame = true;
 	drawDepth = false;
+	drawNormal = false;
 	depthLevel = 0;
 }
 
@@ -146,6 +147,7 @@ void SimpleApplication::keyUp(int key) {
 	scene->player->keyUp(input);
 
 	if (key == 66) drawDepth = !drawDepth;
+	if (key == 78) drawNormal = !drawNormal;
 	if (key == 77) render->setDebugTerrain(!render->getDebugTerrain());
 }
 
@@ -225,6 +227,7 @@ void SimpleApplication::draw() {
 	renderMgr->retrievePrev(scene);
 	renderMgr->genHiz(render, scene, screen->getDepthBuffer());
 	if (drawDepth) renderMgr->drawHiz2Screen(render, scene, depthLevel);
+	if (drawNormal) renderMgr->drawTexture2Screen(render, scene, sceneFilter->getOutput(1)->hnd);
 	//*/
 
 	render->finishDraw();
@@ -427,7 +430,7 @@ void SimpleApplication::initScene() {
 	terrainMat->texids.x = assetMgr->findTextureBindless("grass1-albedo3.bmp");
 	terrainMat->texids.y = assetMgr->findTextureBindless("ground_r.bmp");
 	terrainMat->texids.z = assetMgr->findTextureBindless("ground_s2.bmp");
-	//terrainMat->texids.w = assetMgr->findTextureBindless("grass1-normal1-dx.bmp");
+	terrainMat->texids.w = assetMgr->findTextureBindless("grass1-normal1-dx.bmp");
 	mtlMgr->add(terrainMat);
 	
 	Material* billboardTreeMat = new Material("billboard_tree_mat");
