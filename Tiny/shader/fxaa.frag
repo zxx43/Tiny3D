@@ -1,112 +1,55 @@
 #include "shader/util.glsl"
 
 uniform BindlessSampler2D colorBuffer;
-uniform BindlessSampler2D normalWaterBuffer;
 uniform vec2 pixelSize;
-uniform mat4 invViewProjMatrix;
-uniform vec3 eyePos;
-uniform vec2 uCamParam;
-uniform float udotl;
 
 in vec2 vTexcoord;
 
 out vec4 FragColor;
 
-const vec4 OUTLINE_COLOR = vec4(0.0, 0.0, 0.0, 1.0);
+const float FXAA_REDUCE_MIN = 0.0078125;
+const float FXAA_REDUCE_MUL = 0.125;
+const float FXAA_SPAN_MAX = 8.0;
 
 void main() {
-	float separation = 1.2;
-	vec2 off = pixelSize * separation;
-
-	vec2 ld = vTexcoord + vec2(-off.x, -off.y);
-	vec2 dd = vTexcoord + vec2(0.0,    -off.y);
-	vec2 rd = vTexcoord + vec2(off.x,  -off.y);
-	vec2 ll = vTexcoord + vec2(-off.x,    0.0);
-	vec2 rr = vTexcoord + vec2(off.x,     0.0);
-	vec2 lt = vTexcoord + vec2(-off.x,  off.y);
-	vec2 tt = vTexcoord + vec2(0.0,     off.y);
-	vec2 rt = vTexcoord + vec2(off.x,   off.y);
-	vec2 ct = vTexcoord;
-
-	vec4 c0 = texture(colorBuffer, ld);
-	vec4 c1 = texture(colorBuffer, dd);
-	vec4 c2 = texture(colorBuffer, rd);
-	vec4 c3 = texture(colorBuffer, ll);
-	vec4 c4 = texture(colorBuffer, rr);
-	vec4 c5 = texture(colorBuffer, lt);
-	vec4 c6 = texture(colorBuffer, tt);
-	vec4 c7 = texture(colorBuffer, rt);
-	vec4 color = texture(colorBuffer, ct);
-	float depth = color.w;
-
-	vec4 depth1 = vec4(c0.w, c1.w, c2.w, c3.w);
-	vec4 depth2 = vec4(c4.w, c5.w, c6.w, c7.w);
-
-	vec4 lDepth1 = Linearize(uCamParam.x, uCamParam.y, depth1);
-	vec4 lDepth2 = Linearize(uCamParam.x, uCamParam.y, depth2);
-	float lDepth = Linearize(uCamParam.x, uCamParam.y, depth);
+	float val = 1.0;
+	vec2 inverseVP = pixelSize;
+	vec3 rgbNW = texture(colorBuffer, vTexcoord + (vec2(-val, -val) * inverseVP)).xyz;
+	vec3 rgbNE = texture(colorBuffer, vTexcoord + (vec2(val, -val) * inverseVP)).xyz;
+	vec3 rgbSW = texture(colorBuffer, vTexcoord + (vec2(-val, val) * inverseVP)).xyz;
+	vec3 rgbSE = texture(colorBuffer, vTexcoord + (vec2(val, val) * inverseVP)).xyz;
+	vec3 rgbM  = texture(colorBuffer, vTexcoord).xyz;
+	vec3 luma  = vec3(0.299, 0.587, 0.114);
+	float lumaNW = dot(rgbNW, luma);
+	float lumaNE = dot(rgbNE, luma);
+	float lumaSW = dot(rgbSW, luma);
+	float lumaSE = dot(rgbSE, luma);
+	float lumaM  = dot(rgbM,  luma);
+	float lumaMin = min(lumaM, min(min(lumaNW, lumaNE), min(lumaSW, lumaSE)));
+	float lumaMax = max(lumaM, max(max(lumaNW, lumaNE), max(lumaSW, lumaSE)));
 	
-	vec4 dDepth1 = abs(lDepth1 - lDepth);
-	vec4 dDepth2 = abs(lDepth2 - lDepth);
+	vec2 dir;
+	dir.x = -((lumaNW + lumaNE) - (lumaSW + lumaSE));
+	dir.y =  ((lumaNW + lumaSW) - (lumaNE + lumaSE));
+	float dirReduce = max((lumaNW + lumaNE + lumaSW + lumaSE) *
+		(0.25 * FXAA_REDUCE_MUL), FXAA_REDUCE_MIN);
+	float rcpDirMin = 1.0 / (min(abs(dir.x), abs(dir.y)) + dirReduce);
+	dir = min(vec2(FXAA_SPAN_MAX, FXAA_SPAN_MAX),
+		max(vec2(-FXAA_SPAN_MAX, -FXAA_SPAN_MAX),
+		dir * rcpDirMin)) * inverseVP;
 	
-	vec4 minDDepth = max(min(dDepth1, dDepth2), 0.00001);
-	vec4 maxDDepth = max(dDepth1, dDepth2);
-	vec4 depthResults = step(minDDepth * 1800.0, maxDDepth);
-
-	vec4 ldn = texture(normalWaterBuffer, ld) * 2.0 - 1.0;
-	vec4 ddn = texture(normalWaterBuffer, dd) * 2.0 - 1.0;
-	vec4 rdn = texture(normalWaterBuffer, rd) * 2.0 - 1.0;
-	vec4 lln = texture(normalWaterBuffer, ll) * 2.0 - 1.0;
-	vec4 rrn = texture(normalWaterBuffer, rr) * 2.0 - 1.0;
-	vec4 ltn = texture(normalWaterBuffer, lt) * 2.0 - 1.0;
-	vec4 ttn = texture(normalWaterBuffer, tt) * 2.0 - 1.0;
-	vec4 rtn = texture(normalWaterBuffer, rt) * 2.0 - 1.0;
-	vec4 ctn = texture(normalWaterBuffer, ct) * 2.0 - 1.0;
-
-	vec3 normal = ctn.xyz;
-	vec4 dNormal1 = vec4(dot(normal, ldn.xyz),
-						 dot(normal, ddn.xyz),
-						 dot(normal, rdn.xyz),
-						 dot(normal, lln.xyz));
-	vec4 dNormal2 = vec4(dot(normal, rrn.xyz),
-						 dot(normal, ltn.xyz),
-						 dot(normal, ttn.xyz),
-						 dot(normal, rtn.xyz));
-	vec4 dotDeltas = abs(dNormal1 - dNormal2);
-    vec4 normalResults = step(0.5, dotDeltas);
-
-	vec4 wfs1 = vec4(ldn.w, ddn.w, rdn.w, lln.w) * 0.5 + 0.5;
-	vec4 wfs2 = vec4(rrn.w, ltn.w, ttn.w, rtn.w) * 0.5 + 0.5;
-	float waterFactor = ctn.w * 0.5 + 0.5;
+	vec3 rgbA = 0.5 * (
+		texture(colorBuffer, vTexcoord + dir * (1.0/3.0 - 0.5)).xyz +
+		texture(colorBuffer, vTexcoord + dir * (2.0/3.0 - 0.5)).xyz);
+	vec3 rgbB = rgbA * 0.5 + 0.25 * (
+		texture(colorBuffer, vTexcoord + dir * (0.0/3.0 - 0.5)).xyz +
+		texture(colorBuffer, vTexcoord + dir * (3.0/3.0 - 0.5)).xyz);
 	
-	vec4 dWater1 = vec4(waterFactor) - wfs1;
-	vec4 dWater2 = vec4(waterFactor) - wfs2;
-	vec4 waterResulats = step(0.4, abs(dWater1 + dWater2));
-
-	vec4 results = max(normalResults, depthResults) * (1.0 - waterFactor);
-
-	results = max(waterResulats, results);
-	float edgeWeight = dot(results, vec4(1.0)) * 0.25;
-	
-
-	vec4 finalColor = vec4(color.rgb, 1.0);
-	if(edgeWeight > 0.25) {
-		#ifdef USE_CARTOON
-			finalColor = OUTLINE_COLOR;
-		#else
-			vec3 sum = ZERO_VEC3;
-			sum += c0.rgb + c1.rgb + c2.rgb + c3.rgb;
-			sum += c4.rgb + c5.rgb + c6.rgb + c7.rgb;
-			finalColor = vec4(mix(color.rgb, sum * 0.125, edgeWeight), 1.0);
-		#endif
-	} 
-	
-	#ifdef USE_CARTOON
-		vec3 ndc = vec3(vTexcoord, depth) * 2.0 - 1.0;
-		vec4 worldPos = invViewProjMatrix * vec4(ndc, 1.0); worldPos /= worldPos.w;
-		float depthView = length(worldPos.xyz - eyePos);
-		FragColor.rgb = GenFogColor(-0.0000025, worldPos, depthView, udotl * 1.5, finalColor.rgb);
-	#else
-		FragColor = finalColor;
-	#endif
+	FragColor = vec4(1.0);
+	float lumaB = dot(rgbB, luma);
+	if ((lumaB < lumaMin) || (lumaB > lumaMax)){
+		FragColor.rgb = rgbA;
+	}else{
+		FragColor.rgb = rgbB;
+	}
 }

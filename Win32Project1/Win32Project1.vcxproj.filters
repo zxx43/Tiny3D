@@ -634,9 +634,6 @@
     <None Include="..\Tiny\shader\dof.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\Tiny\shader\fxaa.frag">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="..\Tiny\shader\instance.vert">
       <Filter>Shaders</Filter>
     </None>
@@ -755,6 +752,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Tiny\shader\hiz.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Tiny\shader\edge.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Tiny\shader\fxaa.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

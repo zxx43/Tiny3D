@@ -11,6 +11,8 @@ private:
 	Filter* sceneFilter;
 	FilterChain* ssgChain;
 	FilterChain* combinedChain;
+	std::vector<Texture2D*> edgeInput;
+	Filter* edgeFilter;
 	std::vector<Texture2D*> aaInput;
 	Filter* aaFilter;
 	Filter* dofBlurFilter;

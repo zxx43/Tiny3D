@@ -348,6 +348,7 @@
     <None Include="..\Tiny\shader\deferred.frag" />
     <None Include="..\Tiny\shader\depth.frag" />
     <None Include="..\Tiny\shader\dof.frag" />
+    <None Include="..\Tiny\shader\edge.frag" />
     <None Include="..\Tiny\shader\flush.comp" />
     <None Include="..\Tiny\shader\fxaa.frag" />
     <None Include="..\Tiny\shader\gaussian.frag" />

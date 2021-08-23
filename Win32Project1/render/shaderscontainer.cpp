@@ -22,7 +22,8 @@ using namespace std;
 #define TERRAIN_COMP "shader/terrain.comp"
 #define WATER_VERT "shader/water.vert"
 #define WATER_FRAG "shader/water.frag"
-#define AA_FRAG "shader/fxaa.frag"
+#define EDGE_FRAG "shader/edge.frag"
+#define FXAA_FRAG "shader/fxaa.frag"
 #define BLUR_FRAG "shader/blur.frag"
 #define MEAN_FRAG "shader/mean.frag"
 #define GAUSS_FRAG "shader/gaussian.frag"
@@ -133,11 +134,14 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	deferred->setSlot("roughMetalBuffer", 2);
 	deferred->setSlot("depthBuffer", 3);
 
-	Shader* fxaa = shaders->addShader("fxaa", POST_VERT, AA_FRAG);
+	Shader* edge = shaders->addShader("edge", POST_VERT, EDGE_FRAG);
 	if (cfgs->cartoon)
-		fxaa->attachDef("USE_CARTOON", "1");
+		edge->attachDef("USE_CARTOON", "1");
+	edge->setSlot("colorBuffer", 0);
+	edge->setSlot("normalWaterBuffer", 1);
+
+	Shader* fxaa = shaders->addShader("fxaa", POST_VERT, FXAA_FRAG);
 	fxaa->setSlot("colorBuffer", 0);
-	fxaa->setSlot("normalWaterBuffer", 1);
 
 	Shader* blur = shaders->addShader("blur", POST_VERT, BLUR_FRAG);
 	blur->setSlot("colorBuffer", 0);
