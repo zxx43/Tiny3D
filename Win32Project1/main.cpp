@@ -114,9 +114,9 @@ bool DrawWindow() {
 				dataPrepared = false;
 			}
 			ReleaseMutex(mutex);
-			TimeRun();
+			//TimeRun();
 		}
-		//else return false;
+		else return false;
 	}
 
 	if (windowResized) windowResized = false;
@@ -129,16 +129,17 @@ bool DrawWindow() {
 DWORD WINAPI FrameThreadRun(LPVOID param) {
 	while (!app->willExit && app->cfgs->dualthread) {
 		if (!inited) continue;
-		if (!dataPrepared) {
+		//if (!dataPrepared) {
 			WaitForSingleObject(mutex, INFINITE);
 			{
+				TimeRun();
 				ActRun();
 				app->updateData();
 				app->prepare();
 				dataPrepared = true;
 			}
 			ReleaseMutex(mutex);
-		}
+		//}
 	}
 	threadEnd = true;
 	return 1;
