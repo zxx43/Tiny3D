@@ -9,7 +9,12 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 	float nearSize = 1024;
 	float midSize = 1024;
 	float farSize = 2;
-	if (cfgs->shadowQuality > 3) {
+	if (cfgs->shadowQuality > 4) {
+		nearSize = 4096;
+		midSize = 4096;
+		farSize = 2;
+		depthPre = FLOAT_PRE;
+	} else if (cfgs->shadowQuality > 3) {
 		nearSize = 2048;
 		midSize = 2048;
 		farSize = 2;

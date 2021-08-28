@@ -141,6 +141,9 @@ void Render::setCullMode(int mode) {
 		case CULL_NONE:
 			glCullFace(GL_NONE);
 			break;
+		case CULL_ALL:
+			glCullFace(GL_FRONT_AND_BACK);
+			break;
 	}
 }
 

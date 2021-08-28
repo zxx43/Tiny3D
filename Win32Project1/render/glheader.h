@@ -15,6 +15,7 @@
 #define CULL_NONE 0
 #define CULL_BACK 1
 #define CULL_FRONT 2
+#define CULL_ALL 3
 
 #define LESS 0
 #define LEQUAL 1
