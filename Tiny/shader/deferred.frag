@@ -82,9 +82,9 @@ vec4 genShadowFactor(vec4 worldPos, float depthView, float bias) {
 	float lightDepth = depthView;
 	if(lightDepth <= levels.x - gaps.x) {
 		#ifndef USE_LINEAR_DEPTH
-			float bs = bias * 0.00045;
+			float bs = bias;
 		#else
-			float bs = bias * 0.00015;
+			float bs = bias;
 		#endif
 
 		vec4 dyn = DepthToLinear(lightViewProjDyn, lightProjDyn, lightViewDyn, camParas[0].x, camParas[0].y, worldPos);
@@ -101,9 +101,9 @@ vec4 genShadowFactor(vec4 worldPos, float depthView, float bias) {
 		return vec4(1.0, 0.0, 0.0, sf);
 	} else if(lightDepth > levels.x - gaps.x && lightDepth < levels.x + gaps.x) {
 		#ifndef USE_LINEAR_DEPTH
-			float bsNear = bias * 0.00045, bsMid = bias * 0.00045;
+			float bsNear = bias, bsMid = bias;
 		#else
-			float bsNear = bias * 0.00015, bsMid = bias * 0.00015;
+			float bsNear = bias, bsMid = bias;
 		#endif
 
 		vec4 dyn = DepthToLinear(lightViewProjDyn, lightProjDyn, lightViewDyn, camParas[0].x, camParas[0].y, worldPos);
@@ -135,9 +135,9 @@ vec4 genShadowFactor(vec4 worldPos, float depthView, float bias) {
 		vec3 lightPosition = mid.xyz / mid.w;
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
 		#ifndef USE_LINEAR_DEPTH
-			float bs = bias * 0.00045;
+			float bs = bias;
 		#else
-			float bs = bias * 0.00015;
+			float bs = bias;
 		#endif
 		float sf = genPCF(shadowBuffers[2], shadowCoord, bs, 2.0, 0.04);
 		return vec4(0.0, 1.0, 0.0, sf);
@@ -213,7 +213,7 @@ void main() {
 		normal = vec3(roughMetal.ba, material.z) * 2.0 - vec3(1.0);
 
 		float ndotl = dot(light, normal);
-		float bias = tan(acos(abs(ndotl)));
+		float bias = max(0.005 * (1.0 - ndotl), 0.0005);
 		ndotl = max(ndotl, 0.0);
 
 		vec3 shadowLayer = vec3(1.0);
