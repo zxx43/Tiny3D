@@ -213,7 +213,7 @@ void main() {
 		normal = vec3(roughMetal.ba, material.z) * 2.0 - vec3(1.0);
 
 		float ndotl = dot(light, normal);
-		float bias = max(0.005 * (1.0 - ndotl), 0.0005);
+		float bias = max(0.005 * (1.0 - ndotl), 0.0005) * 0.25;
 		ndotl = max(ndotl, 0.0);
 
 		vec3 shadowLayer = vec3(1.0);
