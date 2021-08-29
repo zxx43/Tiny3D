@@ -73,7 +73,7 @@ RenderBuffer* StaticDrawcall::createBuffers(Batch* batch, int bufCount, int vert
 		buffer->setAttribData(GL_ARRAY_BUFFER, NormalIndex, NormalSlot, GL_FLOAT, vertCount, 3, 1, false, drawType, -1, batch->normalBuffer);
 		buffer->setAttribData(GL_ARRAY_BUFFER, TexcoordIndex, TexcoordSlot, GL_FLOAT, vertCount, 4, 1, false, drawType, -1, batch->texcoordBuffer);
 		buffer->setAttribData(GL_ARRAY_BUFFER, TexidIndex, TexidSlot, GL_FLOAT, vertCount, 4, 1, false, drawType, -1, batch->texidBuffer);
-		buffer->setAttribData(GL_ARRAY_BUFFER, ColorIndex, ColorSlot, GL_UNSIGNED_BYTE, vertCount, 3, 1, false, drawType, -1, batch->colorBuffer);
+		buffer->setAttribData(GL_ARRAY_BUFFER, ColorIndex, ColorSlot, GL_UNSIGNED_BYTE, vertCount, 4, 1, false, drawType, -1, batch->colorBuffer);
 		buffer->setAttribData(GL_ARRAY_BUFFER, TangentIndex, TangentSlot, GL_FLOAT, vertCount, 3, 1, false, drawType, -1, batch->tangentBuffer);
 		if (!isFullStatic())
 			buffer->setAttribData(GL_ARRAY_BUFFER, ObjidIndex, ObjidSlot, GL_UNSIGNED_BYTE, vertCount, 1, 1, false, drawType, -1, batch->objectidBuffer);

@@ -16,6 +16,7 @@ Ks 0.110000 0.110000 0.110000
 d 0.996078
 map_Kd firneedle_texture.bmp
 single 1
+leaf 1
 
 newmtl NoName_2_NoName_1_Solid_8
 Ns 0
@@ -25,6 +26,7 @@ Ks 0.110000 0.110000 0.110000
 d 0.996078
 map_Kd firneedle_texture.bmp
 single 1
+leaf 1
 
 newmtl NoName_2_NoName_1_Solid_9
 Ns 0
@@ -34,6 +36,7 @@ Ks 0.110000 0.110000 0.110000
 d 0.996078
 map_Kd firneedle_texture.bmp
 single 1
+leaf 1
 
 newmtl NoName_2_NoName_1_Solid_1
 Ns 0
@@ -43,6 +46,7 @@ Ks 0.110000 0.110000 0.110000
 d 0.996078
 map_Kd firneedle_texture.bmp 
 single 1
+leaf 1
 
 newmtl NoName_2_NoName_1_Solid_3
 Ns 0
@@ -52,6 +56,7 @@ Ks 0.110000 0.110000 0.110000
 d 0.996078
 map_Kd firneedle_texture.bmp 
 single 1
+leaf 1
 
 newmtl NoName_2_NoName_1_Solid_10
 Ns 0
@@ -61,6 +66,7 @@ Ks 0.110000 0.110000 0.110000
 d 0.996078
 map_Kd firneedle_texture.bmp
 single 1
+leaf 1
 
 newmtl NoName_2_NoName_1_Solid_7
 Ns 0
@@ -70,6 +76,7 @@ Ks 0.110000 0.110000 0.110000
 d 0.996078
 map_Kd firneedle_texture.bmp
 single 1
+leaf 1
 
 newmtl NoName_2_NoName_1_Solid_6
 Ns 0
@@ -79,6 +86,7 @@ Ks 0.110000 0.110000 0.110000
 d 0.996078
 map_Kd firneedle_texture.bmp
 single 1
+leaf 1
 
 newmtl NoName_2_NoName_1_Solid_5
 Ns 0
@@ -88,6 +96,7 @@ Ks 0.110000 0.110000 0.110000
 d 0.996078
 map_Kd firneedle_texture.bmp
 single 1
+leaf 1
 
 newmtl NoName_2_NoName_1_Solid_12
 Ns 0
@@ -97,6 +106,7 @@ Ks 0.110000 0.110000 0.110000
 d 0.996078
 map_Kd firneedle_texture.bmp
 single 1
+leaf 1
 
 newmtl NoName_2_NoName_1_Solid_11
 Ns 0
@@ -106,4 +116,5 @@ Ks 0.110000 0.110000 0.110000
 d 0.996078
 map_Kd firneedle_texture.bmp
 single 1
+leaf 1
 # End

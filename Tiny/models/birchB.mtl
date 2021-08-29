@@ -10,6 +10,7 @@ Ks 1.000000 1.000000 1.000000
 Tr 0.992157
 illum 2
 Ns 0.000000
+map_Ka birchbark.bmp
 map_Kd birchbark.bmp
 
 newmtl material_1
@@ -19,6 +20,8 @@ Ks 1.000000 1.000000 1.000000
 Tr 0.992157
 illum 2
 Ns 0.000000
+map_Ka birchtwig.bmp
 map_Kd birchtwig.bmp
 single 1
+leaf 1
 

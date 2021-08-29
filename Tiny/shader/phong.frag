@@ -8,6 +8,7 @@ uniform vec3 uNormal;
 in vec2 vTexcoord;
 flat in vec4 vTexid;
 flat in vec3 vColor;
+flat in float vLeaf;
 in vec3 vNormal;
 in mat3 vTBN;
 
@@ -23,6 +24,8 @@ void main() {
 		normal = normalize(normal) * 0.5 + 0.5;
 
 		FragMat = vec4(vColor, 1.0);
+		if(vLeaf > 0.5) FragMat.a = 0.5;
+
 		FragRoughMetal.r = vTexid.z >= 0.0 ? texture(texBlds[int(vTexid.z)], vTexcoord).r : DefaultRM.r;
 		FragRoughMetal.g = vTexid.w >= 0.0 ? texture(texBlds[int(vTexid.w)], vTexcoord).r : DefaultRM.g;
 #else

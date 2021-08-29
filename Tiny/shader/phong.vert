@@ -12,7 +12,7 @@ layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec4 texcoord;
 layout (location = 3) in vec4 texid;
-layout (location = 4) in vec3 color;
+layout (location = 4) in vec4 color;
 layout (location = 5) in vec3 tangent;
 layout (location = 6) in float objectid;
 
@@ -22,6 +22,7 @@ flat out vec4 vTexid;
 #endif
 #ifndef ShadowPass 
 flat out vec3 vColor;
+flat out float vLeaf;
 out vec3 vNormal;
 out mat3 vTBN;
 #endif
@@ -33,7 +34,8 @@ void main() {
 	mat3 normalMat = mat3(matModel);
 	vNormal = normalMat * normal;
 	vTBN = normalMat * GetTBN(normalize(normal), normalize(tangent));
-	vColor = COLOR_SCALE * color;
+	vColor = COLOR_SCALE * color.rgb;
+	vLeaf = color.a;
 #endif 
 #ifndef LowPass
 	vTexcoord = texcoord.xy;

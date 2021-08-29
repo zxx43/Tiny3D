@@ -9,6 +9,7 @@ Ks 0.000000 0.000000 0.000000
 d 0.996078
 map_Kd firtex.bmp
 single 1
+leaf 1
 
 newmtl NoName,1001
 Ns 0

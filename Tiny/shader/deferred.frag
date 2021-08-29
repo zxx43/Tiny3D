@@ -126,7 +126,6 @@ vec4 genShadowFactor(vec4 worldPos, float depthView, float bias) {
 			float factorDyn = genPCF(shadowBuffers[0], shadowCoordDyn, bsNear, 3.0, 0.0205);
 			float factorNear = genPCF(shadowBuffers[1], shadowCoordNear, bsNear, 3.0, 0.0205);
 			factorNear = min(factorNear, factorDyn);
-			//factorNear = min(factorNear, factorMid);
 			sf = mix(factorNear, factorMid, (lightDepth - (levels.x - gaps.x)) * gaps.y);
 		}
 		return vec4(0.0, 0.0, 1.0, sf);
@@ -209,11 +208,14 @@ void main() {
 		float depthView = length(v);
 
 		vec4 roughMetal = texture(roughMetalBuffer, vTexcoord);
-		vec3 material = texture(matBuffer, vTexcoord).rgb;
+		vec4 material = texture(matBuffer, vTexcoord);
 		normal = vec3(roughMetal.ba, material.z) * 2.0 - vec3(1.0);
 
 		float ndotl = dot(light, normal);
-		float bias = max(0.005 * (1.0 - ndotl), 0.0005) * 0.25;
+
+		float bias = max(0.005 * (1.0 - ndotl), 0.0005);
+		if(material.a > 0.4 && material.a < 0.6) bias *= -0.5;
+		else bias *= 0.3;
 		ndotl = max(ndotl, 0.0);
 
 		vec3 shadowLayer = vec3(1.0);

@@ -92,7 +92,7 @@ vec4 RayCast(vec3 refDir, vec3 refPos) {
 void main() {
 	float refFlag = texture(matBuffer, vTexcoord).a;
 
-	if(refFlag > 0.99)
+	if(refFlag > 0.2)
 		ReflectColor = texture(lightBuffer, vTexcoord);
 	else {
 		#ifndef HIGH_QUALITY

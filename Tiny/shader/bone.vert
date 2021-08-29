@@ -13,7 +13,7 @@ layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec4 texcoord;
 layout (location = 3) in vec2 texid;
-layout (location = 4) in vec3 color;
+layout (location = 4) in vec4 color;
 layout (location = 5) in vec3 tangent;
 layout (location = 6) in vec4 boneids;
 layout (location = 7) in vec4 weights;
@@ -48,7 +48,7 @@ void main() {
 	mat4 modelMat = convertMat(mat3x4(modelMatrix[0], modelMatrix[1], modelMatrix[2]));
 
 #ifndef ShadowPass
-	vColor = MatScale * color * 0.005;
+	vColor = MatScale * color.rgb * 0.005;
 	mat3 matRot = mat3(modelMat);
 	mat3 normalMat = matRot * mat3(boneMat);
 	vNormal = normalMat * normal;

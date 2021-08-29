@@ -219,7 +219,7 @@ void MultiInstance::initBuffers(int pass) {
 	tangentBuffer = (half*)malloc(vertexCount * 3 * sizeof(half));
 	texcoordBuffer = (float*)malloc(vertexCount * 4 * sizeof(float));
 	texidBuffer = (float*)malloc(vertexCount * 2 * sizeof(float));
-	colorBuffer = (byte*)malloc(vertexCount * 3 * sizeof(byte));
+	colorBuffer = (byte*)malloc(vertexCount * 4 * sizeof(byte));
 	if (hasAnim) {
 		boneidBuffer = (byte*)malloc(vertexCount * 4 * sizeof(byte));
 		weightBuffer = (half*)malloc(vertexCount * 4 * sizeof(half));
@@ -238,7 +238,7 @@ void MultiInstance::initBuffers(int pass) {
 		memcpy(tangentBuffer + curVertex * 3, db->tangentBuffer, db->vertexCount * 3 * sizeof(half));
 		memcpy(texcoordBuffer + curVertex * 4, db->texcoordBuffer, db->vertexCount * 4 * sizeof(float));
 		memcpy(texidBuffer + curVertex * 2, db->texidBuffer, db->vertexCount * 2 * sizeof(float));
-		memcpy(colorBuffer + curVertex * 3, db->colorBuffer, db->vertexCount * 3 * sizeof(byte));
+		memcpy(colorBuffer + curVertex * 4, db->colorBuffer, db->vertexCount * 4 * sizeof(byte));
 		memcpy(indexBuffer + curIndex, db->indexBuffer, db->indexCount * sizeof(ushort));
 		if (hasAnim) {
 			AnimationData* anim = (AnimationData*)db;
