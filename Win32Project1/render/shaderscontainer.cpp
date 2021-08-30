@@ -139,6 +139,7 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 		edge->attachDef("USE_CARTOON", "1");
 	edge->setSlot("colorBuffer", 0);
 	edge->setSlot("normalWaterBuffer", 1);
+	edge->setSlot("matBuffer", 2);
 
 	Shader* fxaa = shaders->addShader("fxaa", POST_VERT, FXAA_FRAG);
 	fxaa->setSlot("colorBuffer", 0);

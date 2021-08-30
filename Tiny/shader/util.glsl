@@ -212,3 +212,10 @@ struct Indirect {
 #define NormalBuf 1
 #define SingleBuf 2
 #define BillBuf   3
+
+// Material Flags
+#define WaterFlag      0.0
+#define WaterThreshold 0.1
+#define LeafFlag       0.5
+#define GrassFlag      0.7
+#define TerrainFlag    0.8

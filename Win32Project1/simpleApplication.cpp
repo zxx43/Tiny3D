@@ -63,9 +63,9 @@ void SimpleApplication::resize(int width, int height) {
 
 	if (screen) delete screen;
 	screen = new FrameBuffer(width, height, hdrPre, 4, false, NEAREST); // texBuffer
-	screen->addColorBuffer(matPre, 4);                         // matBuffer
-	screen->addColorBuffer(matPre, 4);                         // roughMetalNormalBuffer
-	screen->attachDepthBuffer(renderMgr->getDepthPre(), false);       // depthBuffer
+	screen->addColorBuffer(matPre, 4);									// matBuffer
+	screen->addColorBuffer(matPre, 4);									// roughMetalNormalBuffer
+	screen->attachDepthBuffer(renderMgr->getDepthPre(), false);			// depthBuffer
 
 	if (waterFrame) delete waterFrame;
 	waterFrame = new FrameBuffer(width, height, hdrPre, 4, false);
@@ -229,6 +229,7 @@ void SimpleApplication::draw() {
 		if (edgeInput.size() == 0) {
 			edgeInput.push_back(lastFilter->getFrameBuffer()->getColorBuffer(0)); // colorBuffer
 			edgeInput.push_back(combinedChain->getOutputTex(1));				  // normalWaterBuffer
+			edgeInput.push_back(screen->getColorBuffer(1));						  // matBuffer
 		}
 		renderMgr->drawScreenFilter(render, scene, "edge", edgeInput, edgeFilter);
 		lastFilter = edgeFilter;

@@ -70,7 +70,7 @@ vec4 RayCast(vec3 refDir, vec3 refPos) {
 
 		if(storedDepth >= 1.0) 
 			return FAIL_COLOR;
-		else if(curPos.z <= storedView.z + 0.0001 && refFlag > 0.99 && refPos.z >= storedView.z - 20.0) {
+		else if(curPos.z <= storedView.z + 0.0001 && refFlag > WaterThreshold && refPos.z >= storedView.z - 20.0) {
 			vec2 searchData = BinarySearch(lenBefore, lenCurrent, projCoord.xy, refDir, refPos, projRef);
 			vec4 storedData = texture(lightBuffer, searchData);
 
@@ -92,7 +92,7 @@ vec4 RayCast(vec3 refDir, vec3 refPos) {
 void main() {
 	float refFlag = texture(matBuffer, vTexcoord).a;
 
-	if(refFlag > 0.2)
+	if(refFlag > WaterThreshold)
 		ReflectColor = texture(lightBuffer, vTexcoord);
 	else {
 		#ifndef HIGH_QUALITY

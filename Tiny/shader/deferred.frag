@@ -214,8 +214,8 @@ void main() {
 		float ndotl = dot(light, normal);
 
 		float bias = max(0.005 * (1.0 - ndotl), 0.0005);
-		if(material.a > 0.4 && material.a < 0.6) bias *= -0.5;
-		else bias *= 0.3;
+		if(material.a > (GrassFlag - 0.1) && material.a < (TerrainFlag + 0.1)) bias *= 0.5; // terrain(0.8) & grass(0.7) receiver shadow bias
+		else bias *= -0.5; // normal receiver shadow bias
 		ndotl = max(ndotl, 0.0);
 
 		vec3 shadowLayer = vec3(1.0);

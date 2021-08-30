@@ -40,7 +40,7 @@ void main() {
 	normal = normalize(normal) * 0.5 + 0.5;
 		
 	FragTex = texColor;
-	FragMat = vec4(vColor, 1.0);
+	FragMat = vec4(vColor, TerrainFlag);
 
 	FragRoughMetal.r = vRMid.x >= 0.0 ? texture(texBlds[int(vRMid.x)], vTexcoord).r : DefaultRM.r;
 	FragRoughMetal.g = vRMid.y >= 0.0 ? texture(texBlds[int(vRMid.y)], vTexcoord).r : DefaultRM.g;

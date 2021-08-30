@@ -51,7 +51,7 @@ void main() {
 	vec3 refractedColor = refractMapTex;
 
 	vec4 surfaceColor = vec4(reflectedColor, depth);
-	vec4 matColor = vec4(refractedColor, 0.0);
+	vec4 matColor = vec4(refractedColor, WaterFlag);
 		
 	FragTex = surfaceColor;
 	FragMat = matColor;

@@ -2,6 +2,7 @@
 
 uniform BindlessSampler2D colorBuffer;
 uniform BindlessSampler2D normalWaterBuffer;
+uniform BindlessSampler2D matBuffer;
 uniform vec2 pixelSize;
 uniform mat4 invViewProjMatrix;
 uniform vec3 eyePos;
@@ -14,7 +15,33 @@ out vec4 FragColor;
 
 const vec4 OUTLINE_COLOR = vec4(0.0, 0.0, 0.0, 1.0);
 
+vec4 GenColor(vec3 color, float depth) {
+	vec4 res = vec4(1.0);
+	#ifdef USE_CARTOON
+		vec3 ndc = vec3(vTexcoord, depth) * 2.0 - 1.0;
+		vec4 worldPos = invViewProjMatrix * vec4(ndc, 1.0); worldPos /= worldPos.w;
+		float depthView = length(worldPos.xyz - eyePos);
+		res.rgb = GenFogColor(-0.0000025, worldPos, depthView, udotl * 1.5, color);
+	#else
+		res.rgb = color;
+	#endif
+	return res;
+}
+
+bool CompMat(float flag, float base) {
+	return (flag > (base - 0.1) && flag < (base + 0.1));
+}
+
 void main() {
+	vec4 color = texture(colorBuffer, vTexcoord);
+	float depth = color.w;
+	vec4 finalColor = vec4(color.rgb, 1.0);
+	float flag = texture(matBuffer, vTexcoord).a;
+	if (CompMat(flag, GrassFlag)) {
+		FragColor = GenColor(finalColor.rgb, depth);
+		return;
+	}
+
 	float separation = 1.2;
 	vec2 off = pixelSize * separation;
 
@@ -27,6 +54,23 @@ void main() {
 	vec2 tt = vTexcoord + vec2(0.0,     off.y);
 	vec2 rt = vTexcoord + vec2(off.x,   off.y);
 	vec2 ct = vTexcoord;
+	
+	/*
+	float m0 = texture(matBuffer, ld).a;
+	float m1 = texture(matBuffer, dd).a;
+	float m2 = texture(matBuffer, rd).a;
+	float m3 = texture(matBuffer, ll).a;
+	float m4 = texture(matBuffer, rr).a;
+	float m5 = texture(matBuffer, lt).a;
+	float m6 = texture(matBuffer, tt).a;
+	float m7 = texture(matBuffer, rt).a;
+
+	if (CompMat(m0, GrassFlag) || CompMat(m1, GrassFlag) || CompMat(m2, GrassFlag) || CompMat(m3, GrassFlag) ||
+		CompMat(m4, GrassFlag) || CompMat(m5, GrassFlag) || CompMat(m6, GrassFlag) || CompMat(m7, GrassFlag)) {
+			FragColor = GenColor(finalColor.rgb, depth);
+			return;
+	}
+	//*/
 
 	vec4 c0 = texture(colorBuffer, ld);
 	vec4 c1 = texture(colorBuffer, dd);
@@ -36,8 +80,6 @@ void main() {
 	vec4 c5 = texture(colorBuffer, lt);
 	vec4 c6 = texture(colorBuffer, tt);
 	vec4 c7 = texture(colorBuffer, rt);
-	vec4 color = texture(colorBuffer, ct);
-	float depth = color.w;
 
 	vec4 depth1 = vec4(c0.w, c1.w, c2.w, c3.w);
 	vec4 depth2 = vec4(c4.w, c5.w, c6.w, c7.w);
@@ -88,8 +130,6 @@ void main() {
 	results = max(waterResulats, results);
 	float edgeWeight = dot(results, vec4(1.0)) * 0.25;
 	
-
-	vec4 finalColor = vec4(color.rgb, 1.0);
 	if(edgeWeight > 0.25) {
 		#ifdef USE_CARTOON
 			finalColor = OUTLINE_COLOR;
@@ -101,12 +141,5 @@ void main() {
 		#endif
 	} 
 	
-	#ifdef USE_CARTOON
-		vec3 ndc = vec3(vTexcoord, depth) * 2.0 - 1.0;
-		vec4 worldPos = invViewProjMatrix * vec4(ndc, 1.0); worldPos /= worldPos.w;
-		float depthView = length(worldPos.xyz - eyePos);
-		FragColor.rgb = GenFogColor(-0.0000025, worldPos, depthView, udotl * 1.5, finalColor.rgb);
-	#else
-		FragColor = finalColor;
-	#endif
+	FragColor = GenColor(finalColor.rgb, depth);
 }

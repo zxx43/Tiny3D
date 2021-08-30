@@ -32,7 +32,7 @@ AnimationData::AnimationData(Animation* anim, int maxCount) : DataBuffer(ANIMATE
 		colorBuffer[i * 4 + 0] = (byte)(anim->aAmbients[i].x * 255);
 		colorBuffer[i * 4 + 1] = (byte)(anim->aDiffuses[i].x * 255);
 		colorBuffer[i * 4 + 2] = (byte)(anim->aSpeculars[i].x * 255);
-		colorBuffer[i * 4 + 3] = 0;
+		colorBuffer[i * 4 + 3] = 255;
 
 		SetUVec4(anim->aBoneids[i], boneids, i);
 		for (uint v = 0; v < 4; v++)
