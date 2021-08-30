@@ -25,7 +25,6 @@ flat out vec4 vTexid;
 #endif
 #ifndef ShadowPass
 flat out vec3 vColor;
-flat out float vLeaf;
 out vec3 vNormal;
 out mat3 vTBN;
 #endif
@@ -37,7 +36,6 @@ void main() {
 			vNormal = matRot * normal;
 			vTBN = matRot * GetTBN(normalize(normal), normalize(tangent));
 			vColor = COLOR_SCALE * color.rgb;
-			vLeaf = color.a;
 		#endif
 		#ifndef LowPass
 			vTexcoord = texcoord.xy;
