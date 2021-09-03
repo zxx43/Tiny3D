@@ -50,7 +50,7 @@ RenderBuffer* TerrainDrawcall::createBuffers() {
 	buffer->setAttribData(GL_ARRAY_BUFFER, NormalIndex, NormalSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, data->normalBuffer);
 	buffer->setAttribData(GL_ARRAY_BUFFER, TexcoordIndex, TexcoordSlot, GL_FLOAT, vertexCount, 4, 1, false, GL_STATIC_DRAW, 0, data->texcoordBuffer);
 	buffer->setAttribData(GL_ARRAY_BUFFER, TexidIndex, TexidSlot, GL_FLOAT, vertexCount, 4, 1, false, GL_STATIC_DRAW, 0, data->texidBuffer);
-	buffer->setAttribData(GL_ARRAY_BUFFER, ColorIndex, ColorSlot, GL_UNSIGNED_BYTE, vertexCount, 4, 1, false, GL_STATIC_DRAW, 0, data->colorBuffer);
+	buffer->setAttribData(GL_ARRAY_BUFFER, ColorIndex, ColorSlot, GL_UNSIGNED_BYTE, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, data->colorBuffer);
 	buffer->setAttribData(GL_ARRAY_BUFFER, TangentIndex, TangentSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, data->tangentBuffer);
 	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, OutIndex, GL_UNSIGNED_INT, maxIndexCount, GL_STREAM_DRAW, NULL);
 	buffer->useAs(OutIndex, GL_ELEMENT_ARRAY_BUFFER);

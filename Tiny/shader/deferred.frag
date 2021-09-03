@@ -78,6 +78,12 @@ float genShadow(sampler2D shadowMap, vec3 shadowCoord, float bias) {
 	return step(shadowCoord.z + bias, texture(shadowMap, shadowCoord.xy).r);
 }
 
+float getShadowLen(sampler2D shadowMap, vec3 shadowCoord, float bias) {
+	float stored = texture(shadowMap, shadowCoord.xy).r;
+	float scene = shadowCoord.z + bias;
+	return max(scene - stored, 0.0);
+}
+
 vec4 genShadowFactor(vec4 worldPos, float depthView, float bias) {
 	float lightDepth = depthView;
 	if(lightDepth <= levels.x - gaps.x) {

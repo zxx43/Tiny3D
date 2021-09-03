@@ -9,7 +9,7 @@ AnimationData::AnimationData(Animation* anim, int maxCount) : DataBuffer(ANIMATE
 	tangentBuffer = (half*)malloc(vertexCount * 3 * sizeof(half));
 	texcoordBuffer = (float*)malloc(vertexCount * 4 * sizeof(float));
 	texidBuffer = (float*)malloc(vertexCount * 2 * sizeof(float));
-	colorBuffer = (byte*)malloc(vertexCount * 4 * sizeof(byte));
+	colorBuffer = (byte*)malloc(vertexCount * 3 * sizeof(byte));
 	boneids = (byte*)malloc(vertexCount * 4 * sizeof(byte));
 	weights = (half*)malloc(vertexCount * 4 * sizeof(half));
 	indexBuffer = (ushort*)malloc(indexCount * sizeof(ushort));
@@ -29,10 +29,9 @@ AnimationData::AnimationData(Animation* anim, int maxCount) : DataBuffer(ANIMATE
 		texidBuffer[i * 2 + 0] = anim->aTextures[i]->texids.z;
 		texidBuffer[i * 2 + 1] = anim->aTextures[i]->texids.w;
 
-		colorBuffer[i * 4 + 0] = (byte)(anim->aAmbients[i].x * 255);
-		colorBuffer[i * 4 + 1] = (byte)(anim->aDiffuses[i].x * 255);
-		colorBuffer[i * 4 + 2] = (byte)(anim->aSpeculars[i].x * 255);
-		colorBuffer[i * 4 + 3] = 255;
+		colorBuffer[i * 3 + 0] = (byte)(anim->aAmbients[i].x * 255);
+		colorBuffer[i * 3 + 1] = (byte)(anim->aDiffuses[i].x * 255);
+		colorBuffer[i * 3 + 2] = (byte)(anim->aSpeculars[i].x * 255);
 
 		SetUVec4(anim->aBoneids[i], boneids, i);
 		for (uint v = 0; v < 4; v++)

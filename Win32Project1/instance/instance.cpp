@@ -39,7 +39,7 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 	tangentBuffer = (half*)malloc(vertexCount * 3 * sizeof(half));
 	texcoordBuffer = (float*)malloc(vertexCount * 4 * sizeof(float));
 	texidBuffer = (float*)malloc(vertexCount * 2 * sizeof(float));
-	colorBuffer = (byte*)malloc(vertexCount * 4 * sizeof(byte));
+	colorBuffer = (byte*)malloc(vertexCount * 3 * sizeof(byte));
 
 	indexCount=indices;
 	if (indexCount > 0)
@@ -63,7 +63,6 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 		vec3 diffuse = mat->diffuse;
 		vec3 specular = mat->specular;
 		vec4 texids = mat->texids;
-		byte leaf = mat->leaf ? 255 : 0;
 
 		for (int v = 0; v < 3; v++) {
 			vertexBuffer[i * 3 + v] = GetVec4(&vertex, v);
@@ -79,10 +78,9 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 		texidBuffer[i * 2 + 0] = (texids.z);
 		texidBuffer[i * 2 + 1] = (texids.w);
 
-		colorBuffer[i * 4 + 0] = (byte)(ambient.x * 255);
-		colorBuffer[i * 4 + 1] = (byte)(diffuse.x * 255);
-		colorBuffer[i * 4 + 2] = (byte)(specular.x * 255);
-		colorBuffer[i * 4 + 3] = leaf;
+		colorBuffer[i * 3 + 0] = (byte)(ambient.x * 255);
+		colorBuffer[i * 3 + 1] = (byte)(diffuse.x * 255);
+		colorBuffer[i * 3 + 2] = (byte)(specular.x * 255);
 	}
 
 	if(instanceMesh->indices) {

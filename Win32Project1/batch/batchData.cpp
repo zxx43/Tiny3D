@@ -6,7 +6,7 @@ BatchData::BatchData() {
 	tangents = (float*)malloc(MAX_VERTEX_COUNT * 3 * sizeof(float));
 	texcoords = (float*)malloc(MAX_VERTEX_COUNT * 4 * sizeof(float));
 	texids = (float*)malloc(MAX_VERTEX_COUNT * 4 * sizeof(float));
-	colors = (byte*)malloc(MAX_VERTEX_COUNT * 4 * sizeof(byte));
+	colors = (byte*)malloc(MAX_VERTEX_COUNT * 3 * sizeof(byte));
 	objectids = (byte*)malloc(MAX_VERTEX_COUNT * sizeof(byte));
 	indices = (uint*)malloc(MAX_INDEX_COUNT * sizeof(uint));
 	matrices = (float*)malloc(MAX_OBJECT_COUNT * 12 * sizeof(float));
@@ -72,10 +72,9 @@ void BatchData::addObject(Object* object, Mesh* mesh) {
 		texids[vertexCount * 4 + 2] = mat->texids.z;
 		texids[vertexCount * 4 + 3] = mat->texids.w;
 
-		colors[vertexCount * 4 + 0] = (byte)(mat->ambient.x * 255);
-		colors[vertexCount * 4 + 1] = (byte)(mat->diffuse.x * 255);
-		colors[vertexCount * 4 + 2] = (byte)(mat->specular.x * 255);
-		colors[vertexCount * 4 + 3] = mat->leaf ? 255 : 0;
+		colors[vertexCount * 3 + 0] = (byte)(mat->ambient.x * 255);
+		colors[vertexCount * 3 + 1] = (byte)(mat->diffuse.x * 255);
+		colors[vertexCount * 3 + 2] = (byte)(mat->specular.x * 255);
 
 		objectids[vertexCount++] = currentObject;
 	}

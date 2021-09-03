@@ -68,7 +68,7 @@ void Batch::initBatchBuffers(int vertCount, int indCount) {
 	if (!tangentBuffer) tangentBuffer = (float*)malloc(vertexCount * 3 * sizeof(float));
 	if (!texcoordBuffer) texcoordBuffer = (float*)malloc(vertexCount * 4 * sizeof(float));
 	if (!texidBuffer) texidBuffer = (float*)malloc(vertexCount * 4 * sizeof(float));
-	if (!colorBuffer) colorBuffer = (byte*)malloc(vertexCount * 4 * sizeof(byte));
+	if (!colorBuffer) colorBuffer = (byte*)malloc(vertexCount * 3 * sizeof(byte));
 	if (!objectidBuffer) objectidBuffer = (byte*)malloc(vertexCount * sizeof(byte));
 	if (!indexBuffer) indexBuffer = (uint*)malloc(indexCount * sizeof(uint));
 
@@ -127,10 +127,9 @@ void Batch::pushMeshToBuffers(Mesh* mesh,int mid,bool fullStatic,const mat4& tra
 		texidBuffer[vertexCount * 4 + 2] = mat->texids.z;
 		texidBuffer[vertexCount * 4 + 3] = mat->texids.w;
 
-		colorBuffer[vertexCount * 4 + 0] = (byte)(mat->ambient.x * 255);
-		colorBuffer[vertexCount * 4 + 1] = (byte)(mat->diffuse.x * 255);
-		colorBuffer[vertexCount * 4 + 2] = (byte)(mat->specular.x * 255);
-		colorBuffer[vertexCount * 4 + 3] = mat->leaf ? 255 : 0;
+		colorBuffer[vertexCount * 3 + 0] = (byte)(mat->ambient.x * 255);
+		colorBuffer[vertexCount * 3 + 1] = (byte)(mat->diffuse.x * 255);
+		colorBuffer[vertexCount * 3 + 2] = (byte)(mat->specular.x * 255);
 
 		objectidBuffer[vertexCount++] = currentObject;
 	}
@@ -175,7 +174,7 @@ void Batch::setRenderData(int pass, BatchData* data) {
 			memcpy(texidBuffer, data->texids, vertexCount * 4 * sizeof(float));
 			memcpy(normalBuffer, data->normals, vertexCount * 3 * sizeof(float));
 			memcpy(tangentBuffer, data->tangents, vertexCount * 3 * sizeof(float));
-			memcpy(colorBuffer, data->colors, vertexCount * 4 * sizeof(byte));
+			memcpy(colorBuffer, data->colors, vertexCount * 3 * sizeof(byte));
 		}
 	}
 	memcpy(objectidBuffer, data->objectids, vertexCount * sizeof(byte));
