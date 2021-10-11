@@ -142,8 +142,8 @@ void FBXLoader::loadMaterial(FbxNode* pNode, std::vector<uint>& mats) {
 			FbxTexture* texture = findTexture(phong);
 			if (texture) {
 				FbxFileTexture* texFile = FbxCast<FbxFileTexture>(texture);
-				const char* texName = texFile->GetRelativeFileName();
-				mtl->tex1 = convertTexPath(texName).data();
+				std::string texName = std::string(texFile->GetRelativeFileName());
+				mtl->tex1 = convertTexPath(texName);
 			}
 			mtl->ambient = vec3(ambient[0], ambient[1], ambient[2]);
 			mtl->diffuse = vec3(diffuse[0], diffuse[1], diffuse[2]);
@@ -155,8 +155,8 @@ void FBXLoader::loadMaterial(FbxNode* pNode, std::vector<uint>& mats) {
 			FbxTexture* texture = findTexture(lambert);
 			if (texture) {
 				FbxFileTexture* texFile = FbxCast<FbxFileTexture>(texture);
-				const char* texName = texFile->GetRelativeFileName();
-				mtl->tex1 = convertTexPath(texName).data();
+				std::string texName = std::string(texFile->GetRelativeFileName());
+				mtl->tex1 = convertTexPath(texName);
 			}
 			mtl->ambient = vec3(ambient[0], ambient[1], ambient[2]);
 			mtl->diffuse = vec3(diffuse[0], diffuse[1], diffuse[2]);

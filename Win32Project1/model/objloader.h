@@ -13,8 +13,8 @@
 
 class ObjLoader {
 private:
-	const char* objFilePath;
-	const char* mtlFilePath;
+	std::string objFilePath;
+	std::string mtlFilePath;
 	int vtNumber;
 	int vtCount,vnCount;
 

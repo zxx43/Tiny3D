@@ -2,11 +2,11 @@
 #include "../util/util.h"
 
 SoundObject::SoundObject(const char* path) {
-	filePath = path;
+	filePath = std::string(path);
 	alGenBuffers(1, &alSampleSet);
 	alGenSources(1, &alSource);
 	CWaves file;
-	file.loadWavFile(filePath, &alSource, &alSampleSet, &alBufferLen, &alFreqBuffer, &alFormatBuffer);
+	file.loadWavFile(filePath.data(), &alSource, &alSampleSet, &alBufferLen, &alFreqBuffer, &alFormatBuffer);
 	isPlay = false;
 	setLoop(false);
 	setPosition(vec3(0.0));
@@ -17,7 +17,7 @@ SoundObject::SoundObject(const SoundObject& rhs) {
 	alGenBuffers(1, &alSampleSet);
 	alGenSources(1, &alSource);
 	CWaves file;
-	file.loadWavFile(filePath, &alSource, &alSampleSet, &alBufferLen, &alFreqBuffer, &alFormatBuffer);
+	file.loadWavFile(filePath.data(), &alSource, &alSampleSet, &alBufferLen, &alFreqBuffer, &alFormatBuffer);
 	isPlay = rhs.isPlay;
 	setLoop(rhs.isLoop);
 	setPosition(vec3(0, 0, 0));

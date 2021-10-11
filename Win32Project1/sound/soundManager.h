@@ -3,6 +3,7 @@
 
 #include "CWaves.h"
 #include "../util/util.h"
+#include <string>
 
 class SoundObject {
 private:   
@@ -11,7 +12,7 @@ private:
 	ALsizei alBufferLen;
 	uint alSource;  
 	uint alSampleSet;
-	const char* filePath;
+	std::string filePath;
 	bool isLoop, isPlay;
 public:
 	SoundObject(const char* path);

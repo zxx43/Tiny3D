@@ -8,7 +8,7 @@
 using namespace std;
 
 MtlLoader::MtlLoader(const char* mtlPath) {
-	mtlFilePath=mtlPath;
+	mtlFilePath=string(mtlPath);
 	mtlCount=0;
 	readMtlInfo();
 	readMtlFile();
@@ -19,7 +19,7 @@ MtlLoader::~MtlLoader() {
 }
 
 void MtlLoader::readMtlInfo() {
-	ifstream infile(mtlFilePath);
+	ifstream infile(mtlFilePath.data());
 	string sline;
 	while(getline(infile,sline)) {
 		if(sline[0]=='n'&&sline[1]=='e')//newmtl
@@ -29,7 +29,7 @@ void MtlLoader::readMtlInfo() {
 }
 
 void MtlLoader::readMtlFile() {
-	ifstream infile(mtlFilePath);
+	ifstream infile(mtlFilePath.data());
 	string sline;
 	int n = 0, t = 0, d = 0, a = 0, s = 0, c = 0, l = 0;
 

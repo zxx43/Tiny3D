@@ -6,8 +6,8 @@
 using namespace std;
 
 ObjLoader::ObjLoader(const char* objPath,const char* mtlPath,int vtNum) {
-	objFilePath=objPath;
-	mtlFilePath=mtlPath;
+	objFilePath=string(objPath);
+	mtlFilePath=string(mtlPath);
 	vtNumber=vtNum;
 	vCount=0;
 	vnCount=0;
@@ -15,11 +15,11 @@ ObjLoader::ObjLoader(const char* objPath,const char* mtlPath,int vtNum) {
 	faceCount=0;
 	readObjInfo();
 	readObjFile();
-	mtlLoader=new MtlLoader(mtlFilePath);
+	mtlLoader=new MtlLoader(mtlFilePath.data());
 }
 
 void ObjLoader::readObjInfo() {
-	ifstream infile(objFilePath);
+	ifstream infile(objFilePath.data());
 	string sline;
 
 	while(getline(infile,sline)) {//从指定文件逐行读取
@@ -60,7 +60,7 @@ void ObjLoader::readObjFile() {
 	}
 	mtArr=new string[faceCount];
 
-	ifstream infile(objFilePath);
+	ifstream infile(objFilePath.data());
 	string sline;
 	int ii=0,tt=0,jj=0,kk=0;
 

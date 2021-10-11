@@ -14,7 +14,7 @@
 
 class MtlLoader {
 private:
-	const char* mtlFilePath;
+	std::string mtlFilePath;
 	int mtlCount;
 
 	void readMtlInfo();
