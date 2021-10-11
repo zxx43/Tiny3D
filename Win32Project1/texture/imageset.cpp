@@ -23,12 +23,12 @@ ImageSet::~ImageSet() {
 	imageNames.clear();
 }
 
-void ImageSet::addTexture(const char* name) {
+void ImageSet::addTexture(const string name) {
 	set[name] = imageNames.size(); // Start at 0
 	imageNames.push_back(name);
 }
 
-int ImageSet::findTexture(const char* name) {
+int ImageSet::findTexture(const string name) {
 	map<string,int>::iterator itor=set.find(name);
 	if(itor!=set.end())
 		return itor->second;

@@ -14,7 +14,7 @@ private:
 	GLuint* texids;
 	u64* texhnds;
 	std::vector<bool> texSrgbs;
-	std::vector<const char*> texnames;
+	std::vector<std::string> texnames;
 	std::vector<ImageLoader*> imgs;
 	std::vector<int> wraps;
 	int size;
@@ -23,8 +23,8 @@ private:
 public:
 	TextureBindless();
 	~TextureBindless();
-	void addTexture(const char* name, bool srgb, int wrap = WRAP_REPEAT);
-	int findTexture(const char* name);
+	void addTexture(const std::string name, bool srgb, int wrap = WRAP_REPEAT);
+	int findTexture(const std::string name);
 	void initData(std::string dir);
 	int getSize() { return size; }
 	GLuint64* getHnds() { return texhnds; }

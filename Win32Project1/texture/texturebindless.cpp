@@ -37,7 +37,7 @@ void TextureBindless::releaseMemory() {
 	imgs.clear();
 }
 
-void TextureBindless::addTexture(const char* name, bool srgb, int wrap) {
+void TextureBindless::addTexture(const string name, bool srgb, int wrap) {
 	texnames.push_back(name);
 	texSrgbs.push_back(srgb);
 	wraps.push_back(wrap);
@@ -45,7 +45,7 @@ void TextureBindless::addTexture(const char* name, bool srgb, int wrap) {
 	size++;
 }
 
-int TextureBindless::findTexture(const char* name) {
+int TextureBindless::findTexture(const string name) {
 	map<string, int>::iterator it = texinds.find(name);
 	if (it != texinds.end())
 		return it->second;

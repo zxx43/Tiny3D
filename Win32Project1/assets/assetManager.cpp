@@ -53,7 +53,7 @@ AssetManager::~AssetManager() {
 }
 
 void AssetManager::addTextureBindless(const char* name, bool srgb, int wrap) {
-	texBld->addTexture(name, srgb, wrap);
+	texBld->addTexture(string(name), srgb, wrap);
 }
 
 void AssetManager::initTextureBindless(MaterialManager* mtls) {
@@ -61,20 +61,20 @@ void AssetManager::initTextureBindless(MaterialManager* mtls) {
 		Material* mat = mtls->find(i);
 		if (mat->prepared) continue;
 		if (mat->tex1.length() > 0) {
-			if (texBld->findTexture(mat->tex1.data()) < 0) texBld->addTexture(mat->tex1.data(), mat->srgb1);
-			mat->texids.x = texBld->findTexture(mat->tex1.data());
+			if (texBld->findTexture(mat->tex1) < 0) texBld->addTexture(mat->tex1, mat->srgb1);
+			mat->texids.x = texBld->findTexture(mat->tex1);
 		}
 		if (mat->tex2.length() > 0) {
-			if (texBld->findTexture(mat->tex2.data()) < 0) texBld->addTexture(mat->tex2.data(), mat->srgb2);
-			mat->texids.y = texBld->findTexture(mat->tex2.data());
+			if (texBld->findTexture(mat->tex2) < 0) texBld->addTexture(mat->tex2, mat->srgb2);
+			mat->texids.y = texBld->findTexture(mat->tex2);
 		}
 		if (mat->tex3.length() > 0) {
-			if (texBld->findTexture(mat->tex3.data()) < 0) texBld->addTexture(mat->tex3.data(), mat->srgb3);
-			mat->texids.z = texBld->findTexture(mat->tex3.data());
+			if (texBld->findTexture(mat->tex3) < 0) texBld->addTexture(mat->tex3, mat->srgb3);
+			mat->texids.z = texBld->findTexture(mat->tex3);
 		}
 		if (mat->tex4.length() > 0) {
-			if (texBld->findTexture(mat->tex4.data()) < 0) texBld->addTexture(mat->tex4.data(), mat->srgb4);
-			mat->texids.w = texBld->findTexture(mat->tex4.data());
+			if (texBld->findTexture(mat->tex4) < 0) texBld->addTexture(mat->tex4, mat->srgb4);
+			mat->texids.w = texBld->findTexture(mat->tex4);
 		}
 		printf("mat %s: [%d]%s\n", mat->name.data(), (int)mat->texids.x, mat->tex1.data());
 	}
@@ -82,7 +82,7 @@ void AssetManager::initTextureBindless(MaterialManager* mtls) {
 }
 
 int AssetManager::findTextureBindless(const char* name) {
-	return texBld->findTexture(name);
+	return texBld->findTexture(string(name));
 }
 
 void AssetManager::setSkyTexture(CubeMap* tex) {

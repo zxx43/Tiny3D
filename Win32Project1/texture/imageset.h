@@ -30,8 +30,8 @@ private:
 public:
 	ImageSet();
 	~ImageSet();
-	void addTexture(const char* name);
-	int findTexture(const char* name);
+	void addTexture(const std::string name);
+	int findTexture(const std::string name);
 	void initTextureArray(std::string dir);
 };
 

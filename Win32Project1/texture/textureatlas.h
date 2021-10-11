@@ -31,8 +31,8 @@ private:
 public:
 	TextureAtlas();
 	~TextureAtlas();
-	void addTexture(const char* name);
-	TexOffset* findTextureOfs(const char* name);
+	void addTexture(const std::string name);
+	TexOffset* findTextureOfs(const std::string name);
 	void createAtlas(std::string dir);
 };
 

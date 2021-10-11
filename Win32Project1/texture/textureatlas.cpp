@@ -40,12 +40,12 @@ void TextureAtlas::releaseAtlas() {
 	if (texId) glDeleteTextures(1, &texId);
 }
 
-void TextureAtlas::addTexture(const char* name) {
+void TextureAtlas::addTexture(const string name) {
 	imageNames.push_back(name);
 	offsetMap[name] = new TexOffset();
 }
 
-TexOffset* TextureAtlas::findTextureOfs(const char* name) {
+TexOffset* TextureAtlas::findTextureOfs(const string name) {
 	map<string, TexOffset*>::iterator it = offsetMap.find(name);
 	if (it != offsetMap.end())
 		return it->second;
