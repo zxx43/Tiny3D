@@ -5,6 +5,8 @@ uniform BindlessSampler2D texBuffer,
 						roughMetalBuffer, 
 						depthBuffer;
 
+uniform BindlessSamplerCube irradianceMap;
+
 uniform vec2 pixelSize;
 uniform mat4 invViewProjMatrix, invProjMatrix;
 uniform mat3 invViewMatrix;
@@ -233,6 +235,8 @@ void main() {
 			float shadowFactor = 1.0;
 		#endif
 		vec3 ambient = material.r * albedo;
+		vec3 irradiance = texture(irradianceMap, normal).rgb;
+		ambient *= irradiance;
 
 		// PBR
 		#ifndef USE_CARTOON

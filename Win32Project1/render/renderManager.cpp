@@ -61,6 +61,7 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 	hiz = new HizGenerator();
 	prevCameraMat.LoadIdentity();
 	hizDepth = NULL;
+	ibl = NULL;
 }
 
 RenderManager::~RenderManager() {
@@ -79,6 +80,7 @@ RenderManager::~RenderManager() {
 	if (grassDrawcall) delete grassDrawcall; grassDrawcall = NULL;
 	if (hiz) delete hiz; hiz = NULL;
 	if (hizDepth) delete hizDepth; hizDepth = NULL;
+	if (ibl) delete ibl; ibl = NULL;
 }
 
 void RenderManager::resize(float width, float height) {
@@ -447,6 +449,11 @@ void RenderManager::renderSkyTex(Render* render, Scene* scene) {
 		scene->skyBox->state->time = scene->time;
 		scene->skyBox->state->udotl = udotl;
 		scene->skyBox->update(render, lightDir, atmoShader);
+
+		if (!ibl) ibl = new Ibl(scene);
+		static Shader* iblShader = render->findShader("ibl");
+		ibl->generate(render, iblShader);
+
 		needRefreshSky = false;
 	}
 }
@@ -513,6 +520,10 @@ void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* scre
 				midBuffer->getDepthBuffer()->hnd, farBuffer->getDepthBuffer()->hnd };
 			deferredShader->setHandle64v("shadowBuffers", 4, shadowTexs);
 	}
+
+	if (ibl && !deferredShader->isTexBinded(ibl->getTex()->hnd))
+		deferredShader->setHandle64("irradianceMap", ibl->getTex()->hnd);
+
 	filter->draw(scene->renderCamera, render, state, screenBuff->colorBuffers, screenBuff->depthBuffer);
 }
 

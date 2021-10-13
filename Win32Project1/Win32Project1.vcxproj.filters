@@ -103,6 +103,9 @@
     <Filter Include="Source Files\sound">
       <UniqueIdentifier>{ad9f5aed-d25d-4182-ae8f-9b98e103c002}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\ibl">
+      <UniqueIdentifier>{76b1864e-afcd-4174-b970-8e910763b705}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="batch\batch.cpp">
@@ -344,6 +347,9 @@
     </ClCompile>
     <ClCompile Include="texture\hizGenerator.cpp">
       <Filter>Source Files\texture</Filter>
+    </ClCompile>
+    <ClCompile Include="ibl\ibl.cpp">
+      <Filter>Source Files\ibl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -608,6 +614,9 @@
     <ClInclude Include="texture\hizGenerator.h">
       <Filter>Source Files\texture</Filter>
     </ClInclude>
+    <ClInclude Include="ibl\ibl.h">
+      <Filter>Source Files\ibl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Tiny\shader\blur.frag">
@@ -758,6 +767,9 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Tiny\shader\fxaa.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Tiny\shader\ibl.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

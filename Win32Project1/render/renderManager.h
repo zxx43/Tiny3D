@@ -13,6 +13,7 @@
 #include "../render/renderQueue.h"
 #include "../render/computeDrawcall.h"
 #include "../texture/hizGenerator.h"
+#include "../ibl/ibl.h"
 
 struct Renderable {
 	std::vector<RenderQueue*> queues;
@@ -50,6 +51,7 @@ public:
 	int depthPre;
 	HizGenerator* hiz;
 	Texture2D* hizDepth;
+	Ibl* ibl;
 private:
 	Shadow* shadow;
 	bool needResize, needRefreshSky, actShowWater, renderShowWater;

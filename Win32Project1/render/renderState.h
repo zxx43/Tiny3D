@@ -17,6 +17,7 @@ struct RenderState {
 	bool skyPass;
 	bool atmoPass;
 	bool cloudPass;
+	bool iblPass;
 	bool dynSky;
 	bool waterPass;
 	bool grassPass;
@@ -70,6 +71,7 @@ struct RenderState {
 		skyPass = rhs->skyPass;
 		atmoPass = rhs->atmoPass;
 		cloudPass = rhs->cloudPass;
+		iblPass = rhs->iblPass;
 		dynSky = rhs->dynSky;
 		waterPass = rhs->waterPass;
 		grassPass = rhs->grassPass;
@@ -110,6 +112,7 @@ struct RenderState {
 		skyPass = false;
 		atmoPass = false;
 		cloudPass = false;
+		iblPass = false;
 		dynSky = false;
 		waterPass = false;
 		grassPass = false;
