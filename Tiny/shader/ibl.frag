@@ -28,5 +28,7 @@ void main() {
 	}
 	irradiance = PI * irradiance / nrSamples;
 	FragColor.rgb = irradiance;
-	FragColor.rgb = pow(FragColor.rgb, INV_GAMMA);
+    #ifdef DYN_SKY
+	    FragColor.rgb = pow(FragColor.rgb, INV_GAMMA);
+    #endif
 }

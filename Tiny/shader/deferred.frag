@@ -234,15 +234,14 @@ void main() {
 		#else
 			float shadowFactor = 1.0;
 		#endif
-		vec3 ambient = material.r * albedo;
-		vec3 irradiance = texture(irradianceMap, normal).rgb;
-		ambient *= irradiance;
+		vec3 ambient = albedo;
 
 		// PBR
 		#ifndef USE_CARTOON
-			if(shadowFactor * udotl < 0.0001) 
-				sceneColor = ambient * udotl;
-			else {
+			ambient *= texture(irradianceMap, normal).rgb;
+			if(shadowFactor * udotl < 0.0001) {
+				sceneColor = ambient;
+			} else {
 				v /= depthView;
 				vec3 h = normalize(v + light);
 				vec3 radiance = vec3(3.5);
@@ -257,15 +256,16 @@ void main() {
 				float specular = (NDF * G) / (4.0 * max(dot(normal, v), 0.0) * ndotl + 0.001);
 				vec3 Lo = (kD * albedo * INV_PI + kS * specular) * radiance * ndotl;
 
-				sceneColor = shadowLayer * (ambient + shadowFactor * Lo) * udotl;
+				sceneColor = shadowLayer * (ambient + shadowFactor * Lo);
 			}
+			sceneColor *= udotl;
 		// Cartoon
 		#else
 			float darkness = shadowFactor;
 			float threshold = 0.15;
 			float cwFactor = step(darkness, threshold);
 			vec3 kd = KCool * cwFactor + KWarm * (1.0 - cwFactor);
-			sceneColor = (ambient + kd * albedo * material.g) * udotl;
+			sceneColor = (ambient * material.r + kd * albedo * material.g) * udotl;
 		#endif
 	} else {
 		normal = invViewMatrix * normal;

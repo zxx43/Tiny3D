@@ -35,7 +35,8 @@ void main() {
     );
 
     color = cloudRayMarch(texNoise, start, sun, view, udotl, color, time);
+	color = 1.0 - exp(-1.0 * color);
 
 	FragColor = vec4(color, 1.0);
-    FragColor.rgb = pow(FragColor.rgb, INV_GAMMA);
+    //FragColor.rgb = pow(FragColor.rgb, INV_GAMMA);
 }

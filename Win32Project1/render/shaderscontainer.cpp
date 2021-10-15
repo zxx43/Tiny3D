@@ -89,8 +89,7 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 
 	Shader* water = shaders->addShader("water", WATER_VERT, WATER_FRAG);
 	if (!cfgs->ssr) water->attachDef("DISABLE_SSR", "1");
-	if (cfgs->dynsky)
-		water->attachDef("DYN_SKY", "1");
+	if (cfgs->dynsky) water->attachDef("DYN_SKY", "1");
 
 	Shader* phongShadow = shaders->addShader("phong_s", PHONG_VERT, SHADOW_TEX_FRAG);
 	phongShadow->attachDef("ShadowPass", "1.0");
@@ -229,6 +228,7 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	Shader* depth = shaders->addShader("depth", POST_VERT, DEPTH_FRAG);
 	Shader* hiz = shaders->addShader("hiz", POST_VERT, HIZ_FRAG);
 	Shader* ibl = shaders->addShader("ibl", ATMOS_VERT, IBL_FRAG);
+	if (cfgs->dynsky) ibl->attachDef("DYN_SKY", "1");
 
 	shaders->compile();
 }

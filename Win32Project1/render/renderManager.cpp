@@ -451,8 +451,12 @@ void RenderManager::renderSkyTex(Render* render, Scene* scene) {
 		scene->skyBox->update(render, lightDir, atmoShader);
 
 		if (!ibl) ibl = new Ibl(scene);
-		static Shader* iblShader = render->findShader("ibl");
-		ibl->generate(render, iblShader);
+		static bool needRefreshIbl = true;
+		if (needRefreshIbl) {
+			static Shader* iblShader = render->findShader("ibl");
+			ibl->generate(render, iblShader);
+			needRefreshIbl = false;
+		}
 
 		needRefreshSky = false;
 	}
