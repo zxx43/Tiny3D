@@ -154,8 +154,8 @@ void AssetManager::createHeightTex() {
 		vec3 normal = (mesh->normals[i].GetNormalized() + 1.0) * 0.5 * 255.0;
 		SetUVec3(normal, normalData, i);
 	}
-	heightTexture = new Texture2D(size, size, false, TEXTURE_TYPE_COLOR, LOW_PRE, 1, NEAREST, true, heightData);
-	heightNormalTex = new Texture2D(size, size, false, TEXTURE_TYPE_COLOR, LOW_PRE, 3, LINEAR, true, normalData);
+	heightTexture = new Texture2D(size, size, false, TEXTURE_TYPE_COLOR, LOW_PRE, 1, NEAREST, WRAP_CLAMP_TO_BORDER, true, heightData);
+	heightNormalTex = new Texture2D(size, size, false, TEXTURE_TYPE_COLOR, LOW_PRE, 3, LINEAR, WRAP_CLAMP_TO_BORDER, true, normalData);
 	free(heightData);
 	free(normalData);
 }

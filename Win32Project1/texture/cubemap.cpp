@@ -2,7 +2,7 @@
 #include "../render/render.h"
 
 CubeMap::CubeMap(const char* xpos,const char* xneg,const char* ypos,
-		const char* yneg,const char* zpos,const char* zneg) {
+		const char* yneg,const char* zpos,const char* zneg, bool useMip) {
 	xposImg=new ImageLoader(xpos);
 	xnegImg=new ImageLoader(xneg);
 	yposImg=new ImageLoader(ypos);
@@ -41,6 +41,11 @@ CubeMap::CubeMap(const char* xpos,const char* xneg,const char* ypos,
 		znegImg->width, znegImg->height, 0, 
 		GL_RGBA, GL_UNSIGNED_BYTE, znegImg->data);
 
+	if (useMip) {
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+	}
+
 	glBindTexture(GL_TEXTURE_CUBE_MAP,0);
 	hnd = genBindless();
 #ifndef _DEBUG 
@@ -48,7 +53,7 @@ CubeMap::CubeMap(const char* xpos,const char* xneg,const char* ypos,
 #endif
 }
 
-CubeMap::CubeMap(int w, int h, int p) {
+CubeMap::CubeMap(int w, int h, bool useMip, int p) {
 	xposImg = NULL, xnegImg = NULL;
 	yposImg = NULL, ynegImg = NULL;
 	zposImg = NULL, znegImg = NULL;
@@ -78,6 +83,11 @@ CubeMap::CubeMap(int w, int h, int p) {
 		width, height, 0, GL_RGBA, type, NULL);
 	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, format,
 		width, height, 0, GL_RGBA, type, NULL);
+
+	if (useMip) {
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+	}
 
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	hnd = genBindless();

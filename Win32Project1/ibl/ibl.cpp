@@ -18,8 +18,8 @@ Ibl::Ibl(Scene* scene) {
 	iblNode->updateNode(scene);
 	iblNode->prepareDrawcall();
 
-	iblTex = new CubeMap(512, 512, FLOAT_PRE);
-	iblBuff = new FrameBuffer(iblTex);
+	irradianceTex = new CubeMap(512, 512, false, FLOAT_PRE);
+	irradianceBuff = new FrameBuffer(irradianceTex);
 
 	mat4 proj = perspective(90.0, 1.0, 0.5, 10.0);
 	matPosx = proj * viewMat(vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 1.0f, 0.0f), vec3(-1.0f, 0.0f, 0.0f), vec3(0.0, 0.0, 0.0));
@@ -38,15 +38,15 @@ Ibl::~Ibl() {
 	delete mesh; mesh = NULL;
 	delete iblNode; iblNode = NULL;
 	delete state; state = NULL;
-	if (iblBuff) delete iblBuff; iblBuff = NULL;
+	if (irradianceBuff) delete irradianceBuff; irradianceBuff = NULL;
 }
 
 void Ibl::generate(Render* render, Shader* shader) {
-	if (!iblBuff) return;
+	if (!irradianceBuff) return;
 	state->delay = 0;
 	state->iblPass = true;
 	state->shader = shader;
-	render->useFrameBuffer(iblBuff);
+	render->useFrameBuffer(irradianceBuff);
 
 	render->useFrameCube(0);
 	render->setShaderMat4(shader, "viewProjectMatrix", matPosx);

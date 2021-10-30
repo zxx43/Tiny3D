@@ -363,8 +363,8 @@
     <None Include="..\Tiny\shader\grassLayer.vert" />
     <None Include="..\Tiny\shader\hiz.glsl" />
     <None Include="..\Tiny\shader\hizmip.frag" />
-    <None Include="..\Tiny\shader\ibl.frag" />
     <None Include="..\Tiny\shader\instance.vert" />
+    <None Include="..\Tiny\shader\irradiance.frag" />
     <None Include="..\Tiny\shader\mean.frag" />
     <None Include="..\Tiny\shader\multiCull.comp" />
     <None Include="..\Tiny\shader\noise.frag" />

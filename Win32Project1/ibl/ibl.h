@@ -12,9 +12,9 @@ class Ibl {
 private:
 	StaticNode* iblNode;
 	Sphere* mesh;
-	FrameBuffer* iblBuff;
+	FrameBuffer* irradianceBuff;
 	mat4 matPosx, matNegx, matPosy, matNegy, matPosz, matNegz;
-	CubeMap* iblTex;
+	CubeMap* irradianceTex;
 public:
 	RenderState* state;
 public:
@@ -22,7 +22,7 @@ public:
 	~Ibl();
 public:
 	void generate(Render* render, Shader* shader);
-	CubeMap* getTex() { return iblTex; }
+	CubeMap* getIrradianceTex() { return irradianceTex; }
 };
 
 #endif

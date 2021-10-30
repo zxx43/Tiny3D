@@ -21,11 +21,11 @@ Sky::Sky(Scene* scene, bool dyn) {
 	
 	CubeMap* env = new CubeMap("texture/sky/xpos.bmp", "texture/sky/xneg.bmp",
 			"texture/sky/yneg.bmp", "texture/sky/ypos.bmp",
-			"texture/sky/zpos.bmp", "texture/sky/zneg.bmp");
+			"texture/sky/zpos.bmp", "texture/sky/zneg.bmp", false);
 	AssetManager::assetManager->setEnvTexture(env);
 
 	if (dyn) {
-		CubeMap* texture = new CubeMap(512, 512);
+		CubeMap* texture = new CubeMap(512, 512, false, LOW_PRE);
 		AssetManager::assetManager->setSkyTexture(texture);
 		skyBuff = new FrameBuffer(texture);
 	} else {

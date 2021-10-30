@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-Texture2D::Texture2D(uint w, uint h, bool useMip, int t, int p, int c, int filter, bool clampBorder, void* initData) {
+Texture2D::Texture2D(uint w, uint h, bool useMip, int t, int p, int c, int filter, int wrapMode, bool clearWhite, void* initData) {
 	width = w, height = h;
 	type = t;
 	precision = p;
@@ -19,12 +19,14 @@ Texture2D::Texture2D(uint w, uint h, bool useMip, int t, int p, int c, int filte
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterParam);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterParam);
 
-	if (clampBorder) {
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-		const float white[4] = { 1, 1, 1, 1 };
-		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, white);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
+	if (wrapMode == WRAP_CLAMP_TO_BORDER) {
+		const float White[4] = { 1, 1, 1, 1 };
+		const float Black[4] = { 0, 0, 0, 0 };
+		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, clearWhite ? White : Black);
 	}
+	
 	preDepth = precision >= HIGH_PRE ? GL_DEPTH_COMPONENT24 : GL_DEPTH_COMPONENT16;
 	if (precision == FLOAT_PRE) preDepth = GL_DEPTH_COMPONENT32F;
 	format = GL_RGBA;
@@ -82,12 +84,8 @@ Texture2D::Texture2D(uint w, uint h, bool useMip, int t, int p, int c, int filte
 	}
 
 	if (useMip) {
-		GLint filterParam = filter == LINEAR ? GL_LINEAR_MIPMAP_NEAREST : GL_NEAREST_MIPMAP_NEAREST;
+		GLint filterParam = filter == LINEAR ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_NEAREST;
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterParam);
-		if (type == TEXTURE_TYPE_DEPTH) { // mipmap && depth type must be hizMap
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		}
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 

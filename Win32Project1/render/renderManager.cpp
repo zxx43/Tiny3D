@@ -93,9 +93,9 @@ void RenderManager::resize(float width, float height) {
 	}
 
 	if (occluderDepth) delete occluderDepth;
-	occluderDepth = new Texture2D(width, height, false, TEXTURE_TYPE_DEPTH, depthPre, 1, NEAREST);
+	occluderDepth = new Texture2D(width, height, false, TEXTURE_TYPE_DEPTH, depthPre, 1, NEAREST, WRAP_CLAMP_TO_EDGE);
 	if (hizDepth) delete hizDepth;
-	hizDepth = new Texture2D(width, height, true, TEXTURE_TYPE_DEPTH, depthPre, 1, NEAREST);
+	hizDepth = new Texture2D(width, height, true, TEXTURE_TYPE_DEPTH, depthPre, 1, NEAREST, WRAP_CLAMP_TO_EDGE);
 	needResize = true;
 	updateSky();
 }
@@ -453,8 +453,8 @@ void RenderManager::renderSkyTex(Render* render, Scene* scene) {
 		if (!ibl) ibl = new Ibl(scene);
 		static bool needRefreshIbl = true;
 		if (needRefreshIbl) {
-			static Shader* iblShader = render->findShader("ibl");
-			ibl->generate(render, iblShader);
+			static Shader* irrShader = render->findShader("irradiance");
+			ibl->generate(render, irrShader);
 			needRefreshIbl = false;
 		}
 
@@ -525,8 +525,8 @@ void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* scre
 			deferredShader->setHandle64v("shadowBuffers", 4, shadowTexs);
 	}
 
-	if (ibl && !deferredShader->isTexBinded(ibl->getTex()->hnd))
-		deferredShader->setHandle64("irradianceMap", ibl->getTex()->hnd);
+	if (ibl && !deferredShader->isTexBinded(ibl->getIrradianceTex()->hnd))
+		deferredShader->setHandle64("irradianceMap", ibl->getIrradianceTex()->hnd);
 
 	filter->draw(scene->renderCamera, render, state, screenBuff->colorBuffers, screenBuff->depthBuffer);
 }
