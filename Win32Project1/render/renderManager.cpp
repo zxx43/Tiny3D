@@ -86,7 +86,7 @@ RenderManager::~RenderManager() {
 void RenderManager::resize(float width, float height) {
 	if (reflectBuffer) delete reflectBuffer; reflectBuffer = NULL;
 	if (!cfgs->ssr) {
-		reflectBuffer = new FrameBuffer(width, height, LOW_PRE, 4, false);
+		reflectBuffer = new FrameBuffer(width, height, LOW_PRE, 4, WRAP_REPEAT);
 		reflectBuffer->addColorBuffer(LOW_PRE, 4);
 		reflectBuffer->addColorBuffer(LOW_PRE, 3);
 		reflectBuffer->attachDepthBuffer(LOW_PRE, false);
@@ -454,7 +454,11 @@ void RenderManager::renderSkyTex(Render* render, Scene* scene) {
 		static bool needRefreshIbl = true;
 		if (needRefreshIbl) {
 			static Shader* irrShader = render->findShader("irradiance");
-			ibl->generate(render, irrShader);
+			static Shader* prefilterShader = render->findShader("prefiltered");
+			static Shader* brdfShader = render->findShader("brdf");
+			ibl->genIrradiance(render, irrShader);
+			ibl->genPrefiltered(render, prefilterShader);
+			ibl->genBrdf(render, brdfShader);
 			needRefreshIbl = false;
 		}
 
@@ -527,6 +531,10 @@ void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* scre
 
 	if (ibl && !deferredShader->isTexBinded(ibl->getIrradianceTex()->hnd))
 		deferredShader->setHandle64("irradianceMap", ibl->getIrradianceTex()->hnd);
+	if (ibl && !deferredShader->isTexBinded(ibl->getPrefilteredTex()->hnd))
+		deferredShader->setHandle64("prefilteredMap", ibl->getPrefilteredTex()->hnd);
+	if (ibl && !deferredShader->isTexBinded(ibl->getBrdf()->hnd))
+		deferredShader->setHandle64("brdfMap", ibl->getBrdf()->hnd);
 
 	filter->draw(scene->renderCamera, render, state, screenBuff->colorBuffers, screenBuff->depthBuffer);
 }
@@ -703,27 +711,27 @@ void RenderManager::drawNoise3d(Render* render, Scene* scene, FrameBuffer* noise
 
 	render->useFrameBuffer(noiseBuf);
 
-	render->useFrameCube(0);
+	render->useFrameCube(0, 0);
 	render->setShaderMat4(state.shader, "viewProjectMatrix", matPosx);
 	render->draw(NULL, node->drawcall, &state);
 
-	render->useFrameCube(1);
+	render->useFrameCube(1, 0);
 	render->setShaderMat4(state.shader, "viewProjectMatrix", matNegx);
 	render->draw(NULL, node->drawcall, &state);
 
-	render->useFrameCube(2);
+	render->useFrameCube(2, 0);
 	render->setShaderMat4(state.shader, "viewProjectMatrix", matPosy);
 	render->draw(NULL, node->drawcall, &state);
 
-	render->useFrameCube(3);
+	render->useFrameCube(3, 0);
 	render->setShaderMat4(state.shader, "viewProjectMatrix", matNegy);
 	render->draw(NULL, node->drawcall, &state);
 
-	render->useFrameCube(4);
+	render->useFrameCube(4, 0);
 	render->setShaderMat4(state.shader, "viewProjectMatrix", matPosz);
 	render->draw(NULL, node->drawcall, &state);
 
-	render->useFrameCube(5);
+	render->useFrameCube(5, 0);
 	render->setShaderMat4(state.shader, "viewProjectMatrix", matNegz);
 	render->draw(NULL, node->drawcall, &state);
 }

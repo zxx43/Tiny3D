@@ -20,7 +20,7 @@ private:
 private:
 	bool bindTex(int slot, const Texture2D* tex, Shader* shader);
 public:
-	Filter(float width, float height, bool useFramebuffer, int precision, int component, int filt, bool clampBorder = true);
+	Filter(float width, float height, bool useFramebuffer, int precision, int component, int filt, int wrap);
 	~Filter();
 public:
 	void draw(Camera* camera, Render* render, RenderState* state,
@@ -36,9 +36,9 @@ public:
 struct FilterChain {
 	std::vector<Texture2D*> input;
 	Filter* output;
-	FilterChain(int width, int height, bool useFramebuffer, int precision, int component, bool clampBorder = true) {
+	FilterChain(int width, int height, bool useFramebuffer, int precision, int component, int wrapMode = WRAP_CLAMP_TO_BORDER) {
 		input.clear(); 
-		output = new Filter(width, height, useFramebuffer, precision, component, clampBorder);
+		output = new Filter(width, height, useFramebuffer, precision, component, LINEAR, wrapMode);
 	}
 	~FilterChain() {
 		input.clear();
@@ -57,9 +57,9 @@ struct FilterChain {
 
 struct DualFilter {
 	FilterChain *filter1, *filter2;
-	DualFilter(int width, int height, bool useFramebuffer, int precision, int component, bool clampBorder = true) {
-		filter1 = new FilterChain(width, height, useFramebuffer, precision, component, clampBorder);
-		filter2 = new FilterChain(width, height, useFramebuffer, precision, component, clampBorder);
+	DualFilter(int width, int height, bool useFramebuffer, int precision, int component, int wrap) {
+		filter1 = new FilterChain(width, height, useFramebuffer, precision, component, wrap);
+		filter2 = new FilterChain(width, height, useFramebuffer, precision, component, wrap);
 		filter2->addInputTex(filter1->getOutputTex(0));
 	}
 	~DualFilter() {

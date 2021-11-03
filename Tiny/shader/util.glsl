@@ -3,7 +3,7 @@
 const float PI = 3.1415926;
 const float INV_PI = 0.318309891613572;
 const vec4 RAND_FACTOR = vec4(12.9898, 78.233, 45.164, 94.673);
-const vec4 DefaultRM = vec4(0.0, 0.0, 0.0, 1.0);
+const vec4 DefaultRM = vec4(1.0, 0.0, 0.0, 1.0);
 const vec3 MatScale = vec3(0.6, 1.2, 1.0);
 const vec3 COLOR_SCALE = vec3(0.004, 0.008, 0.005);
 const vec3 GAMMA = vec3(2.2);
@@ -14,8 +14,8 @@ const vec4 FAIL_COLOR = vec4(1.0, 1.0, 1.0, 0.0);
 const vec3 UP_VEC3 = vec3(0.0, 1.0, 0.0);
 const vec3 ZERO_VEC3 = vec3(0.0);
 const vec4 BoardMat = vec4(0.3, 0.0, 0.0, 1.0);
-const vec4 BoardRM = vec4(0.0, 0.0, 0.0, 1.0);
-const uint MAX_TEX = 64;
+const vec4 BoardRM = vec4(1.0, 0.0, 0.0, 1.0);
+const uint MAX_TEX = 128;
 
 mat3 RotY(float r) {
 	float cosR = cos(r);

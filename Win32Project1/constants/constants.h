@@ -42,12 +42,13 @@
 #define NULL 0
 #endif
 
-const int InvalidInsId = 1024;
-
 typedef unsigned int uint;
 typedef unsigned char byte;
 typedef unsigned short ushort;
 typedef unsigned long long u64;
 typedef long long i64;
+
+const int InvalidInsId = 1024;
+const uint MaxIblLevel = 5;
 
 #endif /* CONSTANTS_H_ */

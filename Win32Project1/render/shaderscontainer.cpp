@@ -44,6 +44,8 @@ using namespace std;
 #define ATMOS_VERT "shader/atmosphere.vert"
 #define ATMOS_FRAG "shader/atmosphere.frag"
 #define IRR_FRAG "shader/irradiance.frag"
+#define PREFILT_FRAG "shader/prefiltered.frag"
+#define BRDF_FRAG "shader/brdf.frag"
 #define NOISE_VERT "shader/noise.vert"
 #define NOISE_FRAG "shader/noise.frag"
 #define DEPTH_FRAG "shader/depth.frag"
@@ -129,6 +131,7 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 		deferred->attachDef("DYN_SKY", "1");
 	if (cfgs->bloom)
 		deferred->attachDef("USE_BLOOM", "1");
+	deferred->attachDef("MAX_REFLECTION_LOD", to_string((float)MaxIblLevel - 1.0).data());
 	deferred->setSlot("texBuffer", 0);
 	deferred->setSlot("matBuffer", 1);
 	deferred->setSlot("roughMetalBuffer", 2);
@@ -229,6 +232,9 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	Shader* hiz = shaders->addShader("hiz", POST_VERT, HIZ_FRAG);
 	Shader* irr = shaders->addShader("irradiance", ATMOS_VERT, IRR_FRAG);
 	if (cfgs->dynsky) irr->attachDef("DYN_SKY", "1");
+	Shader* prefilt = shaders->addShader("prefiltered", ATMOS_VERT, PREFILT_FRAG);
+	if (cfgs->dynsky) prefilt->attachDef("DYN_SKY", "1");
+	Shader* brdf = shaders->addShader("brdf", POST_VERT, BRDF_FRAG);
 
 	shaders->compile();
 }

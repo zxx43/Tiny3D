@@ -23,12 +23,12 @@ private:
 	unsigned int fboId;
 	int colorBufferCount;
 	bool depthOnly;
-	bool clampBorder;
+	int wrapMode;
 public:
 	std::vector<Texture2D*> colorBuffers;
 	Texture2D* depthBuffer;
 public:
-	FrameBuffer(float width, float height, int precision, int component, bool clampBorder, int filt = LINEAR);
+	FrameBuffer(float width, float height, int precision, int component, int wrap, int filt = LINEAR);
 	FrameBuffer(float width, float height, int precision);
 	~FrameBuffer();
 public:
@@ -43,7 +43,7 @@ public:
 	FrameBuffer(const CubeMap* cube);
 	CubeMap* getCubeBuffer();
 	void useFbo();
-	void useCube(int i);
+	void useCube(int i, int mip);
 };
 
 

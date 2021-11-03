@@ -54,7 +54,7 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 		vec2 texcoord=instanceMesh->texcoords[i];
 
 		Material* mat = NULL;
-		if (!instanceMesh->materialids && mid >= 0)
+		if (mid >= 0)
 			mat = MaterialManager::materials->find(mid);
 		else if (instanceMesh->materialids)
 			mat = MaterialManager::materials->find(instanceMesh->materialids[i]);

@@ -2,6 +2,7 @@
 #define IBL_H_
 
 #include "../mesh/sphere.h"
+#include "../mesh/board.h"
 #include "../node/staticNode.h"
 #include "../render/render.h"
 #include "../camera/camera.h"
@@ -10,19 +11,29 @@ class Scene;
 
 class Ibl {
 private:
-	StaticNode* iblNode;
-	Sphere* mesh;
+	StaticNode* cubeNode;
+	StaticNode* boardNode;
+	Sphere* sphere;
+	Board* board;
 	FrameBuffer* irradianceBuff;
-	mat4 matPosx, matNegx, matPosy, matNegy, matPosz, matNegz;
+	FrameBuffer* prefilteredBuff;
+	FrameBuffer* brdfBuff;
 	CubeMap* irradianceTex;
+	CubeMap* prefilteredTex;
+	Texture2D* brdfLut;
+	mat4 matPosx, matNegx, matPosy, matNegy, matPosz, matNegz;
 public:
 	RenderState* state;
 public:
 	Ibl(Scene* scene);
 	~Ibl();
 public:
-	void generate(Render* render, Shader* shader);
+	void genIrradiance(Render* render, Shader* shader);
+	void genPrefiltered(Render* render, Shader* shader);
+	void genBrdf(Render* render, Shader* shader);
 	CubeMap* getIrradianceTex() { return irradianceTex; }
+	CubeMap* getPrefilteredTex() { return prefilteredTex; }
+	Texture2D* getBrdf() { return brdfLut; }
 };
 
 #endif

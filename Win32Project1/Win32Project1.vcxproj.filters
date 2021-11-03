@@ -772,6 +772,15 @@
     <None Include="..\Tiny\shader\irradiance.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\Tiny\shader\brdf.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Tiny\shader\prefiltered.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Tiny\shader\pbr.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Tiny\config\config.txt">

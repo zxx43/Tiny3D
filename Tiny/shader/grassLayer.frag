@@ -11,7 +11,7 @@ in vec4 vNormalHeight;
 #define BottomColor vec4(0.005, 0.04, 0.01, 1.0)
 #define TopColor vec4(0.1, 0.2, 0.05, 1.0)
 #define GrassMat vec4(0.4, 0.7, 0.0, GrassFlag)
-#define GrassRM vec4(0.0, 0.0, 0.0, 1.0)
+#define GrassRM vec4(1.0, 0.0, 0.0, 1.0)
 
 void main() {
 	FragTex = mix(BottomColor, TopColor, vNormalHeight.w);

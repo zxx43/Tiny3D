@@ -1,9 +1,9 @@
 #include "framebuffer.h"
 
-FrameBuffer::FrameBuffer(float width, float height, int precision, int component, bool clampBorder, int filt) :cubeBuffer(NULL) {
+FrameBuffer::FrameBuffer(float width, float height, int precision, int component, int wrap, int filt) :cubeBuffer(NULL) {
 	this->width = width;
 	this->height = height;
-	this->clampBorder = clampBorder;
+	this->wrapMode = wrap;
 
 	glGenFramebuffers(1, &fboId);
 
@@ -15,7 +15,7 @@ FrameBuffer::FrameBuffer(float width, float height, int precision, int component
 	addColorBuffer(precision, component, filt);
 }
 
-FrameBuffer::FrameBuffer(float width, float height, int precision) :clampBorder(false), cubeBuffer(NULL) {
+FrameBuffer::FrameBuffer(float width, float height, int precision) :wrapMode(WRAP_REPEAT), cubeBuffer(NULL) {
 	this->width = width;
 	this->height = height;
 
@@ -29,7 +29,7 @@ FrameBuffer::FrameBuffer(float width, float height, int precision) :clampBorder(
 	attachDepthBuffer(precision, false);
 }
 
-FrameBuffer::FrameBuffer(const CubeMap* cube) :clampBorder(false) {
+FrameBuffer::FrameBuffer(const CubeMap* cube) :wrapMode(WRAP_REPEAT) {
 	glGenFramebuffers(1, &fboId);
 
 	colorBuffers.clear();
@@ -70,7 +70,7 @@ void FrameBuffer::attachDepthBuffer(int precision, bool useMip) {
 
 void FrameBuffer::addColorBuffer(int precision, int component, int filt) {
 	colorBufferCount++;
-	colorBuffers.push_back(new Texture2D((int)(width), (int)(height), false, TEXTURE_TYPE_COLOR, precision, component, filt, clampBorder ? WRAP_CLAMP_TO_BORDER : WRAP_REPEAT));
+	colorBuffers.push_back(new Texture2D((int)(width), (int)(height), false, TEXTURE_TYPE_COLOR, precision, component, filt, wrapMode));
 	glNamedFramebufferTexture2DEXT(fboId, GL_COLOR_ATTACHMENT0 + (colorBufferCount - 1), GL_TEXTURE_2D,
 		colorBuffers[colorBufferCount - 1]->id, 0);
 	glNamedFramebufferDrawBuffers(fboId, colorBufferCount, ColorAttachments);
@@ -105,9 +105,14 @@ void FrameBuffer::useFbo() {
 	glBindFramebuffer(GL_FRAMEBUFFER, fboId);
 }
 
-void FrameBuffer::useCube(int i) {
+void FrameBuffer::useCube(int i, int mip) {
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-		GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubeBuffer->id, 0);
+		GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubeBuffer->id, mip);
 	glClear(GL_COLOR_BUFFER_BIT);
-	glViewport(0, 0, width, height);
+	uint mipWidth = width, mipHeight = height;
+	if (mip > 0) {
+		mipWidth = width * std::pow(0.5, mip);
+		mipHeight = height * std::pow(0.5, mip);
+	}
+	glViewport(0, 0, mipWidth, mipHeight);
 }

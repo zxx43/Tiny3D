@@ -5,7 +5,7 @@
 #include "../scene/scene.h"
 
 Sky::Sky(Scene* scene, bool dyn) {
-	mesh=new Sphere(16,16);
+	mesh=new Sphere(16, 16);
 	StaticObject* skyObject=new StaticObject(mesh);
 	Material* mat = new Material("sky_mat");
 	mat->diffuse = vec3(0.5f, 0.7f, 0.8f);
@@ -21,11 +21,11 @@ Sky::Sky(Scene* scene, bool dyn) {
 	
 	CubeMap* env = new CubeMap("texture/sky/xpos.bmp", "texture/sky/xneg.bmp",
 			"texture/sky/yneg.bmp", "texture/sky/ypos.bmp",
-			"texture/sky/zpos.bmp", "texture/sky/zneg.bmp", false);
+			"texture/sky/zpos.bmp", "texture/sky/zneg.bmp", true);
 	AssetManager::assetManager->setEnvTexture(env);
 
 	if (dyn) {
-		CubeMap* texture = new CubeMap(512, 512, false, LOW_PRE);
+		CubeMap* texture = new CubeMap(512, 512, true, LOW_PRE);
 		AssetManager::assetManager->setSkyTexture(texture);
 		skyBuff = new FrameBuffer(texture);
 	} else {
@@ -65,29 +65,31 @@ void Sky::update(Render* render, const vec3& sunPos, Shader* shader) {
 	state->shader->setFloat("time", state->time);
 	render->useFrameBuffer(skyBuff);
 	
-	render->useFrameCube(0);
-	render->setShaderMat4(shader, "viewProjectMatrix", matPosx);
-	render->draw(NULL, skyNode->drawcall, state);
+	for (int i = 0; i < MaxIblLevel; ++i) {
+		render->useFrameCube(0, i);
+		render->setShaderMat4(shader, "viewProjectMatrix", matPosx);
+		render->draw(NULL, skyNode->drawcall, state);
 
-	render->useFrameCube(1);
-	render->setShaderMat4(shader, "viewProjectMatrix", matNegx);
-	render->draw(NULL, skyNode->drawcall, state);
+		render->useFrameCube(1, i);
+		render->setShaderMat4(shader, "viewProjectMatrix", matNegx);
+		render->draw(NULL, skyNode->drawcall, state);
 
-	render->useFrameCube(2);
-	render->setShaderMat4(shader, "viewProjectMatrix", matPosy);
-	render->draw(NULL, skyNode->drawcall, state);
+		render->useFrameCube(2, i);
+		render->setShaderMat4(shader, "viewProjectMatrix", matPosy);
+		render->draw(NULL, skyNode->drawcall, state);
 
-	render->useFrameCube(3);
-	render->setShaderMat4(shader, "viewProjectMatrix", matNegy);
-	render->draw(NULL, skyNode->drawcall, state);
+		render->useFrameCube(3, i);
+		render->setShaderMat4(shader, "viewProjectMatrix", matNegy);
+		render->draw(NULL, skyNode->drawcall, state);
 
-	render->useFrameCube(4);
-	render->setShaderMat4(shader, "viewProjectMatrix", matPosz);
-	render->draw(NULL, skyNode->drawcall, state);
+		render->useFrameCube(4, i);
+		render->setShaderMat4(shader, "viewProjectMatrix", matPosz);
+		render->draw(NULL, skyNode->drawcall, state);
 
-	render->useFrameCube(5);
-	render->setShaderMat4(shader, "viewProjectMatrix", matNegz);
-	render->draw(NULL, skyNode->drawcall, state);
+		render->useFrameCube(5, i);
+		render->setShaderMat4(shader, "viewProjectMatrix", matNegz);
+		render->draw(NULL, skyNode->drawcall, state);
+	}
 }
 
 void Sky::draw(Render* render,Shader* shader,Camera* camera) {

@@ -19,7 +19,7 @@ void main() {
 	vec4 textureColor = texture(texBlds[int(vTexid.x)], vTexcoord);
 	if(textureColor.a < 0.25) discard;
 #ifndef BillPass
-		vec3 normal = vTexid.y >= 0.0 ? vTBN * (2.0 * normalize(texture(texBlds[int(vTexid.y)], vTexcoord).rgb) - 1.0) : vNormal;
+		vec3 normal = vTexid.y >= 0.0 ? vTBN * (2.0 * texture(texBlds[int(vTexid.y)], vTexcoord).rgb - 1.0) : vNormal;
 		normal = normalize(normal) * 0.5 + 0.5;
 
 		FragMat = vec4(vColor, 1.0);

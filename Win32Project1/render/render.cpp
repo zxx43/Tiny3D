@@ -48,6 +48,8 @@ void Render::initEnvironment() {
 	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &MaxAniso);
 	debugMode = false;
 	debugTerrain = false;
+
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 }
 
 void Render::clearFrame(bool clearColor,bool clearDepth,bool clearStencil) {
@@ -381,8 +383,10 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 				shader->setHandle64("texNoise", AssetManager::assetManager->getNoiseHnd());
 		} else if (state->iblPass) {
 			if (AssetManager::assetManager->getSkyTexture() &&
-				!shader->isTexBinded(AssetManager::assetManager->getSkyTexture()->hnd)) 
+				!shader->isTexBinded(AssetManager::assetManager->getSkyTexture()->hnd)) {
+					shader->setFloat("uResolution", AssetManager::assetManager->getSkyTexture()->getWidth());
 					shader->setHandle64("environmentMap", AssetManager::assetManager->getSkyTexture()->hnd);
+			}
 		}
 	}
 
@@ -411,8 +415,8 @@ void Render::useFrameBuffer(FrameBuffer* framebuffer) {
 	}
 }
 
-void Render::useFrameCube(int i) {
-	if (currentFrame) currentFrame->useCube(i);
+void Render::useFrameCube(int i, int mip) {
+	if (currentFrame) currentFrame->useCube(i, mip);
 }
 
 void Render::setColorMask(bool r, bool g, bool b, bool a) {

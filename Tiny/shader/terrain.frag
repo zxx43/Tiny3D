@@ -34,7 +34,7 @@ void main() {
 	vec3 normal = vNormal;
 	if(vTexid.w >= 0.0) {
 		vec3 texNorm = texture(texBlds[int(vTexid.w)], vTexcoord).rgb;
-		texNorm = 2.0 * normalize(texNorm) - vec3(1.0);
+		texNorm = 2.0 * texNorm - vec3(1.0);
 		normal = vTBN * texNorm;
 	}
 	normal = normalize(normal) * 0.5 + 0.5;

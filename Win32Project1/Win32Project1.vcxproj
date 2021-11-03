@@ -342,6 +342,7 @@
     <None Include="..\Tiny\shader\blur.frag" />
     <None Include="..\Tiny\shader\bone.frag" />
     <None Include="..\Tiny\shader\bone.vert" />
+    <None Include="..\Tiny\shader\brdf.frag" />
     <None Include="..\Tiny\shader\cloud.glsl" />
     <None Include="..\Tiny\shader\combined.frag" />
     <None Include="..\Tiny\shader\cull.comp" />
@@ -369,9 +370,11 @@
     <None Include="..\Tiny\shader\multiCull.comp" />
     <None Include="..\Tiny\shader\noise.frag" />
     <None Include="..\Tiny\shader\noise.vert" />
+    <None Include="..\Tiny\shader\pbr.glsl" />
     <None Include="..\Tiny\shader\phong.frag" />
     <None Include="..\Tiny\shader\phong.vert" />
     <None Include="..\Tiny\shader\post.vert" />
+    <None Include="..\Tiny\shader\prefiltered.frag" />
     <None Include="..\Tiny\shader\screen.frag" />
     <None Include="..\Tiny\shader\shadow_nontex.frag" />
     <None Include="..\Tiny\shader\shadow_tex.frag" />

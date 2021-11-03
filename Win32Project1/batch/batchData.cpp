@@ -43,11 +43,12 @@ void BatchData::addObject(Object* object, Mesh* mesh) {
 	Material* mat = NULL;
 	if (object->material >= 0)
 		mat = MaterialManager::materials->find(object->material);
-	if (!mat) mat = MaterialManager::materials->find(0);
 
 	for (int i = 0; i < mesh->vertexCount; i++) {
-		if (mesh->materialids)
+		if (!mat && mesh->materialids)
 			mat = MaterialManager::materials->find(mesh->materialids[i]);
+		if (!mat) 
+			mat = MaterialManager::materials->find(0);
 
 		vec3 vertex3 = mesh->vertices3[i];
 		vertices[vertexCount * 3 + 0] = vertex3.x;

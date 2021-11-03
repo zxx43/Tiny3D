@@ -1,4 +1,5 @@
 ﻿#include "shader/util.glsl"
+#include "shader/pbr.glsl"
 
 uniform BindlessSampler2D texBuffer, 
 						matBuffer, 
@@ -6,6 +7,8 @@ uniform BindlessSampler2D texBuffer,
 						depthBuffer;
 
 uniform BindlessSamplerCube irradianceMap;
+uniform BindlessSamplerCube prefilteredMap;
+uniform BindlessSampler2D brdfMap;
 
 uniform vec2 pixelSize;
 uniform mat4 invViewProjMatrix, invProjMatrix;
@@ -162,43 +165,6 @@ vec4 genShadowFactor(vec4 worldPos, float depthView, float bias) {
 	return vec4(1.0);
 }
 
-// ----------------------------------------------------------------------------
-float DistributionGGX(vec3 N, vec3 H, float roughness) {
-    float a = roughness * roughness;
-    float a2 = a * a;
-    float NdotH = max(dot(N, H), 0.0);
-    float NdotH2 = NdotH*NdotH;
-
-    float nom   = a2;
-    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
-    denom = PI * denom * denom;
-
-    return nom / denom;
-}
-// ----------------------------------------------------------------------------
-float GeometrySchlickGGX(float NdotV, float roughness) {
-    float r = (roughness + 1.0);
-	float k = r * r * 0.125;
-	
-    float nom   = NdotV;
-    float denom = NdotV * (1.0 - k) + k;
-
-    return nom / denom;
-}
-// ----------------------------------------------------------------------------
-float GeometrySmith(vec3 N, vec3 V, float NdotL, float roughness) {
-    float NdotV = max(dot(N, V), 0.0);
-    float ggx2 = GeometrySchlickGGX(NdotV, roughness);
-    float ggx1 = GeometrySchlickGGX(NdotL, roughness);
-
-    return ggx1 * ggx2;
-}
-// ----------------------------------------------------------------------------
-vec3 FresnelSchlick(float cosTheta, vec3 F0) {
-    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
-}
-// ----------------------------------------------------------------------------
-
 void main() {
 	float depth = texture(depthBuffer, vTexcoord).r;
 	vec3 ndcPos = vec3(vTexcoord, depth) * 2.0 - 1.0;
@@ -239,23 +205,39 @@ void main() {
 		// PBR
 		#ifndef USE_CARTOON
 			ambient *= texture(irradianceMap, normal).rgb;
-			if(shadowFactor * udotl < 0.0001) {
+			
+			vec3 ref = reflect(-v, normal); 
+			float ndotv = max(dot(normal, v), 0.0);
+			float roughness = roughMetal.r, metallic = roughMetal.g;
+
+			vec3 F0 = mix(vec3(0.04), albedo, metallic);	
+			vec3 fA = FresnelSchlickRoughness(ndotv, F0, roughness);
+			vec3 sA = fA;
+			vec3 dA = (vec3(1.0) - sA) * (1.0 - metallic);
+
+			float roughLevel = roughness * MAX_REFLECTION_LOD;
+    		vec3 prefilteredColor = textureLod(prefilteredMap, ref, roughLevel).rgb;    
+			vec2 brdfCoord = vec2(ndotv, roughness);
+    		vec2 brdf  = texture(brdfMap, brdfCoord).rg;
+    		vec3 ambSpec = prefilteredColor * (fA * brdf.x + brdf.y);
+    		ambient = ambient * dA + ambSpec;
+
+			if(shadowFactor * udotl < 0.0001) {
 				sceneColor = ambient;
 			} else {
-				v /= depthView;
+				v = normalize(v);
 				vec3 h = normalize(v + light);
-				vec3 radiance = vec3(3.5);
+				vec3 radiance = vec3(4.0);
 			
 				// Cook-Torrance BRDF	
-				vec3 F0 = mix(vec3(0.04), albedo, roughMetal.g);	
-				float NDF = DistributionGGX(normal, h, roughMetal.r);   
-				float G   = GeometrySmith(normal, v, ndotl, roughMetal.r);      
+				float NDF = DistributionGGX(normal, h, roughness);   
+				float G   = GeometrySmith(normal, v, ndotl, roughness);      
 				vec3 kS   = FresnelSchlick(max(dot(h, v), 0.0), F0);
-				vec3 kD   = (vec3(1.0) - kS) * (1.0 - roughMetal.g);	 
+				vec3 kD   = (vec3(1.0) - kS) * (1.0 - metallic);
 
-				float specular = (NDF * G) / (4.0 * max(dot(normal, v), 0.0) * ndotl + 0.001);
+				float specular = (NDF * G) / (4.0 * ndotv * ndotl + 0.001);
 				vec3 Lo = (kD * albedo * INV_PI + kS * specular) * radiance * ndotl;
-
+    			
 				sceneColor = shadowLayer * (ambient + shadowFactor * Lo);
 			}
 			sceneColor *= udotl;

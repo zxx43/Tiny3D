@@ -62,21 +62,21 @@ void SimpleApplication::resize(int width, int height) {
 	Application::resize(width, height);
 
 	if (screen) delete screen;
-	screen = new FrameBuffer(width, height, hdrPre, 4, false, NEAREST); // texBuffer
+	screen = new FrameBuffer(width, height, hdrPre, 4, WRAP_REPEAT, NEAREST); // texBuffer
 	screen->addColorBuffer(matPre, 4);									// matBuffer
 	screen->addColorBuffer(matPre, 4);									// roughMetalNormalBuffer
 	screen->attachDepthBuffer(renderMgr->getDepthPre(), false);			// depthBuffer
 
 	if (waterFrame) delete waterFrame;
-	waterFrame = new FrameBuffer(width, height, hdrPre, 4, false);
+	waterFrame = new FrameBuffer(width, height, hdrPre, 4, WRAP_REPEAT);
 	waterFrame->addColorBuffer(waterPre, 4); // FragMat
 	waterFrame->addColorBuffer(waterPre, 3); // FragNormal
 	waterFrame->attachDepthBuffer(renderMgr->getDepthPre(), false);
 
 	if (sceneFilter) delete sceneFilter;
-	sceneFilter = new Filter(width, height, true, precision, 4, false);
-	sceneFilter->addOutput(matPre, 3, NEAREST); // FragNormal
-	sceneFilter->addOutput(hdrPre, 3, NEAREST); // FragBright
+	sceneFilter = new Filter(width, height, true, precision, 4, LINEAR, WRAP_REPEAT);
+	sceneFilter->addOutput(matPre, 3, LINEAR); // FragNormal
+	sceneFilter->addOutput(hdrPre, 3, LINEAR); // FragBright
 
 	if (combinedChain) delete combinedChain;
 	if (!cfgs->cartoon && !cfgs->dof && !cfgs->ssr && !cfgs->fxaa)
@@ -85,17 +85,17 @@ void SimpleApplication::resize(int width, int height) {
 		combinedChain = new FilterChain(width, height, true, precision, 4);
 		if (cfgs->cartoon) {
 			if (edgeFilter) delete edgeFilter;
-			edgeFilter = new Filter(width, height, cfgs->fxaa, edgePre, 3, NEAREST);
+			edgeFilter = new Filter(width, height, cfgs->fxaa, edgePre, 3, NEAREST, WRAP_REPEAT);
 			edgeInput.clear();
 		}
 		if (cfgs->fxaa) {
 			if (aaFilter) delete aaFilter;
-			aaFilter = new Filter(width, height, false, aaPre, 3, NEAREST);
+			aaFilter = new Filter(width, height, false, aaPre, 3, NEAREST, WRAP_REPEAT);
 			aaInput.clear();
 		}
 		if (cfgs->dof) {
 			if (dofBlurFilter) delete dofBlurFilter;
-			dofBlurFilter = new Filter(width * dofScale, height * dofScale, true, dofPre, 4, NEAREST);
+			dofBlurFilter = new Filter(width * dofScale, height * dofScale, true, dofPre, 4, NEAREST, WRAP_REPEAT);
 			if (dofChain) delete dofChain;
 			dofChain = new FilterChain(width, height, (cfgs->cartoon || cfgs->fxaa), dofPre, 4);
 			dofChain->addInputTex(dofBlurFilter->getOutput(0));
@@ -103,7 +103,7 @@ void SimpleApplication::resize(int width, int height) {
 		}
 		if (cfgs->ssr) {
 			if (ssrChain) delete ssrChain;
-			ssrChain = new FilterChain(width * ssrScale, height * ssrScale, true, LOW_PRE, 4, false);
+			ssrChain = new FilterChain(width * ssrScale, height * ssrScale, true, LOW_PRE, 4, WRAP_REPEAT);
 			ssrChain->addInputTex(combinedChain->getOutputTex(0)); // lightBuffer
 			ssrChain->addInputTex(waterFrame->getColorBuffer(1));  // matBuffer
 			ssrChain->addInputTex(waterFrame->getColorBuffer(2));  // normalBuffer
@@ -111,11 +111,11 @@ void SimpleApplication::resize(int width, int height) {
 
 			if (!cfgs->cartoon && !cfgs->dof && !cfgs->fxaa) {
 				if (rawScreenFilter) delete rawScreenFilter;
-				rawScreenFilter = new Filter(width, height, false, rawPre, 4, NEAREST);
+				rawScreenFilter = new Filter(width, height, false, rawPre, 4, NEAREST, WRAP_REPEAT);
 			}
 
 			if (ssrBlurFilter) delete ssrBlurFilter;
-			ssrBlurFilter = new Filter(width * 0.5, height * 0.5, true, LOW_PRE, 4, LINEAR);
+			ssrBlurFilter = new Filter(width * 0.5, height * 0.5, true, LOW_PRE, 4, LINEAR, WRAP_REPEAT);
 		}
 	}
 
@@ -243,6 +243,9 @@ void SimpleApplication::draw() {
 	renderMgr->genHiz(render, scene, screen->getDepthBuffer());
 	if (drawDepth) renderMgr->drawHiz2Screen(render, scene, depthLevel);
 	if (drawNormal) renderMgr->drawTexture2Screen(render, scene, sceneFilter->getOutput(1)->hnd);
+	//renderMgr->drawTexture2Screen(render, scene, renderMgr->ibl->getBrdf()->hnd);
+	//renderMgr->drawTexture2Screen(render, scene, sceneFilter->getOutput(1)->hnd);
+	//renderMgr->drawTexture2Screen(render, scene, screen->getColorBuffer(2)->hnd);
 	//*/
 
 	render->finishDraw();
@@ -356,6 +359,9 @@ void SimpleApplication::initScene() {
 	assetMgr->addMesh("cottage", new Model("models/cottage_obj.obj", "models/cottage_obj.mtl", 2));
 	assetMgr->addMesh("terrain", new Terrain("terrain/Terrain.raw"));
 	assetMgr->addMesh("water", new Water(1024, 16));
+	assetMgr->addMesh("iron_sphere", new Sphere(32, 32));
+	assetMgr->addMesh("gold_sphere", new Sphere(32, 32));
+	assetMgr->addMesh("streaky_sphere", new Sphere(32, 32));
 
 	assetMgr->meshes["treeA"]->setBoundScale(vec3(0.2, 1.0, 0.2));
 	assetMgr->meshes["birch"]->setBoundScale(vec3(0.3, 1.0, 0.3));
@@ -406,10 +412,18 @@ void SimpleApplication::initScene() {
 	assetMgr->addTextureBindless("mixedmoss-normal2.bmp", false);
 	assetMgr->addTextureBindless("mixedmoss-roughness.bmp", false);
 	assetMgr->addTextureBindless("mixedmoss-metalness.bmp", false);
-	assetMgr->addTextureBindless("rustediron2_basecolor.bmp", true);
-	assetMgr->addTextureBindless("rustediron2_normal.bmp", false);
-	assetMgr->addTextureBindless("rustediron2_roughness.bmp", false);
-	assetMgr->addTextureBindless("rustediron2_metallic.bmp", false);
+	assetMgr->addTextureBindless("rustediron2_basecolor.png", true);
+	assetMgr->addTextureBindless("rustediron2_normal.png", false);
+	assetMgr->addTextureBindless("rustediron2_roughness.png", false);
+	assetMgr->addTextureBindless("rustediron2_metallic.png", false);
+	assetMgr->addTextureBindless("streaky-metal1_albedo.png", true);
+	assetMgr->addTextureBindless("streaky-metal1_normal-ogl.png", false);
+	assetMgr->addTextureBindless("streaky-metal1_roughness.png", false);
+	assetMgr->addTextureBindless("streaky-metal1_metallic.png", false);
+	assetMgr->addTextureBindless("lightgold_albedo.png", true);
+	assetMgr->addTextureBindless("lightgold_normal-ogl.png", false);
+	assetMgr->addTextureBindless("lightgold_roughness.png", false);
+	assetMgr->addTextureBindless("lightgold_metallic.png", false);
 	assetMgr->addTextureBindless("grass1-albedo3.bmp", true);
 	assetMgr->addTextureBindless("grass1-normal1-dx.bmp", false);
 	assetMgr->addDistortionTex("distortion.bmp");
@@ -434,11 +448,25 @@ void SimpleApplication::initScene() {
 	mtlMgr->add(sandMat);
 
 	Material* ironMat = new Material("iron_mat");
-	ironMat->tex1 = "rustediron2_basecolor.bmp";
-	ironMat->tex2 = "rustediron2_normal.bmp";
-	ironMat->tex3 = "rustediron2_roughness.bmp";
-	ironMat->tex4 = "rustediron2_metallic.bmp";
+	ironMat->tex1 = "rustediron2_basecolor.png";
+	ironMat->tex2 = "rustediron2_normal.png";
+	ironMat->tex3 = "rustediron2_roughness.png";
+	ironMat->tex4 = "rustediron2_metallic.png";
 	mtlMgr->add(ironMat);
+
+	Material* streakyMat = new Material("streaky_mat");
+	streakyMat->tex1 = "streaky-metal1_albedo.png";
+	streakyMat->tex2 = "streaky-metal1_normal-ogl.png";
+	streakyMat->tex3 = "streaky-metal1_roughness.png";
+	streakyMat->tex4 = "streaky-metal1_metallic.png";
+	mtlMgr->add(streakyMat);
+
+	Material* goldMat = new Material("gold_mat");
+	goldMat->tex1 = "lightgold_albedo.png";
+	goldMat->tex2 = "lightgold_normal-ogl.png";
+	goldMat->tex3 = "lightgold_roughness.png";
+	goldMat->tex4 = "lightgold_metallic.png";
+	mtlMgr->add(goldMat);
 	
 	Material* terrainMat = new Material("terrain_mat");
 	terrainMat->prepared = true;
@@ -466,8 +494,14 @@ void SimpleApplication::initScene() {
 	StaticObject box(meshes["box"]); 
 	box.bindMaterial(mtlMgr->find("box_mat"));
 	box.setSound("push", "sounds/box.wav");
-	StaticObject sphere(meshes["sphere"]); 
-	sphere.bindMaterial(mtlMgr->find("iron_mat"));
+
+	StaticObject ironSphere(meshes["iron_sphere"]); 
+	ironSphere.bindMaterial(mtlMgr->find("iron_mat"));
+	StaticObject goldSphere(meshes["gold_sphere"]);
+	goldSphere.bindMaterial(mtlMgr->find("gold_mat"));
+	StaticObject streakySphere(meshes["streaky_sphere"]);
+	streakySphere.bindMaterial(mtlMgr->find("streaky_mat"));
+	
 	StaticObject board(meshes["board"]);
 	StaticObject quad(meshes["quad"]);
 
@@ -535,9 +569,18 @@ void SimpleApplication::initScene() {
 	node2->addObject(scene, house);
 
 	InstanceNode* node3 = new InstanceNode(vec3(25, 10, 0));
-	StaticObject* objectSphere = sphere.clone();
-	objectSphere->setSize(10, 10, 10);
-	node3->addObject(scene, objectSphere);
+	StaticObject* objIronSphere = ironSphere.clone();
+	objIronSphere->setSize(10, 10, 10);
+	objIronSphere->setPosition(0, 0, 0);
+	node3->addObject(scene, objIronSphere);
+	StaticObject* objGoldSphere = goldSphere.clone();
+	objGoldSphere->setSize(10, 10, 10);
+	objGoldSphere->setPosition(20, 0, 0);
+	node3->addObject(scene, objGoldSphere);
+	StaticObject* objStreakySphere = streakySphere.clone();
+	objStreakySphere->setSize(10, 10, 10);
+	objStreakySphere->setPosition(40, 0, 0);
+	node3->addObject(scene, objStreakySphere);
 
 	InstanceNode* node4 = new InstanceNode(vec3(2553, 0, 1450));
 	StaticObject* objectCottage = model10.clone();
