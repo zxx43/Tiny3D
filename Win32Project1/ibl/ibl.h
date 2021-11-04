@@ -18,6 +18,7 @@ private:
 	FrameBuffer* irradianceBuff;
 	FrameBuffer* prefilteredBuff;
 	FrameBuffer* brdfBuff;
+	bool brdfInited;
 	CubeMap* irradianceTex;
 	CubeMap* prefilteredTex;
 	Texture2D* brdfLut;

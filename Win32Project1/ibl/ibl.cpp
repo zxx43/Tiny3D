@@ -31,8 +31,9 @@ Ibl::Ibl(Scene* scene) {
 	boardNode->addObject(NULL, boardObject);
 	boardNode->prepareDrawcall();
 
-	brdfBuff = new FrameBuffer(128, 128, LOW_PRE, 2, WRAP_CLAMP_TO_EDGE, LINEAR);
+	brdfBuff = new FrameBuffer(128, 128, LOW_PRE, 2, WRAP_CLAMP_TO_EDGE);
 	brdfLut = brdfBuff->getColorBuffer(0);
+	brdfInited = false;
 
 	mat4 proj = perspective(90.0, 1.0, 0.5, 10.0);
 	matPosx = proj * viewMat(vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 1.0f, 0.0f), vec3(-1.0f, 0.0f, 0.0f), vec3(0.0, 0.0, 0.0));
@@ -44,8 +45,6 @@ Ibl::Ibl(Scene* scene) {
 
 	state = new RenderState();
 	state->cullMode = CULL_FRONT;
-	state->enableCull = false;
-	state->enableDepthTest = false;
 	state->lightEffect = false;
 }
 
@@ -140,6 +139,7 @@ void Ibl::genPrefiltered(Render* render, Shader* shader) {
 
 void Ibl::genBrdf(Render* render, Shader* shader) {
 	if (!brdfBuff) return;
+	if (brdfInited) return;
 	state->delay = 0;
 	state->cullMode = CULL_BACK;
 	state->iblPass = true;
@@ -147,4 +147,5 @@ void Ibl::genBrdf(Render* render, Shader* shader) {
 
 	render->setFrameBuffer(brdfBuff);
 	render->draw(NULL, boardNode->drawcall, state);
+	brdfInited = true;
 }

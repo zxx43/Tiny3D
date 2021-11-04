@@ -15,7 +15,7 @@ FrameBuffer::FrameBuffer(float width, float height, int precision, int component
 	addColorBuffer(precision, component, filt);
 }
 
-FrameBuffer::FrameBuffer(float width, float height, int precision) :wrapMode(WRAP_REPEAT), cubeBuffer(NULL) {
+FrameBuffer::FrameBuffer(float width, float height, int precision) :wrapMode(WRAP_CLAMP_TO_BORDER), cubeBuffer(NULL) {
 	this->width = width;
 	this->height = height;
 
@@ -29,7 +29,7 @@ FrameBuffer::FrameBuffer(float width, float height, int precision) :wrapMode(WRA
 	attachDepthBuffer(precision, false);
 }
 
-FrameBuffer::FrameBuffer(const CubeMap* cube) :wrapMode(WRAP_REPEAT) {
+FrameBuffer::FrameBuffer(const CubeMap* cube) :wrapMode(WRAP_CLAMP_TO_EDGE) {
 	glGenFramebuffers(1, &fboId);
 
 	colorBuffers.clear();

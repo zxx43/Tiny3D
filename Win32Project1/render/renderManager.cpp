@@ -50,7 +50,6 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 	state = new RenderState();
 
 	reflectBuffer = NULL;
-	occluderDepth = NULL;
 	needResize = true;
 	updateSky();
 
@@ -76,7 +75,6 @@ RenderManager::~RenderManager() {
 
 	delete state; state = NULL;
 	if (reflectBuffer) delete reflectBuffer; reflectBuffer = NULL;
-	if (occluderDepth) delete occluderDepth; occluderDepth = NULL;
 	if (grassDrawcall) delete grassDrawcall; grassDrawcall = NULL;
 	if (hiz) delete hiz; hiz = NULL;
 	if (hizDepth) delete hizDepth; hizDepth = NULL;
@@ -92,8 +90,6 @@ void RenderManager::resize(float width, float height) {
 		reflectBuffer->attachDepthBuffer(LOW_PRE, false);
 	}
 
-	if (occluderDepth) delete occluderDepth;
-	occluderDepth = new Texture2D(width, height, false, TEXTURE_TYPE_DEPTH, depthPre, 1, NEAREST, WRAP_CLAMP_TO_EDGE);
 	if (hizDepth) delete hizDepth;
 	hizDepth = new Texture2D(width, height, true, TEXTURE_TYPE_DEPTH, depthPre, 1, NEAREST, WRAP_CLAMP_TO_EDGE);
 	needResize = true;
@@ -309,6 +305,10 @@ void RenderManager::drawGrass(Render* render, RenderState* state, Scene* scene, 
 		compShader->setVector3v("mapTrans", GetTranslate(terrain->transformMatrix));
 		compShader->setVector3v("mapScale", terrain->size);
 		compShader->setVector4("mapInfo", STEP_SIZE, node->lineSize, MAP_SIZE, MAP_SIZE);
+		compShader->setFloat("uMaxLevel", hiz->getMaxLevel());
+		compShader->setMatrix4("prevVPMatrix", prevCameraMat);
+		compShader->setVector2("uSize", (float)render->viewWidth, (float)render->viewHeight);
+		compShader->setVector2("uCamParam", camera->zNear, camera->zFar);
 
 		grassDrawcall->update();
 		render->draw(camera, grassDrawcall, state);
@@ -379,10 +379,8 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 		terrainShader->setHandle64("roadTex", AssetManager::assetManager->getRoadHnd());
 		render->draw(camera, terrainNode->drawcall, state);
 
-		occluderDepth->copyDataFrom(render->getFrameBuffer()->getDepthBuffer());
-
 		if (!cfgs->cartoon && !cfgs->debug) {
-			render->useTexture(TEXTURE_2D, 0, occluderDepth->id);
+			//render->useTexture(TEXTURE_2D, 0, hizDepth->id);
 			drawGrass(render, state, scene, camera);
 		}
 	}

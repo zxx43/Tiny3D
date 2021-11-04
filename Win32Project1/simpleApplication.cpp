@@ -120,7 +120,7 @@ void SimpleApplication::resize(int width, int height) {
 	}
 
 	if (bloomChain) delete bloomChain;
-	bloomChain = new DualFilter(width * bloomScale, height * bloomScale, true, hdrPre, 3, false);
+	bloomChain = new DualFilter(width * bloomScale, height * bloomScale, true, hdrPre, 3, WRAP_REPEAT);
 	bloomChain->addInputTex(sceneFilter->getOutput(2)); // Bright
 
 	if (combinedChain) {

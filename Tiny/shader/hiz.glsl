@@ -42,3 +42,37 @@ bool HizQuery(mat4 viewProjectMat, sampler2D depthTex, vec2 size, vec2 camParam,
 
 		return minClip.z > occDepth + zOffset;
 }
+
+bool HizQuery(mat4 viewProjectMat, sampler2D depthTex, vec2 size, vec2 camParam, float maxLevel, 
+	vec4 bv0, vec4 bv1, vec4 bv2, float zOffset) {
+		vec4 b0 = viewProjectMat * bv0;
+		vec4 b1 = viewProjectMat * bv1;
+		vec4 b2 = viewProjectMat * bv2;
+		vec3 inv = 1.0 / vec3(b0.w, b1.w, b2.w);
+		
+		vec3 ndc0 = b0.xyz * inv.x;
+		vec3 ndc1 = b1.xyz * inv.y;
+		vec3 ndc2 = b2.xyz * inv.z;
+
+		vec3 maxNDC = max(ndc2, max(ndc0, ndc1));
+		vec3 minNDC = min(ndc2, min(ndc0, ndc1));
+		
+		vec3 maxClip = clamp(maxNDC * 0.5 + 0.5, vec3(0.0), vec3(1.0));
+		vec3 minClip = clamp(minNDC * 0.5 + 0.5, vec3(0.0), vec3(1.0));
+
+		vec3 bound = maxClip - minClip;
+		float edge = max(1.0, max(bound.x, bound.y) * max(size.x, size.y));
+		float mip = min(ceil(log2(edge)), maxLevel);
+		
+		vec4 occ = vec4(textureLod(depthTex, maxClip.xy, mip).x, 
+						textureLod(depthTex, minClip.xy, mip).x, 
+						textureLod(depthTex, vec2(maxClip.x, minClip.y), mip).x, 
+						textureLod(depthTex, vec2(minClip.x, maxClip.y), mip).x);
+
+		float occDepth = max(occ.w, max(occ.z, max(occ.x, occ.y)));
+
+		occDepth = Linearize(camParam.x, camParam.y, occDepth);	
+		minClip.z = Linearize(camParam.x, camParam.y, minClip.z);
+
+		return minClip.z > occDepth + zOffset;
+}

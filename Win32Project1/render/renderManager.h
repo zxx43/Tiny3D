@@ -47,7 +47,6 @@ public:
 	float udotl;
 	RenderState* state;
 	ConfigArg* cfgs;
-	Texture2D* occluderDepth;
 	int depthPre;
 	HizGenerator* hiz;
 	Texture2D* hizDepth;

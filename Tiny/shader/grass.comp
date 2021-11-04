@@ -1,5 +1,6 @@
 #include "shader/util.glsl"
 #include "shader/triangle.glsl"
+#include "shader/hiz.glsl"
 
 layout(local_size_x = WORKGROUP_SIZE, local_size_y = WORKGROUP_SIZE) in;
 
@@ -12,6 +13,11 @@ uniform vec3 eyePos;
 uniform mat4 viewProjectMatrix;
 uniform mat4 viewMatrix;
 uniform float fullSize;
+
+uniform mat4 prevVPMatrix;
+uniform vec2 uSize;
+uniform vec2 uCamParam;
+uniform float uMaxLevel;
 
 const float WindStrength = 0.65;
 const vec2 WindFrequency = vec2(0.05, 0.05);
@@ -108,12 +114,15 @@ void main() {
 	float rand = (dRand.x + dRand.y) * 0.5;	
 	vec2 size = vec2(rand * 0.5 + 0.5, rand * 2.5 + 2.5);
 
-	vec4 topPose = viewProjectMatrix * vec4(worldPose + vec3(0.0, size.y, 0.0), 1.0);
-	if(topPose.y < -topPose.w) return;
+	vec4 topPose = vec4(worldPose + vec3(0.0, size.y, 0.0), 1.0);
+	vec4 projTop = viewProjectMatrix * topPose;
+	if(projTop.y < -projTop.w) return;
 
-	vec3 tp = topPose.xyz / topPose.w * 0.5 + 0.5;
-	float ocDepth = texture(texDepth, tp.xy).x;
-	if((tp.z - ocDepth) > 0.0001) return;
+	vec4 leftPose = vec4(worldPose + vec3(-size.x, 0.0, 0.0), 1.0);
+	vec4 rightPose = vec4(worldPose + vec3(size.x, 0.0, 0.0), 1.0);
+
+	if(HizQuery(prevVPMatrix, texDepth, uSize, uCamParam, uMaxLevel, 
+		topPose, leftPose, rightPose, 0.01)) return;
 
 	// Wind effect
 	mat3 rotMat = RotY(rand * PI);
