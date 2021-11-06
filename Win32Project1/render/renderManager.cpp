@@ -379,10 +379,8 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 		terrainShader->setHandle64("roadTex", AssetManager::assetManager->getRoadHnd());
 		render->draw(camera, terrainNode->drawcall, state);
 
-		if (!cfgs->cartoon && !cfgs->debug) {
-			//render->useTexture(TEXTURE_2D, 0, hizDepth->id);
+		if (/*!cfgs->cartoon && */!cfgs->debug) 
 			drawGrass(render, state, scene, camera);
-		}
 	}
 
 	state->shader = phongShader;

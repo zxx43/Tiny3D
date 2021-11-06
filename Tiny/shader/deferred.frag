@@ -187,7 +187,7 @@ void main() {
 
 		float ndotl = dot(light, normal);
 
-		float bias = max(0.005 * (1.0 - ndotl), 0.0005);
+		float bias = max(0.0000025 * (1.0 - ndotl), 0.0005);
 		if(material.a > (GrassFlag - 0.1) && material.a < (TerrainFlag + 0.1)) bias *= 0.5; // terrain(0.8) & grass(0.7) receiver shadow bias
 		else bias *= -1.0; // normal receiver shadow bias
 		ndotl = max(ndotl, 0.0);
@@ -205,33 +205,34 @@ void main() {
 		// PBR
 		#ifndef USE_CARTOON
 			ambient *= texture(irradianceMap, normal).rgb;
+			v /= depthView;
 			
 			vec3 ref = reflect(-v, normal); 
 			float ndotv = max(dot(normal, v), 0.0);
 			float roughness = roughMetal.r, metallic = roughMetal.g;
+			if(material.a > (GrassFlag - 0.01) && material.a < (GrassFlag + 0.01)) 
+				roughness = 1.0 - roughness;
 
 			vec3 F0 = mix(vec3(0.04), albedo, metallic);	
 			vec3 fA = FresnelSchlickRoughness(ndotv, F0, roughness);
-			vec3 sA = fA;
-			vec3 dA = (vec3(1.0) - sA) * (1.0 - metallic);
+			vec3 dA = (vec3(1.0) - fA) * (1.0 - metallic);
 
 			float roughLevel = roughness * MAX_REFLECTION_LOD;
-    		vec3 prefilteredColor = textureLod(prefilteredMap, ref, roughLevel).rgb;    
-			vec2 brdfCoord = vec2(ndotv, roughness);
-    		vec2 brdf  = texture(brdfMap, brdfCoord).rg;
+    		vec3 prefilteredColor = textureLod(prefilteredMap, ref, roughLevel).rgb;   
+    		vec2 brdf  = texture(brdfMap, vec2(ndotv, roughness)).rg;
     		vec3 ambSpec = prefilteredColor * (fA * brdf.x + brdf.y);
     		ambient = ambient * dA + ambSpec;
 
 			if(shadowFactor * udotl < 0.0001) {
 				sceneColor = ambient;
 			} else {
-				v = normalize(v);
+				roughness = roughMetal.r, metallic = roughMetal.g;
 				vec3 h = normalize(v + light);
 				vec3 radiance = vec3(4.0);
 			
 				// Cook-Torrance BRDF	
 				float NDF = DistributionGGX(normal, h, roughness);   
-				float G   = GeometrySmith(normal, v, ndotl, roughness);      
+				float G   = GeometrySmith2(normal, v, light, roughness);      
 				vec3 kS   = FresnelSchlick(max(dot(h, v), 0.0), F0);
 				vec3 kD   = (vec3(1.0) - kS) * (1.0 - metallic);
 

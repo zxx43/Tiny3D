@@ -18,10 +18,10 @@ Ibl::Ibl(Scene* scene) {
 	cubeNode->updateNode(scene);
 	cubeNode->prepareDrawcall();
 
-	irradianceTex = new CubeMap(512, 512, false, FLOAT_PRE);
+	irradianceTex = new CubeMap(256, 256, false, FLOAT_PRE);
 	irradianceBuff = new FrameBuffer(irradianceTex);
 
-	prefilteredTex = new CubeMap(512, 512, true, FLOAT_PRE);
+	prefilteredTex = new CubeMap(256, 256, true, FLOAT_PRE);
 	prefilteredBuff = new FrameBuffer(prefilteredTex);
 
 	board = new Board(2, 2, 2);

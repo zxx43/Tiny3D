@@ -122,7 +122,7 @@ void main() {
 	vec4 rightPose = vec4(worldPose + vec3(size.x, 0.0, 0.0), 1.0);
 
 	if(HizQuery(prevVPMatrix, texDepth, uSize, uCamParam, uMaxLevel, 
-		topPose, leftPose, rightPose, 0.01)) return;
+		topPose, leftPose, rightPose, 0.0001)) return;
 
 	// Wind effect
 	mat3 rotMat = RotY(rand * PI);
