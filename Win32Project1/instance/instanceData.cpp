@@ -28,7 +28,7 @@ void InstanceData::addInstance(Object* object) {
 			transformsFull[count * 16 + 12] = instance->insId;
 			transformsFull[count * 16 + 13] = instance->insSingleId;
 			transformsFull[count * 16 + 14] = instance->insBillId;
-			transformsFull[count * 16 + 15] = InvalidInsId;
+			transformsFull[count * 16 + 15] = object->material;
 			if (instance->isBillboard) {
 				if (object->billboard->data[2] < 0) {
 					Material* mat = NULL;

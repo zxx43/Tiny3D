@@ -58,6 +58,7 @@ public:
 	std::vector<vec3> aNormals;
 	std::vector<vec3> aTangents;
 	std::vector<vec2> aTexcoords;
+	std::vector<int> aMids;
 	std::vector<Material*> aTextures;
 	std::vector<vec3> aAmbients;
 	std::vector<vec3> aDiffuses;

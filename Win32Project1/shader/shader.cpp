@@ -284,6 +284,17 @@ void Shader::setVector4v(const char* param, float* arr) {
 	getError(param, location);
 }
 
+void Shader::setVector4v(const char* param, int count, float* arr) {
+	int location = findParamLocation(param);
+	if (location == INVALID_LOCATION) {
+		addParam(param);
+		location = findParamLocation(param);
+	}
+	if (location != INVALID_LOCATION && program)
+		glProgramUniform4fv(program->shaderProg, location, count, arr);
+	getError(param, location);
+}
+
 void Shader::setMatrix4(const char* param,float* matrix) {
 	int location = findParamLocation(param);
 	if (location == INVALID_LOCATION) {

@@ -172,7 +172,11 @@ void AssAnim::loadMeshes(Entry* entry) {
 
 		int mid = materialMap[entry->materialIndex];
 		Material* mat = MaterialManager::materials->find(mid);
-		if (!mat) mat = MaterialManager::materials->find(0);
+		if (!mat) {
+			mid = 0;
+			mat = MaterialManager::materials->find(mid);
+		}
+		aMids.push_back(mid);
 		aTextures.push_back(mat);
 		aAmbients.push_back(mat->ambient);
 		aDiffuses.push_back(mat->diffuse);

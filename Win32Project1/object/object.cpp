@@ -50,6 +50,7 @@ Object::Object(const Object& rhs) {
 	transformsFull = NULL;
 	rotateQuat = rhs.rotateQuat;
 	boundInfo = rhs.boundInfo;
+	material = rhs.material;
 
 	shapeOffset = rhs.shapeOffset;
 	collisionShape = NULL;

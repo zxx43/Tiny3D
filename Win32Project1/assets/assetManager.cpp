@@ -79,6 +79,7 @@ void AssetManager::initTextureBindless(MaterialManager* mtls) {
 		printf("mat %s: [%d]%s\n", mat->name.data(), (int)mat->texids.x, mat->tex1.data());
 	}
 	texBld->initData(COMMON_TEXTURE);
+	mtls->updateMapDatas();
 }
 
 int AssetManager::findTextureBindless(const char* name) {

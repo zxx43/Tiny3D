@@ -1,5 +1,9 @@
 #include "shader/util.glsl"
 
+layout(binding = 1, std430) buffer InMaterial {
+	Material inMaterials[];
+};
+
 uniform mat4 viewProjectMatrix;
 
 #ifdef BillPass
@@ -14,10 +18,8 @@ uniform vec2 camPara;
 layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec4 texcoord;
-layout (location = 3) in vec2 texid;
-layout (location = 4) in vec3 color;
-layout (location = 5) in vec3 tangent;
-layout (location = 8) in mat4 modelMatrix;
+layout (location = 3) in vec3 tangent;
+layout (location = 6) in mat4 modelMatrix;
 
 #ifndef LowPass
 out vec2 vTexcoord;
@@ -30,21 +32,28 @@ out mat3 vTBN;
 #endif
 
 void main() {
+	float insMatid = modelMatrix[3].w;
+	int mid = (insMatid.x > -0.001) ? int(insMatid.x) : int(texcoord.z);
+	Material material = inMaterials[mid];
+
+	mat4 worldMatrix = modelMatrix;
+	worldMatrix[3].w = 1.0;
+
 #ifndef BillPass
 		#ifndef ShadowPass
-			mat3 matRot = mat3(modelMatrix);
+			mat3 matRot = mat3(worldMatrix);
 			vNormal = matRot * normal;
 			vTBN = matRot * GetTBN(normalize(normal), normalize(tangent));
-			vColor = COLOR_SCALE * color.rgb;
+			vColor = material.params.rgb;
 		#endif
 		#ifndef LowPass
 			vTexcoord = texcoord.xy;
-			vTexid = vec4(texcoord.zw, texid);
+			vTexid = material.texids;
 		#endif
-		vec4 worldVertex = modelMatrix * vec4(vertex, 1.0);
+		vec4 worldVertex = worldMatrix * vec4(vertex, 1.0);
 #else
-		vec3 position = modelMatrix[0].xyz;
-		vec3 board = modelMatrix[1].xyz;
+		vec3 position = worldMatrix[0].xyz;
+		vec3 board = worldMatrix[1].xyz;
 		vec2 size = vertex.xy * board.xy;
 		vec3 right = size.x * viewRight;
 		#ifdef ShadowPass
@@ -54,7 +63,7 @@ void main() {
 		#endif
 		#ifndef LowPass
 			vTexcoord = texcoord.xy; 
-			vTexid = vec4(texcoord.zw, 0.0, 0.0);
+			vTexid = vec4(material.texids.xy, 0.0, 0.0);
 		#endif
 		vec4 worldVertex = vec4(position + right + top, 1.0);
 #endif

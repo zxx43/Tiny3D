@@ -11,6 +11,7 @@ Animation::Animation() {
 	aNormals.clear();
 	aTangents.clear();
 	aTexcoords.clear();
+	aMids.clear();
 	aTextures.clear();
 	aAmbients.clear();
 	aDiffuses.clear();
@@ -27,6 +28,7 @@ Animation::~Animation() {
 	aNormals.clear();
 	aTangents.clear();
 	aTexcoords.clear();
+	aMids.clear();
 	aTextures.clear();
 	aAmbients.clear();
 	aDiffuses.clear();

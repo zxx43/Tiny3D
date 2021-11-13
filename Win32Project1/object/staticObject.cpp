@@ -23,7 +23,6 @@ StaticObject::StaticObject(const StaticObject& rhs) :Object(rhs) {
 	mesh = rhs.mesh;
 	meshMid = rhs.meshMid;
 	meshLow = rhs.meshLow;
-	material = rhs.material;
 	if (rhs.bounding)
 		bounding = rhs.bounding->clone();
 	else

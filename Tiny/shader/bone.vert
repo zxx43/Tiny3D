@@ -1,6 +1,10 @@
 #include "shader/util.glsl"
 #include "shader/vtf.glsl"
 
+layout(binding = 1, std430) buffer InMaterial {
+	Material inMaterials[];
+};
+
 uniform mat4 viewProjectMatrix;
 uniform BindlessSampler2D boneTex[MAX_BONE_TEX];
 
@@ -12,12 +16,10 @@ uniform vec2 camPara;
 layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec4 texcoord;
-layout (location = 3) in vec2 texid;
-layout (location = 4) in vec3 color;
-layout (location = 5) in vec3 tangent;
-layout (location = 6) in vec4 boneids;
-layout (location = 7) in vec4 weights;
-layout (location = 8) in mat4 modelMatrix;
+layout (location = 3) in vec3 tangent;
+layout (location = 4) in vec4 boneids;
+layout (location = 5) in vec4 weights;
+layout (location = 6) in mat4 modelMatrix;
 
 #ifndef ShadowPass
 out vec2 vTexcoord;
@@ -45,19 +47,23 @@ void main() {
 		 boneMat += convertMat(m3) * weights.w;
     
     vec4 position = boneMat * vec4(vertex, 1.0);
-	mat4 modelMat = convertMat(mat3x4(modelMatrix[0], modelMatrix[1], modelMatrix[2]));
+	mat4 worldMatrix = convertMat(mat3x4(modelMatrix[0], modelMatrix[1], modelMatrix[2]));
+
+	float insMatid = modelMatrix[3].w;
+	int mid = (insMatid > -0.001) ? int(insMatid) : int(texcoord.z);
+	Material material = inMaterials[mid];
 
 #ifndef ShadowPass
-	vColor = MatScale * color.rgb * 0.005;
-	mat3 matRot = mat3(modelMat);
+	vColor = material.params.rgb;
+	mat3 matRot = mat3(worldMatrix);
 	mat3 normalMat = matRot * mat3(boneMat);
 	vNormal = normalMat * normal;
 	vTBN = normalMat * GetTBN(normal, tangent);
 	vTexcoord = texcoord.xy;
-	vTexid = vec4(texcoord.zw, texid);
+	vTexid = vec4(material.texids);
 #endif
 
-	vec4 modelPosition = modelMat * position;
+	vec4 modelPosition = worldMatrix * position;
 #ifdef ShadowPass
 	gl_Position = DepthToLinear(viewProjectMatrix, projectMatrix, viewMatrix, camPara.x, camPara.y, modelPosition);
 #else

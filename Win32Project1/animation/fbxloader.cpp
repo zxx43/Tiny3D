@@ -182,6 +182,7 @@ void FBXLoader::loadMesh(FbxNode* pNode, std::vector<uint> mats) {
 	std::vector<vec3> innNormals; innNormals.resize(meshIndexCount);
 	std::vector<vec3> innTangents; innTangents.resize(meshIndexCount);
 	std::vector<vec2> innTexcoords; innTexcoords.resize(meshIndexCount);
+	std::vector<int> innMids; innMids.resize(meshIndexCount);
 	std::vector<Material*> innTextures; innTextures.resize(meshIndexCount);
 	std::vector<vec3> innAmbients; innAmbients.resize(meshIndexCount);
 	std::vector<vec3> innDiffuses; innDiffuses.resize(meshIndexCount);
@@ -304,8 +305,12 @@ void FBXLoader::loadMesh(FbxNode* pNode, std::vector<uint> mats) {
 			}
 
 			Material* mat = (mid >= 0) ? MaterialManager::materials->find(mid) : NULL;
-			if (!mat) mat = MaterialManager::materials->find(0);
+			if (!mat) {
+				mid = 0;
+				mat = MaterialManager::materials->find(mid);
+			}
 			if (mat->ambient.x < 0.2) mat->ambient.x = 0.2;
+			innMids[innIndex] = mid;
 			innTextures[innIndex] = mat;
 			innAmbients[innIndex] = mat->ambient;
 			innDiffuses[innIndex] = mat->diffuse;
@@ -320,6 +325,7 @@ void FBXLoader::loadMesh(FbxNode* pNode, std::vector<uint> mats) {
 		aNormals.push_back(innNormals[i]);
 		aTangents.push_back(innTangents[i]);
 		aTexcoords.push_back(innTexcoords[i]);
+		aMids.push_back(innMids[i]);
 		aTextures.push_back(innTextures[i]);
 		aAmbients.push_back(innAmbients[i]);
 		aDiffuses.push_back(innDiffuses[i]);

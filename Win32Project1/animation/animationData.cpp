@@ -24,7 +24,8 @@ AnimationData::AnimationData(Animation* anim, int maxCount) : DataBuffer(ANIMATE
 
 		texcoordBuffer[i * 4 + 0] = anim->aTexcoords[i].x;
 		texcoordBuffer[i * 4 + 1] = anim->aTexcoords[i].y;
-		texcoordBuffer[i * 4 + 2] = anim->aTextures[i]->texids.x;
+		//texcoordBuffer[i * 4 + 2] = anim->aTextures[i]->texids.x;
+		texcoordBuffer[i * 4 + 2] = anim->aMids[i];
 		texcoordBuffer[i * 4 + 3] = anim->aTextures[i]->texids.y;
 		texidBuffer[i * 2 + 0] = anim->aTextures[i]->texids.z;
 		texidBuffer[i * 2 + 1] = anim->aTextures[i]->texids.w;
@@ -65,8 +66,8 @@ void AnimationData::addAnimObject(Object* object) {
 		AnimationObject* animObj = (AnimationObject*)object;
 		transformsFull[animCount * 16 + 12] = animObj->fid + 0.1;
 		transformsFull[animCount * 16 + 13] = animObj->getCurFrame();
-		transformsFull[animCount * 16 + 14] = 0.0;
-		transformsFull[animCount * 16 + 15] = animId + 0.1;
+		transformsFull[animCount * 16 + 14] = animId + 0.1;
+		transformsFull[animCount * 16 + 15] = object->material;
 		animCount++;
 	}
 }

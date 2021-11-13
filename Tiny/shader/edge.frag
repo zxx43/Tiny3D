@@ -28,10 +28,6 @@ vec4 GenColor(vec3 color, float depth) {
 	return res;
 }
 
-bool CompMat(float flag, float base) {
-	return (flag > (base - 0.1) && flag < (base + 0.1));
-}
-
 void main() {
 	vec4 color = texture(colorBuffer, vTexcoord);
 	float depth = color.w;

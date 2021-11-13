@@ -6,26 +6,22 @@
 const uint VertexSlot = 0;
 const uint NormalSlot = 1;
 const uint TexcoordSlot = 2;
-const uint TexidSlot = 3;
-const uint ColorSlot = 4;
-const uint TangentSlot = 5;
-const uint BoneidSlot = 6;
-const uint WeightSlot = 7;
-const uint OutSlot = 8;
+const uint TangentSlot = 3;
+const uint BoneidSlot = 4;
+const uint WeightSlot = 5;
+const uint OutSlot = 6;
 
 // VBO index
 const uint VertexIndex = 0;
 const uint NormalIndex = 1;
 const uint TexcoordIndex = 2;
-const uint TexidIndex = 3;
-const uint ColorIndex = 4;
-const uint TangentIndex = 5;
-const uint BoneidIndex = 6;
-const uint WeightIndex = 7;
-const uint Index = 8;
-const uint InIndex = 9;
-const uint OutIndex = 10;
-const uint BaseIndex = 11;
+const uint TangentIndex = 3;
+const uint BoneidIndex = 4;
+const uint WeightIndex = 5;
+const uint Index = 6;
+const uint InIndex = 7;
+const uint OutIndex = 8;
+const uint BaseIndex = 9;
 
 // Indirect vbo index
 const uint IndirectNormalIndex = 0;
@@ -59,13 +55,11 @@ MultiDrawcall::~MultiDrawcall() {
 }
 
 RenderBuffer* MultiDrawcall::createBuffers(MultiInstance* multi, int vertexCount, int indexCount, uint inIndex, uint outIndex, uint maxCount, RenderBuffer* ref) {
-	RenderBuffer* buffer = new RenderBuffer(12);
+	RenderBuffer* buffer = new RenderBuffer(10);
 	if (!ref) {
 		buffer->setAttribData(GL_ARRAY_BUFFER, VertexIndex, VertexSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, multi->vertexBuffer);
 		buffer->setAttribData(GL_ARRAY_BUFFER, NormalIndex, NormalSlot, GL_HALF_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, multi->normalBuffer);
 		buffer->setAttribData(GL_ARRAY_BUFFER, TexcoordIndex, TexcoordSlot, GL_FLOAT, vertexCount, 4, 1, false, GL_STATIC_DRAW, 0, multi->texcoordBuffer);
-		buffer->setAttribData(GL_ARRAY_BUFFER, TexidIndex, TexidSlot, GL_FLOAT, vertexCount, 2, 1, false, GL_STATIC_DRAW, 0, multi->texidBuffer);
-		buffer->setAttribData(GL_ARRAY_BUFFER, ColorIndex, ColorSlot, GL_UNSIGNED_BYTE, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, multi->colorBuffer);
 		buffer->setAttribData(GL_ARRAY_BUFFER, TangentIndex, TangentSlot, GL_HALF_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, multi->tangentBuffer);
 		buffer->setBufferData(GL_ELEMENT_ARRAY_BUFFER, Index, GL_UNSIGNED_SHORT, indexCount, GL_STATIC_DRAW, multi->indexBuffer);
 		if (multi->hasAnim) {
@@ -77,8 +71,6 @@ RenderBuffer* MultiDrawcall::createBuffers(MultiInstance* multi, int vertexCount
 		buffer->setAttribData(GL_ARRAY_BUFFER, VertexIndex, ref->streamDatas[VertexIndex]);
 		buffer->setAttribData(GL_ARRAY_BUFFER, NormalIndex, ref->streamDatas[NormalIndex]);
 		buffer->setAttribData(GL_ARRAY_BUFFER, TexcoordIndex, ref->streamDatas[TexcoordIndex]);
-		buffer->setAttribData(GL_ARRAY_BUFFER, TexidIndex, ref->streamDatas[TexidIndex]);
-		buffer->setAttribData(GL_ARRAY_BUFFER, ColorIndex, ref->streamDatas[ColorIndex]);
 		buffer->setAttribData(GL_ARRAY_BUFFER, TangentIndex, ref->streamDatas[TangentIndex]);
 		buffer->setAttribData(GL_ELEMENT_ARRAY_BUFFER, Index, ref->streamDatas[Index]);
 		if (multi->hasAnim) {
@@ -109,6 +101,7 @@ void MultiDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
 	if (frame < state->delay) frame++;
 	else {
 		bool shadowPass = state->pass < COLOR_PASS;
+		MaterialManager::materials->useMaterialBuffer(1);
 		if (!multiRef->hasAnim) {
 			// Draw normal faces
 			if (multiRef->normalCount > 0 && multiRef->normalInsCount > 0) {

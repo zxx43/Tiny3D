@@ -45,20 +45,25 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 	if (indexCount > 0)
 		indexBuffer = (ushort*)malloc(indexCount*sizeof(ushort));
 
-	int mid = object->material;
-	if (isBillboard) mid = object->billboard->material;
 	for(int i=0;i<vertexCount;i++) {
 		vec4 vertex=instanceMesh->vertices[i];
 		vec3 normal=instanceMesh->normals[i];
 		vec3 tangent = instanceMesh->tangents[i];
 		vec2 texcoord=instanceMesh->texcoords[i];
 
+		int mid = object->material;
+		if (isBillboard) mid = object->billboard->material;
 		Material* mat = NULL;
 		if (mid >= 0)
 			mat = MaterialManager::materials->find(mid);
-		else if (instanceMesh->materialids)
-			mat = MaterialManager::materials->find(instanceMesh->materialids[i]);
-		if (!mat) mat = MaterialManager::materials->find(0);
+		else if (instanceMesh->materialids) {
+			mid = instanceMesh->materialids[i];
+			mat = MaterialManager::materials->find(mid);
+		}
+		if (!mat) {
+			mid = 0;
+			mat = MaterialManager::materials->find(mid);
+		}
 		vec3 ambient = mat->ambient;
 		vec3 diffuse = mat->diffuse;
 		vec3 specular = mat->specular;
@@ -72,7 +77,8 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 
 		texcoordBuffer[i * 4 + 0] = (texcoord.x);
 		texcoordBuffer[i * 4 + 1] = (texcoord.y);
-		texcoordBuffer[i * 4 + 2] = (texids.x);
+		//texcoordBuffer[i * 4 + 2] = (texids.x);
+		texcoordBuffer[i * 4 + 2] = mid;
 		texcoordBuffer[i * 4 + 3] = (texids.y);
 
 		texidBuffer[i * 2 + 0] = (texids.z);

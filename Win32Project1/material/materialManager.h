@@ -8,6 +8,7 @@
 
 #define DEFAULT_MAT "default_mat"
 #define BLACK_MAT "black_mat"
+#define MAX_MAT 1024
 
 struct Material
 {
@@ -38,7 +39,10 @@ struct Material
 	}
 }; 
 
+struct RenderBuffer;
 class MaterialManager {
+public:
+	static unsigned int MaterialIndex;
 public:
 	static MaterialManager* materials;
 public:
@@ -47,6 +51,11 @@ public:
 private:
 	std::vector<Material*> materialList;
 	std::map<std::string, Material*> materialMap;
+	float* pbrMapDatas;
+	RenderBuffer* materialBuffer;
+	unsigned int mapChannel;
+private:
+	RenderBuffer* createMaterials(int maxCount);
 private:
 	MaterialManager();
 	~MaterialManager();
@@ -56,6 +65,9 @@ public:
 	Material* find(unsigned int i);
 	int find(std::string name);
 	unsigned int size();
+	void updateMapDatas();
+	float* getPBRDatas() { return pbrMapDatas; }
+	void useMaterialBuffer(int location);
 };
 
 #endif

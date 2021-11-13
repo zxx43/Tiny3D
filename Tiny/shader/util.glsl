@@ -197,6 +197,15 @@ vec4 Linearize(float near, float far, vec4 depth) {
 	return vec4(2.0 * near) / (vec4(far + near) - depth * (far - near));
 }
 
+bool CompMat(float flag, float base) {
+	return (flag > (base - 0.01) && flag < (base + 0.01));
+}
+
+struct Material {
+	vec4 texids;
+	vec4 params;
+};
+
 struct Indirect {
 	uint count;
 	uint primCount;

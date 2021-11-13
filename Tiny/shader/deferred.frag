@@ -6,8 +6,7 @@ uniform BindlessSampler2D texBuffer,
 						roughMetalBuffer, 
 						depthBuffer;
 
-uniform BindlessSamplerCube irradianceMap;
-uniform BindlessSamplerCube prefilteredMap;
+uniform BindlessSamplerCube irradianceMap, prefilteredMap;
 uniform BindlessSampler2D brdfMap;
 
 uniform vec2 pixelSize;
@@ -24,8 +23,8 @@ uniform float udotl;
 uniform vec3 eyePos;
 uniform float time;
 
-uniform mat4 lightProjDyn, lightProjNear, lightProjMid, lightProjFar;
-uniform mat4 lightViewDyn, lightViewNear, lightViewMid, lightViewFar;
+uniform mat4 lightProjDyn, lightProjNear, lightProjMid, lightProjFar, 
+			 lightViewDyn, lightViewNear, lightViewMid, lightViewFar;
 uniform vec2 camParas[4];
 uniform vec2 gaps;
 uniform vec3 shadowCenter;
@@ -192,7 +191,7 @@ void main() {
 		else bias *= -1.0; // normal receiver shadow bias
 		ndotl = max(ndotl, 0.0);
 
-		vec3 shadowLayer = vec3(1.0);
+		//vec3 shadowLayer = vec3(1.0);
 		#ifdef USE_SHADOW
 			vec4 sf = genShadowFactor(worldPos, depthView, bias);
 			float shadowFactor = ndotl < 0.01 ? 0.0 : tex.a * sf.a;
@@ -209,9 +208,8 @@ void main() {
 			
 			vec3 ref = reflect(-v, normal); 
 			float ndotv = max(dot(normal, v), 0.0);
-			float roughness = roughMetal.r, metallic = roughMetal.g;
-			if(material.a > (GrassFlag - 0.01) && material.a < (GrassFlag + 0.01)) 
-				roughness = 1.0 - roughness;
+			float metallic = roughMetal.g;
+			float roughness = CompMat(material.a, GrassFlag) ? 1.0 - roughMetal.r : roughMetal.r;
 
 			vec3 F0 = mix(vec3(0.04), albedo, metallic);	
 			vec3 fA = FresnelSchlickRoughness(ndotv, F0, roughness);
@@ -223,9 +221,9 @@ void main() {
     		vec3 ambSpec = prefilteredColor * (fA * brdf.x + brdf.y);
     		ambient = ambient * dA + ambSpec;
 
-			if(shadowFactor * udotl < 0.0001) {
+			if(shadowFactor * udotl < 0.0001) 
 				sceneColor = ambient;
-			} else {
+			else {
 				roughness = roughMetal.r, metallic = roughMetal.g;
 				vec3 h = normalize(v + light);
 				vec3 radiance = vec3(4.0);
@@ -239,7 +237,8 @@ void main() {
 				float specular = (NDF * G) / (4.0 * ndotv * ndotl + 0.001);
 				vec3 Lo = (kD * albedo * INV_PI + kS * specular) * radiance * ndotl;
     			
-				sceneColor = shadowLayer * (ambient + shadowFactor * Lo);
+				//sceneColor = shadowLayer * (ambient + shadowFactor * Lo);
+				sceneColor = ambient + shadowFactor * Lo;
 			}
 			sceneColor *= udotl;
 		// Cartoon

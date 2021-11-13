@@ -359,9 +359,6 @@ void SimpleApplication::initScene() {
 	assetMgr->addMesh("cottage", new Model("models/cottage_obj.obj", "models/cottage_obj.mtl", 2));
 	assetMgr->addMesh("terrain", new Terrain("terrain/Terrain.raw"));
 	assetMgr->addMesh("water", new Water(1024, 16));
-	assetMgr->addMesh("iron_sphere", new Sphere(32, 32));
-	assetMgr->addMesh("gold_sphere", new Sphere(32, 32));
-	assetMgr->addMesh("streaky_sphere", new Sphere(32, 32));
 
 	assetMgr->meshes["treeA"]->setBoundScale(vec3(0.2, 1.0, 0.2));
 	assetMgr->meshes["birch"]->setBoundScale(vec3(0.3, 1.0, 0.3));
@@ -495,13 +492,7 @@ void SimpleApplication::initScene() {
 	box.bindMaterial(mtlMgr->find("box_mat"));
 	box.setSound("push", "sounds/box.wav");
 
-	StaticObject ironSphere(meshes["iron_sphere"]); 
-	ironSphere.bindMaterial(mtlMgr->find("iron_mat"));
-	StaticObject goldSphere(meshes["gold_sphere"]);
-	goldSphere.bindMaterial(mtlMgr->find("gold_mat"));
-	StaticObject streakySphere(meshes["streaky_sphere"]);
-	streakySphere.bindMaterial(mtlMgr->find("streaky_mat"));
-	
+	StaticObject sphere(meshes["sphere"]);
 	StaticObject board(meshes["board"]);
 	StaticObject quad(meshes["quad"]);
 
@@ -569,15 +560,18 @@ void SimpleApplication::initScene() {
 	node2->addObject(scene, house);
 
 	InstanceNode* node3 = new InstanceNode(vec3(25, 10, 0));
-	StaticObject* objIronSphere = ironSphere.clone();
+	StaticObject* objIronSphere = sphere.clone();
+	objIronSphere->bindMaterial(mtlMgr->find("iron_mat"));
 	objIronSphere->setSize(10, 10, 10);
 	objIronSphere->setPosition(0, 0, 0);
 	node3->addObject(scene, objIronSphere);
-	StaticObject* objGoldSphere = goldSphere.clone();
+	StaticObject* objGoldSphere = sphere.clone();
+	objGoldSphere->bindMaterial(mtlMgr->find("gold_mat"));
 	objGoldSphere->setSize(10, 10, 10);
 	objGoldSphere->setPosition(20, 0, 0);
 	node3->addObject(scene, objGoldSphere);
-	StaticObject* objStreakySphere = streakySphere.clone();
+	StaticObject* objStreakySphere = sphere.clone();
+	objStreakySphere->bindMaterial(mtlMgr->find("streaky_mat"));
 	objStreakySphere->setSize(10, 10, 10);
 	objStreakySphere->setPosition(40, 0, 0);
 	node3->addObject(scene, objStreakySphere);
