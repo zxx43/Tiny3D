@@ -54,13 +54,13 @@ void main() {
 	Material material = inMaterials[mid];
 
 #ifndef ShadowPass
-	vColor = material.params.rgb;
 	mat3 matRot = mat3(worldMatrix);
 	mat3 normalMat = matRot * mat3(boneMat);
 	vNormal = normalMat * normal;
 	vTBN = normalMat * GetTBN(normal, tangent);
 	vTexcoord = texcoord.xy;
-	vTexid = vec4(material.texids);
+	vTexid = material.texids;
+	vColor = material.params.rgb;
 #endif
 
 	vec4 modelPosition = worldMatrix * position;

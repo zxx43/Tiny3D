@@ -351,6 +351,9 @@
     <ClCompile Include="ibl\ibl.cpp">
       <Filter>Source Files\ibl</Filter>
     </ClCompile>
+    <ClCompile Include="texture\textureBuffer.cpp">
+      <Filter>Source Files\texture</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="batch\batch.h">
@@ -616,6 +619,9 @@
     </ClInclude>
     <ClInclude Include="ibl\ibl.h">
       <Filter>Source Files\ibl</Filter>
+    </ClInclude>
+    <ClInclude Include="texture\textureBuffer.h">
+      <Filter>Source Files\texture</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

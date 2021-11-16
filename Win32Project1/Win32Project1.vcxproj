@@ -242,6 +242,7 @@
     <ClCompile Include="texture\texture2d.cpp" />
     <ClCompile Include="texture\textureatlas.cpp" />
     <ClCompile Include="texture\texturebindless.cpp" />
+    <ClCompile Include="texture\textureBuffer.cpp" />
     <ClCompile Include="util\triangle.cpp" />
     <ClCompile Include="util\util.cpp" />
   </ItemGroup>
@@ -331,6 +332,7 @@
     <ClInclude Include="texture\texture2d.h" />
     <ClInclude Include="texture\textureatlas.h" />
     <ClInclude Include="texture\texturebindless.h" />
+    <ClInclude Include="texture\textureBuffer.h" />
     <ClInclude Include="util\dirent.h" />
     <ClInclude Include="util\triangle.h" />
     <ClInclude Include="util\util.h" />
