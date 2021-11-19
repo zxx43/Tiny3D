@@ -10,10 +10,6 @@ MaterialManager::MaterialManager() {
 	materialMap.clear();
 	Material* defaultMat = new Material(DEFAULT_MAT);
 	add(defaultMat);
-	Material* blackMat = new Material(BLACK_MAT);
-	blackMat->ambient = vec3(0, 0, 0);
-	blackMat->diffuse = vec3(0, 0, 0);
-	add(blackMat);
 	pbrMapDatas = NULL;
 	materialBuffer = NULL;
 	mapChannel = 0;

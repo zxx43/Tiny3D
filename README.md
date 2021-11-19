@@ -29,17 +29,28 @@ A Small OpenGL Based Renderer
 - Volumetric cloud  
 - Collision detection  
 - Terrain LOD  
-  
 ### Control:  
 
-- num-1,num-2,num-3 switch role to control  
-- numpad 2486 to control light direction  
-- v cancel role control    
-- wasd move  
-- space jump  
-- mouse-left attack  
-- mouse-right defend  
+- **num-1**,**num-2**,**num-3** switch role to control  
 
+- **numpad 2486** to control light direction  
+
+- **v** cancel role control    
+
+- **wasd** move  
+
+- **space** jump  
+
+- **mouse-left** attack  
+
+- **mouse-right** defend  
+
+### Debug:  
+
+- **b** show depth  
+- **n** show normal  
+- **m** show terrain mesh  
+- **p** show bounding box & printf gl error  
 ### Screenshot:  
 
 ![screen](anim.gif)   

@@ -11,6 +11,7 @@
 #include "../animation/animationData.h"
 
 #ifndef QUEUE_STATIC
+#define QUEUE_SIZE       9
 #define QUEUE_DYNAMIC_SN 0
 #define QUEUE_STATIC_SN  1
 #define QUEUE_STATIC_SM  2
@@ -20,6 +21,7 @@
 #define QUEUE_ANIMATE_SF 6
 #define QUEUE_STATIC     7
 #define QUEUE_ANIMATE    8
+#define QUEUE_DEBUG      9
 #endif
 
 struct Queue {
@@ -68,10 +70,12 @@ public:
 	float midDistSqr, lowDistSqr;
 	std::map<Mesh*, InstanceData*> instanceQueue;
 	std::map<Animation*, AnimationData*> animationQueue;
+	InstanceData* instanceDebug;
 	MultiInstance* multiInstance;
 	MultiInstance* singleInstance;
 	MultiInstance* billboards;
 	MultiInstance* animations;
+	MultiInstance* boundings;
 	BatchData* batchData;
 	int shadowLevel;
 	bool firstFlush;
@@ -90,5 +94,6 @@ public:
 };
 
 void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camera, Camera* mainCamera);
+void PushDebugToQueue(RenderQueue* queue, Scene* scene, Camera* camera);
 
 #endif

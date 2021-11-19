@@ -15,6 +15,10 @@
 #include "../sky/sky.h"
 #include "player.h"
 
+#ifndef MAX_DEBUG_OBJ
+#define MAX_DEBUG_OBJ 8192
+#endif
+
 struct MeshObject {
 	Mesh* mesh;
 	Object* object;
@@ -63,7 +67,7 @@ public:
 	void updateNodes();
 	void flushNodes();
 	void updateReflectCamera();
-	void addObject(Object* object);
+	void addObject(Object* object, bool isPhysic = true);
 	void addPlay(AnimationNode* node);
 	uint queryMeshCount(Mesh* mesh);
 	void finishInit() { inited = true; }
@@ -74,7 +78,7 @@ public:
 	void playSounds();
 	void updateListenerPosition() { soundMgr->setListenerPosition(actCamera->position); }
 public: // Just for debugging
-	void createNodeAABB(Node* node);
+	void updateNodeAABB(Node* node);
 	void clearAllAABB();
 private:
 	std::list<AnimationNode*> animationNodes;

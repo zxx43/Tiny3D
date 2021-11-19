@@ -21,6 +21,6 @@ public:
 public:
 	virtual void releaseDatas();
 	void resetAnims() { animCount = 0; }
-	void addAnimObject(Object* object);
+	void addAnimObject(Object* object, bool uniformScale = true);
 };
 #endif

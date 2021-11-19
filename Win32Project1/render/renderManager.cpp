@@ -47,6 +47,9 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 	nextQueue = queue2;
 	renderData = NULL;
 
+	debugQueue = new RenderQueue(QUEUE_DEBUG, distance1, distance2);
+	debugQueue->setCfg(cfgs);
+
 	state = new RenderState();
 
 	reflectBuffer = NULL;
@@ -72,6 +75,7 @@ RenderManager::~RenderManager() {
 
 	delete queue1; queue1 = NULL;
 	delete queue2; queue2 = NULL;
+	delete debugQueue; debugQueue = NULL;
 
 	delete state; state = NULL;
 	if (reflectBuffer) delete reflectBuffer; reflectBuffer = NULL;
@@ -119,6 +123,7 @@ void RenderManager::updateSky() {
 
 void RenderManager::flushRenderQueues() {
 	if (renderData) renderData->flush();
+	if (debugQueue) debugQueue->flush();
 }
 
 void RenderManager::updateRenderQueues(Scene* scene) {
@@ -139,6 +144,8 @@ void RenderManager::updateRenderQueues(Scene* scene) {
 	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE_SM], scene, scene->animationRoot, cameraMid, cameraMain);
 	//PushNodeToQueue(renderData->queues[QUEUE_ANIMATE_SF], scene, scene->animationRoot, cameraFar, cameraMain);
 	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE], scene, scene->animationRoot, cameraMain, cameraMain);
+	
+	if (cfgs->debug && scene->isInited()) PushDebugToQueue(debugQueue, scene, cameraMain);
 }
 
 void RenderManager::animateQueues(float velocity) {
@@ -171,6 +178,14 @@ void RenderManager::prepareData(Scene* scene) {
 	updateWaterVisible(scene);
 	flushRenderQueues();
 	updateRenderQueues(scene);
+}
+
+void RenderManager::updateDebugData(Scene* scene) {
+	if (cfgs->debug && scene->isInited()) {
+		scene->updateNodeAABB(scene->terrainNode);
+		scene->updateNodeAABB(scene->staticRoot);
+		scene->updateNodeAABB(scene->animationRoot);
+	}
 }
 
 void RenderManager::renderShadow(Render* render, Scene* scene) {
@@ -377,9 +392,11 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 		terrainShader->setVector3v("mapScale", state->mapScl);
 		terrainShader->setVector4("mapInfo", STEP_SIZE, terrainNode->lineSize, MAP_SIZE, MAP_SIZE);
 		terrainShader->setHandle64("roadTex", AssetManager::assetManager->getRoadHnd());
+		terrainShader->setInt("isDebug", render->getDebugTerrain() ? 1 : 0);
+		terrainShader->setInt("uDebugMid", MaterialManager::materials->find(BLUE_MAT));
 		render->draw(camera, terrainNode->drawcall, state);
 
-		if (/*!cfgs->cartoon && */!cfgs->debug) 
+		if (/*!cfgs->cartoon && */!cfgs->debug && !render->getDebugTerrain()) 
 			drawGrass(render, state, scene, camera);
 	}
 
@@ -412,26 +429,24 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 		scene->skyBox->draw(render, skyShader, camera);
 
 	// Debug mode
-	if (cfgs->debug) {
-		static bool boxInit = false;
-		if (!boxInit && scene->isInited()) {
-			scene->clearAllAABB();
-			scene->createNodeAABB(scene->terrainNode);
-			scene->createNodeAABB(scene->staticRoot);
-			scene->createNodeAABB(scene->animationRoot);
-			boxInit = true;
+	if (cfgs->debug && scene->isInited()) {
+		if (scene->isInited()) {
+			state->shader = phongShader;
+			state->shaderMulti = multiShader;
+			state->shaderFlush = flushShader;
+
+			state->enableCull = false;
+			state->drawLine = true;
+			state->enableAlphaTest = false;
+			state->uniformScale = false;
+
+			state->shaderMulti->setFloat("uMaxLevel", hiz->getMaxLevel());
+			state->shaderMulti->setMatrix4("prevVPMatrix", prevCameraMat);
+			state->shaderMulti->setVector2("uSize", (float)render->viewWidth, (float)render->viewHeight);
+			state->shaderMulti->setVector2("uCamParam", camera->zNear, camera->zFar);
+
+			debugQueue->draw(scene, camera, render, state);
 		}
-
-		static Shader* debugShader = render->findShader("debug");
-		state->enableCull = false;
-		state->drawLine = true;
-		state->enableAlphaTest = false;
-		state->shader = debugShader;
-		drawBoundings(render, state, scene, camera);
-
-		static int frame = 0;
-		if (frame % 40 == 0) boxInit = false;
-		frame++;
 	}
 
 	scene->flushNodes();
@@ -670,11 +685,8 @@ void RenderManager::retrievePrev(Scene* scene) {
 	if (scene->renderCamera) prevCameraMat = scene->renderCamera->viewProjectMatrix;
 }
 
-void RenderManager::drawBoundings(Render* render, RenderState* state, Scene* scene, Camera* camera) {
-	for (unsigned int i = 0; i<scene->boundingNodes.size(); i++) {
-		Node* node = scene->boundingNodes[i];
-		render->draw(camera, node->drawcall, state);
-	}
+bool RenderManager::isWaterShow(Render* render, const Scene* scene) { 
+	return scene->water && renderShowWater && !cfgs->debug && !render->getDebugTerrain(); 
 }
 
 void RenderManager::drawNoise3d(Render* render, Scene* scene, FrameBuffer* noiseBuf) {

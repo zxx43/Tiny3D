@@ -20,7 +20,7 @@ void InstanceData::resetInstance() {
 	count = 0;
 }
 
-void InstanceData::addInstance(Object* object) {
+void InstanceData::addInstance(Object* object, bool uniformScale) {
 	if (transformsFull && instance) {
 		bool valid = instance->insId != InvalidInsId || instance->insSingleId != InvalidInsId || instance->insBillId != InvalidInsId;
 		if (valid) {
@@ -29,6 +29,12 @@ void InstanceData::addInstance(Object* object) {
 			transformsFull[count * 16 + 13] = instance->insSingleId;
 			transformsFull[count * 16 + 14] = instance->insBillId;
 			transformsFull[count * 16 + 15] = object->material;
+
+			if (!uniformScale) {
+				transformsFull[count * 16 + 4] = object->scaleMat[5];
+				transformsFull[count * 16 + 5] = object->scaleMat[10];
+			}
+
 			if (instance->isBillboard) {
 				if (object->billboard->data[2] < 0) {
 					Material* mat = NULL;

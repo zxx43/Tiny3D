@@ -122,7 +122,10 @@ void TerrainDrawcall::update(Camera* camera, Render* render, RenderState* state)
 
 void TerrainDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
 	bool drawLine = render->drawLine;
-	if (render->getDebugTerrain()) render->setDrawLine(true);
+	if (render->getDebugTerrain()) {
+		render->setDrawLine(true);
+		MaterialManager::materials->useMaterialBuffer(1);
+	}
 
 	if (frame < state->delay) frame++;
 	else {

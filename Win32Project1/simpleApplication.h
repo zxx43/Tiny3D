@@ -25,6 +25,7 @@ private:
 	bool firstFrame;
 	bool drawDepth;
 	bool drawNormal;
+	bool drawBounding;
 	int depthLevel;
 public:
 	SimpleApplication();

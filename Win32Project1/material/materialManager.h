@@ -8,6 +8,10 @@
 
 #define DEFAULT_MAT "default_mat"
 #define BLACK_MAT "black_mat"
+#define RED_MAT "red_mat"
+#define GREEN_MAT "green_mat"
+#define BLUE_MAT "blue_mat"
+#define WHITE_MAT "white_mat"
 #define MAX_MAT 1024
 
 struct Material

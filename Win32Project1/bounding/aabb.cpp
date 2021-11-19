@@ -1,4 +1,5 @@
 #include "aabb.h"
+#include "../node/node.h"
 
 AABB::AABB(const vec3& min,const vec3& max) :BoundingBox() {
 	minVertex.x=min.x; minVertex.y=min.y; minVertex.z=min.z;
@@ -21,6 +22,7 @@ AABB::AABB(const vec3& min,const vec3& max) :BoundingBox() {
 	vertices[7]=vec3(max.x,max.y,max.z);
 
 	caculateRadius();
+	debugNode = NULL;
 }
 
 AABB::AABB(const vec3& pos,float sx,float sy,float sz) :BoundingBox() {
@@ -40,6 +42,7 @@ AABB::AABB(const vec3& pos,float sx,float sy,float sz) :BoundingBox() {
 	vertices[7]=vec3(maxVertex.x,maxVertex.y,maxVertex.z);
 
 	caculateRadius();
+	debugNode = NULL;
 }
 
 AABB::AABB(const AABB& rhs) :BoundingBox(rhs) {
@@ -56,6 +59,7 @@ AABB::AABB(const AABB& rhs) :BoundingBox(rhs) {
 		vertices[i]=rhs.vertices[i];
 
 	caculateRadius();
+	debugNode = NULL;
 }
 
 AABB::~AABB() {

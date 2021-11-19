@@ -11,6 +11,7 @@
 #include "boundingBox.h"
 #include <vector>
 
+class Node;
 class AABB: public BoundingBox {
 private:
 	vec3 vertices[8];
@@ -19,6 +20,7 @@ public:
 	float radius;
 	vec3 halfSize;
 	vec3 minVertex, maxVertex;
+	Node* debugNode;
 private:
 	bool vertexInsideCamera(const vec3& vertex, const Frustum* frustum);
 	bool intersectsWidthRay(const vec3& origin,const vec3& dir,float maxDistance);

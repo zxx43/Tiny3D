@@ -59,7 +59,7 @@ void AnimationData::releaseDatas() {
 	if (weights) free(weights); weights = NULL;
 }
 
-void AnimationData::addAnimObject(Object* object) {
+void AnimationData::addAnimObject(Object* object, bool uniformScale) {
 	if (transformsFull) {
 		memcpy(transformsFull + (animCount * 16), object->transformsFull, 12 * sizeof(buff));
 
@@ -68,6 +68,12 @@ void AnimationData::addAnimObject(Object* object) {
 		transformsFull[animCount * 16 + 13] = animObj->getCurFrame();
 		transformsFull[animCount * 16 + 14] = animId + 0.1;
 		transformsFull[animCount * 16 + 15] = object->material;
+
+		if (!uniformScale) {
+			transformsFull[animCount * 16 + 4] = object->scaleMat[5];
+			transformsFull[animCount * 16 + 5] = object->scaleMat[10];
+		}
+
 		animCount++;
 	}
 }

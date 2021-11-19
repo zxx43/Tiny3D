@@ -152,59 +152,62 @@ void Scene::updateVisualTerrain(int bx, int bz, int sizex, int sizez) {
 	terrainNode->cauculateBlockIndices(bx, bz, sizex, sizez);
 }
 
-void Scene::createNodeAABB(Node* node) {
+void Scene::updateNodeAABB(Node* node) {
 	TerrainNode* tn = dynamic_cast<TerrainNode*>(node);
 	if (tn != NULL) {
 		Terrain* t = tn->getMesh();
 		for (int i = 0; i < t->chunks.size(); ++i) {
 			AABB* aabb = t->chunks[i]->bounding;
-			StaticNode* aabbNode = new StaticNode(aabb->position);
-			StaticObject* aabbObject = new StaticObject(AssetManager::assetManager->meshes["box"]);
-			aabbNode->setDynamicBatch(false);
-			aabbObject->bindMaterial(MaterialManager::materials->find(BLACK_MAT));
-			aabbObject->setSize(aabb->sizex, aabb->sizey, aabb->sizez);
-			aabbNode->addObject(this, aabbObject);
-			aabbNode->updateNode(this);
-			aabbNode->prepareDrawcall();
-			aabbNode->updateRenderData();
-			aabbNode->updateDrawcall();
-			boundingNodes.push_back(aabbNode);
+			if (!aabb->debugNode) {
+				aabb->debugNode = new InstanceNode(aabb->position);
+				StaticObject* aabbObject = new StaticObject(AssetManager::assetManager->meshes["box"]);
+				aabbObject->setPhysic(false);
+				aabbObject->bindMaterial(MaterialManager::materials->find(GREEN_MAT));
+				aabbObject->setSize(aabb->sizex, aabb->sizey, aabb->sizez);
+				aabb->debugNode->addObject(this, aabbObject);
+				boundingNodes.push_back(aabb->debugNode);
+			}
+			aabb->debugNode->translateNode(this, aabb->position.x, aabb->position.y, aabb->position.z);
+			aabb->debugNode->objects[0]->setSize(aabb->sizex, aabb->sizey, aabb->sizez);
+			aabb->debugNode->updateNode(this);
 		}
 		return;
 	}
 
 	AABB* aabb = (AABB*)node->boundingBox;
 	if(aabb) {
-		StaticNode* aabbNode = new StaticNode(aabb->position);
-		StaticObject* aabbObject = new StaticObject(AssetManager::assetManager->meshes["box"]);
-		aabbNode->setDynamicBatch(false);
-		aabbObject->bindMaterial(MaterialManager::materials->find(BLACK_MAT));
-		aabbObject->setSize(aabb->sizex, aabb->sizey, aabb->sizez);
-		aabbNode->addObject(this, aabbObject);
-		aabbNode->updateNode(this);
-		aabbNode->prepareDrawcall();
-		aabbNode->updateRenderData();
-		aabbNode->updateDrawcall();
-		boundingNodes.push_back(aabbNode);
+		if (!aabb->debugNode) {
+			aabb->debugNode = new InstanceNode(aabb->position);
+			StaticObject* aabbObject = new StaticObject(AssetManager::assetManager->meshes["box"]);
+			aabbObject->setPhysic(false);
+			aabbObject->bindMaterial(MaterialManager::materials->find(RED_MAT));
+			aabbObject->setSize(aabb->sizex, aabb->sizey, aabb->sizez);
+			aabb->debugNode->addObject(this, aabbObject);
+			boundingNodes.push_back(aabb->debugNode);
+		}
+		aabb->debugNode->translateNode(this, aabb->position.x, aabb->position.y, aabb->position.z);
+		aabb->debugNode->objects[0]->setSize(aabb->sizex, aabb->sizey, aabb->sizez);
+		aabb->debugNode->updateNode(this);
 	}
 	for (uint i = 0; i < node->children.size(); i++)
-		createNodeAABB(node->children[i]);
+		updateNodeAABB(node->children[i]);
 	
 	if (node->children.size() == 0) {
 		for (uint i = 0; i < node->objects.size(); i++) {
 			AABB* aabb = (AABB*)node->objects[i]->bounding;
 			if (aabb) {
-				StaticNode* aabbNode = new StaticNode(aabb->position);
-				StaticObject* aabbObject = new StaticObject(AssetManager::assetManager->meshes.find("box")->second);
-				aabbNode->setDynamicBatch(false);
-				aabbObject->bindMaterial(MaterialManager::materials->find(BLACK_MAT));
-				aabbObject->setSize(aabb->sizex, aabb->sizey, aabb->sizez);
-				aabbNode->addObject(this, aabbObject);
-				aabbNode->updateNode(this);
-				aabbNode->prepareDrawcall();
-				aabbNode->updateRenderData();
-				aabbNode->updateDrawcall();
-				boundingNodes.push_back(aabbNode);
+				if (!aabb->debugNode) {
+					aabb->debugNode = new InstanceNode(aabb->position);
+					StaticObject* aabbObject = new StaticObject(AssetManager::assetManager->meshes["box"]);
+					aabbObject->setPhysic(false);
+					aabbObject->bindMaterial(MaterialManager::materials->find(BLACK_MAT));
+					aabbObject->setSize(aabb->sizex, aabb->sizey, aabb->sizez);
+					aabb->debugNode->addObject(this, aabbObject);
+					boundingNodes.push_back(aabb->debugNode);
+				}
+				aabb->debugNode->translateNode(this, aabb->position.x, aabb->position.y, aabb->position.z);
+				aabb->debugNode->objects[0]->setSize(aabb->sizex, aabb->sizey, aabb->sizez);
+				aabb->debugNode->updateNode(this);
 			}
 		}
 	}
@@ -216,7 +219,7 @@ void Scene::clearAllAABB() {
 	boundingNodes.clear();
 }
 
-void Scene::addObject(Object* object) {
+void Scene::addObject(Object* object, bool isPhysic) {
 	Mesh* cur = object->mesh;
 	if (cur) {
 		if (meshCount.find(cur) == meshCount.end()) {
@@ -260,9 +263,11 @@ void Scene::addObject(Object* object) {
 			dynamicObjects.push_back(obj);
 	}
 	
-	object->caculateCollisionShape();
-	CollisionObject* cob = object->initCollisionObject();
-	collisionWorld->addObject(cob);
+	if (isPhysic) {
+		object->caculateCollisionShape();
+		CollisionObject* cob = object->initCollisionObject();
+		collisionWorld->addObject(cob);
+	}
 }
 
 void Scene::addPlay(AnimationNode* node) {

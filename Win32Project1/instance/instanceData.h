@@ -17,7 +17,7 @@ public:
 	InstanceData(Mesh* mesh, Object* obj, int maxCount);
 	~InstanceData();
 	void resetInstance();
-	void addInstance(Object* object);
+	void addInstance(Object* object, bool uniformScale = true);
 };
 
 #endif

@@ -14,10 +14,12 @@ RenderQueue::RenderQueue(int type, float midDis, float lowDis) {
 	animQueue = new Queue(1);
 	instanceQueue.clear();
 	animationQueue.clear();
+	instanceDebug = NULL;
 	multiInstance = NULL;
 	singleInstance = NULL;
 	billboards = NULL;
 	animations = NULL;
+	boundings = NULL;
 	batchData = NULL;
 	midDistSqr = powf(midDis, 2);
 	lowDistSqr = powf(lowDis, 2);
@@ -35,6 +37,7 @@ RenderQueue::~RenderQueue() {
 	if (singleInstance) delete singleInstance;
 	if (billboards) delete billboards;
 	if (animations) delete animations;
+	if (boundings) delete boundings;
 
 	map<Mesh*, InstanceData*>::iterator itIns;
 	for (itIns = instanceQueue.begin(); itIns != instanceQueue.end(); ++itIns)
@@ -45,6 +48,8 @@ RenderQueue::~RenderQueue() {
 	for (itAnim = animationQueue.begin(); itAnim != animationQueue.end(); ++itAnim)
 		delete itAnim->second;
 	animationQueue.clear();
+
+	if (instanceDebug) delete instanceDebug;
 }
 
 void RenderQueue::push(Node* node) {
@@ -70,6 +75,8 @@ void RenderQueue::flush() {
 		itAnim->second->resetAnims();
 		++itAnim;
 	}
+
+	if (instanceDebug) instanceDebug->resetInstance();
 	
 	if (batchData) batchData->resetBatch();
 }
@@ -154,6 +161,23 @@ void RenderQueue::createInstances(Scene* scene) {
 			billboards->createDrawcall();
 		}
 	}
+
+	if (instanceDebug) {
+		if (!boundings || !boundings->inited()) {
+			pushDatasToInstance(scene, instanceDebug, false);
+			Instance* instance = instanceDebug->instance;
+			if (instance) {
+				if (!boundings) boundings = new MultiInstance();
+				if (!boundings->inited()) boundings->add(instance);
+			}
+		}
+
+		if (!boundings->inited()) {
+			int pass = cfgArgs->dualqueue ? NORMAL_PASS : ALL_PASS;
+			boundings->initBuffers(pass);
+			boundings->createDrawcall();
+		}
+	}
 }
 
 void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState* state) {
@@ -188,6 +212,11 @@ void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState
 	if (billboards) {
 		billboards->drawcall->update(camera, render, state);
 		render->draw(camera, billboards->drawcall, state);
+	}
+
+	if (boundings) {
+		boundings->drawcall->update(camera, render, state);
+		render->draw(camera, boundings->drawcall, state);
 	}
 
 	if (!animations || !animations->inited()) {
@@ -239,6 +268,28 @@ Mesh* RenderQueue::queryLodMesh(Object* object, const vec3& eye) {
 		mesh = object->meshMid;
 	
 	return mesh;
+}
+
+void PushDebugToQueue(RenderQueue* queue, Scene* scene, Camera* camera) {
+	if (queue->firstFlush) {
+		if (scene->boundingNodes.size() <= 0) return;
+		else {
+			Object* object = scene->boundingNodes[0]->objects[0];
+			Mesh* mesh = object->mesh;
+			queue->instanceDebug = new InstanceData(mesh, object, MAX_DEBUG_OBJ);
+			queue->firstFlush = false;
+		} 
+	}
+
+	if (queue->instanceDebug) {
+		for (uint i = 0; i < scene->boundingNodes.size(); ++i) {
+			Node* node = scene->boundingNodes[i];
+			if (node->checkInCamera(camera) && node->objects.size() > 0) {
+				Object* object = node->objects[0];
+				queue->instanceDebug->addInstance(object, false);
+			}
+		}
+	}
 }
 
 void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camera, Camera* mainCamera) {

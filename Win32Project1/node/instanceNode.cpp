@@ -39,7 +39,7 @@ void InstanceNode::addObject(Scene* scene, Object* object) {
 			Instance::instanceTable[object->meshLow]++;
 	}
 
-	scene->addObject(object);
+	scene->addObject(object, object->isPhysic());
 }
 
 Object* InstanceNode::removeObject(Scene* scene, Object* object) {

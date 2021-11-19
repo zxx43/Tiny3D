@@ -44,6 +44,7 @@ public:
 	CollisionObject* collisionObject;
 	float mass;
 	bool dynamic;
+	bool hasPhysic;
 	std::map<std::string, SoundObject*> sounds;
 public:
 	Object();
@@ -69,6 +70,8 @@ public:
 	void updateObjectTransform(bool translate, bool rotate);
 	void setMass(float m) { mass = m; }
 	bool isDynamic() { return dynamic; }
+	bool isPhysic() { return hasPhysic; }
+	void setPhysic(bool phy) { hasPhysic = phy; }
 	void setSound(const char* name, const char* path);
 	SoundObject* getSound(const char* name);
 	void playEffect(const char* name) { SoundObject* sound = getSound(name); if (sound) sound->play(); }

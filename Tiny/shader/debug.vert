@@ -13,7 +13,7 @@ flat out vec3 vColor;
 out vec3 vNormal;
 
 void main() {
-	vColor = vec3(0.6, 1.2, 1.0) * color.rgb * 0.005;
+	vColor = vec3(0.0);
 	
 	mat4 matModel = convertMat(modelMatrices[int(objectid)]);
 	vec4 worldVertex = matModel * vec4(vertex, 1.0);

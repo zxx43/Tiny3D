@@ -27,6 +27,7 @@ SimpleApplication::SimpleApplication() : Application() {
 	firstFrame = true;
 	drawDepth = false;
 	drawNormal = false;
+	drawBounding = false;
 	depthLevel = 0;
 }
 
@@ -158,6 +159,10 @@ void SimpleApplication::keyUp(int key) {
 	if (key == 66) drawDepth = !drawDepth;
 	if (key == 78) drawNormal = !drawNormal;
 	if (key == 77) render->setDebugTerrain(!render->getDebugTerrain());
+	if (key == 80) {
+		drawBounding = !drawBounding;
+		cfgs->debug = drawBounding ? true : false;
+	}
 }
 
 void SimpleApplication::moveMouse(const float mx, const float my, const float cx, const float cy) {
@@ -204,7 +209,7 @@ void SimpleApplication::draw() {
 	render->setFrameBuffer(waterFrame);
 	if (cfgs->graphQuality <= 3)
 		waterFrame->getDepthBuffer()->copyDataFrom(screen->getDepthBuffer());
-	if (renderMgr->isWaterShow(scene)) 
+	if (renderMgr->isWaterShow(render, scene)) 
 		renderMgr->renderWater(render, scene);
 
 	if (cfgs->bloom)
@@ -330,6 +335,8 @@ void SimpleApplication::act(long startTime, long currentTime, float dTime, float
 	scene->player->updateCamera();
 	updateMovement();
 
+	renderMgr->updateDebugData(scene);
+
 	animNode = (AnimationNode*)node->children[2];
 	animNode->getObject()->playEffect("bark");
 
@@ -393,6 +400,11 @@ void SimpleApplication::initScene() {
 	assetMgr->initFrames();
 
 	// Load textures
+	assetMgr->addTextureBindless("black.bmp", true);
+	assetMgr->addTextureBindless("white.bmp", true);
+	assetMgr->addTextureBindless("red.bmp", true);
+	assetMgr->addTextureBindless("green.bmp", true);
+	assetMgr->addTextureBindless("blue.bmp", true);
 	assetMgr->addTextureBindless("cube.bmp", true);
 	assetMgr->addTextureBindless("ground_n.bmp", false);
 	assetMgr->addTextureBindless("ground.bmp", true);
@@ -429,6 +441,36 @@ void SimpleApplication::initScene() {
 	assetMgr->createHeightTex();
 
 	// Create materials
+	Material* blackMat = new Material(BLACK_MAT);
+	blackMat->tex1 = "black.bmp";
+	blackMat->ambient = vec3(0.0);
+	blackMat->diffuse = vec3(0.0);
+	mtlMgr->add(blackMat);
+
+	Material* whiteMat = new Material(WHITE_MAT);
+	whiteMat->tex1 = "white.bmp";
+	whiteMat->ambient = vec3(0.0);
+	whiteMat->diffuse = vec3(0.0);
+	mtlMgr->add(whiteMat);
+
+	Material* greenMat = new Material(GREEN_MAT);
+	greenMat->tex1 = "green.bmp";
+	greenMat->ambient = vec3(0.0);
+	greenMat->diffuse = vec3(0.0);
+	mtlMgr->add(greenMat);
+
+	Material* blueMat = new Material(BLUE_MAT);
+	blueMat->tex1 = "blue.bmp";
+	blueMat->ambient = vec3(0.0);
+	blueMat->diffuse = vec3(0.0);
+	mtlMgr->add(blueMat);
+
+	Material* redMat = new Material(RED_MAT);
+	redMat->tex1 = "red.bmp";
+	redMat->ambient = vec3(0.0);
+	redMat->diffuse = vec3(0.0);
+	mtlMgr->add(redMat);
+
 	Material* boxMat = new Material("box_mat");
 	boxMat->tex1 = "cube.bmp";
 	boxMat->ambient = vec3(0.4, 0.4, 0.4); 

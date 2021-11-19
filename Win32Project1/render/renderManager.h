@@ -19,7 +19,7 @@ struct Renderable {
 	std::vector<RenderQueue*> queues;
 	Renderable(float midDis, float lowDis, ConfigArg* cfg) {
 		queues.clear();
-		for (uint i = 0; i < 9; i++) {
+		for (uint i = 0; i < QUEUE_SIZE; i++) {
 			queues.push_back(new RenderQueue(i, midDis, lowDis));
 			queues[i]->setCfg(cfg);
 		}
@@ -56,6 +56,8 @@ private:
 	bool needResize, needRefreshSky, actShowWater, renderShowWater;
 	ComputeDrawcall* grassDrawcall;
 	mat4 prevCameraMat;
+private:
+	RenderQueue* debugQueue;
 public:
 	Renderable* renderData;
 	Renderable* queue1;
@@ -63,7 +65,6 @@ public:
 	Renderable* currentQueue;
 	Renderable* nextQueue;
 private:
-	void drawBoundings(Render* render, RenderState* state, Scene* scene, Camera* camera);
 	void drawGrass(Render* render, RenderState* state, Scene* scene, Camera* camera);
 	void updateWaterVisible(const Scene* scene);
 private:
@@ -86,6 +87,7 @@ public:
 	void animateQueues(float velocity);
 	void swapRenderQueues(Scene* scene, bool swapQueue);
 	void prepareData(Scene* scene);
+	void updateDebugData(Scene* scene);
 	void renderShadow(Render* render,Scene* scene);
 	void renderScene(Render* render,Scene* scene);
 	void renderWater(Render* render, Scene* scene);
@@ -105,7 +107,7 @@ public:
 	void genHiz(Render* render, Scene* scene, Texture2D* depth);
 	void drawHiz2Screen(Render* render, Scene* scene, int level);
 	void drawNoise3d(Render* render, Scene* scene, FrameBuffer* noiseBuf);
-	bool isWaterShow(const Scene* scene) { return scene->water && renderShowWater; }
+	bool isWaterShow(Render* render, const Scene* scene);
 	int getDepthPre() { return depthPre; }
 	void retrievePrev(Scene* scene);
 };

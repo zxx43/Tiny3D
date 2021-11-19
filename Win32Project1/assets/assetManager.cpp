@@ -193,7 +193,7 @@ void AssetManager::Init() {
 
 		// Load some basic meshes
 		AssetManager::assetManager->addMesh("box", new Box());
-		AssetManager::assetManager->addMesh("sphere", new Sphere(16, 16));
+		AssetManager::assetManager->addMesh("sphere", new Sphere(32, 32));
 		AssetManager::assetManager->addMesh("board", new Board());
 		AssetManager::assetManager->addMesh("quad", new Quad());
 		AssetManager::assetManager->addMesh("billboard", new Board(1, 1, 1, 0, 0), true, false);
