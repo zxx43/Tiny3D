@@ -430,23 +430,21 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 
 	// Debug mode
 	if (cfgs->debug && scene->isInited()) {
-		if (scene->isInited()) {
-			state->shader = phongShader;
-			state->shaderMulti = multiShader;
-			state->shaderFlush = flushShader;
+		state->shader = phongShader;
+		state->shaderMulti = multiShader;
+		state->shaderFlush = flushShader;
 
-			state->enableCull = false;
-			state->drawLine = true;
-			state->enableAlphaTest = false;
-			state->uniformScale = false;
+		state->enableCull = false;
+		state->drawLine = true;
+		state->enableAlphaTest = false;
+		state->uniformScale = false;
 
-			state->shaderMulti->setFloat("uMaxLevel", hiz->getMaxLevel());
-			state->shaderMulti->setMatrix4("prevVPMatrix", prevCameraMat);
-			state->shaderMulti->setVector2("uSize", (float)render->viewWidth, (float)render->viewHeight);
-			state->shaderMulti->setVector2("uCamParam", camera->zNear, camera->zFar);
+		state->shaderMulti->setFloat("uMaxLevel", hiz->getMaxLevel());
+		state->shaderMulti->setMatrix4("prevVPMatrix", prevCameraMat);
+		state->shaderMulti->setVector2("uSize", (float)render->viewWidth, (float)render->viewHeight);
+		state->shaderMulti->setVector2("uCamParam", camera->zNear, camera->zFar);
 
-			debugQueue->draw(scene, camera, render, state);
-		}
+		debugQueue->draw(scene, camera, render, state);
 	}
 
 	scene->flushNodes();
