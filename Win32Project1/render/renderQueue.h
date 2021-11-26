@@ -80,7 +80,7 @@ public:
 	int shadowLevel;
 	bool firstFlush;
 public:
-	RenderQueue(int type, float midDis, float lowDis);
+	RenderQueue(int type, float midDis, float lowDis, ConfigArg* cfg);
 	~RenderQueue();
 	void push(Node* node);
 	void pushAnim(Node* node);
@@ -90,7 +90,6 @@ public:
 	void draw(Scene* scene, Camera* camera, Render* render, RenderState* state);
 	void animate(float velocity);
 	Mesh* queryLodMesh(Object* object, const vec3& eye);
-	void setCfg(ConfigArg* cfg) { cfgArgs = cfg; }
 };
 
 void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camera, Camera* mainCamera);

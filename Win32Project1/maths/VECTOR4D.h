@@ -72,6 +72,11 @@ public:
 	float DotProduct(const VECTOR4D & rhs)
 	{	return x*rhs.x + y*rhs.y + z*rhs.z + w*rhs.w;	}
 
+	float GetLength() const
+	{ return (float)sqrt((x * x) + (y * y) + (z * z) + (w * w)); }
+
+	void Normalize();
+
 	//rotations
 	void RotateX(double angle);
 	VECTOR4D GetRotatedX(double angle) const;

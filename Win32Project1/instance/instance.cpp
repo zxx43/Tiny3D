@@ -32,7 +32,7 @@ void Instance::releaseDatas() {
 	DataBuffer::releaseDatas();
 }
 
-void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int cnt,bool copy) {
+void Instance::initInstanceBuffers(int vertices,int indices,int cnt,bool copy) {
 	vertexCount = vertices;
 	vertexBuffer = (float*)malloc(vertexCount * 3 * sizeof(float));
 	normalBuffer = (half*)malloc(vertexCount * 3 * sizeof(half));
@@ -51,23 +51,12 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 		vec3 tangent = instanceMesh->tangents[i];
 		vec2 texcoord=instanceMesh->texcoords[i];
 
-		int mid = object->material;
-		if (isBillboard) mid = object->billboard->material;
-		Material* mat = NULL;
-		if (mid >= 0)
-			mat = MaterialManager::materials->find(mid);
-		else if (instanceMesh->materialids) {
-			mid = instanceMesh->materialids[i];
-			mat = MaterialManager::materials->find(mid);
-		}
-		if (!mat) {
-			mid = 0;
-			mat = MaterialManager::materials->find(mid);
-		}
-		vec3 ambient = mat->ambient;
-		vec3 diffuse = mat->diffuse;
-		vec3 specular = mat->specular;
-		vec4 texids = mat->texids;
+		int mid = instanceMesh->materialids ? instanceMesh->materialids[i] : 0;
+		//Material* mat = MaterialManager::materials->find(mid);
+		//vec3 ambient = mat->ambient;
+		//vec3 diffuse = mat->diffuse;
+		//vec3 specular = mat->specular;
+		//vec4 texids = mat->texids;
 
 		for (int v = 0; v < 3; v++) {
 			vertexBuffer[i * 3 + v] = GetVec4(&vertex, v);
@@ -77,16 +66,16 @@ void Instance::initInstanceBuffers(Object* object,int vertices,int indices,int c
 
 		texcoordBuffer[i * 4 + 0] = (texcoord.x);
 		texcoordBuffer[i * 4 + 1] = (texcoord.y);
-		//texcoordBuffer[i * 4 + 2] = (texids.x);
 		texcoordBuffer[i * 4 + 2] = mid;
-		texcoordBuffer[i * 4 + 3] = (texids.y);
+		//texcoordBuffer[i * 4 + 2] = (texids.x);
+		//texcoordBuffer[i * 4 + 3] = (texids.y);
 
-		texidBuffer[i * 2 + 0] = (texids.z);
-		texidBuffer[i * 2 + 1] = (texids.w);
+		//texidBuffer[i * 2 + 0] = (texids.z);
+		//texidBuffer[i * 2 + 1] = (texids.w);
 
-		colorBuffer[i * 3 + 0] = (byte)(ambient.x * 255);
-		colorBuffer[i * 3 + 1] = (byte)(diffuse.x * 255);
-		colorBuffer[i * 3 + 2] = (byte)(specular.x * 255);
+		//colorBuffer[i * 3 + 0] = (byte)(ambient.x * 255);
+		//colorBuffer[i * 3 + 1] = (byte)(diffuse.x * 255);
+		//colorBuffer[i * 3 + 2] = (byte)(specular.x * 255);
 	}
 
 	if(instanceMesh->indices) {

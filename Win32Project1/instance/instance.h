@@ -25,7 +25,7 @@ public:
 	virtual ~Instance();
 public:
 	virtual void releaseDatas();
-	void initInstanceBuffers(Object* object,int vertices,int indices,int cnt,bool copy);
+	void initInstanceBuffers(int vertices,int indices,int cnt,bool copy);
 	void setRenderData(InstanceData* data);
 private:
 	void create(Mesh* mesh);

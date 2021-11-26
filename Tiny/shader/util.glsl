@@ -15,6 +15,7 @@ const vec3 UP_VEC3 = vec3(0.0, 1.0, 0.0);
 const vec3 ZERO_VEC3 = vec3(0.0);
 const vec4 BoardMat = vec4(0.3, 0.0, 0.0, 1.0);
 const vec4 BoardRM = vec4(1.0, 0.0, 0.0, 1.0);
+const float NEG_CHECK = 5.0;
 const uint MAX_TEX = 128;
 
 mat3 RotY(float r) {
@@ -161,6 +162,7 @@ vec4 DepthToLinear(mat4 vpp, mat4 lpp, mat4 lvp, float n, float ivd, vec4 mv) {
 	#define FOG_COLOR vec3(1.0)
 #endif
 vec3 GenFogColor(float factor, vec4 worldPos, float depthView, float udotl, vec3 sceneColor) {
+#ifndef NO_FOG
 	float worldH = worldPos.y / worldPos.w;
 	float heightFactor = smoothstep(START_H, END_H, worldH);
 	float fogFactor = exp2(factor * depthView * depthView * LOG2);
@@ -168,11 +170,43 @@ vec3 GenFogColor(float factor, vec4 worldPos, float depthView, float udotl, vec3
 	fogFactor = mix(fogFactor, 1.0, heightFactor);
 	fogFactor = clamp(fogFactor, 0.0, 1.0);
 	return mix(FOG_COLOR * udotl, sceneColor, fogFactor);
+#else
+	return sceneColor;
+#endif
+}
+
+float RevertNegative(float value) {
+	return value - NEG_CHECK * 2.0;
 }
 
 vec3 DecodeNormal(vec2 vNormal2) {
-	float z = sqrt(1.0 - dot(vNormal2, vNormal2));
-	return vec3(vNormal2, z);
+	vec2 normal2 = vNormal2;
+	float signNormal = 1.0;
+	if(normal2.x > NEG_CHECK) {
+		normal2.x = RevertNegative(normal2.x);
+		signNormal = -1.0;
+	}
+	float z = signNormal * sqrt(1.0 - dot(normal2, normal2));
+	return vec3(normal2, z);
+}
+
+vec4 DecodeQuat(vec3 vQuat3) {
+	vec3 quat3 = vQuat3;
+	float signQuat = 1.0;
+	if(quat3.z > NEG_CHECK) {
+		quat3.z = RevertNegative(quat3.z);
+		signQuat = -1.0;
+	}
+	float w = signQuat * sqrt(1.0 - dot(quat3, quat3));
+	return vec4(quat3, w);
+}
+
+vec3 UnpackFloat2Vec( float v ) {
+	int iv = int(v);
+	int z = iv >> 20;
+	int y = iv - (z << 20); y = y >> 10;
+	float x = v - float((z << 20) + (y << 10));
+	return vec3(x, vec2(ivec2(y, z)));
 }
 
 bool CheckCull(vec4 cp0, vec4 cp1, vec4 cp2, vec4 cp3, 

@@ -196,7 +196,6 @@ void MultiDrawcall::prepareRenderData(Camera* camera, Render* render, RenderStat
 	render->setShaderIVec4(state->shaderMulti, "uCount", multiRef->normalCount, multiRef->singleCount, multiRef->billCount, multiRef->animCount);
 	render->setShaderUVec4(state->shaderMulti, "uInsCount", multiRef->normalInsCount, multiRef->singleInsCount, multiRef->billInsCount, multiRef->animInsCount);
 	render->setShaderMat4(state->shaderMulti, "viewProjectMatrix", camera->viewProjectMatrix);
-	render->setShaderInt(state->shaderMulti, "uniformScale", state->uniformScale ? 1 : 0);
 
 	int dispatch = objectCount > MAX_DISPATCH ? MAX_DISPATCH : objectCount;
 	render->setShaderUint(state->shaderMulti, "pass", 0);

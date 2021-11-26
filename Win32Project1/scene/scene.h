@@ -80,6 +80,8 @@ public:
 public: // Just for debugging
 	void updateNodeAABB(Node* node);
 	void clearAllAABB();
+private: 
+	void updateAABBMesh(AABB* aabb, const char* mat);
 private:
 	std::list<AnimationNode*> animationNodes;
 	std::list<StaticObject*> dynamicObjects;

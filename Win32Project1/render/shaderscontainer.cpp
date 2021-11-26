@@ -75,6 +75,10 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	Shader* terrain = shaders->addShader("terrain", TERRAIN_VERT, TERRAIN_FRAG);
 	shaders->addShaderBindTex(terrain);
 
+	Shader* terrainDebug = shaders->addShader("terrain_debug", TERRAIN_VERT, TERRAIN_FRAG);
+	shaders->addShaderBindTex(terrainDebug);
+	terrainDebug->attachDef("UseDebug", "1.0");
+
 	Shader* terrainComp = shaders->addShader("terrainComp", TERRAIN_COMP);
 	terrainComp->attachDef("CHUNK_INDEX_COUNT", to_string(CHUNK_INDEX_COUNT).data());
 	terrainComp->attachDef("CHUNK_SIZE", to_string(CHUNK_SIZE).data());
@@ -144,6 +148,14 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	edge->setSlot("normalWaterBuffer", 1);
 	edge->setSlot("matBuffer", 2);
 
+	Shader* edgeNFG = shaders->addShader("edge_nfg", POST_VERT, EDGE_FRAG);
+	edgeNFG->attachDef("NO_FOG", "1");
+	if (cfgs->cartoon)
+		edgeNFG->attachDef("USE_CARTOON", "1");
+	edgeNFG->setSlot("colorBuffer", 0);
+	edgeNFG->setSlot("normalWaterBuffer", 1);
+	edgeNFG->setSlot("matBuffer", 2);
+
 	Shader* fxaa = shaders->addShader("fxaa", POST_VERT, FXAA_FRAG);
 	fxaa->setSlot("colorBuffer", 0);
 
@@ -193,6 +205,23 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	combined->setSlot("waterNormalBuffer", 5);
 	combined->setSlot("waterDepthBuffer", 6);
 	combined->setSlot("bloomBuffer", 7);
+
+	Shader* combinedNFG = shaders->addShader("combined_nfg", POST_VERT, COMBINE_FRAG);
+	combinedNFG->attachDef("NO_FOG", "1");
+	if (cfgs->cartoon)
+		combinedNFG->attachDef("USE_CARTOON", "1");
+	if (cfgs->bloom)
+		combinedNFG->attachDef("USE_BLOOM", "1");
+	if (cfgs->graphQuality > 3)
+		combinedNFG->attachDef("HIGH_QUALITY", "1");
+	combinedNFG->setSlot("sceneBuffer", 0);
+	combinedNFG->setSlot("sceneNormalBuffer", 1);
+	combinedNFG->setSlot("sceneDepthBuffer", 2);
+	combinedNFG->setSlot("waterBuffer", 3);
+	combinedNFG->setSlot("waterMatBuffer", 4);
+	combinedNFG->setSlot("waterNormalBuffer", 5);
+	combinedNFG->setSlot("waterDepthBuffer", 6);
+	combinedNFG->setSlot("bloomBuffer", 7);
 
 	Shader* cull = shaders->addShader("cull", CULL_COMP);
 	cull->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());

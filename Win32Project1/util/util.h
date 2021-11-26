@@ -324,6 +324,34 @@ inline mat4 GetRotateAndScale(const mat4& mat) {
 	return res;
 }
 
+inline float PackVec2Float(const vec3& v) {
+	int y = round(v.y);
+	int z = round(v.z);
+	y = y << 10;
+	z = z << 20;
+	return (v.x + y + z);
+}
+
+#define NEG_CHECK 5.0
+
+inline void CheckNegative(const float input, float& value) {
+	if (input < 0.0) value += NEG_CHECK * 2.0;
+}
+
+inline vec2 EncodeNormal(const vec3& n, bool normalized) {
+	vec3 normal = n;
+	if (!normalized) normal.Normalize();
+	CheckNegative(normal.z, normal.x);
+	return vec2(normal.x, normal.y);
+}
+
+inline vec3 EncodeQuat(const vec4& q, bool normalized) {
+	vec4 quat = q;
+	if (!normalized) quat.Normalize();
+	CheckNegative(quat.w, quat.z);
+	return vec3(quat.x, quat.y, quat.z);
+}
+
 template <typename T>
 struct TBuffer {
 	T* tdata;

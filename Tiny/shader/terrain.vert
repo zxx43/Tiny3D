@@ -1,14 +1,18 @@
 #include "shader/util.glsl"
 
+#ifdef UseDebug
 layout(binding = 1, std430) buffer InMaterial {
 	Material inMaterials[];
 };
+#endif
 
 uniform mat4 viewProjectMatrix;
 uniform vec3 mapTrans, mapScale;
 uniform vec4 mapInfo;
-uniform int isDebug;
+
+#ifdef UseDebug
 uniform int uDebugMid;
+#endif
 
 layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 normal;
@@ -37,7 +41,12 @@ void main() {
 	
 	vTexcoord = texcoord.xy;
 	vRMid = texcoord.zw;
-	vTexid = isDebug == 0 ? texid : inMaterials[uDebugMid].texids.xxxx;
+
+#ifndef UseDebug
+	vTexid = texid;
+#else
+	vTexid = inMaterials[uDebugMid].texids.xxxx;
+#endif
 
 	gl_Position = viewProjectMatrix * worldVertex;
 }

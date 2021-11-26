@@ -24,15 +24,15 @@ AnimationData::AnimationData(Animation* anim, int maxCount) : DataBuffer(ANIMATE
 
 		texcoordBuffer[i * 4 + 0] = anim->aTexcoords[i].x;
 		texcoordBuffer[i * 4 + 1] = anim->aTexcoords[i].y;
-		//texcoordBuffer[i * 4 + 2] = anim->aTextures[i]->texids.x;
 		texcoordBuffer[i * 4 + 2] = anim->aMids[i];
-		texcoordBuffer[i * 4 + 3] = anim->aTextures[i]->texids.y;
-		texidBuffer[i * 2 + 0] = anim->aTextures[i]->texids.z;
-		texidBuffer[i * 2 + 1] = anim->aTextures[i]->texids.w;
+		//texcoordBuffer[i * 4 + 2] = anim->aTextures[i]->texids.x;
+		//texcoordBuffer[i * 4 + 3] = anim->aTextures[i]->texids.y;
+		//texidBuffer[i * 2 + 0] = anim->aTextures[i]->texids.z;
+		//texidBuffer[i * 2 + 1] = anim->aTextures[i]->texids.w;
 
-		colorBuffer[i * 3 + 0] = (byte)(anim->aAmbients[i].x * 255);
-		colorBuffer[i * 3 + 1] = (byte)(anim->aDiffuses[i].x * 255);
-		colorBuffer[i * 3 + 2] = (byte)(anim->aSpeculars[i].x * 255);
+		//colorBuffer[i * 3 + 0] = (byte)(anim->aAmbients[i].x * 255);
+		//colorBuffer[i * 3 + 1] = (byte)(anim->aDiffuses[i].x * 255);
+		//colorBuffer[i * 3 + 2] = (byte)(anim->aSpeculars[i].x * 255);
 
 		SetUVec4(anim->aBoneids[i], boneids, i);
 		for (uint v = 0; v < 4; v++)
@@ -70,9 +70,17 @@ void AnimationData::addAnimObject(Object* object, bool uniformScale) {
 		transformsFull[animCount * 16 + 15] = object->material;
 
 		if (!uniformScale) {
-			transformsFull[animCount * 16 + 4] = object->scaleMat[5];
-			transformsFull[animCount * 16 + 5] = object->scaleMat[10];
+			vec3 scale(object->scaleMat[0], object->scaleMat[5], object->scaleMat[10]);
+			float pScale = PackVec2Float(scale);
+			transformsFull[animCount * 16 + 3] = pScale;
 		}
+
+		vec4 quat(transformsFull[animCount * 16 + 4], transformsFull[animCount * 16 + 5], transformsFull[animCount * 16 + 6], transformsFull[animCount * 16 + 7]);
+		vec3 quat3 = EncodeQuat(quat, true);
+		transformsFull[animCount * 16 + 4] = quat3.x;
+		transformsFull[animCount * 16 + 5] = quat3.y;
+		transformsFull[animCount * 16 + 6] = quat3.z;
+		transformsFull[animCount * 16 + 7] = uniformScale ? 1.0 : -1.0;
 
 		animCount++;
 	}

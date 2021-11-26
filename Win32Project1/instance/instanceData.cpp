@@ -31,19 +31,23 @@ void InstanceData::addInstance(Object* object, bool uniformScale) {
 			transformsFull[count * 16 + 15] = object->material;
 
 			if (!uniformScale) {
-				transformsFull[count * 16 + 4] = object->scaleMat[5];
-				transformsFull[count * 16 + 5] = object->scaleMat[10];
+				vec3 scale(object->scaleMat[0], object->scaleMat[5], object->scaleMat[10]);
+				float pScale = PackVec2Float(scale);
+				transformsFull[count * 16 + 3] = pScale;
 			}
 
 			if (instance->isBillboard) {
-				if (object->billboard->data[2] < 0) {
-					Material* mat = NULL;
-					if (MaterialManager::materials)
-						mat = MaterialManager::materials->find(object->billboard->material);
-					object->billboard->data[2] = mat ? mat->texids.x : 0.0;
-				}
 				memcpy(transformsFull + (count * 16) + 4, object->billboard->data, 3 * sizeof(buff));
+				transformsFull[count * 16 + 15] = object->billboard->material;
+			} else {
+				vec4 quat(transformsFull[count * 16 + 4], transformsFull[count * 16 + 5], transformsFull[count * 16 + 6], transformsFull[count * 16 + 7]);
+				vec3 quat3 = EncodeQuat(quat, true);
+				transformsFull[count * 16 + 4] = quat3.x;
+				transformsFull[count * 16 + 5] = quat3.y;
+				transformsFull[count * 16 + 6] = quat3.z;
 			}
+			transformsFull[count * 16 + 7] = uniformScale ? 1.0 : -1.0;
+
 			count++;
 		}
 	} 

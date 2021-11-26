@@ -47,8 +47,7 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 	nextQueue = queue2;
 	renderData = NULL;
 
-	debugQueue = new RenderQueue(QUEUE_DEBUG, distance1, distance2);
-	debugQueue->setCfg(cfgs);
+	debugQueue = new RenderQueue(QUEUE_DEBUG, distance1, distance2, cfgs);
 
 	state = new RenderState();
 
@@ -366,6 +365,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	TerrainNode* terrainNode = scene->terrainNode;
 	if (terrainNode && terrainNode->checkInCamera(camera)) {
 		static Shader* terrainShader = render->findShader("terrain");
+		static Shader* debugTerrainShader = render->findShader("terrain_debug");
 		static Shader* terrainCullShader = render->findShader("terrainComp");
 
 		StaticObject* terrain = (StaticObject*)terrainNode->objects[0];
@@ -387,13 +387,13 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 		((TerrainDrawcall*)terrainNode->drawcall)->update(camera, render, state);
 		state->shaderCompute = NULL;
 		
-		state->shader = terrainShader;
-		terrainShader->setVector3v("mapTrans", state->mapTrans);
-		terrainShader->setVector3v("mapScale", state->mapScl);
-		terrainShader->setVector4("mapInfo", STEP_SIZE, terrainNode->lineSize, MAP_SIZE, MAP_SIZE);
-		terrainShader->setHandle64("roadTex", AssetManager::assetManager->getRoadHnd());
-		terrainShader->setInt("isDebug", render->getDebugTerrain() ? 1 : 0);
-		terrainShader->setInt("uDebugMid", MaterialManager::materials->find(BLUE_MAT));
+		state->shader = render->getDebugTerrain() ? debugTerrainShader : terrainShader;
+		state->shader->setVector3v("mapTrans", state->mapTrans);
+		state->shader->setVector3v("mapScale", state->mapScl);
+		state->shader->setVector4("mapInfo", STEP_SIZE, terrainNode->lineSize, MAP_SIZE, MAP_SIZE);
+		state->shader->setHandle64("roadTex", AssetManager::assetManager->getRoadHnd());
+		if (render->getDebugTerrain())
+			state->shader->setInt("uDebugMid", MaterialManager::materials->find(BLUE_MAT));
 		render->draw(camera, terrainNode->drawcall, state);
 
 		if (/*!cfgs->cartoon && */!cfgs->debug && !render->getDebugTerrain()) 
@@ -437,7 +437,6 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 		state->enableCull = false;
 		state->drawLine = true;
 		state->enableAlphaTest = false;
-		state->uniformScale = false;
 
 		state->shaderMulti->setFloat("uMaxLevel", hiz->getMaxLevel());
 		state->shaderMulti->setMatrix4("prevVPMatrix", prevCameraMat);
@@ -550,13 +549,14 @@ void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* scre
 
 void RenderManager::drawCombined(Render* render, Scene* scene, const std::vector<Texture2D*>& inputTextures, Filter* filter) {
 	static Shader* combinedShader = render->findShader("combined");
+	static Shader* combinedNFGShader = render->findShader("combined_nfg");
 	state->reset();
 	state->quality = cfgs->graphQuality;
 	state->dynSky = cfgs->dynsky;
 	state->eyePos = &(scene->renderCamera->position);
 	state->enableDepthTest = false;
 	state->pass = DEFERRED_PASS;
-	state->shader = combinedShader;
+	state->shader = render->getFog() ? combinedShader : combinedNFGShader;
 	filter->draw(scene->renderCamera, render, state, inputTextures, NULL);
 }
 

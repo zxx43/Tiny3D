@@ -5,7 +5,8 @@ layout(local_size_x = 1) in;
 
 struct Transform {
 	vec4 trans;
-	vec4 rotat;
+	vec3 rotat; 
+	float uScale;
 	vec4 bound;
 	vec4 mesh;
 };
@@ -69,7 +70,6 @@ uniform uint pass;
 uniform uint bufferPass;
 uniform ivec4 uCount;
 uniform uvec4 uInsCount;
-uniform int uniformScale;
 
 Bounding GetBound(Transform ins, vec3 translate) {
 	vec4 bound = ins.bound;
@@ -125,8 +125,10 @@ void main() {
 				if(!OccQuery(bound)) 
 				#endif
 				{
-					mat4 outMat = (uniformScale != 0) ? Translate(translate) * QuatToMat4(transNormal.rotat) * Scale(transNormal.trans.w) :
-						Translate(translate) * Scale(vec3(transNormal.trans.w, transNormal.rotat.xy));
+					bool uniformScale = transNormal.uScale > 0.0;
+					vec3 scale = uniformScale ? vec3(transNormal.trans.w) : UnpackFloat2Vec(transNormal.trans.w).xyz;
+					vec4 quat = DecodeQuat(transNormal.rotat.xyz);
+					mat4 outMat = Translate(translate) * QuatToMat4(quat) * Scale(scale);
 					uint index = atomicAdd(normals[meshid].primCount, 1);
 					uint oindex = normals[meshid].baseInstance + index;
 					outMat[3].w = transNormal.mesh.w;
@@ -147,8 +149,10 @@ void main() {
 				if(!OccQuery(bound)) 
 				#endif
 				{
-					mat4 outMat = (uniformScale != 0) ? Translate(translate) * QuatToMat4(transSingle.rotat) * Scale(transSingle.trans.w) :
-						Translate(translate) * Scale(vec3(transSingle.trans.w, transSingle.rotat.xy));
+					bool uniformScale = transSingle.uScale > 0.0;
+					vec3 scale = uniformScale ? vec3(transSingle.trans.w) : UnpackFloat2Vec(transSingle.trans.w).xyz;
+					vec4 quat = DecodeQuat(transSingle.rotat.xyz);
+					mat4 outMat = Translate(translate) * QuatToMat4(quat) * Scale(scale);
 					uint index = atomicAdd(singles[meshid].primCount, 1);
 					uint oindex = singles[meshid].baseInstance + index;
 					outMat[3].w = transSingle.mesh.w;
@@ -169,8 +173,7 @@ void main() {
 				if(!OccQuery(bound)) 
 				#endif
 				{
-					vec4 rotQuat = (uniformScale != 0) ? transBill.rotat : vec4(0.0, 0.0, 0.0, 1.0);
-					mat4 outMat = mat4(transBill.trans, rotQuat, transBill.bound, transBill.mesh);
+					mat4 outMat = mat4(transBill.trans, vec4(transBill.rotat, transBill.uScale), transBill.bound, transBill.mesh);
 					uint index = atomicAdd(bills[meshid].primCount, 1);
 					uint oindex = bills[meshid].baseInstance + index;
 					outMat[3].w = transBill.mesh.w;
@@ -186,8 +189,10 @@ void main() {
 		int meshid = int(transAnim.mesh.z);
 		vec3 translate = transAnim.trans.xyz;
 
-		mat4 outMat = (uniformScale != 0) ? Translate(translate) * QuatToMat4(transAnim.rotat) * Scale(transAnim.trans.w) : 
-			Translate(translate) * Scale(vec3(transAnim.trans.w, transAnim.rotat.xy));
+		bool uniformScale = transAnim.uScale > 0.0;
+		vec3 scale = uniformScale ? vec3(transAnim.trans.w) : UnpackFloat2Vec(transAnim.trans.w).xyz;
+		vec4 quat = DecodeQuat(transAnim.rotat.xyz);
+		mat4 outMat = Translate(translate) * QuatToMat4(quat) * Scale(scale);
 		outMat = transpose(outMat);
 		outMat[3] = transAnim.mesh;
 

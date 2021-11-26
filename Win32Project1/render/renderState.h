@@ -28,7 +28,6 @@ struct RenderState {
 	bool tess;
 	int pass;
 	bool dynPass;
-	bool uniformScale;
 	float time;
 	float quality;
 	int delay;
@@ -83,7 +82,6 @@ struct RenderState {
 		tess = rhs->tess;
 		pass = rhs->pass;
 		dynPass = rhs->pass;
-		uniformScale = rhs->uniformScale;
 		time = rhs->time;
 		quality = rhs->quality;
 		delay = rhs->delay;
@@ -125,7 +123,6 @@ struct RenderState {
 		tess = false;
 		pass = COLOR_PASS;
 		dynPass = false;
-		uniformScale = true;
 		time = 0.0;
 		quality = 1.0;
 		delay = DELAY_FRAME;

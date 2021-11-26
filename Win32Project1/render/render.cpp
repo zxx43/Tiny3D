@@ -48,6 +48,7 @@ void Render::initEnvironment() {
 	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &MaxAniso);
 	debugMode = false;
 	debugTerrain = false;
+	drawFog = true;
 
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 }

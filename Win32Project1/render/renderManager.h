@@ -19,10 +19,9 @@ struct Renderable {
 	std::vector<RenderQueue*> queues;
 	Renderable(float midDis, float lowDis, ConfigArg* cfg) {
 		queues.clear();
-		for (uint i = 0; i < QUEUE_SIZE; i++) {
-			queues.push_back(new RenderQueue(i, midDis, lowDis));
-			queues[i]->setCfg(cfg);
-		}
+		for (uint i = 0; i < QUEUE_SIZE; i++) 
+			queues.push_back(new RenderQueue(i, midDis, lowDis, cfg));
+
 		queues[QUEUE_DYNAMIC_SN]->shadowLevel = 1;
 		queues[QUEUE_STATIC_SN]->shadowLevel = 1;
 		queues[QUEUE_STATIC_SM]->shadowLevel = 2;

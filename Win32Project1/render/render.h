@@ -39,6 +39,7 @@ public: // Global render state
 private:
 	bool debugMode;
 	bool debugTerrain;
+	bool drawFog;
 	ShaderManager* shaders;
 	FrameBuffer* currentFrame;
 public:
@@ -100,6 +101,8 @@ public:
 	void setShaderMat3(Shader* shader, const char* param, int count, float* matrices) { shader->setMatrix3(param, count, matrices); }
 	void setDebugTerrain(bool dbg) { debugTerrain = dbg; }
 	bool getDebugTerrain() { return debugTerrain; }
+	void setFog(bool fog) { drawFog = fog; }
+	bool getFog() { return drawFog; }
 };
 
 

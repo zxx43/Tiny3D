@@ -15,6 +15,19 @@
 
 #include "Maths.h"
 
+void VECTOR4D::Normalize() {
+	float length = GetLength();
+
+	if (length == 1 || length == 0)			//return if length is 1 or 0
+		return;
+
+	float scalefactor = 1.0f / length;
+	x *= scalefactor;
+	y *= scalefactor;
+	z *= scalefactor;
+	w *= scalefactor;
+}
+
 void VECTOR4D::RotateX(double angle)
 {
 	(*this)=GetRotatedX(angle);

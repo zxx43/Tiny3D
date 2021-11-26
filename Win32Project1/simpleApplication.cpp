@@ -159,6 +159,11 @@ void SimpleApplication::keyUp(int key) {
 	if (key == 66) drawDepth = !drawDepth;
 	if (key == 78) drawNormal = !drawNormal;
 	if (key == 77) render->setDebugTerrain(!render->getDebugTerrain());
+	if (key == 79) render->setFog(!render->getFog());
+	if (key == 73) {
+		cfgs->dof = !cfgs->dof;
+		resize(windowWidth, windowHeight);
+	}
 	if (key == 80) {
 		drawBounding = !drawBounding;
 		cfgs->debug = drawBounding ? true : false;
@@ -236,7 +241,7 @@ void SimpleApplication::draw() {
 			edgeInput.push_back(combinedChain->getOutputTex(1));				  // normalWaterBuffer
 			edgeInput.push_back(screen->getColorBuffer(1));						  // matBuffer
 		}
-		renderMgr->drawScreenFilter(render, scene, "edge", edgeInput, edgeFilter);
+		renderMgr->drawScreenFilter(render, scene, render->getFog() ? "edge" : "edge_nfg", edgeInput, edgeFilter);
 		lastFilter = edgeFilter;
 	}
 	if (cfgs->fxaa) {
@@ -400,11 +405,6 @@ void SimpleApplication::initScene() {
 	assetMgr->initFrames();
 
 	// Load textures
-	assetMgr->addTextureBindless("black.bmp", true);
-	assetMgr->addTextureBindless("white.bmp", true);
-	assetMgr->addTextureBindless("red.bmp", true);
-	assetMgr->addTextureBindless("green.bmp", true);
-	assetMgr->addTextureBindless("blue.bmp", true);
 	assetMgr->addTextureBindless("cube.bmp", true);
 	assetMgr->addTextureBindless("ground_n.bmp", false);
 	assetMgr->addTextureBindless("ground.bmp", true);
@@ -443,32 +443,22 @@ void SimpleApplication::initScene() {
 	// Create materials
 	Material* blackMat = new Material(BLACK_MAT);
 	blackMat->tex1 = "black.bmp";
-	blackMat->ambient = vec3(0.0);
-	blackMat->diffuse = vec3(0.0);
 	mtlMgr->add(blackMat);
 
 	Material* whiteMat = new Material(WHITE_MAT);
 	whiteMat->tex1 = "white.bmp";
-	whiteMat->ambient = vec3(0.0);
-	whiteMat->diffuse = vec3(0.0);
 	mtlMgr->add(whiteMat);
 
 	Material* greenMat = new Material(GREEN_MAT);
 	greenMat->tex1 = "green.bmp";
-	greenMat->ambient = vec3(0.0);
-	greenMat->diffuse = vec3(0.0);
 	mtlMgr->add(greenMat);
 
 	Material* blueMat = new Material(BLUE_MAT);
 	blueMat->tex1 = "blue.bmp";
-	blueMat->ambient = vec3(0.0);
-	blueMat->diffuse = vec3(0.0);
 	mtlMgr->add(blueMat);
 
 	Material* redMat = new Material(RED_MAT);
 	redMat->tex1 = "red.bmp";
-	redMat->ambient = vec3(0.0);
-	redMat->diffuse = vec3(0.0);
 	mtlMgr->add(redMat);
 
 	Material* boxMat = new Material("box_mat");
@@ -538,12 +528,13 @@ void SimpleApplication::initScene() {
 	StaticObject board(meshes["board"]);
 	StaticObject quad(meshes["quad"]);
 
-	//StaticObject model1(meshes["billboard"], meshes["billboard"], meshes["billboard"]);
+	//StaticObject model1(meshes["tree"], meshes["billboard"], meshes["billboard"]);
 	StaticObject model1(meshes["tree"], meshes["treeMid"], meshes["billboard"]);
 	model1.detailLevel = 4;
 	model1.setBillboard(5, 10, mtlMgr->find("billboard_tree_mat"));
 	StaticObject model2(meshes["tank"]);
 	StaticObject model3(meshes["m1a2"]);
+	//StaticObject model4(meshes["treeA"], meshes["billboard"], meshes["billboard"]);
 	StaticObject model4(meshes["treeA"], meshes["treeAMid"], meshes["billboard"]);
 	model4.detailLevel = 4;
 	model4.setBillboard(13, 14, mtlMgr->find("billboard_treeA_mat"));

@@ -197,6 +197,13 @@ void AssetManager::Init() {
 		AssetManager::assetManager->addMesh("board", new Board());
 		AssetManager::assetManager->addMesh("quad", new Quad());
 		AssetManager::assetManager->addMesh("billboard", new Board(1, 1, 1, 0, 0), true, false);
+
+		// Load some basic textures
+		AssetManager::assetManager->addTextureBindless("black.bmp", true);
+		AssetManager::assetManager->addTextureBindless("white.bmp", true);
+		AssetManager::assetManager->addTextureBindless("red.bmp", true);
+		AssetManager::assetManager->addTextureBindless("green.bmp", true);
+		AssetManager::assetManager->addTextureBindless("blue.bmp", true);
 	}
 }
 

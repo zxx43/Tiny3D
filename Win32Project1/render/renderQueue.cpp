@@ -8,7 +8,7 @@
 #include <stdlib.h>
 using namespace std;
 
-RenderQueue::RenderQueue(int type, float midDis, float lowDis) {
+RenderQueue::RenderQueue(int type, float midDis, float lowDis, ConfigArg* cfg) {
 	queueType = type;
 	queue = new Queue(1);
 	animQueue = new Queue(1);
@@ -25,7 +25,7 @@ RenderQueue::RenderQueue(int type, float midDis, float lowDis) {
 	lowDistSqr = powf(lowDis, 2);
 	shadowLevel = 0;
 	firstFlush = true;
-	cfgArgs = NULL;
+	cfgArgs = cfg;
 }
 
 RenderQueue::~RenderQueue() {
@@ -90,7 +90,7 @@ void RenderQueue::deleteInstance(InstanceData* data) {
 void RenderQueue::pushDatasToInstance(Scene* scene, InstanceData* data, bool copy) {
 	if (!data->instance) {
 		data->instance = new Instance(data);
-		data->instance->initInstanceBuffers(data->object, data->insMesh->vertexCount, data->insMesh->indexCount, scene->queryMeshCount(data->insMesh), copy);
+		data->instance->initInstanceBuffers(data->insMesh->vertexCount, data->insMesh->indexCount, scene->queryMeshCount(data->insMesh), copy);
 	}
 	data->instance->setRenderData(data);
 }
@@ -172,10 +172,12 @@ void RenderQueue::createInstances(Scene* scene) {
 			}
 		}
 
-		if (!boundings->inited()) {
-			int pass = cfgArgs->dualqueue ? NORMAL_PASS : ALL_PASS;
-			boundings->initBuffers(pass);
-			boundings->createDrawcall();
+		if (boundings) {
+			if (!boundings->inited()) {
+				int pass = cfgArgs->dualqueue ? NORMAL_PASS : ALL_PASS;
+				boundings->initBuffers(pass);
+				boundings->createDrawcall();
+			}
 		}
 	}
 }
@@ -271,7 +273,7 @@ Mesh* RenderQueue::queryLodMesh(Object* object, const vec3& eye) {
 }
 
 void PushDebugToQueue(RenderQueue* queue, Scene* scene, Camera* camera) {
-	if (queue->firstFlush) {
+	if (queue->instanceDebug == NULL) {
 		if (scene->boundingNodes.size() <= 0) return;
 		else {
 			Object* object = scene->boundingNodes[0]->objects[0];
