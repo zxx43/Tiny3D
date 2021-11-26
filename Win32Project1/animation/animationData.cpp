@@ -69,18 +69,19 @@ void AnimationData::addAnimObject(Object* object, bool uniformScale) {
 		transformsFull[animCount * 16 + 14] = animId + 0.1;
 		transformsFull[animCount * 16 + 15] = object->material;
 
-		if (!uniformScale) {
-			vec3 scale(object->scaleMat[0], object->scaleMat[5], object->scaleMat[10]);
-			float pScale = PackVec2Float(scale);
-			transformsFull[animCount * 16 + 3] = pScale;
-		}
-
 		vec4 quat(transformsFull[animCount * 16 + 4], transformsFull[animCount * 16 + 5], transformsFull[animCount * 16 + 6], transformsFull[animCount * 16 + 7]);
 		vec3 quat3 = EncodeQuat(quat, true);
 		transformsFull[animCount * 16 + 4] = quat3.x;
 		transformsFull[animCount * 16 + 5] = quat3.y;
 		transformsFull[animCount * 16 + 6] = quat3.z;
-		transformsFull[animCount * 16 + 7] = uniformScale ? 1.0 : -1.0;
+
+		if (uniformScale) transformsFull[animCount * 16 + 7] = 1.0;
+		else {
+			vec3 scale(object->scaleMat[0], object->scaleMat[5], object->scaleMat[10]);
+			float pScale = PackVec2Float(scale);
+			transformsFull[animCount * 16 + 3] = pScale;
+			transformsFull[animCount * 16 + 7] = -1.0;
+		}
 
 		animCount++;
 	}
