@@ -281,6 +281,7 @@
     <ClInclude Include="maths\VECTOR4D.h" />
     <ClInclude Include="mesh\board.h" />
     <ClInclude Include="mesh\box.h" />
+    <ClInclude Include="mesh\chunk.h" />
     <ClInclude Include="mesh\mesh.h" />
     <ClInclude Include="mesh\model.h" />
     <ClInclude Include="mesh\quad.h" />

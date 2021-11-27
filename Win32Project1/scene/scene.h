@@ -82,6 +82,8 @@ public: // Just for debugging
 	void clearAllAABB();
 private: 
 	void updateAABBMesh(AABB* aabb, const char* mat);
+	void updateAABBWater(AABB* aabb, const char* mat, const vec3& exTrans, const vec3& exScale);
+	void genWaterBoundings();
 private:
 	std::list<AnimationNode*> animationNodes;
 	std::list<StaticObject*> dynamicObjects;

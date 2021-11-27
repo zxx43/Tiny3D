@@ -370,7 +370,7 @@ void SimpleApplication::initScene() {
 	assetMgr->addMesh("rock_low", new Model("models/sharprockfree_low.obj", "models/sharprockfree_low.mtl", 2));
 	assetMgr->addMesh("cottage", new Model("models/cottage_obj.obj", "models/cottage_obj.mtl", 2));
 	assetMgr->addMesh("terrain", new Terrain("terrain/Terrain.raw"));
-	assetMgr->addMesh("water", new Water(1024, 16));
+	assetMgr->addMesh("water", new Water(1025, 16));
 
 	assetMgr->meshes["treeA"]->setBoundScale(vec3(0.2, 1.0, 0.2));
 	assetMgr->meshes["birch"]->setBoundScale(vec3(0.3, 1.0, 0.3));

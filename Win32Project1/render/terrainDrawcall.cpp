@@ -66,7 +66,7 @@ RenderBuffer* TerrainDrawcall::createSSBuffers() {
 	uint* indexBuffer = (uint*)malloc(chunkCount * CHUNK_INDEX_COUNT * sizeof(uint));
 	for (int i = 0; i < chunkCount; ++i) {
 		Chunk* chunk = mesh->chunks[i];
-		chunk->genBounding(data->vertexBuffer);
+		chunk->genBounding(data->vertexBuffer, CHUNK_INDEX_COUNT);
 		boundCenterBuffer[i * 4 + 0] = chunk->boundCenter.x;
 		boundCenterBuffer[i * 4 + 1] = chunk->boundCenter.y;
 		boundCenterBuffer[i * 4 + 2] = chunk->boundCenter.z;

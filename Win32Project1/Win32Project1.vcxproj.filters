@@ -623,6 +623,9 @@
     <ClInclude Include="texture\textureBuffer.h">
       <Filter>Source Files\texture</Filter>
     </ClInclude>
+    <ClInclude Include="mesh\chunk.h">
+      <Filter>Source Files\mesh</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Tiny\shader\blur.frag">

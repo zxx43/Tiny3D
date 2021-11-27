@@ -7,6 +7,7 @@
 #include "../mesh/quad.h"
 #include "../mesh/model.h"
 #include "../mesh/terrain.h"
+#include "../mesh/water.h"
 #include "../object/staticObject.h"
 using namespace std;
 
@@ -122,6 +123,14 @@ void Scene::createSky(bool dyn) {
 	skyBox = new Sky(this, dyn);
 }
 
+void Scene::genWaterBoundings() {
+	Water* mesh = water->getMesh();
+	for (int i = 0; i < mesh->chunks.size(); ++i) {
+		Chunk* chunk = mesh->chunks[i];
+		chunk->genBounding(water->batch->vertexBuffer, WATER_CHUNK_INDEX_CNT);
+	}
+}
+
 void Scene::createWater(const vec3& position, const vec3& size) {
 	if (water) delete water;
 	water = new WaterNode(vec3(0, 0, 0));
@@ -132,6 +141,7 @@ void Scene::createWater(const vec3& position, const vec3& size) {
 	water->addObject(this, waterObject);
 	water->updateNode(this);
 	water->prepareDrawcall();
+	genWaterBoundings();
 }
 
 void Scene::createTerrain(const vec3& position, const vec3& size) {
@@ -167,12 +177,37 @@ void Scene::updateAABBMesh(AABB* aabb, const char* mat) {
 	aabb->debugNode->updateNode(this);
 }
 
+void Scene::updateAABBWater(AABB* aabb, const char* mat, const vec3& exTrans, const vec3& exScale) {
+	if (!aabb->debugNode) {
+		aabb->debugNode = new InstanceNode(aabb->position);
+		StaticObject* aabbObject = new StaticObject(AssetManager::assetManager->meshes["box"]);
+		aabbObject->setPhysic(false);
+		aabbObject->bindMaterial(MaterialManager::materials->find(mat));
+		aabbObject->setSize(aabb->sizex, aabb->sizey, aabb->sizez);
+		aabb->debugNode->addObject(this, aabbObject);
+		boundingNodes.push_back(aabb->debugNode);
+	}
+	aabb->debugNode->translateNode(this, aabb->position.x + exTrans.x, aabb->position.y + exTrans.y, aabb->position.z + exTrans.z);
+	aabb->debugNode->objects[0]->setSize(aabb->sizex * exScale.x, aabb->sizey * exScale.y, aabb->sizez * exScale.z);
+	aabb->debugNode->updateNode(this);
+}
+
 void Scene::updateNodeAABB(Node* node) {
 	if (node->type == TYPE_TERRAIN) {
 		Terrain* t = ((TerrainNode*)node)->getMesh();
 		for (int i = 0; i < t->chunks.size(); ++i) {
 			AABB* aabb = t->chunks[i]->bounding;
 			updateAABBMesh(aabb, GREEN_MAT);
+		}
+		return;
+	} else if (node->type == TYPE_WATER) {
+		Water* w = ((WaterNode*)node)->getMesh();
+		for (int i = 0; i < w->chunks.size(); ++i) {
+			AABB* aabb = w->chunks[i]->bounding;
+			vec3 ext(0.0), exs(1.0);
+			ext.x = actCamera->position.x;
+			ext.z = actCamera->position.z;
+			updateAABBWater(aabb, RED_MAT, ext, exs);
 		}
 		return;
 	} else {

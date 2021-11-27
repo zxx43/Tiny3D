@@ -181,6 +181,7 @@ void RenderManager::prepareData(Scene* scene) {
 
 void RenderManager::updateDebugData(Scene* scene) {
 	if (cfgs->debug && scene->isInited()) {
+		scene->updateNodeAABB(scene->water);
 		scene->updateNodeAABB(scene->terrainNode);
 		scene->updateNodeAABB(scene->staticRoot);
 		scene->updateNodeAABB(scene->animationRoot);
@@ -684,7 +685,7 @@ void RenderManager::retrievePrev(Scene* scene) {
 }
 
 bool RenderManager::isWaterShow(Render* render, const Scene* scene) { 
-	return scene->water && renderShowWater && !cfgs->debug && !render->getDebugTerrain(); 
+	return scene->water && renderShowWater && !render->getDebugTerrain(); 
 }
 
 void RenderManager::drawNoise3d(Render* render, Scene* scene, FrameBuffer* noiseBuf) {

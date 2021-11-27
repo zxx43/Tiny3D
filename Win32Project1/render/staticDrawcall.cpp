@@ -56,11 +56,11 @@ StaticDrawcall::StaticDrawcall(Batch* batch) :Drawcall() {
 		modelMatricesToPrepare = (float*)malloc(MAX_OBJECT_COUNT * 12 * sizeof(float));
 		memset(modelMatricesToPrepare, 0, MAX_OBJECT_COUNT * 12 * sizeof(float));
 	}
-
-	batchRef->releaseBatchData();
 }
 
 StaticDrawcall::~StaticDrawcall() {
+	batchRef->releaseBatchData();
+	
 	uModelMatrix = NULL;
 	if (dataBufferVisual) delete dataBufferVisual;
 	if (modelMatricesToPrepare) free(modelMatricesToPrepare);

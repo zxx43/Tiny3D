@@ -2,6 +2,7 @@
 #define WATER_NODE_H_
 
 #include "staticNode.h"
+#include "../mesh/water.h"
 
 class WaterNode :public StaticNode {
 private:
@@ -13,6 +14,7 @@ public:
 	virtual ~WaterNode();
 	virtual void addObject(Scene* scene, Object* object);
 	void moveWaterWithCamera(Scene* scene, const Camera* camera);
+	Water* getMesh() { return (Water*)(objects[0]->mesh); }
 };
 
 #endif
