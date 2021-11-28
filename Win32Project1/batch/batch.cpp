@@ -1,6 +1,7 @@
 #include "batch.h"
 #include "../material/materialManager.h"
 #include "../mesh/terrain.h"
+#include "../mesh/water.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -18,6 +19,7 @@ Batch::Batch() {
 
 	fullStatic = false;
 	hasTerrain = false;
+	hasWater = false;
 	type = BATCH_TYPE_DYNAMIC;
 	objectCount = 0;
 	modelMatrices = NULL;
@@ -80,6 +82,7 @@ void Batch::initBatchBuffers(int vertCount, int indCount) {
 
 void Batch::pushMeshToBuffers(Mesh* mesh,int mid,bool fullStatic,const mat4& transformMatrix,const mat4& normalMatrix) {
 	if (dynamic_cast<Terrain*>(mesh)) this->hasTerrain = true;
+	if (dynamic_cast<Water*>(mesh)) this->hasWater = true;
 	this->fullStatic = fullStatic;
 	int baseVertex = vertexCount;
 	int currentObject = objectCount++;

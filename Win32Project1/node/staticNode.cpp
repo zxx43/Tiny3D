@@ -40,10 +40,13 @@ void StaticNode::createBatch() {
 	}
 
 	if (drawcall) delete drawcall;
-	if (!batch->hasTerrain)
+	if (!batch->hasTerrain && !batch->hasWater)
 		drawcall = new StaticDrawcall(batch);
-	else
+	else if (batch->hasTerrain)
 		drawcall = new TerrainDrawcall((Terrain*)(objects[0]->mesh), batch);
+	else if (batch->hasWater)
+		drawcall = new StaticDrawcall(batch); // TODO: create WaterDrawcall
+		//drawcall = new WaterDrawcall((Water*)(objects[0]->mesh), batch);
 }
 
 void StaticNode::prepareDrawcall() {
@@ -61,7 +64,7 @@ void StaticNode::updateRenderData() {
 }
 
 void StaticNode::updateDrawcall() {
-	if (!dynamicBatch && drawcall && !batch->hasTerrain) 
+	if (!dynamicBatch && drawcall && !batch->hasTerrain && !batch->hasWater) 
 		((StaticDrawcall*)drawcall)->updateMatrices();
 	needUpdateDrawcall = false;
 }

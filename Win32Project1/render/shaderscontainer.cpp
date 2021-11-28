@@ -1,6 +1,7 @@
 #include "shaderscontainer.h"
 #include "../shader/textfile.h"
 #include "../mesh/terrain.h"
+#include "../mesh/water.h"
 using namespace std;
 
 #define SHADOW_TEX_FRAG "shader/shadow_tex.frag"
@@ -22,6 +23,7 @@ using namespace std;
 #define TERRAIN_COMP "shader/terrain.comp"
 #define WATER_VERT "shader/water.vert"
 #define WATER_FRAG "shader/water.frag"
+#define WATER_COMP "shader/water.comp"
 #define EDGE_FRAG "shader/edge.frag"
 #define FXAA_FRAG "shader/fxaa.frag"
 #define BLUR_FRAG "shader/blur.frag"
@@ -96,6 +98,11 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	Shader* water = shaders->addShader("water", WATER_VERT, WATER_FRAG);
 	if (!cfgs->ssr) water->attachDef("DISABLE_SSR", "1");
 	if (cfgs->dynsky) water->attachDef("DYN_SKY", "1");
+
+	Shader* waterComp = shaders->addShader("waterComp", WATER_COMP);
+	waterComp->attachDef("CHUNK_INDEX_COUNT", to_string(WATER_CHUNK_INDEX_CNT).data());
+	waterComp->attachDef("CHUNK_SIZE", to_string(WATER_CHUNK_SIZE).data());
+	waterComp->attachDef("LINE_CHUNKS", to_string(WATER_LINE_CHUNKS).data());
 
 	Shader* phongShadow = shaders->addShader("phong_s", PHONG_VERT, SHADOW_TEX_FRAG);
 	phongShadow->attachDef("ShadowPass", "1.0");

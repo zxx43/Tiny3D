@@ -210,8 +210,12 @@ void Render::useShader(Shader* shader) {
 // Pass 5 deferred process
 // Pass 6 fxaa dof ssr ssg
 void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
-	setState(state);
+	if (drawcall == NULL) { 
+		if (getDebug()) printf("Render: No drawcall!\n");
+		return; 
+	}
 
+	setState(state);
 	Shader* shader = state->shader;
 	if (drawcall->getType() == INSTANCE_DC || drawcall->getType() == MULTI_DC)
 		shader = state->shaderIns;

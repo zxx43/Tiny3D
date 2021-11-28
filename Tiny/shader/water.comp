@@ -1,0 +1,67 @@
+#include "shader/util.glsl"
+#include "shader/hiz.glsl"
+
+layout(local_size_x = 1) in;
+
+layout(binding = 1, std430) buffer InCenter {
+	vec4 inBoundCenters[];
+};
+layout(binding = 2, std430) buffer InSize {
+	vec4 inBoundSizes[];
+};
+layout(binding = 3, std430) buffer InIndex {
+	uint inIndices[];
+};
+layout(binding = 4, std430) buffer OutIndirect {
+	uint count;
+	uint primCount;
+	uint firstIndex;
+	uint baseVertex;
+	uint baseInstance;
+} outIndirect;
+layout(binding = 5, std430) buffer OutIndex {
+	uint outIndices[];
+};
+
+layout(binding = 0) uniform sampler2D texDepth;
+uniform mat4 prevVPMatrix;
+uniform vec2 uSize;
+uniform vec2 uCamParam;
+uniform float uMaxLevel;
+uniform mat4 viewProjectMatrix;
+uniform vec3 eyePos;
+
+void main() {
+	uint curChunk = gl_GlobalInvocationID.x;
+
+	vec3 bCenter = inBoundCenters[curChunk].xyz + eyePos;
+	vec3 bSize = inBoundSizes[curChunk].xyz;
+
+	vec4 bv0 = vec4(bCenter + vec3( bSize.x,  bSize.y,  bSize.z), 1.0);
+	vec4 bv1 = vec4(bCenter + vec3(-bSize.x,  bSize.y,  bSize.z), 1.0);
+	vec4 bv2 = vec4(bCenter + vec3(-bSize.x, -bSize.y,  bSize.z), 1.0);
+	vec4 bv3 = vec4(bCenter + vec3(-bSize.x, -bSize.y, -bSize.z), 1.0);
+	vec4 bv4 = vec4(bCenter + vec3( bSize.x, -bSize.y, -bSize.z), 1.0);
+	vec4 bv5 = vec4(bCenter + vec3( bSize.x,  bSize.y, -bSize.z), 1.0);
+	vec4 bv6 = vec4(bCenter + vec3(-bSize.x,  bSize.y, -bSize.z), 1.0);
+	vec4 bv7 = vec4(bCenter + vec3( bSize.x, -bSize.y,  bSize.z), 1.0);
+	
+	vec4 p0 = viewProjectMatrix * bv0; 
+	vec4 p1 = viewProjectMatrix * bv1;
+	vec4 p2 = viewProjectMatrix * bv2; 
+	vec4 p3 = viewProjectMatrix * bv3; 
+	vec4 p4 = viewProjectMatrix * bv4; 
+	vec4 p5 = viewProjectMatrix * bv5; 
+	vec4 p6 = viewProjectMatrix * bv6; 
+	vec4 p7 = viewProjectMatrix * bv7; 
+
+	if(CheckCull(p0, p1, p2, p3, p4, p5, p6, p7)) return;
+
+	if(HizQuery(prevVPMatrix, texDepth, uSize, uCamParam, uMaxLevel, 
+		bv0, bv1, bv2, bv3, bv4, bv5, bv6, bv7, 0.1)) return;
+
+	uint baseIndex = curChunk * CHUNK_INDEX_COUNT;
+	uint curIndex = atomicAdd(outIndirect.count, CHUNK_INDEX_COUNT);
+	for(uint i = 0; i < CHUNK_INDEX_COUNT; ++i) 
+		outIndices[curIndex + i] = inIndices[baseIndex + i];
+}

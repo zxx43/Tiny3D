@@ -391,6 +391,7 @@
     <None Include="..\Tiny\shader\triangle.glsl" />
     <None Include="..\Tiny\shader\util.glsl" />
     <None Include="..\Tiny\shader\vtf.glsl" />
+    <None Include="..\Tiny\shader\water.comp" />
     <None Include="..\Tiny\shader\water.frag" />
     <None Include="..\Tiny\shader\water.vert" />
   </ItemGroup>
