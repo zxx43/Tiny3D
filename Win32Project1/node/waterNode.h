@@ -3,6 +3,7 @@
 
 #include "staticNode.h"
 #include "../mesh/water.h"
+#include "../render/waterDrawcall.h"
 
 class WaterNode :public StaticNode {
 private:

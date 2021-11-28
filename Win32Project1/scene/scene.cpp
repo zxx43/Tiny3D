@@ -123,14 +123,6 @@ void Scene::createSky(bool dyn) {
 	skyBox = new Sky(this, dyn);
 }
 
-void Scene::genWaterBoundings() {
-	Water* mesh = water->getMesh();
-	for (int i = 0; i < mesh->chunks.size(); ++i) {
-		Chunk* chunk = mesh->chunks[i];
-		chunk->genBounding(water->batch->vertexBuffer, WATER_CHUNK_INDEX_CNT);
-	}
-}
-
 void Scene::createWater(const vec3& position, const vec3& size) {
 	if (water) delete water;
 	water = new WaterNode(vec3(0, 0, 0));
@@ -141,7 +133,6 @@ void Scene::createWater(const vec3& position, const vec3& size) {
 	water->addObject(this, waterObject);
 	water->updateNode(this);
 	water->prepareDrawcall();
-	genWaterBoundings();
 }
 
 void Scene::createTerrain(const vec3& position, const vec3& size) {

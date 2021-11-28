@@ -1,6 +1,7 @@
 #include "staticNode.h"
 #include "../render/staticDrawcall.h"
 #include "../render/terrainDrawcall.h"
+#include "../render/waterDrawcall.h"
 #include "../util/util.h"
 #include "../scene/scene.h"
 
@@ -45,8 +46,7 @@ void StaticNode::createBatch() {
 	else if (batch->hasTerrain)
 		drawcall = new TerrainDrawcall((Terrain*)(objects[0]->mesh), batch);
 	else if (batch->hasWater)
-		drawcall = new StaticDrawcall(batch); // TODO: create WaterDrawcall
-		//drawcall = new WaterDrawcall((Water*)(objects[0]->mesh), batch);
+		drawcall = new WaterDrawcall((Water*)(objects[0]->mesh), batch);
 }
 
 void StaticNode::prepareDrawcall() {

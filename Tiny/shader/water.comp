@@ -34,7 +34,7 @@ uniform vec3 eyePos;
 void main() {
 	uint curChunk = gl_GlobalInvocationID.x;
 
-	vec3 bCenter = inBoundCenters[curChunk].xyz + eyePos;
+	vec3 bCenter = inBoundCenters[curChunk].xyz + vec3(eyePos.x, 0.0, eyePos.z);
 	vec3 bSize = inBoundSizes[curChunk].xyz;
 
 	vec4 bv0 = vec4(bCenter + vec3( bSize.x,  bSize.y,  bSize.z), 1.0);
@@ -58,7 +58,7 @@ void main() {
 	if(CheckCull(p0, p1, p2, p3, p4, p5, p6, p7)) return;
 
 	if(HizQuery(prevVPMatrix, texDepth, uSize, uCamParam, uMaxLevel, 
-		bv0, bv1, bv2, bv3, bv4, bv5, bv6, bv7, 0.1)) return;
+		bv0, bv1, bv2, bv3, bv4, bv5, bv6, bv7, 0.001)) return;
 
 	uint baseIndex = curChunk * CHUNK_INDEX_COUNT;
 	uint curIndex = atomicAdd(outIndirect.count, CHUNK_INDEX_COUNT);

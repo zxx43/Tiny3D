@@ -354,6 +354,9 @@
     <ClCompile Include="texture\textureBuffer.cpp">
       <Filter>Source Files\texture</Filter>
     </ClCompile>
+    <ClCompile Include="render\waterDrawcall.cpp">
+      <Filter>Source Files\render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="batch\batch.h">
@@ -625,6 +628,9 @@
     </ClInclude>
     <ClInclude Include="mesh\chunk.h">
       <Filter>Source Files\mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="render\waterDrawcall.h">
+      <Filter>Source Files\render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

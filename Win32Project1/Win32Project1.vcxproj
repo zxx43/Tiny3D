@@ -222,6 +222,7 @@
     <ClCompile Include="render\shaderscontainer.cpp" />
     <ClCompile Include="render\staticDrawcall.cpp" />
     <ClCompile Include="render\terrainDrawcall.cpp" />
+    <ClCompile Include="render\waterDrawcall.cpp" />
     <ClCompile Include="scene\player.cpp" />
     <ClCompile Include="scene\scene.cpp" />
     <ClCompile Include="shader\shader.cpp" />
@@ -313,6 +314,7 @@
     <ClInclude Include="render\shaderscontainer.h" />
     <ClInclude Include="render\staticDrawcall.h" />
     <ClInclude Include="render\terrainDrawcall.h" />
+    <ClInclude Include="render\waterDrawcall.h" />
     <ClInclude Include="scene\player.h" />
     <ClInclude Include="scene\scene.h" />
     <ClInclude Include="shader\shader.h" />

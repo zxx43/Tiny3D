@@ -476,10 +476,20 @@ void RenderManager::renderSkyTex(Render* render, Scene* scene) {
 }
 
 void RenderManager::renderWater(Render* render, Scene* scene) {
+	static Shader* waterCullShader = render->findShader("waterComp");
 	static Shader* waterShader = render->findShader("water");
 	Camera* camera = scene->renderCamera;
 
 	state->reset();
+	render->useTexture(TEXTURE_2D, 0, hizDepth->id);
+	waterCullShader->setFloat("uMaxLevel", hiz->getMaxLevel());
+	waterCullShader->setMatrix4("prevVPMatrix", prevCameraMat);
+	waterCullShader->setVector2("uSize", (float)render->viewWidth, (float)render->viewHeight);
+	waterCullShader->setVector2("uCamParam", camera->zNear, camera->zFar);
+	state->shaderCompute = waterCullShader;
+	((WaterDrawcall*)(scene->water->drawcall))->update(camera, render, state);
+	state->shaderCompute = NULL;
+
 	state->eyePos = &(scene->renderCamera->position);
 	state->light = lightDir;
 	state->udotl = udotl;

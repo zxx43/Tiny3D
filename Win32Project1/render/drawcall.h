@@ -15,6 +15,7 @@
 #define COMPUTE_DC 4
 #define MULTI_DC 5
 #define TERRAIN_DC 6
+#define WATER_DC 7
 
 #define NEAR_SHADOW_PASS 1
 #define MID_SHADOW_PASS 2
