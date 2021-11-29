@@ -3,23 +3,20 @@
 
 layout(local_size_x = 1) in;
 
-layout(binding = 1, std430) buffer InCenter {
-	vec4 inBoundCenters[];
+layout(binding = 1, std430) buffer InChunk {
+	ChunkBuff inChunks[];
 };
-layout(binding = 2, std430) buffer InSize {
-	vec4 inBoundSizes[];
-};
-layout(binding = 3, std430) buffer InIndex {
+layout(binding = 2, std430) buffer InIndex {
 	uint inIndices[];
 };
-layout(binding = 4, std430) buffer OutIndirect {
+layout(binding = 3, std430) buffer OutIndirect {
 	uint count;
 	uint primCount;
 	uint firstIndex;
 	uint baseVertex;
 	uint baseInstance;
 } outIndirect;
-layout(binding = 5, std430) buffer OutIndex {
+layout(binding = 4, std430) buffer OutIndex {
 	uint outIndices[];
 };
 
@@ -35,7 +32,7 @@ uniform vec3 mapTrans, mapScale;
 #define INVALID_LEVEL 1024
 
 uint GetLevel(ivec2 ref, int targetChunk) {
-	vec2 targetCenter = inBoundCenters[targetChunk].xz;
+	vec2 targetCenter = inChunks[targetChunk].center.xz;
 	targetCenter = (targetCenter - mapTrans.xz) / mapScale.xz;
 	targetCenter = floor(targetCenter / CHUNK_SIZE);
 	ivec2 target = ivec2(targetCenter);
@@ -123,9 +120,10 @@ void GenLodIndices(uint chunkBase, uint level, bvec4 edge) {
 
 void main() {
 	uint curChunk = gl_GlobalInvocationID.x;
+	ChunkBuff chunkBound = inChunks[curChunk];
 	
-	vec3 bCenter = inBoundCenters[curChunk].xyz;
-	vec3 bSize = inBoundSizes[curChunk].xyz;
+	vec3 bCenter = chunkBound.center.xyz;
+	vec3 bSize = chunkBound.size.xyz;
 
 	vec4 bv0 = vec4(bCenter + vec3( bSize.x,  bSize.y,  bSize.z), 1.0);
 	vec4 bv1 = vec4(bCenter + vec3(-bSize.x,  bSize.y,  bSize.z), 1.0);

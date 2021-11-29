@@ -240,6 +240,11 @@ struct Material {
 	vec4 params;
 };
 
+struct ChunkBuff {
+	vec4 center;
+	vec4 size;
+};
+
 struct Indirect {
 	uint count;
 	uint primCount;

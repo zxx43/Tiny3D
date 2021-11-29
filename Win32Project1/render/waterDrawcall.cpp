@@ -10,9 +10,8 @@ const uint OutIndex = 1;
 const uint IndirectIndex = 2;
 
 // SSBO index
-const uint BoundCenterIndex = 0;
-const uint BoundSizeIndex = 1;
-const uint InputIndex = 2;
+const uint ChunkIndex = 0;
+const uint InputIndex = 1;
 
 WaterDrawcall::WaterDrawcall(Water* water, Batch* batch) {
 	mesh = water;
@@ -45,32 +44,28 @@ RenderBuffer* WaterDrawcall::createBuffers() {
 }
 
 RenderBuffer* WaterDrawcall::createSSBuffers() {
-	float* boundCenterBuffer = (float*)malloc(chunkCount * 4 * sizeof(float));
-	float* boundSizeBuffer = (float*)malloc(chunkCount * 4 * sizeof(float));
+	ChunkBuffer* chunkBuffer = (ChunkBuffer*)malloc(chunkCount * sizeof(ChunkBuffer));
+	memset(chunkBuffer, 0, chunkCount * sizeof(ChunkBuffer));
 	uint* indexBuffer = (uint*)malloc(chunkCount * WATER_CHUNK_INDEX_CNT * sizeof(uint));
+
 	for (int i = 0; i < chunkCount; ++i) {
 		Chunk* chunk = mesh->chunks[i];
 		chunk->genBounding(data->vertexBuffer, WATER_CHUNK_INDEX_CNT);
-		boundCenterBuffer[i * 4 + 0] = chunk->boundCenter.x;
-		boundCenterBuffer[i * 4 + 1] = chunk->boundCenter.y;
-		boundCenterBuffer[i * 4 + 2] = chunk->boundCenter.z;
-		boundCenterBuffer[i * 4 + 3] = 0.0;
-		boundSizeBuffer[i * 4 + 0] = chunk->boundSize.x;
-		boundSizeBuffer[i * 4 + 1] = chunk->boundSize.y;
-		boundSizeBuffer[i * 4 + 2] = chunk->boundSize.z;
-		boundSizeBuffer[i * 4 + 3] = 0.0;
+		chunkBuffer[i].data[0] = chunk->boundCenter.x;
+		chunkBuffer[i].data[1] = chunk->boundCenter.y;
+		chunkBuffer[i].data[2] = chunk->boundCenter.z;
+		chunkBuffer[i].data[4] = chunk->boundSize.x;
+		chunkBuffer[i].data[5] = chunk->boundSize.y;
+		chunkBuffer[i].data[6] = chunk->boundSize.z;
 		for (uint j = 0; j < WATER_CHUNK_INDEX_CNT; ++j)
 			indexBuffer[i * WATER_CHUNK_INDEX_CNT + j] = chunk->indices[j];
 	}
 
-	RenderBuffer* buffer = new RenderBuffer(3, false);
-
-	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, BoundCenterIndex, GL_FLOAT, chunkCount, 4, GL_STATIC_DRAW, boundCenterBuffer);
-	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, BoundSizeIndex, GL_FLOAT, chunkCount, 4, GL_STATIC_DRAW, boundSizeBuffer);
+	RenderBuffer* buffer = new RenderBuffer(2, false);
+	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, ChunkIndex, GL_ONE, chunkCount * sizeof(ChunkBuffer), GL_STATIC_DRAW, chunkBuffer);
 	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, InputIndex, GL_UNSIGNED_INT, chunkCount * WATER_CHUNK_INDEX_CNT, GL_STATIC_DRAW, indexBuffer);
 
-	free(boundCenterBuffer);
-	free(boundSizeBuffer);
+	free(chunkBuffer);
 	free(indexBuffer);
 	return buffer;
 }
@@ -84,11 +79,10 @@ void WaterDrawcall::update(Camera* camera, Render* render, RenderState* state) {
 	indirectBuffer->count = 0; // Refresh index count
 	dataBuffer->updateBufferMap(GL_DRAW_INDIRECT_BUFFER, IndirectIndex, sizeof(Indirect), indirectBuffer);
 
-	ssBuffer->setShaderBase(BoundCenterIndex, 1);
-	ssBuffer->setShaderBase(BoundSizeIndex, 2);
-	ssBuffer->setShaderBase(InputIndex, 3);
-	dataBuffer->setShaderBase(IndirectIndex, 4);
-	dataBuffer->setShaderBase(OutIndex, 5);
+	ssBuffer->setShaderBase(ChunkIndex, 1);
+	ssBuffer->setShaderBase(InputIndex, 2);
+	dataBuffer->setShaderBase(IndirectIndex, 3);
+	dataBuffer->setShaderBase(OutIndex, 4);
 
 	render->useShader(state->shaderCompute);
 	state->shaderCompute->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
@@ -97,11 +91,11 @@ void WaterDrawcall::update(Camera* camera, Render* render, RenderState* state) {
 	glDispatchCompute(chunkCount, 1, 1); // Update per chunk, check chunk cull
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
-	UnbindShaderBuffers(1, 5);
+	UnbindShaderBuffers(1, 4);
 
 	/*
 	dataBuffer->readBufferData(GL_DRAW_INDIRECT_BUFFER, IndirectIndex, sizeof(Indirect), indirectBuffer);
-	printf("terrain index cnt: %d\n", indirectBuffer->count);
+	printf("water index cnt: %d\n", indirectBuffer->count);
 	//*/
 }
 
