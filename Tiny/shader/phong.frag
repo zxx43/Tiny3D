@@ -16,20 +16,21 @@ layout (location = 1) out vec4 FragMat;
 layout (location = 2) out vec4 FragRoughMetal;
 
 void main() {
-	vec4 textureColor = texture(texBlds[int(vTexid.x)], vTexcoord);
-	if(textureColor.a < 0.25) discard;
+	ivec4 texid = ivec4(vTexid);
+	vec4 textureColor = texture(texBlds[texid.x], vTexcoord);
+	if(textureColor.a < 0.3) discard;
 #ifndef BillPass
-		vec3 normal = vTexid.y >= 0.0 ? vTBN * (2.0 * texture(texBlds[int(vTexid.y)], vTexcoord).rgb - 1.0) : vNormal;
-		normal = normalize(normal) * 0.5 + 0.5;
+	vec3 normal = texid.y > 0.0 ? vTBN * (2.0 * texture(texBlds[texid.y], vTexcoord).rgb - 1.0) : vNormal;
+	normal = normalize(normal) * 0.5 + 0.5;
 
-		FragMat = vec4(vColor, 1.0);
-		FragRoughMetal.r = vTexid.z >= 0.0 ? texture(texBlds[int(vTexid.z)], vTexcoord).r : DefaultRM.r;
-		FragRoughMetal.g = vTexid.w >= 0.0 ? texture(texBlds[int(vTexid.w)], vTexcoord).r : DefaultRM.g;
+	FragMat = vec4(vColor, 1.0);
+	FragRoughMetal.r = texid.z >= 0 ? texture(texBlds[texid.z], vTexcoord).r : DefaultRM.r;
+	FragRoughMetal.g = texid.w >= 0 ? texture(texBlds[texid.w], vTexcoord).r : DefaultRM.g;
 #else
-		vec3 normal = uNormal;
+	vec3 normal = uNormal;
 
-		FragMat = BoardMat;
-		FragRoughMetal = BoardRM;
+	FragMat = BoardMat;
+	FragRoughMetal = BoardRM;
 #endif
 	FragTex = textureColor;
 	FragRoughMetal.ba = normal.xy;

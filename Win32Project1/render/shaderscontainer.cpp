@@ -62,78 +62,100 @@ string LoadExShader(char* name) {
 
 void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	Shader* phong = shaders->addShader("phong", PHONG_VERT, PHONG_FRAG);
+	phong->attachDef("Shader", "phong");
 	shaders->addShaderBindTex(phong);
 
 	Shader* phongIns = shaders->addShader("phong_ins", INSTANCE_VERT, PHONG_FRAG);
+	phongIns->attachDef("Shader", "instance");
 	shaders->addShaderBindTex(phongIns);
 
 	Shader* billIns = shaders->addShader("bill_ins", INSTANCE_VERT, PHONG_FRAG);
+	billIns->attachDef("Shader", "bill_instance");
 	billIns->attachDef("BillPass", "1.0");
 	shaders->addShaderBindTex(billIns);
 
 	Shader* bone = shaders->addShader("bone", BONE_VERT, BONE_FRAG);
+	bone->attachDef("Shader", "bone");
 	shaders->addShaderBindTex(bone);
 
 	Shader* terrain = shaders->addShader("terrain", TERRAIN_VERT, TERRAIN_FRAG);
+	terrain->attachDef("Shader", "terrain");
 	shaders->addShaderBindTex(terrain);
 
 	Shader* terrainDebug = shaders->addShader("terrain_debug", TERRAIN_VERT, TERRAIN_FRAG);
+	terrainDebug->attachDef("Shader", "terrain_debug");
 	shaders->addShaderBindTex(terrainDebug);
 	terrainDebug->attachDef("UseDebug", "1.0");
 
 	Shader* terrainComp = shaders->addShader("terrainComp", TERRAIN_COMP);
+	terrainComp->attachDef("Shader", "terrain_culling");
 	terrainComp->attachDef("CHUNK_INDEX_COUNT", to_string(CHUNK_INDEX_COUNT).data());
 	terrainComp->attachDef("CHUNK_SIZE", to_string(CHUNK_SIZE).data());
 	terrainComp->attachDef("LINE_CHUNKS", to_string(LINE_CHUNKS).data());
 
 	Shader* grassLayer = shaders->addShader("grassLayer", GRASS_LAYER_VERT, GRASS_LAYER_FRAG, GRASS_LAYER_TESC, GRASS_LAYER_TESE, GRASS_LAYER_GEOM);
+	grassLayer->attachDef("Shader", "grass_geom");
 	shaders->addShaderBindTex(grassLayer);
 
 	Shader* grassComp = shaders->addShader("grassComp", GRASS_COMP);
+	grassComp->attachDef("Shader", "grass_culling");
 	grassComp->attachDef("WORKGROUP_SIZE", to_string(COMP_GROUPE_SIZE).data());
 
 	Shader* grass = shaders->addShader("grass", GRASS_VERT, GRASS_LAYER_FRAG);
+	grass->attachDef("Shader", "grass");
+
 	Shader* sky = shaders->addShader("sky", SKY_VERT, SKY_FRAG);
+	sky->attachDef("Shader", "sky");
 
 	Shader* water = shaders->addShader("water", WATER_VERT, WATER_FRAG);
+	water->attachDef("Shader", "water");
 	if (!cfgs->ssr) water->attachDef("DISABLE_SSR", "1");
 	if (cfgs->dynsky) water->attachDef("DYN_SKY", "1");
 
 	Shader* waterComp = shaders->addShader("waterComp", WATER_COMP);
+	waterComp->attachDef("Shader", "water_culling");
 	waterComp->attachDef("CHUNK_INDEX_COUNT", to_string(WATER_CHUNK_INDEX_CNT).data());
 	waterComp->attachDef("CHUNK_SIZE", to_string(WATER_CHUNK_SIZE).data());
 	waterComp->attachDef("LINE_CHUNKS", to_string(WATER_LINE_CHUNKS).data());
 
 	Shader* phongShadow = shaders->addShader("phong_s", PHONG_VERT, SHADOW_TEX_FRAG);
+	phongShadow->attachDef("Shader", "phong_tex_shadow");
 	phongShadow->attachDef("ShadowPass", "1.0");
 	shaders->addShaderBindTex(phongShadow);
 
 	Shader* phongShadowIns = shaders->addShader("phong_s_ins", INSTANCE_VERT, SHADOW_TEX_FRAG);
+	phongShadowIns->attachDef("Shader", "instance_tex_shadow");
 	phongShadowIns->attachDef("ShadowPass", "1.0");
 	shaders->addShaderBindTex(phongShadowIns);
 
 	Shader* billShadowIns = shaders->addShader("bill_s_ins", INSTANCE_VERT, SHADOW_TEX_FRAG);
+	billShadowIns->attachDef("Shader", "billboard_tex_shadow");
 	billShadowIns->attachDef("ShadowPass", "1.0");
 	billShadowIns->attachDef("BillPass", "1.0");
 	shaders->addShaderBindTex(billShadowIns);
 
 	Shader* phongShadowLow = shaders->addShader("phong_sl", PHONG_VERT, SHADOW_NONTEX_FRAG);
+	phongShadowLow->attachDef("Shader", "phong_shadow_notex");
 	phongShadowLow->attachDef("ShadowPass", "1.0");
 	phongShadowLow->attachDef("LowPass", "1.0");
 
 	Shader* phongSimpShadowLow = shaders->addShader("phong_sl_ins", INSTANCE_VERT, SHADOW_NONTEX_FRAG);
+	phongSimpShadowLow->attachDef("Shader", "instance_shadow_notex");
 	phongSimpShadowLow->attachDef("ShadowPass", "1.0");
 	phongSimpShadowLow->attachDef("LowPass", "1.0");
 
 	Shader* billSimpShadowLow = shaders->addShader("bill_sl_ins", INSTANCE_VERT, SHADOW_NONTEX_FRAG);
+	billSimpShadowLow->attachDef("Shader", "billboard_shadow_notex");
 	billSimpShadowLow->attachDef("ShadowPass", "1.0");
 	billSimpShadowLow->attachDef("LowPass", "1.0");
 	billSimpShadowLow->attachDef("BillPass", "1.0");
 
 	Shader* boneShadow = shaders->addShader("bone_s", BONE_VERT, SHADOW_NONTEX_FRAG);
+	boneShadow->attachDef("Shader", "bone_shadow_notex");
 	boneShadow->attachDef("ShadowPass", "1.0");
 
 	Shader* deferred = shaders->addShader("deferred", POST_VERT, DEFERRED_FRAG);
+	deferred->attachDef("Shader", "deferred");
 	if (cfgs->shadowQuality > 0)
 		deferred->attachDef("USE_SHADOW", "1");
 	if (cfgs->cartoon)
@@ -149,6 +171,7 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	deferred->setSlot("depthBuffer", 3);
 
 	Shader* edge = shaders->addShader("edge", POST_VERT, EDGE_FRAG);
+	edge->attachDef("Shader", "edge");
 	if (cfgs->cartoon)
 		edge->attachDef("USE_CARTOON", "1");
 	edge->setSlot("colorBuffer", 0);
@@ -156,6 +179,7 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	edge->setSlot("matBuffer", 2);
 
 	Shader* edgeNFG = shaders->addShader("edge_nfg", POST_VERT, EDGE_FRAG);
+	edgeNFG->attachDef("Shader", "edge_nofog");
 	edgeNFG->attachDef("NO_FOG", "1");
 	if (cfgs->cartoon)
 		edgeNFG->attachDef("USE_CARTOON", "1");
@@ -164,32 +188,41 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	edgeNFG->setSlot("matBuffer", 2);
 
 	Shader* fxaa = shaders->addShader("fxaa", POST_VERT, FXAA_FRAG);
+	fxaa->attachDef("Shader", "fxaa");
 	fxaa->setSlot("colorBuffer", 0);
 
 	Shader* blur = shaders->addShader("blur", POST_VERT, BLUR_FRAG);
+	blur->attachDef("Shader", "blur");
 	blur->setSlot("colorBuffer", 0);
 
 	Shader* mean = shaders->addShader("mean", POST_VERT, MEAN_FRAG);
+	mean->attachDef("Shader", "mean");
 	mean->setSlot("colorBuffer", 0);
 
 	Shader* gaussv = shaders->addShader("gaussv", POST_VERT, GAUSS_FRAG);
+	gaussv->attachDef("Shader", "gaussv");
 	gaussv->attachDef("PASS_V", "1");
 	gaussv->setSlot("colorBuffer", 0);
 
 	Shader* gaussh = shaders->addShader("gaussh", POST_VERT, GAUSS_FRAG);
+	gaussh->attachDef("Shader", "gaussh");
 	gaussh->attachDef("PASS_H", "1");
 	gaussh->setSlot("colorBuffer", 0);
 
 	Shader* dof = shaders->addShader("dof", POST_VERT, DOF_FRAG);
+	dof->attachDef("Shader", "dof");
 	dof->setSlot("colorBufferLow", 0);
 	dof->setSlot("colorBufferHigh", 1);
 
 	Shader* debug = shaders->addShader("debug", DEBUG_VERT, DEBUG_FRAG);
-	
+	debug->attachDef("Shader", "debug");
+
 	Shader* screen = shaders->addShader("screen", POST_VERT, SCREEN_FRAG);
+	screen->attachDef("Shader", "screen");
 	screen->setSlot("tex", 0);
 
 	Shader* ssr = shaders->addShader("ssr", POST_VERT, SSR_FRAG);
+	ssr->attachDef("Shader", "ssr");
 	if (cfgs->graphQuality > 3)
 		ssr->attachDef("HIGH_QUALITY", "1");
 	ssr->setSlot("lightBuffer", 0);
@@ -198,6 +231,7 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	ssr->setSlot("depthBuffer", 3);
 
 	Shader* combined = shaders->addShader("combined", POST_VERT, COMBINE_FRAG);
+	combined->attachDef("Shader", "combined");
 	if (cfgs->cartoon)
 		combined->attachDef("USE_CARTOON", "1");
 	if (cfgs->bloom)
@@ -214,6 +248,7 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	combined->setSlot("bloomBuffer", 7);
 
 	Shader* combinedNFG = shaders->addShader("combined_nfg", POST_VERT, COMBINE_FRAG);
+	combinedNFG->attachDef("Shader", "combined_nofog");
 	combinedNFG->attachDef("NO_FOG", "1");
 	if (cfgs->cartoon)
 		combinedNFG->attachDef("USE_CARTOON", "1");
@@ -231,26 +266,31 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	combinedNFG->setSlot("bloomBuffer", 7);
 
 	Shader* cull = shaders->addShader("cull", CULL_COMP);
+	cull->attachDef("Shader", "culling");
 	cull->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());
 
 	Shader* multi = shaders->addShader("multi", MULTI_COMP);
+	multi->attachDef("Shader", "multiculling");
 	multi->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());
 	multi->attachDef("MAX_DISPATCH", to_string(MAX_DISPATCH).data());
 	multi->attachDef("InvalidIns", to_string(InvalidInsId).data());
 
 	Shader* animMulti = shaders->addShader("animMulti", MULTI_COMP);
+	animMulti->attachDef("Shader", "animation_culling");
 	animMulti->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());
 	animMulti->attachDef("MAX_DISPATCH", to_string(MAX_DISPATCH).data());
 	animMulti->attachDef("InvalidIns", to_string(InvalidInsId).data());
 	animMulti->attachDef("AnimPass", "1.0");
 
 	Shader* multiShadow = shaders->addShader("multi_s", MULTI_COMP);
+	multiShadow->attachDef("Shader", "shadow_culling");
 	multiShadow->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());
 	multiShadow->attachDef("MAX_DISPATCH", to_string(MAX_DISPATCH).data());
 	multiShadow->attachDef("InvalidIns", to_string(InvalidInsId).data());
 	multiShadow->attachDef("ShadowPass", "1.0");
 
 	Shader* animMultiShadow = shaders->addShader("animMulti_s", MULTI_COMP);
+	animMultiShadow->attachDef("Shader", "animation_shadow_culling");
 	animMultiShadow->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());
 	animMultiShadow->attachDef("MAX_DISPATCH", to_string(MAX_DISPATCH).data());
 	animMultiShadow->attachDef("InvalidIns", to_string(InvalidInsId).data());
@@ -258,19 +298,34 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	animMultiShadow->attachDef("ShadowPass", "1.0");
 
 	Shader* flush = shaders->addShader("flush", FLUSH_COMP);
+	flush->attachDef("Shader", "flush");
 
 	Shader* animFlush = shaders->addShader("animFlush", FLUSH_COMP);
+	animFlush->attachDef("Shader", "animation_flush");
 	animFlush->attachDef("AnimPass", "1.0");
 
 	Shader* atmos = shaders->addShader("atmos", ATMOS_VERT, ATMOS_FRAG);
+	atmos->attachDef("Shader", "atmos");
+
 	Shader* noise = shaders->addShader("noise", NOISE_VERT, NOISE_FRAG);
+	noise->attachDef("Shader", "noise");
+
 	Shader* depth = shaders->addShader("depth", POST_VERT, DEPTH_FRAG);
+	depth->attachDef("Shader", "depth_view");
+
 	Shader* hiz = shaders->addShader("hiz", POST_VERT, HIZ_FRAG);
+	hiz->attachDef("Shader", "hizgen");
+
 	Shader* irr = shaders->addShader("irradiance", ATMOS_VERT, IRR_FRAG);
+	irr->attachDef("Shader", "irradiance");
 	if (cfgs->dynsky) irr->attachDef("DYN_SKY", "1");
+
 	Shader* prefilt = shaders->addShader("prefiltered", ATMOS_VERT, PREFILT_FRAG);
+	prefilt->attachDef("Shader", "prefiltered");
 	if (cfgs->dynsky) prefilt->attachDef("DYN_SKY", "1");
+
 	Shader* brdf = shaders->addShader("brdf", POST_VERT, BRDF_FRAG);
+	brdf->attachDef("Shader", "brdf");
 
 	shaders->compile();
 }
