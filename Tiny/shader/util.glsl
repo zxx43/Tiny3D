@@ -235,6 +235,10 @@ bool CompMat(float flag, float base) {
 	return (flag > (base - 0.01) && flag < (base + 0.01));
 }
 
+vec3 GetNormalFromMap(sampler2D tex, vec2 coord, mat3 tbn) {
+	return tbn * (2.0 * texture(tex, coord).rgb - 1.0);
+}
+
 struct Material {
 	vec4 texids;
 	vec4 params;

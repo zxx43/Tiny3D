@@ -23,7 +23,7 @@ layout (location = 6) in mat4 modelMatrix;
 
 #ifndef ShadowPass
 out vec2 vTexcoord;
-flat out vec4 vTexid;
+flat out ivec4 vTexid;
 flat out vec3 vColor;
 out vec3 vNormal;
 out mat3 vTBN;
@@ -59,7 +59,7 @@ void main() {
 	vNormal = normalMat * normal;
 	vTBN = normalMat * GetTBN(normal, tangent);
 	vTexcoord = texcoord.xy;
-	vTexid = material.texids;
+	vTexid = ivec4(material.texids);
 	vColor = material.params.rgb;
 #endif
 

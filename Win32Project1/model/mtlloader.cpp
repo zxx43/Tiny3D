@@ -59,14 +59,14 @@ void MtlLoader::readMtlFile() {
 					mtl->srgb2 = false;
 				}
 				t++;
-			} else if (value == "map_Km") {
+			} else if (value == "map_Kr") {
 				ins >> texture;
 				if (mtl) {
 					mtl->tex3 = texture;
 					mtl->srgb3 = false;
 				}
 				t++;
-			} else if (value == "map_Kr") {
+			} else if (value == "map_Km") {
 				ins >> texture;
 				if (mtl) {
 					mtl->tex4 = texture;

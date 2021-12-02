@@ -426,14 +426,17 @@ void SimpleApplication::initScene() {
 	assetMgr->addTextureBindless("rustediron2_normal.png", false);
 	assetMgr->addTextureBindless("rustediron2_roughness.png", false);
 	assetMgr->addTextureBindless("rustediron2_metallic.png", false);
+	assetMgr->addTextureBindless("rustediron2_metallic_roughness.png", false);
 	assetMgr->addTextureBindless("streaky-metal1_albedo.png", true);
 	assetMgr->addTextureBindless("streaky-metal1_normal-ogl.png", false);
 	assetMgr->addTextureBindless("streaky-metal1_roughness.png", false);
 	assetMgr->addTextureBindless("streaky-metal1_metallic.png", false);
+	assetMgr->addTextureBindless("streaky-metal1_metallic_roughness.png", false);
 	assetMgr->addTextureBindless("lightgold_albedo.png", true);
 	assetMgr->addTextureBindless("lightgold_normal-ogl.png", false);
 	assetMgr->addTextureBindless("lightgold_roughness.png", false);
 	assetMgr->addTextureBindless("lightgold_metallic.png", false);
+	assetMgr->addTextureBindless("lightgold_metallic_roughness.png", false);
 	assetMgr->addTextureBindless("grass1-albedo3.bmp", true);
 	assetMgr->addTextureBindless("grass1-normal1-dx.bmp", false);
 	assetMgr->addDistortionTex("distortion.bmp");
@@ -480,21 +483,21 @@ void SimpleApplication::initScene() {
 	Material* ironMat = new Material("iron_mat");
 	ironMat->tex1 = "rustediron2_basecolor.png";
 	ironMat->tex2 = "rustediron2_normal.png";
-	ironMat->tex3 = "rustediron2_roughness.png";
+	ironMat->tex3 = "rustediron2_metallic_roughness.png";
 	ironMat->tex4 = "rustediron2_metallic.png";
 	mtlMgr->add(ironMat);
 
 	Material* streakyMat = new Material("streaky_mat");
 	streakyMat->tex1 = "streaky-metal1_albedo.png";
 	streakyMat->tex2 = "streaky-metal1_normal-ogl.png";
-	streakyMat->tex3 = "streaky-metal1_roughness.png";
+	streakyMat->tex3 = "streaky-metal1_metallic_roughness.png";
 	streakyMat->tex4 = "streaky-metal1_metallic.png";
 	mtlMgr->add(streakyMat);
 
 	Material* goldMat = new Material("gold_mat");
 	goldMat->tex1 = "lightgold_albedo.png";
 	goldMat->tex2 = "lightgold_normal-ogl.png";
-	goldMat->tex3 = "lightgold_roughness.png";
+	goldMat->tex3 = "lightgold_metallic_roughness.png";
 	goldMat->tex4 = "lightgold_metallic.png";
 	mtlMgr->add(goldMat);
 	

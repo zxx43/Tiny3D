@@ -18,7 +18,7 @@ layout (location = 6) in float objectid;
 
 #ifndef LowPass
 out vec2 vTexcoord;
-flat out vec4 vTexid;
+flat out ivec4 vTexid;
 #endif
 #ifndef ShadowPass 
 flat out vec3 vColor;
@@ -37,7 +37,7 @@ void main() {
 #endif 
 #ifndef LowPass
 	vTexcoord = texcoord.xy;
-	vTexid = texid;
+	vTexid = ivec4(texid);
 #endif
 
 #ifdef ShadowPass

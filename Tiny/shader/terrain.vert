@@ -22,8 +22,8 @@ layout (location = 4) in vec3 color;
 layout (location = 5) in vec3 tangent;
 
 out vec2 vTexcoord;
-flat out vec2 vRMid;
-flat out vec4 vTexid;
+flat out ivec2 vRMid;
+flat out ivec4 vTexid;
 flat out vec3 vColor;
 out vec3 vNormal;
 out mat3 vTBN;
@@ -40,12 +40,12 @@ void main() {
 	vTBN = GetTBN(normalize(normal), normalize(tangent));
 	
 	vTexcoord = texcoord.xy;
-	vRMid = texcoord.zw;
+	vRMid = ivec2(texcoord.zw);
 
 #ifndef UseDebug
-	vTexid = texid;
+	vTexid = ivec4(texid);
 #else
-	vTexid = inMaterials[uDebugMid].texids.xxxx;
+	vTexid = ivec4(inMaterials[uDebugMid].texids.xxxx);
 #endif
 
 	gl_Position = viewProjectMatrix * worldVertex;

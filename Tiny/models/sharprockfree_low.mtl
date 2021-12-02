@@ -12,6 +12,5 @@ Ns 0.000000
 map_Ka sharprockfree_default_color.bmp
 map_Kd sharprockfree_default_color.bmp
 map_Kn sharprockfree_default_nmap-dx.bmp
-map_Kr sharprockfree_default_rough.bmp
+map_Kr sharprockfree_default_metalness_roughness.bmp
 map_Km sharprockfree_default_metalness.bmp
-

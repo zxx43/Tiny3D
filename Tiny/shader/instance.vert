@@ -23,7 +23,7 @@ layout (location = 6) in mat4 modelMatrix;
 
 #ifndef LowPass
 out vec2 vTexcoord;
-flat out vec4 vTexid;
+flat out ivec4 vTexid;
 #endif
 #ifndef ShadowPass
 flat out vec3 vColor;
@@ -48,7 +48,7 @@ void main() {
 		#endif
 		#ifndef LowPass
 			vTexcoord = texcoord.xy;
-			vTexid = material.texids;
+			vTexid = ivec4(material.texids);
 		#endif
 		vec4 worldVertex = worldMatrix * vec4(vertex, 1.0);
 #else
@@ -63,7 +63,7 @@ void main() {
 		#endif
 		#ifndef LowPass
 			vTexcoord = texcoord.xy; 
-			vTexid = vec4(material.texids.xy, 0.0, 0.0);
+			vTexid = ivec4(ivec2(material.texids.xy), 0, 0);
 		#endif
 		vec4 worldVertex = vec4(position + right + top, 1.0);
 #endif
