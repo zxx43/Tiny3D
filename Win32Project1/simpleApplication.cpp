@@ -439,6 +439,8 @@ void SimpleApplication::initScene() {
 	assetMgr->addTextureBindless("lightgold_metallic_roughness.png", false);
 	assetMgr->addTextureBindless("grass1-albedo3.bmp", true);
 	assetMgr->addTextureBindless("grass1-normal1-dx.bmp", false);
+	assetMgr->addTextureBindless("ninja_red.bmp", true);
+	assetMgr->addTextureBindless("ninja_blue.bmp", true);
 	assetMgr->addDistortionTex("distortion.bmp");
 	assetMgr->addNoiseTex("noise.bmp");
 	assetMgr->addRoadTex("road.bmp");
@@ -500,6 +502,14 @@ void SimpleApplication::initScene() {
 	goldMat->tex3 = "lightgold_metallic_roughness.png";
 	goldMat->tex4 = "lightgold_metallic.png";
 	mtlMgr->add(goldMat);
+
+	Material* clothRedMat = new Material("cloth_red");
+	clothRedMat->tex1 = "ninja_red.bmp";
+	mtlMgr->add(clothRedMat);
+
+	Material* clothBlueMat = new Material("cloth_blue");
+	clothBlueMat->tex1 = "ninja_blue.bmp";
+	mtlMgr->add(clothBlueMat);
 	
 	Material* terrainMat = new Material("terrain_mat");
 	terrainMat->prepared = true;
@@ -866,12 +876,14 @@ void SimpleApplication::initScene() {
 	animNode2->translateNode(scene, 40, 0, 40);
 	animNode2->rotateNodeObject(scene, 0, 45, 0);
 	animNode2->getObject()->setDefaultAnim("idle1");
+	animNode2->getObject()->bindMaterial(mtlMgr->find("cloth_red"));
 	AnimationNode* animNode3 = new AnimationNode(vec3(5, 10, 5));
 	animNode3->setAnimation(scene, animations["ninja"]);
 	animNode3->scaleNodeObject(scene, 0.05, 0.05, 0.05);
 	animNode3->getObject()->setPosition(0, -5, -1);
 	animNode3->translateNode(scene, 5, 0, 15);
 	animNode3->getObject()->setDefaultAnim("idle2");
+	animNode3->getObject()->bindMaterial(mtlMgr->find("cloth_blue"));
 	AnimationNode* animNode4 = new AnimationNode(vec3(5, 10, 5));
 	animNode4->setAnimation(scene, animations["ninja"]);
 	animNode4->scaleNodeObject(scene, 0.05, 0.05, 0.05);
