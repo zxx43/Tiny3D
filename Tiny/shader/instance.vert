@@ -42,8 +42,13 @@ void main() {
 #ifndef BillPass
 		#ifndef ShadowPass
 			mat3 matRot = mat3(worldMatrix);
-			vNormal = matRot * normal;
-			vTBN = material.texids.y >= 0 ? matRot * GetTBN(normalize(normal), normalize(tangent)) : GetIdentity();
+			if(material.texids.y < -0.01) {
+				vNormal = matRot * normal;
+				vTBN = mat3(1.0);
+			} else {
+				vNormal = vec3(0.0, 1.0, 0.0);
+				vTBN = matRot * GetTBN(normalize(normal), normalize(tangent));
+			}
 			vColor = material.params.rgb;
 		#endif
 		#ifndef LowPass
