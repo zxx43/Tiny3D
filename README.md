@@ -48,9 +48,16 @@ A Small OpenGL Based Renderer
 ### Debug:  
 
 - **b** show depth  
+
 - **n** show normal  
+
 - **m** show terrain mesh  
+
 - **p** show bounding box & printf gl error  
+
+### Detail:  
+https://www.zhihu.com/column/c_1177633837260251136  
+
 ### Screenshot:  
 
 ![screen](anim.gif)   
