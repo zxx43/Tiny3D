@@ -18,6 +18,7 @@ uniform mat4 prevVPMatrix;
 uniform vec2 uSize;
 uniform vec2 uCamParam;
 uniform float uMaxLevel;
+uniform ivec2 refChunk;
 
 const float WindStrength = 0.65;
 const vec2 WindFrequency = vec2(0.05, 0.05);
@@ -74,8 +75,11 @@ void main() {
 	if(any(bvec2(any(lessThan(coord, vec2(0.0))), any(greaterThan(coord, vec2(1.0)))))) return;
 	else if(texture(roadTex, coord).r > 0.001) return;
 
+	vec2 grassChunk = round((worldPose.xz - mapTrans.xz) / (mapScale.xz * CHUNK_SIZE));
+	float lodLevel = float(GetChunkLevel(refChunk, ivec2(grassChunk)));
+
 	// Caculate grass pos y;
-	vec2 texSize = infoSize / mapInfo.x;
+	vec2 texSize = (infoSize / mapInfo.x) / lodLevel;
 	vec2 texPos = coord * texSize;
 	vec2 texLD = floor(texPos), texRT = ceil(texPos);
 	if(abs(texLD.x - texRT.x) < 0.00001) {

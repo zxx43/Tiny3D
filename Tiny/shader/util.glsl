@@ -239,6 +239,18 @@ vec3 GetNormalFromMap(sampler2D tex, vec2 coord, mat3 tbn) {
 	return tbn * (2.0 * texture(tex, coord).rgb - 1.0);
 }
 
+#define LEVEL_1 4
+#define LEVEL_2 8
+#define LEVEL_3 16
+
+uint GetChunkLevel(ivec2 ref, ivec2 target) {
+	ivec2 ref2Target = abs(target - ref);
+	if(any(greaterThan(ref2Target, ivec2(LEVEL_3)))) return 8;
+	else if(any(greaterThan(ref2Target, ivec2(LEVEL_2)))) return 4;
+	else if(any(greaterThan(ref2Target, ivec2(LEVEL_1)))) return 2;
+	else return 1;
+}
+
 struct Material {
 	vec4 texids;
 	vec4 params;

@@ -297,7 +297,7 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	//*/
 }
 
-void RenderManager::drawGrass(Render* render, RenderState* state, Scene* scene, Camera* camera) {
+void RenderManager::drawGrass(Render* render, RenderState* state, Scene* scene, Camera* camera, const vec3& ref) {
 	bool computeGrass = true;
 	state->enableCull = false;
 	state->grassPass = true;
@@ -324,6 +324,7 @@ void RenderManager::drawGrass(Render* render, RenderState* state, Scene* scene, 
 		compShader->setMatrix4("prevVPMatrix", prevCameraMat);
 		compShader->setVector2("uSize", (float)render->viewWidth, (float)render->viewHeight);
 		compShader->setVector2("uCamParam", camera->zNear, camera->zFar);
+		compShader->setIVector2("refChunk", floor(ref.x), floor(ref.z));
 
 		grassDrawcall->update();
 		render->draw(camera, grassDrawcall, state);
@@ -398,7 +399,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 		render->draw(camera, terrainNode->drawcall, state);
 
 		if (/*!cfgs->cartoon && */!cfgs->debug && !render->getDebugTerrain()) 
-			drawGrass(render, state, scene, camera);
+			drawGrass(render, state, scene, camera, ref);
 	}
 
 	state->shader = phongShader;

@@ -64,7 +64,7 @@ public:
 	Renderable* currentQueue;
 	Renderable* nextQueue;
 private:
-	void drawGrass(Render* render, RenderState* state, Scene* scene, Camera* camera);
+	void drawGrass(Render* render, RenderState* state, Scene* scene, Camera* camera, const vec3& ref);
 	void updateWaterVisible(const Scene* scene);
 private:
 	FrameBuffer* nearStaticBuffer;

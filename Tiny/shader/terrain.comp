@@ -36,12 +36,7 @@ uint GetLevel(ivec2 ref, int targetChunk) {
 	targetCenter = (targetCenter - mapTrans.xz) / mapScale.xz;
 	targetCenter = floor(targetCenter / CHUNK_SIZE);
 	ivec2 target = ivec2(targetCenter);
-	
-	ivec2 ref2Target = abs(target - ref);
-	if(any(greaterThan(ref2Target, ivec2(16)))) return 8;
-	else if(any(greaterThan(ref2Target, ivec2(8)))) return 4;
-	else if(any(greaterThan(ref2Target, ivec2(4)))) return 2;
-	else return 1;
+	return GetChunkLevel(ref, target);
 }
 
 uint GetIndexByBlock(uint x, uint y, uint inner) {
