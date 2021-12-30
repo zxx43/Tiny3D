@@ -53,8 +53,6 @@ RenderBuffer* ComputeDrawcall::createBuffers(int objCount) {
 }
 
 void ComputeDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
-	dataBuffer->use();
-
 	dataBuffer->setShaderBase(PositionOutIndex, 1);
 	dataBuffer->setShaderBase(IndirectBufIndex, 2);
 
@@ -62,8 +60,9 @@ void ComputeDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
 	state->shaderCompute->setFloat("fullSize", maxCount);
 
 	glDispatchCompute(dispatchCount, dispatchCount, 1);
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT);
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
+	dataBuffer->use();
 	render->useShader(shader);
 	glDrawArraysIndirect(GL_TRIANGLES, 0);
 }

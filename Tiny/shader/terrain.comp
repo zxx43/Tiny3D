@@ -36,6 +36,12 @@ uint GetLevel(ivec2 ref, int targetChunk) {
 	targetCenter = (targetCenter - mapTrans.xz) / mapScale.xz;
 	targetCenter = floor(targetCenter / CHUNK_SIZE);
 	ivec2 target = ivec2(targetCenter);
+	
+	/*
+	ivec2 target;
+	target.x = (targetChunk % LINE_CHUNKS) * 4;
+	target.y = (targetChunk / (LINE_CHUNKS)) * 4;
+	*/
 	return GetChunkLevel(ref, target);
 }
 

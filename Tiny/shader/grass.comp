@@ -75,7 +75,7 @@ void main() {
 	if(any(bvec2(any(lessThan(coord, vec2(0.0))), any(greaterThan(coord, vec2(1.0)))))) return;
 	else if(texture(roadTex, coord).r > 0.001) return;
 
-	vec2 grassChunk = round((worldPose.xz - mapTrans.xz) / (mapScale.xz * CHUNK_SIZE));
+	vec2 grassChunk = floor((worldPose.xz - mapTrans.xz) / (mapScale.xz * CHUNK_SIZE));
 	float lodLevel = float(GetChunkLevel(refChunk, ivec2(grassChunk)));
 
 	// Caculate grass pos y;
