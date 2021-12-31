@@ -69,13 +69,14 @@ void main() {
 	vec2 dRand = vec2(random(worldPose, 0.1), random(worldPose, 0.2));
 	worldPose.xz += dRand * spread;
 
-	vec2 infoSize = vec2(floor(mapInfo.zw / mapInfo.x * 0.25) * 4.0) * mapInfo.x;
+	float fStepSize = float(STEP_SIZE), fChunkSize = float(CHUNK_SIZE);
+	vec2 infoSize = mapInfo.zw - vec2(fStepSize);
 
 	vec2 coord = (worldPose.xz - mapTrans.xz) / (mapScale.xz * infoSize);
 	if(any(bvec2(any(lessThan(coord, vec2(0.0))), any(greaterThan(coord, vec2(1.0)))))) return;
 	else if(texture(roadTex, coord).r > 0.001) return;
 
-	vec2 grassChunk = floor((worldPose.xz - mapTrans.xz) / (mapScale.xz * CHUNK_SIZE));
+	vec2 grassChunk = floor((worldPose.xz - mapTrans.xz) / (mapScale.xz * fStepSize * fChunkSize));
 	float lodLevel = float(GetChunkLevel(refChunk, ivec2(grassChunk)));
 
 	// Caculate grass pos y;

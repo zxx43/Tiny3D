@@ -92,6 +92,7 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	terrainComp->attachDef("CHUNK_INDEX_COUNT", to_string(CHUNK_INDEX_COUNT).data());
 	terrainComp->attachDef("CHUNK_SIZE", to_string(CHUNK_SIZE).data());
 	terrainComp->attachDef("LINE_CHUNKS", to_string(LINE_CHUNKS).data());
+	terrainComp->attachDef("STEP_SIZE", to_string(STEP_SIZE).data());
 
 	Shader* grassLayer = shaders->addShader("grassLayer", GRASS_LAYER_VERT, GRASS_LAYER_FRAG, GRASS_LAYER_TESC, GRASS_LAYER_TESE, GRASS_LAYER_GEOM);
 	grassLayer->attachDef("Shader", "grass_geom");
@@ -101,6 +102,7 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	grassComp->attachDef("Shader", "grass_culling");
 	grassComp->attachDef("WORKGROUP_SIZE", to_string(COMP_GROUPE_SIZE).data());
 	grassComp->attachDef("CHUNK_SIZE", to_string(CHUNK_SIZE).data());
+	grassComp->attachDef("STEP_SIZE", to_string(STEP_SIZE).data());
 
 	Shader* grass = shaders->addShader("grass", GRASS_VERT, GRASS_LAYER_FRAG);
 	grass->attachDef("Shader", "grass");

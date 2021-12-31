@@ -239,9 +239,9 @@ vec3 GetNormalFromMap(sampler2D tex, vec2 coord, mat3 tbn) {
 	return tbn * (2.0 * texture(tex, coord).rgb - 1.0);
 }
 
-#define LEVEL_1 8
-#define LEVEL_2 16
-#define LEVEL_3 32
+#define LEVEL_1 1
+#define LEVEL_2 3
+#define LEVEL_3 7
 
 uint GetChunkLevel(ivec2 ref, ivec2 target) {
 	ivec2 ref2Target = abs(target - ref);

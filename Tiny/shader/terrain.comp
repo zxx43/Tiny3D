@@ -32,16 +32,7 @@ uniform vec3 mapTrans, mapScale;
 #define INVALID_LEVEL 1024
 
 uint GetLevel(ivec2 ref, int targetChunk) {
-	vec2 targetCenter = inChunks[targetChunk].center.xz;
-	targetCenter = (targetCenter - mapTrans.xz) / mapScale.xz;
-	targetCenter = floor(targetCenter / CHUNK_SIZE);
-	ivec2 target = ivec2(targetCenter);
-	
-	/*
-	ivec2 target;
-	target.x = (targetChunk % LINE_CHUNKS) * 4;
-	target.y = (targetChunk / (LINE_CHUNKS)) * 4;
-	*/
+	ivec2 target = ivec2((targetChunk % LINE_CHUNKS), (targetChunk / LINE_CHUNKS));
 	return GetChunkLevel(ref, target);
 }
 

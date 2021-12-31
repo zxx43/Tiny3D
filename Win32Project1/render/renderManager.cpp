@@ -381,7 +381,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 		terrainCullShader->setVector2("uSize", (float)render->viewWidth, (float)render->viewHeight);
 		terrainCullShader->setVector2("uCamParam", camera->zNear, camera->zFar);
 
-		vec3 ref = ((camera->position - state->mapTrans) / state->mapScl) / CHUNK_SIZE;
+		vec3 ref = ((camera->position - state->mapTrans) / (state->mapScl * STEP_SIZE)) / CHUNK_SIZE;
 		terrainCullShader->setIVector2("refChunk", floor(ref.x), floor(ref.z));
 		terrainCullShader->setVector3v("mapTrans", state->mapTrans);
 		terrainCullShader->setVector3v("mapScale", state->mapScl);
