@@ -251,6 +251,11 @@ uint GetChunkLevel(ivec2 ref, ivec2 target) {
 	else return 1;
 }
 
+uint GetLevel(ivec2 ref, int targetChunk, int lineChunks) {
+	ivec2 target = ivec2((targetChunk % lineChunks), (targetChunk / lineChunks));
+	return GetChunkLevel(ref, target);
+}
+
 struct Material {
 	vec4 texids;
 	vec4 params;

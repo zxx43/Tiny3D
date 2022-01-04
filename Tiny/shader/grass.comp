@@ -23,6 +23,8 @@ uniform ivec2 refChunk;
 const float WindStrength = 0.65;
 const vec2 WindFrequency = vec2(0.05, 0.05);
 
+#define INVALID_LEVEL 1024
+
 layout(binding = 1, std430) buffer OutPose {
 	mat4 outPose[];
 };
@@ -58,6 +60,15 @@ mat3 GetWindMat(vec2 pos) {
 	return windRotation;
 }
 
+int GetGrassChunk(ivec2 target) {
+	return target.x + target.y * LINE_CHUNKS;
+}
+
+vec3 GetTerrainPosition(vec2 ref, vec2 invTexSize) {
+	vec2 coord = ref * invTexSize;
+	return vec3(coord.x, texture(heightTex, coord).x, coord.y);
+}
+
 void main() {
 	uvec2 cur = gl_GlobalInvocationID.xy;
 	vec2 dPose = vec2(fullSize * 0.5) - vec2(cur);
@@ -76,11 +87,13 @@ void main() {
 	if(any(bvec2(any(lessThan(coord, vec2(0.0))), any(greaterThan(coord, vec2(1.0)))))) return;
 	else if(texture(roadTex, coord).r > 0.001) return;
 
-	vec2 grassChunk = floor((worldPose.xz - mapTrans.xz) / (mapScale.xz * fStepSize * fChunkSize));
-	float lodLevel = float(GetChunkLevel(refChunk, ivec2(grassChunk)));
-
+	vec2 grassPos = (worldPose.xz - mapTrans.xz) / (mapScale.xz);
+	ivec2 grassChunk = ivec2(floor(grassPos / (fStepSize * fChunkSize)));
+	float lodLevel = float(GetChunkLevel(refChunk, grassChunk));
+	uint levelCurr = uint(lodLevel);
+	
 	// Caculate grass pos y;
-	vec2 texSize = (infoSize / mapInfo.x) / lodLevel;
+	vec2 texSize = infoSize / (mapInfo.x * lodLevel);
 	vec2 texPos = coord * texSize;
 	vec2 texLD = floor(texPos), texRT = ceil(texPos);
 	if(abs(texLD.x - texRT.x) < 0.00001) {
@@ -91,23 +104,84 @@ void main() {
 		if(texLD.y > 0.00001) texLD.y -= 1.0;
 		else texRT.y += 1.0;
 	}
+	vec2 texLT = vec2(texLD.x, texRT.y);
+	vec2 texRD = vec2(texRT.x, texLD.y);
 	
 	vec2 invTexSize = vec2(1.0) / texSize;
-	vec2 coord1 = texLD * invTexSize;
-	vec2 coord2 = texRT * invTexSize;
-	vec2 coord3 = vec2(texLD.x, texRT.y) * invTexSize;
+	vec3 p1 = GetTerrainPosition(texLD, invTexSize);
+	vec3 p2 = GetTerrainPosition(texRT, invTexSize);
+	vec3 p3 = GetTerrainPosition(texLT, invTexSize);
 
-	vec3 p1 = vec3(coord1.x, texture(heightTex, coord1).x, coord1.y);
-	vec3 p2 = vec3(coord2.x, texture(heightTex, coord2).x, coord2.y);
-	vec3 p3 = vec3(coord3.x, texture(heightTex, coord3).x, coord3.y);
+	if(levelCurr == 1) {
+		if(CheckIn(coord, p1, p2, p3))
+			worldPose.y = CaculateY(coord, p1, p2, p3);
+		else {
+			vec3 p4 = GetTerrainPosition(texRD, invTexSize);
+			worldPose.y = CaculateY(coord, p1, p4, p2);
+		}
+	} else {
+		int curChunk = GetGrassChunk(grassChunk);
+		ivec4 adjChunks = ivec4((curChunk - LINE_CHUNKS) >= 0 ? (curChunk - LINE_CHUNKS) : -1, 
+								(curChunk + LINE_CHUNKS) < (LINE_CHUNKS * LINE_CHUNKS) ? (curChunk + LINE_CHUNKS) : -1, 
+								(curChunk - 1) >= 0 ? (curChunk - 1) : -1, 
+								(curChunk + 1) < (LINE_CHUNKS * LINE_CHUNKS) ? (curChunk + 1) : -1);
 
-	if(CheckIn(coord, p1, p2, p3)) 
-		worldPose.y = CaculateY(coord, p1, p2, p3);
-	else {
-		vec2 coord4 = vec2(texRT.x, texLD.y) * invTexSize;
-		vec3 p4 = vec3(coord4.x, texture(heightTex, coord4).x, coord4.y);
-		worldPose.y = CaculateY(coord, p1, p4, p2);
-	}
+		uvec4 levelEdge = uvec4(adjChunks.x >= 0 ? GetLevel(refChunk, adjChunks.x, LINE_CHUNKS) : INVALID_LEVEL, 
+								adjChunks.y >= 0 ? GetLevel(refChunk, adjChunks.y, LINE_CHUNKS) : INVALID_LEVEL, 
+								adjChunks.z >= 0 ? GetLevel(refChunk, adjChunks.z, LINE_CHUNKS) : INVALID_LEVEL, 
+								adjChunks.w >= 0 ? GetLevel(refChunk, adjChunks.w, LINE_CHUNKS) : INVALID_LEVEL);
+
+		ivec2 innerBlock = ivec2(floor(grassPos / fStepSize)) % CHUNK_SIZE;
+		bvec4 edgeChunk = bvec4(levelCurr > levelEdge.x, levelCurr > levelEdge.y, levelCurr > levelEdge.z, levelCurr > levelEdge.w);
+		if(edgeChunk.x && (innerBlock.y >= 0 && innerBlock.y < levelCurr)) { // Up edge T crack
+			vec2 texH = texLD + vec2(0.5, 0.0);
+			vec3 ph = GetTerrainPosition(texH, invTexSize);
+
+			if(CheckIn(coord, p1, ph, p3)) worldPose.y = CaculateY(coord, p1, ph, p3);
+			else if(CheckIn(coord, p3, ph, p2)) worldPose.y = CaculateY(coord, p3, ph, p2);
+			else {
+				vec3 p4 = GetTerrainPosition(texRD, invTexSize);
+				worldPose.y = CaculateY(coord, ph, p4, p2);
+			}
+		} else if(edgeChunk.y && (innerBlock.y >= (CHUNK_SIZE - levelCurr) && innerBlock.y < CHUNK_SIZE)) { // Down edge T crack
+			vec2 texH = texRT - vec2(0.5, 0.0);
+			vec3 ph = GetTerrainPosition(texH, invTexSize);
+
+			if(CheckIn(coord, p3, p1, ph)) worldPose.y = CaculateY(coord, p3, p1, ph);
+			else {
+				vec3 p4 = GetTerrainPosition(texRD, invTexSize);		
+				if(CheckIn(coord, p1, ph, p4)) worldPose.y = CaculateY(coord, p1, ph, p4);
+				else worldPose.y = CaculateY(coord, ph, p4, p2);
+			}
+		} else if(edgeChunk.z && (innerBlock.x >= 0 && innerBlock.x < levelCurr)) { // Left edge T crack
+			vec2 texH = texLD + vec2(0.0, 0.5);
+			vec3 ph = GetTerrainPosition(texH, invTexSize);
+
+			if(CheckIn(coord, p3, p2, ph)) worldPose.y = CaculateY(coord, p3, p2, ph);
+			else {
+				vec3 p4 = GetTerrainPosition(texRD, invTexSize);	
+				if(CheckIn(coord, p2, ph, p4)) worldPose.y = CaculateY(coord, p2, ph, p4);
+				else worldPose.y = CaculateY(coord, ph, p1, p4);
+			}
+		} else if(edgeChunk.w && (innerBlock.x >= (CHUNK_SIZE - levelCurr) && innerBlock.x < CHUNK_SIZE)) { // Right edge T crack
+			vec2 texH = texRT - vec2(0.0, 0.5);
+			vec3 ph = GetTerrainPosition(texH, invTexSize);
+
+			if(CheckIn(coord, p2, ph, p3)) worldPose.y = CaculateY(coord, p2, ph, p3);
+			else if(CheckIn(coord, p3, ph, p1)) worldPose.y = CaculateY(coord, p3, ph, p1);
+			else {
+				vec3 p4 = GetTerrainPosition(texRD, invTexSize);
+				worldPose.y = CaculateY(coord, p1, ph, p4);
+			}
+		} else { // No T crack
+			if(CheckIn(coord, p1, p2, p3)) 
+				worldPose.y = CaculateY(coord, p1, p2, p3);
+			else {
+				vec3 p4 = GetTerrainPosition(texRD, invTexSize);
+				worldPose.y = CaculateY(coord, p1, p4, p2);
+			}
+		}
+	} 
 	worldPose.y = worldPose.y * 255.0 * mapScale.y + mapTrans.y;
 
 	// Caculate occlusion

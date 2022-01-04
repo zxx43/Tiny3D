@@ -5,7 +5,7 @@
 #include "../scene/scene.h"
 
 Sky::Sky(Scene* scene, bool dyn) {
-	mesh=new Sphere(8, 8);
+	mesh=new Sphere(16, 16);
 	StaticObject* skyObject=new StaticObject(mesh);
 	Material* mat = new Material("sky_mat");
 	mat->diffuse = vec3(0.5f, 0.7f, 0.8f);

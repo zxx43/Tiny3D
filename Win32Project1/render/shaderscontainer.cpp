@@ -102,6 +102,7 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	grassComp->attachDef("Shader", "grass_culling");
 	grassComp->attachDef("WORKGROUP_SIZE", to_string(COMP_GROUPE_SIZE).data());
 	grassComp->attachDef("CHUNK_SIZE", to_string(CHUNK_SIZE).data());
+	grassComp->attachDef("LINE_CHUNKS", to_string(LINE_CHUNKS).data());
 	grassComp->attachDef("STEP_SIZE", to_string(STEP_SIZE).data());
 
 	Shader* grass = shaders->addShader("grass", GRASS_VERT, GRASS_LAYER_FRAG);
