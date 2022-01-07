@@ -80,20 +80,20 @@ void main() {
 	vec2 dRand = vec2(random(worldPose, 0.1), random(worldPose, 0.2));
 	worldPose.xz += dRand * spread;
 
-	float fStepSize = float(STEP_SIZE), fChunkSize = float(CHUNK_SIZE);
-	vec2 infoSize = mapInfo.zw - vec2(fStepSize);
+	float fStepSize = mapInfo.x, fChunkSize = float(CHUNK_SIZE);
+	vec2 mapMeshSize = mapInfo.zw - vec2(fStepSize);
 
-	vec2 coord = (worldPose.xz - mapTrans.xz) / (mapScale.xz * infoSize);
+	vec2 grassPos = (worldPose.xz - mapTrans.xz) / mapScale.xz;
+	vec2 coord = grassPos / mapMeshSize;
 	if(any(bvec2(any(lessThan(coord, vec2(0.0))), any(greaterThan(coord, vec2(1.0)))))) return;
 	else if(texture(roadTex, coord).r > 0.001) return;
 
-	vec2 grassPos = (worldPose.xz - mapTrans.xz) / (mapScale.xz);
 	ivec2 grassChunk = ivec2(floor(grassPos / (fStepSize * fChunkSize)));
-	float lodLevel = float(GetChunkLevel(refChunk, grassChunk));
-	uint levelCurr = uint(lodLevel);
+	uint levelCurr = GetChunkLevel(refChunk, grassChunk);
+	float lodLevel = float(levelCurr);
 	
 	// Caculate grass pos y;
-	vec2 texSize = infoSize / (mapInfo.x * lodLevel);
+	vec2 texSize = mapMeshSize / (fStepSize * lodLevel);
 	vec2 texPos = coord * texSize;
 	vec2 texLD = floor(texPos), texRT = ceil(texPos);
 	if(abs(texLD.x - texRT.x) < 0.00001) {
@@ -132,7 +132,7 @@ void main() {
 								adjChunks.w >= 0 ? GetLevel(refChunk, adjChunks.w, LINE_CHUNKS) : INVALID_LEVEL);
 
 		ivec2 innerBlock = ivec2(floor(grassPos / fStepSize)) % CHUNK_SIZE;
-		bvec4 edgeChunk = bvec4(levelCurr > levelEdge.x, levelCurr > levelEdge.y, levelCurr > levelEdge.z, levelCurr > levelEdge.w);
+		bvec4 edgeChunk = greaterThan(uvec4(levelCurr), levelEdge);
 		if(edgeChunk.x && (innerBlock.y >= 0 && innerBlock.y < levelCurr)) { // Up edge T crack
 			vec2 texH = texLD + vec2(0.5, 0.0);
 			vec3 ph = GetTerrainPosition(texH, invTexSize);

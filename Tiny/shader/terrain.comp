@@ -150,16 +150,13 @@ void main() {
 							adjChunks.w >= 0 ? GetLevel(refChunk, adjChunks.w, LINE_CHUNKS) : INVALID_LEVEL);
 	
 	uint baseIndex = curChunk * CHUNK_INDEX_COUNT;
-	if(levelCurr == 1) { // No lod
+	bvec4 edgeChunk = greaterThan(uvec4(levelCurr), levelEdge);
+	if(levelCurr > 1) // Do lod
+		GenLodIndices(baseIndex, levelCurr, edgeChunk);
+	else { // No lod
 		uint curIndex = atomicAdd(outIndirect.count, CHUNK_INDEX_COUNT);
 		for(uint i = 0; i < CHUNK_INDEX_COUNT; ++i) 
 			outIndices[curIndex + i] = inIndices[baseIndex + i];
-	} else { // Do lod
-		if(levelCurr > levelEdge.x) GenLodIndices(baseIndex, levelCurr, bvec4(true, false, false, false));
-		else if(levelCurr > levelEdge.y) GenLodIndices(baseIndex, levelCurr, bvec4(false, true, false, false));
-		else if(levelCurr > levelEdge.z) GenLodIndices(baseIndex, levelCurr, bvec4(false, false, true, false));
-		else if(levelCurr > levelEdge.w) GenLodIndices(baseIndex, levelCurr, bvec4(false, false, false, true));
-		else GenLodIndices(baseIndex, levelCurr, bvec4(false)); // Not edge without T crack
 	}
 }
 
