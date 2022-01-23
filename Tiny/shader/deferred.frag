@@ -186,7 +186,12 @@ void main() {
 
 		float ndotl = dot(light, normal);
 
-		float bias = max(0.0000025 * (1.0 - ndotl), 0.0005);
+		#ifndef USE_CARTOON
+			float biasMax = 0.001;
+		#else
+			float biasMax = 0.0001;
+		#endif
+		float bias = max(0.0000025 * (1.0 - ndotl), biasMax);
 		if(material.a > (GrassFlag - 0.1) && material.a < (TerrainFlag + 0.1)) bias *= 0.5; // terrain(0.8) & grass(0.7) receiver shadow bias
 		else bias *= -1.0; // normal receiver shadow bias
 		ndotl = max(ndotl, 0.0);

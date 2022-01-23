@@ -155,12 +155,18 @@ void Object::caculateCollisionShape() {
 	} else {
 		float sx = MAX_VAL; float sy = MAX_VAL; float sz = MAX_VAL;
 		float lx = MIN_VAL; float ly = MIN_VAL; float lz = MIN_VAL;
-		for (uint n = 0; n < mesh->normalFaces.size(); ++n) {
-			FaceBuf* buf = mesh->normalFaces[n];
-			for (int i = 0; i < buf->count; ++i) {
-				int index = mesh->indices[buf->start + i];
-
-				vec4 vertex = mesh->vertices[index];
+		for (uint n = 0; n < mesh->vertexCount; ++n) {
+			int mid = material;
+			Material* mat = NULL;
+			bool isLeaf = false;
+			if (mid >= 0) mat = MaterialManager::materials->find(mid);
+			if (!mat) {
+				mid = mesh->materialids[n];
+				if (mid >= 0) mat = MaterialManager::materials->find(mid);
+			}
+			if (mat) isLeaf = mat->leaf;
+			if (!isLeaf) {
+				vec4 vertex = mesh->vertices[n];
 				vertex = scale(size.x, size.y, size.z) * vertex;
 				float invw = 1.0 / vertex.w;
 				vertex.x *= invw;
