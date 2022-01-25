@@ -53,8 +53,8 @@ RenderBuffer* ComputeDrawcall::createBuffers(int objCount) {
 }
 
 void ComputeDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
-	dataBuffer->setShaderBase(PositionOutIndex, 1);
-	dataBuffer->setShaderBase(IndirectBufIndex, 2);
+	dataBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, PositionOutIndex, 1);
+	dataBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, IndirectBufIndex, 2);
 
 	render->useShader(state->shaderCompute);
 	state->shaderCompute->setFloat("fullSize", maxCount);

@@ -84,7 +84,7 @@ RenderBuffer* MaterialManager::createMaterials(int maxCount) {
 }
 
 void MaterialManager::useMaterialBuffer(int location) { 
-	if (materialBuffer) materialBuffer->setShaderBase(MaterialIndex, location); 
+	if (materialBuffer) materialBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, MaterialIndex, location); 
 }
 
 void MaterialManager::Init() {

@@ -163,11 +163,11 @@ void MultiDrawcall::update(Camera* camera, Render* render, RenderState* state) {
 }
 
 void MultiDrawcall::updateIndirect(Render* render, RenderState* state) {
-	indirectBuffer->setShaderBase(IndirectNormalIndex, 1);
-	indirectBuffer->setShaderBase(IndirectSingleIndex, 2);
-	indirectBuffer->setShaderBase(IndirectBillIndex, 3);
-	indirectBuffer->setShaderBase(IndirectAnimIndex, 4);
-	dataBuffer->setShaderBase(BaseIndex, 5);
+	indirectBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, IndirectNormalIndex, 1);
+	indirectBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, IndirectSingleIndex, 2);
+	indirectBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, IndirectBillIndex, 3);
+	indirectBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, IndirectAnimIndex, 4);
+	dataBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, BaseIndex, 5);
 
 	render->useShader(state->shaderFlush);
 	render->setShaderUVec4(state->shaderFlush, "uCount", multiRef->normalCount, multiRef->singleCount, multiRef->billCount, multiRef->animCount);
@@ -176,20 +176,20 @@ void MultiDrawcall::updateIndirect(Render* render, RenderState* state) {
 }
 
 void MultiDrawcall::prepareRenderData(Camera* camera, Render* render, RenderState* state) {
-	dataBuffer->setShaderBase(InIndex, 1);
-	singleBuffer->setShaderBase(InIndex, 2);
-	billBuffer->setShaderBase(InIndex, 3);
-	animBuffer->setShaderBase(InIndex, 4);
+	dataBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, InIndex, 1);
+	singleBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, InIndex, 2);
+	billBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, InIndex, 3);
+	animBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, InIndex, 4);
 
-	dataBuffer->setShaderBase(OutIndex, 5);
-	singleBuffer->setShaderBase(OutIndex, 6);
-	billBuffer->setShaderBase(OutIndex, 7);
-	animBuffer->setShaderBase(OutIndex, 8);
+	dataBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, OutIndex, 5);
+	singleBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, OutIndex, 6);
+	billBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, OutIndex, 7);
+	animBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, OutIndex, 8);
 
-	indirectBuffer->setShaderBase(IndirectNormalIndex, 9);
-	indirectBuffer->setShaderBase(IndirectSingleIndex, 10);
-	indirectBuffer->setShaderBase(IndirectBillIndex, 11);
-	indirectBuffer->setShaderBase(IndirectAnimIndex, 12);
+	indirectBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, IndirectNormalIndex, 9);
+	indirectBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, IndirectSingleIndex, 10);
+	indirectBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, IndirectBillIndex, 11);
+	indirectBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, IndirectAnimIndex, 12);
 
 	render->useShader(state->shaderMulti);
 	render->setShaderUint(state->shaderMulti, "bufferPass", multiRef->bufferPass);

@@ -79,10 +79,10 @@ void WaterDrawcall::update(Camera* camera, Render* render, RenderState* state) {
 	indirectBuffer->count = 0; // Refresh index count
 	dataBuffer->updateBufferMap(GL_DRAW_INDIRECT_BUFFER, IndirectIndex, sizeof(Indirect), indirectBuffer);
 
-	ssBuffer->setShaderBase(ChunkIndex, 1);
-	ssBuffer->setShaderBase(InputIndex, 2);
-	dataBuffer->setShaderBase(IndirectIndex, 3);
-	dataBuffer->setShaderBase(OutIndex, 4);
+	ssBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, ChunkIndex, 1);
+	ssBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, InputIndex, 2);
+	dataBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, IndirectIndex, 3);
+	dataBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, OutIndex, 4);
 
 	render->useShader(state->shaderCompute);
 	state->shaderCompute->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
@@ -91,7 +91,7 @@ void WaterDrawcall::update(Camera* camera, Render* render, RenderState* state) {
 	glDispatchCompute(chunkCount, 1, 1); // Update per chunk, check chunk cull
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
-	UnbindShaderBuffers(1, 4);
+	UnbindShaderBuffers(GL_SHADER_STORAGE_BUFFER, 1, 4);
 
 	/*
 	dataBuffer->readBufferData(GL_DRAW_INDIRECT_BUFFER, IndirectIndex, sizeof(Indirect), indirectBuffer);

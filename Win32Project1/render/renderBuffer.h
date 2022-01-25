@@ -84,11 +84,11 @@ struct RenderData {
 	void useAs(GLenum target) {
 		glBindBuffer(target, bufferid);
 	}
-	void setShaderBase(int base) {
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, base, bufferid);
+	void setShaderBase(GLenum target, int base) {
+		glBindBufferBase(target, base, bufferid);
 	}
-	void unbindShaderBase(int base) {
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, base, 0);
+	void unbindShaderBase(GLenum target, int base) {
+		glBindBufferBase(target, base, 0);
 	}
 	void updateBuffer(uint count, void* data) {
 		dataSize = count * channelCount * rowCount;
@@ -192,11 +192,11 @@ struct RenderBuffer {
 	void setAttrib(uint ind) {
 		streamDatas[ind]->createAttribute();
 	}
-	void setShaderBase(uint ind, int base) {
-		streamDatas[ind]->setShaderBase(base);
+	void setShaderBase(GLenum target, uint ind, int base) {
+		streamDatas[ind]->setShaderBase(target, base);
 	}
-	void unbindShaderBase(uint ind, int base) {
-		streamDatas[ind]->unbindShaderBase(base);
+	void unbindShaderBase(GLenum target, uint ind, int base) {
+		streamDatas[ind]->unbindShaderBase(target, base);
 	}
 	void updateBufferData(uint loc, uint count, void* data) {
 		streamDatas[loc]->updateBuffer(count, data);
@@ -221,8 +221,8 @@ struct RenderBuffer {
 	}
 };
 
-inline void UnbindShaderBuffers(GLuint first, GLsizei count​) {
-	glBindBuffersBase(GL_SHADER_STORAGE_BUFFER, first, count​, 0);
+inline void UnbindShaderBuffers(GLenum target, GLuint first, GLsizei count​) {
+	glBindBuffersBase(target, first, count​, 0);
 }
 
 #endif
