@@ -289,3 +289,6 @@ struct Indirect {
 #define LeafFlag       0.5
 #define GrassFlag      0.7
 #define TerrainFlag    0.8
+
+#define MAX_MAT 512
+#define MAX_MESH 512

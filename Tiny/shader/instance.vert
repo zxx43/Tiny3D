@@ -1,7 +1,7 @@
 #include "shader/util.glsl"
 
-layout(binding = 1, std430) buffer InMaterial {
-	Material inMaterials[];
+layout(binding = 1, std140) uniform InMaterial {
+	Material inMaterials[MAX_MAT];
 };
 
 uniform mat4 viewProjectMatrix;

@@ -15,10 +15,12 @@ private:
 	RenderBuffer* animBuffer;
 private:
 	RenderBuffer* indirectBuffer;
+	RenderBuffer* uniformBuffer;
 	int meshCount;
 private:
 	RenderBuffer* createBuffers(MultiInstance* multi, int vertexCount, int indexCount, uint inIndex, uint outIndex, uint maxCount, RenderBuffer* ref = NULL);
 	RenderBuffer* createIndirects(MultiInstance* multi);
+	RenderBuffer* createUniforms(MultiInstance* multi);
 	void updateIndirect(Render* render, RenderState* state);
 	void prepareRenderData(Camera* camera, Render* render, RenderState* state);
 public:

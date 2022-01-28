@@ -27,7 +27,12 @@ uniform vec2 uCamParam;
 uniform float uMaxLevel;
 uniform mat4 viewProjectMatrix;
 uniform ivec2 refChunk;
-uniform vec3 mapTrans, mapScale;
+
+layout(binding = 5, std140) uniform TerrainBuffer {
+	vec4 mapTrans;
+	vec4 mapScale;
+	vec4 mapInfo;
+};
 
 #define INVALID_LEVEL 1024
 

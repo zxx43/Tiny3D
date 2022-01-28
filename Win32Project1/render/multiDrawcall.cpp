@@ -21,7 +21,9 @@ const uint WeightIndex = 5;
 const uint Index = 6;
 const uint InIndex = 7;
 const uint OutIndex = 8;
-const uint BaseIndex = 9;
+
+// UBO index
+const uint BaseIndex = 0;
 
 // Indirect vbo index
 const uint IndirectNormalIndex = 0;
@@ -38,7 +40,7 @@ MultiDrawcall::MultiDrawcall(MultiInstance* multi) :Drawcall() {
 	singleBuffer = createBuffers(multiRef, vertexCount, indexCount, InIndex, OutIndex, multiRef->maxSingleInstance, dataBuffer);
 	billBuffer = createBuffers(multiRef, vertexCount, indexCount, InIndex, OutIndex, multiRef->maxBillInstance, dataBuffer);
 	animBuffer = createBuffers(multiRef, vertexCount, indexCount, InIndex, OutIndex, multiRef->maxAnimInstance, dataBuffer);
-
+	uniformBuffer = createUniforms(multiRef);
 	indirectBuffer = createIndirects(multiRef);
 
 	meshCount = multiRef->meshCount;
@@ -49,13 +51,14 @@ MultiDrawcall::MultiDrawcall(MultiInstance* multi) :Drawcall() {
 
 MultiDrawcall::~MultiDrawcall() {
 	if (indirectBuffer) delete indirectBuffer;
+	if (uniformBuffer) delete uniformBuffer;
 	if (singleBuffer) delete singleBuffer;
 	if (billBuffer) delete billBuffer;
 	if (animBuffer) delete animBuffer;
 }
 
 RenderBuffer* MultiDrawcall::createBuffers(MultiInstance* multi, int vertexCount, int indexCount, uint inIndex, uint outIndex, uint maxCount, RenderBuffer* ref) {
-	RenderBuffer* buffer = new RenderBuffer(10);
+	RenderBuffer* buffer = new RenderBuffer(9);
 	if (!ref) {
 		buffer->setAttribData(GL_ARRAY_BUFFER, VertexIndex, VertexSlot, GL_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, multi->vertexBuffer);
 		buffer->setAttribData(GL_ARRAY_BUFFER, NormalIndex, NormalSlot, GL_HALF_FLOAT, vertexCount, 3, 1, false, GL_STATIC_DRAW, 0, multi->normalBuffer);
@@ -66,7 +69,6 @@ RenderBuffer* MultiDrawcall::createBuffers(MultiInstance* multi, int vertexCount
 			buffer->setAttribData(GL_ARRAY_BUFFER, BoneidIndex, BoneidSlot, GL_UNSIGNED_BYTE, vertexCount, 4, 1, false, GL_STATIC_DRAW, 0, multi->boneidBuffer);
 			buffer->setAttribData(GL_ARRAY_BUFFER, WeightIndex, WeightSlot, GL_HALF_FLOAT, vertexCount, 4, 1, false, GL_STATIC_DRAW, 0, multi->weightBuffer);
 		}
-		buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, BaseIndex, GL_UNSIGNED_INT, multi->meshCount, 4, GL_DYNAMIC_DRAW, NULL);
 	} else {
 		buffer->setAttribData(GL_ARRAY_BUFFER, VertexIndex, ref->streamDatas[VertexIndex]);
 		buffer->setAttribData(GL_ARRAY_BUFFER, NormalIndex, ref->streamDatas[NormalIndex]);
@@ -77,7 +79,6 @@ RenderBuffer* MultiDrawcall::createBuffers(MultiInstance* multi, int vertexCount
 			buffer->setAttribData(GL_ARRAY_BUFFER, BoneidIndex, ref->streamDatas[BoneidIndex]);
 			buffer->setAttribData(GL_ARRAY_BUFFER, WeightIndex, ref->streamDatas[WeightIndex]);
 		}
-		buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, BaseIndex, ref->streamDatas[BaseIndex]);
 	}
 	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, inIndex, GL_FLOAT, maxCount, 16, GL_DYNAMIC_DRAW, NULL);
 	buffer->setAttribData(GL_SHADER_STORAGE_BUFFER, outIndex, OutSlot, GL_FLOAT, maxCount, 4, 4, false, GL_STREAM_DRAW, 1, NULL);
@@ -85,6 +86,12 @@ RenderBuffer* MultiDrawcall::createBuffers(MultiInstance* multi, int vertexCount
 	buffer->setAttrib(outIndex);
 
 	buffer->unuse();
+	return buffer;
+}
+
+RenderBuffer* MultiDrawcall::createUniforms(MultiInstance* multi) {
+	RenderBuffer* buffer = new RenderBuffer(1, false);
+	buffer->setBufferData(GL_UNIFORM_BUFFER, BaseIndex, GL_UNSIGNED_INT, multi->meshCount, 4, GL_DYNAMIC_DRAW, NULL);
 	return buffer;
 }
 
@@ -148,7 +155,7 @@ void MultiDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
 
 void MultiDrawcall::update(Camera* camera, Render* render, RenderState* state) {
 	objectCount = multiRef->updateTransform();
-	dataBuffer->updateBufferData(BaseIndex, meshCount, (void*)(multiRef->bases));
+	uniformBuffer->updateBufferData(BaseIndex, meshCount, (void*)(multiRef->bases));
 	if (multiRef->normalInsCount > 0)
 		dataBuffer->updateBufferData(InIndex, multiRef->normalInsCount, (void*)(multiRef->transformsNormal));
 	if (multiRef->singleInsCount > 0)
@@ -167,7 +174,7 @@ void MultiDrawcall::updateIndirect(Render* render, RenderState* state) {
 	indirectBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, IndirectSingleIndex, 2);
 	indirectBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, IndirectBillIndex, 3);
 	indirectBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, IndirectAnimIndex, 4);
-	dataBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, BaseIndex, 5);
+	uniformBuffer->setShaderBase(GL_UNIFORM_BUFFER, BaseIndex, 5);
 
 	render->useShader(state->shaderFlush);
 	render->setShaderUVec4(state->shaderFlush, "uCount", multiRef->normalCount, multiRef->singleCount, multiRef->billCount, multiRef->animCount);
@@ -192,7 +199,6 @@ void MultiDrawcall::prepareRenderData(Camera* camera, Render* render, RenderStat
 	indirectBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, IndirectAnimIndex, 12);
 
 	render->useShader(state->shaderMulti);
-	render->setShaderUint(state->shaderMulti, "bufferPass", multiRef->bufferPass);
 	render->setShaderIVec4(state->shaderMulti, "uCount", multiRef->normalCount, multiRef->singleCount, multiRef->billCount, multiRef->animCount);
 	render->setShaderUVec4(state->shaderMulti, "uInsCount", multiRef->normalInsCount, multiRef->singleInsCount, multiRef->billInsCount, multiRef->animInsCount);
 	render->setShaderMat4(state->shaderMulti, "viewProjectMatrix", camera->viewProjectMatrix);

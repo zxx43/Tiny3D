@@ -59,9 +59,10 @@ unsigned int MaterialManager::size() {
 
 void MaterialManager::updateMapDatas() {
 	mapChannel = 8;
+	uint matSize = materialList.size();
 	if (pbrMapDatas) free(pbrMapDatas);
-	pbrMapDatas = (float*)malloc(materialList.size() * sizeof(float) * mapChannel);
-	for (int i = 0; i < materialList.size(); ++i) {
+	pbrMapDatas = (float*)malloc(matSize * sizeof(float) * mapChannel);
+	for (int i = 0; i < matSize; ++i) {
 		Material* mat = materialList[i];
 		pbrMapDatas[i * mapChannel + 0] = mat->texids.x;
 		pbrMapDatas[i * mapChannel + 1] = mat->texids.y;
@@ -73,18 +74,13 @@ void MaterialManager::updateMapDatas() {
 		pbrMapDatas[i * mapChannel + 7] = mat->singleFace ? 1.0 : 0.0;
 	}
 
-	if (!materialBuffer) materialBuffer = createMaterials(MAX_MAT);
-	materialBuffer->updateBufferData(MaterialIndex, size(), pbrMapDatas);
-}
-
-RenderBuffer* MaterialManager::createMaterials(int maxCount) {
-	RenderBuffer* buffer = new RenderBuffer(1, false);
-	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, MaterialIndex, GL_FLOAT, maxCount, mapChannel, GL_DYNAMIC_DRAW, NULL);
-	return buffer;
+	if (materialBuffer) delete materialBuffer;
+	materialBuffer = new RenderBuffer(1, false);
+	materialBuffer->setBufferData(GL_UNIFORM_BUFFER, MaterialIndex, GL_FLOAT, matSize, mapChannel, GL_STATIC_DRAW, pbrMapDatas);
 }
 
 void MaterialManager::useMaterialBuffer(int location) { 
-	if (materialBuffer) materialBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, MaterialIndex, location); 
+	if (materialBuffer) materialBuffer->setShaderBase(GL_UNIFORM_BUFFER, MaterialIndex, location);
 }
 
 void MaterialManager::Init() {

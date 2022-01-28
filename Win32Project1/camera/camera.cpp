@@ -24,6 +24,7 @@ void Camera::initPerspectCamera(float fovy, float aspect, float zNear, float zFa
 	this->aspect = aspect;
 	this->zNear = zNear;
 	this->zFar = zFar;
+	invDist = 1.0 / (this->zFar - this->zNear);
 	projectMatrix = perspective(fovy, aspect, zNear, zFar);
 	invProjMatrix = projectMatrix.GetInverse();
 	boundMat = projectMatrix;
@@ -33,6 +34,7 @@ void Camera::initPerspectCamera(float fovy, float aspect, float zNear, float zFa
 void Camera::initOrthoCamera(float left, float right, float bottom, float top, float near, float far) {
 	zNear = near;
 	zFar = far;
+	invDist = 1.0 / (zFar - zNear);
 	projectMatrix = ortho(left, right, bottom, top, near, far);
 	invProjMatrix = projectMatrix.GetInverse();
 	boundMat = projectMatrix;
@@ -42,6 +44,7 @@ void Camera::initOrthoCamera(float left, float right, float bottom, float top, f
 void Camera::initOrthoCamera(float left, float right, float bottom, float top, float near, float far, float ex, float ey, float ez) {
 	zNear = near;
 	zFar = far;
+	invDist = 1.0 / (zFar - zNear);
 	projectMatrix = ortho(left, right, bottom, top, near, far);
 	invProjMatrix = projectMatrix.GetInverse();
 	boundMat = ortho(left * ex, right * ex, bottom * ey, top * ey, near * ez, far * ez);
@@ -205,6 +208,7 @@ void Camera::copy(Camera* src) {
 	aspect = src->aspect;
 	zNear = src->zNear; 
 	zFar = src->zFar;
+	invDist = src->invDist;
 	velocity = src->velocity;
 
 	needRefresh = src->needRefresh;

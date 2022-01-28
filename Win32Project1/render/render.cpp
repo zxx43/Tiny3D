@@ -228,7 +228,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 				shader->setMatrix4("viewProjectMatrix", camera->viewProjectMatrix);
 				if (state->tess && state->grassPass) {
 					shader->setFloat("time", state->time * 0.025);
-					shader->setVector3v("eyePos", *(state->eyePos));
+					shader->setVector3v("eyePos", camera->position);
 					shader->setMatrix4("viewMatrix", camera->viewMatrix);
 					shader->setFloat("distortionId", AssetManager::assetManager->getDistortionTex());
 					shader->setFloat("quality", state->quality);
@@ -239,7 +239,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 					if(!state->grassPass)
 						state->shaderCompute->setFloat("isColor", state->pass >= COLOR_PASS ? 1.0 : 0.0);
 					else {
-						state->shaderCompute->setVector3v("eyePos", *(state->eyePos));
+						state->shaderCompute->setVector3v("eyePos", camera->position);
 						state->shaderCompute->setMatrix4("viewMatrix", camera->viewMatrix);
 						state->shaderCompute->setHandle64("distortionTex", AssetManager::assetManager->getDistortionHnd());
 						state->shaderCompute->setHandle64("roadTex", AssetManager::assetManager->getRoadHnd());
@@ -269,9 +269,9 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 
 				if (state->waterPass) {
 					shader->setFloat("time", state->time);
-					shader->setVector3v("eyePos", *(state->eyePos));
 					shader->setVector3v("light", -state->light);
 					shader->setFloat("udotl", state->udotl);
+					shader->setVector3v("eyePos", camera->position);
 					shader->setMatrix4("viewMatrix", camera->viewMatrix);
 					if (state->enableSsr)
 						shader->setVector2("waterBias", 0.0, 0.0);
@@ -299,7 +299,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 			shader->setMatrix4("invViewProjMatrix", camera->invViewProjectMatrix);
 			shader->setMatrix4("invProjMatrix", camera->invProjMatrix);
 			shader->setMatrix4("viewMatrix", camera->viewMatrix);
-			shader->setVector3v("eyePos", *(state->eyePos));
+			shader->setVector3v("eyePos", camera->position);
 			shader->setFloat("time", state->time);
 
 			float invViewMat[9] = { camera->invViewMatrix[0], camera->invViewMatrix[1], camera->invViewMatrix[2],
@@ -308,13 +308,18 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 			shader->setMatrix3("invViewMatrix", invViewMat);
 
 			if (state->shadow) {
-				if (state->shadow->flushDyn) shader->setMatrix4("lightViewProjDyn", state->shadow->renderLightCameraDyn->viewProjectMatrix);
-				if (state->shadow->flushNear) shader->setMatrix4("lightViewProjNear", state->shadow->renderLightCameraNear->viewProjectMatrix);
-				if (state->shadow->flushMid) shader->setMatrix4("lightViewProjMid", state->shadow->renderLightCameraMid->viewProjectMatrix);
-				if (state->shadow->flushFar) shader->setMatrix4("lightViewProjFar", state->shadow->renderLightCameraFar->viewProjectMatrix);
+				Camera* camDyn = state->shadow->renderLightCameraDyn;
+				Camera* camNear = state->shadow->renderLightCameraNear;
+				Camera* camMid = state->shadow->renderLightCameraMid;
+				Camera* camFar = state->shadow->renderLightCameraFar;
+
+				if (state->shadow->flushDyn) shader->setMatrix4("lightViewProjDyn", camDyn->viewProjectMatrix);
+				if (state->shadow->flushNear) shader->setMatrix4("lightViewProjNear", camNear->viewProjectMatrix);
+				if (state->shadow->flushMid) shader->setMatrix4("lightViewProjMid", camMid->viewProjectMatrix);
+				if (state->shadow->flushFar) shader->setMatrix4("lightViewProjFar", camFar->viewProjectMatrix);
 				shader->setVector2("gaps", state->shadow->gap, state->shadow->inv2Gap);
 				shader->setVector3("levels", state->shadow->level1, state->shadow->level2, state->shadow->radius);
-				shader->setVector3v("shadowCenter", state->shadow->renderLightCameraNear->position);
+				shader->setVector3v("shadowCenter", camNear->position);
 			}
 			if (state->lightEffect) {
 				shader->setVector3("light", -state->light.x, -state->light.y, -state->light.z);
@@ -325,7 +330,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 			shader->setFloat("time", state->time);
 		} else if (state->pass == POST_PASS) {
 			shader->setMatrix4("invViewProjMatrix", camera->invViewProjectMatrix);
-			shader->setVector3v("eyePos", *(state->eyePos));
+			shader->setVector3v("eyePos", camera->position);
 			shader->setFloat("udotl", state->udotl);
 		}
 		if (state->ssrPass) {
@@ -336,47 +341,46 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 		}
 
 		if (state->pass < COLOR_PASS) {
-			float invd = 1.0 / (camera->zFar - camera->zNear);
-
 			shader->setMatrix4("projectMatrix", camera->projectMatrix);
 			shader->setMatrix4("viewMatrix", camera->viewMatrix);
-			shader->setVector2("camPara", camera->zNear, invd);
+			shader->setVector2("camPara", camera->zNear, camera->invDist);
 
 			if (state->shaderBill) {
 				state->shaderBill->setMatrix4("projectMatrix", camera->projectMatrix);
 				state->shaderBill->setMatrix4("viewMatrix", camera->viewMatrix);
-				state->shaderBill->setVector2("camPara", camera->zNear, invd);
+				state->shaderBill->setVector2("camPara", camera->zNear, camera->invDist);
 			}
 		} else if (state->pass == DEFERRED_PASS) {
 			if (state->shadow) {
-				float invdDyn = 1.0 / (state->shadow->renderLightCameraDyn->zFar - state->shadow->renderLightCameraDyn->zNear);
+				Camera* camDyn = state->shadow->renderLightCameraDyn;
+				Camera* camNear = state->shadow->renderLightCameraNear;
+				Camera* camMid = state->shadow->renderLightCameraMid;
+				Camera* camFar = state->shadow->renderLightCameraFar;
+
 				if (state->shadow->flushDyn) {
-					shader->setMatrix4("lightProjDyn", state->shadow->renderLightCameraDyn->projectMatrix);
-					shader->setMatrix4("lightViewDyn", state->shadow->renderLightCameraDyn->viewMatrix);
+					shader->setMatrix4("lightProjDyn", camDyn->projectMatrix);
+					shader->setMatrix4("lightViewDyn", camDyn->viewMatrix);
 				}
-				float invdNear = 1.0 / (state->shadow->renderLightCameraNear->zFar - state->shadow->renderLightCameraNear->zNear);
 				if (state->shadow->flushNear) {
-					shader->setMatrix4("lightProjNear", state->shadow->renderLightCameraNear->projectMatrix);
-					shader->setMatrix4("lightViewNear", state->shadow->renderLightCameraNear->viewMatrix);
+					shader->setMatrix4("lightProjNear", camNear->projectMatrix);
+					shader->setMatrix4("lightViewNear", camNear->viewMatrix);
 				}
 
-				float invdMid = 1.0 / (state->shadow->renderLightCameraMid->zFar - state->shadow->renderLightCameraMid->zNear);
 				if (state->shadow->flushMid) {
-					shader->setMatrix4("lightProjMid", state->shadow->renderLightCameraMid->projectMatrix);
-					shader->setMatrix4("lightViewMid", state->shadow->renderLightCameraMid->viewMatrix);
+					shader->setMatrix4("lightProjMid", camMid->projectMatrix);
+					shader->setMatrix4("lightViewMid", camMid->viewMatrix);
 				}
 
-				float invdFar = 1.0 / (state->shadow->renderLightCameraFar->zFar - state->shadow->renderLightCameraFar->zNear);
 				if (state->shadow->flushFar) {
-					shader->setMatrix4("lightProjFar", state->shadow->renderLightCameraFar->projectMatrix);
-					shader->setMatrix4("lightViewFar", state->shadow->renderLightCameraFar->viewMatrix);
+					shader->setMatrix4("lightProjFar", camFar->projectMatrix);
+					shader->setMatrix4("lightViewFar", camFar->viewMatrix);
 				}
 
 				float camParas[8] = { 
-					state->shadow->renderLightCameraDyn->zNear, invdDyn,
-					state->shadow->renderLightCameraNear->zNear, invdNear,
-					state->shadow->renderLightCameraMid->zNear, invdMid,
-					state->shadow->renderLightCameraFar->zNear, invdFar 
+					camDyn->zNear, camDyn->invDist,
+					camNear->zNear, camNear->invDist,
+					camMid->zNear, camMid->invDist,
+					camFar->zNear, camFar->invDist 
 				};
 				shader->setVector2v("camParas", 4, camParas);
 			}
@@ -385,7 +389,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 		if (state->atmoPass) {
 			if (AssetManager::assetManager->getNoiseTex() >= 0 &&
 				!shader->isTexBinded(AssetManager::assetManager->getNoiseHnd()))
-				shader->setHandle64("texNoise", AssetManager::assetManager->getNoiseHnd());
+					shader->setHandle64("texNoise", AssetManager::assetManager->getNoiseHnd());
 		} else if (state->iblPass) {
 			if (AssetManager::assetManager->getSkyTexture() &&
 				!shader->isTexBinded(AssetManager::assetManager->getSkyTexture()->hnd)) {

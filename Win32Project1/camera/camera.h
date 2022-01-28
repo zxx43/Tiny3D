@@ -27,7 +27,7 @@ private:
 public:
 	Frustum* frustum;
 	vec3 position, lookDir, up;
-	float fovy,aspect,zNear,zFar;
+	float fovy,aspect,zNear,zFar,invDist;
 	float velocity;
 	mat4 viewMatrix, projectMatrix, viewProjectMatrix;
 	mat4 invViewProjectMatrix, invProjMatrix, invViewMatrix;

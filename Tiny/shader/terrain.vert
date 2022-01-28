@@ -1,14 +1,17 @@
 #include "shader/util.glsl"
 
 #ifdef UseDebug
-layout(binding = 1, std430) buffer InMaterial {
-	Material inMaterials[];
+layout(binding = 1, std140) uniform InMaterial {
+	Material inMaterials[MAX_MAT];
 };
 #endif
 
 uniform mat4 viewProjectMatrix;
-uniform vec3 mapTrans, mapScale;
-uniform vec4 mapInfo;
+layout(binding = 2, std140) uniform TerrainBuffer {
+	vec4 mapTrans;
+	vec4 mapScale;
+	vec4 mapInfo;
+};
 
 #ifdef UseDebug
 uniform int uDebugMid;

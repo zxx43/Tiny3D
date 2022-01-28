@@ -10,12 +10,17 @@ TerrainNode::TerrainNode(const vec3& position) : StaticNode(position) {
 	offset = vec3(0, 0, 0);
 	offsize = vec3(1, 1, 1);
 	type = TYPE_TERRAIN;
+
+	info = NULL;
+	infoBuffer = NULL;
 }
 
 TerrainNode::~TerrainNode() {
 	for (uint i = 0; i < triangles.size(); i++)
 		delete triangles[i];
 	triangles.clear();
+	if (info) delete info;
+	if (infoBuffer) delete infoBuffer;
 }
 
 void TerrainNode::prepareCollisionData() {
@@ -157,4 +162,17 @@ void TerrainNode::standObjectsOnGround(Scene* scene, Node* node) {
 		for (uint c = 0; c < node->children.size(); c++)
 			standObjectsOnGround(scene, node->children[c]);
 	}
+}
+
+void TerrainNode::createTerrainInfo() {
+	StaticObject* terrain = (StaticObject*)objects[0];
+	if (info) delete info;
+	info = new TerrainInfo();
+	info->trans = vec4(GetTranslate(terrain->transformMatrix), 1.0);
+	info->scale = vec4(terrain->size, 1.0);
+	info->info = vec4(STEP_SIZE, lineSize, MAP_SIZE, MAP_SIZE);
+
+	if (infoBuffer) delete infoBuffer;
+	infoBuffer = new RenderBuffer(1, false);
+	infoBuffer->setBufferData(GL_UNIFORM_BUFFER, 0, GL_FLOAT, 1, sizeof(TerrainInfo), GL_STATIC_DRAW, info);
 }

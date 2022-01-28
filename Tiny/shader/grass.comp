@@ -6,8 +6,6 @@ layout(local_size_x = WORKGROUP_SIZE, local_size_y = WORKGROUP_SIZE) in;
 
 layout(binding = 0) uniform sampler2D texDepth;
 uniform BindlessSampler2D distortionTex, roadTex, heightTex, heightNormal;
-uniform vec3 mapTrans, mapScale;
-uniform vec4 mapInfo;
 uniform float time;
 uniform vec3 eyePos;
 uniform mat4 viewProjectMatrix;
@@ -35,6 +33,12 @@ layout(binding = 2, std430) buffer IndirectBuff {
 	uint  first;
 	uint  baseInstance;
 } indirect;
+
+layout(binding = 3, std140) uniform TerrainBuffer {
+	vec4 mapTrans;
+	vec4 mapScale;
+	vec4 mapInfo;
+};
 
 mat3 AngleAxis3x3(float angle, vec3 axis) {
 	float c = cos(angle), s = sin(angle);

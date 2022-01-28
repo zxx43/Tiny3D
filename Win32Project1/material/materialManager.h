@@ -12,7 +12,6 @@
 #define GREEN_MAT "green_mat"
 #define BLUE_MAT "blue_mat"
 #define WHITE_MAT "white_mat"
-#define MAX_MAT 1024
 
 struct Material
 {
@@ -58,8 +57,6 @@ private:
 	float* pbrMapDatas;
 	RenderBuffer* materialBuffer;
 	unsigned int mapChannel;
-private:
-	RenderBuffer* createMaterials(int maxCount);
 private:
 	MaterialManager();
 	~MaterialManager();

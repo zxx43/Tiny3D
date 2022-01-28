@@ -317,15 +317,14 @@ void RenderManager::drawGrass(Render* render, RenderState* state, Scene* scene, 
 		state->eyePos = &(camera->position);
 
 		StaticObject* terrain = (StaticObject*)node->objects[0];
-		compShader->setVector3v("mapTrans", GetTranslate(terrain->transformMatrix));
-		compShader->setVector3v("mapScale", terrain->size);
-		compShader->setVector4("mapInfo", STEP_SIZE, node->lineSize, MAP_SIZE, MAP_SIZE);
 		compShader->setFloat("uMaxLevel", hiz->getMaxLevel());
 		compShader->setMatrix4("prevVPMatrix", prevCameraMat);
 		compShader->setVector2("uSize", (float)render->viewWidth, (float)render->viewHeight);
 		compShader->setVector2("uCamParam", camera->zNear, camera->zFar);
 		compShader->setIVector2("refChunk", floor(ref.x), floor(ref.z));
 
+		if (!node->getTerrainUniforms()) node->createTerrainInfo();
+		node->useTerrainUniforms(3);
 		grassDrawcall->update();
 		render->draw(camera, grassDrawcall, state);
 	} else {
@@ -371,10 +370,12 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 		static Shader* terrainCullShader = render->findShader("terrainComp");
 
 		StaticObject* terrain = (StaticObject*)terrainNode->objects[0];
-		state->mapTrans = GetTranslate(terrain->transformMatrix);
-		state->mapScl = terrain->size;
-		state->mapInfo = vec4(STEP_SIZE, terrainNode->lineSize, MAP_SIZE, MAP_SIZE);
-		
+		if (!terrainNode->getTerrainUniforms()) terrainNode->createTerrainInfo();
+		TerrainInfo* terrainInfo = terrainNode->getTerrainInfo();
+		state->mapTrans = vec3(terrainInfo->trans.x, terrainInfo->trans.y, terrainInfo->trans.z);
+		state->mapScl = vec3(terrainInfo->scale.x, terrainInfo->scale.y, terrainInfo->scale.z);
+		state->mapInfo = terrainInfo->info;
+
 		render->useTexture(TEXTURE_2D, 0, hizDepth->id);
 		terrainCullShader->setFloat("uMaxLevel", hiz->getMaxLevel());
 		terrainCullShader->setMatrix4("prevVPMatrix", prevCameraMat);
@@ -383,19 +384,16 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 
 		vec3 ref = ((camera->position - state->mapTrans) / (state->mapScl * STEP_SIZE)) / CHUNK_SIZE;
 		terrainCullShader->setIVector2("refChunk", floor(ref.x), floor(ref.z));
-		terrainCullShader->setVector3v("mapTrans", state->mapTrans);
-		terrainCullShader->setVector3v("mapScale", state->mapScl);
 		state->shaderCompute = terrainCullShader;
+		terrainNode->useTerrainUniforms(5);
 		((TerrainDrawcall*)terrainNode->drawcall)->update(camera, render, state);
 		state->shaderCompute = NULL;
 		
 		state->shader = render->getDebugTerrain() ? debugTerrainShader : terrainShader;
-		state->shader->setVector3v("mapTrans", state->mapTrans);
-		state->shader->setVector3v("mapScale", state->mapScl);
-		state->shader->setVector4("mapInfo", STEP_SIZE, terrainNode->lineSize, MAP_SIZE, MAP_SIZE);
 		state->shader->setHandle64("roadTex", AssetManager::assetManager->getRoadHnd());
 		if (render->getDebugTerrain())
 			state->shader->setInt("uDebugMid", MaterialManager::materials->find(BLUE_MAT));
+		terrainNode->useTerrainUniforms(2);
 		render->draw(camera, terrainNode->drawcall, state);
 
 		if (/*!cfgs->cartoon && */!cfgs->debug && !render->getDebugTerrain()) 

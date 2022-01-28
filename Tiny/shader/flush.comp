@@ -17,8 +17,8 @@ layout(binding = 4, std430) buffer IndirectAnimBuffer {
 	Indirect indirectsAnim[];
 };
 #endif
-layout(binding = 5, std430) buffer BaseBuffer {
-	uvec4 baseBuffer[];
+layout(binding = 5, std140) uniform BaseBuffer {
+	uvec4 baseBuffer[MAX_MESH];
 };
 
 uniform uvec4 uCount;

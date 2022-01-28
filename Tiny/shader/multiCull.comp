@@ -67,7 +67,6 @@ uniform vec2 uSize;
 uniform vec2 uCamParam;
 uniform float uMaxLevel;
 uniform uint pass;
-uniform uint bufferPass;
 uniform ivec4 uCount;
 uniform uvec4 uInsCount;
 

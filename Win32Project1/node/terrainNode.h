@@ -6,7 +6,16 @@
 #include "../util/triangle.h"
 #include "../render/terrainDrawcall.h"
 
+struct TerrainInfo {
+	vec4 trans;
+	vec4 scale;
+	vec4 info;
+};
+
 class TerrainNode: public StaticNode {
+private:
+	TerrainInfo* info;
+	RenderBuffer* infoBuffer;
 public:
 	std::vector<Triangle*> triangles;
 	int blockCount, lineSize;
@@ -20,6 +29,10 @@ public:
 	void cauculateBlockIndices(int cx, int cz, int sizex, int sizez);
 	void standObjectsOnGround(Scene* scene, Node* node);
 	Terrain* getMesh() { return (Terrain*)(objects[0]->mesh); }
+	void createTerrainInfo();
+	TerrainInfo* getTerrainInfo() { return info; }
+	RenderBuffer* getTerrainUniforms() { return infoBuffer; }
+	void useTerrainUniforms(int base) { infoBuffer->setShaderBase(GL_UNIFORM_BUFFER, 0, base); }
 };
 
 #endif
