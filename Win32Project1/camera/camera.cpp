@@ -15,6 +15,12 @@ Camera::Camera(float height) {
 	needRefresh = true;
 }
 
+Camera::Camera(const Camera& rhs) {
+	copy(&rhs);
+	frustum = new Frustum();
+	updateFrustum(true);
+}
+
 Camera::~Camera() {
 	delete frustum; frustum = NULL;
 }
@@ -91,13 +97,13 @@ void Camera::updateMoveable(uint transType) {
 	needRefresh = true;
 }
 
-void Camera::updateFrustum() {
-	if (needRefresh) {
+void Camera::updateFrustum(bool forceUpdate) {
+	if (needRefresh || forceUpdate) {
 		viewProjectMatrix = projectMatrix * viewMatrix;
 		invViewProjectMatrix = viewProjectMatrix.GetInverse();
 		lookDir.Normalize();
 		frustum->update((boundMat * viewMatrix).GetInverse(), lookDir);
-		needRefresh = false;
+		if (!forceUpdate) needRefresh = false;
 	}
 }
 
@@ -185,7 +191,7 @@ float Camera::getHeight() {
 	return height;
 }
 
-void Camera::copy(Camera* src) {
+void Camera::copy(const Camera* src) {
 	xrot = src->xrot;
 	yrot = src->yrot;
 	height = src->height;

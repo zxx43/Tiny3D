@@ -33,6 +33,7 @@ public:
 	mat4 invViewProjectMatrix, invProjMatrix, invViewMatrix;
 public:
 	Camera(float height);
+	Camera(const Camera& rhs);
 	~Camera();
 	void initPerspectCamera(float fovy,float aspect,float zNear,float zFar);
 	void initOrthoCamera(float left,float right,float bottom,float top,float near,float far);
@@ -42,7 +43,7 @@ public:
 	void updateLook(const vec3& pos, const vec3& dir);
 	void updateMoveable(uint transType);
 	void forceRefresh() { needRefresh = true; }
-	void updateFrustum();
+	void updateFrustum(bool forceUpdate = false);
 
 	void turnY(int ud);
 	void turnX(int lr);
@@ -51,7 +52,7 @@ public:
 	void move(int dir,float speed);
 	void moveTo(const vec3& pos);
 	float getHeight();
-	void copy(Camera* src);
+	void copy(const Camera* src);
 };
 
 
