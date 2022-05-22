@@ -10,8 +10,6 @@ using namespace std;
 #define PHONG_FRAG "shader/phong.frag"
 #define INSTANCE_VERT "shader/instance.vert"
 #define CULL_COMP "shader/cull.comp"
-#define MULTI_COMP "shader/multiCull.comp"
-#define FLUSH_COMP "shader/flush.comp"
 #define BONE_VERT "shader/bone.vert"
 #define BONE_FRAG "shader/bone.frag"
 #define SKY_VERT "shader/sky.vert"
@@ -52,6 +50,10 @@ using namespace std;
 #define NOISE_FRAG "shader/noise.frag"
 #define DEPTH_FRAG "shader/depth.frag"
 #define HIZ_FRAG "shader/hizmip.frag"
+#define CLEAR_COMP "shader/clear.comp"
+#define LOD_COMP "shader/lod.comp"
+#define REARRANGE_COMP "shader/rearrange.comp"
+#define GATHER_COMP "shader/gather.comp"
 
 string LoadExShader(char* name) {
 	char* fileStr = textFileRead(name);
@@ -273,41 +275,6 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	cull->attachDef("Shader", "culling");
 	cull->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());
 
-	Shader* multi = shaders->addShader("multi", MULTI_COMP);
-	multi->attachDef("Shader", "multiculling");
-	multi->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());
-	multi->attachDef("MAX_DISPATCH", to_string(MAX_DISPATCH).data());
-	multi->attachDef("InvalidIns", to_string(InvalidInsId).data());
-
-	Shader* animMulti = shaders->addShader("animMulti", MULTI_COMP);
-	animMulti->attachDef("Shader", "animation_culling");
-	animMulti->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());
-	animMulti->attachDef("MAX_DISPATCH", to_string(MAX_DISPATCH).data());
-	animMulti->attachDef("InvalidIns", to_string(InvalidInsId).data());
-	animMulti->attachDef("AnimPass", "1.0");
-
-	Shader* multiShadow = shaders->addShader("multi_s", MULTI_COMP);
-	multiShadow->attachDef("Shader", "shadow_culling");
-	multiShadow->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());
-	multiShadow->attachDef("MAX_DISPATCH", to_string(MAX_DISPATCH).data());
-	multiShadow->attachDef("InvalidIns", to_string(InvalidInsId).data());
-	multiShadow->attachDef("ShadowPass", "1.0");
-
-	Shader* animMultiShadow = shaders->addShader("animMulti_s", MULTI_COMP);
-	animMultiShadow->attachDef("Shader", "animation_shadow_culling");
-	animMultiShadow->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());
-	animMultiShadow->attachDef("MAX_DISPATCH", to_string(MAX_DISPATCH).data());
-	animMultiShadow->attachDef("InvalidIns", to_string(InvalidInsId).data());
-	animMultiShadow->attachDef("AnimPass", "1.0");
-	animMultiShadow->attachDef("ShadowPass", "1.0");
-
-	Shader* flush = shaders->addShader("flush", FLUSH_COMP);
-	flush->attachDef("Shader", "flush");
-
-	Shader* animFlush = shaders->addShader("animFlush", FLUSH_COMP);
-	animFlush->attachDef("Shader", "animation_flush");
-	animFlush->attachDef("AnimPass", "1.0");
-
 	Shader* atmos = shaders->addShader("atmos", ATMOS_VERT, ATMOS_FRAG);
 	atmos->attachDef("Shader", "atmos");
 
@@ -330,6 +297,11 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 
 	Shader* brdf = shaders->addShader("brdf", POST_VERT, BRDF_FRAG);
 	brdf->attachDef("Shader", "brdf");
+
+	Shader* clear = shaders->addShader("clearProcessor", CLEAR_COMP);
+	Shader* lod = shaders->addShader("lodProcessor", LOD_COMP);
+	Shader* rearrange = shaders->addShader("rearrangeProcessor", REARRANGE_COMP);
+	Shader* gather = shaders->addShader("gatherProcessor", GATHER_COMP);
 
 	shaders->compile();
 }

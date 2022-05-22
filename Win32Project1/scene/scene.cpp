@@ -9,6 +9,7 @@
 #include "../mesh/terrain.h"
 #include "../mesh/water.h"
 #include "../object/staticObject.h"
+#include "../gather/meshBuffer.h"
 using namespace std;
 
 Scene::Scene() {
@@ -32,10 +33,6 @@ Scene::Scene() {
 	animationRoot = NULL;
 	initNodes();
 	boundingNodes.clear();
-	meshCount.clear();
-	meshes.clear();
-	animCount.clear();
-	anims.clear();
 	animPlayers.clear();
 	animationNodes.clear();
 	dynamicObjects.clear();
@@ -46,6 +43,11 @@ Scene::Scene() {
 	collisionWorld = new DynamicWorld();
 	soundMgr = new SoundManager();
 	sounds.clear();
+
+	meshMgr = new MeshManager();
+	debugMeshMgr = new MeshManager();
+	meshGather = NULL, meshBuffer = NULL;
+	debugMeshGather = NULL, debugMeshBuffer = NULL;
 }
 
 Scene::~Scene() {
@@ -61,14 +63,8 @@ Scene::~Scene() {
 	if (staticRoot) delete staticRoot; staticRoot = NULL;
 	if (billboardRoot) delete billboardRoot; billboardRoot = NULL;
 	if (animationRoot) delete animationRoot; animationRoot = NULL;
-	meshCount.clear();
 	clearAllAABB();
-	for (uint i = 0; i < meshes.size(); ++i)
-		delete meshes[i];
-	meshes.clear();
-	anims.clear();
 	animPlayers.clear();
-	animCount.clear();
 	animationNodes.clear();
 	dynamicObjects.clear();
 
@@ -77,6 +73,49 @@ Scene::~Scene() {
 		delete sounds[i];
 	sounds.clear();
 	delete soundMgr;
+
+	releaseMeshBuffer();
+	releaseDebugBuffer();
+	releaseMeshGather();
+	releaseDebugGather();
+	delete meshMgr;
+	delete debugMeshMgr;
+}
+
+void Scene::releaseMeshGather() {
+	if (meshGather) delete meshGather; meshGather = NULL;
+}
+
+void Scene::createMeshGather() {
+	releaseMeshGather();
+	meshGather = new MeshGather(meshMgr);
+}
+
+void Scene::releaseDebugGather() {
+	if (debugMeshGather) delete debugMeshGather; debugMeshGather = NULL;
+}
+
+void Scene::createDebugGather() {
+	releaseDebugGather();
+	debugMeshGather = new MeshGather(debugMeshMgr);
+}
+
+void Scene::releaseMeshBuffer() {
+	if (meshBuffer) delete meshBuffer; meshBuffer = NULL;
+}
+
+void Scene::createMeshBuffer() {
+	releaseMeshBuffer();
+	meshBuffer = new MeshBuffer(meshGather);
+}
+
+void Scene::releaseDebugBuffer() {
+	if (debugMeshBuffer) delete debugMeshBuffer; debugMeshBuffer = NULL;
+}
+
+void Scene::createDebugBuffer() {
+	releaseDebugBuffer();
+	debugMeshBuffer = new MeshBuffer(debugMeshGather);
 }
 
 void Scene::initNodes() {
@@ -153,11 +192,12 @@ void Scene::updateVisualTerrain(int bx, int bz, int sizex, int sizez) {
 	terrainNode->cauculateBlockIndices(bx, bz, sizex, sizez);
 }
 
-void Scene::updateAABBMesh(AABB* aabb, const char* mat) {
+void Scene::updateAABBMesh(AABB* aabb, const char* mat, const char* mesh) {
 	if (!aabb->debugNode) {
 		aabb->debugNode = new InstanceNode(aabb->position);
-		StaticObject* aabbObject = new StaticObject(AssetManager::assetManager->meshes["box"]);
+		StaticObject* aabbObject = new StaticObject(AssetManager::assetManager->meshes[mesh]);
 		aabbObject->setPhysic(false);
+		aabbObject->setDebug(true);
 		aabbObject->bindMaterial(MaterialManager::materials->find(mat));
 		aabbObject->setSize(aabb->sizex, aabb->sizey, aabb->sizez);
 		aabb->debugNode->addObject(this, aabbObject);
@@ -173,6 +213,7 @@ void Scene::updateAABBWater(AABB* aabb, const char* mat, const vec3& exTrans, co
 		aabb->debugNode = new InstanceNode(aabb->position);
 		StaticObject* aabbObject = new StaticObject(AssetManager::assetManager->meshes["box"]);
 		aabbObject->setPhysic(false);
+		aabbObject->setDebug(true);
 		aabbObject->bindMaterial(MaterialManager::materials->find(mat));
 		aabbObject->setSize(aabb->sizex, aabb->sizey, aabb->sizez);
 		aabb->debugNode->addObject(this, aabbObject);
@@ -188,23 +229,23 @@ void Scene::updateNodeAABB(Node* node) {
 		Terrain* t = ((TerrainNode*)node)->getMesh();
 		for (int i = 0; i < t->chunks.size(); ++i) {
 			AABB* aabb = t->chunks[i]->bounding;
-			updateAABBMesh(aabb, GREEN_MAT);
+			updateAABBMesh(aabb, GREEN_MAT, "box");
 		}
 		return;
 	} else if (node->type == TYPE_WATER) {
-		Water* w = ((WaterNode*)node)->getMesh();
-		for (int i = 0; i < w->chunks.size(); ++i) {
-			AABB* aabb = w->chunks[i]->bounding;
-			vec3 ext(0.0), exs(1.0);
-			ext.x = actCamera->position.x;
-			ext.z = actCamera->position.z;
-			updateAABBWater(aabb, RED_MAT, ext, exs);
-		}
+		//Water* w = ((WaterNode*)node)->getMesh();
+		//for (int i = 0; i < w->chunks.size(); ++i) {
+		//	AABB* aabb = w->chunks[i]->bounding;
+		//	vec3 ext(0.0), exs(1.0);
+		//	ext.x = actCamera->position.x;
+		//	ext.z = actCamera->position.z;
+		//	updateAABBWater(aabb, RED_MAT, ext, exs);
+		//}
 		return;
 	} else {
 		if (node->type == TYPE_ANIMATE) {
 			AABB* aabb = (AABB*)node->boundingBox;
-			if (aabb) updateAABBMesh(aabb, RED_MAT);
+			if (aabb) updateAABBMesh(aabb, RED_MAT, "box");
 		}
 
 		for (uint i = 0; i < node->children.size(); i++)
@@ -213,7 +254,7 @@ void Scene::updateNodeAABB(Node* node) {
 		if (node->children.size() == 0) {
 			for (uint i = 0; i < node->objects.size(); i++) {
 				AABB* aabb = (AABB*)node->objects[i]->bounding;
-				if (aabb) updateAABBMesh(aabb, BLACK_MAT);
+				if (aabb) updateAABBMesh(aabb, BLACK_MAT, "box");
 			}
 		}
 	}
@@ -226,40 +267,9 @@ void Scene::clearAllAABB() {
 }
 
 void Scene::addObject(Object* object, bool isPhysic) {
-	Mesh* cur = object->mesh;
-	if (cur) {
-		if (meshCount.find(cur) == meshCount.end()) {
-			meshCount[cur] = 0;
-			meshes.push_back(new MeshObject(cur, object));
-		}
-		meshCount[cur]++;
-	}
-	cur = object->meshMid;
-	if (cur && cur != object->mesh) {
-		if (meshCount.find(cur) == meshCount.end()) {
-			meshCount[cur] = 0;
-			meshes.push_back(new MeshObject(cur, object));
-		}
-		meshCount[cur]++;
-	}
-	cur = object->meshLow;
-	if (cur && cur != object->meshMid && cur != object->mesh) {
-		if (meshCount.find(cur) == meshCount.end()) {
-			meshCount[cur] = 0;
-			meshes.push_back(new MeshObject(cur, object));
-		}
-		meshCount[cur]++;
-	}
-	
 	if (!object->mesh) { // Animation object
 		AnimationObject* animObj = (AnimationObject*)object;
 		if (animObj) {
-			Animation* curAnim = animObj->animation;
-			if (animCount.find(curAnim) == animCount.end()) {
-				animCount[curAnim] = 0;
-				anims.push_back(curAnim);
-			}
-			animCount[curAnim]++;
 			if (animObj->parent)
 				animationNodes.push_back((AnimationNode*)(animObj->parent));
 		}
@@ -274,16 +284,13 @@ void Scene::addObject(Object* object, bool isPhysic) {
 		CollisionObject* cob = object->initCollisionObject();
 		collisionWorld->addObject(cob);
 	}
+
+	if (object->isDebug()) debugMeshMgr->addObject(object);
+	else meshMgr->addObject(object);
 }
 
 void Scene::addPlay(AnimationNode* node) {
 	animPlayers.push_back(node);
-}
-
-uint Scene::queryMeshCount(Mesh* mesh) {
-	if (meshCount.find(mesh) == meshCount.end())
-		meshCount[mesh] = 0;
-	return meshCount[mesh];
 }
 
 void Scene::initAnimNodes() {

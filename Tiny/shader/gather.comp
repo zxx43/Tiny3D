@@ -1,0 +1,90 @@
+#include "shader/util.glsl"
+#include "shader/mesh.glsl"
+
+layout(local_size_x = 1) in;
+
+layout(binding = 1, std140) uniform BoardInfo {
+	vec4 boardInfos[MAX_MESH];
+};
+
+layout(binding = 2, std430) buffer InObjects {
+	MeshObject lodObjects[];	
+};
+
+layout(binding = 3, std430) buffer IndirectNormal {
+	Indirect normals[];
+};
+layout(binding = 4, std430) buffer IndirectSingle {
+	Indirect singles[];
+};
+layout(binding = 5, std430) buffer IndirectBillbd {
+	Indirect billbds[];
+};
+layout(binding = 6, std430) buffer IndirectAnimat {
+	Indirect animats[];
+};
+
+layout(binding = 7, std430) buffer OutNObjects {
+	mat4 outNormals[];	
+};
+layout(binding = 8, std430) buffer OutSObjects {
+	mat4 outSingles[];	
+};
+layout(binding = 9, std430) buffer OutBObjects {
+	mat4 outBillbds[];	
+};
+layout(binding = 10, std430) buffer OutAObjects {
+	mat4 outAnimats[];	
+};
+
+void main() {
+	uint objectid = gl_GlobalInvocationID.x;
+	
+	MeshObject object = lodObjects[objectid];
+	vec3 translate = object.position;
+	vec3 scale = object.scale;
+	vec4 quat = object.quat;
+	float mtl = object.mtl;
+
+	int amd = GetAnimatMid(object);
+	if(!MidValid(amd)) { // object without animation
+		int nid = GetNormalMid(object);
+		int sid = GetSingleMid(object);
+		int bid = GetBillbdMid(object);
+	
+		if(MidValid(nid) || MidValid(sid)) {
+			mat4 outMat = Translate(translate) * QuatToMat4(quat) * Scale(scale);
+			
+			if(MidValid(nid)) {
+				uint index = normals[nid].baseInstance + atomicAdd(normals[nid].primCount, 1);
+				outMat[3].w = mtl;
+				outNormals[index] = outMat;
+			}
+			if(MidValid(sid)) {
+				uint index = singles[sid].baseInstance + atomicAdd(singles[sid].primCount, 1);
+				outMat[3].w = mtl;
+				outSingles[index] = outMat;
+			}
+		}
+		
+		if(MidValid(bid)) {
+			uint boardid = uint(object.billid);
+			vec4 board = boardInfos[boardid];
+			mat4 outMat = mat4(0.0);
+			outMat[0].xyz = translate;
+			outMat[1].xyz = board.xyz * scale;
+			outMat[3].w = board.w;
+					
+			uint index = billbds[bid].baseInstance + atomicAdd(billbds[bid].primCount, 1);
+			outBillbds[index] = outMat;
+		}
+		
+	} else {
+		mat4 outMat = Translate(translate) * QuatToMat4(quat) * Scale(scale);
+		outMat = transpose(outMat);
+		outMat[3] = vec4(GetAnimatInfo(object), -1.0, mtl);
+				
+		uint index = animats[amd].baseInstance + atomicAdd(animats[amd].primCount, 1);
+		outAnimats[index] = outMat;
+	}
+}

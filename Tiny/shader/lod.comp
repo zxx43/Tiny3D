@@ -1,0 +1,132 @@
+#include "shader/util.glsl"
+#include "shader/hiz.glsl"
+#include "shader/mesh.glsl"
+
+layout(local_size_x = 1) in;
+
+layout(binding = 1, std140) uniform MeshInfo {
+	MeshGroup meshInfos[MAX_MESH];
+};
+
+layout(binding = 2, std430) buffer Dispatchs {
+	DispatchIndirect dispIndirect;
+};
+
+layout(binding = 3, std430) buffer InObjects {
+	GroupObject inObjects[];	
+};
+
+layout(binding = 4, std430) buffer OutCounts {
+	uvec4 countBuff[];
+};
+
+layout(binding = 5, std430) buffer OutObjects {
+	MeshObject lodObjects[];	
+};
+
+layout(binding = 0) uniform sampler2D texDepth;
+uniform mat4 viewProjectMatrix;
+uniform mat4 prevVPMatrix;
+uniform vec2 uSize;
+uniform vec2 uCamParam;
+uniform float uMaxLevel;
+uniform vec2 uDist;
+uniform vec3 eyePos;
+
+Bounding GetBound(GroupObject ins, vec3 translate) {
+	vec4 bound = ins.bound;
+	vec3 size = bound.xyz;
+	vec3 pose = vec3(translate.x, bound.w, translate.z);
+
+	Bounding res;
+	res.bv[0] = vec4(pose + size * vec3( 0.5,  0.5,  0.5), 1.0);
+	res.bv[1] = vec4(pose + size * vec3( 0.5,  0.5, -0.5), 1.0);
+	res.bv[2] = vec4(pose + size * vec3(-0.5,  0.5, -0.5), 1.0);
+	res.bv[3] = vec4(pose + size * vec3(-0.5,  0.5,  0.5), 1.0);
+	res.bv[4] = vec4(pose + size * vec3( 0.5, -0.5,  0.5), 1.0);
+	res.bv[5] = vec4(pose + size * vec3( 0.5, -0.5, -0.5), 1.0);
+	res.bv[6] = vec4(pose + size * vec3(-0.5, -0.5, -0.5), 1.0);
+	res.bv[7] = vec4(pose + size * vec3(-0.5, -0.5,  0.5), 1.0);
+	return res;
+}
+
+bool FrustumCull(Bounding ins) {
+	vec4 p0 = viewProjectMatrix * ins.bv[0]; 
+	vec4 p1 = viewProjectMatrix * ins.bv[1];
+	vec4 p2 = viewProjectMatrix * ins.bv[2]; 
+	vec4 p3 = viewProjectMatrix * ins.bv[3]; 
+	vec4 p4 = viewProjectMatrix * ins.bv[4]; 
+	vec4 p5 = viewProjectMatrix * ins.bv[5]; 
+	vec4 p6 = viewProjectMatrix * ins.bv[6]; 
+	vec4 p7 = viewProjectMatrix * ins.bv[7];
+
+	return CheckCull(p0, p1, p2, p3, p4, p5, p6, p7);
+}
+
+bool OccQuery(Bounding ins) {
+	return HizQuery(prevVPMatrix, texDepth, uSize, uCamParam, uMaxLevel, 
+		ins.bv[0], ins.bv[1], ins.bv[2], ins.bv[3], ins.bv[4], ins.bv[5], ins.bv[6], ins.bv[7], 0.01);
+};
+
+void main() {
+	uint objectid = gl_GlobalInvocationID.x;
+	
+	GroupObject object = inObjects[objectid];
+	MeshGroup group = meshInfos[int(GetGroupId(object))];
+	vec3 objPos = object.trans.xyz;
+	int normalMid = -1;
+	int singleMid = -1;
+	int billbdMid = -1;
+	int animatMid = -1;
+	
+	Bounding bound = GetBound(object, objPos);
+	if(!FrustumCull(bound)) {
+		#ifndef ShadowPass
+		if(!OccQuery(bound)) 
+		#endif
+		{
+			float dist = distance(objPos, eyePos);
+			if(dist < uDist.x) {
+				normalMid = group.normalMeshs.x;
+				singleMid = group.singleMeshs.x;
+			} else if(dist < uDist.y) {
+				normalMid = group.normalMeshs.y;
+				singleMid = group.singleMeshs.y;
+			} else {
+				billbdMid = group.singleMeshs.w;
+				if(!MidValid(billbdMid)) {
+					normalMid = group.normalMeshs.z;
+					singleMid = group.singleMeshs.z;
+				}
+			}
+			animatMid = group.normalMeshs.w;
+				
+			if(MidValid(normalMid) || MidValid(singleMid) || MidValid(billbdMid)) {
+				uint addIndex = atomicAdd(dispIndirect.numx, 1);
+				lodObjects[addIndex].position = object.trans.xyz;
+				lodObjects[addIndex].billid = GetBillid(object);
+				lodObjects[addIndex].quat = DecodeQuat(object.rotat);
+				lodObjects[addIndex].scale = vec3(GetScaleMain(object), GetScaleOther(object));
+				lodObjects[addIndex].mtl = GetMtl(object);
+				lodObjects[addIndex].bound = object.bound;
+				lodObjects[addIndex].meshid = vec4(ivec4(normalMid, singleMid, billbdMid, animatMid));
+					
+				if(MidValid(normalMid)) atomicAdd(countBuff[normalMid].x, 1);
+				if(MidValid(singleMid)) atomicAdd(countBuff[singleMid].y, 1);
+				if(MidValid(billbdMid)) atomicAdd(countBuff[billbdMid].z, 1);
+			} else if(MidValid(animatMid)) {
+				uint addIndex = atomicAdd(dispIndirect.numx, 1);
+				lodObjects[addIndex].position = object.trans.xyz;
+				lodObjects[addIndex].quat = DecodeQuat(object.rotat);
+				vec3 scale = UniformScale(object) ? vec3(GetScaleMain(object)) : UnpackFloat2Vec(GetScaleMain(object));
+				lodObjects[addIndex].scale = scale;
+				lodObjects[addIndex].mtl = GetMtl(object);
+				lodObjects[addIndex].bound = object.bound;
+				vec2 animInfo = GetAnimInfo(object);
+				lodObjects[addIndex].meshid = vec4(animInfo, float(billbdMid), float(animatMid));
+					
+				atomicAdd(countBuff[animatMid].w, 1);
+			}
+		}
+	}
+}

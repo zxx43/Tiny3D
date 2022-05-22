@@ -4,6 +4,7 @@
 #include "../node/instanceNode.h"
 #include "../assets/assetManager.h"
 #include "../scene/scene.h"
+#include "../gather/meshBuffer.h"
 #include <string.h>
 #include <stdlib.h>
 using namespace std;
@@ -12,44 +13,35 @@ RenderQueue::RenderQueue(int type, float midDis, float lowDis, ConfigArg* cfg) {
 	queueType = type;
 	queue = new Queue(1);
 	animQueue = new Queue(1);
-	instanceQueue.clear();
-	animationQueue.clear();
-	instanceDebug = NULL;
-	multiInstance = NULL;
-	singleInstance = NULL;
-	billboards = NULL;
-	animations = NULL;
-	boundings = NULL;
 	batchData = NULL;
 	midDistSqr = powf(midDis, 2);
 	lowDistSqr = powf(lowDis, 2);
 	shadowLevel = 0;
-	firstFlush = true;
 	cfgArgs = cfg;
+
+	objectGather = NULL, processor = NULL;
+	debugGather = NULL, debugProcessor = NULL;
+
+	normalDrawcall = NULL, singleDrawcall = NULL, billbdDrawcall = NULL, animatDrawcall = NULL;
+	debugDrawcall = NULL;
 }
 
 RenderQueue::~RenderQueue() {
 	delete queue;
 	delete animQueue;
 
+	if (processor) delete processor; processor = NULL;
+	if (debugProcessor) delete debugProcessor; debugProcessor = NULL;
+	if (objectGather) delete objectGather; objectGather = NULL;
+	if (debugGather) delete debugGather; debugGather = NULL;
+
+	if (normalDrawcall) delete normalDrawcall; normalDrawcall = NULL;
+	if (singleDrawcall) delete singleDrawcall; singleDrawcall = NULL;
+	if (billbdDrawcall) delete billbdDrawcall; billbdDrawcall = NULL;
+	if (animatDrawcall) delete animatDrawcall; animatDrawcall = NULL;
+	if (debugDrawcall) delete debugDrawcall; debugDrawcall = NULL;
+
 	if (batchData) delete batchData;
-	if (multiInstance) delete multiInstance;
-	if (singleInstance) delete singleInstance;
-	if (billboards) delete billboards;
-	if (animations) delete animations;
-	if (boundings) delete boundings;
-
-	map<Mesh*, InstanceData*>::iterator itIns;
-	for (itIns = instanceQueue.begin(); itIns != instanceQueue.end(); ++itIns)
-		delete itIns->second;
-	instanceQueue.clear();
-
-	map<Animation*, AnimationData*>::iterator itAnim;
-	for (itAnim = animationQueue.begin(); itAnim != animationQueue.end(); ++itAnim)
-		delete itAnim->second;
-	animationQueue.clear();
-
-	if (instanceDebug) delete instanceDebug;
 }
 
 void RenderQueue::push(Node* node) {
@@ -60,39 +52,29 @@ void RenderQueue::pushAnim(Node* node) {
 	animQueue->push(node);
 }
 
-void RenderQueue::flush() {
+void RenderQueue::flush(Scene* scene) {
 	queue->flush();
 	animQueue->flush();
-	
-	map<Mesh*, InstanceData*>::iterator itData = instanceQueue.begin();
-	while (itData != instanceQueue.end()) {
-		itData->second->resetInstance();
-		++itData;
+
+	if (!isDebugQueue()) {
+		if (objectGather) objectGather->resetGroupObject();
+		else {
+			if (scene->meshGather && scene->meshBuffer) {
+				objectGather = new ObjectGather(scene->meshMgr, isAnimQueue());
+				objectGather->showLog();
+			}
+		}
+	} else {
+		if (debugGather) debugGather->resetGroupObject();
+		else {
+			if (scene->debugMeshGather && scene->debugMeshBuffer) {
+				debugGather = new ObjectGather(scene->debugMeshMgr, false);
+				debugGather->showLog();
+			}
+		}
 	}
 
-	map<Animation*, AnimationData*>::iterator itAnim = animationQueue.begin();
-	while (itAnim != animationQueue.end()) {
-		itAnim->second->resetAnims();
-		++itAnim;
-	}
-
-	if (instanceDebug) instanceDebug->resetInstance();
-	
 	if (batchData) batchData->resetBatch();
-}
-
-void RenderQueue::deleteInstance(InstanceData* data) {
-	if (data->instance)
-		delete data->instance;
-	data->instance = NULL;
-}
-
-void RenderQueue::pushDatasToInstance(Scene* scene, InstanceData* data, bool copy) {
-	if (!data->instance) {
-		data->instance = new Instance(data);
-		data->instance->initInstanceBuffers(data->insMesh->vertexCount, data->insMesh->indexCount, scene->queryMeshCount(data->insMesh), copy);
-	}
-	data->instance->setRenderData(data);
 }
 
 void RenderQueue::pushDatasToBatch(BatchData* data, int pass) {
@@ -105,79 +87,32 @@ void RenderQueue::pushDatasToBatch(BatchData* data, int pass) {
 	data->batch->setRenderData(pass, data);
 }
 
-void RenderQueue::createInstances(Scene* scene) {
-	if (!multiInstance || !multiInstance->inited()) {
-		map<Mesh*, InstanceData*>::iterator itData = instanceQueue.begin();
-		while (itData != instanceQueue.end()) {
-			InstanceData* data = itData->second;
-			pushDatasToInstance(scene, data, false);
-			Instance* instance = data->instance;
-			if (instance) {
-				if (!cfgArgs->dualqueue) {
-					if (!multiInstance) multiInstance = new MultiInstance();
-					if (!multiInstance->inited()) multiInstance->add(instance);
-				}
-				else {
-					if (!instance->isBillboard) {
-						if (instance->hasNormal) {
-							if (!multiInstance) multiInstance = new MultiInstance();
-							if (!multiInstance->inited()) multiInstance->add(instance);
-						}
-						if (instance->hasSingle) {
-							if (!singleInstance) singleInstance = new MultiInstance();
-							if (!singleInstance->inited()) singleInstance->add(instance);
-						}
-					}
-					else {
-						if (!billboards) billboards = new MultiInstance();
-						if (!billboards->inited()) billboards->add(instance);
-					}
-				}
+void RenderQueue::process(Scene* scene, Render* render, const RenderState* state, const LodParam& param) {
+	if (!isDebugQueue()) {
+		if (!scene->meshBuffer && scene->meshGather) scene->createMeshBuffer();
+		if (!processor) {
+			if (objectGather) {
+				processor = new Processor(scene->meshGather, scene->meshBuffer, objectGather);
 			}
-			++itData;
+		} else {
+			processor->update();
+			processor->clear(render);
+			processor->lod(render, state, param);
+			processor->rearrange(render);
+			processor->gather(render);
 		}
-	}
-
-	if (multiInstance) {
-		if (!multiInstance->inited()) {
-			int pass = cfgArgs->dualqueue ? NORMAL_PASS : ALL_PASS;
-			multiInstance->initBuffers(pass);
-			multiInstance->createDrawcall();
-		}
-	}
-
-	if (singleInstance) {
-		if (!singleInstance->inited()) {
-			int pass = cfgArgs->dualqueue ? SINGLE_PASS : ALL_PASS;
-			singleInstance->initBuffers(pass);
-			singleInstance->createDrawcall();
-		}
-	}
-
-	if (billboards) {
-		if (!billboards->inited()) {
-			int pass = cfgArgs->dualqueue ? BILL_PASS : ALL_PASS;
-			billboards->initBuffers(pass);
-			billboards->createDrawcall();
-		}
-	}
-
-	if (instanceDebug) {
-		if (!boundings || !boundings->inited()) {
-			pushDatasToInstance(scene, instanceDebug, false);
-			Instance* instance = instanceDebug->instance;
-			if (instance) {
-				if (!boundings) boundings = new MultiInstance();
-				if (!boundings->inited()) boundings->add(instance);
+	} else {
+		if (!scene->debugMeshBuffer && scene->debugMeshGather) scene->createDebugBuffer();
+		if (!debugProcessor) {
+			if (debugGather) {
+				debugProcessor = new Processor(scene->debugMeshGather, scene->debugMeshBuffer, debugGather);
 			}
-		}
-
-		if (boundings) {
-			if (!boundings->inited()) {
-				int pass = cfgArgs->dualqueue ? NORMAL_PASS : ALL_PASS;
-				boundings->initBuffers(pass);
-				boundings->createDrawcall();
-			}
+		} else {
+			debugProcessor->update();
+			debugProcessor->clear(render);
+			debugProcessor->lod(render, state, param);
+			debugProcessor->rearrange(render);
+			debugProcessor->gather(render);
 		}
 	}
 }
@@ -199,47 +134,6 @@ void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState
 		}
 	}
 
-	createInstances(scene);
-
-	if (multiInstance) {
-		multiInstance->drawcall->update(camera, render, state);
-		render->draw(camera, multiInstance->drawcall, state);
-	}
-
-	if (singleInstance) {
-		singleInstance->drawcall->update(camera, render, state);
-		render->draw(camera, singleInstance->drawcall, state);
-	}
-
-	if (billboards) {
-		billboards->drawcall->update(camera, render, state);
-		render->draw(camera, billboards->drawcall, state);
-	}
-
-	if (boundings) {
-		boundings->drawcall->update(camera, render, state);
-		render->draw(camera, boundings->drawcall, state);
-	}
-
-	if (!animations || !animations->inited()) {
-		map<Animation*, AnimationData*>::iterator itAnim = animationQueue.begin();
-		while (itAnim != animationQueue.end()) {
-			AnimationData* data = itAnim->second;
-			if (!animations) animations = new MultiInstance();
-			if (!animations->inited()) animations->add(data);
-			++itAnim;
-		}
-	}
-
-	if (animations) {
-		if (!animations->inited()) {
-			animations->initBuffers();
-			animations->createDrawcall();
-		}
-		animations->drawcall->update(camera, render, state);
-		render->draw(camera, animations->drawcall, state);
-	}
-	
 	if (batchData) {
 		pushDatasToBatch(batchData, state->pass);
 		Batch* batch = batchData->batch;
@@ -252,6 +146,29 @@ void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState
 			}
 		}
 	}
+
+	if (isDebugQueue()) {
+		if (!debugDrawcall && scene->debugMeshBuffer && debugProcessor && debugProcessor->indNormalCount) debugDrawcall = new IndirectDrawcall(debugProcessor, scene->debugMeshBuffer, INDIRECT_NORMAL);
+	} else {
+		if (isAnimQueue()) {
+			if (!animatDrawcall && scene->meshBuffer && processor && processor->indAnimatCount) animatDrawcall = new IndirectDrawcall(processor, scene->meshBuffer, INDIRECT_ANIMAT);
+		} else {
+			if (!normalDrawcall && scene->meshBuffer && processor && processor->indNormalCount) normalDrawcall = new IndirectDrawcall(processor, scene->meshBuffer, INDIRECT_NORMAL);
+			if (!singleDrawcall && scene->meshBuffer && processor && processor->indSingleCount) singleDrawcall = new IndirectDrawcall(processor, scene->meshBuffer, INDIRECT_SINGLE);
+			if (!billbdDrawcall && scene->meshBuffer && processor && processor->indBillbdCount) billbdDrawcall = new IndirectDrawcall(processor, scene->meshBuffer, INDIRECT_BILLBD);
+		}
+	}
+
+	if (processor && processor->inputObjectCount > 0) {
+		if (normalDrawcall) render->draw(camera, normalDrawcall, state);
+		if (singleDrawcall) render->draw(camera, singleDrawcall, state);
+		if (billbdDrawcall) render->draw(camera, billbdDrawcall, state);
+		if (animatDrawcall) render->draw(camera, animatDrawcall, state);
+	}
+
+	if (debugProcessor && debugProcessor->inputObjectCount > 0) {
+		if (debugDrawcall) render->draw(camera, debugDrawcall, state);
+	}
 }
 
 void RenderQueue::animate(float velocity) {
@@ -261,63 +178,19 @@ void RenderQueue::animate(float velocity) {
 	}
 }
 
-Mesh* RenderQueue::queryLodMesh(Object* object, const vec3& eye) {
-	Mesh* mesh = object->mesh;
-	float e2oDis = (eye - object->bounding->position).GetSquaredLength();
-	if (e2oDis > lowDistSqr) 
-		mesh = object->meshLow;
-	else if (e2oDis > midDistSqr) 
-		mesh = object->meshMid;
-	
-	return mesh;
-}
-
 void PushDebugToQueue(RenderQueue* queue, Scene* scene, Camera* camera) {
-	if (queue->instanceDebug == NULL) {
-		if (scene->boundingNodes.size() <= 0) return;
-		else {
-			Object* object = scene->boundingNodes[0]->objects[0];
-			Mesh* mesh = object->mesh;
-			queue->instanceDebug = new InstanceData(mesh, object, MAX_DEBUG_OBJ);
-			queue->firstFlush = false;
-		} 
-	}
-
-	if (queue->instanceDebug) {
+	if (queue->debugGather) {
 		for (uint i = 0; i < scene->boundingNodes.size(); ++i) {
 			Node* node = scene->boundingNodes[i];
 			if (node->checkInCamera(camera) && node->objects.size() > 0) {
 				Object* object = node->objects[0];
-				queue->instanceDebug->addInstance(object, false);
+				if (object->isDebug()) queue->debugGather->addGroupObject(object);
 			}
 		}
 	}
 }
 
 void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camera, Camera* mainCamera) {
-	if (queue->firstFlush) {
-		if (queue->queueType == QUEUE_DYNAMIC_SN ||
-			queue->queueType == QUEUE_STATIC_SN || queue->queueType == QUEUE_STATIC_SM || 
-			queue->queueType == QUEUE_STATIC_SF || queue->queueType == QUEUE_STATIC) {
-			for (uint i = 0; i < scene->meshes.size(); ++i) {
-				Mesh* mesh = scene->meshes[i]->mesh;
-				Object* object = scene->meshes[i]->object;
-				InstanceData* insData = new InstanceData(mesh, object, scene->queryMeshCount(mesh));
-				queue->instanceQueue.insert(pair<Mesh*, InstanceData*>(mesh, insData));
-			}
-		} else if (queue->queueType == QUEUE_ANIMATE_SN || queue->queueType == QUEUE_ANIMATE_SM || 
-				queue->queueType == QUEUE_ANIMATE_SF || queue->queueType == QUEUE_ANIMATE) {
-			map<Animation*, uint>::iterator it = scene->animCount.begin();
-			while (it != scene->animCount.end()) {
-				Animation* anim = it->first;
-				AnimationData* animData = new AnimationData(anim, it->second);
-				queue->animationQueue.insert(pair<Animation*, AnimationData*>(anim, animData));
-				++it;
-			}
-		}
-		queue->firstFlush = false;
-	}
-
 	if (node->checkInCamera(camera)) {
 		for (unsigned int i = 0; i<node->children.size(); ++i) {
 			Node* child = node->children[i];
@@ -337,21 +210,17 @@ void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camer
 
 							if (queue->shadowLevel > 0 && !object->genShadow) continue;
 							if (object->sphereInCamera(camera)) {
-								Mesh* mesh = queue->queryLodMesh(object, mainCamera->position);
-								if (!mesh) continue;
-								if (queue->shadowLevel > 0 && !mesh->drawShadow) continue;
-								InstanceData* insData = queue->instanceQueue[mesh];
-								insData->addInstance(object);
+								if (!object->isDebug() && queue->objectGather) queue->objectGather->addGroupObject(object);
 							}
 						}
 					} else if (child->type == TYPE_ANIMATE) {
 						if (child->objects.size() > 0) {
 							queue->pushAnim(child);
 							AnimationNode* animNode = (AnimationNode*)child;
-							Animation* anim = animNode->getObject()->animation;
-							AnimationData* animData = queue->animationQueue[anim];
-							animData->addAnimObject(animNode->getObject());
 							animNode->animate(scene->velocity);
+
+							Object* object = animNode->getObject();
+							if (!object->isDebug() && queue->objectGather) queue->objectGather->addGroupObject(object);
 						}
 					} 
 				}

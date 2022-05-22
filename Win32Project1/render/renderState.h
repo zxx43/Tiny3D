@@ -39,8 +39,6 @@ struct RenderState {
 	Shader* shaderIns;
 	Shader* shaderBill;
 	Shader* shaderCompute;
-	Shader* shaderMulti;
-	Shader* shaderFlush;
 
 	vec3 mapTrans, mapScl;
 	vec4 mapInfo;
@@ -93,8 +91,6 @@ struct RenderState {
 		shaderIns = rhs->shaderIns;
 		shaderBill = rhs->shaderBill;
 		shaderCompute = rhs->shaderCompute;
-		shaderMulti = rhs->shaderMulti;
-		shaderFlush = rhs->shaderFlush;
 		mapTrans = rhs->mapTrans;
 		mapScl = rhs->mapScl;
 		mapInfo = rhs->mapInfo;
@@ -131,8 +127,9 @@ struct RenderState {
 		shaderIns = NULL;
 		shaderBill = NULL;
 		shaderCompute = NULL;
-		shaderMulti = NULL;
-		shaderFlush = NULL;
+	}
+	bool isShadowPass() const {
+		return pass < COLOR_PASS;
 	}
 };
 

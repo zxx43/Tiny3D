@@ -15,6 +15,7 @@ AnimationObject::AnimationObject(Animation* anim) :Object() {
 	time = 0.0, curFrame = 0.0;
 	initMatricesData();
 	mass = 100.0;
+	type = OBJ_TYPE_ANIMAT;
 }
 
 AnimationObject::AnimationObject(const AnimationObject& rhs) :Object(rhs) {
@@ -53,6 +54,8 @@ AnimationObject::AnimationObject(const AnimationObject& rhs) :Object(rhs) {
 		transformsFull = (buff*)malloc(16 * sizeof(buff));
 		memcpy(transformsFull, rhs.transformsFull, 16 * sizeof(buff));
 	}
+
+	type = rhs.type;
 }
 
 AnimationObject::~AnimationObject() {
@@ -103,10 +106,10 @@ void AnimationObject::setRotation(const vec4& q) {
 void AnimationObject::setSize(float sx, float sy, float sz) {
 	size = vec3(sx, sy, sz);
 	updateLocalMatrices();
-	if (billboard) {
-		billboard->data[0] *= size.x;
-		billboard->data[1] *= size.y;
-	}
+	//if (billboard) { // todo in shader
+	//	billboard->data[0] *= size.x;
+	//	billboard->data[1] *= size.y;
+	//}
 }
 
 bool AnimationObject::setCurAnim(const char* name, bool once) {

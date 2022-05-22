@@ -23,8 +23,13 @@ const vec2 WindFrequency = vec2(0.05, 0.05);
 
 #define INVALID_LEVEL 1024
 
+struct GrassPose {
+	mat4 trans;
+	vec4 normal;
+};
+
 layout(binding = 1, std430) buffer OutPose {
-	mat4 outPose[];
+	GrassPose outPose[];
 };
 
 layout(binding = 2, std430) buffer IndirectBuff {
@@ -95,7 +100,7 @@ void main() {
 	ivec2 grassChunk = ivec2(floor(grassPos / (fStepSize * fChunkSize)));
 	uint levelCurr = GetChunkLevel(refChunk, grassChunk);
 	float lodLevel = float(levelCurr);
-	
+
 	// Caculate grass pos y;
 	vec2 texSize = mapMeshSize / (fStepSize * lodLevel);
 	vec2 texPos = coord * texSize;
@@ -211,12 +216,12 @@ void main() {
 	mat3 rotMat = RotY(rand * PI);
 	mat3 windMat = GetWindMat(worldPose.xz + vec2(viewz));
 	rotMat = rotMat * windMat;
-	
+
 	// Caculate transform & normal
-	mat4 trans = Translate(worldPose) * M3ToM4(rotMat) * Scale(vec3(size, 1.0));
-	trans = transpose(trans);
-	trans[3] = vec4((texture(heightNormal, coord).xyz - 0.5) * 2.0, 1.0); // normal
+	mat4 trans = viewProjectMatrix * Translate(worldPose) * M3ToM4(rotMat) * Scale(vec3(size, 1.0));
 
 	// Output result & add grass instance count
-	outPose[atomicAdd(indirect.instanceCount, 1)] = trans;
+	uint outIndex = atomicAdd(indirect.instanceCount, 1); 	
+	outPose[outIndex].trans = trans;
+	outPose[outIndex].normal = vec4((texture(heightNormal, coord).xyz - 0.5) * 2.0, 1.0); // normal
 }

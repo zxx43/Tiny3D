@@ -424,6 +424,12 @@ struct Indirect {
 	uint baseInstance;
 };
 
+struct DispatchIndirect {
+	uint numx;
+	uint numy;
+	uint numz;
+};
+
 struct ConfigArg {
 	int width;
 	int height;

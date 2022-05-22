@@ -6,8 +6,6 @@ using namespace std;
 InstanceNode::InstanceNode(const vec3& position):Node(position, vec3(0, 0, 0)) {
 	type = TYPE_INSTANCE;
 	instance = NULL;
-	isGroup = false;
-	groupBuffer = NULL;
 
 	needCreateDrawcall = false;
 	needUpdateDrawcall = false;
@@ -15,7 +13,6 @@ InstanceNode::InstanceNode(const vec3& position):Node(position, vec3(0, 0, 0)) {
 
 InstanceNode::~InstanceNode() {
 	if (instance) delete instance; instance = NULL;
-	if (groupBuffer) delete groupBuffer; groupBuffer = NULL;
 }
 
 void InstanceNode::addObject(Scene* scene, Object* object) {
@@ -57,20 +54,6 @@ Object* InstanceNode::removeObject(Scene* scene, Object* object) {
 void InstanceNode::addObjects(Scene* scene,Object** objectArray,int count) {
 	for(int i=0;i<count;i++)
 		this->addObject(scene,objectArray[i]);
-}
-
-void InstanceNode::prepareGroup() {
-	if (groupBuffer) return;
-	groupBuffer = new InstanceData(objects[0]->mesh, objects[0], objects.size());
-	for (uint i = 0; i < objects.size(); ++i)
-		groupBuffer->addInstance(objects[i]);
-}
-
-void InstanceNode::releaseGroup() {
-	if (groupBuffer) {
-		delete groupBuffer;
-		groupBuffer = NULL;
-	}
 }
 
 void InstanceNode::prepareDrawcall() {

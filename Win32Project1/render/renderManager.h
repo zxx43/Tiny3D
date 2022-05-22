@@ -34,9 +34,9 @@ struct Renderable {
 		for (uint i = 0; i < queues.size(); i++)
 			delete queues[i];
 	}
-	void flush() {
+	void flush(Scene* scene) {
 		for (uint i = 0; i < queues.size(); i++)
-			queues[i]->flush();
+			queues[i]->flush(scene);
 	}
 };
 
@@ -55,6 +55,7 @@ private:
 	bool needResize, needRefreshSky, actShowWater, renderShowWater;
 	ComputeDrawcall* grassDrawcall;
 	mat4 prevCameraMat;
+	LodParam lodParam;
 private:
 	RenderQueue* debugQueue;
 public:
@@ -81,7 +82,7 @@ public:
 	void updateShadowCamera(Camera* mainCamera);
 	void updateMainLight(Scene* scene);
 	void updateSky();
-	void flushRenderQueues();
+	void flushRenderQueues(Scene* scene);
 	void updateRenderQueues(Scene* scene);
 	void animateQueues(float velocity);
 	void swapRenderQueues(Scene* scene, bool swapQueue);
@@ -109,6 +110,7 @@ public:
 	bool isWaterShow(Render* render, const Scene* scene);
 	int getDepthPre() { return depthPre; }
 	void retrievePrev(Scene* scene);
+	void finishInit(Scene* scene);
 };
 
 

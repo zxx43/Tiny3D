@@ -83,6 +83,10 @@ void MaterialManager::useMaterialBuffer(int location) {
 	if (materialBuffer) materialBuffer->setShaderBase(GL_UNIFORM_BUFFER, MaterialIndex, location);
 }
 
+void MaterialManager::unuseMaterial(int location) {
+	if (materialBuffer) materialBuffer->unbindShaderBase(GL_UNIFORM_BUFFER, MaterialIndex, location);
+}
+
 void MaterialManager::Init() {
 	if (!MaterialManager::materials)
 		MaterialManager::materials = new MaterialManager();

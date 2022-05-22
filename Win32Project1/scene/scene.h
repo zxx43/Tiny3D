@@ -15,25 +15,15 @@
 #include "../sky/sky.h"
 #include "player.h"
 
+#include "../gather/processor.h"
+
 #ifndef MAX_DEBUG_OBJ
 #define MAX_DEBUG_OBJ 8192
 #endif
 
-struct MeshObject {
-	Mesh* mesh;
-	Object* object;
-	MeshObject(Mesh* m, Object* o) :mesh(m), object(o) {}
-};
-
 class StaticObject;
 class Scene {
-public:
-	std::vector<MeshObject*> meshes;
-	std::vector<Animation*> anims;
-public:
-	std::map<Animation*, uint> animCount;
 private:
-	std::map<Mesh*, uint> meshCount;
 	bool inited;
 private:
 	void initNodes();
@@ -57,8 +47,25 @@ public:
 	SoundManager* soundMgr;
 	std::vector<SoundObject*> sounds;
 public:
+	MeshManager* meshMgr;
+	MeshGather* meshGather;
+	MeshBuffer* meshBuffer;
+	MeshManager* debugMeshMgr;
+	MeshGather* debugMeshGather;
+	MeshBuffer* debugMeshBuffer;
+public:
 	Scene();
 	~Scene();
+public:
+	void createMeshGather();
+	void releaseMeshGather();
+	void createMeshBuffer();
+	void releaseMeshBuffer();
+	void createDebugGather();
+	void releaseDebugGather();
+	void createDebugBuffer();
+	void releaseDebugBuffer();
+public:
 	void createReflectCamera();
 	void createSky(bool dyn);
 	void createWater(const vec3& position, const vec3& size);
@@ -69,7 +76,6 @@ public:
 	void updateReflectCamera();
 	void addObject(Object* object, bool isPhysic = true);
 	void addPlay(AnimationNode* node);
-	uint queryMeshCount(Mesh* mesh);
 	void finishInit() { inited = true; }
 	bool isInited() { return inited; }
 	void act(float dTime) { time = dTime * 0.025; }
@@ -81,7 +87,7 @@ public: // Just for debugging
 	void updateNodeAABB(Node* node);
 	void clearAllAABB();
 private: 
-	void updateAABBMesh(AABB* aabb, const char* mat);
+	void updateAABBMesh(AABB* aabb, const char* mat, const char* mesh);
 	void updateAABBWater(AABB* aabb, const char* mat, const vec3& exTrans, const vec3& exScale);
 private:
 	std::list<AnimationNode*> animationNodes;

@@ -1,0 +1,61 @@
+#include "shader/util.glsl"
+#include "shader/mesh.glsl"
+
+layout(local_size_x = 1) in;
+
+layout(binding = 1, std430) buffer OutCounts {
+	uvec4 countBuff[];
+};
+
+layout(binding = 2, std430) buffer Dispatchs {
+	DispatchIndirect dispIndirect;
+};
+
+layout(binding = 3, std430) buffer IndirectNormal {
+	Indirect normals[];
+};
+layout(binding = 4, std430) buffer IndirectSingle {
+	Indirect singles[];
+};
+layout(binding = 5, std430) buffer IndirectBillbd {
+	Indirect billbds[];
+};
+layout(binding = 6, std430) buffer IndirectAnimat {
+	Indirect animats[];
+};
+
+uniform uvec4 uMeshCounts;
+
+void main() {
+	uint meshid = gl_GlobalInvocationID.x;
+	
+	dispIndirect.numx = 0;
+	dispIndirect.numy = 1;
+	dispIndirect.numz = 1;
+	
+	bvec4 hasMesh = bvec4(meshid < uMeshCounts.x, 
+						  meshid < uMeshCounts.y, 
+						  meshid < uMeshCounts.z, 
+						  meshid < uMeshCounts.w);
+						  
+	if(hasMesh.x) {
+		normals[meshid].primCount = 0;
+		normals[meshid].baseInstance = 0;
+		countBuff[meshid].x = 0;
+	}
+	if(hasMesh.y) {
+		singles[meshid].primCount = 0;
+		singles[meshid].baseInstance = 0;
+		countBuff[meshid].y = 0;
+	}
+	if(hasMesh.z) {
+		billbds[meshid].primCount = 0;
+		billbds[meshid].baseInstance = 0;
+		countBuff[meshid].z = 0;
+	}
+	if(hasMesh.w) {
+		animats[meshid].primCount = 0;
+		animats[meshid].baseInstance = 0;
+		countBuff[meshid].w = 0;
+	}
+}

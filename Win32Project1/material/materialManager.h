@@ -69,6 +69,7 @@ public:
 	void updateMapDatas();
 	float* getPBRDatas() { return pbrMapDatas; }
 	void useMaterialBuffer(int location);
+	void unuseMaterial(int location);
 };
 
 #endif

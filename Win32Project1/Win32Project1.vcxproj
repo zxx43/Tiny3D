@@ -179,11 +179,19 @@
     <ClCompile Include="config\config.cpp" />
     <ClCompile Include="filter\filter.cpp" />
     <ClCompile Include="framebuffer\framebuffer.cpp" />
+    <ClCompile Include="gather\billboardData.cpp" />
+    <ClCompile Include="gather\indirectData.cpp" />
+    <ClCompile Include="gather\meshBuffer.cpp" />
+    <ClCompile Include="gather\meshData.cpp" />
+    <ClCompile Include="gather\meshGather.cpp" />
+    <ClCompile Include="gather\meshGroupData.cpp" />
+    <ClCompile Include="gather\meshManager.cpp" />
+    <ClCompile Include="gather\objectGather.cpp" />
+    <ClCompile Include="gather\processor.cpp" />
     <ClCompile Include="ibl\ibl.cpp" />
     <ClCompile Include="input\input.cpp" />
     <ClCompile Include="instance\instance.cpp" />
     <ClCompile Include="instance\instanceData.cpp" />
-    <ClCompile Include="instance\multiInstance.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="material\materialManager.cpp" />
     <ClCompile Include="maths\COLOR.cpp" />
@@ -215,7 +223,7 @@
     <ClCompile Include="render\computeDrawcall.cpp" />
     <ClCompile Include="render\dataBuffer.cpp" />
     <ClCompile Include="render\drawcall.cpp" />
-    <ClCompile Include="render\multiDrawcall.cpp" />
+    <ClCompile Include="render\indirectDrawcall.cpp" />
     <ClCompile Include="render\render.cpp" />
     <ClCompile Include="render\renderManager.cpp" />
     <ClCompile Include="render\renderQueue.cpp" />
@@ -249,8 +257,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="animation\animation.h" />
-    <ClInclude Include="animation\assanim.h" />
     <ClInclude Include="animation\animationData.h" />
+    <ClInclude Include="animation\assanim.h" />
     <ClInclude Include="animation\fbxloader.h" />
     <ClInclude Include="animation\fbxutil.h" />
     <ClInclude Include="animation\frameMgr.h" />
@@ -267,11 +275,19 @@
     <ClInclude Include="constants\constants.h" />
     <ClInclude Include="filter\filter.h" />
     <ClInclude Include="framebuffer\framebuffer.h" />
+    <ClInclude Include="gather\billboardData.h" />
+    <ClInclude Include="gather\indirectData.h" />
+    <ClInclude Include="gather\meshBuffer.h" />
+    <ClInclude Include="gather\meshData.h" />
+    <ClInclude Include="gather\meshGather.h" />
+    <ClInclude Include="gather\meshGroupData.h" />
+    <ClInclude Include="gather\meshManager.h" />
+    <ClInclude Include="gather\objectGather.h" />
+    <ClInclude Include="gather\processor.h" />
     <ClInclude Include="ibl\ibl.h" />
     <ClInclude Include="input\input.h" />
     <ClInclude Include="instance\instance.h" />
     <ClInclude Include="instance\instanceData.h" />
-    <ClInclude Include="instance\multiInstance.h" />
     <ClInclude Include="material\materialManager.h" />
     <ClInclude Include="maths\COLOR.h" />
     <ClInclude Include="maths\Maths.h" />
@@ -305,7 +321,7 @@
     <ClInclude Include="render\dataBuffer.h" />
     <ClInclude Include="render\drawcall.h" />
     <ClInclude Include="render\glheader.h" />
-    <ClInclude Include="render\multiDrawcall.h" />
+    <ClInclude Include="render\indirectDrawcall.h" />
     <ClInclude Include="render\render.h" />
     <ClInclude Include="render\renderBuffer.h" />
     <ClInclude Include="render\renderManager.h" />
@@ -348,6 +364,7 @@
     <None Include="..\Tiny\shader\bone.frag" />
     <None Include="..\Tiny\shader\bone.vert" />
     <None Include="..\Tiny\shader\brdf.frag" />
+    <None Include="..\Tiny\shader\clear.comp" />
     <None Include="..\Tiny\shader\cloud.glsl" />
     <None Include="..\Tiny\shader\combined.frag" />
     <None Include="..\Tiny\shader\cull.comp" />
@@ -357,8 +374,8 @@
     <None Include="..\Tiny\shader\depth.frag" />
     <None Include="..\Tiny\shader\dof.frag" />
     <None Include="..\Tiny\shader\edge.frag" />
-    <None Include="..\Tiny\shader\flush.comp" />
     <None Include="..\Tiny\shader\fxaa.frag" />
+    <None Include="..\Tiny\shader\gather.comp" />
     <None Include="..\Tiny\shader\gaussian.frag" />
     <None Include="..\Tiny\shader\grass.comp" />
     <None Include="..\Tiny\shader\grass.vert" />
@@ -370,9 +387,11 @@
     <None Include="..\Tiny\shader\hiz.glsl" />
     <None Include="..\Tiny\shader\hizmip.frag" />
     <None Include="..\Tiny\shader\instance.vert" />
+    <None Include="..\Tiny\shader\instance_simp.vert" />
     <None Include="..\Tiny\shader\irradiance.frag" />
+    <None Include="..\Tiny\shader\lod.comp" />
     <None Include="..\Tiny\shader\mean.frag" />
-    <None Include="..\Tiny\shader\multiCull.comp" />
+    <None Include="..\Tiny\shader\mesh.glsl" />
     <None Include="..\Tiny\shader\noise.frag" />
     <None Include="..\Tiny\shader\noise.vert" />
     <None Include="..\Tiny\shader\pbr.glsl" />
@@ -380,6 +399,7 @@
     <None Include="..\Tiny\shader\phong.vert" />
     <None Include="..\Tiny\shader\post.vert" />
     <None Include="..\Tiny\shader\prefiltered.frag" />
+    <None Include="..\Tiny\shader\rearrange.comp" />
     <None Include="..\Tiny\shader\screen.frag" />
     <None Include="..\Tiny\shader\shadow_nontex.frag" />
     <None Include="..\Tiny\shader\shadow_tex.frag" />

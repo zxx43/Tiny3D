@@ -44,7 +44,7 @@ ComputeDrawcall::~ComputeDrawcall() {
 RenderBuffer* ComputeDrawcall::createBuffers(int objCount) {
 	RenderBuffer* buffer = new RenderBuffer(3);
 	buffer->setAttribData(GL_ARRAY_BUFFER, VertexIndex, VertexSlot, GL_HALF_FLOAT, channelCount, 2, 1, false, GL_STATIC_DRAW, 0, vertBuf);
-	buffer->setAttribData(GL_SHADER_STORAGE_BUFFER, PositionOutIndex, PositionSlot, GL_FLOAT, objCount, 4, 4, false, GL_STREAM_DRAW, 1, NULL);
+	buffer->setAttribData(GL_SHADER_STORAGE_BUFFER, PositionOutIndex, PositionSlot, GL_FLOAT, objCount, 4, 5, false, GL_STREAM_DRAW, 1, NULL);
 	buffer->useAs(PositionOutIndex, GL_ARRAY_BUFFER);
 	buffer->setAttrib(PositionOutIndex);
 	buffer->setBufferData(GL_DRAW_INDIRECT_BUFFER, IndirectBufIndex, GL_ONE, sizeof(ArrayIndirect), GL_DYNAMIC_DRAW, indirectBuf);

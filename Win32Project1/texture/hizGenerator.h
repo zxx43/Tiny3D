@@ -3,9 +3,9 @@
 
 #include "texture2d.h"
 
+struct RenderState;
 class StaticNode;
 class Camera;
-class RenderState;
 class Render;
 class Shader;
 

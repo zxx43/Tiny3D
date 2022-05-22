@@ -184,34 +184,35 @@ struct RenderBuffer {
 		glBindBuffer(target, data->bufferid);
 	}
 	void useAs(uint ind, GLenum target) {
-		streamDatas[ind]->useAs(target);
+		if (streamDatas[ind]) streamDatas[ind]->useAs(target);
 	}
 	void unuseAs(GLenum target) {
 		glBindBuffer(target, 0);
 	}
 	void setAttrib(uint ind) {
-		streamDatas[ind]->createAttribute();
+		if (streamDatas[ind]) streamDatas[ind]->createAttribute();
 	}
 	void setShaderBase(GLenum target, uint ind, int base) {
-		streamDatas[ind]->setShaderBase(target, base);
+		if (streamDatas[ind]) streamDatas[ind]->setShaderBase(target, base);
 	}
 	void unbindShaderBase(GLenum target, uint ind, int base) {
-		streamDatas[ind]->unbindShaderBase(target, base);
+		if (streamDatas[ind]) streamDatas[ind]->unbindShaderBase(target, base);
 	}
 	void updateBufferData(uint loc, uint count, void* data) {
-		streamDatas[loc]->updateBuffer(count, data);
+		if (streamDatas[loc]) streamDatas[loc]->updateBuffer(count, data);
 	}
 	void updateBufferMap(GLenum target, uint loc, uint count, void* data) {
-		streamDatas[loc]->updateBufferMap(target, count, data);
+		if (streamDatas[loc]) streamDatas[loc]->updateBufferMap(target, count, data);
 	}
 	void* getBufferMap(uint count, uint loc) {
-		return streamDatas[loc]->getMapBuffer(count);
+		if (streamDatas[loc]) return streamDatas[loc]->getMapBuffer(count);
+		else return NULL;
 	}
 	void endBufferMap(uint loc) {
-		streamDatas[loc]->endMapBuffer();
+		if (streamDatas[loc]) streamDatas[loc]->endMapBuffer();
 	}
 	void readBufferData(GLenum target, uint loc, uint count, void* ret) {
-		streamDatas[loc]->readBufferData(target, count, ret);
+		if (streamDatas[loc]) streamDatas[loc]->readBufferData(target, count, ret);
 	}
 	void use() {
 		if(useVao) glBindVertexArray(vao);

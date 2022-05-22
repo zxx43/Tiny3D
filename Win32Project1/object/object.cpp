@@ -37,14 +37,18 @@ Object::Object() {
 	mass = 0;
 	dynamic = false;
 	hasPhysic = true;
+	debug = false;
 
 	sounds.clear();
+	type = OBJ_TYPE_NONE;
+	groupid = 0;
+	boardid = -1;
 }
 
 Object::Object(const Object& rhs) {
 	parent = rhs.parent;
 	if (rhs.billboard)
-		billboard = new Billboard(rhs.billboard->data[0], rhs.billboard->data[1], rhs.billboard->material);
+		billboard = new Billboard(*rhs.billboard);
 	else
 		billboard = NULL;
 	transforms = NULL;
@@ -59,6 +63,7 @@ Object::Object(const Object& rhs) {
 	mass = rhs.mass;
 	dynamic = rhs.dynamic;
 	hasPhysic = rhs.hasPhysic;
+	debug = rhs.debug;
 	boundCenter = rhs.boundCenter;
 	localBoundPosition = rhs.localBoundPosition;
 
@@ -67,6 +72,10 @@ Object::Object(const Object& rhs) {
 	std::map<std::string, SoundObject*> soundsToCopy = rhs.sounds;
 	for (it = soundsToCopy.begin(); it != soundsToCopy.end(); ++it)
 		sounds[it->first] = new SoundObject(*it->second);
+
+	type = rhs.type;
+	groupid = rhs.groupid;
+	boardid = rhs.boardid;
 }
 
 Object::~Object() {

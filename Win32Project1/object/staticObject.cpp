@@ -9,6 +9,7 @@ StaticObject::StaticObject(Mesh* mesh) :Object() {
 	this->meshLow = mesh;
 	positionBefore = vec3(0.0);
 	initMatricesData();
+	type = OBJ_TYPE_STATIC;
 }
 
 StaticObject::StaticObject(Mesh* mesh, Mesh* meshMid, Mesh* meshLow) :Object() {
@@ -17,6 +18,7 @@ StaticObject::StaticObject(Mesh* mesh, Mesh* meshMid, Mesh* meshLow) :Object() {
 	this->meshLow = meshLow;
 	positionBefore = vec3(0.0);
 	initMatricesData();
+	type = OBJ_TYPE_STATIC;
 }
 
 StaticObject::StaticObject(const StaticObject& rhs) :Object(rhs) {
@@ -49,6 +51,8 @@ StaticObject::StaticObject(const StaticObject& rhs) :Object(rhs) {
 		transformsFull = (buff*)malloc(16 * sizeof(buff));
 		memcpy(transformsFull, rhs.transformsFull, 16 * sizeof(buff));
 	}
+
+	type = rhs.type;
 }
 
 StaticObject::~StaticObject() {
@@ -90,10 +94,10 @@ void StaticObject::setRotation(float ax, float ay, float az) {
 void StaticObject::setSize(float sx, float sy, float sz) {
 	size = vec3(sx, sy, sz);
 	updateLocalMatrices();
-	if (billboard) {
-		billboard->data[0] *= size.x;
-		billboard->data[1] *= size.y;
-	}
+	//if (billboard) { // todo in shader
+	//	billboard->data[0] *= size.x;
+	//	billboard->data[1] *= size.y;
+	//}
 }
 
 void StaticObject::translateAtWorld(const vec3& position) {

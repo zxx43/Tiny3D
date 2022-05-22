@@ -58,9 +58,6 @@
     <Filter Include="Source Files\input">
       <UniqueIdentifier>{cf1fba8d-dc0c-416c-8b87-cd6b84d61d8a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\instance">
-      <UniqueIdentifier>{4e13c0f7-5169-4790-8973-c8d25b2377c0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\maths">
       <UniqueIdentifier>{c3bf350b-9469-4420-8e89-d211c6839b1a}</UniqueIdentifier>
     </Filter>
@@ -106,6 +103,12 @@
     <Filter Include="Source Files\ibl">
       <UniqueIdentifier>{76b1864e-afcd-4174-b970-8e910763b705}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\gather">
+      <UniqueIdentifier>{4e4fcee0-bc66-4076-a56d-a60a6e591925}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\instance">
+      <UniqueIdentifier>{fd642997-64d7-4b03-8353-43352c6d8784}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="batch\batch.cpp">
@@ -128,9 +131,6 @@
     </ClCompile>
     <ClCompile Include="input\input.cpp">
       <Filter>Source Files\input</Filter>
-    </ClCompile>
-    <ClCompile Include="instance\instance.cpp">
-      <Filter>Source Files\instance</Filter>
     </ClCompile>
     <ClCompile Include="maths\COLOR.cpp">
       <Filter>Source Files\maths</Filter>
@@ -288,9 +288,6 @@
     <ClCompile Include="texture\textureatlas.cpp">
       <Filter>Source Files\texture</Filter>
     </ClCompile>
-    <ClCompile Include="instance\instanceData.cpp">
-      <Filter>Source Files\instance</Filter>
-    </ClCompile>
     <ClCompile Include="batch\batchData.cpp">
       <Filter>Source Files\batch</Filter>
     </ClCompile>
@@ -298,12 +295,6 @@
       <Filter>Source Files\texture</Filter>
     </ClCompile>
     <ClCompile Include="render\computeDrawcall.cpp">
-      <Filter>Source Files\render</Filter>
-    </ClCompile>
-    <ClCompile Include="instance\multiInstance.cpp">
-      <Filter>Source Files\instance</Filter>
-    </ClCompile>
-    <ClCompile Include="render\multiDrawcall.cpp">
       <Filter>Source Files\render</Filter>
     </ClCompile>
     <ClCompile Include="animation\frameMgr.cpp">
@@ -316,9 +307,6 @@
       <Filter>Source Files\animation</Filter>
     </ClCompile>
     <ClCompile Include="animation\fbxutil.cpp">
-      <Filter>Source Files\animation</Filter>
-    </ClCompile>
-    <ClCompile Include="animation\assanim.cpp">
       <Filter>Source Files\animation</Filter>
     </ClCompile>
     <ClCompile Include="animation\animation.cpp">
@@ -339,9 +327,6 @@
     <ClCompile Include="render\dataBuffer.cpp">
       <Filter>Source Files\render</Filter>
     </ClCompile>
-    <ClCompile Include="animation\animationData.cpp">
-      <Filter>Source Files\animation</Filter>
-    </ClCompile>
     <ClCompile Include="render\terrainDrawcall.cpp">
       <Filter>Source Files\render</Filter>
     </ClCompile>
@@ -356,6 +341,48 @@
     </ClCompile>
     <ClCompile Include="render\waterDrawcall.cpp">
       <Filter>Source Files\render</Filter>
+    </ClCompile>
+    <ClCompile Include="gather\meshManager.cpp">
+      <Filter>Source Files\gather</Filter>
+    </ClCompile>
+    <ClCompile Include="gather\meshData.cpp">
+      <Filter>Source Files\gather</Filter>
+    </ClCompile>
+    <ClCompile Include="gather\meshGather.cpp">
+      <Filter>Source Files\gather</Filter>
+    </ClCompile>
+    <ClCompile Include="gather\indirectData.cpp">
+      <Filter>Source Files\gather</Filter>
+    </ClCompile>
+    <ClCompile Include="gather\meshGroupData.cpp">
+      <Filter>Source Files\gather</Filter>
+    </ClCompile>
+    <ClCompile Include="gather\billboardData.cpp">
+      <Filter>Source Files\gather</Filter>
+    </ClCompile>
+    <ClCompile Include="gather\objectGather.cpp">
+      <Filter>Source Files\gather</Filter>
+    </ClCompile>
+    <ClCompile Include="gather\processor.cpp">
+      <Filter>Source Files\gather</Filter>
+    </ClCompile>
+    <ClCompile Include="gather\meshBuffer.cpp">
+      <Filter>Source Files\gather</Filter>
+    </ClCompile>
+    <ClCompile Include="render\indirectDrawcall.cpp">
+      <Filter>Source Files\render</Filter>
+    </ClCompile>
+    <ClCompile Include="animation\animationData.cpp">
+      <Filter>Source Files\animation</Filter>
+    </ClCompile>
+    <ClCompile Include="animation\assanim.cpp">
+      <Filter>Source Files\animation</Filter>
+    </ClCompile>
+    <ClCompile Include="instance\instance.cpp">
+      <Filter>Source Files\instance</Filter>
+    </ClCompile>
+    <ClCompile Include="instance\instanceData.cpp">
+      <Filter>Source Files\instance</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -385,9 +412,6 @@
     </ClInclude>
     <ClInclude Include="input\input.h">
       <Filter>Source Files\input</Filter>
-    </ClInclude>
-    <ClInclude Include="instance\instance.h">
-      <Filter>Source Files\instance</Filter>
     </ClInclude>
     <ClInclude Include="maths\COLOR.h">
       <Filter>Source Files\maths</Filter>
@@ -560,9 +584,6 @@
     <ClInclude Include="texture\textureatlas.h">
       <Filter>Source Files\texture</Filter>
     </ClInclude>
-    <ClInclude Include="instance\instanceData.h">
-      <Filter>Source Files\instance</Filter>
-    </ClInclude>
     <ClInclude Include="batch\batchData.h">
       <Filter>Source Files\batch</Filter>
     </ClInclude>
@@ -571,15 +592,6 @@
     </ClInclude>
     <ClInclude Include="render\computeDrawcall.h">
       <Filter>Source Files\render</Filter>
-    </ClInclude>
-    <ClInclude Include="instance\multiInstance.h">
-      <Filter>Source Files\instance</Filter>
-    </ClInclude>
-    <ClInclude Include="render\multiDrawcall.h">
-      <Filter>Source Files\render</Filter>
-    </ClInclude>
-    <ClInclude Include="animation\animationData.h">
-      <Filter>Source Files\animation</Filter>
     </ClInclude>
     <ClInclude Include="animation\frameMgr.h">
       <Filter>Source Files\animation</Filter>
@@ -631,6 +643,45 @@
     </ClInclude>
     <ClInclude Include="render\waterDrawcall.h">
       <Filter>Source Files\render</Filter>
+    </ClInclude>
+    <ClInclude Include="gather\meshManager.h">
+      <Filter>Source Files\gather</Filter>
+    </ClInclude>
+    <ClInclude Include="gather\meshData.h">
+      <Filter>Source Files\gather</Filter>
+    </ClInclude>
+    <ClInclude Include="gather\meshGather.h">
+      <Filter>Source Files\gather</Filter>
+    </ClInclude>
+    <ClInclude Include="gather\indirectData.h">
+      <Filter>Source Files\gather</Filter>
+    </ClInclude>
+    <ClInclude Include="gather\meshGroupData.h">
+      <Filter>Source Files\gather</Filter>
+    </ClInclude>
+    <ClInclude Include="gather\billboardData.h">
+      <Filter>Source Files\gather</Filter>
+    </ClInclude>
+    <ClInclude Include="gather\objectGather.h">
+      <Filter>Source Files\gather</Filter>
+    </ClInclude>
+    <ClInclude Include="gather\processor.h">
+      <Filter>Source Files\gather</Filter>
+    </ClInclude>
+    <ClInclude Include="gather\meshBuffer.h">
+      <Filter>Source Files\gather</Filter>
+    </ClInclude>
+    <ClInclude Include="render\indirectDrawcall.h">
+      <Filter>Source Files\render</Filter>
+    </ClInclude>
+    <ClInclude Include="animation\animationData.h">
+      <Filter>Source Files\animation</Filter>
+    </ClInclude>
+    <ClInclude Include="instance\instance.h">
+      <Filter>Source Files\instance</Filter>
+    </ClInclude>
+    <ClInclude Include="instance\instanceData.h">
+      <Filter>Source Files\instance</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -739,12 +790,6 @@
     <None Include="..\Tiny\shader\triangle.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\Tiny\shader\flush.comp">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Tiny\shader\multiCull.comp">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="..\Tiny\shader\vtf.glsl">
       <Filter>Shaders</Filter>
     </None>
@@ -797,6 +842,24 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Tiny\shader\water.comp">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Tiny\shader\clear.comp">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Tiny\shader\gather.comp">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Tiny\shader\instance_simp.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Tiny\shader\lod.comp">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Tiny\shader\mesh.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Tiny\shader\rearrange.comp">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

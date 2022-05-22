@@ -59,6 +59,7 @@ void Application::init() {
 
 void Application::initScene() {
 	scene->finishInit();
+	renderMgr->finishInit(scene);
 	printf("Scene inited!\n");
 }
 

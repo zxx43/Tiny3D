@@ -15,6 +15,12 @@
 #include "../physics/dynamicWorld.h"
 #include "../sound/soundManager.h"
 
+#ifndef OBJ_TYPE_NONE
+#define OBJ_TYPE_NONE	0
+#define OBJ_TYPE_STATIC 1
+#define OBJ_TYPE_ANIMAT 2
+#endif
+
 class Node;
 
 class Object {
@@ -26,8 +32,10 @@ public:
 	Mesh* mesh;
 	Mesh* meshMid;
 	Mesh* meshLow;
+	uint groupid;
 	int material;
 	Billboard* billboard;
+	int boardid;
 	mat4 localTransformMatrix,normalMatrix; // Local transform
 	mat4 transformMatrix,transformTransposed; // Global transform
 	vec4 rotateQuat;
@@ -45,7 +53,9 @@ public:
 	float mass;
 	bool dynamic;
 	bool hasPhysic;
+	bool debug;
 	std::map<std::string, SoundObject*> sounds;
+	int type;
 public:
 	Object();
 	Object(const Object& rhs);
@@ -71,7 +81,9 @@ public:
 	void setMass(float m) { mass = m; }
 	bool isDynamic() { return dynamic; }
 	bool isPhysic() { return hasPhysic; }
+	bool isDebug() { return debug; }
 	void setPhysic(bool phy) { hasPhysic = phy; }
+	void setDebug(bool db) { debug = db; }
 	void setSound(const char* name, const char* path);
 	SoundObject* getSound(const char* name);
 	void playEffect(const char* name) { SoundObject* sound = getSound(name); if (sound) sound->play(); }

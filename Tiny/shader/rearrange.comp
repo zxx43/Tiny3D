@@ -1,0 +1,38 @@
+#include "shader/util.glsl"
+
+layout(local_size_x = 1) in;
+
+layout(binding = 1, std430) buffer InCounts {
+	uvec4 countBuff[];
+};
+
+layout(binding = 2, std430) buffer IndirectNormal {
+	Indirect normals[];
+};
+layout(binding = 3, std430) buffer IndirectSingle {
+	Indirect singles[];
+};
+layout(binding = 4, std430) buffer IndirectBillbd {
+	Indirect billbds[];
+};
+layout(binding = 5, std430) buffer IndirectAnimat {
+	Indirect animats[];
+};
+
+uniform uvec4 uMeshCounts;
+
+void main() {
+	uint meshid = gl_GlobalInvocationID.x;
+	
+	bvec4 hasMesh = bvec4(meshid < uMeshCounts.x, 
+						  meshid < uMeshCounts.y, 
+						  meshid < uMeshCounts.z, 
+						  meshid < uMeshCounts.w);
+
+	for(int n = 0; n < meshid; ++n) {
+		if(hasMesh.x) atomicAdd(normals[meshid].baseInstance, countBuff[n].x); // normal
+		if(hasMesh.y) atomicAdd(singles[meshid].baseInstance, countBuff[n].y); // single
+		if(hasMesh.z) atomicAdd(billbds[meshid].baseInstance, countBuff[n].z); // billbd
+		if(hasMesh.w) atomicAdd(animats[meshid].baseInstance, countBuff[n].w); // animat
+	}
+}

@@ -13,7 +13,11 @@ in vec4 teProjPos[];
 in vec3 teNormal[];
 in vec4 teInfo[];
 
-out vec4 vNormalHeight;
+out vec3 vNormal;
+out vec3 vColor;
+
+#define BottomColor vec3(0.005, 0.04, 0.01)
+#define TopColor vec3(0.1, 0.2, 0.05)
 
 const float WindStrength = 0.6;
 const vec2 WindFrequency = vec2(0.05, 0.05);
@@ -67,15 +71,18 @@ void main() {
 		vertB = rotMat * vertB + trans;
 		vertC = rotMat * vertC + trans;
 
-		vNormalHeight = vec4(normal, hbt.x);
+		vNormal = normal;
+		vColor = mix(BottomColor, TopColor, hbt.x);
 		gl_Position = viewProjectMatrix * vec4(vertA, 1.0);
 		EmitVertex();
 	
-		vNormalHeight = vec4(normal, hbt.x);
+		vNormal = normal;
+		vColor = mix(BottomColor, TopColor, hbt.x);
 		gl_Position = viewProjectMatrix * vec4(vertB, 1.0);
 		EmitVertex();
-	
-		vNormalHeight = vec4(normal, hbt.y);
+
+		vNormal = normal;
+		vColor = mix(BottomColor, TopColor, hbt.y);
 		gl_Position = viewProjectMatrix * vec4(vertC, 1.0);
 		EmitVertex();
 	
