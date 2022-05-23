@@ -435,8 +435,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	currentQueue->queues[QUEUE_ANIMATE]->draw(scene, camera, render, state);
 
 	// Draw sky
-	if (scene->skyBox)
-		scene->skyBox->draw(render, skyShader, camera);
+	if (scene->skyBox) scene->skyBox->draw(render, skyShader, camera);
 
 	// Debug mode
 	if (cfgs->debug && scene->isInited()) {

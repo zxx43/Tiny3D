@@ -94,7 +94,7 @@ void StaticObject::setRotation(float ax, float ay, float az) {
 void StaticObject::setSize(float sx, float sy, float sz) {
 	size = vec3(sx, sy, sz);
 	updateLocalMatrices();
-	//if (billboard) { // todo in shader
+	//if (billboard) { // do scale in shader
 	//	billboard->data[0] *= size.x;
 	//	billboard->data[1] *= size.y;
 	//}

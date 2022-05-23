@@ -181,7 +181,7 @@ struct RenderBuffer {
 	void setBufferData(GLenum target, uint ind, RenderData* data) {
 		streamDatas[ind] = data;
 		relies[ind] = true;
-		glBindBuffer(target, data->bufferid);
+		if (data) glBindBuffer(target, data->bufferid);
 	}
 	void useAs(uint ind, GLenum target) {
 		if (streamDatas[ind]) streamDatas[ind]->useAs(target);
