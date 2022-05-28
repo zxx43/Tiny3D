@@ -208,7 +208,6 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	static Shader* phongShadowLowShader = render->findShader("phong_sl");
 	static Shader* billShadowInsShader = render->findShader("bill_s_ins");
 	static Shader* billShadowLowShader = render->findShader("bill_sl_ins");
-	static Shader* cullShader = render->findShader("cull");
 
 	state->reset();
 	state->eyePos = &(scene->renderCamera->position);
@@ -225,7 +224,7 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	state->shaderIns = phongShadowInsShader;
 	state->shaderBone = boneShadowShader;
 	state->shaderBill = billShadowInsShader;
-	state->shaderCompute = cullShader;
+	state->shaderCompute = NULL;
 
 	static ushort fn = fln;
 	if (fn % fln != 0) {
@@ -345,7 +344,6 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	static Shader* billInsShader = render->findShader("bill_ins");
 	static Shader* boneShader = render->findShader("bone");
 	static Shader* skyShader = render->findShader("sky");
-	static Shader* cullShader = render->findShader("cull");
 
 	state->reset();
 	state->eyePos = &(scene->renderCamera->position);
@@ -400,7 +398,7 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	state->shaderIns = phongInsShader;
 	state->shaderBone = boneShader;
 	state->shaderBill = billInsShader;
-	state->shaderCompute = cullShader;
+	state->shaderCompute = NULL;
 
 	lodParam.vpMat = camera->viewProjectMatrix;
 	lodParam.eyePos = camera->position;

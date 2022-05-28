@@ -156,7 +156,11 @@ vec4 genShadowFactor(vec4 worldPos, float depthView, float bias) {
 			vec4 far = DepthToLinear(lightViewProjFar, lightProjFar, lightViewFar, camParas[3].x, camParas[3].y, worldPos);
 			vec3 lightPosition = far.xyz / far.w;
 			vec3 shadowCoord = lightPosition * 0.5 + 0.5;
-			float bs = bias * 0.0;
+			#ifndef USE_LINEAR_DEPTH
+				float bs = bias * 1.0;
+			#else
+				float bs = bias * 1.0;
+			#endif
 			float sf = genShadow(shadowBuffers[3], shadowCoord, bs);
 			return vec4(1.0, 1.0, 1.0, sf);
 		}

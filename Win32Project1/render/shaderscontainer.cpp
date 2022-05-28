@@ -9,7 +9,6 @@ using namespace std;
 #define PHONG_VERT "shader/phong.vert"
 #define PHONG_FRAG "shader/phong.frag"
 #define INSTANCE_VERT "shader/instance.vert"
-#define CULL_COMP "shader/cull.comp"
 #define BONE_VERT "shader/bone.vert"
 #define BONE_FRAG "shader/bone.frag"
 #define SKY_VERT "shader/sky.vert"
@@ -272,10 +271,6 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	combinedNFG->setSlot("waterNormalBuffer", 5);
 	combinedNFG->setSlot("waterDepthBuffer", 6);
 	combinedNFG->setSlot("bloomBuffer", 7);
-
-	Shader* cull = shaders->addShader("cull", CULL_COMP);
-	cull->attachDef("Shader", "culling");
-	cull->attachDef("WORKGROUP_SIZE", to_string(WORKGROUPE_SIZE).data());
 
 	Shader* atmos = shaders->addShader("atmos", ATMOS_VERT, ATMOS_FRAG);
 	atmos->attachDef("Shader", "atmos");
