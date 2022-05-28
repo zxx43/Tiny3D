@@ -162,6 +162,8 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 
 	Shader* deferred = shaders->addShader("deferred", POST_VERT, DEFERRED_FRAG);
 	deferred->attachDef("Shader", "deferred");
+	if (cfgs->shadowQuality > 5)
+		deferred->attachDef("DRAW_FAR_SHADOW", "1");
 	if (cfgs->shadowQuality > 0)
 		deferred->attachDef("USE_SHADOW", "1");
 	if (cfgs->cartoon)

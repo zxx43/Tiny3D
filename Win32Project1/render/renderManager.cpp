@@ -9,7 +9,12 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 	float nearSize = 1024;
 	float midSize = 1024;
 	float farSize = 2;
-	if (cfgs->shadowQuality > 4) {
+	if (cfgs->shadowQuality > 5) {
+		nearSize = 4096;
+		midSize = 4096;
+		farSize = 4096;
+		depthPre = FLOAT_PRE;
+	} else if (cfgs->shadowQuality > 4) {
 		nearSize = 4096;
 		midSize = 4096;
 		depthPre = FLOAT_PRE;
@@ -34,7 +39,7 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 	nearDynamicBuffer = new FrameBuffer(nearSize, nearSize, depthPre);
 	nearStaticBuffer = new FrameBuffer(nearSize, nearSize, depthPre);
 	midBuffer = new FrameBuffer(midSize, midSize, depthPre);
-	farBuffer = new FrameBuffer(farSize, farSize, LOW_PRE);
+	farBuffer = new FrameBuffer(farSize, farSize, depthPre);
 
 	lightDir = light.GetNormalized();
 	queue1 = new Renderable(distance1, distance2, cfgs);
@@ -134,6 +139,8 @@ void RenderManager::updateRenderQueues(Scene* scene) {
 
 	PushNodeToQueue(renderData->queues[QUEUE_DYN_SNEAR], scene, scene->root, cameraDyn, cameraMain);
 	PushNodeToQueue(renderData->queues[QUEUE_DYN_SMID], scene, scene->root, cameraMid, cameraMain);
+	if (cfgs->shadowQuality > 5) 
+		PushNodeToQueue(renderData->queues[QUEUE_DYN_SFAR], scene, scene->root, cameraFar, cameraMain);
 	PushNodeToQueue(renderData->queues[QUEUE_DYN_MAIN], scene, scene->root, cameraMain, cameraMain);
 	if (!renderData->queues[QUEUE_STATIC]->staticDataReady())
 		InitNodeToQueue(renderData->queues[QUEUE_STATIC], scene, scene->root);
@@ -210,7 +217,7 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	state->udotl = udotl;
 	state->time = scene->time;
 
-	const static ushort fln = 10, flf = 10;
+	const static ushort fln = 10, flf = 20;
 	Camera* mainCamera = scene->renderCamera;
 
 	state->pass = NEAR_SHADOW_PASS;
@@ -267,38 +274,27 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 		currentQueue->queues[QUEUE_STATIC]->draw(scene, cameraMid, render, state);
 	}
 
-	///*
-	static ushort flushCount = 1;
-	static bool flushed = false;
-	if (!flushed) {
-		if (flushCount % 3 == 0)
-			flushCount = 1;
-		else {
-			if (flushCount % 3 == 1) {
-				render->setFrameBuffer(farBuffer);
-				if (true) {
-					flushed = true;
-					shadow->setFlushFar(false);
-				} else {
-					shadow->setFlushFar(true);
-					Camera* cameraFar = shadow->renderLightCameraFar;
-					state->pass = FAR_SHADOW_PASS;
-					state->shader = phongShadowLowShader;
-					state->shaderBill = billShadowLowShader;
-					lodParam.vpMat = cameraFar->viewProjectMatrix;
-					lodParam.eyePos = mainCamera->position;
-					lodParam.shadowPass = 1;
-					currentQueue->queues[QUEUE_DYN_SFAR]->process(scene, render, state, lodParam);
-					currentQueue->queues[QUEUE_DYN_SFAR]->draw(scene, cameraFar, render, state);
+	if (cfgs->shadowQuality > 5) {
+		static ushort ff = flf;
+		if (ff % flf != 0) {
+			++ff;
+			shadow->setFlushFar(false);
+		} else {
+			ff = 1;
+			shadow->setFlushFar(true);
+			render->setFrameBuffer(farBuffer);
+			Camera* cameraFar = shadow->renderLightCameraFar;
+			state->pass = FAR_SHADOW_PASS;
+			lodParam.vpMat = cameraFar->viewProjectMatrix;
+			lodParam.eyePos = mainCamera->position;
+			lodParam.shadowPass = 1;
+			currentQueue->queues[QUEUE_DYN_SFAR]->process(scene, render, state, lodParam);
+			currentQueue->queues[QUEUE_DYN_SFAR]->draw(scene, cameraFar, render, state);
 
-					currentQueue->queues[QUEUE_STATIC]->process(scene, render, state, lodParam);
-					currentQueue->queues[QUEUE_STATIC]->draw(scene, cameraFar, render, state);
-				}
-			}
-			flushCount++;
+			currentQueue->queues[QUEUE_STATIC]->process(scene, render, state, lodParam);
+			currentQueue->queues[QUEUE_STATIC]->draw(scene, cameraFar, render, state);
 		}
 	}
-	//*/
 }
 
 void RenderManager::drawGrass(Render* render, RenderState* state, Scene* scene, Camera* camera, const vec3& ref) {
