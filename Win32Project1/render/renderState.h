@@ -13,6 +13,7 @@ struct RenderState {
 	bool enableAlphaTest;
 	int alphaTestMode;
 	float alphaThreshold;
+	bool debug;
 	bool lightEffect;
 	bool skyPass;
 	bool atmoPass;
@@ -37,6 +38,7 @@ struct RenderState {
 	vec3* eyePos;
 	Shader* shader;
 	Shader* shaderIns;
+	Shader* shaderBone;
 	Shader* shaderBill;
 	Shader* shaderCompute;
 
@@ -65,6 +67,7 @@ struct RenderState {
 		enableAlphaTest = rhs->enableAlphaTest;
 		alphaTestMode = rhs->alphaTestMode;
 		alphaThreshold = rhs->alphaThreshold;
+		debug = rhs->debug;
 		lightEffect = rhs->lightEffect;
 		skyPass = rhs->skyPass;
 		atmoPass = rhs->atmoPass;
@@ -89,6 +92,7 @@ struct RenderState {
 		eyePos = rhs->eyePos;
 		shader = rhs->shader;
 		shaderIns = rhs->shaderIns;
+		shaderBone = rhs->shaderBone;
 		shaderBill = rhs->shaderBill;
 		shaderCompute = rhs->shaderCompute;
 		mapTrans = rhs->mapTrans;
@@ -104,6 +108,7 @@ struct RenderState {
 		enableAlphaTest = false;
 		alphaTestMode = GREATER;
 		alphaThreshold = 0;
+		debug = false;
 		lightEffect = true;
 		skyPass = false;
 		atmoPass = false;
@@ -125,6 +130,7 @@ struct RenderState {
 		shadow = NULL;
 		shader = NULL;
 		shaderIns = NULL;
+		shaderBone = NULL;
 		shaderBill = NULL;
 		shaderCompute = NULL;
 	}

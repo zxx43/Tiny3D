@@ -26,6 +26,9 @@ Node::Node(const vec3& position,const vec3& size) {
 	type = TYPE_NULL;
 	shadowLevel = 3;
 	detailLevel = 3;
+
+	staticObjects.clear();
+	dynamicObjects.clear();
 }
 
 Node::~Node() {
@@ -44,6 +47,9 @@ Node::~Node() {
 
 	nodeBBs.clear();
 	clearChildren();
+
+	staticObjects.clear();
+	dynamicObjects.clear();
 }
 
 void Node::clearChildren() {
@@ -57,6 +63,12 @@ void Node::clearChildren() {
 
 bool Node::checkInCamera(Camera* camera) {
 	return checkInFrustum(camera->frustum);
+}
+
+bool Node::checkInSphere(Camera* camera) {
+	if (boundingBox)
+		return boundingBox->sphereWithCamera(camera->frustum);
+	return true;
 }
 
 bool Node::checkInFrustum(Frustum* frustum) {
@@ -84,7 +96,7 @@ void Node::updateObjectBoundingInNode(Object* object, bool nodeTransformed) {
 void Node::addObject(Scene* scene, Object* object) {
 	object->parent = this;
 	objects.push_back(object);
-	object->caculateLocalAABB(false, false);
+	object->caculateLocalAABB(true);
 	BoundingBox* objectBB = object->bounding;
 	if (objectBB) {
 		updateObjectBoundingInNode(object);
@@ -99,10 +111,29 @@ void Node::addObject(Scene* scene, Object* object) {
 	}
 	needCreateDrawcall = true;
 	pushToUpdate(scene);
+
+	if (object->isDynamic()) dynamicObjects.push_back(object);
+	else staticObjects.push_back(object);
 }
 
 Object* Node::removeObject(Scene* scene, Object* object) {
 	std::vector<Object*>::iterator it;
+	if (object->isDynamic()) {
+		for (it = dynamicObjects.begin(); it != dynamicObjects.end(); ++it) {
+			if ((*it) == object) {
+				dynamicObjects.erase(it);
+				break;
+			}
+		}
+	} else {
+		for (it = staticObjects.begin(); it != staticObjects.end(); ++it) {
+			if ((*it) == object) {
+				staticObjects.erase(it);
+				break;
+			}
+		}
+	}
+
 	std::vector<BoundingBox*>::iterator itbb;
 	for (it = objects.begin(); it != objects.end(); ++it) {
 		if ((*it) == object) {
@@ -135,6 +166,7 @@ Object* Node::removeObject(Scene* scene, Object* object) {
 			return object;
 		}
 	}
+
 	return NULL;
 }
 
@@ -303,7 +335,7 @@ void Node::translateNode(Scene* scene, float x, float y, float z) {
 void Node::translateNodeObject(Scene* scene, int i, float x, float y, float z) {
 	Object* object = objects[i];
 	object->setPosition(x, y, z);
-	object->caculateLocalAABB(false, false);
+	object->caculateLocalAABB(false);
 
 	updateObjectBoundingInNode(object);
 	boundingBox->merge(objectsBBs);
@@ -328,7 +360,7 @@ void Node::translateNodeObjectCenterAtWorld(Scene* scene, int i, float x, float 
 void Node::rotateNodeObject(Scene* scene, int i, float ax, float ay, float az) {
 	Object* object = objects[i];
 	object->setRotation(ax,ay,az);
-	object->caculateLocalAABB(false, false);
+	object->caculateLocalAABBFast(true);
 
 	updateObjectBoundingInNode(object);
 	boundingBox->merge(objectsBBs);
@@ -345,7 +377,7 @@ void Node::rotateNodeObject(Scene* scene, int i, float ax, float ay, float az) {
 void Node::scaleNodeObject(Scene* scene, int i, float sx, float sy, float sz) {
 	Object* object = objects[i];
 	object->setSize(sx, sy, sz);
-	object->caculateLocalAABB(false, false);
+	object->caculateLocalAABBFast(true);
 
 	updateObjectBoundingInNode(object);
 	boundingBox->merge(objectsBBs);

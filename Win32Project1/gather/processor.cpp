@@ -43,6 +43,8 @@ Processor::Processor(const MeshGather* meshs, const MeshBuffer* meshVBs, const O
 	buffer->setAttribData(GL_SHADER_STORAGE_BUFFER, Processor::OutputSingle, MeshBuffer::OutputSlot, GL_FLOAT, objectDB->maxSingleSize, 4, 4, false, GL_STREAM_DRAW, 1, NULL);
 	buffer->setAttribData(GL_SHADER_STORAGE_BUFFER, Processor::OutputBillbd, MeshBuffer::OutputSlot, GL_FLOAT, objectDB->maxBillbdSize, 4, 4, false, GL_STREAM_DRAW, 1, NULL);
 	buffer->setAttribData(GL_SHADER_STORAGE_BUFFER, Processor::OutputAnimat, MeshBuffer::OutputSlot, GL_FLOAT, objectDB->maxAnimatSize, 4, 4, false, GL_STREAM_DRAW, 1, NULL);
+
+	inputPushed = false;
 }
 
 Processor::~Processor() {
@@ -62,7 +64,7 @@ void Processor::clear(Render* render) {
 	render->useShader(shader);
 	render->setShaderUVec4(shader, "uMeshCounts", indNormalCount, indSingleCount, indBillbdCount, indAnimatCount);
 	glDispatchCompute(meshDB->maxSubCount, 1, 1);
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT);
 }
 
 void Processor::lod(Render* render, const RenderState* state, const LodParam& param) {
@@ -75,11 +77,13 @@ void Processor::lod(Render* render, const RenderState* state, const LodParam& pa
 	buffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, LodDataIndex, 5);
 
 	render->useShader(shader);
-	render->useTexture(TEXTURE_2D, 0, param.depthTex);
-	render->setShaderMat4(shader, "viewProjectMatrix", param.vpMat);
+	render->setShaderMat4(shader, "viewProjectMatrix", param.vpMat); // frustum culling param
+	// lod param
 	render->setShaderVec2v(shader, "uDist", param.lodDist);
 	render->setShaderVec3v(shader, "eyePos", param.eyePos);
-	if (!state->isShadowPass()) {
+	render->setShaderInt(shader, "uShadowPass", param.shadowPass);
+	if (!state->isShadowPass()) { // occlusion culling param
+		render->useTexture(TEXTURE_2D, 0, param.depthTex);
 		render->setShaderMat4(shader, "prevVPMatrix", param.prevMat);
 		render->setShaderVec2v(shader, "uSize", param.size);
 		render->setShaderVec2v(shader, "uCamParam", param.camParam);
@@ -126,9 +130,10 @@ void Processor::gather(Render* render) {
 
 void Processor::update() {
 	inputObjectCount = objectDB->inObjectCount;
-	if (inputObjectCount > 0) buffer->updateBufferData(InputDataIndex, objectDB->inObjectCount, objectDB->inObjectBuffer);
-	//buffer->updateBufferMap(GL_SHADER_STORAGE_BUFFER, InputDataIndex, objectDB->inObjectCount, objectDB->inObjectBuffer);
-	if (buffer->streamDatas[InputDataIndex]->bufferid == 0) printf("error buffer\n");
+	if (inputObjectCount > 0) {
+		buffer->updateBufferData(InputDataIndex, objectDB->inObjectCount, objectDB->inObjectBuffer);
+		inputPushed = true;
+	}
 }
 
 void Processor::showLog() {
@@ -137,4 +142,5 @@ void Processor::showLog() {
 	printf("indSingleCount %d\n", indSingleCount);
 	printf("indBillbdCount %d\n", indBillbdCount);
 	printf("indAnimatCount %d\n\n", indAnimatCount);
+	if (buffer->streamDatas[InputDataIndex]->bufferid == 0) printf("error buffer\n");
 }

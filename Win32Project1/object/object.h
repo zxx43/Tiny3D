@@ -22,7 +22,6 @@
 #endif
 
 class Node;
-
 class Object {
 public:
 	Node* parent;
@@ -43,6 +42,7 @@ public:
 	float* transforms; // Global translate used in GPU
 	buff* transformsFull; // Global transform used in GPU (translate, quat, bounding)
 	BoundingBox* bounding; // Bounding box in world space
+	BoxInfo* baseBounding; // Bounding info with scale and rotate
 	vec3 boundCenter; // Bounding center in model space
 	vec3 localBoundPosition; // Bounding position in node
 	bool genShadow;
@@ -61,7 +61,8 @@ public:
 	Object(const Object& rhs);
 	virtual ~Object();
 	virtual Object* clone()=0;
-	void caculateLocalAABB(bool looseWidth,bool looseAll);
+	void caculateLocalAABB(bool hasRotateScale);
+	void caculateLocalAABBFast(bool hasRotateScale);
 	void caculateCollisionShape(); // Caculate collision obb
 	CollisionObject* initCollisionObject();
 	void setShapeOffset(const vec3& off) { shapeOffset = off; }

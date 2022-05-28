@@ -114,7 +114,7 @@ void Application::swapData(bool swapQueue) {
 }
 
 void Application::animate(float velocity) {
-	renderMgr->animateQueues(velocity);
+	
 }
 
 void Application::resize(int width, int height) {

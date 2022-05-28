@@ -219,8 +219,8 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 	Shader* shader = state->shader;
 	if (drawcall->getType() == INSTANCE_DC || drawcall->getType() == MULTI_DC)
 		shader = state->shaderIns;
-	else if (drawcall->getType() == ANIMATE_DC) 
-		shader->setHandle64v("boneTex", AssetManager::assetManager->frames->animCount, AssetManager::assetManager->frames->datas);
+	else if (drawcall->getType() == ANIMATE_DC)
+		shader = state->shaderBone;
 	
 	if (camera) {
 		if (state->pass < DEFERRED_PASS) {

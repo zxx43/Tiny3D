@@ -18,6 +18,7 @@ Mesh::Mesh() {
 	isBillboard = false;
 	drawShadow = true;
 	bounding = NULL;
+	boundBox = NULL;
 
 	singleFaces.clear();
 	normalFaces.clear();
@@ -28,6 +29,7 @@ Mesh::Mesh() {
 Mesh::Mesh(const Mesh& rhs) {
 	isBillboard = rhs.isBillboard;
 	boundScale = rhs.boundScale;
+	boundBox = rhs.boundBox ? rhs.boundBox->clone() : NULL;
 
 	for (uint i = 0; i < rhs.singleFaces.size(); i++)
 		singleFaces.push_back(rhs.singleFaces[i]->copy());
@@ -45,6 +47,7 @@ Mesh::~Mesh() {
 	if (materialids) delete[] materialids;
 	if (indices) free(indices);
 	if (bounding) free(bounding);
+	if (boundBox) delete boundBox;
 	vertices = NULL;
 	vertices3 = NULL;
 	normals = NULL;
@@ -54,6 +57,7 @@ Mesh::~Mesh() {
 	materialids = NULL;
 	indices = NULL;
 	bounding = NULL;
+	boundBox = NULL;
 
 	clearFaceBuf();
 }
@@ -96,6 +100,9 @@ void Mesh::caculateBounding() {
 	bounding[3] = bbox.sizex * 0.5;
 	bounding[4] = bbox.sizey * 0.5;
 	bounding[5] = bbox.sizez * 0.5;
+
+	if (!boundBox) boundBox = new BoxInfo(minVertex, maxVertex);
+	else boundBox->update(minVertex, maxVertex);
 }
 
 void Mesh::clearFaceBuf() {

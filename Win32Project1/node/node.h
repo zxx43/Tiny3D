@@ -26,6 +26,9 @@ public:
 	static std::vector<Node*> nodesToUpdate;
 	static std::vector<Node*> nodesToRemove;
 public:
+	std::vector<Object*> staticObjects;
+	std::vector<Object*> dynamicObjects;
+public:
 	void updateObjectBoundingInNode(Object* object, bool nodeTransformed = false);
 private:
 	void updateBaseNodeBounding();
@@ -58,6 +61,7 @@ public:
 	Node(const vec3& position,const vec3& size);
 	virtual ~Node();
 	bool checkInCamera(Camera* camera);
+	bool checkInSphere(Camera* camera);
 	bool checkInFrustum(Frustum* frustum);
 	virtual void prepareDrawcall() = 0;
 	virtual void updateRenderData() = 0;

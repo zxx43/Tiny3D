@@ -299,9 +299,16 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	brdf->attachDef("Shader", "brdf");
 
 	Shader* clear = shaders->addShader("clearProcessor", CLEAR_COMP);
+	clear->attachDef("Shader", "clear");
+
 	Shader* lod = shaders->addShader("lodProcessor", LOD_COMP);
+	lod->attachDef("Shader", "lod");
+
 	Shader* rearrange = shaders->addShader("rearrangeProcessor", REARRANGE_COMP);
+	rearrange->attachDef("Shader", "rearrange");
+	
 	Shader* gather = shaders->addShader("gatherProcessor", GATHER_COMP);
+	gather->attachDef("Shader", "gather");
 
 	shaders->compile();
 }

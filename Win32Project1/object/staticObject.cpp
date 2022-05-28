@@ -25,12 +25,8 @@ StaticObject::StaticObject(const StaticObject& rhs) :Object(rhs) {
 	mesh = rhs.mesh;
 	meshMid = rhs.meshMid;
 	meshLow = rhs.meshLow;
-	if (rhs.bounding)
-		bounding = rhs.bounding->clone();
-	else
-		bounding = NULL;
-	positionBefore = rhs.positionBefore;
 
+	positionBefore = rhs.positionBefore;
 	position = rhs.position;
 	size = rhs.size;
 	localTransformMatrix = rhs.localTransformMatrix;

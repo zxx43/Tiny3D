@@ -22,13 +22,9 @@ struct Renderable {
 		for (uint i = 0; i < QUEUE_SIZE; i++) 
 			queues.push_back(new RenderQueue(i, midDis, lowDis, cfg));
 
-		queues[QUEUE_DYNAMIC_SN]->shadowLevel = 1;
-		queues[QUEUE_STATIC_SN]->shadowLevel = 1;
-		queues[QUEUE_STATIC_SM]->shadowLevel = 2;
-		queues[QUEUE_STATIC_SF]->shadowLevel = 3;
-		queues[QUEUE_ANIMATE_SN]->shadowLevel = 1;
-		queues[QUEUE_ANIMATE_SM]->shadowLevel = 2;
-		queues[QUEUE_ANIMATE_SF]->shadowLevel = 3;
+		queues[QUEUE_DYN_SNEAR]->shadowLevel = 1;
+		queues[QUEUE_DYN_SMID]->shadowLevel = 2;
+		queues[QUEUE_DYN_SFAR]->shadowLevel = 3;
 	}
 	~Renderable() {
 		for (uint i = 0; i < queues.size(); i++)
@@ -84,7 +80,6 @@ public:
 	void updateSky();
 	void flushRenderQueues(Scene* scene);
 	void updateRenderQueues(Scene* scene);
-	void animateQueues(float velocity);
 	void swapRenderQueues(Scene* scene, bool swapQueue);
 	void prepareData(Scene* scene);
 	void updateDebugData(Scene* scene);

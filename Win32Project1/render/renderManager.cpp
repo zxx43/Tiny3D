@@ -12,22 +12,18 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 	if (cfgs->shadowQuality > 4) {
 		nearSize = 4096;
 		midSize = 4096;
-		farSize = 2;
 		depthPre = FLOAT_PRE;
 	} else if (cfgs->shadowQuality > 3) {
 		nearSize = 2048;
 		midSize = 2048;
-		farSize = 2;
 		depthPre = FLOAT_PRE;
 	} else if (cfgs->shadowQuality > 2) {
 		nearSize = 2048;
 		midSize = 2048;
-		farSize = 2;
 		depthPre = HIGH_PRE;
 	} else if (cfgs->shadowQuality > 1) {
 		nearSize = 1024;
 		midSize = 1024;
-		farSize = 2;
 		depthPre = HIGH_PRE;
 	}
 	shadow = new Shadow(scene->actCamera, nearSize, midSize, farSize);
@@ -132,29 +128,17 @@ void RenderManager::updateRenderQueues(Scene* scene) {
 	if (!renderData) return;
 
 	Camera* cameraDyn = shadow->actLightCameraDyn;
-	Camera* cameraNear = shadow->actLightCameraNear;
 	Camera* cameraMid = shadow->actLightCameraMid;
 	Camera* cameraFar = shadow->actLightCameraFar;
 	Camera* cameraMain = scene->actCamera;
 
-	PushNodeToQueue(renderData->queues[QUEUE_DYNAMIC_SN], scene, scene->staticRoot, cameraDyn, cameraMain);
-	PushNodeToQueue(renderData->queues[QUEUE_STATIC_SN], scene, scene->staticRoot, cameraNear, cameraMain);
-	PushNodeToQueue(renderData->queues[QUEUE_STATIC_SM], scene, scene->staticRoot, cameraMid, cameraMain);
-	//PushNodeToQueue(renderData->queues[QUEUE_STATIC_SF], scene, scene->staticRoot, cameraFar, cameraMain);
-	PushNodeToQueue(renderData->queues[QUEUE_STATIC], scene, scene->staticRoot, cameraMain, cameraMain);
-	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE_SN], scene, scene->animationRoot, cameraDyn, cameraMain);
-	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE_SM], scene, scene->animationRoot, cameraMid, cameraMain);
-	//PushNodeToQueue(renderData->queues[QUEUE_ANIMATE_SF], scene, scene->animationRoot, cameraFar, cameraMain);
-	PushNodeToQueue(renderData->queues[QUEUE_ANIMATE], scene, scene->animationRoot, cameraMain, cameraMain);
+	PushNodeToQueue(renderData->queues[QUEUE_DYN_SNEAR], scene, scene->root, cameraDyn, cameraMain);
+	PushNodeToQueue(renderData->queues[QUEUE_DYN_SMID], scene, scene->root, cameraMid, cameraMain);
+	PushNodeToQueue(renderData->queues[QUEUE_DYN_MAIN], scene, scene->root, cameraMain, cameraMain);
+	if (!renderData->queues[QUEUE_STATIC]->staticDataReady())
+		InitNodeToQueue(renderData->queues[QUEUE_STATIC], scene, scene->root);
 	
 	if (cfgs->debug && scene->isInited()) PushDebugToQueue(debugQueue, scene, cameraMain);
-}
-
-void RenderManager::animateQueues(float velocity) {
-	currentQueue->queues[QUEUE_ANIMATE_SN]->animate(velocity);
-	currentQueue->queues[QUEUE_ANIMATE_SM]->animate(velocity);
-	currentQueue->queues[QUEUE_ANIMATE_SF]->animate(velocity);
-	currentQueue->queues[QUEUE_ANIMATE]->animate(velocity);
 }
 
 void RenderManager::swapRenderQueues(Scene* scene, bool swapQueue) {
@@ -186,8 +170,7 @@ void RenderManager::updateDebugData(Scene* scene) {
 	if (cfgs->debug && scene->isInited()) {
 		scene->updateNodeAABB(scene->water);
 		scene->updateNodeAABB(scene->terrainNode);
-		scene->updateNodeAABB(scene->staticRoot);
-		scene->updateNodeAABB(scene->animationRoot);
+		scene->updateNodeAABB(scene->root);
 		if (!scene->debugMeshGather) {
 			scene->createDebugGather();
 		}
@@ -205,6 +188,10 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 		render->setFrameBuffer(nearDynamicBuffer);
 		render->setFrameBuffer(midBuffer);
 		render->setFrameBuffer(farBuffer);
+		shadow->setFlushDyn(false);
+		shadow->setFlushNear(false);
+		shadow->setFlushMid(false);
+		shadow->setFlushFar(false);
 		return;
 	}
 
@@ -229,6 +216,7 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	state->pass = NEAR_SHADOW_PASS;
 	state->shader = phongShadowShader;
 	state->shaderIns = phongShadowInsShader;
+	state->shaderBone = boneShadowShader;
 	state->shaderBill = billShadowInsShader;
 	state->shaderCompute = cullShader;
 
@@ -243,9 +231,10 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 		Camera* cameraNear = shadow->renderLightCameraNear;
 		state->dynPass = false;
 		lodParam.vpMat = cameraNear->viewProjectMatrix;
-		lodParam.eyePos = cameraNear->position;
-		currentQueue->queues[QUEUE_STATIC_SN]->process(scene, render, state, lodParam);
-		currentQueue->queues[QUEUE_STATIC_SN]->draw(scene, cameraNear, render, state);
+		lodParam.eyePos = mainCamera->position;
+		lodParam.shadowPass = 1;
+		currentQueue->queues[QUEUE_STATIC]->process(scene, render, state, lodParam);
+		currentQueue->queues[QUEUE_STATIC]->draw(scene, cameraNear, render, state);
 	}
 	
 	shadow->setFlushDyn(true);
@@ -253,12 +242,10 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 	Camera* cameraDyn=shadow->renderLightCameraDyn;
 	state->dynPass = true;
 	lodParam.vpMat = cameraDyn->viewProjectMatrix;
-	lodParam.eyePos = cameraDyn->position;
-	currentQueue->queues[QUEUE_DYNAMIC_SN]->process(scene, render, state, lodParam);
-	currentQueue->queues[QUEUE_DYNAMIC_SN]->draw(scene, cameraDyn, render, state);
-	state->shader = boneShadowShader;
-	currentQueue->queues[QUEUE_ANIMATE_SN]->process(scene, render, state, lodParam);
-	currentQueue->queues[QUEUE_ANIMATE_SN]->draw(scene, cameraDyn, render, state);
+	lodParam.eyePos = mainCamera->position;
+	lodParam.shadowPass = 1;
+	currentQueue->queues[QUEUE_DYN_SNEAR]->process(scene, render, state, lodParam);
+	currentQueue->queues[QUEUE_DYN_SNEAR]->draw(scene, cameraDyn, render, state);
 
 	static ushort fm = flf;
 	if (fm % flf != 0) {
@@ -270,14 +257,14 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 		render->setFrameBuffer(midBuffer);
 		Camera* cameraMid = shadow->renderLightCameraMid;
 		state->pass = MID_SHADOW_PASS;
-		state->shader = phongShadowShader;
 		lodParam.vpMat = cameraMid->viewProjectMatrix;
-		lodParam.eyePos = cameraMid->position;
-		currentQueue->queues[QUEUE_STATIC_SM]->process(scene, render, state, lodParam);
-		currentQueue->queues[QUEUE_STATIC_SM]->draw(scene, cameraMid, render, state);
-		state->shader = boneShadowShader;
-		currentQueue->queues[QUEUE_ANIMATE_SM]->process(scene, render, state, lodParam);
-		currentQueue->queues[QUEUE_ANIMATE_SM]->draw(scene, cameraMid, render, state);
+		lodParam.eyePos = mainCamera->position;
+		lodParam.shadowPass = 1;
+		currentQueue->queues[QUEUE_DYN_SMID]->process(scene, render, state, lodParam);
+		currentQueue->queues[QUEUE_DYN_SMID]->draw(scene, cameraMid, render, state);
+
+		currentQueue->queues[QUEUE_STATIC]->process(scene, render, state, lodParam);
+		currentQueue->queues[QUEUE_STATIC]->draw(scene, cameraMid, render, state);
 	}
 
 	///*
@@ -293,18 +280,19 @@ void RenderManager::renderShadow(Render* render, Scene* scene) {
 					flushed = true;
 					shadow->setFlushFar(false);
 				} else {
+					shadow->setFlushFar(true);
 					Camera* cameraFar = shadow->renderLightCameraFar;
 					state->pass = FAR_SHADOW_PASS;
 					state->shader = phongShadowLowShader;
-					state->shaderIns = phongShadowInsShader;
 					state->shaderBill = billShadowLowShader;
 					lodParam.vpMat = cameraFar->viewProjectMatrix;
-					lodParam.eyePos = cameraFar->position;
-					currentQueue->queues[QUEUE_STATIC_SF]->process(scene, render, state, lodParam);
-					currentQueue->queues[QUEUE_STATIC_SF]->draw(scene, cameraFar, render, state);
-					state->shader = boneShadowShader;
-					currentQueue->queues[QUEUE_ANIMATE_SF]->process(scene, render, state, lodParam);
-					currentQueue->queues[QUEUE_ANIMATE_SF]->draw(scene, cameraFar, render, state);
+					lodParam.eyePos = mainCamera->position;
+					lodParam.shadowPass = 1;
+					currentQueue->queues[QUEUE_DYN_SFAR]->process(scene, render, state, lodParam);
+					currentQueue->queues[QUEUE_DYN_SFAR]->draw(scene, cameraFar, render, state);
+
+					currentQueue->queues[QUEUE_STATIC]->process(scene, render, state, lodParam);
+					currentQueue->queues[QUEUE_STATIC]->draw(scene, cameraFar, render, state);
 				}
 			}
 			flushCount++;
@@ -414,11 +402,13 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 
 	state->shader = phongShader;
 	state->shaderIns = phongInsShader;
+	state->shaderBone = boneShader;
 	state->shaderBill = billInsShader;
 	state->shaderCompute = cullShader;
 
 	lodParam.vpMat = camera->viewProjectMatrix;
 	lodParam.eyePos = camera->position;
+	lodParam.shadowPass = 0;
 	lodParam.prevMat = prevCameraMat;
 	lodParam.maxLevel = hiz->getMaxLevel();
 	lodParam.size.x = render->viewWidth;
@@ -426,37 +416,21 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	lodParam.camParam.x = camera->zNear;
 	lodParam.camParam.y = camera->zFar;
 	lodParam.depthTex = hizDepth->id;
+	currentQueue->queues[QUEUE_DYN_MAIN]->process(scene, render, state, lodParam);
+	currentQueue->queues[QUEUE_DYN_MAIN]->draw(scene, camera, render, state);
+
 	currentQueue->queues[QUEUE_STATIC]->process(scene, render, state, lodParam);
 	currentQueue->queues[QUEUE_STATIC]->draw(scene, camera, render, state);
 
-	state->shader = boneShader;
-
-	currentQueue->queues[QUEUE_ANIMATE]->process(scene, render, state, lodParam);
-	currentQueue->queues[QUEUE_ANIMATE]->draw(scene, camera, render, state);
-
-	// Draw sky
-	if (scene->skyBox) scene->skyBox->draw(render, skyShader, camera);
-
 	// Debug mode
 	if (cfgs->debug && scene->isInited()) {
-		state->shader = phongShader;
-
-		state->enableCull = false;
-		state->drawLine = true;
-		state->enableAlphaTest = false;
-
-		lodParam.vpMat = camera->viewProjectMatrix;
-		lodParam.eyePos = camera->position;
-		lodParam.prevMat = prevCameraMat;
-		lodParam.maxLevel = hiz->getMaxLevel();
-		lodParam.size.x = render->viewWidth;
-		lodParam.size.y = render->viewHeight;
-		lodParam.camParam.x = camera->zNear;
-		lodParam.camParam.y = camera->zFar;
-		lodParam.depthTex = hizDepth->id;
+		state->debug = true;
 		debugQueue->process(scene, render, state, lodParam);
 		debugQueue->draw(scene, camera, render, state);
 	}
+
+	// Draw sky
+	if (scene->skyBox) scene->skyBox->draw(render, skyShader, camera);
 
 	scene->flushNodes();
 	if (needResize) needResize = false;

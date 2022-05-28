@@ -35,8 +35,8 @@ public:
 	Sky* skyBox;
 	WaterNode* water;
 	TerrainNode* terrainNode;
+	Node* root;
 	Node* staticRoot;
-	Node* billboardRoot;
 	Node* animationRoot;
 	Node* noise3d;
 	Player* player;

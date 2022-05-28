@@ -28,8 +28,8 @@ Scene::Scene() {
 	textureNode = NULL;
 	noise3d = NULL;
 	
+	root = NULL;
 	staticRoot = NULL;
-	billboardRoot = NULL;
 	animationRoot = NULL;
 	initNodes();
 	boundingNodes.clear();
@@ -60,9 +60,11 @@ Scene::~Scene() {
 	if (terrainNode) delete terrainNode; terrainNode = NULL;
 	if (textureNode) delete textureNode; textureNode = NULL;
 	if (noise3d) delete noise3d; noise3d = NULL;
-	if (staticRoot) delete staticRoot; staticRoot = NULL;
-	if (billboardRoot) delete billboardRoot; billboardRoot = NULL;
-	if (animationRoot) delete animationRoot; animationRoot = NULL;
+	if (root) {
+		delete root; 
+		staticRoot = NULL, animationRoot = NULL;
+		root = NULL;
+	}
 	clearAllAABB();
 	animPlayers.clear();
 	animationNodes.clear();
@@ -120,8 +122,10 @@ void Scene::createDebugBuffer() {
 
 void Scene::initNodes() {
 	staticRoot = new StaticNode(vec3(0, 0, 0));
-	billboardRoot = new StaticNode(vec3(0, 0, 0));
 	animationRoot = new StaticNode(vec3(0, 0, 0));
+	root = new StaticNode(vec3(0, 0, 0));
+	root->attachChild(this, staticRoot);
+	root->attachChild(this, animationRoot);
 }
 
 void Scene::updateNodes() {
@@ -203,9 +207,8 @@ void Scene::updateAABBMesh(AABB* aabb, const char* mat, const char* mesh) {
 		aabb->debugNode->addObject(this, aabbObject);
 		boundingNodes.push_back(aabb->debugNode);
 	}
+	aabb->debugNode->scaleNodeObject(this, 0, aabb->sizex, aabb->sizey, aabb->sizez);
 	aabb->debugNode->translateNode(this, aabb->position.x, aabb->position.y, aabb->position.z);
-	aabb->debugNode->objects[0]->setSize(aabb->sizex, aabb->sizey, aabb->sizez);
-	aabb->debugNode->updateNode(this);
 }
 
 void Scene::updateAABBWater(AABB* aabb, const char* mat, const vec3& exTrans, const vec3& exScale) {
@@ -219,9 +222,8 @@ void Scene::updateAABBWater(AABB* aabb, const char* mat, const vec3& exTrans, co
 		aabb->debugNode->addObject(this, aabbObject);
 		boundingNodes.push_back(aabb->debugNode);
 	}
+	aabb->debugNode->scaleNodeObject(this, 0, aabb->sizex * exScale.x, aabb->sizey * exScale.y, aabb->sizez * exScale.z);
 	aabb->debugNode->translateNode(this, aabb->position.x + exTrans.x, aabb->position.y + exTrans.y, aabb->position.z + exTrans.z);
-	aabb->debugNode->objects[0]->setSize(aabb->sizex * exScale.x, aabb->sizey * exScale.y, aabb->sizez * exScale.z);
-	aabb->debugNode->updateNode(this);
 }
 
 void Scene::updateNodeAABB(Node* node) {
@@ -246,9 +248,12 @@ void Scene::updateNodeAABB(Node* node) {
 		if (node->type == TYPE_ANIMATE) {
 			AABB* aabb = (AABB*)node->boundingBox;
 			if (aabb) updateAABBMesh(aabb, RED_MAT, "box");
+		} else {
+			AABB* aabb = (AABB*)node->boundingBox;
+			if (aabb) updateAABBMesh(aabb, BLUE_MAT, "box");
 		}
 
-		for (uint i = 0; i < node->children.size(); i++)
+		for (uint i = 0; i < node->children.size(); i++) 
 			updateNodeAABB(node->children[i]);
 
 		if (node->children.size() == 0) {

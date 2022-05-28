@@ -32,6 +32,7 @@ uniform vec2 uCamParam;
 uniform float uMaxLevel;
 uniform vec2 uDist;
 uniform vec3 eyePos;
+uniform int uShadowPass;
 
 Bounding GetBound(GroupObject ins, vec3 translate) {
 	vec4 bound = ins.bound;
@@ -64,8 +65,11 @@ bool FrustumCull(Bounding ins) {
 }
 
 bool OccQuery(Bounding ins) {
-	return HizQuery(prevVPMatrix, texDepth, uSize, uCamParam, uMaxLevel, 
-		ins.bv[0], ins.bv[1], ins.bv[2], ins.bv[3], ins.bv[4], ins.bv[5], ins.bv[6], ins.bv[7], 0.01);
+	if (uShadowPass > 0) return false;
+	else {
+		return HizQuery(prevVPMatrix, texDepth, uSize, uCamParam, uMaxLevel, 
+			ins.bv[0], ins.bv[1], ins.bv[2], ins.bv[3], ins.bv[4], ins.bv[5], ins.bv[6], ins.bv[7], 0.01);
+	}
 };
 
 void main() {
@@ -80,53 +84,48 @@ void main() {
 	int animatMid = -1;
 	
 	Bounding bound = GetBound(object, objPos);
-	if(!FrustumCull(bound)) {
-		#ifndef ShadowPass
-		if(!OccQuery(bound)) 
-		#endif
-		{
-			float dist = distance(objPos, eyePos);
-			if(dist < uDist.x) {
-				normalMid = group.normalMeshs.x;
-				singleMid = group.singleMeshs.x;
-			} else if(dist < uDist.y) {
-				normalMid = group.normalMeshs.y;
-				singleMid = group.singleMeshs.y;
-			} else {
-				billbdMid = group.singleMeshs.w;
-				if(!MidValid(billbdMid)) {
-					normalMid = group.normalMeshs.z;
-					singleMid = group.singleMeshs.z;
-				}
+	if(!FrustumCull(bound) && !OccQuery(bound)) {
+		float dist = distance(objPos, eyePos);
+		if(dist < uDist.x) {
+			normalMid = group.normalMeshs.x;
+			singleMid = group.singleMeshs.x;
+		} else if(dist < uDist.y) {
+			normalMid = group.normalMeshs.y;
+			singleMid = group.singleMeshs.y;
+		} else {
+			billbdMid = group.singleMeshs.w;
+			if(!MidValid(billbdMid)) {
+				normalMid = group.normalMeshs.z;
+				singleMid = group.singleMeshs.z;
 			}
-			animatMid = group.normalMeshs.w;
+		}
+		animatMid = group.normalMeshs.w;
 				
-			if(MidValid(normalMid) || MidValid(singleMid) || MidValid(billbdMid)) {
-				uint addIndex = atomicAdd(dispIndirect.numx, 1);
-				lodObjects[addIndex].position = object.trans.xyz;
-				lodObjects[addIndex].billid = GetBillid(object);
-				lodObjects[addIndex].quat = DecodeQuat(object.rotat);
-				lodObjects[addIndex].scale = vec3(GetScaleMain(object), GetScaleOther(object));
-				lodObjects[addIndex].mtl = GetMtl(object);
-				lodObjects[addIndex].bound = object.bound;
-				lodObjects[addIndex].meshid = vec4(ivec4(normalMid, singleMid, billbdMid, animatMid));
+		if(MidValid(normalMid) || MidValid(singleMid) || MidValid(billbdMid)) {
+			uint addIndex = atomicAdd(dispIndirect.numx, 1);
+			lodObjects[addIndex].position = object.trans.xyz;
+			lodObjects[addIndex].billid = GetBillid(object);
+			lodObjects[addIndex].quat = DecodeQuat(object.rotat);
+			lodObjects[addIndex].scale = vec3(GetScaleMain(object), GetScaleOther(object));
+			lodObjects[addIndex].mtl = GetMtl(object);
+			lodObjects[addIndex].bound = object.bound;
+			lodObjects[addIndex].meshid = vec4(ivec4(normalMid, singleMid, billbdMid, animatMid));
 					
-				if(MidValid(normalMid)) atomicAdd(countBuff[normalMid].x, 1);
-				if(MidValid(singleMid)) atomicAdd(countBuff[singleMid].y, 1);
-				if(MidValid(billbdMid)) atomicAdd(countBuff[billbdMid].z, 1);
-			} else if(MidValid(animatMid)) {
-				uint addIndex = atomicAdd(dispIndirect.numx, 1);
-				lodObjects[addIndex].position = object.trans.xyz;
-				lodObjects[addIndex].quat = DecodeQuat(object.rotat);
-				vec3 scale = UniformScale(object) ? vec3(GetScaleMain(object)) : UnpackFloat2Vec(GetScaleMain(object));
-				lodObjects[addIndex].scale = scale;
-				lodObjects[addIndex].mtl = GetMtl(object);
-				lodObjects[addIndex].bound = object.bound;
-				vec2 animInfo = GetAnimInfo(object);
-				lodObjects[addIndex].meshid = vec4(animInfo, float(billbdMid), float(animatMid));
+			if(MidValid(normalMid)) atomicAdd(countBuff[normalMid].x, 1);
+			if(MidValid(singleMid)) atomicAdd(countBuff[singleMid].y, 1);
+			if(MidValid(billbdMid)) atomicAdd(countBuff[billbdMid].z, 1);
+		} else if(MidValid(animatMid)) {
+			uint addIndex = atomicAdd(dispIndirect.numx, 1);
+			lodObjects[addIndex].position = object.trans.xyz;
+			lodObjects[addIndex].quat = DecodeQuat(object.rotat);
+			vec3 scale = UniformScale(object) ? vec3(GetScaleMain(object)) : UnpackFloat2Vec(GetScaleMain(object));
+			lodObjects[addIndex].scale = scale;
+			lodObjects[addIndex].mtl = GetMtl(object);
+			lodObjects[addIndex].bound = object.bound;
+			vec2 animInfo = GetAnimInfo(object);
+			lodObjects[addIndex].meshid = vec4(animInfo, float(billbdMid), float(animatMid));
 					
-				atomicAdd(countBuff[animatMid].w, 1);
-			}
+			atomicAdd(countBuff[animatMid].w, 1);
 		}
 	}
 }

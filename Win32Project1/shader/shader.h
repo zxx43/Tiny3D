@@ -35,6 +35,12 @@ public:
 		else 
 			return it->second; 
 	}
+	bool isTexBinded(u64* texhnds, uint count) {
+		for (uint i = 0; i < count; ++i) {
+			if (!isTexBinded(texhnds[i])) return false;
+		}
+		return true;
+	}
 	void rebindTex(u64 texhnd) { bindedTexs[texhnd] = false; }
 	void setSlot(const std::string& texName, int slot) { texSlots[slot] = texName; }
 	bool hasSlot(int slot) { return texSlots.find(slot) != texSlots.end(); }

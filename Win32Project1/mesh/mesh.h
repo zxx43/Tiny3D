@@ -20,6 +20,7 @@ struct FaceBuf {
 	}
 };
 
+struct BoxInfo;
 class Mesh {
 private:
 	virtual void initFaces()=0;
@@ -37,6 +38,7 @@ public:
 	int* indices;
 	bool isBillboard, drawShadow;
 	float* bounding;
+	BoxInfo* boundBox;
 	std::vector<FaceBuf*> singleFaces;
 	std::vector<FaceBuf*> normalFaces;
 public:

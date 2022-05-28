@@ -109,6 +109,11 @@ public:
 	VECTOR3D operator*(const float rhs) const
 	{	return VECTOR3D(x*rhs, y*rhs, z*rhs);	}
 	
+	VECTOR3D operator*(const VECTOR3D & rhs) const
+	{
+		return VECTOR3D(x * rhs.x, y * rhs.y, z * rhs.z);
+	}
+
 	VECTOR3D operator/(const float rhs) const
 	{	return (rhs==0.0f) ? VECTOR3D(0.0f, 0.0f, 0.0f) : VECTOR3D(x / rhs, y / rhs, z / rhs);	}
 

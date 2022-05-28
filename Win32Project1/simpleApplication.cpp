@@ -333,6 +333,14 @@ void SimpleApplication::act(long startTime, long currentTime, float dTime, float
 	float rsin = sinf(radian);
 	animNode->translateNode(scene, animNode->position.x + 0.04 * rsin, animNode->position.y, animNode->position.z + 0.04 * rcos);
 
+	//Node* n = scene->staticRoot->children[1];
+	//for (int i = 0; i < n->objects.size(); ++i) {
+	//	n->rotateNodeObject(scene, i, 0, currentTime * 0.01, 0);
+	//	n->translateNodeObject(scene, i, n->objects[i]->position.x + 0.1, n->objects[i]->position.y, n->objects[i]->position.z);
+	//	n->scaleNodeObject(scene, i, n->objects[i]->size.x + 0.001, n->objects[i]->size.y + 0.001, n->objects[i]->size.z + 0.001);
+	//}
+	//scene->terrainNode->standObjectsOnGround(scene, n);
+	
 	scene->updateNodes();
 
 	scene->collisionWorld->act(dTime);
@@ -597,7 +605,7 @@ void SimpleApplication::initScene() {
 	node2->addObject(scene, object6);
 	StaticObject* object7 = box.clone();
 	object7->setPosition(-5, 5, 6);
-	object7->setRotation(0, 0, 30);
+	object7->setRotation(30, 0, 30);
 	object7->setSize(5, 5, 5);
 	node2->addObject(scene, object7);
 	StaticObject* house = model5.clone();
@@ -700,6 +708,10 @@ void SimpleApplication::initScene() {
 			tree->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
 			tree->setPosition(j * treeSpace + treeSpace * (rand() % 100) * 0.01, 0, i * treeSpace + treeSpace * (rand() % 100) * 0.01);
 			instanceNode1->addObject(scene, tree);
+
+			//instanceNode1->scaleNodeObject(scene, instanceNode1->objects.size() - 1, size, size, size);
+			//instanceNode1->rotateNodeObject(scene, instanceNode1->objects.size() - 1, 0, 360 * (rand() % 100) * 0.01, 0);
+			//instanceNode1->translateNodeObject(scene, instanceNode1->objects.size() - 1, j * treeSpace + treeSpace * (rand() % 100) * 0.01, 0, i * treeSpace + treeSpace * (rand() % 100) * 0.01);
 		}
 	}
 	treeSpace = 100;
@@ -718,6 +730,10 @@ void SimpleApplication::initScene() {
 			tree->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
 			tree->setPosition(j * treeSpace + treeSpace * (rand() % 100) * 0.01, 0, i * treeSpace + treeSpace * (rand() % 100) * 0.01);
 			instanceNode2->addObject(scene, tree);
+
+			//instanceNode2->translateNodeObject(scene, instanceNode2->objects.size() - 1, j * treeSpace + treeSpace * (rand() % 100) * 0.01, 0, i * treeSpace + treeSpace * (rand() % 100) * 0.01);
+			//instanceNode2->rotateNodeObject(scene, instanceNode2->objects.size() - 1, 0, 360 * (rand() % 100) * 0.01, 0);
+			//instanceNode2->scaleNodeObject(scene, instanceNode2->objects.size() - 1, size, size, size);
 		}
 	}
 	InstanceNode* instanceNode3 = new InstanceNode(vec3(-700, 0, 1320));
@@ -735,6 +751,10 @@ void SimpleApplication::initScene() {
 			tree->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
 			tree->setPosition(j * treeSpace + treeSpace * (rand() % 100) * 0.01, 0, i * treeSpace + treeSpace * (rand() % 100) * 0.01);
 			instanceNode3->addObject(scene, tree);
+
+			//instanceNode3->translateNodeObject(scene, instanceNode3->objects.size() - 1, j * treeSpace + treeSpace * (rand() % 100) * 0.01, 0, i * treeSpace + treeSpace * (rand() % 100) * 0.01);
+			//instanceNode3->rotateNodeObject(scene, instanceNode3->objects.size() - 1, 0, 360 * (rand() % 100) * 0.01, 0);
+			//instanceNode3->scaleNodeObject(scene, instanceNode3->objects.size() - 1, size, size, size);
 		}
 	}
 	InstanceNode* instanceNode4 = new InstanceNode(vec3(-750, 0, -500));
@@ -752,6 +772,10 @@ void SimpleApplication::initScene() {
 			tree->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
 			tree->setPosition(j * treeSpace + treeSpace * (rand() % 100) * 0.01, 0, i * treeSpace + treeSpace * (rand() % 100) * 0.01);
 			instanceNode4->addObject(scene, tree);
+
+			//instanceNode4->translateNodeObject(scene, instanceNode4->objects.size() - 1, j * treeSpace + treeSpace * (rand() % 100) * 0.01, 0, i * treeSpace + treeSpace * (rand() % 100) * 0.01);
+			//instanceNode4->rotateNodeObject(scene, instanceNode4->objects.size() - 1, 0, 360 * (rand() % 100) * 0.01, 0);
+			//instanceNode4->scaleNodeObject(scene, instanceNode4->objects.size() - 1, size, size, size);
 		}
 	}
 	InstanceNode* instanceNode5 = new InstanceNode(vec3(2100, 0, -600));
@@ -769,6 +793,10 @@ void SimpleApplication::initScene() {
 			tree->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
 			tree->setPosition(j * treeSpace + treeSpace * (rand() % 100) * 0.01, 0, i * treeSpace + treeSpace * (rand() % 100) * 0.01);
 			instanceNode5->addObject(scene, tree);
+
+			//instanceNode5->translateNodeObject(scene, instanceNode5->objects.size() - 1, j * treeSpace + treeSpace * (rand() % 100) * 0.01, 0, i * treeSpace + treeSpace * (rand() % 100) * 0.01);
+			//instanceNode5->rotateNodeObject(scene, instanceNode5->objects.size() - 1, 0, 360 * (rand() % 100) * 0.01, 0);
+			//instanceNode5->scaleNodeObject(scene, instanceNode5->objects.size() - 1, size, size, size);
 		}
 	}
 	treeSpace = 150;
@@ -787,6 +815,10 @@ void SimpleApplication::initScene() {
 			tree->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
 			tree->setPosition(j * treeSpace + treeSpace * (rand() % 100) * 0.01, 0, i * treeSpace + treeSpace * (rand() % 100) * 0.01);
 			instanceNode6->addObject(scene, tree);
+
+			//instanceNode6->translateNodeObject(scene, instanceNode6->objects.size() - 1, j * treeSpace + treeSpace * (rand() % 100) * 0.01, 0, i * treeSpace + treeSpace * (rand() % 100) * 0.01);
+			//instanceNode6->rotateNodeObject(scene, instanceNode6->objects.size() - 1, 0, 360 * (rand() % 100) * 0.01, 0);
+			//instanceNode6->scaleNodeObject(scene, instanceNode6->objects.size() - 1, size, size, size);
 		}
 	}
 
@@ -807,6 +839,10 @@ void SimpleApplication::initScene() {
 			stone->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
 			stone->setPosition(j * stoneSpace + stoneSpace * (rand() % 100) * 0.01, 0, i * stoneSpace + stoneSpace * (rand() % 100) * 0.01);
 			stoneNode->addObject(scene, stone);
+
+			//stoneNode->scaleNodeObject(scene, stoneNode->objects.size() - 1, size, size, size);
+			//stoneNode->rotateNodeObject(scene, stoneNode->objects.size() - 1, 0, 360 * (rand() % 100) * 0.01, 0);
+			//stoneNode->translateNodeObject(scene, stoneNode->objects.size() - 1, j * stoneSpace + stoneSpace * (rand() % 100) * 0.01, 0, i* stoneSpace + stoneSpace * (rand() % 100) * 0.01);
 		}
 	}
 

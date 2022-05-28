@@ -20,10 +20,6 @@ AnimationObject::AnimationObject(Animation* anim) :Object() {
 
 AnimationObject::AnimationObject(const AnimationObject& rhs) :Object(rhs) {
 	animation=rhs.animation;
-	if(rhs.bounding)
-		bounding=rhs.bounding->clone();
-	else
-		bounding=NULL;
 	anglex=rhs.anglex; angley=rhs.angley; anglez=rhs.anglez;
 	fid = rhs.fid;
 

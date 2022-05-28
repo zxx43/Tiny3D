@@ -2,8 +2,8 @@
 #include "../object/staticObject.h"
 #include "../object/animationObject.h"
 
-#define MAX_COUNT_PER_SUB 4096
-#define MAX_COUNT_PER_GROUP 4096
+#define MAX_COUNT_PER_SUB 16384
+#define MAX_COUNT_PER_GROUP 16384
 
 MeshManager::MeshManager() {
 	meshs.clear();

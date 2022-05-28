@@ -13,6 +13,7 @@ struct LodParam {
 	float maxLevel;
 	vec2 lodDist;
 	vec3 eyePos;
+	int shadowPass;
 };
 
 struct RenderBuffer;
@@ -23,6 +24,8 @@ class Camera;
 class HizGenerator;
 class Texture2D;
 class Processor {
+private:
+	bool inputPushed;
 public:
 	static const uint IndNormalIndex, IndSingleIndex, IndBillbdIndex, IndAnimatIndex;
 	static const uint OutputNormal, OutputSingle, OutputBillbd, OutputAnimat;
@@ -43,6 +46,7 @@ public:
 	void gather(Render* render);
 	void update();
 	void showLog();
+	bool isInputPushed() { return inputPushed; }
 };
 
 #endif

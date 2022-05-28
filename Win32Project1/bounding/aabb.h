@@ -11,6 +11,18 @@
 #include "boundingBox.h"
 #include <vector>
 
+struct BoxInfo {
+	vec3 minPos, maxPos;
+	BoxInfo(const vec3& min, const vec3& max) : minPos(min), maxPos(max) {}
+	BoxInfo* clone() {
+		return new BoxInfo(minPos, maxPos);
+	}
+	void update(const vec3& min, const vec3& max) {
+		minPos = min;
+		maxPos = max;
+	}
+};
+
 class Node;
 class AABB: public BoundingBox {
 private:
@@ -36,6 +48,7 @@ public:
 	virtual bool sphereWithCamera(Frustum* frustum);
 	void update(const vec3& newMinVertex,const vec3& newMaxVertex);
 	void update(float sx, float sy, float sz);
+	void update(const mat4& mat);
 	virtual void update(const vec3& pos);
 	virtual void merge(const std::vector<BoundingBox*>& others);
 };

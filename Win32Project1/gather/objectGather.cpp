@@ -3,29 +3,23 @@
 #include "../object/animationObject.h"
 #include <assert.h>
 
-ObjectGather::ObjectGather(const MeshManager* meshManager, bool hasAnim) {
+ObjectGather::ObjectGather(const MeshManager* meshManager) {
 	maxObjectSize = 0;
 	for (uint i = 0; i < meshManager->meshGroups.size(); ++i) {
 		MeshGroup* group = meshManager->meshGroups[i];
-		if (hasAnim && group->subNormals[3] >= 0)
-			maxObjectSize += group->objectCount;
-		else if (!hasAnim && group->subNormals[3] < 0)
-			maxObjectSize += group->objectCount;
+		maxObjectSize += group->objectCount;
 	}
 	inObjectBuffer = (buff*)malloc(maxObjectSize * 16 * sizeof(buff));
 
 	maxNormalSize = 0, maxSingleSize = 0, maxBillbdSize = 0, maxAnimatSize = 0;
-	if (!hasAnim) {
-		for (uint i = 0; i < meshManager->normalMeshs.size(); ++i)
-			maxNormalSize += meshManager->normalMeshs[i]->objectCount;
-		for (uint i = 0; i < meshManager->singleMeshs.size(); ++i)
-			maxSingleSize += meshManager->singleMeshs[i]->objectCount;
-		for (uint i = 0; i < meshManager->billbdMeshs.size(); ++i)
-			maxBillbdSize += meshManager->billbdMeshs[i]->objectCount;
-	} else {
-		for (uint i = 0; i < meshManager->animatMeshs.size(); ++i)
-			maxAnimatSize += meshManager->animatMeshs[i]->objectCount;
-	}
+	for (uint i = 0; i < meshManager->normalMeshs.size(); ++i)
+		maxNormalSize += meshManager->normalMeshs[i]->objectCount;
+	for (uint i = 0; i < meshManager->singleMeshs.size(); ++i)
+		maxSingleSize += meshManager->singleMeshs[i]->objectCount;
+	for (uint i = 0; i < meshManager->billbdMeshs.size(); ++i)
+		maxBillbdSize += meshManager->billbdMeshs[i]->objectCount;
+	for (uint i = 0; i < meshManager->animatMeshs.size(); ++i)
+		maxAnimatSize += meshManager->animatMeshs[i]->objectCount;
 
 	resetGroupObject();
 }

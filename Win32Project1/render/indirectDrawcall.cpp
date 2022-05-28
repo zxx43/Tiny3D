@@ -1,6 +1,7 @@
 #include "indirectDrawcall.h"
 #include "render.h"
 #include "../gather/meshBuffer.h"
+#include "../assets/assetManager.h"
 
 IndirectDrawcall::IndirectDrawcall(const Processor* process, const MeshBuffer* meshDB, int type) :Drawcall() {
 	indirectType = type;
@@ -73,7 +74,7 @@ void IndirectDrawcall::draw(Render* render, RenderState* state, Shader* shader) 
 			case INDIRECT_ANIMAT:
 				indirectCount = processor->indAnimatCount;
 				indirectIndex = Processor::IndAnimatIndex;
-				shaderToUse = state->shader;
+				shaderToUse = state->shaderBone;
 				break;
 			default:
 				indirectCount = processor->indNormalCount;
@@ -85,20 +86,34 @@ void IndirectDrawcall::draw(Render* render, RenderState* state, Shader* shader) 
 		MaterialManager::materials->useMaterialBuffer(1);
 		dataBuffer->use();
 		render->useShader(shaderToUse);
-		if (state->isShadowPass()) render->setShaderFloat(shaderToUse, "uAlpha", 0.0);
 
 		if (indirectType == INDIRECT_NORMAL || indirectType == INDIRECT_ANIMAT) {
 			render->setCullMode(CULL_BACK);
 			render->setCullState(true);
+			if (state->isShadowPass()) render->setShaderFloat(shaderToUse, "uAlpha", 0.0);
+			if (indirectType == INDIRECT_ANIMAT && !shaderToUse->isTexBinded(AssetManager::assetManager->frames->datas, AssetManager::assetManager->frames->animCount)) {
+				shaderToUse->setHandle64v("boneTex", AssetManager::assetManager->frames->animCount, AssetManager::assetManager->frames->datas);
+			}
 		} else if (indirectType == INDIRECT_SINGLE) {
 			if (!state->isShadowPass()) render->setCullState(false);
 			else {
 				render->setCullMode(CULL_BACK);
 				render->setCullState(true);
-				if (state->isShadowPass()) render->setShaderFloat(shaderToUse, "uAlpha", 1.0);
+				render->setShaderFloat(shaderToUse, "uAlpha", 1.0);
 			}
 		} else if (indirectType == INDIRECT_BILLBD) {
-			if (state->isShadowPass()) render->setCullState(false);
+			if (!state->isShadowPass()) {
+				render->setCullMode(CULL_BACK);
+				render->setCullState(true);
+			} else {
+				render->setCullState(false);
+				render->setShaderFloat(shaderToUse, "uAlpha", 1.0);
+			}
+		}
+
+		if (state->debug) {
+			render->setCullState(false);
+			render->setDrawLine(true);
 		}
 
 		sbo->useAs(indirectIndex, GL_DRAW_INDIRECT_BUFFER);

@@ -18,6 +18,7 @@ Object::Object() {
 	meshMid = NULL;
 	meshLow = NULL;
 	bounding = NULL;
+	baseBounding = NULL;
 	material = -1;
 	boundCenter = vec3(0.0);
 	localBoundPosition = vec3(0.0);
@@ -66,6 +67,8 @@ Object::Object(const Object& rhs) {
 	debug = rhs.debug;
 	boundCenter = rhs.boundCenter;
 	localBoundPosition = rhs.localBoundPosition;
+	baseBounding = rhs.baseBounding ? rhs.baseBounding->clone() : NULL;
+	bounding = rhs.bounding ? rhs.bounding->clone() : NULL;
 
 	sounds.clear();
 	std::map<std::string, SoundObject*>::iterator it;
@@ -79,6 +82,7 @@ Object::Object(const Object& rhs) {
 }
 
 Object::~Object() {
+	if (baseBounding) delete baseBounding; baseBounding = NULL;
 	if (bounding) delete bounding; bounding = NULL;
 	if (billboard) delete billboard; billboard = NULL;
 
@@ -108,49 +112,79 @@ void Object::initMatricesData() {
 	transformsFull[7] = rotateQuat.w;
 }
 
-void Object::caculateLocalAABB(bool looseWidth, bool looseAll) {
+void Object::caculateLocalAABB(bool hasRotateScale) {
 	if (!mesh) return; // caculate AABB by yourself
 	int vertexCount = mesh->vertexCount;
 	if (vertexCount <= 0) return;
-	vec4* vertices = mesh->vertices;
-	mat4 localRotateMatrix = GetRotateAndScale(localTransformMatrix);
-	vec4 first4 = localRotateMatrix * vertices[0];
-	float firstInvw = 1.0 / first4.w;
-	float sx = first4.x * firstInvw;
-	float sy = first4.y * firstInvw;
-	float sz = first4.z * firstInvw;
-	float lx = sx;
-	float ly = sy;
-	float lz = sz;
-	for (int i = 1; i < vertexCount; i++) {
-		vec4 vertex4 = vertices[i];
-		vec4 local4 = localRotateMatrix * vertex4;
-		float invw = 1.0 / local4.w;
-		vec3 local3(local4.x * invw, local4.y * invw, local4.z * invw);
-		sx = sx > local3.x ? local3.x : sx;
-		sy = sy > local3.y ? local3.y : sy;
-		sz = sz > local3.z ? local3.z : sz;
-		lx = lx < local3.x ? local3.x : lx;
-		ly = ly < local3.y ? local3.y : ly;
-		lz = lz < local3.z ? local3.z : lz;
-	}
-	vec3 minVertex(sx, sy, sz), maxVertex(lx, ly, lz);
-	if (!bounding) bounding = new AABB(minVertex, maxVertex);
-	else ((AABB*)bounding)->update(minVertex, maxVertex);
 
-	if (looseWidth) {
-		AABB* aabb = (AABB*)bounding;
-		float maxWidth = aabb->sizex > aabb->sizez ? aabb->sizex : aabb->sizez;
-		aabb->update(maxWidth, aabb->sizey, maxWidth);
-	} 
-	
-	if (looseAll) {
-		AABB* aabb = (AABB*)bounding;
-		float maxSide = aabb->sizex;
-		maxSide = maxSide < aabb->sizey ? aabb->sizey : maxSide;
-		maxSide = maxSide < aabb->sizez ? aabb->sizez : maxSide;
-		aabb->update(maxSide, maxSide, maxSide);
+	if (!baseBounding || hasRotateScale) {
+		vec4* vertices = mesh->vertices;
+		mat4 localScaleRotateMatrix = GetRotateAndScale(localTransformMatrix);
+		vec4 first4 = localScaleRotateMatrix * vertices[0];
+		float firstInvw = 1.0 / first4.w;
+		float sx = first4.x * firstInvw;
+		float sy = first4.y * firstInvw;
+		float sz = first4.z * firstInvw;
+		float lx = sx;
+		float ly = sy;
+		float lz = sz;
+		for (int i = 1; i < vertexCount; i++) {
+			vec4 vertex4 = vertices[i];
+			vec4 local4 = localScaleRotateMatrix * vertex4;
+			float invw = 1.0 / local4.w;
+			vec3 local3(local4.x * invw, local4.y * invw, local4.z * invw);
+			sx = sx > local3.x ? local3.x : sx;
+			sy = sy > local3.y ? local3.y : sy;
+			sz = sz > local3.z ? local3.z : sz;
+			lx = lx < local3.x ? local3.x : lx;
+			ly = ly < local3.y ? local3.y : ly;
+			lz = lz < local3.z ? local3.z : lz;
+		}
+		vec3 minVertex(sx, sy, sz), maxVertex(lx, ly, lz);
+		// replace base bounding with accurate vertices
+		if (!baseBounding) baseBounding = new BoxInfo(minVertex, maxVertex);
+		else baseBounding->update(minVertex, maxVertex);
 	}
+
+	if (!bounding) bounding = new AABB(baseBounding->minPos, baseBounding->maxPos);
+	else {
+		AABB* aabb = (AABB*)bounding;
+		aabb->update(baseBounding->minPos, baseBounding->maxPos);
+	}
+
+	boundCenter = bounding->position;
+	localBoundPosition = boundCenter + GetTranslate(localTransformMatrix);
+	bounding->update(localBoundPosition);
+}
+
+void Object::caculateLocalAABBFast(bool hasRotateScale) {
+	if (!mesh) return; // caculate AABB by yourself
+	int vertexCount = mesh->vertexCount;
+	if (vertexCount <= 0) return;
+
+	if (!baseBounding || hasRotateScale) {
+		if (!mesh->boundBox) mesh->caculateExData();
+		// replace bounding box with mesh bounding
+		if (!bounding) bounding = new AABB(mesh->boundBox->minPos, mesh->boundBox->maxPos);
+		else {
+			AABB* aabb = (AABB*)bounding;
+			aabb->update(mesh->boundBox->minPos, mesh->boundBox->maxPos);
+		}
+
+		AABB* aabb = (AABB*)bounding;
+		// apply rotate & scale to bounding box
+		aabb->update(GetRotateAndScale(localTransformMatrix));
+
+		if (!baseBounding) baseBounding = new BoxInfo(aabb->minVertex, aabb->maxVertex);
+		else baseBounding->update(aabb->minVertex, aabb->maxVertex);
+	}
+
+	if (!bounding) bounding = new AABB(baseBounding->minPos, baseBounding->maxPos);
+	else {
+		AABB* aabb = (AABB*)bounding;
+		aabb->update(baseBounding->minPos, baseBounding->maxPos);
+	}
+
 	boundCenter = bounding->position;
 	localBoundPosition = boundCenter + GetTranslate(localTransformMatrix);
 	bounding->update(localBoundPosition);

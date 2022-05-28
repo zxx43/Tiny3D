@@ -98,6 +98,30 @@ void AABB::update(const vec3& pos) {
 	update(pos - halfSize, pos + halfSize);
 }
 
+void AABB::update(const mat4& mat) {
+	for (int i = 0; i < 8; ++i) {
+		vec4 vert = mat * vec4(vertices[i]);
+		vertices[i].x = vert.x;
+		vertices[i].y = vert.y;
+		vertices[i].z = vert.z;
+	}
+
+	float sx = vertices[0].x, sy = vertices[0].y, sz = vertices[0].z;
+	float lx = sx, ly = sy, lz = sz;
+	for (int i = 1; i < 8; ++i) {
+		vec3 vert = vertices[i];
+		sx = sx > vert.x ? vert.x : sx;
+		sy = sy > vert.y ? vert.y : sy;
+		sz = sz > vert.z ? vert.z : sz;
+		lx = lx < vert.x ? vert.x : lx;
+		ly = ly < vert.y ? vert.y : ly;
+		lz = lz < vert.z ? vert.z : lz;
+	}
+	vec3 minVertex(sx, sy, sz), maxVertex(lx, ly, lz);
+
+	update(minVertex, maxVertex);
+}
+
 AABB* AABB::clone() {
 	return new AABB(*this);
 }

@@ -14,7 +14,7 @@ public:
 	uint maxBillbdSize; // use to init billboard submesh output buffer
 	uint maxAnimatSize; // use to init animation submesh output buffer
 public:
-	ObjectGather(const MeshManager* meshManager, bool hasAnim);
+	ObjectGather(const MeshManager* meshManager);
 	~ObjectGather();
 public:
 	void addGroupObject(Object* object);
