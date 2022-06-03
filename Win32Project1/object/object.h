@@ -66,6 +66,7 @@ public:
 	void caculateLocalAABB(bool hasRotateScale);
 	void caculateLocalAABBFast(bool hasRotateScale);
 	void caculateCollisionShape(); // Caculate collision obb
+	void removeCollisionShape();
 	CollisionObject* initCollisionObject();
 	void setShapeOffset(const vec3& off) { shapeOffset = off; }
 	void removeCollisionObject();

@@ -1,5 +1,6 @@
 #include "aabb.h"
 #include "../node/node.h"
+#include "../scene/scene.h"
 
 AABB::AABB(const vec3& min,const vec3& max) :BoundingBox() {
 	minVertex.x=min.x; minVertex.y=min.y; minVertex.z=min.z;
@@ -63,7 +64,22 @@ AABB::AABB(const AABB& rhs) :BoundingBox(rhs) {
 }
 
 AABB::~AABB() {
-
+	if (debugNode && debugNode->objects.size() > 0) {
+		Object* object = debugNode->objects[0];
+		Scene* scene = object->belong;
+		if (scene) {
+			std::vector<Node*>::iterator it = scene->boundingNodes.begin();
+			while (it != scene->boundingNodes.end()) {
+				if (*it == debugNode) {
+					scene->boundingNodes.erase(it);
+					delete debugNode;
+					debugNode = NULL;
+					break;
+				}
+				++it;
+			}
+		}
+	}
 }
 
 void AABB::caculateRadius() {

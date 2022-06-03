@@ -90,8 +90,6 @@ Object::~Object() {
 
 	if (transforms) free(transforms); transforms = NULL;
 	if (transformsFull) free(transformsFull); transformsFull = NULL;
-	
-	if (collisionShape) delete collisionShape;
 
 	std::map<std::string, SoundObject*>::iterator it;
 	for (it = sounds.begin(); it != sounds.end(); ++it)
@@ -230,6 +228,11 @@ void Object::caculateCollisionShape() {
 		halfSize *= mesh->getBoundScale();
 		collisionShape = new CollisionShape(halfSize);
 	}
+}
+
+void Object::removeCollisionShape() {
+	if (collisionShape) delete collisionShape;
+	collisionShape = NULL;
 }
 
 CollisionObject* Object::initCollisionObject() {

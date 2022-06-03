@@ -79,6 +79,7 @@ public:
 	bool isDebugQueue() { return queueType == QUEUE_DEBUG; }
 	bool isStaticQueue() { return queueType == QUEUE_STATIC; }
 	void forceUpdateData() { forceUpdateInput = true; }
+	void finishForceUpdate() { forceUpdateInput = false; }
 	bool staticDataReady();
 };
 

@@ -287,8 +287,8 @@ void Scene::addObject(Object* object) {
 	
 	if (object->isPhysic()) {
 		object->caculateCollisionShape();
-		CollisionObject* cob = object->initCollisionObject();
-		collisionWorld->addObject(cob);
+		object->initCollisionObject();
+		collisionWorld->addObject(object->collisionObject);
 	}
 
 	if (object->isDebug()) debugMeshMgr->addObject(object);
@@ -301,6 +301,7 @@ void Scene::removeObject(Object* object) {
 	if (object->isPhysic()) {
 		collisionWorld->removeObject(object->collisionObject);
 		object->removeCollisionObject();
+		object->removeCollisionShape();
 	}
 
 	if (!object->isDebug()) {

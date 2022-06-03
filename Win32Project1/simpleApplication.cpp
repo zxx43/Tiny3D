@@ -352,50 +352,83 @@ void SimpleApplication::act(long startTime, long currentTime, float dTime, float
 	static Node* target5 = scene->staticRoot->children[5];
 	static Node* target6 = scene->staticRoot->children[6];
 	/*
-	if (timer == 5000) {
-		barker->pushToRemove();
-		barker = NULL;
-		printf("dog killed\n");
+	if (timer > 5000) {
+		if (barker) {
+			barker->pushToRemove();
+			barker = NULL;
+			printf("dog killed\n");
+		}
 	}
-	if (timer == 10000) {
-		ninja->pushToRemove();
-		ninja = NULL;
-		scene->player->setNode(NULL, NULL);
-		printf("ninja killed\n");
+	if (timer > 10000) {
+		if (ninja) {
+			ninja->pushToRemove();
+			ninja = NULL;
+			scene->player->setNode(NULL, NULL);
+			printf("ninja killed\n");
+		}
 	}
-	if (timer == 15000) {
-		man->pushToRemove();
-		man = NULL;
-		printf("man killed\n");
+	if (timer > 15000) {
+		if (man) {
+			man->pushToRemove();
+			man = NULL;
+			printf("man killed\n");
+		}
 	}
-	if (timer == 10000) {
-		for (int i = 0; i < target1->objects.size() * 0.5; ++i)
-			delete target1->removeObject(target1->objects[i]);
-		for (int i = 0; i < target2->objects.size() * 0.5; ++i)
-			delete target2->removeObject(target2->objects[i]);
-		for (int i = 0; i < target3->objects.size() * 0.5; ++i)
-			delete target3->removeObject(target3->objects[i]);
-		for (int i = 0; i < target4->objects.size() * 0.5; ++i)
-			delete target4->removeObject(target4->objects[i]);
-		for (int i = 0; i < target5->objects.size() * 0.5; ++i)
-			delete target5->removeObject(target5->objects[i]);
-		for (int i = 0; i < target6->objects.size() * 0.5; ++i)
-			delete target6->removeObject(target6->objects[i]);
-		printf("half tree killed\n");
+	static bool halfKilled = false;
+	if (timer > 10000) {
+		if (!halfKilled) {
+			for (int i = 0; i < target1->objects.size() * 0.5; ++i)
+				delete target1->removeObject(target1->objects[i]);
+			for (int i = 0; i < target2->objects.size() * 0.5; ++i)
+				delete target2->removeObject(target2->objects[i]);
+			for (int i = 0; i < target3->objects.size() * 0.5; ++i)
+				delete target3->removeObject(target3->objects[i]);
+			for (int i = 0; i < target4->objects.size() * 0.5; ++i)
+				delete target4->removeObject(target4->objects[i]);
+			for (int i = 0; i < target5->objects.size() * 0.5; ++i)
+				delete target5->removeObject(target5->objects[i]);
+			for (int i = 0; i < target6->objects.size() * 0.5; ++i)
+				delete target6->removeObject(target6->objects[i]);
+			halfKilled = true;
+			printf("half tree killed\n");
+		}
 	}
-	if (timer == 14500) {
-		target2->pushToRemove();
-	} else if (timer == 15500) {
-		target3->pushToRemove();
-	} else if (timer == 16500) {
-		target4->pushToRemove();
-	} else if (timer == 17500) {
-		target5->pushToRemove();
-	} else if (timer == 18500) {
-		target6->pushToRemove();
-	} else if (timer == 20000) {
-		target1->pushToRemove();
-		printf("all tree killed\n");
+	if (timer > 14500) {
+		if (target2) {
+			target2->pushToRemove();
+			target2 = NULL;
+		}
+	} 
+	if (timer > 15500) {
+		if (target3) {
+			target3->pushToRemove();
+			target3 = NULL;
+		}
+	} 
+	if (timer > 16500) {
+		if (target4) {
+			target4->pushToRemove();
+			target4 = NULL;
+		}
+	} 
+	if (timer > 17500) {
+		if (target5) {
+			target5->pushToRemove();
+			target5 = NULL;
+		}
+	} 
+	if (timer > 18500) {
+		if (target6) {
+			target6->pushToRemove();
+			target6 = NULL;
+		}
+	} 
+	if (timer > 20000) {
+		if (target1) {
+			target1->pushToRemove();
+			target1 = NULL;
+			printf("all tree killed\n");
+		}
 	}
 	//*/
 	scene->updateNodes();
@@ -415,7 +448,8 @@ void SimpleApplication::act(long startTime, long currentTime, float dTime, float
 	if (!cfgs->ssr) scene->updateReflectCamera();
 
 	scene->flushNodes();
-	timer++;
+	if (cfgs->debug) timer += 5;
+	else timer++;
 }
 
 void SimpleApplication::initScene() {

@@ -56,7 +56,7 @@ void RenderQueue::process(Scene* scene, Render* render, const RenderState* state
 		} else {
 			if (!staticDataReady() || forceUpdateInput) {
 				processor->update();
-				if (forceUpdateInput) forceUpdateInput = false;
+				if (forceUpdateInput) finishForceUpdate();
 			}
 			processor->clear(render);
 			processor->lod(render, state, param);
