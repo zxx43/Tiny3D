@@ -106,9 +106,6 @@
     <Filter Include="Source Files\gather">
       <UniqueIdentifier>{4e4fcee0-bc66-4076-a56d-a60a6e591925}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\instance">
-      <UniqueIdentifier>{fd642997-64d7-4b03-8353-43352c6d8784}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="batch\batch.cpp">
@@ -372,17 +369,8 @@
     <ClCompile Include="render\indirectDrawcall.cpp">
       <Filter>Source Files\render</Filter>
     </ClCompile>
-    <ClCompile Include="animation\animationData.cpp">
-      <Filter>Source Files\animation</Filter>
-    </ClCompile>
     <ClCompile Include="animation\assanim.cpp">
       <Filter>Source Files\animation</Filter>
-    </ClCompile>
-    <ClCompile Include="instance\instance.cpp">
-      <Filter>Source Files\instance</Filter>
-    </ClCompile>
-    <ClCompile Include="instance\instanceData.cpp">
-      <Filter>Source Files\instance</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -673,15 +661,6 @@
     </ClInclude>
     <ClInclude Include="render\indirectDrawcall.h">
       <Filter>Source Files\render</Filter>
-    </ClInclude>
-    <ClInclude Include="animation\animationData.h">
-      <Filter>Source Files\animation</Filter>
-    </ClInclude>
-    <ClInclude Include="instance\instance.h">
-      <Filter>Source Files\instance</Filter>
-    </ClInclude>
-    <ClInclude Include="instance\instanceData.h">
-      <Filter>Source Files\instance</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

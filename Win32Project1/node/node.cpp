@@ -1,6 +1,5 @@
 #include "node.h"
 #include "../util/util.h"
-#include "../instance/instance.h"
 #include "../object/staticObject.h"
 #include "../scene/scene.h"
 
@@ -32,6 +31,28 @@ Node::Node(const vec3& position,const vec3& size) {
 }
 
 Node::~Node() {
+	if (parent) { // delete this node in parent node bounding list & children list
+		std::vector<BoundingBox*>::iterator itbb = parent->nodeBBs.begin();
+		while (itbb != parent->nodeBBs.end()) {
+			if (*itbb == boundingBox) {
+				parent->nodeBBs.erase(itbb);
+				break;
+			}
+			++itbb;
+		}
+		std::vector<Node*>::iterator itchild = parent->children.begin();
+		while (itchild != parent->children.end()) {
+			if (*itchild == this) {
+				parent->children.erase(itchild);
+				break;
+			}
+			++itchild;
+		}
+		parent = NULL;
+	}
+
+	cancelFromUpdate(); // do not update node to be deleted
+
 	if(boundingBox)
 		delete boundingBox;
 	boundingBox=NULL;
@@ -94,6 +115,7 @@ void Node::updateObjectBoundingInNode(Object* object, bool nodeTransformed) {
 }
 
 void Node::addObject(Scene* scene, Object* object) {
+	object->belong = scene;
 	object->parent = this;
 	objects.push_back(object);
 	object->caculateLocalAABB(true);
@@ -110,26 +132,30 @@ void Node::addObject(Scene* scene, Object* object) {
 		}
 	}
 	needCreateDrawcall = true;
-	pushToUpdate(scene);
+	pushToUpdate(object->belong);
 
-	if (object->isDynamic()) dynamicObjects.push_back(object);
-	else staticObjects.push_back(object);
+	if (object->type == OBJ_TYPE_STATIC) {
+		if (object->isDynamic()) dynamicObjects.push_back(object);
+		else staticObjects.push_back(object);
+	}
 }
 
-Object* Node::removeObject(Scene* scene, Object* object) {
+Object* Node::removeObject(Object* object) {
 	std::vector<Object*>::iterator it;
-	if (object->isDynamic()) {
-		for (it = dynamicObjects.begin(); it != dynamicObjects.end(); ++it) {
-			if ((*it) == object) {
-				dynamicObjects.erase(it);
-				break;
+	if (object->type == OBJ_TYPE_STATIC) {
+		if (object->isDynamic()) {
+			for (it = dynamicObjects.begin(); it != dynamicObjects.end(); ++it) {
+				if ((*it) == object) {
+					dynamicObjects.erase(it);
+					break;
+				}
 			}
-		}
-	} else {
-		for (it = staticObjects.begin(); it != staticObjects.end(); ++it) {
-			if ((*it) == object) {
-				staticObjects.erase(it);
-				break;
+		} else {
+			for (it = staticObjects.begin(); it != staticObjects.end(); ++it) {
+				if ((*it) == object) {
+					staticObjects.erase(it);
+					break;
+				}
 			}
 		}
 	}
@@ -153,16 +179,10 @@ Object* Node::removeObject(Scene* scene, Object* object) {
 			}
 
 			needCreateDrawcall = true;
-			pushToUpdate(scene);
+			pushToUpdate(object->belong);
 			object->parent = NULL;
+			object->belong = NULL;
 
-			scene->collisionWorld->removeObject(object->collisionObject);
-			object->removeCollisionObject();
-			if (object->mesh) {
-				StaticObject* staticObj = (StaticObject*)object;
-				if (staticObj->isDynamic())
-					scene->removeDynamicObject(staticObj);
-			}
 			return object;
 		}
 	}
@@ -233,7 +253,7 @@ void Node::updateBounding() {
 		if (childAABB && (childAABB->sizex > 0 || childAABB->sizey > 0 || childAABB->sizez > 0))
 			nodeBBs.push_back(child->boundingBox);
 	}
-	if (nodeBBs.size()>0)
+	if (boundingBox && nodeBBs.size()>0)
 		boundingBox->merge(nodeBBs);
 }
 
@@ -288,17 +308,6 @@ Node* Node::detachChild(Node* child) {
 			while (superior) {
 				superior->updateBounding();
 				superior = superior->parent;
-			}
-
-			if (child->type == TYPE_INSTANCE) {
-				for (uint i = 0; i < child->objects.size(); i++) {
-					Object* object = child->objects[i];
-					Instance::instanceTable[object->mesh]--;
-					if (object->meshMid)
-						Instance::instanceTable[object->meshMid]--;
-					if (object->meshLow)
-						Instance::instanceTable[object->meshLow]--;
-				}
 			}
 
 			return child;
@@ -396,6 +405,18 @@ void Node::pushToUpdate(Scene* scene) {
 	if (!needUpdateNode && type != TYPE_ANIMATE) {
 		Node::nodesToUpdate.push_back(this);
 		needUpdateNode = true;
+	}
+}
+
+void Node::cancelFromUpdate() {
+	std::vector<Node*>::iterator it = Node::nodesToUpdate.begin();
+	while (it != Node::nodesToUpdate.end()) {
+		if (*it == this) {
+			needUpdateNode = false;
+			Node::nodesToUpdate.erase(it);
+			break;
+		}
+		++it;
 	}
 }
 

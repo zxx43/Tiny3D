@@ -80,6 +80,7 @@ public:
 	void updateSky();
 	void flushRenderQueues(Scene* scene);
 	void updateRenderQueues(Scene* scene);
+	void flushRenderQueueDatas(Scene* scene);
 	void swapRenderQueues(Scene* scene, bool swapQueue);
 	void prepareData(Scene* scene);
 	void updateDebugData(Scene* scene);

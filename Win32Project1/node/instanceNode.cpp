@@ -5,50 +5,26 @@ using namespace std;
 
 InstanceNode::InstanceNode(const vec3& position):Node(position, vec3(0, 0, 0)) {
 	type = TYPE_INSTANCE;
-	instance = NULL;
 
 	needCreateDrawcall = false;
 	needUpdateDrawcall = false;
 }
 
 InstanceNode::~InstanceNode() {
-	if (instance) delete instance; instance = NULL;
+	while (objects.size() > 0) {
+		Object* object = objects[objects.size() - 1];
+		delete removeObject(object);
+	}
 }
 
 void InstanceNode::addObject(Scene* scene, Object* object) {
 	Node::addObject(scene, object);
-	if (Instance::instanceTable.find(object->mesh) == Instance::instanceTable.end())
-		Instance::instanceTable[object->mesh] = 1;
-	else
-		Instance::instanceTable[object->mesh]++;
-
-	if (object->meshMid) {
-		if (Instance::instanceTable.find(object->meshMid) == Instance::instanceTable.end())
-			Instance::instanceTable[object->meshMid] = 1;
-		else
-			Instance::instanceTable[object->meshMid]++;
-	}
-
-	if (object->meshLow) {
-		if (Instance::instanceTable.find(object->meshLow) == Instance::instanceTable.end())
-			Instance::instanceTable[object->meshLow] = 1;
-		else
-			Instance::instanceTable[object->meshLow]++;
-	}
-
-	scene->addObject(object, object->isPhysic());
+	if (object->belong) object->belong->addObject(object);
 }
 
-Object* InstanceNode::removeObject(Scene* scene, Object* object) {
-	Object* object2Remove = Node::removeObject(scene, object);
-	if (object2Remove) {
-		Instance::instanceTable[object2Remove->mesh]--;
-		if (object2Remove->meshMid)
-			Instance::instanceTable[object2Remove->meshMid]--;
-		if (object2Remove->meshLow)
-			Instance::instanceTable[object2Remove->meshLow]--;
-	}
-	return object2Remove;
+Object* InstanceNode::removeObject(Object* object) {
+	if (object->belong) object->belong->removeObject(object);
+	return Node::removeObject(object);
 }
 
 void InstanceNode::addObjects(Scene* scene,Object** objectArray,int count) {

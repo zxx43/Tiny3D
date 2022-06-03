@@ -29,6 +29,7 @@ SimpleApplication::SimpleApplication() : Application() {
 	drawNormal = false;
 	drawBounding = false;
 	depthLevel = 0;
+	timer = 0;
 }
 
 SimpleApplication::~SimpleApplication() {
@@ -326,21 +327,77 @@ void SimpleApplication::act(long startTime, long currentTime, float dTime, float
 	}
 
 	node = scene->animationRoot->children[1];
-	animNode = (AnimationNode*)node->children[3];
-	animNode->rotateNodeObject(scene, animNode->getObject()->anglex, animNode->getObject()->angley, animNode->getObject()->anglez + 0.1);
-	float radian = angleToRadian(animNode->getObject()->anglez);
-	float rcos = cosf(radian);
-	float rsin = sinf(radian);
-	animNode->translateNode(scene, animNode->position.x + 0.04 * rsin, animNode->position.y, animNode->position.z + 0.04 * rcos);
 
-	//Node* n = scene->staticRoot->children[1];
-	//for (int i = 0; i < n->objects.size(); ++i) {
-	//	n->rotateNodeObject(scene, i, 0, currentTime * 0.01, 0);
-	//	n->translateNodeObject(scene, i, n->objects[i]->position.x + 0.1, n->objects[i]->position.y, n->objects[i]->position.z);
-	//	n->scaleNodeObject(scene, i, n->objects[i]->size.x + 0.001, n->objects[i]->size.y + 0.001, n->objects[i]->size.z + 0.001);
+	static AnimationNode* man = (AnimationNode*)node->children[2];
+	if (man) {
+		man->rotateNodeObject(scene, man->getObject()->anglex, man->getObject()->angley, man->getObject()->anglez + 0.1);
+		float radian = angleToRadian(man->getObject()->anglez);
+		float rcos = cosf(radian);
+		float rsin = sinf(radian);
+		man->translateNode(scene, man->position.x + 0.04 * rsin, man->position.y, man->position.z + 0.04 * rcos);
+	}
+	//static Node* dynObjs = scene->staticRoot->children[7];
+	//for (int i = 0; i < dynObjs->objects.size(); ++i) {
+	//	dynObjs->rotateNodeObject(scene, i, 0, currentTime * 0.01, 0);
+	//	dynObjs->translateNodeObject(scene, i, dynObjs->objects[i]->position.x + 0.01, dynObjs->objects[i]->position.y + 10.0, dynObjs->objects[i]->position.z + 0.01);
 	//}
-	//scene->terrainNode->standObjectsOnGround(scene, n);
-	
+	//scene->terrainNode->standObjectsOnGround(scene, dynObjs);
+
+	static AnimationNode* ninja = (AnimationNode*)node->children[1];
+	static AnimationNode* barker = (AnimationNode*)node->children[3];
+	static Node* target1 = scene->staticRoot->children[1];
+	static Node* target2 = scene->staticRoot->children[2];
+	static Node* target3 = scene->staticRoot->children[3];
+	static Node* target4 = scene->staticRoot->children[4];
+	static Node* target5 = scene->staticRoot->children[5];
+	static Node* target6 = scene->staticRoot->children[6];
+	/*
+	if (timer == 5000) {
+		barker->pushToRemove();
+		barker = NULL;
+		printf("dog killed\n");
+	}
+	if (timer == 10000) {
+		ninja->pushToRemove();
+		ninja = NULL;
+		scene->player->setNode(NULL, NULL);
+		printf("ninja killed\n");
+	}
+	if (timer == 15000) {
+		man->pushToRemove();
+		man = NULL;
+		printf("man killed\n");
+	}
+	if (timer == 10000) {
+		for (int i = 0; i < target1->objects.size() * 0.5; ++i)
+			delete target1->removeObject(target1->objects[i]);
+		for (int i = 0; i < target2->objects.size() * 0.5; ++i)
+			delete target2->removeObject(target2->objects[i]);
+		for (int i = 0; i < target3->objects.size() * 0.5; ++i)
+			delete target3->removeObject(target3->objects[i]);
+		for (int i = 0; i < target4->objects.size() * 0.5; ++i)
+			delete target4->removeObject(target4->objects[i]);
+		for (int i = 0; i < target5->objects.size() * 0.5; ++i)
+			delete target5->removeObject(target5->objects[i]);
+		for (int i = 0; i < target6->objects.size() * 0.5; ++i)
+			delete target6->removeObject(target6->objects[i]);
+		printf("half tree killed\n");
+	}
+	if (timer == 14500) {
+		target2->pushToRemove();
+	} else if (timer == 15500) {
+		target3->pushToRemove();
+	} else if (timer == 16500) {
+		target4->pushToRemove();
+	} else if (timer == 17500) {
+		target5->pushToRemove();
+	} else if (timer == 18500) {
+		target6->pushToRemove();
+	} else if (timer == 20000) {
+		target1->pushToRemove();
+		printf("all tree killed\n");
+	}
+	//*/
 	scene->updateNodes();
 
 	scene->collisionWorld->act(dTime);
@@ -351,11 +408,14 @@ void SimpleApplication::act(long startTime, long currentTime, float dTime, float
 
 	renderMgr->updateDebugData(scene);
 
-	animNode = (AnimationNode*)node->children[2];
-	animNode->getObject()->playEffect("bark");
+	//if (ninja) ninja->getObject()->playEffect("wang");
+	if (barker) barker->getObject()->playEffect("bark");
 
 	scene->updateListenerPosition();
 	if (!cfgs->ssr) scene->updateReflectCamera();
+
+	scene->flushNodes();
+	timer++;
 }
 
 void SimpleApplication::initScene() {
@@ -563,7 +623,7 @@ void SimpleApplication::initScene() {
 	StaticObject model5(meshes["house"]);
 	StaticObject model6(meshes["oildrum"]);
 	model6.setSound("push", "sounds/box.wav");
-	StaticObject model9(meshes["rock"], meshes["rock_low"], NULL);
+	StaticObject model9(meshes["rock"], meshes["rock_low"], meshes["rock_low"]);
 	StaticObject model10(meshes["cottage"]);
 	StaticObject model11(meshes["birch"], meshes["birch"], meshes["billboard"]);
 	model11.detailLevel = 4;
@@ -704,6 +764,7 @@ void SimpleApplication::initScene() {
 			float baseSize = changeTree ? 3 : 5;
 			float size = (rand() % 100 * 0.01) * 2 + baseSize;
 
+			//tree->setDynamic(true);
 			tree->setSize(size, size, size);
 			tree->setRotation(0, 360 * (rand() % 100) * 0.01, 0);
 			tree->setPosition(j * treeSpace + treeSpace * (rand() % 100) * 0.01, 0, i * treeSpace + treeSpace * (rand() % 100) * 0.01);
@@ -926,19 +987,20 @@ void SimpleApplication::initScene() {
 	animNode4->getObject()->setPosition(0, -5, -1);
 	animNode4->translateNode(scene, 40, 0, 40);
 	animNode4->getObject()->setDefaultAnim("idle3");
-	AnimationNode* animNode5 = new AnimationNode(vec3(7.5, 7.5, 10.5));
-	animNode5->setAnimation(scene, animations["dog"]);
-	animNode5->scaleNodeObject(scene, 0.075, 0.075, 0.075);
-	animNode5->getObject()->setPosition(0, -2.6, -1.5);
-	animNode5->translateNode(scene, 30, 0, 20);
-	animNode5->getObject()->setDefaultAnim("dog_idle");
-	animNode5->getObject()->setSound("bark", "sounds/dog.wav");
-	AnimationNode* animNode6 = new AnimationNode(vec3(5.0, 10.0, 5.0));
-	animNode6->setAnimation(scene, animations["male"]);
-	animNode6->scaleNodeObject(scene, 0.05, 0.05, 0.05);
-	animNode6->getObject()->setPosition(0.0, -4.0, 0.0);
-	animNode6->translateNode(scene, 40, 0, 0);
-	animNode6->getObject()->setDefaultAnim("male_run");
+	animNode4->getObject()->setSound("wang", "sounds/dog.wav");
+	AnimationNode* animNode5 = new AnimationNode(vec3(5.0, 10.0, 5.0));
+	animNode5->setAnimation(scene, animations["male"]);
+	animNode5->scaleNodeObject(scene, 0.05, 0.05, 0.05);
+	animNode5->getObject()->setPosition(0.0, -4.0, 0.0);
+	animNode5->translateNode(scene, 40, 0, 0);
+	animNode5->getObject()->setDefaultAnim("male_run");
+	AnimationNode* animNode6 = new AnimationNode(vec3(7.5, 7.5, 10.5));
+	animNode6->setAnimation(scene, animations["dog"]);
+	animNode6->scaleNodeObject(scene, 0.075, 0.075, 0.075);
+	animNode6->getObject()->setPosition(0, -2.6, -1.5);
+	animNode6->translateNode(scene, 30, 0, 20);
+	animNode6->getObject()->setDefaultAnim("dog_idle");
+	animNode6->getObject()->setSound("bark", "sounds/dog.wav");
 
 	Node* animNode = new StaticNode(vec3(0.0));
 	animNode->attachChild(scene, animNode1);

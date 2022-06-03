@@ -68,10 +68,11 @@ public:
 	virtual void updateDrawcall() = 0;
 	void updateNode(const Scene* scene);
 	void pushToUpdate(Scene* scene);
+	void cancelFromUpdate();
 
 	void updateBounding();
 	virtual void addObject(Scene* scene, Object* object);
-	virtual Object* removeObject(Scene* scene, Object* object);
+	virtual Object* removeObject(Object* object);
 	void attachChild(Scene* scene, Node* child);
 	Node* detachChild(Node* child);
 	virtual void translateNode(Scene* scene, float x, float y, float z);

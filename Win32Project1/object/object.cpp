@@ -4,6 +4,7 @@
 #include "../constants/constants.h"
 
 Object::Object() {
+	belong = NULL;
 	parent = NULL;
 	position = vec3(0.0);
 	size = vec3(1.0);
@@ -47,6 +48,7 @@ Object::Object() {
 }
 
 Object::Object(const Object& rhs) {
+	belong = rhs.belong;
 	parent = rhs.parent;
 	if (rhs.billboard)
 		billboard = new Billboard(*rhs.billboard);
@@ -244,6 +246,7 @@ CollisionObject* Object::initCollisionObject() {
 }
 
 void Object::removeCollisionObject() {
+	if (collisionObject) delete collisionObject;
 	collisionObject = NULL;
 }
 

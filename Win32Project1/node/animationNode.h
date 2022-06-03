@@ -23,6 +23,7 @@ public:
 	virtual void updateRenderData() {}
 	virtual void updateDrawcall() { needUpdateDrawcall = false; }
 	void setAnimation(Scene* scene, Animation* anim);
+	virtual Object* removeObject(Object* object);
 	AnimationObject* getObject();
 	void animate(float velocity);
 	virtual void translateNode(Scene* scene, float x, float y, float z); // Local translate

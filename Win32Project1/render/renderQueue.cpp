@@ -19,6 +19,8 @@ RenderQueue::RenderQueue(int type, float midDis, float lowDis, ConfigArg* cfg) {
 
 	normalDrawcall = NULL, singleDrawcall = NULL, billbdDrawcall = NULL, animatDrawcall = NULL;
 	debugDrawcall = NULL;
+
+	forceUpdateInput = false;
 }
 
 RenderQueue::~RenderQueue() {
@@ -52,7 +54,10 @@ void RenderQueue::process(Scene* scene, Render* render, const RenderState* state
 				processor = new Processor(scene->meshGather, scene->meshBuffer, objectGather);
 			}
 		} else {
-			if (!staticDataReady()) processor->update();
+			if (!staticDataReady() || forceUpdateInput) {
+				processor->update();
+				if (forceUpdateInput) forceUpdateInput = false;
+			}
 			processor->clear(render);
 			processor->lod(render, state, param);
 			processor->rearrange(render);
@@ -148,6 +153,13 @@ void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camer
 			}
 		}
 	}
+}
+
+void ResetStaticQueueData(RenderQueue* queue, Scene* scene, Node* node) {
+	if (!queue->isStaticQueue()) return;
+	if (queue->objectGather) queue->objectGather->resetGroupObject();
+	InitNodeToQueue(queue, scene, node);
+	queue->forceUpdateData();
 }
 
 void InitNodeToQueue(RenderQueue* queue, Scene* scene, Node* node) {

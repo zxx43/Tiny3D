@@ -12,14 +12,29 @@ AnimationNode::AnimationNode(const vec3& boundingSize):
 	needUpdateDrawcall = false;
 }
 
-AnimationNode::~AnimationNode() {}
+AnimationNode::~AnimationNode() {
+	while (objects.size() > 0) {
+		Object* object = objects[objects.size() - 1];
+		delete removeObject(object);
+	}
+}
 
 void AnimationNode::setAnimation(Scene* scene, Animation* anim) {
 	animation = anim;
 	AnimationObject* object = new AnimationObject(animation);
 	Node::addObject(scene, object);
-	scene->addObject(object);
-	scene->addPlay(this);
+	if (object->belong) {
+		object->belong->addObject(object);
+		object->belong->addPlay(this);
+	}
+}
+
+Object* AnimationNode::removeObject(Object* object) {
+	if (object->belong) {
+		object->belong->removePlay(this);
+		object->belong->removeObject(object);
+	}
+	return Node::removeObject(object);
 }
 
 void AnimationNode::animate(float velocity) {

@@ -63,6 +63,8 @@ private:
 	IndirectDrawcall* billbdDrawcall;
 	IndirectDrawcall* animatDrawcall;
 	IndirectDrawcall* debugDrawcall;
+private:
+	bool forceUpdateInput;
 public:
 	ConfigArg* cfgArgs;
 	int queueType;
@@ -76,9 +78,11 @@ public:
 	void draw(Scene* scene, Camera* camera, Render* render, RenderState* state);
 	bool isDebugQueue() { return queueType == QUEUE_DEBUG; }
 	bool isStaticQueue() { return queueType == QUEUE_STATIC; }
+	void forceUpdateData() { forceUpdateInput = true; }
 	bool staticDataReady();
 };
 
+void ResetStaticQueueData(RenderQueue* queue, Scene* scene, Node* node);
 void InitNodeToQueue(RenderQueue* queue, Scene* scene, Node* node);
 void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camera, Camera* mainCamera);
 void PushDebugToQueue(RenderQueue* queue, Scene* scene, Camera* camera);

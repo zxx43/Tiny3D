@@ -21,9 +21,11 @@
 #define OBJ_TYPE_ANIMAT 2
 #endif
 
+class Scene;
 class Node;
 class Object {
 public:
+	Scene* belong;
 	Node* parent;
 	vec3 position; // Object local position
 	vec3 size;

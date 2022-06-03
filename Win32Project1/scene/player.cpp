@@ -189,9 +189,13 @@ void Player::keyDown(Input* input, const Scene* scene) {
 	if (input->getBoards()[KEY_3]) cid = 3;
 	if (input->getBoards()[KEY_V]) cid = -1;
 	if (cid > -2) {
-		input->setControl(cid);
-		if(cid < 0) setNode(NULL, NULL);
-		else setNode(scene->animPlayers[cid], scene->actCamera);
+		if (cid < 0 || cid >= scene->animPlayers.size() || scene->animPlayers[cid]->getObject()->animation->name != "ninja") {
+			input->setControl(-1);
+			setNode(NULL, NULL);
+		} else {
+			input->setControl(cid);
+			setNode(scene->animPlayers[cid], scene->actCamera);
+		}
 	}
 }
 

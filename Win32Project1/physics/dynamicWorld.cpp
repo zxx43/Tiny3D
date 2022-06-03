@@ -38,7 +38,6 @@ void DynamicWorld::addObject(CollisionObject* cob) {
 void DynamicWorld::removeObject(CollisionObject* cob) {
 	dynamicsWorld->removeRigidBody(cob->object);
 	objects.remove(cob);
-	delete cob;
 }
 
 void DynamicWorld::act(float dtime) {

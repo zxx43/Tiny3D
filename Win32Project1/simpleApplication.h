@@ -27,6 +27,7 @@ private:
 	bool drawNormal;
 	bool drawBounding;
 	int depthLevel;
+	uint timer;
 public:
 	SimpleApplication();
 	virtual ~SimpleApplication();

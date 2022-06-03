@@ -148,6 +148,14 @@ void RenderManager::updateRenderQueues(Scene* scene) {
 	if (cfgs->debug && scene->isInited()) PushDebugToQueue(debugQueue, scene, cameraMain);
 }
 
+void RenderManager::flushRenderQueueDatas(Scene* scene) {
+	if (scene->staticDatasShouldFlush()) {
+		if (queue1) ResetStaticQueueData(queue1->queues[QUEUE_STATIC], scene, scene->root);
+		if (queue2) ResetStaticQueueData(queue2->queues[QUEUE_STATIC], scene, scene->root);
+		scene->staticDatasFlushed();
+	}
+}
+
 void RenderManager::swapRenderQueues(Scene* scene, bool swapQueue) {
 	if (swapQueue) {
 		currentQueue = (currentQueue == queue1) ? queue2 : queue1;
@@ -171,6 +179,7 @@ void RenderManager::prepareData(Scene* scene) {
 	updateWaterVisible(scene);
 	flushRenderQueues(scene);
 	updateRenderQueues(scene);
+	flushRenderQueueDatas(scene);
 }
 
 void RenderManager::updateDebugData(Scene* scene) {
@@ -426,7 +435,6 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	// Draw sky
 	if (scene->skyBox) scene->skyBox->draw(render, skyShader, camera);
 
-	scene->flushNodes();
 	if (needResize) needResize = false;
 }
 

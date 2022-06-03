@@ -25,6 +25,7 @@ class StaticObject;
 class Scene {
 private:
 	bool inited;
+	bool needUpdateStatics;
 private:
 	void initNodes();
 public:
@@ -74,8 +75,10 @@ public:
 	void updateNodes();
 	void flushNodes();
 	void updateReflectCamera();
-	void addObject(Object* object, bool isPhysic = true);
+	void addObject(Object* object);
+	void removeObject(Object* object);
 	void addPlay(AnimationNode* node);
+	void removePlay(AnimationNode* node);
 	void finishInit() { inited = true; }
 	bool isInited() { return inited; }
 	void act(float dTime) { time = dTime * 0.025; }
@@ -83,6 +86,9 @@ public:
 	void addSound(SoundObject* sound) { sounds.push_back(sound); }
 	void playSounds();
 	void updateListenerPosition() { soundMgr->setListenerPosition(actCamera->position); }
+	void flushStaticDatas() { needUpdateStatics = true; }
+	void staticDatasFlushed() { needUpdateStatics = false; }
+	bool staticDatasShouldFlush() { return needUpdateStatics; }
 public: // Just for debugging
 	void updateNodeAABB(Node* node);
 	void clearAllAABB();
@@ -90,11 +96,11 @@ private:
 	void updateAABBMesh(AABB* aabb, const char* mat, const char* mesh);
 	void updateAABBWater(AABB* aabb, const char* mat, const vec3& exTrans, const vec3& exScale);
 private:
-	std::list<AnimationNode*> animationNodes;
-	std::list<StaticObject*> dynamicObjects;
-public:
-	void removeAnimationNode(AnimationNode* node) { animationNodes.remove(node); }
-	void removeDynamicObject(StaticObject* object) { dynamicObjects.remove(object); }
+	std::list<AnimationObject*> animationPhyObjects;
+	std::list<StaticObject*> dynamicPhyObjects;
+private:
+	void removeAnimationPhy(AnimationObject* object) { animationPhyObjects.remove(object); }
+	void removeDynamicPhy(StaticObject* object) { dynamicPhyObjects.remove(object); }
 public:
 	void initAnimNodes();
 	void updateAnimNodes();

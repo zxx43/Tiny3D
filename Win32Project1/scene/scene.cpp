@@ -34,11 +34,10 @@ Scene::Scene() {
 	initNodes();
 	boundingNodes.clear();
 	animPlayers.clear();
-	animationNodes.clear();
-	dynamicObjects.clear();
+	animationPhyObjects.clear();
+	dynamicPhyObjects.clear();
 	Node::nodesToUpdate.clear();
 	Node::nodesToRemove.clear();
-	Instance::instanceTable.clear();
 
 	collisionWorld = new DynamicWorld();
 	soundMgr = new SoundManager();
@@ -48,6 +47,8 @@ Scene::Scene() {
 	debugMeshMgr = new MeshManager();
 	meshGather = NULL, meshBuffer = NULL;
 	debugMeshGather = NULL, debugMeshBuffer = NULL;
+
+	needUpdateStatics = false;
 }
 
 Scene::~Scene() {
@@ -67,8 +68,8 @@ Scene::~Scene() {
 	}
 	clearAllAABB();
 	animPlayers.clear();
-	animationNodes.clear();
-	dynamicObjects.clear();
+	animationPhyObjects.clear();
+	dynamicPhyObjects.clear();
 
 	delete collisionWorld;
 	for (uint i = 0; i < sounds.size(); ++i)
@@ -271,20 +272,20 @@ void Scene::clearAllAABB() {
 	boundingNodes.clear();
 }
 
-void Scene::addObject(Object* object, bool isPhysic) {
-	if (!object->mesh) { // Animation object
-		AnimationObject* animObj = (AnimationObject*)object;
-		if (animObj) {
-			if (animObj->parent)
-				animationNodes.push_back((AnimationNode*)(animObj->parent));
+void Scene::addObject(Object* object) {
+	if (!object->isDebug()) {
+		if (object->type == OBJ_TYPE_ANIMAT) { // Animation object
+			AnimationObject* animObj = (AnimationObject*)object;
+			if (animObj && animObj->parent)
+				animationPhyObjects.push_back(animObj);
+		} else {
+			StaticObject* obj = (StaticObject*)object;
+			if (obj->parent && obj->isDynamic())
+				dynamicPhyObjects.push_back(obj);
 		}
-	} else { 
-		StaticObject* obj = (StaticObject*)object;
-		if (obj->parent && obj->isDynamic())
-			dynamicObjects.push_back(obj);
 	}
 	
-	if (isPhysic) {
+	if (object->isPhysic()) {
 		object->caculateCollisionShape();
 		CollisionObject* cob = object->initCollisionObject();
 		collisionWorld->addObject(cob);
@@ -292,16 +293,51 @@ void Scene::addObject(Object* object, bool isPhysic) {
 
 	if (object->isDebug()) debugMeshMgr->addObject(object);
 	else meshMgr->addObject(object);
+
+	if (!object->isDebug() && object->type == OBJ_TYPE_STATIC && !object->isDynamic()) flushStaticDatas();
+}
+
+void Scene::removeObject(Object* object) {
+	if (object->isPhysic()) {
+		collisionWorld->removeObject(object->collisionObject);
+		object->removeCollisionObject();
+	}
+
+	if (!object->isDebug()) {
+		if (object->type == OBJ_TYPE_ANIMAT)
+			removeAnimationPhy((AnimationObject*)object);
+		else if (object->type == OBJ_TYPE_STATIC) {
+			if (object->isDynamic()) removeDynamicPhy((StaticObject*)object);
+		}
+	}
+
+	if (!object->isDebug() && object->type == OBJ_TYPE_STATIC && !object->isDynamic()) flushStaticDatas();
 }
 
 void Scene::addPlay(AnimationNode* node) {
 	animPlayers.push_back(node);
 }
 
+void Scene::removePlay(AnimationNode* node) {
+	std::vector<AnimationNode*>::iterator it = animPlayers.begin();
+	while (it != animPlayers.end()) {
+		if (*it == node) {
+			animPlayers.erase(it);
+			break;
+		}
+		++it;
+	}
+}
+
 void Scene::initAnimNodes() {
-	list<AnimationNode*>::iterator it;
-	for (it = animationNodes.begin(); it != animationNodes.end(); ++it) 
-		(*it)->doUpdateNodeTransform(this, true, true, true);
+	list<AnimationObject*>::iterator it;
+	for (it = animationPhyObjects.begin(); it != animationPhyObjects.end(); ++it) {
+		AnimationObject* object = *it;
+		if (object->parent) {
+			AnimationNode* animNode = (AnimationNode*)(object->parent);
+			animNode->doUpdateNodeTransform(this, true, true, true);
+		}
+	}
 }
 
 // Read collision transform to render data
@@ -318,9 +354,9 @@ void Scene::synPhysics2Graphic(StaticObject* object) {
 
 void Scene::updateDynamicNodes() {
 	list<StaticObject*>::iterator it;
-	for (it = dynamicObjects.begin(); it != dynamicObjects.end(); ++it) {
+	for (it = dynamicPhyObjects.begin(); it != dynamicPhyObjects.end(); ++it) {
 		StaticObject* object = *it;
-		if (!object->collisionObject || object->collisionObject->isStatic()) continue;
+		if (!object->collisionObject || object->collisionObject->isStatic() || !object->parent) continue;
 		synPhysics2Graphic(object); // Read back collision transform
 		object->standOnGround(this); // Stand object on ground after collision (no terrain collision) & update object's bounding box
 		object->updateObjectTransform(true, true); // Send render data for using
@@ -341,24 +377,26 @@ void Scene::synPhysics2Graphic(AnimationNode* node, AnimationObject* object) {
 
 // Update animation nodes' transform & aabb after collision
 void Scene::updateAnimNodes() {
-	list<AnimationNode*>::iterator it;
-	for (it = animationNodes.begin(); it != animationNodes.end(); ++it) {
-		AnimationNode* node = *it;
-		AnimationObject* object = node->getObject();
-		if (!object->collisionObject || object->collisionObject->isStatic()) continue;
+	list<AnimationObject*>::iterator it;
+	for (it = animationPhyObjects.begin(); it != animationPhyObjects.end(); ++it) {
+		AnimationObject* object = *it;
+		if (object->parent) {
+			AnimationNode* node = (AnimationNode*)(object->parent);
+			if (!object || !object->collisionObject || object->collisionObject->isStatic()) continue;
 
-		synPhysics2Graphic(node, object); // Read back collision transform
-		terrainNode->standObjectsOnGround(this, node); // Stand animation nodes on ground after collision (no terrain collision)
-		node->boundingBox->update(GetTranslate(node->nodeTransform)); // Update bounding box after terrain collision
-		Node* superior = node->parent;
-		while (superior) {
-			superior->updateBounding();
-			superior = superior->parent;
+			synPhysics2Graphic(node, object); // Read back collision transform
+			terrainNode->standObjectsOnGround(this, node); // Stand animation nodes on ground after collision (no terrain collision)
+			node->boundingBox->update(GetTranslate(node->nodeTransform)); // Update bounding box after terrain collision
+			Node* superior = node->parent;
+			while (superior) {
+				superior->updateBounding();
+				superior = superior->parent;
+			}
+
+			object->updateObjectTransform(true, true); // Send render data for using
+			if (player->getNode() == node)
+				player->setPosition(node->position);
 		}
-
-		object->updateObjectTransform(true, true); // Send render data for using
-		if (player->getNode() == node)
-			player->setPosition(node->position);
 	}
 }
 
