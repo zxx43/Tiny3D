@@ -440,7 +440,7 @@ void SimpleApplication::act(long startTime, long currentTime, float dTime, float
 		}
 	}
 	//*/
-	///*
+	/*
 	static bool created1 = false;
 	if (timer > 5000) {
 		if (!created1) {
@@ -522,7 +522,7 @@ void SimpleApplication::act(long startTime, long currentTime, float dTime, float
 	//	}
 	//}
 	//*/
-	///*
+	/*
 	static bool animAdded1 = false;
 	if (timer > 3500) {
 		if (!animAdded1) {
@@ -577,6 +577,7 @@ void SimpleApplication::act(long startTime, long currentTime, float dTime, float
 	if (!cfgs->ssr) scene->updateReflectCamera();
 
 	scene->flushNodes();
+	if (!cfgs->dualthread) timer += 2;
 	if (cfgs->debug) timer += 5;
 	else timer++;
 }

@@ -48,8 +48,6 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 	nextQueue = queue2;
 	renderData = NULL;
 
-	debugQueue = new RenderQueue(QUEUE_DEBUG, distance1, distance2, cfgs);
-
 	state = new RenderState();
 
 	reflectBuffer = NULL;
@@ -80,7 +78,6 @@ RenderManager::~RenderManager() {
 
 	delete queue1; queue1 = NULL;
 	delete queue2; queue2 = NULL;
-	delete debugQueue; debugQueue = NULL;
 
 	delete state; state = NULL;
 	if (reflectBuffer) delete reflectBuffer; reflectBuffer = NULL;
@@ -128,7 +125,6 @@ void RenderManager::updateSky() {
 
 void RenderManager::flushRenderQueues(Scene* scene) {
 	if (renderData) renderData->flush(scene);
-	if (debugQueue) debugQueue->flush(scene);
 }
 
 void RenderManager::updateRenderQueues(Scene* scene) {
@@ -153,8 +149,9 @@ void RenderManager::updateRenderQueues(Scene* scene) {
 
 	if (!renderData->queues[QUEUE_STATIC]->staticDataReady() && renderData->queues[QUEUE_STATIC]->isObjGatherPrepared())
 		InitNodeToQueue(renderData->queues[QUEUE_STATIC], scene, scene->root);
-	
-	if (cfgs->debug && scene->isInited() && debugQueue->isObjGatherPrepared()) PushDebugToQueue(debugQueue, scene, cameraMain);
+
+	if (cfgs->debug && scene->isInited() && renderData->queues[QUEUE_DEBUG]->isObjGatherPrepared())
+		PushDebugToQueue(renderData->queues[QUEUE_DEBUG], scene, cameraMain);
 }
 
 void RenderManager::flushRenderQueueDatas(Scene* scene) {
@@ -208,6 +205,7 @@ void RenderManager::clearRenderDatas(Scene* scene) {
 			queue1->queues[QUEUE_DYN_SFAR]->clearRenderData();
 			queue1->queues[QUEUE_DYN_MAIN]->clearRenderData();
 			queue1->queues[QUEUE_STATIC]->clearRenderData();
+			queue1->queues[QUEUE_DEBUG]->clearRenderData();
 		}
 		if (queue2) {
 			queue2->queues[QUEUE_DYN_SNEAR]->clearRenderData();
@@ -215,8 +213,8 @@ void RenderManager::clearRenderDatas(Scene* scene) {
 			queue2->queues[QUEUE_DYN_SFAR]->clearRenderData();
 			queue2->queues[QUEUE_DYN_MAIN]->clearRenderData();
 			queue2->queues[QUEUE_STATIC]->clearRenderData();
+			queue2->queues[QUEUE_DEBUG]->clearRenderData();
 		}
-		debugQueue->clearRenderData();
 
 		scene->releaseMeshBuffer();
 		scene->releaseDebugBuffer();
@@ -247,6 +245,7 @@ void RenderManager::resetRenderDatas(Scene* scene) {
 			queue1->queues[QUEUE_DYN_SFAR]->resetObjGatherFin();
 			queue1->queues[QUEUE_DYN_MAIN]->resetObjGatherFin();
 			queue1->queues[QUEUE_STATIC]->resetObjGatherFin();
+			queue1->queues[QUEUE_DEBUG]->resetObjGatherFin();
 		}
 		if (queue2) {
 			queue2->queues[QUEUE_DYN_SNEAR]->resetObjGatherFin();
@@ -254,20 +253,17 @@ void RenderManager::resetRenderDatas(Scene* scene) {
 			queue2->queues[QUEUE_DYN_SFAR]->resetObjGatherFin();
 			queue2->queues[QUEUE_DYN_MAIN]->resetObjGatherFin();
 			queue2->queues[QUEUE_STATIC]->resetObjGatherFin();
+			queue2->queues[QUEUE_DEBUG]->resetObjGatherFin();
 		}
-		debugQueue->resetObjGatherFin();
 		resetRender = false;
 	}
 }
 
 void RenderManager::updateDebugData(Scene* scene) {
-	if (cfgs->debug && scene->isInited() && debugQueue->isObjGatherPrepared()) {
+	if (cfgs->debug && scene->isInited()) {
 		scene->updateNodeAABB(scene->water);
 		scene->updateNodeAABB(scene->terrainNode);
 		scene->updateNodeAABB(scene->root);
-		if (!scene->debugMeshGather) {
-			scene->createDebugGather();
-		}
 	}
 }
 
@@ -506,8 +502,8 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	// Debug mode
 	if (cfgs->debug && scene->isInited()) {
 		state->debug = true;
-		debugQueue->process(scene, render, state, lodParam);
-		debugQueue->draw(scene, camera, render, state);
+		currentQueue->queues[QUEUE_DEBUG]->process(scene, render, state, lodParam);
+		currentQueue->queues[QUEUE_DEBUG]->draw(scene, camera, render, state);
 	}
 
 	// Draw sky

@@ -9,7 +9,7 @@
 #include "../render/indirectDrawcall.h"
 
 #ifndef QUEUE_STATIC
-#define QUEUE_SIZE      5
+#define QUEUE_SIZE      6
 #define QUEUE_STATIC    0
 #define QUEUE_DYN_SNEAR 1
 #define QUEUE_DYN_SMID  2

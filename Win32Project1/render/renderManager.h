@@ -54,8 +54,6 @@ private:
 	LodParam lodParam;
 private:
 	bool clearRender, resetRender, resetGather;
-private:
-	RenderQueue* debugQueue;
 public:
 	Renderable* renderData;
 	Renderable* queue1;
