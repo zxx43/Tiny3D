@@ -49,6 +49,7 @@ Scene::Scene() {
 	debugMeshGather = NULL, debugMeshBuffer = NULL;
 
 	needUpdateStatics = false;
+	needAddObject = false;
 }
 
 Scene::~Scene() {
@@ -294,7 +295,8 @@ void Scene::addObject(Object* object) {
 	if (object->isDebug()) debugMeshMgr->addObject(object);
 	else meshMgr->addObject(object);
 
-	if (!object->isDebug() && object->type == OBJ_TYPE_STATIC && !object->isDynamic()) flushStaticDatas();
+	//if (!object->isDebug() && object->type == OBJ_TYPE_STATIC && !object->isDynamic()) flushStaticDatas(); // refreshed in renderManager
+	needAddObject = true;
 }
 
 void Scene::removeObject(Object* object) {

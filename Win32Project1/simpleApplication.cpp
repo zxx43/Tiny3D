@@ -260,6 +260,9 @@ void SimpleApplication::draw() {
 	//renderMgr->drawTexture2Screen(render, scene, screen->getColorBuffer(2)->hnd);
 	//*/
 
+	renderMgr->clearRenderDatas(scene);
+	renderMgr->resetRenderDatas(scene);
+
 	render->finishDraw();
 }
 
@@ -336,13 +339,19 @@ void SimpleApplication::act(long startTime, long currentTime, float dTime, float
 		float rsin = sinf(radian);
 		man->translateNode(scene, man->position.x + 0.04 * rsin, man->position.y, man->position.z + 0.04 * rcos);
 	}
-	//static Node* dynObjs = scene->staticRoot->children[7];
-	//for (int i = 0; i < dynObjs->objects.size(); ++i) {
-	//	dynObjs->rotateNodeObject(scene, i, 0, currentTime * 0.01, 0);
-	//	dynObjs->translateNodeObject(scene, i, dynObjs->objects[i]->position.x + 0.01, dynObjs->objects[i]->position.y + 10.0, dynObjs->objects[i]->position.z + 0.01);
-	//}
-	//scene->terrainNode->standObjectsOnGround(scene, dynObjs);
 
+	static Node* dynObjs = scene->staticRoot->children[7];
+	/*
+	if (dynObjs) {
+		for (int i = 0; i < dynObjs->objects.size(); ++i) {
+			if (dynObjs->objects[i]->isDynamic()) {
+				dynObjs->rotateNodeObject(scene, i, 0, currentTime * 0.1, 0);
+				dynObjs->translateNodeObject(scene, i, dynObjs->objects[i]->position.x + 0.01, dynObjs->objects[i]->position.y + 10.0, dynObjs->objects[i]->position.z + 0.01);
+			}
+		}
+		scene->terrainNode->standObjectsOnGround(scene, dynObjs);
+	}
+	//*/
 	static AnimationNode* ninja = (AnimationNode*)node->children[1];
 	static AnimationNode* barker = (AnimationNode*)node->children[3];
 	static Node* target1 = scene->staticRoot->children[1];
@@ -398,36 +407,153 @@ void SimpleApplication::act(long startTime, long currentTime, float dTime, float
 			target2->pushToRemove();
 			target2 = NULL;
 		}
-	} 
+	}
 	if (timer > 15500) {
 		if (target3) {
 			target3->pushToRemove();
 			target3 = NULL;
 		}
-	} 
+	}
 	if (timer > 16500) {
 		if (target4) {
 			target4->pushToRemove();
 			target4 = NULL;
 		}
-	} 
+	}
 	if (timer > 17500) {
 		if (target5) {
 			target5->pushToRemove();
 			target5 = NULL;
 		}
-	} 
+	}
 	if (timer > 18500) {
 		if (target6) {
 			target6->pushToRemove();
 			target6 = NULL;
 		}
-	} 
+	}
 	if (timer > 20000) {
 		if (target1) {
 			target1->pushToRemove();
 			target1 = NULL;
 			printf("all tree killed\n");
+		}
+	}
+	//*/
+	///*
+	static bool created1 = false;
+	if (timer > 5000) {
+		if (!created1) {
+			StaticObject* sphere = new StaticObject(AssetManager::assetManager->meshes["sphere"]);
+			sphere->bindMaterial(MaterialManager::materials->find("iron_mat"));
+			sphere->setSize(5, 5, 5);
+			sphere->setPosition(0, 0, 0);
+			sphere->setDynamic(true);
+			dynObjs->addObject(scene, sphere);
+
+			StaticObject* house = new StaticObject(AssetManager::assetManager->meshes["house"]);
+			house->setSize(2, 2, 2);
+			house->setPosition(5, 0, 5);
+			dynObjs->addObject(scene, house);
+
+			printf("added1!!\n");
+			created1 = true;
+
+			scene->terrainNode->standObjectsOnGround(scene, dynObjs);
+		}
+	}
+
+	static bool created2 = false;
+	if (timer > 5500) {
+		if (!created2) {
+			StaticObject* sphere = new StaticObject(AssetManager::assetManager->meshes["sphere"]);
+			sphere->bindMaterial(MaterialManager::materials->find("gold_mat"));
+			sphere->setSize(5, 5, 5);
+			sphere->setPosition(4, 0, 1);
+			sphere->setDynamic(true);
+			dynObjs->addObject(scene, sphere);
+
+			printf("added2!!\n");
+			created2 = true;
+
+			scene->terrainNode->standObjectsOnGround(scene, dynObjs);
+		}
+	}
+
+	static bool created3 = false;
+	if (timer > 6000) {
+		if (!created3) {
+			StaticObject* sphere = new StaticObject(AssetManager::assetManager->meshes["sphere"]);
+			sphere->bindMaterial(MaterialManager::materials->find("streaky_mat"));
+			sphere->setSize(5, 5, 5);
+			sphere->setPosition(3, 0, 5);
+			sphere->setDynamic(true);
+			dynObjs->addObject(scene, sphere);
+
+			printf("added3!!\n");
+			created3 = true;
+
+			scene->terrainNode->standObjectsOnGround(scene, dynObjs);
+		}
+	}
+
+	//static bool deleted = false;
+	//if (timer > 12000) {
+	//	if (!deleted) {
+	//		while (dynObjs->objects.size() > 0) {
+	//			delete dynObjs->removeObject(dynObjs->objects[dynObjs->objects.size() - 1]);
+	//		}
+	//		deleted = true;
+	//	}
+	//}
+
+	//static bool created4 = false;
+	//if (timer > 16000) {
+	//	if (!created4) {
+	//		StaticObject* house = new StaticObject(AssetManager::assetManager->meshes["house"]);
+	//		house->setSize(4, 4, 4);
+	//		house->setPosition(5, 0, 5);
+	//		house->setDynamic(true);
+	//		dynObjs->addObject(scene, house);
+
+	//		created4 = true;
+
+	//		scene->terrainNode->standObjectsOnGround(scene, dynObjs);
+	//	}
+	//}
+	//*/
+	///*
+	static bool animAdded1 = false;
+	if (timer > 3500) {
+		if (!animAdded1) {
+			AnimationNode* ninja = new AnimationNode(vec3(5, 10, 5));
+			ninja->setAnimation(scene, AssetManager::assetManager->animations["ninja"]);
+			ninja->scaleNodeObject(scene, 0.05, 0.05, 0.05);
+			ninja->getObject()->setPosition(0, -5, -1);
+			ninja->translateNode(scene, 20, 0, 20);
+			ninja->rotateNodeObject(scene, 0, 15, 0);
+			ninja->getObject()->setDefaultAnim("idle2");
+			ninja->getObject()->bindMaterial(MaterialManager::materials->find("cloth_red"));
+			scene->animationRoot->attachChild(scene, ninja);
+
+			animAdded1 = true;
+			printf("anim added1\n");
+		}
+	}
+	static bool animAdded2 = false;
+	if (timer > 5500) {
+		if (!animAdded2) {
+			AnimationNode* ninja = new AnimationNode(vec3(5, 10, 5));
+			ninja->setAnimation(scene, AssetManager::assetManager->animations["ninja"]);
+			ninja->scaleNodeObject(scene, 0.05, 0.05, 0.05);
+			ninja->getObject()->setPosition(0, -5, -1);
+			ninja->translateNode(scene, 50, 0, 50);
+			ninja->rotateNodeObject(scene, 0, 135, 0);
+			ninja->getObject()->setDefaultAnim("idle3");
+			scene->animationRoot->attachChild(scene, ninja);
+
+			animAdded2 = true;
+			printf("anim added2\n");
 		}
 	}
 	//*/
@@ -440,6 +566,9 @@ void SimpleApplication::act(long startTime, long currentTime, float dTime, float
 	updateMovement();
 
 	renderMgr->updateDebugData(scene);
+
+	renderMgr->clearGatherDatas(scene);
+	renderMgr->resetGatherDatas(scene);
 
 	//if (ninja) ninja->getObject()->playEffect("wang");
 	if (barker) barker->getObject()->playEffect("bark");

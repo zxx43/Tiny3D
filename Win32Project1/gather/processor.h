@@ -26,6 +26,7 @@ class Texture2D;
 class Processor {
 private:
 	bool inputPushed;
+	int maxSub;
 public:
 	static const uint IndNormalIndex, IndSingleIndex, IndBillbdIndex, IndAnimatIndex;
 	static const uint OutputNormal, OutputSingle, OutputBillbd, OutputAnimat;

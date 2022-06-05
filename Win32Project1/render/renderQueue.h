@@ -65,6 +65,7 @@ private:
 	IndirectDrawcall* debugDrawcall;
 private:
 	bool forceUpdateInput;
+	bool objGatherPrepared;
 public:
 	ConfigArg* cfgArgs;
 	int queueType;
@@ -76,11 +77,15 @@ public:
 	void flush(Scene* scene);
 	void process(Scene* scene, Render* render, const RenderState* state, const LodParam& param);
 	void draw(Scene* scene, Camera* camera, Render* render, RenderState* state);
+	void clearRenderData();
 	bool isDebugQueue() { return queueType == QUEUE_DEBUG; }
 	bool isStaticQueue() { return queueType == QUEUE_STATIC; }
 	void forceUpdateData() { forceUpdateInput = true; }
 	void finishForceUpdate() { forceUpdateInput = false; }
 	bool staticDataReady();
+	void needResetObjGather() { objGatherPrepared = false; }
+	void resetObjGatherFin() { objGatherPrepared = true; }
+	bool isObjGatherPrepared() { return objGatherPrepared; }
 };
 
 void ResetStaticQueueData(RenderQueue* queue, Scene* scene, Node* node);

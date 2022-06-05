@@ -26,6 +26,7 @@ class Scene {
 private:
 	bool inited;
 	bool needUpdateStatics;
+	bool needAddObject;
 private:
 	void initNodes();
 public:
@@ -89,6 +90,8 @@ public:
 	void flushStaticDatas() { needUpdateStatics = true; }
 	void staticDatasFlushed() { needUpdateStatics = false; }
 	bool staticDatasShouldFlush() { return needUpdateStatics; }
+	void finAddObject() { needAddObject = false; }
+	bool isNeedAddObject() { return needAddObject; }
 public: // Just for debugging
 	void updateNodeAABB(Node* node);
 	void clearAllAABB();

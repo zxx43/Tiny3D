@@ -29,10 +29,11 @@ Processor::Processor(const MeshGather* meshs, const MeshBuffer* meshVBs, const O
 	indSingleCount = meshDB->singles->count;
 	indBillbdCount = meshDB->billbds->count;
 	indAnimatCount = meshDB->animats->count;
+	maxSub = meshDB->maxSubCount;
 
 	buffer = new RenderBuffer(12, false);
 	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, DispatchIndex, GL_ONE, sizeof(DispatchIndirect), GL_STREAM_DRAW, NULL);
-	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, CountDataIndex, GL_UNSIGNED_INT, meshDB->maxSubCount, 4, GL_STREAM_DRAW, NULL);
+	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, CountDataIndex, GL_UNSIGNED_INT, maxSub, 4, GL_STREAM_DRAW, NULL);
 	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, Processor::IndNormalIndex, GL_ONE, indNormalCount * sizeof(Indirect), GL_STREAM_DRAW, meshDB->normals->buffer);
 	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, Processor::IndSingleIndex, GL_ONE, indSingleCount * sizeof(Indirect), GL_STREAM_DRAW, meshDB->singles->buffer);
 	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, Processor::IndBillbdIndex, GL_ONE, indBillbdCount * sizeof(Indirect), GL_STREAM_DRAW, meshDB->billbds->buffer);
@@ -63,7 +64,7 @@ void Processor::clear(Render* render) {
 
 	render->useShader(shader);
 	render->setShaderUVec4(shader, "uMeshCounts", indNormalCount, indSingleCount, indBillbdCount, indAnimatCount);
-	glDispatchCompute(meshDB->maxSubCount, 1, 1);
+	glDispatchCompute(maxSub, 1, 1);
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT);
 }
 
@@ -104,7 +105,7 @@ void Processor::rearrange(Render* render) {
 
 	render->useShader(shader);
 	render->setShaderUVec4(shader, "uMeshCounts", indNormalCount, indSingleCount, indBillbdCount, indAnimatCount);
-	glDispatchCompute(meshDB->maxSubCount, 1, 1);
+	glDispatchCompute(maxSub, 1, 1);
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 

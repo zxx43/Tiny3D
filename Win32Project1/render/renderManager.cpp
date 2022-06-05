@@ -67,6 +67,8 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 
 	lodParam.lodDist.x = distance1;
 	lodParam.lodDist.y = distance2;
+
+	clearRender = false, resetRender = false, resetGather = false;
 }
 
 RenderManager::~RenderManager() {
@@ -137,15 +139,22 @@ void RenderManager::updateRenderQueues(Scene* scene) {
 	Camera* cameraFar = shadow->actLightCameraFar;
 	Camera* cameraMain = scene->actCamera;
 
-	PushNodeToQueue(renderData->queues[QUEUE_DYN_SNEAR], scene, scene->root, cameraDyn, cameraMain);
-	PushNodeToQueue(renderData->queues[QUEUE_DYN_SMID], scene, scene->root, cameraMid, cameraMain);
-	if (cfgs->shadowQuality > 5) 
+	if (renderData->queues[QUEUE_DYN_SNEAR]->isObjGatherPrepared())
+		PushNodeToQueue(renderData->queues[QUEUE_DYN_SNEAR], scene, scene->root, cameraDyn, cameraMain);
+	
+	if (renderData->queues[QUEUE_DYN_SMID]->isObjGatherPrepared())
+		PushNodeToQueue(renderData->queues[QUEUE_DYN_SMID], scene, scene->root, cameraMid, cameraMain);
+	
+	if (cfgs->shadowQuality > 5 && renderData->queues[QUEUE_DYN_SFAR]->isObjGatherPrepared())
 		PushNodeToQueue(renderData->queues[QUEUE_DYN_SFAR], scene, scene->root, cameraFar, cameraMain);
-	PushNodeToQueue(renderData->queues[QUEUE_DYN_MAIN], scene, scene->root, cameraMain, cameraMain);
-	if (!renderData->queues[QUEUE_STATIC]->staticDataReady())
+	
+	if (renderData->queues[QUEUE_DYN_MAIN]->isObjGatherPrepared())
+		PushNodeToQueue(renderData->queues[QUEUE_DYN_MAIN], scene, scene->root, cameraMain, cameraMain);
+
+	if (!renderData->queues[QUEUE_STATIC]->staticDataReady() && renderData->queues[QUEUE_STATIC]->isObjGatherPrepared())
 		InitNodeToQueue(renderData->queues[QUEUE_STATIC], scene, scene->root);
 	
-	if (cfgs->debug && scene->isInited()) PushDebugToQueue(debugQueue, scene, cameraMain);
+	if (cfgs->debug && scene->isInited() && debugQueue->isObjGatherPrepared()) PushDebugToQueue(debugQueue, scene, cameraMain);
 }
 
 void RenderManager::flushRenderQueueDatas(Scene* scene) {
@@ -182,8 +191,77 @@ void RenderManager::prepareData(Scene* scene) {
 	flushRenderQueueDatas(scene);
 }
 
+void RenderManager::clearGatherDatas(Scene* scene) {
+	if (scene->isNeedAddObject()) {
+		scene->releaseMeshGather();
+		scene->releaseDebugGather();
+		clearRender = true;
+		scene->finAddObject();
+	}
+}
+
+void RenderManager::clearRenderDatas(Scene* scene) {
+	if (clearRender) {
+		if (queue1) {
+			queue1->queues[QUEUE_DYN_SNEAR]->clearRenderData();
+			queue1->queues[QUEUE_DYN_SMID]->clearRenderData();
+			queue1->queues[QUEUE_DYN_SFAR]->clearRenderData();
+			queue1->queues[QUEUE_DYN_MAIN]->clearRenderData();
+			queue1->queues[QUEUE_STATIC]->clearRenderData();
+		}
+		if (queue2) {
+			queue2->queues[QUEUE_DYN_SNEAR]->clearRenderData();
+			queue2->queues[QUEUE_DYN_SMID]->clearRenderData();
+			queue2->queues[QUEUE_DYN_SFAR]->clearRenderData();
+			queue2->queues[QUEUE_DYN_MAIN]->clearRenderData();
+			queue2->queues[QUEUE_STATIC]->clearRenderData();
+		}
+		debugQueue->clearRenderData();
+
+		scene->releaseMeshBuffer();
+		scene->releaseDebugBuffer();
+		clearRender = false;
+		resetGather = true;
+	}
+}
+
+void RenderManager::resetGatherDatas(Scene* scene) {
+	if (resetGather) {
+		scene->createMeshGather();
+		if (scene->boundingNodes.size() > 0) {
+			scene->updateNodeAABB(scene->water);
+			scene->updateNodeAABB(scene->terrainNode);
+			scene->updateNodeAABB(scene->root);
+			scene->createDebugGather();
+		}
+		resetGather = false;
+		resetRender = true;
+	}
+}
+
+void RenderManager::resetRenderDatas(Scene* scene) {
+	if (resetRender) {
+		if (queue1) {
+			queue1->queues[QUEUE_DYN_SNEAR]->resetObjGatherFin();
+			queue1->queues[QUEUE_DYN_SMID]->resetObjGatherFin();
+			queue1->queues[QUEUE_DYN_SFAR]->resetObjGatherFin();
+			queue1->queues[QUEUE_DYN_MAIN]->resetObjGatherFin();
+			queue1->queues[QUEUE_STATIC]->resetObjGatherFin();
+		}
+		if (queue2) {
+			queue2->queues[QUEUE_DYN_SNEAR]->resetObjGatherFin();
+			queue2->queues[QUEUE_DYN_SMID]->resetObjGatherFin();
+			queue2->queues[QUEUE_DYN_SFAR]->resetObjGatherFin();
+			queue2->queues[QUEUE_DYN_MAIN]->resetObjGatherFin();
+			queue2->queues[QUEUE_STATIC]->resetObjGatherFin();
+		}
+		debugQueue->resetObjGatherFin();
+		resetRender = false;
+	}
+}
+
 void RenderManager::updateDebugData(Scene* scene) {
-	if (cfgs->debug && scene->isInited()) {
+	if (cfgs->debug && scene->isInited() && debugQueue->isObjGatherPrepared()) {
 		scene->updateNodeAABB(scene->water);
 		scene->updateNodeAABB(scene->terrainNode);
 		scene->updateNodeAABB(scene->root);

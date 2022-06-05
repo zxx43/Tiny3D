@@ -53,6 +53,8 @@ private:
 	mat4 prevCameraMat;
 	LodParam lodParam;
 private:
+	bool clearRender, resetRender, resetGather;
+private:
 	RenderQueue* debugQueue;
 public:
 	Renderable* renderData;
@@ -82,6 +84,10 @@ public:
 	void updateRenderQueues(Scene* scene);
 	void flushRenderQueueDatas(Scene* scene);
 	void swapRenderQueues(Scene* scene, bool swapQueue);
+	void clearGatherDatas(Scene* sceen);
+	void clearRenderDatas(Scene* scene);
+	void resetGatherDatas(Scene* scene);
+	void resetRenderDatas(Scene* scene);
 	void prepareData(Scene* scene);
 	void updateDebugData(Scene* scene);
 	void renderShadow(Render* render,Scene* scene);

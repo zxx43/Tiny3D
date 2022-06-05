@@ -21,6 +21,7 @@ RenderQueue::RenderQueue(int type, float midDis, float lowDis, ConfigArg* cfg) {
 	debugDrawcall = NULL;
 
 	forceUpdateInput = false;
+	objGatherPrepared = true;
 }
 
 RenderQueue::~RenderQueue() {
@@ -37,6 +38,7 @@ RenderQueue::~RenderQueue() {
 }
 
 void RenderQueue::flush(Scene* scene) {
+	if (!objGatherPrepared) return;
 	if (staticDataReady()) return;
 
 	if (objectGather) objectGather->resetGroupObject();
@@ -44,6 +46,7 @@ void RenderQueue::flush(Scene* scene) {
 }
 
 void RenderQueue::process(Scene* scene, Render* render, const RenderState* state, const LodParam& param) {
+	if (!objGatherPrepared) return;
 	if (!isDebugQueue()) {
 		if (!scene->meshBuffer && scene->meshGather) scene->createMeshBuffer();
 		if (!objectGather) {
@@ -83,6 +86,7 @@ void RenderQueue::process(Scene* scene, Render* render, const RenderState* state
 }
 
 void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState* state) {
+	if (!objGatherPrepared) return;
 	if (isDebugQueue()) {
 		if (!debugDrawcall && scene->debugMeshBuffer && debugProcessor && debugProcessor->indNormalCount > 0) debugDrawcall = new IndirectDrawcall(debugProcessor, scene->debugMeshBuffer, INDIRECT_NORMAL);
 	} else {
@@ -104,6 +108,21 @@ void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState
 	}
 }
 
+void RenderQueue::clearRenderData() {
+	if (normalDrawcall) delete normalDrawcall; normalDrawcall = NULL;
+	if (singleDrawcall) delete singleDrawcall; singleDrawcall = NULL;
+	if (billbdDrawcall) delete billbdDrawcall; billbdDrawcall = NULL;
+	if (animatDrawcall) delete animatDrawcall; animatDrawcall = NULL;
+	if (processor) delete processor; processor = NULL;
+
+	if (debugDrawcall) delete debugDrawcall; debugDrawcall = NULL;
+	if (debugProcessor) delete debugProcessor; debugProcessor = NULL;
+
+	if (objectGather) delete objectGather; objectGather = NULL;
+	if (debugGather) delete debugGather; debugGather = NULL;
+	needResetObjGather();
+}
+
 bool RenderQueue::staticDataReady() { 
 	if (processor) return isStaticQueue() && processor->isInputPushed();
 	return false; 
@@ -115,7 +134,7 @@ void PushDebugToQueue(RenderQueue* queue, Scene* scene, Camera* camera) {
 			Node* node = scene->boundingNodes[i];
 			if (node->checkInCamera(camera) && node->objects.size() > 0) {
 				Object* object = node->objects[0];
-				if (object->isDebug()) queue->debugGather->addGroupObject(object);
+				if (object->isDebug() && queue->debugGather) queue->debugGather->addGroupObject(object);
 			}
 		}
 	}
@@ -137,14 +156,14 @@ void PushNodeToQueue(RenderQueue* queue, Scene* scene, Node* node, Camera* camer
 
 							if (queue->shadowLevel > 0 && !object->genShadow) continue;
 							if (object->isDebug()) continue;
-							if (object->sphereInCamera(camera)) {
+							if (object->sphereInCamera(camera) && queue->objectGather) {
 								queue->objectGather->addGroupObject(object);
 							}
 						}
 					} else if (child->type == TYPE_ANIMATE) {
 						AnimationNode* animNode = (AnimationNode*)child;
 						Object* object = animNode->getObject();
-						if (object && !object->isDebug()) {
+						if (object && !object->isDebug() && queue->objectGather) {
 							queue->objectGather->addGroupObject(object);
 							animNode->animate(scene->velocity);
 						}
@@ -172,7 +191,7 @@ void InitNodeToQueue(RenderQueue* queue, Scene* scene, Node* node) {
 			if (child->type == TYPE_INSTANCE) {
 				for (uint j = 0; j < child->staticObjects.size(); ++j) {
 					Object* object = child->staticObjects[j];
-					if (!object->isDebug()) queue->objectGather->addGroupObject(object);
+					if (!object->isDebug() && queue->objectGather) queue->objectGather->addGroupObject(object);
 				}
 			}
 		}
