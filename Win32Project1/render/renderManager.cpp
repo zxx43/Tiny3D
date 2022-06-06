@@ -226,12 +226,8 @@ void RenderManager::clearRenderDatas(Scene* scene) {
 void RenderManager::resetGatherDatas(Scene* scene) {
 	if (resetGather) {
 		scene->createMeshGather();
-		if (scene->boundingNodes.size() > 0) {
-			scene->updateNodeAABB(scene->water);
-			scene->updateNodeAABB(scene->terrainNode);
-			scene->updateNodeAABB(scene->root);
+		if (scene->boundingNodes.size() > 0) 
 			scene->createDebugGather();
-		}
 		resetGather = false;
 		resetRender = true;
 	}
