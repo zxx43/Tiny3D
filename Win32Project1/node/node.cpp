@@ -51,16 +51,18 @@ Node::~Node() {
 		parent = NULL;
 	}
 
+	objectsBBs.clear();
+	while (objects.size() > 0) {
+		Object* object = objects[objects.size() - 1];
+		delete removeObject(object);
+	}
+	objects.clear();
+
 	cancelFromUpdate(); // do not update node to be deleted
 
-	if(boundingBox)
+	if (boundingBox)
 		delete boundingBox;
-	boundingBox=NULL;
-
-	objectsBBs.clear();
-	for (uint i = 0; i < objects.size(); i++) 
-		delete objects[i];
-	objects.clear();
+	boundingBox = NULL;
 
 	if(drawcall)
 		delete drawcall;
