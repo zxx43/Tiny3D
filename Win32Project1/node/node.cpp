@@ -79,7 +79,6 @@ Node::~Node() {
 void Node::clearChildren() {
 	for(unsigned int i=0;i<children.size();i++) {
 		Node* child=children[i];
-		child->clearChildren();
 		delete child;
 	}
 	children.clear();
