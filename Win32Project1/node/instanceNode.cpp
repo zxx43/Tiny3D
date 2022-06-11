@@ -11,10 +11,7 @@ InstanceNode::InstanceNode(const vec3& position):Node(position, vec3(0, 0, 0)) {
 }
 
 InstanceNode::~InstanceNode() {
-	while (objects.size() > 0) {
-		Object* object = objects[objects.size() - 1];
-		delete removeObject(object);
-	}
+
 }
 
 void InstanceNode::addObject(Scene* scene, Object* object) {

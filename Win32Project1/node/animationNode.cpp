@@ -13,10 +13,7 @@ AnimationNode::AnimationNode(const vec3& boundingSize):
 }
 
 AnimationNode::~AnimationNode() {
-	while (objects.size() > 0) {
-		Object* object = objects[objects.size() - 1];
-		delete removeObject(object);
-	}
+
 }
 
 void AnimationNode::setAnimation(Scene* scene, Animation* anim) {

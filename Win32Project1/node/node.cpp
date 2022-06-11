@@ -61,7 +61,9 @@ Node::~Node() {
 	objectsBBs.clear();
 	while (objects.size() > 0) {
 		Object* object = objects[objects.size() - 1];
-		delete removeObject(object);
+		if (type == TYPE_INSTANCE) delete ((InstanceNode*)this)->InstanceNode::removeObject(object);
+		else if (type == TYPE_ANIMATE) delete ((AnimationNode*)this)->AnimationNode::removeObject(object);
+		else delete this->removeObject(object);
 	}
 	objects.clear();
 
