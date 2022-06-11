@@ -31,6 +31,10 @@ Node::Node(const vec3& position,const vec3& size) {
 }
 
 Node::~Node() {
+	// clear children first
+	nodeBBs.clear();
+	clearChildren();
+
 	if (parent) { // delete this node in parent node bounding list & children list
 		std::vector<BoundingBox*>::iterator itbb = parent->nodeBBs.begin();
 		while (itbb != parent->nodeBBs.end()) {
@@ -67,9 +71,6 @@ Node::~Node() {
 	if(drawcall)
 		delete drawcall;
 	drawcall=NULL;
-
-	nodeBBs.clear();
-	clearChildren();
 
 	staticObjects.clear();
 	dynamicObjects.clear();
