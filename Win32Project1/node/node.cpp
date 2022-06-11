@@ -55,6 +55,9 @@ Node::~Node() {
 		parent = NULL;
 	}
 
+	staticObjects.clear();
+	dynamicObjects.clear();
+
 	objectsBBs.clear();
 	while (objects.size() > 0) {
 		Object* object = objects[objects.size() - 1];
@@ -71,9 +74,6 @@ Node::~Node() {
 	if(drawcall)
 		delete drawcall;
 	drawcall=NULL;
-
-	staticObjects.clear();
-	dynamicObjects.clear();
 }
 
 void Node::clearChildren() {
