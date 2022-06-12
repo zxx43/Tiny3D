@@ -39,7 +39,7 @@ Processor::Processor(const MeshGather* meshs, const MeshBuffer* meshVBs, const O
 	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, Processor::IndBillbdIndex, GL_ONE, indBillbdCount * sizeof(Indirect), GL_STREAM_DRAW, meshDB->billbds->buffer);
 	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, Processor::IndAnimatIndex, GL_ONE, indAnimatCount * sizeof(Indirect), GL_STREAM_DRAW, meshDB->animats->buffer);
 	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, InputDataIndex, GL_FLOAT, objectDB->maxObjectSize, 16, GL_DYNAMIC_DRAW, NULL);
-	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, LodDataIndex, GL_FLOAT, objectDB->maxObjectSize, 20, GL_STREAM_DRAW, NULL);
+	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, LodDataIndex, GL_FLOAT, objectDB->maxObjectSize, 16, GL_STREAM_DRAW, NULL);
 	buffer->setAttribData(GL_SHADER_STORAGE_BUFFER, Processor::OutputNormal, MeshBuffer::OutputSlot, GL_FLOAT, objectDB->maxNormalSize, 4, 4, false, GL_STREAM_DRAW, 1, NULL);
 	buffer->setAttribData(GL_SHADER_STORAGE_BUFFER, Processor::OutputSingle, MeshBuffer::OutputSlot, GL_FLOAT, objectDB->maxSingleSize, 4, 4, false, GL_STREAM_DRAW, 1, NULL);
 	buffer->setAttribData(GL_SHADER_STORAGE_BUFFER, Processor::OutputBillbd, MeshBuffer::OutputSlot, GL_FLOAT, objectDB->maxBillbdSize, 4, 4, false, GL_STREAM_DRAW, 1, NULL);

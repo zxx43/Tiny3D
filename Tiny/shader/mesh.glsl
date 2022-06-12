@@ -53,7 +53,6 @@ struct MeshObject {
 	vec4 quat;     // quat x,y,z,w
 	vec3 scale;    // scale
 	float mtl;     // mtlid
-	vec4 bound;    // bounding box
 	vec4 meshid;   // nmeshid smeshid bmeshid ameshid | aid aframes bmeshid ameshid
 };
 

@@ -108,7 +108,6 @@ void main() {
 			lodObjects[addIndex].quat = DecodeQuat(object.rotat);
 			lodObjects[addIndex].scale = vec3(GetScaleMain(object), GetScaleOther(object));
 			lodObjects[addIndex].mtl = GetMtl(object);
-			lodObjects[addIndex].bound = object.bound;
 			lodObjects[addIndex].meshid = vec4(ivec4(normalMid, singleMid, billbdMid, animatMid));
 					
 			if(MidValid(normalMid)) atomicAdd(countBuff[normalMid].x, 1);
@@ -121,7 +120,6 @@ void main() {
 			vec3 scale = UniformScale(object) ? vec3(GetScaleMain(object)) : UnpackFloat2Vec(GetScaleMain(object));
 			lodObjects[addIndex].scale = scale;
 			lodObjects[addIndex].mtl = GetMtl(object);
-			lodObjects[addIndex].bound = object.bound;
 			vec2 animInfo = GetAnimInfo(object);
 			lodObjects[addIndex].meshid = vec4(animInfo, float(billbdMid), float(animatMid));
 					
