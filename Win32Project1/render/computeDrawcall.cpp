@@ -57,7 +57,7 @@ void ComputeDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
 	dataBuffer->setShaderBase(GL_SHADER_STORAGE_BUFFER, IndirectBufIndex, 2);
 
 	render->useShader(state->shaderCompute);
-	state->shaderCompute->setFloat("fullSize", maxCount);
+	state->shaderCompute->setFloat("invFullSize", 1.0 / maxCount);
 
 	glDispatchCompute(dispatchCount, dispatchCount, 1);
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);

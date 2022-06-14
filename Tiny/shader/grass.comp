@@ -10,7 +10,7 @@ uniform float time;
 uniform vec3 eyePos;
 uniform mat4 viewProjectMatrix;
 uniform mat4 viewMatrix;
-uniform float fullSize;
+uniform float invFullSize;
 
 uniform mat4 prevVPMatrix;
 uniform vec2 uSize;
@@ -79,14 +79,15 @@ vec3 GetTerrainPosition(vec2 ref, vec2 invTexSize) {
 }
 
 void main() {
-	uvec2 cur = gl_GlobalInvocationID.xy;
-	vec2 dPose = vec2(fullSize * 0.5) - vec2(cur);
-	
-	float spread = 0.25 + length(dPose) * 0.004;
+	vec2 cur = vec2(gl_GlobalInvocationID.xy);
+
+	float phi = (cur.y * invFullSize) * 2.0 * PI;
+	float radian = cur.x;
+	float spread = 0.025 + radian * 0.0015;
 	vec3 worldPose = vec3(0.0);
-	worldPose.xz = floor(eyePos.xz * 0.02) * 50.0 + dPose * spread;
-	// Random grass xz position
-	vec2 dRand = vec2(random(worldPose, 0.1), random(worldPose, 0.2));
+	worldPose.xz = floor(eyePos.xz * 0.02) * 50.0 + vec2(cos(phi) * radian, sin(phi) * radian) * spread;
+	
+	vec2 dRand = vec2(random(worldPose, 0.2), random(worldPose, 0.4)) * 4.0;
 	worldPose.xz += dRand * spread;
 
 	float fStepSize = mapInfo.x, fChunkSize = float(CHUNK_SIZE);
@@ -199,7 +200,7 @@ void main() {
 	vec4 projPose = viewProjectMatrix * vec4(worldPose, 1.0);
 	if(any(bvec2(any(greaterThan(projPose.xyz, vec3(projPose.w))), projPose.x < -projPose.w))) return;
 	
-	float rand = (dRand.x + dRand.y) * 0.5;	
+	float rand = (dRand.x + dRand.y) * 0.125;	
 	vec2 size = vec2(rand * 0.5 + 0.5, rand * 2.5 + 2.5);
 
 	vec4 topPose = vec4(worldPose + vec3(0.0, size.y, 0.0), 1.0);
