@@ -20,13 +20,11 @@
 
 class Texture2D {
 private:
-	GLenum texType, depthType;
-	int buffSize;
+	GLenum texType, depthType, format;
 public:
 	uint id;
 	u64 hnd;
 	uint width, height, channel;
-	GLenum preColor, preDepth, format;
 	int type, precision;
 public:
 	Texture2D(uint w,uint h, bool useMip,int t,int p,int c,int filter, int wrapMode, bool clearWhite = true, void* initData=NULL);

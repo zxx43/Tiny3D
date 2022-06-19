@@ -1,4 +1,5 @@
 #include "textureBuffer.h"
+#include "../util/util.h"
 
 TextureBuffer::TextureBuffer(int p, int c, int size, void* data) :precision(p), component(c), maxSize(size) {
     switch (precision) {
@@ -7,6 +8,9 @@ TextureBuffer::TextureBuffer(int p, int c, int size, void* data) :precision(p), 
             break;
         case HIGH_PRE:
             bitSize = sizeof(short);
+            break;
+        case HALF_PRE:
+            bitSize = sizeof(half);
             break;
         case FLOAT_PRE:
             bitSize = sizeof(float);
@@ -33,6 +37,21 @@ TextureBuffer::TextureBuffer(int p, int c, int size, void* data) :precision(p), 
                 break;
             case 4:
                 type = GL_RGBA32F;
+                break;
+        }
+    } else if (precision == HALF_PRE) {
+        switch (component) {
+            case 1:
+                type = GL_R16F;
+                break;
+            case 2:
+                type = GL_RG16F;
+                break;
+            case 3:
+                type = GL_RGB16F;
+                break;
+            case 4:
+                type = GL_RGBA16F;
                 break;
         }
     } else if (precision == HIGH_PRE) {
