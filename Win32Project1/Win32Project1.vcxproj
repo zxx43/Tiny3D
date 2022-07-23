@@ -394,6 +394,7 @@
     <None Include="..\Tiny\shader\prefiltered.frag" />
     <None Include="..\Tiny\shader\rearrange.comp" />
     <None Include="..\Tiny\shader\screen.frag" />
+    <None Include="..\Tiny\shader\shadow.glsl" />
     <None Include="..\Tiny\shader\shadow_nontex.frag" />
     <None Include="..\Tiny\shader\shadow_tex.frag" />
     <None Include="..\Tiny\shader\sky.frag" />

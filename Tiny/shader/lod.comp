@@ -68,7 +68,7 @@ bool OccQuery(Bounding ins) {
 	if (uShadowPass > 0) return false;
 	else {
 		return HizQuery(prevVPMatrix, texDepth, uSize, uCamParam, uMaxLevel, 
-			ins.bv[0], ins.bv[1], ins.bv[2], ins.bv[3], ins.bv[4], ins.bv[5], ins.bv[6], ins.bv[7], 0.01);
+			ins.bv[0], ins.bv[1], ins.bv[2], ins.bv[3], ins.bv[4], ins.bv[5], ins.bv[6], ins.bv[7], 0.0001);
 	}
 };
 

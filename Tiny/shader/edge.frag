@@ -89,7 +89,7 @@ void main() {
 	
 	vec4 minDDepth = max(min(dDepth1, dDepth2), 0.00001);
 	vec4 maxDDepth = max(dDepth1, dDepth2);
-	vec4 depthResults = step(minDDepth * 1800.0, maxDDepth);
+	vec4 depthResults = step(minDDepth * 4000.0, maxDDepth);
 
 	vec4 ldn = texture(normalWaterBuffer, ld) * 2.0 - 1.0;
 	vec4 ddn = texture(normalWaterBuffer, dd) * 2.0 - 1.0;

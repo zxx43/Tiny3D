@@ -84,6 +84,7 @@ public:
 	void setVector2v(const char* param, float* arr);
 	void setVector2v(const char* param, int count, float* arr);
 	void setVector3v(const char* param, float* arr);
+	void setVector3v(const char* param, int count, float* arr);
 	void setVector4v(const char* param, float* arr);
 	void setVector4v(const char* param, int count, float* arr);
 	void setMatrix4(const char* param,float* matrix);

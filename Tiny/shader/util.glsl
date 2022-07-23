@@ -224,11 +224,21 @@ bool CheckCull(vec4 cp0, vec4 cp1, vec4 cp2, vec4 cp3,
 }
 
 float Linearize(float near, float far, float depth) {
-	return (2.0 * near) / (far + near - depth * (far - near));
+	float z = depth * 2.0 - 1.0;
+	float res = (2.0 * near * far) / (far + near - z * (far - near));
+	return (res - near) / (far - near);
 }
 
 vec4 Linearize(float near, float far, vec4 depth) {
-	return vec4(2.0 * near) / (vec4(far + near) - depth * (far - near));
+	vec4 z = depth * 2.0 - vec4(1.0);
+	vec4 res = vec4(2.0 * near * far) / (vec4(far + near) - z * (far - near));
+	return (res - near) / (far - near);
+}
+
+float LinearizeDepth(float near, float far, float depth) {
+	float z = depth * 2.0 - 1.0;
+	float res = (2.0 * near * far) / (far + near - z * (far - near));
+	return res;
 }
 
 bool CompMat(float flag, float base) {

@@ -273,6 +273,17 @@ void Shader::setVector3v(const char* param, float* arr) {
 		printf("vec3 is: %f,%f,%f\n", arr[0], arr[1], arr[2]);
 }
 
+void Shader::setVector3v(const char* param, int count, float* arr) {
+	int location = findParamLocation(param);
+	if (location == INVALID_LOCATION) {
+		addParam(param);
+		location = findParamLocation(param);
+	}
+	if (location != INVALID_LOCATION && program)
+		glProgramUniform3fv(program->shaderProg, location, count, arr);
+	getError(param, location);
+}
+
 void Shader::setVector4v(const char* param, float* arr) {
 	int location = findParamLocation(param);
 	if (location == INVALID_LOCATION) {

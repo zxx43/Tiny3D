@@ -376,13 +376,13 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 					shader->setMatrix4("lightViewFar", camFar->viewMatrix);
 				}
 
-				float camParas[8] = { 
-					camDyn->zNear, camDyn->invDist,
-					camNear->zNear, camNear->invDist,
-					camMid->zNear, camMid->invDist,
-					camFar->zNear, camFar->invDist 
+				float camParas[12] = { 
+					camDyn->zNear, camDyn->invDist, camDyn->zFar,
+					camNear->zNear, camNear->invDist, camNear->zFar,
+					camMid->zNear, camMid->invDist, camMid->zFar,
+					camFar->zNear, camFar->invDist, camFar->zFar 
 				};
-				shader->setVector2v("camParas", 4, camParas);
+				shader->setVector3v("camParas", 4, camParas);
 			}
 		}
 	} else {

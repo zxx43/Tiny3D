@@ -1,5 +1,6 @@
 ﻿#include "shader/util.glsl"
 #include "shader/pbr.glsl"
+#include "shader/shadow.glsl"
 
 uniform BindlessSampler2D texBuffer, 
 						matBuffer, 
@@ -25,7 +26,7 @@ uniform float time;
 
 uniform mat4 lightProjDyn, lightProjNear, lightProjMid, lightProjFar, 
 			 lightViewDyn, lightViewNear, lightViewMid, lightViewFar;
-uniform vec2 camParas[4];
+uniform vec3 camParas[4];
 uniform vec2 gaps;
 uniform vec3 shadowCenter;
 
@@ -37,56 +38,6 @@ layout (location = 2) out vec4 FragBright;
 
 const vec3 KCool = vec3(0.15, 0.15, 0.35);
 const vec3 KWarm = vec3(0.9, 0.9, 0.25);
-
-float genPCF(sampler2D shadowMap, vec3 shadowCoord, float bias, float pcount, float inv) {
-	float shadowFactor = 0.0, biasDepth = shadowCoord.z + bias, i = 0.0, rand = 0.0;
-
-	i += 1.0;
-	rand = random(vec3(shadowCoord.xy + vec2(-pcount, -pcount), i), i);
-	shadowFactor += step(biasDepth, texture(shadowMap, shadowCoord.xy + vec2(-pcount, -pcount) * shadowPixSize * rand).r);
-	
-	i += 1.0;
-	rand = random(vec3(shadowCoord.xy + vec2(pcount, -pcount), i), i);
-	shadowFactor += step(biasDepth, texture(shadowMap, shadowCoord.xy + vec2(pcount, -pcount) * shadowPixSize * rand).r);
-
-	i += 1.0;
-	rand = random(vec3(shadowCoord.xy + vec2(pcount, pcount), i), i);
-	shadowFactor += step(biasDepth, texture(shadowMap, shadowCoord.xy + vec2(pcount, pcount) * shadowPixSize * rand).r);
-	
-	i += 1.0;
-	rand = random(vec3(shadowCoord.xy + vec2(-pcount, pcount), i), i);
-	shadowFactor += step(biasDepth, texture(shadowMap, shadowCoord.xy + vec2(-pcount, pcount) * shadowPixSize * rand).r);
-
-	float preFactor = shadowFactor * 0.25;
-	if(preFactor * (1.0 - preFactor) < 0.01) return preFactor;
-	else {
-		float pcount2 = pcount * pcount;
-		for(float offx = -pcount; offx <= pcount; offx += 1.0) {
-			for(float offy = -pcount; offy <= pcount; offy += 1.0) {
-				float off2 = abs(offx * offy);
-				if(off2 != pcount2) {
-					i += 1.0;
-					rand = random(vec3(shadowCoord.xy + vec2(offx, offy), i), i);
-					shadowFactor += step(biasDepth, texture(shadowMap, shadowCoord.xy + vec2(offx, offy) * shadowPixSize * rand).r);
-				}
-				else continue;
-			}
-		}
-
-		return shadowFactor * inv;
-	}
-}
-
-
-float genShadow(sampler2D shadowMap, vec3 shadowCoord, float bias) {
-	return step(shadowCoord.z + bias, texture(shadowMap, shadowCoord.xy).r);
-}
-
-float getShadowLen(sampler2D shadowMap, vec3 shadowCoord, float bias) {
-	float stored = texture(shadowMap, shadowCoord.xy).r;
-	float scene = shadowCoord.z + bias;
-	return max(scene - stored, 0.0);
-}
 
 vec4 genShadowFactor(vec4 worldPos, float depthView, float bias) {
 	float lightDepth = depthView;
@@ -100,13 +51,21 @@ vec4 genShadowFactor(vec4 worldPos, float depthView, float bias) {
 		vec4 dyn = DepthToLinear(lightViewProjDyn, lightProjDyn, lightViewDyn, camParas[0].x, camParas[0].y, worldPos);
 		vec3 lightPositionDyn = dyn.xyz / dyn.w;
 		vec3 shadowCoordDyn = lightPositionDyn * 0.5 + 0.5;
-		float sd = genPCF(shadowBuffers[0], shadowCoordDyn, bs, 3.0, 0.0205);
+		#ifndef USE_PCSS
+			float sd = genPCF(shadowBuffers[0], shadowCoordDyn, bs, shadowPixSize, sparams[1]);
+		#else
+			float sd = genPCSS(shadowBuffers[0], shadowCoordDyn, bs, shadowPixSize, camParas[0]);	
+		#endif
 
 		vec4 near = DepthToLinear(lightViewProjNear, lightProjNear, lightViewNear, camParas[1].x, camParas[1].y, worldPos);
 		vec3 lightPosition = near.xyz / near.w;
 		vec3 shadowCoord = lightPosition * 0.5 + 0.5;
-		float sf = genPCF(shadowBuffers[1], shadowCoord, bs, 3.0, 0.0205);
-		
+		#ifndef USE_PCSS
+			float sf = genPCF(shadowBuffers[1], shadowCoord, bs, shadowPixSize, sparams[1]);
+		#else
+			float sf = genPCSS(shadowBuffers[1], shadowCoord, bs, shadowPixSize, camParas[1]);
+		#endif
+
 		sf = min(sd, sf);
 		return vec4(1.0, 0.0, 0.0, sf);
 	} else if(lightDepth > levels.x - gaps.x && lightDepth < levels.x + gaps.x) {
@@ -128,13 +87,18 @@ vec4 genShadowFactor(vec4 worldPos, float depthView, float bias) {
 		vec3 lightPositionMid = mid.xyz / mid.w;
 		vec3 shadowCoordMid = lightPositionMid * 0.5 + 0.5;
 
-		float factorMid = genPCF(shadowBuffers[2], shadowCoordMid, bsMid, 2.0, 0.04);
+		float factorMid = genPCF(shadowBuffers[2], shadowCoordMid, bsMid, shadowPixSize * 0.5, sparams[0]);
 		float sf = 0.0;
 		if(any(bvec2(any(lessThan(shadowCoordNear, vec3(0.001))), any(greaterThan(shadowCoordNear, vec3(0.999))))))
 			sf = factorMid;
 		else {
-			float factorDyn = genPCF(shadowBuffers[0], shadowCoordDyn, bsNear, 3.0, 0.0205);
-			float factorNear = genPCF(shadowBuffers[1], shadowCoordNear, bsNear, 3.0, 0.0205);
+			#ifndef USE_PCSS
+				float factorDyn = genPCF(shadowBuffers[0], shadowCoordDyn, bsNear, shadowPixSize, sparams[1]);
+				float factorNear = genPCF(shadowBuffers[1], shadowCoordNear, bsNear, shadowPixSize, sparams[1]);
+			#else
+				float factorDyn = genPCSS(shadowBuffers[0], shadowCoordDyn, bsNear, shadowPixSize, camParas[0]);
+				float factorNear = genPCSS(shadowBuffers[1], shadowCoordNear, bsNear, shadowPixSize, camParas[1]);
+			#endif
 			factorNear = min(factorNear, factorDyn);
 			sf = mix(factorNear, factorMid, (lightDepth - (levels.x - gaps.x)) * gaps.y);
 		}
@@ -148,7 +112,7 @@ vec4 genShadowFactor(vec4 worldPos, float depthView, float bias) {
 		#else
 			float bs = bias * 0.25;
 		#endif
-		float sf = genPCF(shadowBuffers[2], shadowCoord, bs, 2.0, 0.04);
+		float sf = genPCF(shadowBuffers[2], shadowCoord, bs, shadowPixSize * 0.5, sparams[0]);
 		return vec4(0.0, 1.0, 0.0, sf);
 	}
 	#ifdef DRAW_FAR_SHADOW

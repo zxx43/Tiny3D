@@ -838,6 +838,9 @@
     <None Include="..\Tiny\shader\rearrange.comp">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\Tiny\shader\shadow.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Tiny\config\config.txt">

@@ -138,7 +138,7 @@ void main() {
 	if(CheckCull(p0, p1, p2, p3, p4, p5, p6, p7)) return;
 
 	if(HizQuery(prevVPMatrix, texDepth, uSize, uCamParam, uMaxLevel, 
-		bv0, bv1, bv2, bv3, bv4, bv5, bv6, bv7, 0.1)) return;
+		bv0, bv1, bv2, bv3, bv4, bv5, bv6, bv7, 0.001)) return;
 
 	// Current chunk & adjacent chunks	
 	int iCurChunk = int(curChunk);
