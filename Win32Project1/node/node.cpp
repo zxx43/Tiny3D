@@ -387,6 +387,23 @@ void Node::rotateNodeObject(Scene* scene, int i, float ax, float ay, float az) {
 	pushToUpdate(scene);
 }
 
+void Node::rotateNodeObject(Scene* scene, int i, const vec4& quat) {
+	Object* object = objects[i];
+	object->setRotation(quat);
+	object->caculateLocalAABBFast(true);
+
+	updateObjectBoundingInNode(object);
+	boundingBox->merge(objectsBBs);
+	Node* superior = parent;
+	while (superior) {
+		superior->updateBounding();
+		superior = superior->parent;
+	}
+	needUpdateNormal = true;
+	needUpdateDrawcall = true;
+	pushToUpdate(scene);
+}
+
 void Node::scaleNodeObject(Scene* scene, int i, float sx, float sy, float sz) {
 	Object* object = objects[i];
 	object->setSize(sx, sy, sz);

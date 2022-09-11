@@ -79,6 +79,7 @@ public:
 	void translateNodeObject(Scene* scene, int i, float x, float y, float z);
 	void translateNodeObjectCenterAtWorld(Scene* scene, int i, float x, float y, float z);
 	void rotateNodeObject(Scene* scene, int i, float ax, float ay, float az);
+	void rotateNodeObject(Scene* scene, int i, const vec4& quat);
 	void scaleNodeObject(Scene* scene, int i, float sx, float sy, float sz);
 	Node* getAncestor();
 	void clearChildren();

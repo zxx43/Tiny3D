@@ -41,6 +41,14 @@ inline vec4 Euler2Quat(const vec3& angle) {
 	return res;
 }
 
+inline vec4 MulQuat(const vec4& quat1, const vec4& quat2) {
+	btQuaternion q1(quat1.x, quat1.y, quat1.z, quat1.w);
+	btQuaternion q2(quat2.x, quat2.y, quat2.z, quat2.w);
+	btQuaternion qr = q1 * q2;
+	vec4 res(qr.x(), qr.y(), qr.z(), qr.w());
+	return res;
+}
+
 struct CollisionShape {
 	btCollisionShape* shape;
 	CollisionShape(const vec3& halfSize) {
@@ -142,6 +150,12 @@ struct CollisionObject {
 		quat = qz * quat;
 		setAxis(quat);
 		trans.setRotation(quat);
+		object->setWorldTransform(trans);
+	}
+	void setRotate(const vec4& quat) {
+		btTransform trans = object->getWorldTransform();
+		btQuaternion q(quat.x, quat.y, quat.z, quat.w);
+		trans.setRotation(q);
 		object->setWorldTransform(trans);
 	}
 	vec3 getTranslate() {

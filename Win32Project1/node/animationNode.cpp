@@ -24,6 +24,7 @@ void AnimationNode::setAnimation(Scene* scene, Animation* anim) {
 		object->belong->addObject(object);
 		object->belong->addPlay(this);
 	}
+	rotateNodeObject(scene, 0, 0, 0);
 }
 
 Object* AnimationNode::removeObject(Object* object) {
@@ -76,8 +77,15 @@ void AnimationNode::translateNode(Scene* scene, float x, float y, float z) {
 }
 
 void AnimationNode::rotateNodeObject(Scene* scene, float ax, float ay, float az) {
-	getObject()->setRotation(ax, ay, az);
+	getObject()->setRotation(ax + (animation->inverseYZ ? 270 : 0), ay, az);
 	
+	if (scene->isInited())
+		doUpdateNodeTransform(scene, false, true, true);
+}
+
+void AnimationNode::rotateNodeObject(Scene* scene, const vec4& quat) {
+	getObject()->setRotation(quat);
+
 	if (scene->isInited())
 		doUpdateNodeTransform(scene, false, true, true);
 }
@@ -92,10 +100,7 @@ void AnimationNode::doUpdateNodeTransform(Scene* scene, bool translate, bool rot
 		else
 			getObject()->collisionObject->initTranslate(gPosition);
 	} 
-	if (rotate) {
-		vec3 gRotation = vec3(getObject()->anglex, getObject()->angley, getObject()->anglez);
-		getObject()->collisionObject->setRotateAngle(gRotation, animation->inverseYZ); // fbx inverse obb yz readback to object 
-	}
+	if (rotate) getObject()->collisionObject->setRotate(getObject()->rotateQuat);
 }
 
 void AnimationNode::scaleNodeObject(Scene* scene, float sx, float sy, float sz) {

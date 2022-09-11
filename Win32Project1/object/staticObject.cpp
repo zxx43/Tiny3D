@@ -87,6 +87,11 @@ void StaticObject::setRotation(float ax, float ay, float az) {
 	updateLocalMatrices();
 }
 
+void StaticObject::setRotation(const vec4& q) {
+	rotateQuat = q;
+	updateLocalMatrices();
+}
+
 void StaticObject::setSize(float sx, float sy, float sz) {
 	size = vec3(sx, sy, sz);
 	updateLocalMatrices();

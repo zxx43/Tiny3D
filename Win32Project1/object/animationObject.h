@@ -31,8 +31,8 @@ public:
 	virtual AnimationObject* clone();
 	virtual void setPosition(float x, float y, float z);
 	virtual void setRotation(float ax, float ay, float az);
+	virtual void setRotation(const vec4& q);
 	virtual void setSize(float sx, float sy, float sz);
-	void setRotation(const vec4& q);
 	bool setCurAnim(const char* name, bool once);
 	std::string getCurAnim() { return aname; }
 	void resetTime() { time = 0.0; }

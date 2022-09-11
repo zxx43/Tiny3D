@@ -24,6 +24,7 @@ public:
 	virtual void normalTransform();
 	virtual void setPosition(float x,float y,float z);
 	virtual void setRotation(float ax, float ay, float az);
+	virtual void setRotation(const vec4& q);
 	virtual void setSize(float sx, float sy, float sz);
 	void translateAtWorld(const vec3& position);
 	void rotateAtWorld(const vec4& q);

@@ -79,6 +79,7 @@ public:
 	bool sphereInCamera(Camera* camera);
 	virtual void setPosition(float x, float y, float z) = 0;
 	virtual void setRotation(float ax, float ay, float az) = 0;
+	virtual void setRotation(const vec4& quat) = 0;
 	virtual void setSize(float sx, float sy, float sz) = 0;
 	void setBillboard(float sx, float sy, int mid);
 	void updateObjectTransform(bool translate, bool rotate);

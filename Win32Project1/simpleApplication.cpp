@@ -316,7 +316,9 @@ void SimpleApplication::act(long startTime, long currentTime, float dTime, float
 	Node* node = scene->animationRoot->children[0];
 	AnimationNode* animNode = (AnimationNode*)node->children[0];
 	if (needRotate) {
-		animNode->rotateNodeObject(scene, 0, 135 + 90 * dr, 0);
+		vec4 quat = Euler2Quat(vec3(0, 180, 0));
+		quat = MulQuat(quat, animNode->getObject()->rotateQuat);
+		animNode->rotateNodeObject(scene, quat);
 		needRotate = false;
 	}
 	animNode->translateNode(scene, animNode->position.x - 0.025 * dd, animNode->position.y, animNode->position.z - 0.025 * dd);
@@ -333,8 +335,12 @@ void SimpleApplication::act(long startTime, long currentTime, float dTime, float
 
 	static AnimationNode* man = (AnimationNode*)node->children[2];
 	if (man) {
-		man->rotateNodeObject(scene, man->getObject()->anglex, man->getObject()->angley, man->getObject()->anglez + 0.1);
-		float radian = angleToRadian(man->getObject()->anglez);
+		vec4 quat = Euler2Quat(vec3(0, 0.1, 0));
+		quat = MulQuat(quat, man->getObject()->rotateQuat);
+		man->rotateNodeObject(scene, quat);
+
+		man->getObject()->angley += 0.1;
+		float radian = angleToRadian(man->getObject()->angley);
 		float rcos = cosf(radian);
 		float rsin = sinf(radian);
 		man->translateNode(scene, man->position.x + 0.04 * rsin, man->position.y, man->position.z + 0.04 * rcos);
@@ -345,7 +351,9 @@ void SimpleApplication::act(long startTime, long currentTime, float dTime, float
 	if (dynObjs) {
 		for (int i = 0; i < dynObjs->objects.size(); ++i) {
 			if (dynObjs->objects[i]->isDynamic()) {
-				dynObjs->rotateNodeObject(scene, i, 0, currentTime * 0.1, 0);
+				vec4 quat = Euler2Quat(vec3(0.1, 0.1, 0.1));
+				quat = MulQuat(quat, dynObjs->objects[i]->rotateQuat);
+				dynObjs->rotateNodeObject(scene, i, quat);
 				dynObjs->translateNodeObject(scene, i, dynObjs->objects[i]->position.x + 0.01, dynObjs->objects[i]->position.y + 10.0, dynObjs->objects[i]->position.z + 0.01);
 			}
 		}
@@ -1128,6 +1136,7 @@ void SimpleApplication::initScene() {
 	animNode1->scaleNodeObject(scene, 0.05, 0.05, 0.05);
 	animNode1->getObject()->setPosition(0, -5, -1);
 	animNode1->translateNode(scene, 5, 0, 15);
+	animNode1->rotateNodeObject(scene, 0, 45, 0);
 	animNode1->getObject()->setDefaultAnim("army_run");
 	animNode1->getObject()->setLoop(true);
 	AnimationNode* animNode2 = new AnimationNode(vec3(5, 10, 5));
