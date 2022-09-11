@@ -20,7 +20,8 @@ const vec4 UNIT_NEG_Z(0,0,-1,0);
 
 class Camera {
 private:
-	float xrot,yrot,height;
+	vec4 rotXQuat, rotYQuat;
+	float height;
 	mat4 rotXMat, rotYMat, transMat, boundMat;
 	vec4 lookDir4;
 	bool needRefresh;

@@ -69,8 +69,9 @@ void Player::run(int dir) {
 				doRotate = true;
 				break;
 		}
-		float dir = angleToRadian(fxAngle + dr);
-		position += vec3(sinf(dir), 0.0, cosf(dir)) * speed;
+		vec3 playerDir(-node->getObject()->rotateMat[8], -node->getObject()->rotateMat[9], -node->getObject()->rotateMat[10]);
+		playerDir.Normalize();
+		position += playerDir * speed;
 		doMove = true;
 	}
 }

@@ -1,5 +1,6 @@
 #include "camera.h"
 #include "../util/util.h"
+#include "../physics/dynamicWorld.h"
 
 Camera::Camera(float height) {
 	position = vec3(0.0, 0.0, 0.0);
@@ -7,7 +8,8 @@ Camera::Camera(float height) {
 	lookDir4 = vec4();
 	up = vec3(0.0, 1.0, 0.0);
 
-	xrot = 0; yrot = 0;
+	rotXQuat = vec4(0, 0, 0, 1);
+	rotYQuat = vec4(0, 0, 0, 1);
 	this->height = height;
 	velocity = 1.0;
 
@@ -81,12 +83,12 @@ void Camera::updateLook(const vec3& pos, const vec3& dir) {
 void Camera::updateMoveable(uint transType) {
 	if (transType & TRANS_TRANSLATE)
 		transMat = translate(-position);
-	if (transType & TRANS_ROTATE_Y) 
-		rotXMat = rotateX(-yrot);
+	if (transType & TRANS_ROTATE_Y)
+		rotXMat = Quat2Mat(rotXQuat).GetTranspose();
 	if (transType & TRANS_ROTATE_X)
-		rotYMat = rotateY(-xrot);
+		rotYMat = Quat2Mat(rotYQuat).GetTranspose();
 
-	viewMatrix = rotXMat * rotYMat * transMat;
+	viewMatrix = rotYMat * rotXMat * transMat;
 	invViewMatrix = viewMatrix.GetInverse();
 
 	lookDir4 = invViewMatrix * UNIT_NEG_Z;
@@ -132,22 +134,18 @@ void Camera::turnY(int ud) {
 }
 
 void Camera::turnDX(float dx) {
-	xrot += dx;
-	RestrictAngle(xrot);
+	vec4 dquat = Euler2Quat(vec3(0, dx, 0));
+	rotXQuat = MulQuat(dquat, rotXQuat);
 }
 
 void Camera::turnDY(float dy) {
-	yrot += dy;
-	RestrictAngle(yrot);
+	vec4 dquat = Euler2Quat(vec3(dy, 0, 0));
+	rotYQuat = MulQuat(dquat, rotYQuat);
 }
 
 void Camera::move(int dir,float speed) {
-	float xz=angleToRadian(xrot);
-	float yz=angleToRadian(yrot);
-	float cosYZ = speed * cosf(yz);
-	float dx = cosYZ * sinf(xz);
-	float dy = speed * sinf(yz);
-	float dz = cosYZ * cosf(xz);
+	vec3 cameraX(viewMatrix[0], viewMatrix[4], viewMatrix[8]);
+	vec3 cameraZ(viewMatrix[2], viewMatrix[6], viewMatrix[10]);
 
 	switch(dir) {
 		case DOWN:
@@ -161,22 +159,16 @@ void Camera::move(int dir,float speed) {
 			position.y += speed;
 			break;
 		case RIGHT:
-			position.x+=speed*cosf(xz);
-			position.z-=speed*sinf(xz);
+			position += cameraX;
 			break;
 		case LEFT:
-			position.x-=speed*cosf(xz);
-			position.z+=speed*sinf(xz);
+			position -= cameraX;
 			break;
 		case MFAR:
-			position.x+=dx;
-			position.y-=dy;
-			position.z+=dz;
+			position += cameraZ;
 			break;
 		case MNEAR:
-			position.x-=dx;
-			position.y+=dy;
-			position.z-=dz;
+			position -= cameraZ;
 			break;
 	}
 	updateMoveable(TRANS_TRANSLATE);
@@ -192,8 +184,8 @@ float Camera::getHeight() {
 }
 
 void Camera::copy(const Camera* src) {
-	xrot = src->xrot;
-	yrot = src->yrot;
+	rotXQuat = src->rotXQuat;
+	rotYQuat = src->rotYQuat;
 	height = src->height;
 	rotXMat = src->rotXMat;
 	rotYMat = src->rotYMat;
