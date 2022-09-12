@@ -12,6 +12,7 @@ Player::Player() {
 	isMove = false, isRotate = false;
 	fxAngle = 0.0, fyAngle = 0.0;
 	exAngle = 0.0;
+	basicQuat = vec4(0, 0, 0, 1);
 	position = vec3(0.0, 0.0, 0.0);
 	camera = NULL;
 	zoom = 10.0;
@@ -23,7 +24,8 @@ void Player::setNode(AnimationNode* n, Camera* cam) {
 	if (node != n) {
 		node = n;
 		if (node) {
-			fxAngle = node->getObject()->angley;
+			basicQuat = node->getObject()->rotateQuat;
+			fxAngle = Quat2Euler(basicQuat).y;
 			fyAngle = 0.0;
 			position = node->position;
 			camera = cam;
@@ -48,23 +50,18 @@ void Player::run(int dir) {
 			node->getObject()->setCurAnim("walk", false);
 		if (node->getObject()->getCurAnim() == "walk")
 			node->getObject()->setMoving(true);
-		float dr = 0.0;
 		switch (dir) {
 			case MNEAR:
-				dr = 180.0;
 				break;
 			case MFAR:
-				dr = 0.0;
 				exAngle = 180.0;
 				doRotate = true;
 				break;
 			case LEFT:
-				dr = 270.0;
 				exAngle = 90.0;
 				doRotate = true;
 				break;
 			case RIGHT:
-				dr = 90.0;
 				exAngle = 270.0;
 				doRotate = true;
 				break;
@@ -128,6 +125,8 @@ void Player::turn(bool lr, float angle) {
 			float dAngle = fxAngle + angle;
 			RestrictAngle(dAngle);
 			fxAngle = dAngle;
+			vec4 quat = Euler2Quat(vec3(0, angle, 0));
+			basicQuat = MulQuat(quat, basicQuat);
 		} else {
 			float dAngle = fyAngle + angle;
 			RestrictYAngle(dAngle);
@@ -149,8 +148,14 @@ void Player::resetExAngle() {
 
 bool Player::rotateAct(Scene* scene) {
 	if (doRotate) {
-		if (node)
-			node->rotateNodeObject(scene, node->getObject()->anglex, fxAngle + exAngle, node->getObject()->anglez);
+		if (node) {
+			vec4 rotQuat = basicQuat;
+			if (exAngle != 0.0) {
+				vec4 exQuat = Euler2Quat(vec3(0, exAngle, 0));
+				rotQuat = MulQuat(exQuat, basicQuat);
+			}
+			node->rotateNodeObject(scene, rotQuat);
+		}
 		doRotate = false;
 		if(!doTurn) return false;
 		else {

@@ -5,7 +5,6 @@
 
 AnimationObject::AnimationObject(Animation* anim) :Object() {
 	animation = anim; // no mesh!
-	anglex = 0; angley = 0; anglez = 0;
 	setCurAnim("", false);
 	setLoop(false);
 	setPlayOnce(false);
@@ -20,7 +19,6 @@ AnimationObject::AnimationObject(Animation* anim) :Object() {
 
 AnimationObject::AnimationObject(const AnimationObject& rhs) :Object(rhs) {
 	animation=rhs.animation;
-	anglex=rhs.anglex; angley=rhs.angley; anglez=rhs.anglez;
 	fid = rhs.fid;
 
 	position = rhs.position;
@@ -86,11 +84,11 @@ void AnimationObject::setPosition(float x,float y,float z) {
 }
 
 void AnimationObject::setRotation(float ax, float ay, float az) {
-	anglex = ax, angley = ay, anglez = az;
-	RestrictAngle(anglex);
-	RestrictAngle(angley);
-	RestrictAngle(anglez);
-	rotateQuat = Euler2Quat(vec3(anglex, angley, anglez));
+	vec3 euler(ax, ay, az);
+	RestrictAngle(euler.x);
+	RestrictAngle(euler.y);
+	RestrictAngle(euler.z);
+	rotateQuat = Euler2Quat(euler);
 	updateLocalMatrices();
 }
 

@@ -16,7 +16,6 @@ private:
 	virtual void vertexTransform();
 	virtual void normalTransform();
 public:
-	float anglex,angley,anglez;
 	Animation* animation;
 	int fid;
 	std::string aname;

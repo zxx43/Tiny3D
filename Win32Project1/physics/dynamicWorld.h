@@ -22,6 +22,11 @@ inline vec3 GetAxis(const btQuaternion& q, const vec3& axis) {
 	return res;
 }
 
+inline float GetAngle(const vec4& q) {
+	btQuaternion quat(q.x, q.y, q.z, q.w);
+	return radianToAngle(quat.getAngle());
+}
+
 inline vec4 Euler2Quat(const vec3& angle) {
 	vec3 ax(1, 0, 0), ay(0, 1, 0), az(0, 0, 1);
 	vec3 ang = angleToRadian(angle);
@@ -38,6 +43,14 @@ inline vec4 Euler2Quat(const vec3& angle) {
 	quat = qz * quat;
 
 	vec4 res(quat.x(), quat.y(), quat.z(), quat.w());
+	return res;
+}
+
+inline vec3 Quat2Euler(const vec4& q) {
+	btQuaternion quat(q.x, q.y, q.z, q.w);
+	vec3 res;
+	quat.getEulerZYX(res.z, res.y, res.x);
+	res = radianToAngle(res);
 	return res;
 }
 
