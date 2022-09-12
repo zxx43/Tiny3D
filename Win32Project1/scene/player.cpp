@@ -10,9 +10,9 @@ Player::Player() {
 	doRotate = false, doTurn = false;
 	doMove = false;
 	isMove = false, isRotate = false;
-	fxAngle = 0.0, fyAngle = 0.0;
-	exAngle = 0.0;
+	fyAngle = 0.0, exAngle = 0.0;
 	basicQuat = vec4(0, 0, 0, 1);
+	yQuat = vec4(0, 0, 0, 1);
 	position = vec3(0.0, 0.0, 0.0);
 	camera = NULL;
 	zoom = 10.0;
@@ -25,7 +25,7 @@ void Player::setNode(AnimationNode* n, Camera* cam) {
 		node = n;
 		if (node) {
 			basicQuat = node->getObject()->rotateQuat;
-			fxAngle = Quat2Euler(basicQuat).y;
+			yQuat = vec4(0, 0, 0, 1);
 			fyAngle = 0.0;
 			position = node->position;
 			camera = cam;
@@ -122,9 +122,6 @@ void Player::jump() {
 void Player::turn(bool lr, float angle) {
 	if (node) {
 		if (lr) {
-			float dAngle = fxAngle + angle;
-			RestrictAngle(dAngle);
-			fxAngle = dAngle;
 			vec4 quat = Euler2Quat(vec3(0, angle, 0));
 			basicQuat = MulQuat(quat, basicQuat);
 		} else {
@@ -133,6 +130,10 @@ void Player::turn(bool lr, float angle) {
 			fyAngle = dAngle;
 			if (fyAngle > 30.0) fyAngle = 30.0;
 			else if (fyAngle < -30.0) fyAngle = -30.0;
+			else {
+				vec4 quat = Euler2Quat(vec3(angle, 0, 0));
+				yQuat = MulQuat(quat, yQuat);
+			}
 		}
 		doRotate = true;
 		doTurn = true;
@@ -179,8 +180,10 @@ bool Player::moveAct(Scene* scene) {
 
 void Player::cameraAct() {
 	if (!camera || !node) return;
-	vec4 pDir = rotateY(fxAngle) * rotateX(fyAngle) * UNIT_NEG_Z;
-	vec3 dir = vec3(pDir.x, pDir.y, pDir.z).GetNormalized() * zoom;
+	vec4 camQuat = MulQuat(basicQuat, yQuat);
+	mat4 rotMat = Quat2Mat(camQuat);
+	vec3 pDir(rotMat[8], rotMat[9], rotMat[10]);
+	vec3 dir = (-pDir).GetNormalized() * zoom;
 	float gx = node->getObject()->transformsFull[0];
 	float gy = node->getObject()->transformsFull[1] + ((AABB*)node->boundingBox)->sizey;
 	float gz = node->getObject()->transformsFull[2];

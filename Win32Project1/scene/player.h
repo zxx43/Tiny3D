@@ -11,8 +11,8 @@ private:
 	AnimationNode* node;
 	bool moveAnim, doRotate, doTurn, doMove;
 	bool isMove, isRotate;
-	float fxAngle, fyAngle, exAngle;
-	vec4 basicQuat;
+	float fyAngle, exAngle;
+	vec4 basicQuat, yQuat;
 	vec3 position;
 	Camera* camera;
 	float zoom, speed;
