@@ -10,7 +10,7 @@ Player::Player() {
 	doRotate = false, doTurn = false;
 	doMove = false;
 	isMove = false, isRotate = false;
-	fyAngle = 0.0, exAngle = 0.0;
+	exAngle = 0.0;
 	basicQuat = vec4(0, 0, 0, 1);
 	yQuat = vec4(0, 0, 0, 1);
 	position = vec3(0.0, 0.0, 0.0);
@@ -26,7 +26,6 @@ void Player::setNode(AnimationNode* n, Camera* cam) {
 		if (node) {
 			basicQuat = node->getObject()->rotateQuat;
 			yQuat = vec4(0, 0, 0, 1);
-			fyAngle = 0.0;
 			position = node->position;
 			camera = cam;
 			zoom = 10.0;
@@ -67,7 +66,6 @@ void Player::run(int dir) {
 				break;
 		}
 		vec3 playerDir(-node->getObject()->rotateMat[8], -node->getObject()->rotateMat[9], -node->getObject()->rotateMat[10]);
-		playerDir.Normalize();
 		position += playerDir * speed;
 		doMove = true;
 	}
@@ -125,15 +123,12 @@ void Player::turn(bool lr, float angle) {
 			vec4 quat = Euler2Quat(vec3(0, angle, 0));
 			basicQuat = MulQuat(quat, basicQuat);
 		} else {
-			float dAngle = fyAngle + angle;
-			RestrictYAngle(dAngle);
-			fyAngle = dAngle;
-			if (fyAngle > 30.0) fyAngle = 30.0;
-			else if (fyAngle < -30.0) fyAngle = -30.0;
-			else {
-				vec4 quat = Euler2Quat(vec3(angle, 0, 0));
-				yQuat = MulQuat(quat, yQuat);
-			}
+			vec4 quat = Euler2Quat(vec3(angle, 0, 0));
+			vec4 quatToGive = MulQuat(quat, yQuat);
+			float fyAngle = GetAngle(quatToGive);
+			RestrictYAngle(fyAngle);
+			if (!(fyAngle > 30.0 || fyAngle < -30.0)) 
+				yQuat = quatToGive;
 		}
 		doRotate = true;
 		doTurn = true;
@@ -183,12 +178,12 @@ void Player::cameraAct() {
 	vec4 camQuat = MulQuat(basicQuat, yQuat);
 	mat4 rotMat = Quat2Mat(camQuat);
 	vec3 pDir(rotMat[8], rotMat[9], rotMat[10]);
-	vec3 dir = (-pDir).GetNormalized() * zoom;
+	pDir = (-pDir).GetNormalized() * zoom;
 	float gx = node->getObject()->transformsFull[0];
 	float gy = node->getObject()->transformsFull[1] + ((AABB*)node->boundingBox)->sizey;
 	float gz = node->getObject()->transformsFull[2];
-	vec3 pos = vec3(gx, gy, gz) - dir;
-	camera->setView(pos, dir);
+	vec3 pos = vec3(gx, gy, gz) - pDir;
+	camera->setView(pos, pDir);
 }
 
 void Player::keyDown(Input* input, const Scene* scene) { 
