@@ -340,7 +340,6 @@ void SimpleApplication::act(long startTime, long currentTime, float dTime, float
 		man->rotateNodeObject(scene, quat);
 
 		vec3 dir(-man->getObject()->rotateMat[4], -man->getObject()->rotateMat[5], -man->getObject()->rotateMat[6]);
-		dir.Normalize();
 		man->translateNode(scene, man->position.x + dir.x * 0.04, man->position.y + dir.y * 0.04, man->position.z + dir.z * 0.04);
 	}
 

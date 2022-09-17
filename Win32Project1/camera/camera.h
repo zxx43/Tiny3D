@@ -22,7 +22,7 @@ class Camera {
 private:
 	vec4 rotXQuat, rotYQuat;
 	float height;
-	mat4 rotXMat, rotYMat, transMat, boundMat;
+	mat4 rotMat, transMat, boundMat;
 	vec4 lookDir4;
 	bool needRefresh;
 public:
