@@ -641,6 +641,7 @@ void RenderManager::drawCombined(Render* render, Scene* scene, const std::vector
 	state->enableDepthTest = false;
 	state->pass = DEFERRED_PASS;
 	state->shader = render->getFog() ? combinedShader : combinedNFGShader;
+	render->setShaderFloat(state->shader, "wHeight", scene->water->position.y);
 	filter->draw(scene->renderCamera, render, state, inputTextures, NULL);
 }
 
