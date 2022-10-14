@@ -56,7 +56,8 @@ void SimpleApplication::resize(int width, int height) {
 
 	const int precision = cfgs->graphQuality > 4 ? HIGH_PRE : LOW_PRE;
 	const int scrPre = (cfgs->graphQuality > 4 || cfgs->ssr) ? HIGH_PRE : LOW_PRE;
-	const int hdrPre = cfgs->graphQuality > 7 ? FLOAT_PRE : precision;
+	//const int hdrPre = cfgs->graphQuality > 7 ? FLOAT_PRE : precision;
+	const int hdrPre = precision;
 	const int matPre = LOW_PRE, waterPre = LOW_PRE;
 	const int aaPre = LOW_PRE, edgePre = LOW_PRE, dofPre = precision, rawPre = LOW_PRE;
 	const float bloomScale = 0.75, ssrScale = 0.75, dofScale = 0.5;
@@ -340,7 +341,6 @@ void SimpleApplication::act(long startTime, long currentTime, float dTime, float
 		man->rotateNodeObject(scene, quat);
 
 		vec3 dir(-man->getObject()->rotateMat[4], -man->getObject()->rotateMat[5], -man->getObject()->rotateMat[6]);
-		dir.Normalize();
 		man->translateNode(scene, man->position.x + dir.x * 0.04, man->position.y + dir.y * 0.04, man->position.z + dir.z * 0.04);
 	}
 

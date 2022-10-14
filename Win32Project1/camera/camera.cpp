@@ -8,6 +8,7 @@ Camera::Camera(float height) {
 	lookDir4 = vec4();
 	up = vec3(0.0, 1.0, 0.0);
 
+	rotMat.LoadIdentity();
 	rotXQuat = vec4(0, 0, 0, 1);
 	rotYQuat = vec4(0, 0, 0, 1);
 	this->height = height;
@@ -83,12 +84,10 @@ void Camera::updateLook(const vec3& pos, const vec3& dir) {
 void Camera::updateMoveable(uint transType) {
 	if (transType & TRANS_TRANSLATE)
 		transMat = translate(-position);
-	if (transType & TRANS_ROTATE_Y)
-		rotXMat = Quat2Mat(rotXQuat).GetTranspose();
-	if (transType & TRANS_ROTATE_X)
-		rotYMat = Quat2Mat(rotYQuat).GetTranspose();
-
-	viewMatrix = rotYMat * rotXMat * transMat;
+	if (transType & TRANS_ROTATE_X || transType & TRANS_ROTATE_Y)
+		rotMat = Quat2Mat(MulQuat(rotXQuat, rotYQuat)).GetTranspose();
+	
+	viewMatrix = rotMat * transMat;
 	invViewMatrix = viewMatrix.GetInverse();
 
 	lookDir4 = invViewMatrix * UNIT_NEG_Z;
@@ -187,8 +186,7 @@ void Camera::copy(const Camera* src) {
 	rotXQuat = src->rotXQuat;
 	rotYQuat = src->rotYQuat;
 	height = src->height;
-	rotXMat = src->rotXMat;
-	rotYMat = src->rotYMat;
+	rotMat = src->rotMat;
 	transMat = src->transMat;
 	lookDir4 = src->lookDir4;
 
