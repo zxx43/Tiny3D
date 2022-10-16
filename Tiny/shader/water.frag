@@ -52,8 +52,11 @@ void main() {
 
 	vec4 surfaceColor = vec4(reflectedColor, depth);
 	vec4 matColor = vec4(refractedColor, WaterFlag);
+
+	float ndote = -dot(normal, eye2Water);
+	float fresnel = mix(0.25, 1.0, pow(1.0 - ndote, 3.0));
 		
 	FragTex = surfaceColor;
 	FragMat = matColor;
-	FragNormal = vec4(normal * 0.5 + 0.5, 1.0);
+	FragNormal = vec4(normal * 0.5 + 0.5, fresnel);
 }

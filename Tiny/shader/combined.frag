@@ -56,15 +56,13 @@ void main() {
 		vec4 waterPos = invViewProjMatrix * vec4(ndcWater, 1.0);
 		waterPos /= waterPos.w;
 
-		vec3 eye2Water = waterPos.xyz - eyePos;
-		float depthView = length(eye2Water);
+		float depthView = length(waterPos.xyz - eyePos);
 
 		vec4 waterMatColor = texture(waterMatBuffer, vTexcoord);
 		float depthFactor = clamp((wHeight - scenePos.y - 10.0) * 0.01, 0.0, 1.0);
 
-		vec3 waterNormalPix = texture(waterNormalBuffer, vTexcoord).rgb;
-		vec3 waterNormal = waterNormalPix * 2.0 - 1.0;
-		float ndote = -dot(waterNormal, normalize(eye2Water));
+		vec4 waterNormalPix = texture(waterNormalBuffer, vTexcoord);
+		float fresnel = waterNormalPix.w;
 
 		vec3 sceneRefract = sceneColor.rgb;
 		vec3 waterReflect = waterRefColor.rgb;
@@ -72,7 +70,6 @@ void main() {
 
 		waterRefract = mix(sceneRefract, waterRefract, depthFactor).rgb;
 
-		float fresnel = mix(0.25, 1.0, pow(1.0 - ndote, 3.0));
 		vec3 finalColor = mix(waterRefract, waterReflect, fresnel);
 
 		#ifdef USE_CARTOON
@@ -81,7 +78,7 @@ void main() {
 			FragColor = vec4(GenFogColor(-0.00000075, waterPos, depthView, udotl, finalColor), wDepth);
 		#endif
 
-		NormalWaterFlag = vec4(waterNormalPix, 1.0);
+		NormalWaterFlag = vec4(waterNormalPix.xyz, 1.0);
 	}
 
 	#ifdef HIGH_QUALITY

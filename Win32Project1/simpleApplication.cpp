@@ -73,7 +73,7 @@ void SimpleApplication::resize(int width, int height) {
 	if (waterFrame) delete waterFrame;
 	waterFrame = new FrameBuffer(width, height, hdrPre, 4, WRAP_REPEAT);
 	waterFrame->addColorBuffer(waterPre, 4); // FragMat
-	waterFrame->addColorBuffer(waterPre, 3); // FragNormal
+	waterFrame->addColorBuffer(waterPre, 4); // FragNormal
 	waterFrame->attachDepthBuffer(renderMgr->getDepthPre(), false);
 
 	if (sceneFilter) delete sceneFilter;
