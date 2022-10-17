@@ -116,6 +116,8 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	water->attachDef("Shader", "water");
 	if (!cfgs->ssr) water->attachDef("DISABLE_SSR", "1");
 	if (cfgs->dynsky) water->attachDef("DYN_SKY", "1");
+	if (cfgs->graphQuality > 3)
+		water->attachDef("HIGH_QUALITY", "1");
 
 	Shader* waterComp = shaders->addShader("waterComp", WATER_COMP);
 	waterComp->attachDef("Shader", "water_culling");
@@ -235,9 +237,8 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	if (cfgs->graphQuality > 3)
 		ssr->attachDef("HIGH_QUALITY", "1");
 	ssr->setSlot("lightBuffer", 0);
-	ssr->setSlot("matBuffer", 1);
-	ssr->setSlot("normalBuffer", 2);
-	ssr->setSlot("depthBuffer", 3);
+	ssr->setSlot("normalBuffer", 1);
+	ssr->setSlot("depthBuffer", 2);
 
 	Shader* combined = shaders->addShader("combined", POST_VERT, COMBINE_FRAG);
 	combined->attachDef("Shader", "combined");
@@ -251,10 +252,9 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	combined->setSlot("sceneNormalBuffer", 1);
 	combined->setSlot("sceneDepthBuffer", 2);
 	combined->setSlot("waterBuffer", 3);
-	combined->setSlot("waterMatBuffer", 4);
-	combined->setSlot("waterNormalBuffer", 5);
-	combined->setSlot("waterDepthBuffer", 6);
-	combined->setSlot("bloomBuffer", 7);
+	combined->setSlot("waterNormalBuffer", 4);
+	combined->setSlot("waterDepthBuffer", 5);
+	combined->setSlot("bloomBuffer", 6);
 
 	Shader* combinedNFG = shaders->addShader("combined_nfg", POST_VERT, COMBINE_FRAG);
 	combinedNFG->attachDef("Shader", "combined_nofog");
@@ -269,10 +269,9 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	combinedNFG->setSlot("sceneNormalBuffer", 1);
 	combinedNFG->setSlot("sceneDepthBuffer", 2);
 	combinedNFG->setSlot("waterBuffer", 3);
-	combinedNFG->setSlot("waterMatBuffer", 4);
-	combinedNFG->setSlot("waterNormalBuffer", 5);
-	combinedNFG->setSlot("waterDepthBuffer", 6);
-	combinedNFG->setSlot("bloomBuffer", 7);
+	combinedNFG->setSlot("waterNormalBuffer", 4);
+	combinedNFG->setSlot("waterDepthBuffer", 5);
+	combinedNFG->setSlot("bloomBuffer", 6);
 
 	Shader* atmos = shaders->addShader("atmos", ATMOS_VERT, ATMOS_FRAG);
 	atmos->attachDef("Shader", "atmos");

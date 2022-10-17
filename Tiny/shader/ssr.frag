@@ -1,7 +1,6 @@
 #include "shader/util.glsl"
 
 uniform BindlessSampler2D lightBuffer, 
-						matBuffer, 
 						normalBuffer, 
 						depthBuffer;
 
@@ -66,7 +65,7 @@ vec4 RayCast(vec3 refDir, vec3 refPos) {
 		vec4 storedView = invProjMatrix * vec4(vec3(projCoord.xy, storedDepth) * 2.0 - 1.0, 1.0);
 		storedView /= storedView.w;
 
-		float refFlag = texture(matBuffer, projCoord.xy).a;
+		float refFlag = texture(normalBuffer, projCoord.xy).a;
 
 		if(storedDepth >= 1.0) 
 			return FAIL_COLOR;
@@ -90,7 +89,8 @@ vec4 RayCast(vec3 refDir, vec3 refPos) {
 }
 
 void main() {
-	float refFlag = texture(matBuffer, vTexcoord).a;
+	vec4 normalFlag = texture(normalBuffer, vTexcoord);
+	float refFlag = normalFlag.a;
 
 	if(refFlag > WaterThreshold)
 		ReflectColor = texture(lightBuffer, vTexcoord);
@@ -105,7 +105,7 @@ void main() {
 		vec4 viewPos = invProjMatrix * vec4(ndcPos, 1.0);
 		viewPos /= viewPos.w;
 		
-		vec3 normal = texture(normalBuffer, vTexcoord).xyz * 2.0 - 1.0;
+		vec3 normal = normalFlag.xyz * 2.0 - 1.0;
 		vec3 viewNormal = mat3(viewMatrix) * normal;
 		
 		vec3 reflectDir = normalize(reflect(viewPos.xyz, viewNormal));

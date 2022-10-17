@@ -4,19 +4,20 @@ layout(early_fragment_tests) in;
 
 uniform BindlessSamplerCube texEnv, texSky;
 uniform BindlessSampler2D texRef;
+uniform BindlessSampler2D texScene, sceneDepth;
 
-uniform mat4 viewMatrix;
+uniform mat4 viewMatrix, invViewProjMatrix;
 uniform vec2 waterBias;
 uniform vec3 light;
 uniform float udotl;
+uniform float wHeight;
 
 in vec3 vNormal;
 in vec3 vEye2Water;
 in vec4 vProjPos;
 
 layout (location = 0) out vec4 FragTex;
-layout (location = 1) out vec4 FragMat;
-layout (location = 2) out vec4 FragNormal;
+layout (location = 1) out vec4 FragNormal;
 
 void main() {
 	vec3 normal = normalize(vNormal);
@@ -48,15 +49,23 @@ void main() {
 	#endif
 
 	vec3 reflectedColor = reflectTex.rgb * reflectMapTex;
-	vec3 refractedColor = refractMapTex;
 
-	vec4 surfaceColor = vec4(reflectedColor, depth);
-	vec4 matColor = vec4(refractedColor, WaterFlag);
+	vec4 sceneColor = texture(texScene, refCoord.xy);
+	#ifndef HIGH_QUALITY
+		float sDepth = texture(sceneDepth, refCoord.xy).r;
+	#else
+		float sDepth = sceneColor.w;
+	#endif
+	vec3 ndcScene = vec3(refCoord.xy, sDepth) * 2.0 - 1.0;
+	vec4 scenePos = invViewProjMatrix * vec4(ndcScene, 1.0); 
+	scenePos /= scenePos.w;
+	float depthFactor = clamp((wHeight - scenePos.y - 10.0) * 0.01, 0.0, 1.0);
+	vec3 refractedColor = mix(sceneColor.rgb, refractMapTex, depthFactor).rgb;
 
 	float ndote = -dot(normal, eye2Water);
 	float fresnel = mix(0.25, 1.0, pow(1.0 - ndote, 3.0));
+	vec3 waterColor = mix(refractedColor, reflectedColor, fresnel);
 		
-	FragTex = surfaceColor;
-	FragMat = matColor;
-	FragNormal = vec4(normal * 0.5 + 0.5, fresnel);
+	FragTex = vec4(waterColor, depth);
+	FragNormal = vec4(normal * 0.5 + vec3(0.5), WaterFlag);
 }

@@ -15,6 +15,8 @@ AssetManager::AssetManager() {
 	envTexture = NULL;
 	noise3DTexture = NULL;
 	reflectTexture = NULL;
+	sceneTexture = NULL;
+	sceneDepth = NULL;
 	heightTexture = NULL;
 	heightNormalTex = NULL;
 	distortionTex = -1;
@@ -116,12 +118,28 @@ CubeMap* AssetManager::getNoise3D() {
 	return noise3DTexture;
 }
 
-void AssetManager::setReflectTexture(Texture2D* tex) {
-	reflectTexture = tex;
+void AssetManager::setReflectTexture(const Texture2D* tex) {
+	reflectTexture = (Texture2D*)tex;
 }
 
 Texture2D* AssetManager::getReflectTexture() {
 	return reflectTexture;
+}
+
+void AssetManager::setSceneTexture(const Texture2D* tex) {
+	sceneTexture = (Texture2D*)tex;
+}
+
+Texture2D* AssetManager::getSceneTexture() {
+	return sceneTexture;
+}
+
+void AssetManager::setSceneDepth(const Texture2D* tex) {
+	sceneDepth = (Texture2D*)tex;
+}
+
+Texture2D* AssetManager::getSceneDepth() {
+	return sceneDepth;
 }
 
 void AssetManager::addDistortionTex(const char* texName) {

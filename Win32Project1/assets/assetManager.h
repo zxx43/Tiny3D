@@ -27,6 +27,8 @@ public:
 	CubeMap* envTexture;
 	CubeMap* noise3DTexture;
 	Texture2D* reflectTexture;
+	Texture2D* sceneTexture;
+	Texture2D* sceneDepth;
 	int distortionTex, noiseTex, roadTex;
 private:
 	Texture2D* heightTexture;
@@ -48,8 +50,12 @@ public:
 	CubeMap* getEnvTexture();
 	void setNoise3D(CubeMap* tex);
 	CubeMap* getNoise3D();
-	void setReflectTexture(Texture2D* tex);
+	void setReflectTexture(const Texture2D* tex);
 	Texture2D* getReflectTexture();
+	void setSceneTexture(const Texture2D* tex);
+	Texture2D* getSceneTexture();
+	void setSceneDepth(const Texture2D* tex);
+	Texture2D* getSceneDepth();
 	void addDistortionTex(const char* texName);
 	int getDistortionTex() { return distortionTex; }
 	u64 getDistortionHnd() { return texBld->getHnds()[distortionTex]; }

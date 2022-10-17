@@ -273,6 +273,7 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 					shader->setFloat("udotl", state->udotl);
 					shader->setVector3v("eyePos", camera->position);
 					shader->setMatrix4("viewMatrix", camera->viewMatrix);
+					shader->setMatrix4("invViewProjMatrix", camera->invViewProjectMatrix);
 					if (state->enableSsr)
 						shader->setVector2("waterBias", 0.0, 0.0);
 					else
@@ -286,6 +287,12 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 					if (AssetManager::assetManager->getReflectTexture() &&
 						!shader->isTexBinded(AssetManager::assetManager->getReflectTexture()->hnd))
 							shader->setHandle64("texRef", AssetManager::assetManager->getReflectTexture()->hnd);
+					if (AssetManager::assetManager->getSceneTexture() &&
+						!shader->isTexBinded(AssetManager::assetManager->getSceneTexture()->hnd))
+							shader->setHandle64("texScene", AssetManager::assetManager->getSceneTexture()->hnd);
+					if (AssetManager::assetManager->getSceneDepth() &&
+						!shader->isTexBinded(AssetManager::assetManager->getSceneDepth()->hnd))
+							shader->setHandle64("sceneDepth", AssetManager::assetManager->getSceneDepth()->hnd);
 				}
 			} else if (state->skyPass) {
 				mat4 viewMat = camera->viewMatrix;

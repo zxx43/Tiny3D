@@ -72,7 +72,6 @@ void SimpleApplication::resize(int width, int height) {
 
 	if (waterFrame) delete waterFrame;
 	waterFrame = new FrameBuffer(width, height, hdrPre, 4, WRAP_REPEAT);
-	waterFrame->addColorBuffer(waterPre, 4); // FragMat
 	waterFrame->addColorBuffer(waterPre, 4); // FragNormal
 	waterFrame->attachDepthBuffer(renderMgr->getDepthPre(), false);
 
@@ -108,8 +107,7 @@ void SimpleApplication::resize(int width, int height) {
 			if (ssrChain) delete ssrChain;
 			ssrChain = new FilterChain(width * ssrScale, height * ssrScale, true, LOW_PRE, 4, WRAP_REPEAT);
 			ssrChain->addInputTex(combinedChain->getOutputTex(0)); // lightBuffer
-			ssrChain->addInputTex(waterFrame->getColorBuffer(1));  // matBuffer
-			ssrChain->addInputTex(waterFrame->getColorBuffer(2));  // normalBuffer
+			ssrChain->addInputTex(waterFrame->getColorBuffer(1));  // normalBuffer
 			ssrChain->addInputTex(waterFrame->getDepthBuffer());   // depthBuffer
 
 			if (!cfgs->cartoon && !cfgs->dof && !cfgs->fxaa) {
@@ -135,8 +133,7 @@ void SimpleApplication::resize(int width, int height) {
 		combinedChain->addInputTex(sceneFilter->getOutput(1));     // sceneNormalBuffer
 		combinedChain->addInputTex(screen->getDepthBuffer());      // sceneDepthBuffer
 		combinedChain->addInputTex(waterFrame->getColorBuffer(0)); // waterBuffer
-		combinedChain->addInputTex(waterFrame->getColorBuffer(1)); // waterMatBuffer
-		combinedChain->addInputTex(waterFrame->getColorBuffer(2)); // waterNormalBuffer
+		combinedChain->addInputTex(waterFrame->getColorBuffer(1)); // waterNormalBuffer
 		combinedChain->addInputTex(waterFrame->getDepthBuffer());  // waterDepthBuffer
 		combinedChain->addInputTex(bloomChain->getOutputTex());    // bloomBuffer
 	}
@@ -202,6 +199,8 @@ void SimpleApplication::draw() {
 			AssetManager::assetManager->setReflectTexture(renderMgr->reflectBuffer->getColorBuffer(0));
 		}
 	}
+	AssetManager::assetManager->setSceneTexture(sceneFilter->getOutput(0));
+	AssetManager::assetManager->setSceneDepth(screen->getDepthBuffer());
 	
 	///*
 
