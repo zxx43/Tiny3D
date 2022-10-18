@@ -8,6 +8,7 @@ layout (location = 0) in vec3 vertex;
 
 out vec3 vNormal;
 out vec3 vEye2Water;
+out vec3 vWaterPos;
 out vec4 vProjPos;
 
 vec3 CalculateWavePosition(float q, float a, float w, vec3 dir, vec3 meshVert, float ph, float t) {
@@ -94,6 +95,7 @@ void main() {
 	vNormal = normal;
 	vEye2Water = position - eyePos;
 
+	vWaterPos = position;
 	vProjPos = viewProjectMatrix * vec4(position, 1.0);
 	gl_Position = vProjPos;
 }

@@ -14,6 +14,7 @@ uniform float wHeight;
 
 in vec3 vNormal;
 in vec3 vEye2Water;
+in vec3 vWaterPos;
 in vec4 vProjPos;
 
 layout (location = 0) out vec4 FragTex;
@@ -65,7 +66,12 @@ void main() {
 	float ndote = -dot(normal, eye2Water);
 	float fresnel = mix(0.25, 1.0, pow(1.0 - ndote, 3.0));
 	vec3 waterColor = mix(refractedColor, reflectedColor, fresnel);
-		
-	FragTex = vec4(waterColor, depth);
+	
+	#ifdef USE_CARTOON
+		FragTex = vec4(waterColor, depth);
+	#else 
+		float depthView = length(vEye2Water);
+		FragTex = vec4(GenFogColor(-0.00000075, vec4(vWaterPos, 1.0), depthView, udotl, waterColor), depth);
+	#endif
 	FragNormal = vec4(normal * 0.5 + vec3(0.5), WaterFlag);
 }

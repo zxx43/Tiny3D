@@ -118,6 +118,8 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	if (cfgs->dynsky) water->attachDef("DYN_SKY", "1");
 	if (cfgs->graphQuality > 3)
 		water->attachDef("HIGH_QUALITY", "1");
+	if (cfgs->cartoon)
+		water->attachDef("USE_CARTOON", "1");
 
 	Shader* waterComp = shaders->addShader("waterComp", WATER_COMP);
 	waterComp->attachDef("Shader", "water_culling");
