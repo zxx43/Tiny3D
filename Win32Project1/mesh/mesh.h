@@ -41,6 +41,7 @@ public:
 	BoxInfo* boundBox;
 	std::vector<FaceBuf*> singleFaces;
 	std::vector<FaceBuf*> normalFaces;
+	std::vector<FaceBuf*> transpFaces;
 public:
 	Mesh();
 	Mesh(const Mesh& rhs);
@@ -54,6 +55,7 @@ public:
 	void clearFaceBuf();
 private:
 	void caculateBounding();
+	bool isEmptyFaces() { return singleFaces.size() == 0 && normalFaces.size() == 0 && transpFaces.size() == 0; }
 private:
 	vec3 boundScale;
 public:

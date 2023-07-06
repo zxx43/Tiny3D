@@ -25,7 +25,7 @@ struct Material
 	bool srgb1, srgb2, srgb3, srgb4;
 	vec4 texids;
 	vec2 exTexids;
-	bool singleFace, leaf;
+	bool singleFace, leaf, transparent;
 	Material(const char* mtlName) {
 		id = -1;
 		name = mtlName;
@@ -38,6 +38,7 @@ struct Material
 		diffuse = vec3(0.6, 0.6, 0.6);
 		specular = vec3(0, 0, 0);
 		singleFace = false;
+		transparent = false;
 		leaf = false;
 	}
 }; 

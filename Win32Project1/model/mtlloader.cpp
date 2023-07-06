@@ -31,10 +31,10 @@ void MtlLoader::readMtlInfo() {
 void MtlLoader::readMtlFile() {
 	ifstream infile(mtlFilePath.data());
 	string sline;
-	int n = 0, t = 0, d = 0, a = 0, s = 0, c = 0, l = 0;
+	int n = 0, t = 0, d = 0, a = 0, s = 0, c = 0, l = 0, tr = 0;
 
 	string value,name,texture;
-	float red = 0, green = 0, blue = 0, single = 0, leaf = 0;
+	float red = 0, green = 0, blue = 0, single = 0, leaf = 0, transparent = 0;
 	Material* mtl=NULL;
 	while(getline(infile,sline)) {
 		if(sline!="") {
@@ -107,6 +107,11 @@ void MtlLoader::readMtlFile() {
 				if (mtl)
 					mtl->leaf = true;
 				l++;
+			} else if (value == "transparent") {
+				ins >> transparent;
+				if (mtl)
+					mtl->transparent = true;
+				tr++;
 			}
 		}
 	}

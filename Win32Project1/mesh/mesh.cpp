@@ -22,6 +22,7 @@ Mesh::Mesh() {
 
 	singleFaces.clear();
 	normalFaces.clear();
+	transpFaces.clear();
 
 	boundScale = vec3(1.0, 1.0, 1.0);
 }
@@ -35,6 +36,8 @@ Mesh::Mesh(const Mesh& rhs) {
 		singleFaces.push_back(rhs.singleFaces[i]->copy());
 	for (uint i = 0; i < rhs.normalFaces.size(); i++)
 		normalFaces.push_back(rhs.normalFaces[i]->copy());
+	for (uint i = 0; i < rhs.transpFaces.size(); i++)
+		transpFaces.push_back(rhs.transpFaces[i]->copy());
 }
 
 Mesh::~Mesh() {
@@ -112,6 +115,9 @@ void Mesh::clearFaceBuf() {
 	for (uint i = 0; i < normalFaces.size(); i++)
 		delete normalFaces[i];
 	normalFaces.clear();
+	for (uint i = 0; i < transpFaces.size(); i++)
+		delete transpFaces[i];
+	transpFaces.clear();
 }
 
 void Mesh::setIsBillboard(bool billboard) {
@@ -128,9 +134,7 @@ void Mesh::setAllSingle() {
 }
 
 void Mesh::setAllNormal() {
-	if (indexCount > 0) {
-		if (singleFaces.size() == 0 && normalFaces.size() == 0)
-			normalFaces.push_back(new FaceBuf(0, indexCount));
-	}
+	if (indexCount > 0 && isEmptyFaces())
+		normalFaces.push_back(new FaceBuf(0, indexCount));
 }
 

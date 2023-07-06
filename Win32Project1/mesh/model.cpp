@@ -115,7 +115,7 @@ void Model::initFaces() {
 	materialids = new int[indexCount];
 	indices = (int*)malloc(indexCount*sizeof(int));
 
-	std::vector<bool> statlst; statlst.clear();
+	std::vector<int> statlst; statlst.clear();
 	std::vector<int> startlst; startlst.clear();
 	std::vector<int> countlst; countlst.clear();
 	int laststat = -1;
@@ -183,6 +183,7 @@ void Model::initFaces() {
 		int curstat = 0;
 		Material* mat = MaterialManager::materials->find(mid);
 		if (mat && mat->singleFace) curstat = 1;
+		else if (mat && mat->transparent) curstat = 2;
 		else curstat = 0;
 		if (laststat == curstat)
 			countlst[countlst.size() - 1] += 3;
@@ -195,15 +196,22 @@ void Model::initFaces() {
 	}
 
 	for (uint i = 0; i < statlst.size(); i++) {
-		bool stat = statlst[i];
-		if (!stat) normalFaces.push_back(new FaceBuf(startlst[i], countlst[i]));
-		else singleFaces.push_back(new FaceBuf(startlst[i], countlst[i]));
+		int stat = statlst[i];
+		if (stat == 0) normalFaces.push_back(new FaceBuf(startlst[i], countlst[i]));
+		else if (stat == 1) singleFaces.push_back(new FaceBuf(startlst[i], countlst[i]));
+		else if (stat == 2) transpFaces.push_back(new FaceBuf(startlst[i], countlst[i]));
 	}
 	vertexCount = dupIndex;
 
-	if (normalFaces.size() > 0 && singleFaces.size() > 0) {
+	bool allNormal = singleFaces.size() == 0 && transpFaces.size() == 0 && normalFaces.size() > 0;
+	bool allSingle = normalFaces.size() == 0 && transpFaces.size() == 0 && singleFaces.size() > 0;
+	bool allTransp = normalFaces.size() == 0 && singleFaces.size() == 0 && transpFaces.size() > 0;
+	bool hasFaces = normalFaces.size() > 0 || singleFaces.size() > 0 || transpFaces.size() > 0;
+
+	if (hasFaces && !allNormal && !allSingle && !allTransp) {
 		int* tmp = (int*)malloc(indexCount * sizeof(int));
-		int curIndex = 0, normalStart = 0, singleCount = 0, normalCount = 0;
+		int curIndex = 0, singleStart = 0, singleCount = 0, normalStart = 0, normalCount = 0, transpStart = 0, transpCount = 0;
+		singleStart = curIndex;
 		for (uint i = 0; i < singleFaces.size(); i++) {
 			FaceBuf* buf = singleFaces[i];
 			memcpy(tmp + curIndex, indices + buf->start, buf->count * sizeof(int));
@@ -217,11 +225,19 @@ void Model::initFaces() {
 			curIndex += buf->count;
 			normalCount += buf->count;
 		}
+		transpStart = curIndex;
+		for (uint i = 0; i < transpFaces.size(); i++) {
+			FaceBuf* buf = transpFaces[i];
+			memcpy(tmp + curIndex, indices + buf->start, buf->count * sizeof(int));
+			curIndex += buf->count;
+			transpCount += buf->count;
+		}
 		free(indices);
 		indices = tmp;
 
 		clearFaceBuf();
-		singleFaces.push_back(new FaceBuf(0, singleCount));
-		normalFaces.push_back(new FaceBuf(normalStart, normalCount));
+		if (singleCount > 0) singleFaces.push_back(new FaceBuf(singleStart, singleCount));
+		if (normalCount > 0) normalFaces.push_back(new FaceBuf(normalStart, normalCount));
+		if (transpCount > 0) transpFaces.push_back(new FaceBuf(transpStart, transpCount));
 	}
 }
