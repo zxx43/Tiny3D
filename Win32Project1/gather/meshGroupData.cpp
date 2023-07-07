@@ -32,6 +32,7 @@ void MeshGroupData::append(const MeshGroup* meshGroup) {
 	bufferTmp[base + 5] = meshGroup->subSingles[1];
 	bufferTmp[base + 6] = meshGroup->subSingles[2];
 	bufferTmp[base + 7] = meshGroup->subSingles[3];
+	// todo
 
 	releaseBuffer();
 	count = newCount;

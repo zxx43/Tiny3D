@@ -16,6 +16,7 @@ MeshManager::MeshManager() {
 	singleMeshs.clear();
 	billbdMeshs.clear();
 	animatMeshs.clear();
+	transpMeshs.clear();
 }
 
 MeshManager::~MeshManager() {
@@ -55,6 +56,9 @@ void MeshManager::release() {
 	for (uint i = 0; i < animatMeshs.size(); ++i)
 		delete animatMeshs[i];
 	animatMeshs.clear();
+	for (uint i = 0; i < transpMeshs.size(); ++i)
+		delete transpMeshs[i];
+	transpMeshs.clear();
 }
 
 uint MeshManager::getMeshGroupId(const MeshGroup* group) {
@@ -116,6 +120,18 @@ int MeshManager::getSubMeshId(Mesh* mesh, int typ) {
 			if (target < 0) {
 				target = (int)singleMeshs.size();
 				singleMeshs.push_back(new SubMesh(mesh, typ));
+			}
+		} else if (typ == SUBMESH_TYPE_TRANSP && mesh->transpFaces.size() > 0) {
+			for (uint i = 0; i < transpMeshs.size(); ++i) {
+				SubMesh* sub = transpMeshs[i];
+				if (sub->mesh == mesh) {
+					target = (int)i;
+					break;
+				}
+			}
+			if (target < 0) {
+				target = (int)transpMeshs.size();
+				transpMeshs.push_back(new SubMesh(mesh, typ));
 			}
 		}
 	}
@@ -217,17 +233,21 @@ void MeshManager::addObject(Object* object) {
 		int subLowNormal = getSubMeshId(sobj->meshLow, SUBMESH_TYPE_NORMAL); 
 		int subLowSingle = getSubMeshId(sobj->meshLow, SUBMESH_TYPE_SINGLE); 
 		int subBill = getSubMeshId(sobj->meshLow, SUBMESH_TYPE_BILLBD);
+		//todo
 
 		addSubMeshObjectCount(normalMeshs, subHighNormal);
 		addSubMeshObjectCount(singleMeshs, subHighSingle);
+		//todo
 		if (sobj->meshMid && sobj->meshMid != sobj->mesh) {
 			addSubMeshObjectCount(normalMeshs, subMidNormal);
 			addSubMeshObjectCount(singleMeshs, subMidSingle);
+			//todo
 		}
 		if (sobj->meshLow && sobj->meshLow != sobj->meshMid && sobj->meshLow != sobj->mesh) {
 			addSubMeshObjectCount(normalMeshs, subLowNormal);
 			addSubMeshObjectCount(singleMeshs, subLowSingle);
 			addSubMeshObjectCount(billbdMeshs, subBill);
+			//todo
 		}
 
 		MeshGroup group(subHighNormal, subMidNormal, subLowNormal, -1, subHighSingle, subMidSingle, subLowSingle, subBill);
@@ -255,6 +275,7 @@ void MeshManager::showLog() {
 		MeshGroup* group = meshGroups[i];
 		int n0 = group->subNormals[0], n1 = group->subNormals[1], n2 = group->subNormals[2], n3 = group->subNormals[3];
 		int s0 = group->subSingles[0], s1 = group->subSingles[1], s2 = group->subSingles[2], s3 = group->subSingles[3];
+		//todo
 		std::string name0 = SubMeshValid(n0) ? normalMeshs[n0]->name + " * " + std::to_string(normalMeshs[n0]->objectCount) : "invalid * -1";
 		std::string name1 = SubMeshValid(n1) ? normalMeshs[n1]->name + " * " + std::to_string(normalMeshs[n1]->objectCount) : "invalid * -1";
 		std::string name2 = SubMeshValid(n2) ? normalMeshs[n2]->name + " * " + std::to_string(normalMeshs[n2]->objectCount) : "invalid * -1";
@@ -263,6 +284,7 @@ void MeshManager::showLog() {
 		std::string name5 = SubMeshValid(s1) ? singleMeshs[s1]->name + " * " + std::to_string(singleMeshs[s1]->objectCount) : "invalid * -1";
 		std::string name6 = SubMeshValid(s2) ? singleMeshs[s2]->name + " * " + std::to_string(singleMeshs[s2]->objectCount) : "invalid * -1";
 		std::string name7 = SubMeshValid(s3) ? billbdMeshs[s3]->name + " * " + std::to_string(billbdMeshs[s3]->objectCount) : "invalid * -1";
+		//todo
 		printf("Group:\n");
 		printf("%s, %s, %s, %s\n", name0.data(), name1.data(), name2.data(), name3.data());
 		printf("%s, %s, %s, %s\n\n", name4.data(), name5.data(), name6.data(), name7.data());

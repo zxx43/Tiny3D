@@ -20,6 +20,7 @@ ObjectGather::ObjectGather(const MeshManager* meshManager) {
 		maxBillbdSize += meshManager->billbdMeshs[i]->objectCount;
 	for (uint i = 0; i < meshManager->animatMeshs.size(); ++i)
 		maxAnimatSize += meshManager->animatMeshs[i]->objectCount;
+	//todo
 
 	resetGroupObject();
 }

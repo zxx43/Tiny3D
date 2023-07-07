@@ -11,34 +11,42 @@
 #define SUBMESH_TYPE_SINGLE 1
 #define SUBMESH_TYPE_BILLBD 2
 #define SUBMESH_TYPE_ANIMAT 3
+#define SUBMESH_TYPE_TRANSP 4
 #endif
 
 struct MeshGroup {
 	int* subNormals;
 	int* subSingles;
+	int* subTransps;
 	uint objectCount;
 	MeshGroup(int nhigh, int nmid, int nlow, int nanim, int shigh, int smid, int slow, int sbill) {
 		subNormals = (int*)malloc(4 * sizeof(int));
 		subSingles = (int*)malloc(4 * sizeof(int));
+		subTransps = (int*)malloc(4 * sizeof(int));
 		objectCount = 0;
 		subNormals[0] = nhigh, subNormals[1] = nmid, subNormals[2] = nlow, subNormals[3] = nanim;
 		subSingles[0] = shigh, subSingles[1] = smid, subSingles[2] = slow, subSingles[3] = sbill;
+		subTransps[0] = -1, subTransps[1] = -1, subTransps[2] = -1, subTransps[3] = -1;
 	}
 	MeshGroup(const MeshGroup* rhs) {
 		subNormals = (int*)malloc(4 * sizeof(int));
 		subSingles = (int*)malloc(4 * sizeof(int));
+		subTransps = (int*)malloc(4 * sizeof(int));
 		objectCount = 0;
 		memcpy(subNormals, rhs->subNormals, 4 * sizeof(int));
 		memcpy(subSingles, rhs->subSingles, 4 * sizeof(int));
+		memcpy(subTransps, rhs->subTransps, 4 * sizeof(int));
 	}
 	~MeshGroup() {
 		free(subNormals);
 		free(subSingles);
+		free(subTransps);
 	}
 	bool equals(const MeshGroup* rhs) {
 		for (int i = 0; i < 4; ++i) {
 			if (rhs->subNormals[i] != subNormals[i]) return false;
 			if (rhs->subSingles[i] != subSingles[i]) return false;
+			if (rhs->subTransps[i] != subTransps[i]) return false;
 		}
 		return true;
 	}
@@ -69,6 +77,10 @@ struct SubMesh {
 			case SUBMESH_TYPE_BILLBD:
 				ext = "_billbd";
 				indirect->count = mesh->singleFaces[0]->count;
+				break;
+			case SUBMESH_TYPE_TRANSP:
+				ext = "_transp";
+				indirect->count = mesh->transpFaces[0]->count;
 				break;
 		}
 		name = mesh->getName() + ext;
@@ -110,6 +122,7 @@ public:
 	std::vector<SubMesh*> singleMeshs;
 	std::vector<SubMesh*> billbdMeshs;
 	std::vector<SubMesh*> animatMeshs;
+	std::vector<SubMesh*> transpMeshs;
 	std::vector<MeshGroup*> meshGroups;
 	std::vector<Billboard*> billboards;
 public:

@@ -27,6 +27,7 @@ MeshGather::MeshGather(MeshManager* manager) {
 	singles = new IndirectData();
 	billbds = new IndirectData();
 	animats = new IndirectData();
+	//todo
 	for (uint i = 0; i < manager->normalMeshs.size(); ++i)
 		addIndirect(manager->normalMeshs[i], normals);
 	for (uint i = 0; i < manager->singleMeshs.size(); ++i)
@@ -35,6 +36,7 @@ MeshGather::MeshGather(MeshManager* manager) {
 		addIndirect(manager->billbdMeshs[i], billbds);
 	for (uint i = 0; i < manager->animatMeshs.size(); ++i)
 		addIndirect(manager->animatMeshs[i], animats);
+	//todo
 
 	groupData = new MeshGroupData();
 	for (uint i = 0; i < manager->meshGroups.size(); ++i)
@@ -54,6 +56,7 @@ MeshGather::~MeshGather() {
 	delete singles;
 	delete billbds;
 	delete animats;
+	//todo
 	delete groupData;
 	delete boardData;
 	delete meshData;
@@ -68,6 +71,7 @@ void MeshGather::addIndirect(SubMesh* sub, IndirectData* indirectData) {
 			sub->indirect->firstIndex = meshManager->meshOffsets[mesh]->indexOffset + mesh->normalFaces[0]->start;
 		else if (sub->type == SUBMESH_TYPE_SINGLE || sub->type == SUBMESH_TYPE_BILLBD)
 			sub->indirect->firstIndex = meshManager->meshOffsets[mesh]->indexOffset + mesh->singleFaces[0]->start;
+		//todo
 	} else {
 		Animation* anim = sub->animat;
 		sub->indirect->baseVertex = meshManager->animatOffsets[anim]->vertexOffset;
@@ -82,5 +86,6 @@ void MeshGather::showLog() {
 	printf("sub single count: %d\n", singles->count);
 	printf("sub billbd count: %d\n", billbds->count);
 	printf("sub animat count: %d\n", animats->count);
+	//todo
 	printf("max sub count: %d\n\n", maxSubCount);
 }

@@ -15,6 +15,7 @@ public:
 	IndirectData* singles;
 	IndirectData* billbds;
 	IndirectData* animats;
+	//todo
 	MeshGroupData* groupData;
 	BillboardData* boardData;
 public:
