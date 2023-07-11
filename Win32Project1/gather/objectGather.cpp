@@ -11,7 +11,7 @@ ObjectGather::ObjectGather(const MeshManager* meshManager) {
 	}
 	inObjectBuffer = (buff*)malloc(maxObjectSize * 16 * sizeof(buff));
 
-	maxNormalSize = 0, maxSingleSize = 0, maxBillbdSize = 0, maxAnimatSize = 0;
+	maxNormalSize = 0, maxSingleSize = 0, maxBillbdSize = 0, maxAnimatSize = 0, maxTranspSize = 0;
 	for (uint i = 0; i < meshManager->normalMeshs.size(); ++i)
 		maxNormalSize += meshManager->normalMeshs[i]->objectCount;
 	for (uint i = 0; i < meshManager->singleMeshs.size(); ++i)
@@ -20,7 +20,8 @@ ObjectGather::ObjectGather(const MeshManager* meshManager) {
 		maxBillbdSize += meshManager->billbdMeshs[i]->objectCount;
 	for (uint i = 0; i < meshManager->animatMeshs.size(); ++i)
 		maxAnimatSize += meshManager->animatMeshs[i]->objectCount;
-	//todo
+	for (uint i = 0; i < meshManager->transpMeshs.size(); ++i)
+		maxTranspSize += meshManager->transpMeshs[i]->objectCount;
 
 	resetGroupObject();
 }
@@ -81,6 +82,7 @@ void ObjectGather::showLog() {
 	printf("max group object %d\n", maxObjectSize);
 	printf("max normal object %d\n", maxNormalSize);
 	printf("max single object %d\n", maxSingleSize);
+	printf("max transp object %d\n", maxTranspSize);
 	printf("max billbd object %d\n", maxBillbdSize);
 	printf("max animat object %d\n\n", maxAnimatSize);
 }

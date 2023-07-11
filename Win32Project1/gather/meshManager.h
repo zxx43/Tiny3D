@@ -19,14 +19,16 @@ struct MeshGroup {
 	int* subSingles;
 	int* subTransps;
 	uint objectCount;
-	MeshGroup(int nhigh, int nmid, int nlow, int nanim, int shigh, int smid, int slow, int sbill) {
+	MeshGroup(int nhigh, int nmid, int nlow, int nanim, 
+			int shigh, int smid, int slow, int sbill, 
+			int phigh, int pmid, int plow, int pex) {
 		subNormals = (int*)malloc(4 * sizeof(int));
 		subSingles = (int*)malloc(4 * sizeof(int));
 		subTransps = (int*)malloc(4 * sizeof(int));
 		objectCount = 0;
 		subNormals[0] = nhigh, subNormals[1] = nmid, subNormals[2] = nlow, subNormals[3] = nanim;
 		subSingles[0] = shigh, subSingles[1] = smid, subSingles[2] = slow, subSingles[3] = sbill;
-		subTransps[0] = -1, subTransps[1] = -1, subTransps[2] = -1, subTransps[3] = -1;
+		subTransps[0] = phigh, subTransps[1] = pmid, subTransps[2] = plow, subTransps[3] = pex;
 	}
 	MeshGroup(const MeshGroup* rhs) {
 		subNormals = (int*)malloc(4 * sizeof(int));

@@ -25,18 +25,19 @@ MeshGather::MeshGather(MeshManager* manager) {
 
 	normals = new IndirectData();
 	singles = new IndirectData();
+	transps = new IndirectData();
 	billbds = new IndirectData();
 	animats = new IndirectData();
-	//todo
 	for (uint i = 0; i < manager->normalMeshs.size(); ++i)
 		addIndirect(manager->normalMeshs[i], normals);
 	for (uint i = 0; i < manager->singleMeshs.size(); ++i)
 		addIndirect(manager->singleMeshs[i], singles);
+	for (uint i = 0; i < manager->transpMeshs.size(); ++i)
+		addIndirect(manager->transpMeshs[i], transps);
 	for (uint i = 0; i < manager->billbdMeshs.size(); ++i)
 		addIndirect(manager->billbdMeshs[i], billbds);
 	for (uint i = 0; i < manager->animatMeshs.size(); ++i)
 		addIndirect(manager->animatMeshs[i], animats);
-	//todo
 
 	groupData = new MeshGroupData();
 	for (uint i = 0; i < manager->meshGroups.size(); ++i)
@@ -47,6 +48,7 @@ MeshGather::MeshGather(MeshManager* manager) {
 		boardData->append(manager->billboards[i]);
 
 	maxSubCount = normals->count > singles->count ? normals->count : singles->count;
+	maxSubCount = maxSubCount > transps->count ? maxSubCount : transps->count;
 	maxSubCount = maxSubCount > billbds->count ? maxSubCount : billbds->count;
 	maxSubCount = maxSubCount > animats->count ? maxSubCount : animats->count;
 }
@@ -54,9 +56,9 @@ MeshGather::MeshGather(MeshManager* manager) {
 MeshGather::~MeshGather() {
 	delete normals;
 	delete singles;
+	delete transps;
 	delete billbds;
 	delete animats;
-	//todo
 	delete groupData;
 	delete boardData;
 	delete meshData;
@@ -71,7 +73,8 @@ void MeshGather::addIndirect(SubMesh* sub, IndirectData* indirectData) {
 			sub->indirect->firstIndex = meshManager->meshOffsets[mesh]->indexOffset + mesh->normalFaces[0]->start;
 		else if (sub->type == SUBMESH_TYPE_SINGLE || sub->type == SUBMESH_TYPE_BILLBD)
 			sub->indirect->firstIndex = meshManager->meshOffsets[mesh]->indexOffset + mesh->singleFaces[0]->start;
-		//todo
+		else if (sub->type == SUBMESH_TYPE_TRANSP)
+			sub->indirect->firstIndex = meshManager->meshOffsets[mesh]->indexOffset + mesh->transpFaces[0]->start;
 	} else {
 		Animation* anim = sub->animat;
 		sub->indirect->baseVertex = meshManager->animatOffsets[anim]->vertexOffset;
@@ -84,8 +87,8 @@ void MeshGather::showLog() {
 	printf("Indirect info:\n");
 	printf("sub normal count: %d\n", normals->count);
 	printf("sub single count: %d\n", singles->count);
+	printf("sub transp count: %d\n", transps->count);
 	printf("sub billbd count: %d\n", billbds->count);
 	printf("sub animat count: %d\n", animats->count);
-	//todo
 	printf("max sub count: %d\n\n", maxSubCount);
 }

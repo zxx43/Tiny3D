@@ -228,29 +228,33 @@ void MeshManager::addObject(Object* object) {
 
 		int subHighNormal = getSubMeshId(sobj->mesh, SUBMESH_TYPE_NORMAL);
 		int subHighSingle = getSubMeshId(sobj->mesh, SUBMESH_TYPE_SINGLE);
+		int subHighTransp = getSubMeshId(sobj->mesh, SUBMESH_TYPE_TRANSP);
 		int subMidNormal = getSubMeshId(sobj->meshMid, SUBMESH_TYPE_NORMAL);
 		int subMidSingle = getSubMeshId(sobj->meshMid, SUBMESH_TYPE_SINGLE);
+		int subMidTransp = getSubMeshId(sobj->meshMid, SUBMESH_TYPE_TRANSP);
 		int subLowNormal = getSubMeshId(sobj->meshLow, SUBMESH_TYPE_NORMAL); 
 		int subLowSingle = getSubMeshId(sobj->meshLow, SUBMESH_TYPE_SINGLE); 
+		int subLowTransp = getSubMeshId(sobj->meshLow, SUBMESH_TYPE_TRANSP);
 		int subBill = getSubMeshId(sobj->meshLow, SUBMESH_TYPE_BILLBD);
-		//todo
 
 		addSubMeshObjectCount(normalMeshs, subHighNormal);
 		addSubMeshObjectCount(singleMeshs, subHighSingle);
-		//todo
+		addSubMeshObjectCount(transpMeshs, subHighTransp);
 		if (sobj->meshMid && sobj->meshMid != sobj->mesh) {
 			addSubMeshObjectCount(normalMeshs, subMidNormal);
 			addSubMeshObjectCount(singleMeshs, subMidSingle);
-			//todo
+			addSubMeshObjectCount(transpMeshs, subMidTransp);
 		}
 		if (sobj->meshLow && sobj->meshLow != sobj->meshMid && sobj->meshLow != sobj->mesh) {
 			addSubMeshObjectCount(normalMeshs, subLowNormal);
 			addSubMeshObjectCount(singleMeshs, subLowSingle);
+			addSubMeshObjectCount(transpMeshs, subLowTransp);
 			addSubMeshObjectCount(billbdMeshs, subBill);
-			//todo
 		}
 
-		MeshGroup group(subHighNormal, subMidNormal, subLowNormal, -1, subHighSingle, subMidSingle, subLowSingle, subBill);
+		MeshGroup group(subHighNormal, subMidNormal, subLowNormal, -1, 
+			subHighSingle, subMidSingle, subLowSingle, subBill,
+			subHighTransp, subMidTransp, subLowTransp, -1);
 		object->groupid = getMeshGroupId(&group);
 		addGroupObjectCount(meshGroups, object->groupid);
 
@@ -261,7 +265,7 @@ void MeshManager::addObject(Object* object) {
 		int subAnim = getSubMeshId(aobj->animation);
 		addSubMeshObjectCount(animatMeshs, subAnim);
 
-		MeshGroup group(-1, -1, -1, subAnim, -1, -1, -1, -1);
+		MeshGroup group(-1, -1, -1, subAnim, -1, -1, -1, -1, -1, -1, -1, -1);
 		object->groupid = getMeshGroupId(&group);
 		addGroupObjectCount(meshGroups, object->groupid);
 
@@ -275,7 +279,7 @@ void MeshManager::showLog() {
 		MeshGroup* group = meshGroups[i];
 		int n0 = group->subNormals[0], n1 = group->subNormals[1], n2 = group->subNormals[2], n3 = group->subNormals[3];
 		int s0 = group->subSingles[0], s1 = group->subSingles[1], s2 = group->subSingles[2], s3 = group->subSingles[3];
-		//todo
+		int p0 = group->subTransps[0], p1 = group->subTransps[1], p2 = group->subTransps[2], p3 = group->subTransps[3];
 		std::string name0 = SubMeshValid(n0) ? normalMeshs[n0]->name + " * " + std::to_string(normalMeshs[n0]->objectCount) : "invalid * -1";
 		std::string name1 = SubMeshValid(n1) ? normalMeshs[n1]->name + " * " + std::to_string(normalMeshs[n1]->objectCount) : "invalid * -1";
 		std::string name2 = SubMeshValid(n2) ? normalMeshs[n2]->name + " * " + std::to_string(normalMeshs[n2]->objectCount) : "invalid * -1";
@@ -284,10 +288,13 @@ void MeshManager::showLog() {
 		std::string name5 = SubMeshValid(s1) ? singleMeshs[s1]->name + " * " + std::to_string(singleMeshs[s1]->objectCount) : "invalid * -1";
 		std::string name6 = SubMeshValid(s2) ? singleMeshs[s2]->name + " * " + std::to_string(singleMeshs[s2]->objectCount) : "invalid * -1";
 		std::string name7 = SubMeshValid(s3) ? billbdMeshs[s3]->name + " * " + std::to_string(billbdMeshs[s3]->objectCount) : "invalid * -1";
-		//todo
+		std::string name8 = SubMeshValid(p0) ? transpMeshs[p0]->name + " * " + std::to_string(transpMeshs[p0]->objectCount) : "invalid * -1";
+		std::string name9 = SubMeshValid(p1) ? transpMeshs[p1]->name + " * " + std::to_string(transpMeshs[p1]->objectCount) : "invalid * -1";
+		std::string name10 = SubMeshValid(p2) ? transpMeshs[p2]->name + " * " + std::to_string(transpMeshs[p2]->objectCount) : "invalid * -1";
 		printf("Group:\n");
 		printf("%s, %s, %s, %s\n", name0.data(), name1.data(), name2.data(), name3.data());
 		printf("%s, %s, %s, %s\n\n", name4.data(), name5.data(), name6.data(), name7.data());
+		printf("%s, %s, %s\n\n", name8.data(), name9.data(), name10.data());
 	}
 
 	printf("Billboard: %d\n\n", billboards.size());

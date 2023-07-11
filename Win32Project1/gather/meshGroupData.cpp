@@ -5,7 +5,7 @@
 MeshGroupData::MeshGroupData() {
 	buffer = NULL;
 	count = 0;
-	channel = 8;
+	channel = 12;
 }
 
 MeshGroupData::~MeshGroupData() {
@@ -32,7 +32,10 @@ void MeshGroupData::append(const MeshGroup* meshGroup) {
 	bufferTmp[base + 5] = meshGroup->subSingles[1];
 	bufferTmp[base + 6] = meshGroup->subSingles[2];
 	bufferTmp[base + 7] = meshGroup->subSingles[3];
-	// todo
+	bufferTmp[base + 8] = meshGroup->subTransps[0];
+	bufferTmp[base + 9] = meshGroup->subTransps[1];
+	bufferTmp[base + 10] = meshGroup->subTransps[2];
+	bufferTmp[base + 11] = meshGroup->subTransps[3];
 
 	releaseBuffer();
 	count = newCount;

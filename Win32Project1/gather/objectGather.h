@@ -13,6 +13,7 @@ public:
 	uint maxSingleSize; // use to init single submesh output buffer
 	uint maxBillbdSize; // use to init billboard submesh output buffer
 	uint maxAnimatSize; // use to init animation submesh output buffer
+	uint maxTranspSize; // use to init transparent submesh output buffer
 public:
 	ObjectGather(const MeshManager* meshManager);
 	~ObjectGather();

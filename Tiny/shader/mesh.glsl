@@ -1,6 +1,7 @@
 struct MeshGroup {
 	ivec4 normalMeshs; // high/middle/low/animat mid
 	ivec4 singleMeshs; // high/middle/low/billbd mid
+	ivec4 transpMeshs; // high/middle/low/ex mid
 };
 
 bool MidValid(int mid) {

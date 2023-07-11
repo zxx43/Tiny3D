@@ -13,9 +13,9 @@ public:
 	MeshData* animData; // anim vbo
 	IndirectData* normals;
 	IndirectData* singles;
+	IndirectData* transps;
 	IndirectData* billbds;
 	IndirectData* animats;
-	//todo
 	MeshGroupData* groupData;
 	BillboardData* boardData;
 public:
