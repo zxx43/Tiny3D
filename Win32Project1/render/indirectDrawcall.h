@@ -9,6 +9,7 @@
 #define INDIRECT_SINGLE 1
 #define INDIRECT_BILLBD 2
 #define INDIRECT_ANIMAT 3
+#define INDIRECT_TRANSP 4
 #endif
 
 class IndirectDrawcall : public Drawcall {

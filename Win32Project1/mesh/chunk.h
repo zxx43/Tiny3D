@@ -4,10 +4,6 @@
 #include "../constants/constants.h"
 #include "../bounding/aabb.h"
 
-struct ChunkBuffer {
-	float data[8];
-};
-
 struct Chunk {
 	std::vector<uint> indices;
 	vec3 boundCenter;

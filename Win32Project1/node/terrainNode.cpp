@@ -172,7 +172,23 @@ void TerrainNode::createTerrainInfo() {
 	info->scale = vec4(terrain->size, 1.0);
 	info->info = vec4(STEP_SIZE, lineSize, MAP_SIZE, MAP_SIZE);
 
+	int channelCount = 12;
+	float* infoData = (float*)malloc(channelCount * sizeof(float));
+	infoData[0] = info->trans.x;
+	infoData[1] = info->trans.y;
+	infoData[2] = info->trans.z;
+	infoData[3] = info->trans.w;
+	infoData[4] = info->scale.x;
+	infoData[5] = info->scale.y;
+	infoData[6] = info->scale.z;
+	infoData[7] = info->scale.w;
+	infoData[8] = info->info.x;
+	infoData[9] = info->info.y;
+	infoData[10] = info->info.z;
+	infoData[11] = info->info.w;
+
 	if (infoBuffer) delete infoBuffer;
 	infoBuffer = new RenderBuffer(1, false);
-	infoBuffer->setBufferData(GL_UNIFORM_BUFFER, 0, GL_FLOAT, 1, sizeof(TerrainInfo), GL_STATIC_DRAW, info);
+	infoBuffer->setBufferData(GL_UNIFORM_BUFFER, 0, GL_FLOAT, 1, channelCount, GL_STATIC_DRAW, infoData);
+	free(infoData);
 }

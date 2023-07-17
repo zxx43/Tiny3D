@@ -23,6 +23,11 @@ IndirectDrawcall::IndirectDrawcall(const Processor* process, const MeshBuffer* m
 			vbo = meshDB->animVBs;
 			bufferCount = 8;
 			break;
+		case INDIRECT_TRANSP:
+			inputIndex = Processor::OutputTransp;
+			vbo = meshDB->meshVBs;
+			bufferCount = 6;
+			break;
 		default:
 			inputIndex = Processor::OutputNormal;
 			vbo = meshDB->meshVBs;
@@ -76,6 +81,11 @@ void IndirectDrawcall::draw(Render* render, RenderState* state, Shader* shader) 
 				indirectIndex = Processor::IndAnimatIndex;
 				shaderToUse = state->shaderBone;
 				break;
+			case INDIRECT_TRANSP:
+				indirectCount = processor->indTranspCount;
+				indirectIndex = Processor::IndTranspIndex;
+				shaderToUse = state->shaderIns; // todo use oit shader
+				break;
 			default:
 				indirectCount = processor->indNormalCount;
 				indirectIndex = Processor::IndNormalIndex;
@@ -101,6 +111,9 @@ void IndirectDrawcall::draw(Render* render, RenderState* state, Shader* shader) 
 				render->setCullState(true);
 				render->setShaderFloat(shaderToUse, "uAlpha", 1.0);
 			}
+		} else if (indirectType == INDIRECT_TRANSP) {
+			render->setCullState(false);
+			// todo set oit state
 		} else if (indirectType == INDIRECT_BILLBD) {
 			if (!state->isShadowPass()) {
 				render->setCullMode(CULL_BACK);

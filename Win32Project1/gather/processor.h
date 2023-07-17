@@ -28,11 +28,11 @@ private:
 	bool inputPushed;
 	int maxSub;
 public:
-	static const uint IndNormalIndex, IndSingleIndex, IndBillbdIndex, IndAnimatIndex;
-	static const uint OutputNormal, OutputSingle, OutputBillbd, OutputAnimat;
+	static const uint IndNormalIndex, IndSingleIndex, IndBillbdIndex, IndAnimatIndex, IndTranspIndex;
+	static const uint OutputNormal, OutputSingle, OutputBillbd, OutputAnimat, OutputTransp;
 	RenderBuffer* buffer;
 public:
-	int indNormalCount, indSingleCount, indBillbdCount, indAnimatCount, inputObjectCount;
+	int indNormalCount, indSingleCount, indTranspCount, indBillbdCount, indAnimatCount, inputObjectCount;
 public:
 	const MeshGather* meshDB;
 	const ObjectGather* objectDB;

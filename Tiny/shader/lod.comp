@@ -17,7 +17,7 @@ layout(binding = 3, std430) buffer InObjects {
 };
 
 layout(binding = 4, std430) buffer OutCounts {
-	uvec4 countBuff[];
+	CountBuff counter[];
 };
 
 layout(binding = 5, std430) buffer OutObjects {
@@ -82,6 +82,7 @@ void main() {
 	int singleMid = -1;
 	int billbdMid = -1;
 	int animatMid = -1;
+	int transpMid = -1;
 	
 	Bounding bound = GetBound(object, objPos);
 	if(!FrustumCull(bound) && !OccQuery(bound)) {
@@ -89,19 +90,22 @@ void main() {
 		if(dist < uDist.x) {
 			normalMid = group.normalMeshs.x;
 			singleMid = group.singleMeshs.x;
+			transpMid = group.transpMeshs.x;
 		} else if(dist < uDist.y) {
 			normalMid = group.normalMeshs.y;
 			singleMid = group.singleMeshs.y;
+			transpMid = group.transpMeshs.y;
 		} else {
 			billbdMid = group.singleMeshs.w;
 			if(!MidValid(billbdMid)) {
 				normalMid = group.normalMeshs.z;
 				singleMid = group.singleMeshs.z;
+				transpMid = group.transpMeshs.z;
 			}
 		}
 		animatMid = group.normalMeshs.w;
 				
-		if(MidValid(normalMid) || MidValid(singleMid) || MidValid(billbdMid)) {
+		if(MidValid(normalMid) || MidValid(singleMid) || MidValid(billbdMid) || MidValid(transpMid)) {
 			uint addIndex = atomicAdd(dispIndirect.numx, 1);
 			lodObjects[addIndex].position = object.trans.xyz;
 			lodObjects[addIndex].billid = GetBillid(object);
@@ -109,10 +113,12 @@ void main() {
 			lodObjects[addIndex].scale = vec3(GetScaleMain(object), GetScaleOther(object));
 			lodObjects[addIndex].mtl = GetMtl(object);
 			lodObjects[addIndex].meshid = vec4(ivec4(normalMid, singleMid, billbdMid, animatMid));
+			lodObjects[addIndex].exMeshid.x = float(transpMid);
 					
-			if(MidValid(normalMid)) atomicAdd(countBuff[normalMid].x, 1);
-			if(MidValid(singleMid)) atomicAdd(countBuff[singleMid].y, 1);
-			if(MidValid(billbdMid)) atomicAdd(countBuff[billbdMid].z, 1);
+			if(MidValid(normalMid)) atomicAdd(counter[normalMid].countBuff.x, 1);
+			if(MidValid(singleMid)) atomicAdd(counter[singleMid].countBuff.y, 1);
+			if(MidValid(billbdMid)) atomicAdd(counter[billbdMid].countBuff.z, 1);
+			if(MidValid(transpMid)) atomicAdd(counter[transpMid].exCountBuff.x, 1);
 		} else if(MidValid(animatMid)) {
 			uint addIndex = atomicAdd(dispIndirect.numx, 1);
 			lodObjects[addIndex].position = object.trans.xyz;
@@ -123,7 +129,7 @@ void main() {
 			vec2 animInfo = GetAnimInfo(object);
 			lodObjects[addIndex].meshid = vec4(animInfo, float(billbdMid), float(animatMid));
 					
-			atomicAdd(countBuff[animatMid].w, 1);
+			atomicAdd(counter[animatMid].countBuff.w, 1);
 		}
 	}
 }

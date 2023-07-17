@@ -4,6 +4,11 @@ struct MeshGroup {
 	ivec4 transpMeshs; // high/middle/low/ex mid
 };
 
+struct CountBuff {
+	uvec4 countBuff;
+	uvec4 exCountBuff;
+};
+
 bool MidValid(int mid) {
 	return mid >= 0;
 }
@@ -55,6 +60,7 @@ struct MeshObject {
 	vec3 scale;    // scale
 	float mtl;     // mtlid
 	vec4 meshid;   // nmeshid smeshid bmeshid ameshid | aid aframes bmeshid ameshid
+	vec4 exMeshid; // tmeshid
 };
 
 int GetNormalMid(MeshObject object) {
@@ -71,6 +77,10 @@ int GetBillbdMid(MeshObject object) {
 
 int GetAnimatMid(MeshObject object) {
 	return int(object.meshid.w);
+}
+
+int GetTranspMid(MeshObject object) {
+	return int(object.exMeshid.x);
 }
 
 vec2 GetAnimatInfo(MeshObject object) {

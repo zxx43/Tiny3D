@@ -1,9 +1,10 @@
 #include "shader/util.glsl"
+#include "shader/mesh.glsl"
 
 layout(local_size_x = 1) in;
 
 layout(binding = 1, std430) buffer InCounts {
-	uvec4 countBuff[];
+	CountBuff counter[];
 };
 
 layout(binding = 2, std430) buffer IndirectNormal {
@@ -18,8 +19,12 @@ layout(binding = 4, std430) buffer IndirectBillbd {
 layout(binding = 5, std430) buffer IndirectAnimat {
 	Indirect animats[];
 };
+layout(binding = 6, std430) buffer IndirectTransp {
+	Indirect transps[];
+};
 
 uniform uvec4 uMeshCounts;
+uniform uint uTransCounts;
 
 void main() {
 	uint meshid = gl_GlobalInvocationID.x;
@@ -28,11 +33,13 @@ void main() {
 						  meshid < uMeshCounts.y, 
 						  meshid < uMeshCounts.z, 
 						  meshid < uMeshCounts.w);
+	bool hasTransp = meshid < uTransCounts;
 
 	for(int n = 0; n < meshid; ++n) {
-		if(hasMesh.x) atomicAdd(normals[meshid].baseInstance, countBuff[n].x); // normal
-		if(hasMesh.y) atomicAdd(singles[meshid].baseInstance, countBuff[n].y); // single
-		if(hasMesh.z) atomicAdd(billbds[meshid].baseInstance, countBuff[n].z); // billbd
-		if(hasMesh.w) atomicAdd(animats[meshid].baseInstance, countBuff[n].w); // animat
+		if(hasMesh.x) atomicAdd(normals[meshid].baseInstance, counter[n].countBuff.x); // normal
+		if(hasMesh.y) atomicAdd(singles[meshid].baseInstance, counter[n].countBuff.y); // single
+		if(hasMesh.z) atomicAdd(billbds[meshid].baseInstance, counter[n].countBuff.z); // billbd
+		if(hasMesh.w) atomicAdd(animats[meshid].baseInstance, counter[n].countBuff.w); // animat
+		if(hasTransp) atomicAdd(transps[meshid].baseInstance, counter[n].exCountBuff.x); // transp
 	}
 }

@@ -4,7 +4,7 @@
 layout(local_size_x = 1) in;
 
 layout(binding = 1, std430) buffer OutCounts {
-	uvec4 countBuff[];
+	CountBuff counter[];
 };
 
 layout(binding = 2, std430) buffer Dispatchs {
@@ -23,8 +23,12 @@ layout(binding = 5, std430) buffer IndirectBillbd {
 layout(binding = 6, std430) buffer IndirectAnimat {
 	Indirect animats[];
 };
+layout(binding = 7, std430) buffer IndirectTransp {
+	Indirect transps[];
+};
 
 uniform uvec4 uMeshCounts;
+uniform uint uTransCounts;
 
 void main() {
 	uint meshid = gl_GlobalInvocationID.x;
@@ -37,25 +41,31 @@ void main() {
 						  meshid < uMeshCounts.y, 
 						  meshid < uMeshCounts.z, 
 						  meshid < uMeshCounts.w);
+	bool hasTransp = meshid < uTransCounts;
 						  
 	if(hasMesh.x) {
 		normals[meshid].primCount = 0;
 		normals[meshid].baseInstance = 0;
-		countBuff[meshid].x = 0;
+		counter[meshid].countBuff.x = 0;
 	}
 	if(hasMesh.y) {
 		singles[meshid].primCount = 0;
 		singles[meshid].baseInstance = 0;
-		countBuff[meshid].y = 0;
+		counter[meshid].countBuff.y = 0;
 	}
 	if(hasMesh.z) {
 		billbds[meshid].primCount = 0;
 		billbds[meshid].baseInstance = 0;
-		countBuff[meshid].z = 0;
+		counter[meshid].countBuff.z = 0;
 	}
 	if(hasMesh.w) {
 		animats[meshid].primCount = 0;
 		animats[meshid].baseInstance = 0;
-		countBuff[meshid].w = 0;
+		counter[meshid].countBuff.w = 0;
+	}
+	if(hasTransp) {
+		transps[meshid].primCount = 0;
+		transps[meshid].baseInstance = 0;
+		counter[meshid].exCountBuff.x = 0;
 	}
 }

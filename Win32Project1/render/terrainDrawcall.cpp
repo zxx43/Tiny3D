@@ -60,28 +60,30 @@ RenderBuffer* TerrainDrawcall::createBuffers() {
 }
 
 RenderBuffer* TerrainDrawcall::createSSBuffers() {
-	ChunkBuffer* chunkBuffer = (ChunkBuffer*)malloc(chunkCount * sizeof(ChunkBuffer));
-	memset(chunkBuffer, 0, chunkCount * sizeof(ChunkBuffer));
+	int chunkChannel = 8;
+	float* chunkData = (float*)malloc(chunkCount * chunkChannel * sizeof(float));
+	memset(chunkData, 0, chunkCount * chunkChannel * sizeof(float));
+
 	uint* indexBuffer = (uint*)malloc(chunkCount * CHUNK_INDEX_COUNT * sizeof(uint));
 
 	for (int i = 0; i < chunkCount; ++i) {
 		Chunk* chunk = mesh->chunks[i];
 		chunk->genBounding(data->vertexBuffer, CHUNK_INDEX_COUNT);
-		chunkBuffer[i].data[0] = chunk->boundCenter.x;
-		chunkBuffer[i].data[1] = chunk->boundCenter.y;
-		chunkBuffer[i].data[2] = chunk->boundCenter.z;
-		chunkBuffer[i].data[4] = chunk->boundSize.x;
-		chunkBuffer[i].data[5] = chunk->boundSize.y;
-		chunkBuffer[i].data[6] = chunk->boundSize.z;
+		chunkData[i * chunkChannel + 0] = chunk->boundCenter.x;
+		chunkData[i * chunkChannel + 1] = chunk->boundCenter.y;
+		chunkData[i * chunkChannel + 2] = chunk->boundCenter.z;
+		chunkData[i * chunkChannel + 4] = chunk->boundSize.x;
+		chunkData[i * chunkChannel + 5] = chunk->boundSize.y;
+		chunkData[i * chunkChannel + 6] = chunk->boundSize.z;
 		for (uint j = 0; j < CHUNK_INDEX_COUNT; ++j)
 			indexBuffer[i * CHUNK_INDEX_COUNT + j] = chunk->indices[j];
 	}
 
 	RenderBuffer* buffer = new RenderBuffer(2, false);
-	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, ChunkIndex, GL_ONE, chunkCount * sizeof(ChunkBuffer), GL_STATIC_DRAW, chunkBuffer);
+	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, ChunkIndex, GL_FLOAT, chunkCount, chunkChannel, GL_STATIC_DRAW, chunkData);
 	buffer->setBufferData(GL_SHADER_STORAGE_BUFFER, InputIndex, GL_UNSIGNED_INT, chunkCount * CHUNK_INDEX_COUNT, GL_STATIC_DRAW, indexBuffer);
 
-	free(chunkBuffer);
+	free(chunkData);
 	free(indexBuffer);
 	return buffer;
 }

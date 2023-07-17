@@ -23,18 +23,24 @@ layout(binding = 5, std430) buffer IndirectBillbd {
 layout(binding = 6, std430) buffer IndirectAnimat {
 	Indirect animats[];
 };
+layout(binding = 7, std430) buffer IndirectTransp {
+	Indirect transps[];
+};
 
-layout(binding = 7, std430) buffer OutNObjects {
+layout(binding = 8, std430) buffer OutNObjects {
 	mat4 outNormals[];	
 };
-layout(binding = 8, std430) buffer OutSObjects {
+layout(binding = 9, std430) buffer OutSObjects {
 	mat4 outSingles[];	
 };
-layout(binding = 9, std430) buffer OutBObjects {
+layout(binding = 10, std430) buffer OutBObjects {
 	mat4 outBillbds[];	
 };
-layout(binding = 10, std430) buffer OutAObjects {
+layout(binding = 11, std430) buffer OutAObjects {
 	mat4 outAnimats[];	
+};
+layout(binding = 12, std430) buffer OutTObjects {
+	mat4 outTransps[];	
 };
 
 void main() {
@@ -51,19 +57,25 @@ void main() {
 		int nid = GetNormalMid(object);
 		int sid = GetSingleMid(object);
 		int bid = GetBillbdMid(object);
+		int tid = GetTranspMid(object);
 	
-		if(MidValid(nid) || MidValid(sid)) {
+		if(MidValid(nid) || MidValid(sid) || MidValid(tid)) {
 			mat4 outMat = Translate(translate) * QuatToMat4(quat) * Scale(scale);
 			
 			if(MidValid(nid)) {
 				uint index = normals[nid].baseInstance + atomicAdd(normals[nid].primCount, 1);
-				outMat[3].w = mtl;
 				outNormals[index] = outMat;
+				outNormals[index][3].w = mtl;
 			}
 			if(MidValid(sid)) {
 				uint index = singles[sid].baseInstance + atomicAdd(singles[sid].primCount, 1);
-				outMat[3].w = mtl;
 				outSingles[index] = outMat;
+				outSingles[index][3].w = mtl;
+			}
+			if(MidValid(tid)) {
+				uint index = transps[tid].baseInstance + atomicAdd(transps[tid].primCount, 1);
+				outTransps[index] = outMat;
+				outTransps[index][3].w = mtl;
 			}
 		}
 		
