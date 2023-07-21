@@ -187,6 +187,8 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	edge->attachDef("Shader", "edge");
 	if (cfgs->cartoon)
 		edge->attachDef("USE_CARTOON", "1");
+	if (cfgs->graphQuality > 3)
+		edge->attachDef("HIGH_QUALITY", "1");
 	edge->setSlot("colorBuffer", 0);
 	edge->setSlot("normalWaterBuffer", 1);
 	edge->setSlot("matBuffer", 2);
@@ -196,6 +198,8 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	edgeNFG->attachDef("NO_FOG", "1");
 	if (cfgs->cartoon)
 		edgeNFG->attachDef("USE_CARTOON", "1");
+	if (cfgs->graphQuality > 3)
+		edgeNFG->attachDef("HIGH_QUALITY", "1");
 	edgeNFG->setSlot("colorBuffer", 0);
 	edgeNFG->setSlot("normalWaterBuffer", 1);
 	edgeNFG->setSlot("matBuffer", 2);
