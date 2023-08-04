@@ -2,7 +2,7 @@
 
 layout (early_fragment_tests) in;
 
-layout(binding = 0, r32ui) uniform uimage2D headPointers; // clear to 0 each frame
+layout(bindless_image, r32ui) uniform uimage2D headPointers; // clear to 0 each frame
 layout(binding = 0, offset = 0) uniform atomic_uint indexDispenser; // clear to 0 each frame
 layout(binding = 0, std430) buffer LinkedList {
 	uvec4 nodes[];

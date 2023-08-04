@@ -35,6 +35,8 @@
 #define HIGH_PRE 1
 #define HALF_PRE 2
 #define FLOAT_PRE 3
+#define UINT_PRE 4
+#define INT_PRE 5
 
 #define NEAREST 0
 #define LINEAR 1

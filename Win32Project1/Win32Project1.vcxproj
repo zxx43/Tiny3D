@@ -243,6 +243,7 @@
     <ClCompile Include="texture\bmploader.cpp" />
     <ClCompile Include="texture\cubemap.cpp" />
     <ClCompile Include="texture\hizGenerator.cpp" />
+    <ClCompile Include="texture\image2d.cpp" />
     <ClCompile Include="texture\imageloader.cpp" />
     <ClCompile Include="texture\imageset.cpp" />
     <ClCompile Include="texture\texture2d.cpp" />
@@ -340,6 +341,7 @@
     <ClInclude Include="texture\bmploader.h" />
     <ClInclude Include="texture\cubemap.h" />
     <ClInclude Include="texture\hizGenerator.h" />
+    <ClInclude Include="texture\image2d.h" />
     <ClInclude Include="texture\imageloader.h" />
     <ClInclude Include="texture\imageset.h" />
     <ClInclude Include="texture\texture2d.h" />
@@ -387,6 +389,9 @@
     <None Include="..\Tiny\shader\mesh.glsl" />
     <None Include="..\Tiny\shader\noise.frag" />
     <None Include="..\Tiny\shader\noise.vert" />
+    <None Include="..\Tiny\shader\oit.glsl" />
+    <None Include="..\Tiny\shader\oit_blend.frag" />
+    <None Include="..\Tiny\shader\oit_render.frag" />
     <None Include="..\Tiny\shader\pbr.glsl" />
     <None Include="..\Tiny\shader\phong.frag" />
     <None Include="..\Tiny\shader\phong.vert" />
