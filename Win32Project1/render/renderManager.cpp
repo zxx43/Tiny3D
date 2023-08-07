@@ -67,6 +67,13 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 	lodParam.lodDist.y = distance2;
 
 	clearRender = false, resetRender = false, resetGather = false;
+
+	//init oit
+	oitCounter = new RenderBuffer(1, false);
+	oitCounter->setBufferData(GL_ATOMIC_COUNTER_BUFFER, 0, GL_UNSIGNED_INT, 1, 1, GL_DYNAMIC_DRAW, NULL);
+	oitList = NULL;
+	oitHeader = NULL;
+	zeroHeader = NULL;
 }
 
 RenderManager::~RenderManager() {
@@ -85,6 +92,11 @@ RenderManager::~RenderManager() {
 	if (hiz) delete hiz; hiz = NULL;
 	if (hizDepth) delete hizDepth; hizDepth = NULL;
 	if (ibl) delete ibl; ibl = NULL;
+
+	delete oitCounter;
+	if (oitList) delete oitList; oitList = NULL;
+	if (oitHeader) delete oitHeader; oitHeader = NULL;
+	if (zeroHeader) free(zeroHeader); zeroHeader = NULL;
 }
 
 void RenderManager::resize(float width, float height) {
@@ -100,6 +112,38 @@ void RenderManager::resize(float width, float height) {
 	hizDepth = new Texture2D(width, height, true, TEXTURE_TYPE_DEPTH, depthPre, 1, NEAREST, WRAP_CLAMP_TO_EDGE);
 	needResize = true;
 	updateSky();
+
+	//create oit buffers
+	if (zeroHeader) free(zeroHeader);
+	zeroHeader = (uint*)malloc(width * height * sizeof(uint));
+	memset(zeroHeader, 0, width * height * sizeof(uint));
+	if (oitHeader) delete oitHeader;
+	oitHeader = new Image2D(width, height, UINT_PRE, 1, 0, NEAREST, WRAP_CLAMP_TO_EDGE, zeroHeader);
+	if (oitList) delete oitList;
+	oitList = new RenderBuffer(1, false);
+	oitList->setBufferData(GL_SHADER_STORAGE_BUFFER, 0, GL_UNSIGNED_INT, width * height * MAX_OIT_LAYER, 4, GL_STREAM_DRAW, NULL);
+}
+
+void RenderManager::resetOit() {
+	if (oitHeader) oitHeader->updateData(zeroHeader);
+	uint zeroData = 0;
+	if (oitCounter) oitCounter->updateBufferData(0, 1, &zeroData);
+}
+
+void RenderManager::useOitCounter(int loc) {
+	if (oitCounter) oitCounter->setShaderBase(GL_ATOMIC_COUNTER_BUFFER, 0, loc);
+}
+
+void RenderManager::unuseOitCounter(int loc) {
+	if (oitCounter) oitCounter->unbindShaderBase(GL_ATOMIC_COUNTER_BUFFER, 0, loc);
+}
+
+void RenderManager::useOitList(int loc) {
+	if (oitList) oitList->setShaderBase(GL_SHADER_STORAGE_BUFFER, 0, loc);
+}
+
+void RenderManager::unuseOitList(int loc) {
+	if (oitList) oitList->unbindShaderBase(GL_SHADER_STORAGE_BUFFER, 0, loc);
 }
 
 void RenderManager::updateShadowCamera(Camera* mainCamera) {

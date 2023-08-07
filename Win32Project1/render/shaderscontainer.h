@@ -14,6 +14,7 @@
 #define WORKGROUPE_SIZE 1
 #define COMP_GROUPE_SIZE 4
 #define MAX_DISPATCH 8192
+#define MAX_OIT_LAYER 4
 
 void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs);
 
