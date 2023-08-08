@@ -1,11 +1,15 @@
 #include "shader/oit.glsl"
+#include "shader/util.glsl"
 
-layout(binding = 0, r32ui) uniform uimage2D headPointers;
+layout(bindless_image, r32ui) uniform uimage2D headPointers;
 layout(binding = 0, std430) buffer LinkedList {
 	uvec4 nodes[];
 };
+uniform BindlessSampler2D colorBuffer;
 
-layout(location = 0) out vec4 FragColor;
+in vec2 vTexcoord;
+
+out vec4 FragColor;
 
 vec4 blend(vec4 baseColor) {
 	uvec4 frags[MAX_LAYER];
@@ -28,7 +32,6 @@ vec4 blend(vec4 baseColor) {
 }
 
 void main() {
-	// todo read base color
-	vec4 baseColor;
+	vec4 baseColor = vec4(texture(colorBuffer, vTexcoord).rgb, 1.0);
 	FragColor = blend(baseColor);
 }

@@ -1,5 +1,3 @@
-#define MAX_LAYER 4
-
 uvec2 PackColor(vec4 color) {
 	uint colorLen = floatBitsToUint(length(color));
 	uint normColor = packUnorm4x8(color);

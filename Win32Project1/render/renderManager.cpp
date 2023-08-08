@@ -116,7 +116,7 @@ void RenderManager::resize(float width, float height) {
 	//create oit buffers
 	if (zeroHeader) free(zeroHeader);
 	zeroHeader = (uint*)malloc(width * height * sizeof(uint));
-	memset(zeroHeader, 0, width * height * sizeof(uint));
+	for (int i = 0; i < width * height; ++i) zeroHeader[i] = 0;
 	if (oitHeader) delete oitHeader;
 	oitHeader = new Image2D(width, height, UINT_PRE, 1, 0, NEAREST, WRAP_CLAMP_TO_EDGE, zeroHeader);
 	if (oitList) delete oitList;
@@ -125,7 +125,7 @@ void RenderManager::resize(float width, float height) {
 }
 
 void RenderManager::resetOit() {
-	if (oitHeader) oitHeader->updateData(zeroHeader);
+	if (oitHeader && zeroHeader) oitHeader->updateData(zeroHeader);
 	uint zeroData = 0;
 	if (oitCounter) oitCounter->updateBufferData(0, 1, &zeroData);
 }

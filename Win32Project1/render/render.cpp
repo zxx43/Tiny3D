@@ -33,6 +33,7 @@ void Render::initEnvironment() {
 	drawLine=true;
 	enableBlend = true;
 	enableColor = false;
+	depthWrite = false;
 	setDepthTest(true,LEQUAL);
 	setAlphaTest(false, GREATER, 0);
 	setCullState(true);
@@ -40,6 +41,7 @@ void Render::initEnvironment() {
 	setDrawLine(false);
 	setBlend(false);
 	setColorWrite(true);
+	setDepthWrite(true);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	setClearColor(1,1,1,1);
 	currentShader=NULL;
@@ -169,6 +171,13 @@ void Render::setColorWrite(bool enable) {
 	enableColor = enable;
 	if (enable) glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	else glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+}
+
+void Render::setDepthWrite(bool enable) {
+	if (enable == depthWrite) return;
+	depthWrite = enable;
+	if (enable) glDepthMask(GL_TRUE);
+	else glDepthMask(GL_FALSE);
 }
 
 void Render::setClearColor(float r,float g,float b,float a) {

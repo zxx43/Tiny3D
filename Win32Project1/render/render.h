@@ -34,6 +34,7 @@ public: // Global render state
 	float alphaThreshold;
 	bool enableBlend;
 	bool enableColor;
+	bool depthWrite;
 	COLOR clearColor;
 	Shader* currentShader;
 private:
@@ -57,6 +58,7 @@ public:
 	void setDrawLine(bool line);
 	void setBlend(bool enable);
 	void setColorWrite(bool enable);
+	void setDepthWrite(bool enable);
 	void setClearColor(float r, float g, float b, float a);
 	void setViewPort(int width, int height);
 	void resize(int width, int height, Camera* camera1, Camera* camera2, Camera* reflectCamera);
