@@ -18,24 +18,37 @@ Image2D::Image2D(uint w, uint h, int p, int c, int layout, int filter, int wrapM
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
 
 	GLenum color1, color2, color3, color4;
+	GLenum format1, format2, format3, format4;
 	switch (precision) {
 		case UINT_PRE:
 			color1 = GL_R32UI;
 			color2 = GL_RG32UI;
 			color3 = GL_RGB32UI;
 			color4 = GL_RGBA32UI;
+			format1 = GL_RED_INTEGER;
+			format2 = GL_RG_INTEGER;
+			format3 = GL_RGB_INTEGER;
+			format4 = GL_RGBA_INTEGER;
 			break;
 		case INT_PRE:
 			color1 = GL_R32I;
 			color2 = GL_RG32I;
 			color3 = GL_RGB32I;
 			color4 = GL_RGBA32I;
+			format1 = GL_RED_INTEGER;
+			format2 = GL_RG_INTEGER;
+			format3 = GL_RGB_INTEGER;
+			format4 = GL_RGBA_INTEGER;
 			break;
 		case FLOAT_PRE:
 			color1 = GL_R32F;
 			color2 = GL_RG32F;
 			color3 = GL_RGB32F;
 			color4 = GL_RGBA32F;
+			format1 = GL_RED;
+			format2 = GL_RG;
+			format3 = GL_RGB;
+			format4 = GL_RGBA;
 			break;
 	}
 
@@ -43,19 +56,19 @@ Image2D::Image2D(uint w, uint h, int p, int c, int layout, int filter, int wrapM
 	switch (channel) {
 		case 1:
 			preColor = color1;
-			format = GL_RED;
+			format = format1;
 			break;
 		case 2:
 			preColor = color2;
-			format = GL_RG;
+			format = format2;
 			break;
 		case 3:
 			preColor = color3;
-			format = GL_RGB;
+			format = format3;
 			break;
 		case 4:
 			preColor = color4;
-			format = GL_RGBA;
+			format = format4;
 			break;
 	}
 
