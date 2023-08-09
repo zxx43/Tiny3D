@@ -52,7 +52,6 @@ Image2D::Image2D(uint w, uint h, int p, int c, int layout, int filter, int wrapM
 			break;
 	}
 
-	GLenum preColor;
 	switch (channel) {
 		case 1:
 			preColor = color1;
@@ -85,10 +84,9 @@ Image2D::Image2D(uint w, uint h, int p, int c, int layout, int filter, int wrapM
 	}
 
 	void* data = initData ? initData : 0;
-	if (data) glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glTexImage2D(GL_TEXTURE_2D, 0, preColor, width, height, 0, format, texType, data);
-	glBindImageTexture(layout, id, 0, GL_FALSE, 0, GL_READ_WRITE, preColor);
+	setLayout(layout);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -110,6 +108,15 @@ void Image2D::releaseBindless(u64 texHnd) {
 	glMakeTextureHandleNonResidentARB(texHnd);
 }
 
+void Image2D::setLayout(int layout) {
+	glBindImageTexture(layout, id, 0, GL_FALSE, 0, GL_READ_WRITE, preColor);
+}
+
 void Image2D::updateData(void* data) {
 	glTextureSubImage2D(id, 0, 0, 0, width, height, format, texType, data);
+}
+
+void Image2D::readData(int bitSize, void* ret) {
+	int bufSize = width * height * channel * bitSize;
+	glGetTextureSubImage(id, 0, 0, 0, 0, width, height, 1, format, texType, bufSize, ret);
 }

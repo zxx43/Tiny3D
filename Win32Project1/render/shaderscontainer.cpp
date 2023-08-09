@@ -53,6 +53,7 @@ using namespace std;
 #define LOD_COMP "shader/lod.comp"
 #define REARRANGE_COMP "shader/rearrange.comp"
 #define GATHER_COMP "shader/gather.comp"
+#define OIT_CLEAR "shader/oit_clear.comp"
 
 string LoadExShader(char* name) {
 	char* fileStr = textFileRead(name);
@@ -313,6 +314,8 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	
 	Shader* gather = shaders->addShader("gatherProcessor", GATHER_COMP);
 	gather->attachDef("Shader", "gather");
+
+	shaders->addShader("oitClear", OIT_CLEAR);
 
 	shaders->compile();
 }

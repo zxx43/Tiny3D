@@ -216,6 +216,7 @@
     <ClCompile Include="object\animationObject.cpp" />
     <ClCompile Include="object\object.cpp" />
     <ClCompile Include="object\staticObject.cpp" />
+    <ClCompile Include="oit\oit.cpp" />
     <ClCompile Include="physics\dynamicWorld.cpp" />
     <ClCompile Include="render\computeDrawcall.cpp" />
     <ClCompile Include="render\dataBuffer.cpp" />
@@ -311,6 +312,7 @@
     <ClInclude Include="object\animationObject.h" />
     <ClInclude Include="object\object.h" />
     <ClInclude Include="object\staticObject.h" />
+    <ClInclude Include="oit\oit.h" />
     <ClInclude Include="physics\dynamicWorld.h" />
     <ClInclude Include="render\computeDrawcall.h" />
     <ClInclude Include="render\dataBuffer.h" />
@@ -391,6 +393,7 @@
     <None Include="..\Tiny\shader\noise.vert" />
     <None Include="..\Tiny\shader\oit.glsl" />
     <None Include="..\Tiny\shader\oit_blend.frag" />
+    <None Include="..\Tiny\shader\oit_clear.comp" />
     <None Include="..\Tiny\shader\oit_render.frag" />
     <None Include="..\Tiny\shader\pbr.glsl" />
     <None Include="..\Tiny\shader\phong.frag" />

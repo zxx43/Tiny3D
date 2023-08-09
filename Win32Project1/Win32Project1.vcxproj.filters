@@ -106,6 +106,9 @@
     <Filter Include="Source Files\gather">
       <UniqueIdentifier>{4e4fcee0-bc66-4076-a56d-a60a6e591925}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\oit">
+      <UniqueIdentifier>{c743e9ad-6f30-4364-a4ce-43416533d57b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="batch\batch.cpp">
@@ -374,6 +377,9 @@
     </ClCompile>
     <ClCompile Include="texture\image2d.cpp">
       <Filter>Source Files\texture</Filter>
+    </ClCompile>
+    <ClCompile Include="oit\oit.cpp">
+      <Filter>Source Files\oit</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -668,6 +674,9 @@
     <ClInclude Include="texture\image2d.h">
       <Filter>Source Files\texture</Filter>
     </ClInclude>
+    <ClInclude Include="oit\oit.h">
+      <Filter>Source Files\oit</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Tiny\shader\blur.frag">
@@ -854,6 +863,9 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Tiny\shader\oit_render.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Tiny\shader\oit_clear.comp">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

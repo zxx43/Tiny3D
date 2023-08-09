@@ -14,7 +14,7 @@
 #include "../render/computeDrawcall.h"
 #include "../texture/hizGenerator.h"
 #include "../ibl/ibl.h"
-#include "../texture/image2d.h"
+#include "../oit/oit.h"
 
 struct Renderable {
 	std::vector<RenderQueue*> queues;
@@ -47,6 +47,7 @@ public:
 	HizGenerator* hiz;
 	Texture2D* hizDepth;
 	Ibl* ibl;
+	Oit* oit;
 private:
 	Shadow* shadow;
 	bool needResize, needRefreshSky, actShowWater, renderShowWater;
@@ -71,17 +72,6 @@ private:
 	FrameBuffer* farBuffer;
 public:
 	FrameBuffer* reflectBuffer;
-private:
-	uint* zeroHeader;
-	Image2D* oitHeader;
-	RenderBuffer* oitCounter;
-	RenderBuffer* oitList;
-private:
-	void resetOit();
-	void useOitCounter(int loc);
-	void unuseOitCounter(int loc);
-	void useOitList(int loc);
-	void unuseOitList(int loc);
 public:
 	RenderManager(ConfigArg* cfg, Scene* scene, float distance1, float distance2, const vec3& light);
 	~RenderManager();
