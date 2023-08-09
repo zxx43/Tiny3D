@@ -42,6 +42,7 @@ public:
 		return true;
 	}
 	void rebindTex(u64 texhnd) { bindedTexs[texhnd] = false; }
+	void rebindAllTex() { bindedTexs.clear(); }
 	void setSlot(const std::string& texName, int slot) { texSlots[slot] = texName; }
 	bool hasSlot(int slot) { return texSlots.find(slot) != texSlots.end(); }
 	std::string getSlot(int slot) { return texSlots[slot]; }

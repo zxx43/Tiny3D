@@ -200,6 +200,7 @@ void Render::resize(int width, int height, Camera* camera1, Camera* camera2, Cam
 		camera2->initPerspectCamera(60.0, fAspect, 1.0, 2000.0);
 	if (reflectCamera) 
 		reflectCamera->initPerspectCamera(60.0, fAspect, 0.1, 2000.0);
+	shaders->unbindAllTex();
 }
 
 Shader* Render::findShader(const char* shader) {

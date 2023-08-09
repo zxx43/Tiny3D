@@ -8,23 +8,17 @@ Oit::Oit() {
 	oitCounter->setBufferData(GL_ATOMIC_COUNTER_BUFFER, counterIndex, GL_UNSIGNED_INT, 1, 1, GL_DYNAMIC_DRAW, NULL);
 	oitList = NULL;
 	oitHeader = NULL;
-	headerBefore = NULL;
 }
 
 Oit::~Oit() {
 	delete oitCounter;
 	if (oitList) delete oitList; oitList = NULL;
 	if (oitHeader) delete oitHeader; oitHeader = NULL;
-	if (headerBefore) free(headerBefore); headerBefore = NULL;
 }
 
 void Oit::resize(int width, int height) {
 	scrWidth = width, scrHeight = height;
-	if (oitHeader) {
-		if (!headerBefore) headerBefore = (u64*)malloc(sizeof(u64));
-		*headerBefore = oitHeader->hnd;
-		delete oitHeader;
-	}
+	if (oitHeader) delete oitHeader;
 	oitHeader = new Image2D(scrWidth, scrHeight, UINT_PRE, 1, 0, NEAREST, WRAP_CLAMP_TO_EDGE);
 	if (oitList) delete oitList;
 	oitList = new RenderBuffer(1, false);
@@ -54,10 +48,6 @@ void Oit::resetOit(Render* render, Shader* shader) {
 	
 	// clear head image
 	render->useShader(shader);
-	if (headerBefore) {
-		shader->rebindTex(*headerBefore);
-		free(headerBefore); headerBefore = NULL;
-	}
 	if (!shader->isTexBinded(oitHeader->hnd)) shader->setHandle64("headPointers", oitHeader->hnd);
 	glDispatchCompute(scrWidth, scrHeight, 1);
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);

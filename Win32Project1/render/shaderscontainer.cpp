@@ -320,3 +320,7 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	shaders->compile();
 }
 
+void ClearAllBindingTex(ShaderManager* shaders) {
+	shaders->unbindAllTex();
+}
+

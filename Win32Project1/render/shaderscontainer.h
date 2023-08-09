@@ -17,5 +17,6 @@
 #define MAX_OIT_LAYER 4
 
 void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs);
+void ClearAllBindingTex(ShaderManager* shaders);
 
 #endif /* SHADERSCONTAINER_H_ */

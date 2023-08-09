@@ -21,6 +21,7 @@ public:
 	Shader* addShader(const char* name, const char* vs, const char* fs, const char* tc = NULL, const char* te = NULL, const char* gs = NULL);
 	Shader* addShader(const char* name, const char* cs);
 	Shader* findShader(const char* name);
+	void unbindAllTex();
 	void compile();
 	void addShaderBindTex(Shader* shader);
 	std::vector<Shader*>* getShaderBindTex() { return &shaderBindTex; }

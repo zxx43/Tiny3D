@@ -53,3 +53,11 @@ void ShaderManager::addShaderBindTex(Shader* shader) {
 	shaderBindTex.push_back(shader);
 }
 
+void ShaderManager::unbindAllTex() {
+	map<string, Shader*>::iterator itor;
+	for (itor = shaders.begin(); itor != shaders.end(); itor++) {
+		Shader* shader = itor->second;
+		shader->rebindAllTex();
+	}
+}
+

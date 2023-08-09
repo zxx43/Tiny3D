@@ -10,7 +10,6 @@ private:
 	Image2D* oitHeader;
 	RenderBuffer* oitCounter;
 	RenderBuffer* oitList;
-	u64* headerBefore;
 public:
 	Oit();
 	~Oit();
