@@ -20,7 +20,7 @@ vec4 blend(vec4 baseColor) {
 		++layer;
 	}
 	
-	if (layer > 0) Sort(frags, layer);
+	if (layer > 1) Sort(frags, layer);
 
 	vec4 resColor = baseColor;
 	for (uint i = 0; i < layer; ++i) {  
