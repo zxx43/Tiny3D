@@ -1,5 +1,5 @@
-#include "shader/oit.glsl"
 #include "shader/util.glsl"
+#include "shader/oit.glsl"
 
 layout (early_fragment_tests) in;
 

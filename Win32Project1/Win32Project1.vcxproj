@@ -395,6 +395,7 @@
     <None Include="..\Tiny\shader\oit_blend.frag" />
     <None Include="..\Tiny\shader\oit_clear.comp" />
     <None Include="..\Tiny\shader\oit_render.frag" />
+    <None Include="..\Tiny\shader\oit_render.vert" />
     <None Include="..\Tiny\shader\pbr.glsl" />
     <None Include="..\Tiny\shader\phong.frag" />
     <None Include="..\Tiny\shader\phong.vert" />

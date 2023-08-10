@@ -54,6 +54,9 @@ using namespace std;
 #define REARRANGE_COMP "shader/rearrange.comp"
 #define GATHER_COMP "shader/gather.comp"
 #define OIT_CLEAR "shader/oit_clear.comp"
+#define OIT_RENDER_VERT "shader/oit_render.vert"
+#define OIT_RENDER_FRAG "shader/oit_render.frag"
+#define OIT_BLEND_FRAG "shader/oit_blend.frag"
 
 string LoadExShader(char* name) {
 	char* fileStr = textFileRead(name);
@@ -317,10 +320,14 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 
 	shaders->addShader("oitClear", OIT_CLEAR);
 
-	shaders->compile();
-}
+	Shader* oitRender = shaders->addShader("oitRender", OIT_RENDER_VERT, OIT_RENDER_FRAG);
+	oitRender->attachDef("MAX_LAYER", to_string(MAX_OIT_LAYER).data());
+	shaders->addShaderBindTex(oitRender);
 
-void ClearAllBindingTex(ShaderManager* shaders) {
-	shaders->unbindAllTex();
+	Shader* oitBlend = shaders->addShader("oitBlend", POST_VERT, OIT_BLEND_FRAG);
+	oitBlend->attachDef("MAX_LAYER", to_string(MAX_OIT_LAYER).data());
+	oitBlend->setSlot("colorBuffer", 0);
+
+	shaders->compile();
 }
 

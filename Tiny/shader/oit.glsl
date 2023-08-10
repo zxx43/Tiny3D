@@ -10,9 +10,9 @@ vec4 UnpackColor(uvec2 color) {
 	return normColor * vec4(colorLen);
 }
 
-void Sort(inout uvec4 list[MAX_LAYER], int n) {
-	for (int i = n - 2; i >= 0; ++i) {
-		for (int j = 0; j <= i; ++j) {
+void Sort(inout uvec4 list[MAX_LAYER], uint n) {
+	for (uint i = n - 2; i >= 0; ++i) {
+		for (uint j = 0; j <= i; ++j) {
 			if (uintBitsToFloat(list[j].z) > uintBitsToFloat(list[j + 1].z)) {
 				uvec4 tmp = list[j + 1];
 				list[j + 1] = list[j];

@@ -1,5 +1,5 @@
-#include "shader/oit.glsl"
 #include "shader/util.glsl"
+#include "shader/oit.glsl"
 
 layout(bindless_image, r32ui) uniform uimage2D headPointers;
 layout(binding = 0, std430) buffer LinkedList {
