@@ -511,9 +511,21 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 	if (scene->skyBox) scene->skyBox->draw(render, skyShader, camera);
 
 	if (needResize) needResize = false;
+}
 
+void RenderManager::renderTransparent(Render* render, Scene* scene) {
 	static Shader* oitClear = render->findShader("oitClear");
 	oit->resetOit(render, oitClear);
+
+	static Shader* oitRender = render->findShader("oitRender");
+	state->shaderTrans = oitRender;
+	state->transparent = true;
+	Camera* camera = scene->renderCamera;
+	oit->beginRenderOit(render, state, state->shaderTrans);
+	currentQueue->queues[QUEUE_DYN_MAIN]->drawTransparent(scene, camera, render, state);
+	currentQueue->queues[QUEUE_STATIC]->drawTransparent(scene, camera, render, state);
+	oit->endRenderOit(render);
+	state->transparent = false;
 }
 
 void RenderManager::renderSkyTex(Render* render, Scene* scene) {

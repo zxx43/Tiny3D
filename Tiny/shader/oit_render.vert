@@ -14,6 +14,7 @@ layout (location = 6) in mat4 modelMatrix;
 
 out vec2 vTexcoord;
 flat out ivec4 vTexid;
+flat out vec3 vColor;
 out vec4 vWorldVertex;
 out vec3 vNormal;
 out mat3 vTBN;
@@ -34,6 +35,7 @@ void main() {
 		vNormal = vec3(0.0, 1.0, 0.0);
 		vTBN = matRot * GetTBN(normalize(normal), normalize(tangent));
 	}
+	vColor = material.params.rgb;
 	vTexcoord = texcoord.xy;
 	vTexid = ivec4(material.texids);
 	vWorldVertex = worldMatrix * vec4(vertex, 1.0);

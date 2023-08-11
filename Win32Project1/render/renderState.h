@@ -27,6 +27,7 @@ struct RenderState {
 	bool enableSsr;
 	bool blend;
 	bool tess;
+	bool transparent;
 	int pass;
 	bool dynPass;
 	float time;
@@ -38,6 +39,7 @@ struct RenderState {
 	vec3* eyePos;
 	Shader* shader;
 	Shader* shaderIns;
+	Shader* shaderTrans;
 	Shader* shaderBone;
 	Shader* shaderBill;
 	Shader* shaderCompute;
@@ -81,8 +83,9 @@ struct RenderState {
 		enableSsr = rhs->enableSsr;
 		blend = rhs->blend;
 		tess = rhs->tess;
+		transparent = rhs->transparent;
 		pass = rhs->pass;
-		dynPass = rhs->pass;
+		dynPass = rhs->dynPass;
 		time = rhs->time;
 		quality = rhs->quality;
 		delay = rhs->delay;
@@ -92,6 +95,7 @@ struct RenderState {
 		eyePos = rhs->eyePos;
 		shader = rhs->shader;
 		shaderIns = rhs->shaderIns;
+		shaderTrans = rhs->shaderTrans;
 		shaderBone = rhs->shaderBone;
 		shaderBill = rhs->shaderBill;
 		shaderCompute = rhs->shaderCompute;
@@ -122,6 +126,7 @@ struct RenderState {
 		enableSsr = false;
 		blend = false;
 		tess = false;
+		transparent = false;
 		pass = COLOR_PASS;
 		dynPass = false;
 		time = 0.0;
@@ -130,6 +135,7 @@ struct RenderState {
 		shadow = NULL;
 		shader = NULL;
 		shaderIns = NULL;
+		shaderTrans = NULL;
 		shaderBone = NULL;
 		shaderBill = NULL;
 		shaderCompute = NULL;

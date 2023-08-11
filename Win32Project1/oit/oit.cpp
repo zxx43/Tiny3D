@@ -53,6 +53,26 @@ void Oit::resetOit(Render* render, Shader* shader) {
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 }
 
+void Oit::beginRenderOit(Render* render, RenderState* state, Shader* shader) {
+	render->setDepthWrite(false);
+	render->useShader(shader);
+	useOitCounter(0);
+	useOitList(0);
+	shader->setUint("uMaxNodes", scrWidth * scrHeight * MAX_OIT_LAYER);
+	if (!shader->isTexBinded(oitHeader->hnd)) shader->setHandle64("headPointers", oitHeader->hnd);
+}
+
+void Oit::endRenderOit(Render* render) {
+	unuseOitCounter(0);
+	unuseOitList(0);
+	render->setDepthWrite(true);
+
+	//uint* data = (uint*)malloc(scrWidth * scrHeight * sizeof(uint));
+	//oitHeader->readData(sizeof(uint), data);
+	//printf("header: %d %d %d %d\n", data[0], data[1], data[2], data[3]);
+	//free(data);
+}
+
 void Oit::blendOit(Render* render, RenderState* state, Shader* shader) {
 	// todo draw screen board
 }

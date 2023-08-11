@@ -92,6 +92,7 @@ public:
 	void updateDebugData(Scene* scene);
 	void renderShadow(Render* render,Scene* scene);
 	void renderScene(Render* render,Scene* scene);
+	void renderTransparent(Render* render, Scene* scene);
 	void renderWater(Render* render, Scene* scene);
 	void renderReflect(Render* render, Scene* scene);
 	void renderSkyTex(Render* render, Scene* scene);

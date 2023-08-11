@@ -15,11 +15,14 @@ uniform vec3 eyePos;
 
 in vec2 vTexcoord;
 flat in ivec4 vTexid;
+flat in vec3 vColor;
 in vec4 vWorldVertex;
 in vec3 vNormal;
 in mat3 vTBN;
 
-out vec4 FragOut;
+layout (location = 0) out vec4 FragOut;
+layout (location = 1) out vec4 FragMat;
+layout (location = 2) out vec4 FragRoughMetal;
 
 void render(vec4 color) {
 	uint index = atomicCounterIncrement(indexDispenser);
@@ -45,7 +48,12 @@ void main() {
 
 	render(transColor);
 
-	//vec3 normal = vTexid.y >= 0 ? GetNormalFromMap(texBlds[vTexid.y], vTexcoord, vTBN) : vNormal;
-	//normal = normalize(normal) * 0.5 + 0.5;
+	vec3 normal = vTexid.y >= 0 ? GetNormalFromMap(texBlds[vTexid.y], vTexcoord, vTBN) : vNormal;
+	normal = normalize(normal) * 0.5 + 0.5;
+	FragMat = vec4(vColor, 1.0);
+	FragRoughMetal.rg = vTexid.z >= 0 ? texture(texBlds[vTexid.z], vTexcoord).gr : DefaultRM.rg;
+	FragRoughMetal.ba = normal.xy;
+	FragMat.z = normal.z;
+
 	FragOut = vec4(vec3(0.0), 1.0);
 }

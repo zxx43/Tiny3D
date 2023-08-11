@@ -20,6 +20,8 @@ private:
 	void unuseOitList(int loc);
 public:
 	void resetOit(Render* render, Shader* shader);
+	void beginRenderOit(Render* render, RenderState* state, Shader* shader);
+	void endRenderOit(Render* render);
 	void blendOit(Render* render, RenderState* state, Shader* shader);
 	void resize(int width, int height);
 };

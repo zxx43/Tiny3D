@@ -209,6 +209,9 @@ void SimpleApplication::draw() {
 	render->setFrameBuffer(screen);
 	renderMgr->renderScene(render, scene);
 
+	// todo attach a framebuffer
+	renderMgr->renderTransparent(render, scene);
+
 	renderMgr->drawDeferred(render, scene, screen, sceneFilter);
 	if (ssgChain)
 		renderMgr->drawSSGFilter(render, scene, "ssg", ssgChain->input, ssgChain->output);

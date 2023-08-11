@@ -62,6 +62,7 @@ private:
 	IndirectDrawcall* singleDrawcall;
 	IndirectDrawcall* billbdDrawcall;
 	IndirectDrawcall* animatDrawcall;
+	IndirectDrawcall* transpDrawcall;
 	IndirectDrawcall* debugDrawcall;
 private:
 	bool forceUpdateInput;
@@ -77,6 +78,7 @@ public:
 	void flush(Scene* scene);
 	void process(Scene* scene, Render* render, const RenderState* state, const LodParam& param);
 	void draw(Scene* scene, Camera* camera, Render* render, RenderState* state);
+	void drawTransparent(Scene* scene, Camera* camera, Render* render, RenderState* state);
 	void clearRenderData();
 	bool isDebugQueue() { return queueType == QUEUE_DEBUG; }
 	bool isStaticQueue() { return queueType == QUEUE_STATIC; }

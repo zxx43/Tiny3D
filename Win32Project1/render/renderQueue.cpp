@@ -17,7 +17,7 @@ RenderQueue::RenderQueue(int type, float midDis, float lowDis, ConfigArg* cfg) {
 	objectGather = NULL, processor = NULL;
 	debugGather = NULL, debugProcessor = NULL;
 
-	normalDrawcall = NULL, singleDrawcall = NULL, billbdDrawcall = NULL, animatDrawcall = NULL;
+	normalDrawcall = NULL, singleDrawcall = NULL, billbdDrawcall = NULL, animatDrawcall = NULL, transpDrawcall = NULL;
 	debugDrawcall = NULL;
 
 	forceUpdateInput = false;
@@ -34,6 +34,7 @@ RenderQueue::~RenderQueue() {
 	if (singleDrawcall) delete singleDrawcall; singleDrawcall = NULL;
 	if (billbdDrawcall) delete billbdDrawcall; billbdDrawcall = NULL;
 	if (animatDrawcall) delete animatDrawcall; animatDrawcall = NULL;
+	if (transpDrawcall) delete transpDrawcall; transpDrawcall = NULL;
 	if (debugDrawcall) delete debugDrawcall; debugDrawcall = NULL;
 }
 
@@ -108,11 +109,22 @@ void RenderQueue::draw(Scene* scene, Camera* camera, Render* render, RenderState
 	}
 }
 
+void RenderQueue::drawTransparent(Scene* scene, Camera* camera, Render* render, RenderState* state) {
+	if (!objGatherPrepared) return;
+	if (!isDebugQueue()) {
+		if (!transpDrawcall && scene->meshBuffer && processor && processor->indTranspCount > 0)
+			transpDrawcall = new IndirectDrawcall(processor, scene->meshBuffer, INDIRECT_TRANSP);
+	}
+	if (processor && processor->inputObjectCount > 0)
+		if (transpDrawcall) render->draw(camera, transpDrawcall, state);
+}
+
 void RenderQueue::clearRenderData() {
 	if (normalDrawcall) delete normalDrawcall; normalDrawcall = NULL;
 	if (singleDrawcall) delete singleDrawcall; singleDrawcall = NULL;
 	if (billbdDrawcall) delete billbdDrawcall; billbdDrawcall = NULL;
 	if (animatDrawcall) delete animatDrawcall; animatDrawcall = NULL;
+	if (transpDrawcall) delete transpDrawcall; transpDrawcall = NULL;
 	if (processor) delete processor; processor = NULL;
 
 	if (debugDrawcall) delete debugDrawcall; debugDrawcall = NULL;

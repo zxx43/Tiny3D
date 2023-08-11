@@ -84,7 +84,7 @@ void IndirectDrawcall::draw(Render* render, RenderState* state, Shader* shader) 
 			case INDIRECT_TRANSP:
 				indirectCount = processor->indTranspCount;
 				indirectIndex = Processor::IndTranspIndex;
-				shaderToUse = state->shaderIns; // todo use oit shader
+				shaderToUse = state->shaderTrans;
 				break;
 			default:
 				indirectCount = processor->indNormalCount;
@@ -113,7 +113,6 @@ void IndirectDrawcall::draw(Render* render, RenderState* state, Shader* shader) 
 			}
 		} else if (indirectType == INDIRECT_TRANSP) {
 			render->setCullState(false);
-			// todo set oit state
 		} else if (indirectType == INDIRECT_BILLBD) {
 			if (!state->isShadowPass()) {
 				render->setCullMode(CULL_BACK);

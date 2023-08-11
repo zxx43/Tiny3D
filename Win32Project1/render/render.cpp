@@ -227,9 +227,10 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 
 	setState(state);
 	Shader* shader = state->shader;
-	if (drawcall->getType() == INSTANCE_DC || drawcall->getType() == MULTI_DC)
-		shader = state->shaderIns;
-	else if (drawcall->getType() == ANIMATE_DC)
+	if (drawcall->getType() == INSTANCE_DC || drawcall->getType() == MULTI_DC) {
+		if (!state->transparent) shader = state->shaderIns;
+		else shader = state->shaderTrans;
+	} else if (drawcall->getType() == ANIMATE_DC)
 		shader = state->shaderBone;
 	
 	if (camera) {
@@ -274,6 +275,11 @@ void Render::draw(Camera* camera,Drawcall* drawcall,RenderState* state) {
 							state->shaderBill->setVector3v("uNormal", normal);
 							state->shaderBill->setVector3v("viewRight", viewRight);
 						}
+					}
+					// Oit drawcall
+					if (state->transparent) {
+						state->shaderTrans->setFloat("udotl", state->udotl);
+						state->shaderTrans->setVector3v("eyePos", camera->position);
 					}
 				}
 
