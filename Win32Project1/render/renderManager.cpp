@@ -69,6 +69,7 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 	clearRender = false, resetRender = false, resetGather = false;
 
 	oit = new Oit();
+	oitDrawed = false;
 }
 
 RenderManager::~RenderManager() {
@@ -514,6 +515,11 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 }
 
 void RenderManager::renderTransparent(Render* render, Scene* scene) {
+	oitDrawed = false;
+	if (!currentQueue->queues[QUEUE_DYN_MAIN]->processor || !currentQueue->queues[QUEUE_STATIC]->processor) return;
+	int transpObjectCount = currentQueue->queues[QUEUE_DYN_MAIN]->processor->indTranspCount + currentQueue->queues[QUEUE_STATIC]->processor->indTranspCount;
+	if (transpObjectCount <= 0) return;
+
 	static Shader* oitClear = render->findShader("oitClear");
 	oit->resetOit(render, oitClear);
 
@@ -526,6 +532,12 @@ void RenderManager::renderTransparent(Render* render, Scene* scene) {
 	currentQueue->queues[QUEUE_STATIC]->drawTransparent(scene, camera, render, state);
 	oit->endRenderOit(render);
 	state->transparent = false;
+	oitDrawed = true;
+}
+
+void RenderManager::blendTransparent(Render* render, Scene* scene) {
+	static Shader* oitBlend = render->findShader("oitBlend");
+	oit->blendOit(render, state, oitBlend);
 }
 
 void RenderManager::renderSkyTex(Render* render, Scene* scene) {

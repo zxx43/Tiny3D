@@ -74,5 +74,9 @@ void Oit::endRenderOit(Render* render) {
 }
 
 void Oit::blendOit(Render* render, RenderState* state, Shader* shader) {
+	render->useShader(shader);
+	useOitList(0);
+	if (!shader->isTexBinded(oitHeader->hnd)) shader->setHandle64("headPointers", oitHeader->hnd);
 	// todo draw screen board
+	unuseOitList(0);
 }

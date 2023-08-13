@@ -54,6 +54,7 @@ private:
 	ComputeDrawcall* grassDrawcall;
 	mat4 prevCameraMat;
 	LodParam lodParam;
+	bool oitDrawed;
 private:
 	bool clearRender, resetRender, resetGather;
 public:
@@ -93,6 +94,7 @@ public:
 	void renderShadow(Render* render,Scene* scene);
 	void renderScene(Render* render,Scene* scene);
 	void renderTransparent(Render* render, Scene* scene);
+	void blendTransparent(Render* render, Scene* scene);
 	void renderWater(Render* render, Scene* scene);
 	void renderReflect(Render* render, Scene* scene);
 	void renderSkyTex(Render* render, Scene* scene);
