@@ -59,11 +59,4 @@ void main() {
 			NormalWaterFlag = vec4(1.0);
 		#endif
 	}
-
-	#ifndef USE_CARTOON
-		#ifdef HIGH_QUALITY
-			FragColor.rgb = vec3(1.0) - exp(-FragColor.rgb * 2.5);
-		#endif
-		FragColor.rgb = pow(FragColor.rgb, INV_GAMMA);
-	#endif
 }

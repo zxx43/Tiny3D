@@ -50,6 +50,7 @@ public:
 	void setIsBillboard(bool billboard);
 	void setAllSingle();
 	void setAllNormal();
+	void setAllTransp();
 	std::string getName() { return name; }
 	void setName(std::string value) { name = value; }
 	void clearFaceBuf();

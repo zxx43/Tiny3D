@@ -69,7 +69,6 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 	clearRender = false, resetRender = false, resetGather = false;
 
 	oit = new Oit();
-	oitDrawed = false;
 }
 
 RenderManager::~RenderManager() {
@@ -106,6 +105,10 @@ void RenderManager::resize(float width, float height) {
 	updateSky();
 
 	oit->resize(width, height);
+}
+
+void RenderManager::prepareTransparent(FrameBuffer* screen, bool hasNextEffect, const int outputPre) {
+	oit->createOitFramebuffers(screen, hasNextEffect, outputPre);
 }
 
 void RenderManager::updateShadowCamera(Camera* mainCamera) {
@@ -515,7 +518,6 @@ void RenderManager::renderScene(Render* render, Scene* scene) {
 }
 
 void RenderManager::renderTransparent(Render* render, Scene* scene) {
-	oitDrawed = false;
 	if (!currentQueue->queues[QUEUE_DYN_MAIN]->processor || !currentQueue->queues[QUEUE_STATIC]->processor) return;
 	int transpObjectCount = currentQueue->queues[QUEUE_DYN_MAIN]->processor->indTranspCount + currentQueue->queues[QUEUE_STATIC]->processor->indTranspCount;
 	if (transpObjectCount <= 0) return;
@@ -524,7 +526,8 @@ void RenderManager::renderTransparent(Render* render, Scene* scene) {
 	oit->resetOit(render, oitClear);
 
 	static Shader* oitRender = render->findShader("oitRender");
-	state->shaderTrans = oitRender;
+	static Shader* oitRenderNfg = render->findShader("oitRenderNfg");
+	state->shaderTrans = render->getFog() ? oitRender : oitRenderNfg;
 	state->transparent = true;
 	Camera* camera = scene->renderCamera;
 	oit->beginRenderOit(render, state, state->shaderTrans);
@@ -532,12 +535,13 @@ void RenderManager::renderTransparent(Render* render, Scene* scene) {
 	currentQueue->queues[QUEUE_STATIC]->drawTransparent(scene, camera, render, state);
 	oit->endRenderOit(render);
 	state->transparent = false;
-	oitDrawed = true;
 }
 
-void RenderManager::blendTransparent(Render* render, Scene* scene) {
+void RenderManager::blendTransparent(Render* render, Scene* scene, Texture2D* background) {
 	static Shader* oitBlend = render->findShader("oitBlend");
-	oit->blendOit(render, state, oitBlend);
+	oit->beginBlendOit(render, state, oitBlend, background);
+	drawScreenFilter(render, scene, "oitBlend", oit->blendInput, oit->blendFilter);
+	oit->endBlendOit();
 }
 
 void RenderManager::renderSkyTex(Render* render, Scene* scene) {

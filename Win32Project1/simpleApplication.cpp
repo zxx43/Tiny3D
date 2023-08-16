@@ -80,10 +80,10 @@ void SimpleApplication::resize(int width, int height) {
 	sceneFilter->addOutput(matPre, 3, LINEAR); // FragNormal
 	sceneFilter->addOutput(hdrPre, 3, LINEAR); // FragBright
 
+	renderMgr->prepareTransparent(screen, cfgs->cartoon || cfgs->dof || cfgs->fxaa, hdrPre);
+
 	if (combinedChain) delete combinedChain;
-	if (!cfgs->cartoon && !cfgs->dof && !cfgs->ssr && !cfgs->fxaa)
-		combinedChain = new FilterChain(width, height, false, precision, 4);
-	else {
+	{
 		combinedChain = new FilterChain(width, height, true, precision, 4);
 		if (cfgs->cartoon) {
 			if (edgeFilter) delete edgeFilter;
@@ -101,7 +101,7 @@ void SimpleApplication::resize(int width, int height) {
 			if (dofChain) delete dofChain;
 			dofChain = new FilterChain(width, height, (cfgs->cartoon || cfgs->fxaa), dofPre, 4);
 			dofChain->addInputTex(dofBlurFilter->getOutput(0));
-			dofChain->addInputTex(combinedChain->getOutputTex(0));
+			dofChain->addInputTex(renderMgr->oit->blendFilter->getOutput(0));
 		}
 		if (cfgs->ssr) {
 			if (ssrChain) delete ssrChain;
@@ -110,10 +110,10 @@ void SimpleApplication::resize(int width, int height) {
 			ssrChain->addInputTex(waterFrame->getColorBuffer(1));  // normalBuffer
 			ssrChain->addInputTex(waterFrame->getDepthBuffer());   // depthBuffer
 
-			if (!cfgs->cartoon && !cfgs->dof && !cfgs->fxaa) {
-				if (rawScreenFilter) delete rawScreenFilter;
-				rawScreenFilter = new Filter(width, height, false, rawPre, 4, NEAREST, WRAP_REPEAT);
-			}
+			//if (!cfgs->cartoon && !cfgs->dof && !cfgs->fxaa) {
+			//	if (rawScreenFilter) delete rawScreenFilter;
+			//	rawScreenFilter = new Filter(width, height, false, rawPre, 4, NEAREST, WRAP_REPEAT);
+			//}
 
 			if (ssrBlurFilter) delete ssrBlurFilter;
 			ssrBlurFilter = new Filter(width * 0.5, height * 0.5, true, LOW_PRE, 4, LINEAR, WRAP_REPEAT);
@@ -208,8 +208,6 @@ void SimpleApplication::draw() {
 	renderMgr->renderSkyTex(render, scene);
 	render->setFrameBuffer(screen);
 	renderMgr->renderScene(render, scene);
-
-	// todo attach a framebuffer
 	renderMgr->renderTransparent(render, scene);
 
 	renderMgr->drawDeferred(render, scene, screen, sceneFilter);
@@ -235,8 +233,13 @@ void SimpleApplication::draw() {
 	}
 
 	Filter* lastFilter = combinedChain->output;
+	
+	// blend oit
+	renderMgr->blendTransparent(render, scene, lastFilter->getFrameBuffer()->getColorBuffer(0));
+	lastFilter = renderMgr->oit->blendFilter;
+
 	if (cfgs->dof) {
-		renderMgr->drawScreenFilter(render, scene, "blur", combinedChain->getOutputTex(0), dofBlurFilter);
+		renderMgr->drawScreenFilter(render, scene, "blur", lastFilter->getOutput(0), dofBlurFilter);
 		renderMgr->drawScreenFilter(render, scene, "dof", dofChain->input, dofChain->output);
 		lastFilter = dofChain->output;
 	}
@@ -778,6 +781,10 @@ void SimpleApplication::initScene() {
 	box.bindMaterial(mtlMgr->find("box_mat"));
 	box.setSound("push", "sounds/box.wav");
 
+	StaticObject boxTransp(meshes["box_trans"]);
+	boxTransp.bindMaterial(mtlMgr->find("box_mat"));
+	boxTransp.setSound("push", "sounds/box.wav");
+
 	StaticObject sphere(meshes["sphere"]);
 	StaticObject board(meshes["board"]);
 	StaticObject quad(meshes["quad"]);
@@ -835,7 +842,7 @@ void SimpleApplication::initScene() {
 	object6->setRotation(0, 30, 0);
 	object6->setSize(4, 4, 4);
 	node2->addObject(scene, object6);
-	StaticObject* object7 = box.clone();
+	StaticObject* object7 = boxTransp.clone();
 	object7->setPosition(-5, 5, 6);
 	object7->setRotation(30, 0, 30);
 	object7->setSize(5, 5, 5);
@@ -1096,7 +1103,7 @@ void SimpleApplication::initScene() {
 	oil4->setPosition(40, 0, 40);
 	oil4->setSize(10, 10, 10);
 	oil4->setDynamic(true);
-	StaticObject* box1 = box.clone();
+	StaticObject* box1 = boxTransp.clone();
 	box1->setPosition(0, 0, 30);
 	box1->setSize(6, 6, 6);
 	box1->setDynamic(true);

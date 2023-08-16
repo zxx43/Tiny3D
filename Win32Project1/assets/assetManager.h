@@ -38,6 +38,7 @@ private:
 	~AssetManager();
 public:
 	void addMesh(const char* name, Mesh* mesh, bool billboard = false, bool drawShadow = true);
+	void addTranspMesh(const char* name, Mesh* mesh);
 	Animation* exportAnimation(const char* name, Animation* animation);
 	void addAnimationData(const char* name, const char* path, Animation* animation);
 	void initFrames();

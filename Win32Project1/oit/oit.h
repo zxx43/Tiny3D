@@ -3,6 +3,7 @@
 
 #include "../texture/image2d.h"
 #include "../render/render.h"
+#include "../filter/filter.h"
 
 class Oit {
 private:
@@ -10,6 +11,10 @@ private:
 	Image2D* oitHeader;
 	RenderBuffer* oitCounter;
 	RenderBuffer* oitList;
+public:
+	FrameBuffer* oitBuf;
+	std::vector<Texture2D*> blendInput;
+	Filter* blendFilter;
 public:
 	Oit();
 	~Oit();
@@ -22,8 +27,10 @@ public:
 	void resetOit(Render* render, Shader* shader);
 	void beginRenderOit(Render* render, RenderState* state, Shader* shader);
 	void endRenderOit(Render* render);
-	void blendOit(Render* render, RenderState* state, Shader* shader);
+	void beginBlendOit(Render* render, RenderState* state, Shader* shader, Texture2D* backgroundTex);
+	void endBlendOit();
 	void resize(int width, int height);
+	void createOitFramebuffers(FrameBuffer* screen, bool hasNextEffect, const int outputPre);
 };
 
 #endif

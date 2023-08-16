@@ -138,3 +138,8 @@ void Mesh::setAllNormal() {
 		normalFaces.push_back(new FaceBuf(0, indexCount));
 }
 
+void Mesh::setAllTransp() {
+	if (indexCount > 0 && isEmptyFaces())
+		transpFaces.push_back(new FaceBuf(0, indexCount));
+}
+

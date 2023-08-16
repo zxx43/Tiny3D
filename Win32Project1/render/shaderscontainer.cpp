@@ -324,8 +324,15 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	oitRender->attachDef("MAX_LAYER", to_string(MAX_OIT_LAYER).data());
 	shaders->addShaderBindTex(oitRender);
 
+	Shader* oitRenderNFG = shaders->addShader("oitRenderNfg", OIT_RENDER_VERT, OIT_RENDER_FRAG);
+	oitRenderNFG->attachDef("MAX_LAYER", to_string(MAX_OIT_LAYER).data());
+	oitRenderNFG->attachDef("NO_FOG", "1");
+	shaders->addShaderBindTex(oitRenderNFG);
+
 	Shader* oitBlend = shaders->addShader("oitBlend", POST_VERT, OIT_BLEND_FRAG);
 	oitBlend->attachDef("MAX_LAYER", to_string(MAX_OIT_LAYER).data());
+	if (cfgs->graphQuality > 3)
+		oitBlend->attachDef("HIGH_QUALITY", "1");
 	oitBlend->setSlot("colorBuffer", 0);
 
 	shaders->compile();

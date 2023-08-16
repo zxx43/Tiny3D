@@ -22,10 +22,6 @@ vec4 GenColor(vec3 color, float depth) {
 		vec4 worldPos = invViewProjMatrix * vec4(ndc, 1.0); worldPos /= worldPos.w;
 		float depthView = length(worldPos.xyz - eyePos);
 		res.rgb = GenFogColor(-0.0000025, worldPos, depthView, udotl * 1.5, color);
-		#ifdef HIGH_QUALITY
-			res.rgb = vec3(1.0) - exp(-res.rgb * 2.5);
-		#endif
-		res.rgb = pow(res.rgb, INV_GAMMA);
 	#else
 		res.rgb = color;
 	#endif

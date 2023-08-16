@@ -23,6 +23,8 @@ private:
 	unsigned int fboId;
 	int colorBufferCount;
 	bool depthOnly;
+	bool depthRef;
+	bool readOnly;
 	int wrapMode;
 public:
 	std::vector<Texture2D*> colorBuffers;
@@ -30,10 +32,12 @@ public:
 public:
 	FrameBuffer(float width, float height, int precision, int component, int wrap, int filt = LINEAR);
 	FrameBuffer(float width, float height, int precision);
+	FrameBuffer(float width, float height);
 	~FrameBuffer();
 public:
 	void addColorBuffer(int precision, int component, int filt = LINEAR);
 	void attachDepthBuffer(int precision, bool useMip);
+	void setDepthBuffer(Texture2D* depthTex);
 	Texture2D* getColorBuffer(int n);
 	Texture2D* getDepthBuffer();
 	void use();
@@ -44,6 +48,7 @@ public:
 	CubeMap* getCubeBuffer();
 	void useFbo();
 	void useCube(int i, int mip);
+	void setReadOnly(bool ro) { readOnly = ro; }
 };
 
 

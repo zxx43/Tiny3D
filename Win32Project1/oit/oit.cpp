@@ -8,12 +8,20 @@ Oit::Oit() {
 	oitCounter->setBufferData(GL_ATOMIC_COUNTER_BUFFER, counterIndex, GL_UNSIGNED_INT, 1, 1, GL_DYNAMIC_DRAW, NULL);
 	oitList = NULL;
 	oitHeader = NULL;
+
+	oitBuf = NULL;
+	blendInput.clear();
+	blendFilter = NULL;
 }
 
 Oit::~Oit() {
 	delete oitCounter;
 	if (oitList) delete oitList; oitList = NULL;
 	if (oitHeader) delete oitHeader; oitHeader = NULL;
+
+	if (oitBuf) delete oitBuf; oitBuf = NULL;
+	blendInput.clear();
+	if (blendFilter) delete blendFilter; blendFilter = NULL;
 }
 
 void Oit::resize(int width, int height) {
@@ -23,6 +31,17 @@ void Oit::resize(int width, int height) {
 	if (oitList) delete oitList;
 	oitList = new RenderBuffer(1, false);
 	oitList->setBufferData(GL_SHADER_STORAGE_BUFFER, linkedListIndex, GL_UNSIGNED_INT, scrWidth * scrHeight * MAX_OIT_LAYER, 4, GL_STREAM_DRAW, NULL);
+}
+
+void Oit::createOitFramebuffers(FrameBuffer* screen, bool hasNextEffect, const int outputPre) {
+	if (oitBuf) delete oitBuf;
+	oitBuf = new FrameBuffer(scrWidth, scrHeight);
+	oitBuf->setDepthBuffer(screen->getDepthBuffer());
+	oitBuf->setReadOnly(true);
+
+	if (blendFilter) delete blendFilter;
+	blendFilter = new Filter(scrWidth, scrHeight, hasNextEffect, outputPre, 4, LINEAR, WRAP_REPEAT);
+	blendInput.clear();
 }
 
 void Oit::useOitCounter(int loc) {
@@ -51,20 +70,26 @@ void Oit::resetOit(Render* render, Shader* shader) {
 	if (!shader->isTexBinded(oitHeader->hnd)) shader->setHandle64("headPointers", oitHeader->hnd);
 	glDispatchCompute(scrWidth, scrHeight, 1);
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+	//uint* data = (uint*)malloc(sizeof(uint));
+	//oitCounter->readBufferData(GL_ATOMIC_COUNTER_BUFFER, counterIndex, 1, data);
+	//printf("count %d\n", *data);
+	//free(data);
 }
 
 void Oit::beginRenderOit(Render* render, RenderState* state, Shader* shader) {
+	render->setFrameBuffer(oitBuf);
 	render->setDepthWrite(false);
 	render->useShader(shader);
 	useOitCounter(0);
-	useOitList(0);
+	useOitList(1);
 	shader->setUint("uMaxNodes", scrWidth * scrHeight * MAX_OIT_LAYER);
 	if (!shader->isTexBinded(oitHeader->hnd)) shader->setHandle64("headPointers", oitHeader->hnd);
 }
 
 void Oit::endRenderOit(Render* render) {
 	unuseOitCounter(0);
-	unuseOitList(0);
+	unuseOitList(1);
 	render->setDepthWrite(true);
 
 	//uint* data = (uint*)malloc(scrWidth * scrHeight * sizeof(uint));
@@ -73,10 +98,14 @@ void Oit::endRenderOit(Render* render) {
 	//free(data);
 }
 
-void Oit::blendOit(Render* render, RenderState* state, Shader* shader) {
+void Oit::beginBlendOit(Render* render, RenderState* state, Shader* shader, Texture2D* backgroundTex) {
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_ATOMIC_COUNTER_BARRIER_BIT);
+	if (blendInput.size() == 0) blendInput.push_back(backgroundTex);
 	render->useShader(shader);
-	useOitList(0);
+	useOitList(1);
 	if (!shader->isTexBinded(oitHeader->hnd)) shader->setHandle64("headPointers", oitHeader->hnd);
-	// todo draw screen board
-	unuseOitList(0);
+}
+
+void Oit::endBlendOit() {
+	unuseOitList(1);
 }

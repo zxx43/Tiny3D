@@ -2,7 +2,7 @@
 #include "shader/oit.glsl"
 
 layout(bindless_image, r32ui) uniform uimage2D headPointers;
-layout(binding = 0, std430) buffer LinkedList {
+layout(binding = 1, std430) buffer LinkedList {
 	uvec4 nodes[];
 };
 uniform BindlessSampler2D colorBuffer;
@@ -12,9 +12,10 @@ in vec2 vTexcoord;
 out vec4 FragColor;
 
 vec4 blend(vec4 baseColor) {
-	uvec4 frags[MAX_LAYER];
-	uint layer = 0, next = imageLoad(headPointers, ivec2(gl_FragCoord.xy)).r;
-	while (next != 0 && layer < MAX_LAYER) {
+	uvec4 frags[MAX_LAYER_STORED];
+	int layer = 0;
+	uint next = imageLoad(headPointers, ivec2(gl_FragCoord.xy)).r;
+	while (next != 0 && layer < MAX_LAYER_STORED) {
 		frags[layer] = nodes[next - 1];
 		next = frags[layer].w;
 		++layer;
@@ -23,7 +24,7 @@ vec4 blend(vec4 baseColor) {
 	if (layer > 1) Sort(frags, layer);
 
 	vec4 resColor = baseColor;
-	for (uint i = 0; i < layer; ++i) {  
+	for (int i = 0; i < layer; ++i) {  
 		vec4 color = UnpackColor(frags[i].xy);
 		resColor.rgb = mix(resColor.rgb, color.rgb, color.a);
 		resColor.a = uintBitsToFloat(frags[i].z);
@@ -32,6 +33,12 @@ vec4 blend(vec4 baseColor) {
 }
 
 void main() {
-	vec4 baseColor = vec4(texture(colorBuffer, vTexcoord).rgb, 1.0);
+	vec4 baseColor = texture(colorBuffer, vTexcoord);
 	FragColor = blend(baseColor);
+
+	// gamma correction
+	#ifdef HIGH_QUALITY
+		FragColor.rgb = vec3(1.0) - exp(-FragColor.rgb * 2.5);
+	#endif
+	FragColor.rgb = pow(FragColor.rgb, INV_GAMMA);
 }

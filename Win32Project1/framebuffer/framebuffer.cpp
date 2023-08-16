@@ -12,6 +12,8 @@ FrameBuffer::FrameBuffer(float width, float height, int precision, int component
 
 	depthBuffer = NULL;
 	depthOnly = false;
+	depthRef = false;
+	setReadOnly(false);
 	addColorBuffer(precision, component, filt);
 }
 
@@ -26,7 +28,24 @@ FrameBuffer::FrameBuffer(float width, float height, int precision) :wrapMode(WRA
 
 	depthBuffer = NULL;
 	depthOnly = true;
+	depthRef = false;
+	setReadOnly(false);
 	attachDepthBuffer(precision, false);
+}
+
+FrameBuffer::FrameBuffer(float width, float height) :wrapMode(WRAP_CLAMP_TO_BORDER), cubeBuffer(NULL) {
+	this->width = width;
+	this->height = height;
+
+	glGenFramebuffers(1, &fboId);
+
+	colorBuffers.clear();
+	colorBufferCount = 0;
+
+	depthBuffer = NULL;
+	depthOnly = true;
+	depthRef = false;
+	setReadOnly(false);
 }
 
 FrameBuffer::FrameBuffer(const CubeMap* cube) :wrapMode(WRAP_CLAMP_TO_EDGE) {
@@ -37,6 +56,8 @@ FrameBuffer::FrameBuffer(const CubeMap* cube) :wrapMode(WRAP_CLAMP_TO_EDGE) {
 
 	depthBuffer = NULL;
 	depthOnly = false;
+	depthRef = false;
+	setReadOnly(false);
 
 	cubeBuffer = (CubeMap*)cube;
 	width = (float)(cubeBuffer->getWidth());
@@ -48,7 +69,7 @@ FrameBuffer::~FrameBuffer() {
 		delete colorBuffers[i];
 	colorBuffers.clear();
 
-	if (depthBuffer) delete depthBuffer;
+	if (depthBuffer && !depthRef) delete depthBuffer;
 	depthBuffer = NULL;
 	cubeBuffer = NULL;
 
@@ -68,7 +89,18 @@ void FrameBuffer::attachDepthBuffer(int precision, bool useMip) {
 	}
 }
 
+void FrameBuffer::setDepthBuffer(Texture2D* depthTex) {
+	depthBuffer = depthTex;
+	depthRef = true;
+	glNamedFramebufferTexture2DEXT(fboId, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthBuffer->id, 0);
+	if (depthOnly) {
+		glNamedFramebufferDrawBuffer(fboId, GL_NONE);
+		glNamedFramebufferReadBuffer(fboId, GL_NONE);
+	}
+}
+
 void FrameBuffer::addColorBuffer(int precision, int component, int filt) {
+	depthOnly = false;
 	colorBufferCount++;
 	colorBuffers.push_back(new Texture2D((int)(width), (int)(height), false, TEXTURE_TYPE_COLOR, precision, component, filt, wrapMode));
 	glNamedFramebufferTexture2DEXT(fboId, GL_COLOR_ATTACHMENT0 + (colorBufferCount - 1), GL_TEXTURE_2D,
@@ -97,7 +129,7 @@ void FrameBuffer::use() {
 		clearMask = GL_DEPTH_BUFFER_BIT;
 	else if (depthBuffer)
 		clearMask |= GL_DEPTH_BUFFER_BIT;
-	glClear(clearMask);
+	if (!readOnly) glClear(clearMask);
 	glViewport(0, 0, width, height);
 }
 
@@ -108,7 +140,7 @@ void FrameBuffer::useFbo() {
 void FrameBuffer::useCube(int i, int mip) {
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
 		GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubeBuffer->id, mip);
-	glClear(GL_COLOR_BUFFER_BIT);
+	if (!readOnly) glClear(GL_COLOR_BUFFER_BIT);
 	uint mipWidth = width, mipHeight = height;
 	if (mip > 0) {
 		mipWidth = width * std::pow(0.5, mip);

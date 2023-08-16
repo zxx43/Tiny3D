@@ -186,6 +186,13 @@ void AssetManager::addMesh(const char* name, Mesh* mesh, bool billboard, bool dr
 	meshes[name]->drawShadow = drawShadow;
 }
 
+void AssetManager::addTranspMesh(const char* name, Mesh* mesh) {
+	mesh->setName(name);
+	meshes[name] = mesh;
+	meshes[name]->setAllTransp();
+	meshes[name]->drawShadow = false;
+}
+
 Animation* AssetManager::exportAnimation(const char* name, Animation* animation) {
 	animations[name] = animation;
 	animation->setName(name);
@@ -211,6 +218,7 @@ void AssetManager::Init() {
 
 		// Load some basic meshes
 		AssetManager::assetManager->addMesh("box", new Box());
+		AssetManager::assetManager->addTranspMesh("box_trans", new Box());
 		AssetManager::assetManager->addMesh("sphere", new Sphere(32, 32));
 		AssetManager::assetManager->addMesh("board", new Board());
 		AssetManager::assetManager->addMesh("quad", new Quad());
