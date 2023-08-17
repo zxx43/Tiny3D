@@ -15,7 +15,7 @@ SimpleApplication::SimpleApplication() : Application() {
 	edgeFilter = NULL;
 	aaFilter = NULL;
 	dofBlurFilter = NULL;
-	dofChain = NULL;
+	dofFilter = NULL;
 	ssrChain = NULL;
 	ssrBlurFilter = NULL;
 	rawScreenFilter = NULL;
@@ -23,6 +23,7 @@ SimpleApplication::SimpleApplication() : Application() {
 	bloomChain = NULL;
 	edgeInput.clear();
 	aaInput.clear();
+	dofInput.clear();
 	noiseBuf = NULL;
 	firstFrame = true;
 	drawDepth = false;
@@ -38,7 +39,7 @@ SimpleApplication::~SimpleApplication() {
 	if (sceneFilter) delete sceneFilter; sceneFilter = NULL;
 	if (combinedChain) delete combinedChain; combinedChain = NULL;
 	if (dofBlurFilter) delete dofBlurFilter; dofBlurFilter = NULL;
-	if (dofChain) delete dofChain; dofChain = NULL;
+	if (dofFilter) delete dofFilter; dofFilter = NULL;
 	if (edgeFilter) delete edgeFilter; edgeFilter = NULL;
 	if (aaFilter) delete aaFilter; aaFilter = NULL;
 	if (ssrChain) delete ssrChain; ssrChain = NULL;
@@ -48,6 +49,7 @@ SimpleApplication::~SimpleApplication() {
 	if (bloomChain) delete bloomChain; bloomChain = NULL;
 	edgeInput.clear();
 	aaInput.clear();
+	dofInput.clear();
 	if (noiseBuf) delete noiseBuf; noiseBuf = NULL;
 }
 
@@ -98,10 +100,9 @@ void SimpleApplication::resize(int width, int height) {
 		if (cfgs->dof) {
 			if (dofBlurFilter) delete dofBlurFilter;
 			dofBlurFilter = new Filter(width * dofScale, height * dofScale, true, dofPre, 4, NEAREST, WRAP_REPEAT);
-			if (dofChain) delete dofChain;
-			dofChain = new FilterChain(width, height, (cfgs->cartoon || cfgs->fxaa), dofPre, 4);
-			dofChain->addInputTex(dofBlurFilter->getOutput(0));
-			dofChain->addInputTex(renderMgr->oit->blendFilter->getOutput(0));
+			if (dofFilter) delete dofFilter;
+			dofFilter = new Filter(width, height, cfgs->cartoon || cfgs->fxaa, dofPre, 4, LINEAR, WRAP_CLAMP_TO_BORDER);
+			dofInput.clear();
 		}
 		if (cfgs->ssr) {
 			if (ssrChain) delete ssrChain;
@@ -240,8 +241,12 @@ void SimpleApplication::draw() {
 
 	if (cfgs->dof) {
 		renderMgr->drawScreenFilter(render, scene, "blur", lastFilter->getOutput(0), dofBlurFilter);
-		renderMgr->drawScreenFilter(render, scene, "dof", dofChain->input, dofChain->output);
-		lastFilter = dofChain->output;
+		if (dofInput.size() == 0) {
+			dofInput.push_back(dofBlurFilter->getOutput(0));
+			dofInput.push_back(lastFilter->getOutput(0));
+		}
+		renderMgr->drawScreenFilter(render, scene, "dof", dofInput, dofFilter);
+		lastFilter = dofFilter;
 	}
 	if (cfgs->cartoon) {
 		if (edgeInput.size() == 0) {

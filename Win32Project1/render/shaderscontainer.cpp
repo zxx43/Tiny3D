@@ -318,18 +318,26 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	Shader* gather = shaders->addShader("gatherProcessor", GATHER_COMP);
 	gather->attachDef("Shader", "gather");
 
-	shaders->addShader("oitClear", OIT_CLEAR);
+	Shader* oitClear = shaders->addShader("oitClear", OIT_CLEAR);
+	oitClear->attachDef("Shader", "oitClear");
 
 	Shader* oitRender = shaders->addShader("oitRender", OIT_RENDER_VERT, OIT_RENDER_FRAG);
+	oitRender->attachDef("Shader", "oitRender");
 	oitRender->attachDef("MAX_LAYER", to_string(MAX_OIT_LAYER).data());
+	if (cfgs->cartoon) 
+		oitRender->attachDef("USE_CARTOON", "1");
 	shaders->addShaderBindTex(oitRender);
 
 	Shader* oitRenderNFG = shaders->addShader("oitRenderNfg", OIT_RENDER_VERT, OIT_RENDER_FRAG);
+	oitRenderNFG->attachDef("Shader", "oitRender_nofog");
 	oitRenderNFG->attachDef("MAX_LAYER", to_string(MAX_OIT_LAYER).data());
 	oitRenderNFG->attachDef("NO_FOG", "1");
+	if (cfgs->cartoon)
+		oitRenderNFG->attachDef("USE_CARTOON", "1");
 	shaders->addShaderBindTex(oitRenderNFG);
 
 	Shader* oitBlend = shaders->addShader("oitBlend", POST_VERT, OIT_BLEND_FRAG);
+	oitBlend->attachDef("Shader", "oitBlend");
 	oitBlend->attachDef("MAX_LAYER", to_string(MAX_OIT_LAYER).data());
 	if (cfgs->graphQuality > 3)
 		oitBlend->attachDef("HIGH_QUALITY", "1");

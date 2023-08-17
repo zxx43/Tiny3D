@@ -16,7 +16,8 @@ private:
 	std::vector<Texture2D*> aaInput;
 	Filter* aaFilter;
 	Filter* dofBlurFilter;
-	FilterChain* dofChain;
+	std::vector<Texture2D*> dofInput;
+	Filter* dofFilter;
 	FilterChain* ssrChain;
 	Filter* ssrBlurFilter;
 	Filter* rawScreenFilter;

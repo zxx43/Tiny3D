@@ -29,6 +29,7 @@ A Small OpenGL Based Renderer
 - Volumetric cloud  
 - Collision detection  
 - Terrain LOD  
+- Order Independent Transparency  
 ### Control:  
 
 - **num-1**,**num-2**,**num-3** switch role to control  

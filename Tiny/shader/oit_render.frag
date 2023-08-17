@@ -33,11 +33,16 @@ void render(vec4 color) {
 void main() {
 	vec4 textureColor = vTexid.x >= 0 ? texture(texBlds[vTexid.x], vTexcoord) : vec4(0.5);
 
-	vec4 transColor = vec4(1.0);
-	transColor.a = textureColor.a;
+	vec4 transColor = textureColor;
+	transColor.rgb *= udotl;
 
 	float depthView = length(vWorldVertex.xyz - eyePos);
-	transColor.rgb = GenFogColor(-0.00000075, vWorldVertex, depthView, udotl, textureColor.rgb);
+#ifdef USE_CARTOON
+	float fogFactor = -0.00000025;
+#else
+	float fogFactor = -0.00000075;
+#endif
+	transColor.rgb = GenFogColor(fogFactor, vWorldVertex, depthView, udotl, transColor.rgb);
 	transColor.a = 0.5;
 
 	render(transColor);
