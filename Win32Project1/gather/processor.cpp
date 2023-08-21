@@ -5,7 +5,6 @@
 #include "../render/render.h"
 #include "../render/renderState.h"
 #include "../texture/hizGenerator.h"
-#include "../texture/texture2d.h"
 
 const uint DispatchIndex = 0;
 const uint CountDataIndex = 1;

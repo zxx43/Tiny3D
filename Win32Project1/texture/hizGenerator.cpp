@@ -27,7 +27,7 @@ HizGenerator::~HizGenerator() {
 	delete state; state = NULL;
 }
 
-void HizGenerator::genMipmap(Render* render, Shader* shader, Texture2D* texDepth) {
+void HizGenerator::genMipmap(Render* render, Shader* shader, Texture* texDepth) {
 	int currentWidth = render->viewWidth, currentHeight = render->viewHeight;
 	numLevels = 1 + (int)floorf(log2f(fmaxf(currentWidth, currentHeight)));
 
@@ -54,7 +54,7 @@ void HizGenerator::genMipmap(Render* render, Shader* shader, Texture2D* texDepth
 	render->useTexture(TEXTURE_2D, 0, texBefore);
 }
 
-void HizGenerator::drawDebug(Camera* camera, Render* render, Shader* shader, Texture2D* texDepth, int level) {
+void HizGenerator::drawDebug(Camera* camera, Render* render, Shader* shader, Texture* texDepth, int level) {
 	render->setFrameBuffer(NULL);
 
 	int levelUse = level > numLevels - 1 ? numLevels - 1 : level;

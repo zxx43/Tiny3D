@@ -537,7 +537,7 @@ void RenderManager::renderTransparent(Render* render, Scene* scene) {
 	state->transparent = false;
 }
 
-void RenderManager::blendTransparent(Render* render, Scene* scene, Texture2D* background) {
+void RenderManager::blendTransparent(Render* render, Scene* scene, Texture* background) {
 	static Shader* oitBlend = render->findShader("oitBlend");
 	oit->beginBlendOit(render, state, oitBlend, background);
 	drawScreenFilter(render, scene, "oitBlend", oit->blendInput, oit->blendFilter);
@@ -660,7 +660,7 @@ void RenderManager::drawDeferred(Render* render, Scene* scene, FrameBuffer* scre
 	filter->draw(scene->renderCamera, render, state, screenBuff->colorBuffers, screenBuff->depthBuffer);
 }
 
-void RenderManager::drawCombined(Render* render, Scene* scene, const std::vector<Texture2D*>& inputTextures, Filter* filter) {
+void RenderManager::drawCombined(Render* render, Scene* scene, const std::vector<Texture*>& inputTextures, Filter* filter) {
 	static Shader* combinedShader = render->findShader("combined");
 	static Shader* combinedNFGShader = render->findShader("combined_nfg");
 	if (!combinedShader) {
@@ -693,7 +693,7 @@ void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* s
 	filter->draw(scene->renderCamera, render, state, inputBuff->colorBuffers, NULL);
 }
 
-void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, Texture2D* inputTexture, Filter* filter) {
+void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, Texture* inputTexture, Filter* filter) {
 	Shader* shader = render->findShader(shaderStr);
 	if (!shader) return;
 	state->reset();
@@ -704,7 +704,7 @@ void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* s
 	filter->draw(scene->renderCamera, render, state, inputTexture, NULL);
 }
 
-void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter) {
+void RenderManager::drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture*>& inputTextures, Filter* filter) {
 	Shader* shader = render->findShader(shaderStr);
 	if (!shader) return;
 	state->reset();
@@ -721,7 +721,7 @@ void RenderManager::drawDualFilter(Render* render, Scene* scene, const char* sha
 	drawScreenFilter(render, scene, shader2, filter->getInput2(), filter->getOutput2());
 }
 
-void RenderManager::drawSSRFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter) {
+void RenderManager::drawSSRFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture*>& inputTextures, Filter* filter) {
 	Shader* shader = render->findShader(shaderStr);
 	if (!shader) return;
 	state->reset();
@@ -734,7 +734,7 @@ void RenderManager::drawSSRFilter(Render* render, Scene* scene, const char* shad
 	filter->draw(scene->renderCamera, render, state, inputTextures, NULL);
 }
 
-void RenderManager::drawSSGFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter) {
+void RenderManager::drawSSGFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture*>& inputTextures, Filter* filter) {
 	Shader* shader = render->findShader(shaderStr);
 	if (!shader) return;
 	state->reset();
@@ -802,7 +802,7 @@ void RenderManager::drawDepth2Screen(Render* render, Scene* scene, int texid) {
 	render->useTexture(TEXTURE_2D, 0, texBefore);
 }
 
-void RenderManager::genHiz(Render* render, Scene* scene, Texture2D* depth) {
+void RenderManager::genHiz(Render* render, Scene* scene, Texture* depth) {
 	hizDepth->copyDataFrom(depth);
 	static Shader* hizShader = render->findShader("hiz");
 	hiz->genMipmap(render, hizShader, hizDepth);

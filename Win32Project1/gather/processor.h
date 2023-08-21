@@ -22,7 +22,6 @@ class MeshBuffer;
 class Render;
 class Camera;
 class HizGenerator;
-class Texture2D;
 class Processor {
 private:
 	bool inputPushed;

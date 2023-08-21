@@ -9,11 +9,12 @@ class Oit {
 private:
 	int scrWidth, scrHeight;
 	Image2D* oitHeader;
+	FrameBuffer* clearBuff;
 	RenderBuffer* oitCounter;
 	RenderBuffer* oitList;
 public:
 	FrameBuffer* oitBuf;
-	std::vector<Texture2D*> blendInput;
+	std::vector<Texture*> blendInput;
 	Filter* blendFilter;
 public:
 	Oit();
@@ -27,7 +28,7 @@ public:
 	void resetOit(Render* render, Shader* shader);
 	void beginRenderOit(Render* render, RenderState* state, Shader* shader);
 	void endRenderOit(Render* render);
-	void beginBlendOit(Render* render, RenderState* state, Shader* shader, Texture2D* backgroundTex);
+	void beginBlendOit(Render* render, RenderState* state, Shader* shader, Texture* backgroundTex);
 	void endBlendOit();
 	void resize(int width, int height);
 	void createOitFramebuffers(FrameBuffer* screen, bool hasNextEffect, const int outputPre);

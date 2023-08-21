@@ -247,6 +247,7 @@
     <ClCompile Include="texture\image2d.cpp" />
     <ClCompile Include="texture\imageloader.cpp" />
     <ClCompile Include="texture\imageset.cpp" />
+    <ClCompile Include="texture\texture.cpp" />
     <ClCompile Include="texture\texture2d.cpp" />
     <ClCompile Include="texture\textureatlas.cpp" />
     <ClCompile Include="texture\texturebindless.cpp" />
@@ -346,6 +347,7 @@
     <ClInclude Include="texture\image2d.h" />
     <ClInclude Include="texture\imageloader.h" />
     <ClInclude Include="texture\imageset.h" />
+    <ClInclude Include="texture\texture.h" />
     <ClInclude Include="texture\texture2d.h" />
     <ClInclude Include="texture\textureatlas.h" />
     <ClInclude Include="texture\texturebindless.h" />

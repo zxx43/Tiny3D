@@ -3,12 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-Image2D::Image2D(uint w, uint h, int p, int c, int layout, int filter, int wrapMode, void* initData) {
-	width = w, height = h;
-	precision = p;
-	channel = c;
-
-	glGenTextures(1, &id);
+Image2D::Image2D(uint w, uint h, int p, int c, int layout, int filter, int wrapMode, void* initData): Texture(w, h, p, c) {
 	glBindTexture(GL_TEXTURE_2D, id);
 
 	GLint filterParam = filter == LINEAR ? GL_LINEAR : GL_NEAREST;
@@ -94,18 +89,7 @@ Image2D::Image2D(uint w, uint h, int p, int c, int layout, int filter, int wrapM
 }
 
 Image2D::~Image2D() {
-	releaseBindless(hnd);
-	glDeleteTextures(1, &id);
-}
 
-u64 Image2D::genBindless() {
-	u64 texHnd = glGetTextureHandleARB(id);
-	glMakeTextureHandleResidentARB(texHnd);
-	return texHnd;
-}
-
-void Image2D::releaseBindless(u64 texHnd) {
-	glMakeTextureHandleNonResidentARB(texHnd);
 }
 
 void Image2D::setLayout(int layout) {

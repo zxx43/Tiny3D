@@ -1,11 +1,12 @@
-#include "shader/util.glsl"
+#extension GL_ARB_bindless_texture : enable 
 
-layout(bindless_image, r32ui) uniform uimage2D headPointers;
+layout(bindless_image, r32ui) writeonly uniform uimage2D headPointers;
 
 layout(local_size_x = 1, local_size_y = 1) in;
 
+#define ClearValue 0
+
 void main() {
 	uvec2 coord = gl_GlobalInvocationID.xy;
-	uint clearValue = 0;
-	imageStore(headPointers, ivec2(coord), uvec4(clearValue));
+	imageStore(headPointers, ivec2(coord), uvec4(ClearValue));
 }

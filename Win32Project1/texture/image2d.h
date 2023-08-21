@@ -1,23 +1,12 @@
 #ifndef IMAGE2D_H_
 #define IMAGE2D_H_
 
-#include "../render/glheader.h"
-#include "../constants/constants.h"
+#include "texture.h"
 
-class Image2D {
-private:
-	GLenum texType, format, preColor;
-private:
-	u64 genBindless();
-	void releaseBindless(u64 texHnd);
-public:
-	uint id;
-	u64 hnd;
-	uint width, height, channel;
-	int precision;
+class Image2D: public Texture {
 public:
 	Image2D(uint w, uint h, int p, int c, int layout, int filter, int wrapMode, void* initData = NULL);
-	~Image2D();
+	virtual ~Image2D();
 public:
 	void setLayout(int layout);
 	void updateData(void* data);

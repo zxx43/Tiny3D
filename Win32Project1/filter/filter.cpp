@@ -27,7 +27,7 @@ Filter::~Filter() {
 	}
 }
 
-bool Filter::bindTex(int slot, const Texture2D* tex, Shader* shader) {
+bool Filter::bindTex(int slot, const Texture* tex, Shader* shader) {
 	if (!shader->hasSlot(slot)) {
 		if (isDebug) printf("shader: %s error slot:%d\n", shader->name.data(), slot);
 		return false;
@@ -41,7 +41,7 @@ bool Filter::bindTex(int slot, const Texture2D* tex, Shader* shader) {
 }
 
 void Filter::draw(Camera* camera, Render* render, RenderState* state,
-		Texture2D* inputTexture, const Texture2D* depthTexture) {
+		Texture* inputTexture, const Texture* depthTexture) {
 	Shader* shader = state->shader;
 	render->setFrameBuffer(framebuffer);
 	render->setShaderVec2(shader, "pixelSize", pixWidth, pixHeight);
@@ -60,7 +60,7 @@ void Filter::draw(Camera* camera, Render* render, RenderState* state,
 }
 
 void Filter::draw(Camera* camera, Render* render, RenderState* state,
-		const std::vector<Texture2D*>& inputTextures, const Texture2D* depthTexture) {
+		const std::vector<Texture*>& inputTextures, const Texture* depthTexture) {
 	isDebug = render->getDebug();
 
 	Shader* shader = state->shader;
@@ -90,7 +90,7 @@ void Filter::addDepthBuffer(int precision, bool useMip) {
 		framebuffer->attachDepthBuffer(precision, useMip);
 }
 
-Texture2D* Filter::getOutput(int i) {
+Texture* Filter::getOutput(int i) {
 	if(framebuffer)
 		return framebuffer->getColorBuffer(i);
 	return NULL;

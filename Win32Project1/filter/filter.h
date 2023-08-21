@@ -18,23 +18,23 @@ private:
 	StaticNode* boardNode;
 	bool isDebug;
 private:
-	bool bindTex(int slot, const Texture2D* tex, Shader* shader);
+	bool bindTex(int slot, const Texture* tex, Shader* shader);
 public:
 	Filter(float width, float height, bool useFramebuffer, int precision, int component, int filt, int wrap);
 	~Filter();
 public:
 	void draw(Camera* camera, Render* render, RenderState* state,
-		Texture2D* inputTexture, const Texture2D* depthTexture);
+		Texture* inputTexture, const Texture* depthTexture);
 	void draw(Camera* camera, Render* render, RenderState* state, 
-		const std::vector<Texture2D*>& inputTextures, const Texture2D* depthTexture);
+		const std::vector<Texture*>& inputTextures, const Texture* depthTexture);
 	void addOutput(int precision, int component, int filt);
 	void addDepthBuffer(int precision, bool useMip);
 	FrameBuffer* getFrameBuffer();
-	Texture2D* getOutput(int i);
+	Texture* getOutput(int i);
 };
 
 struct FilterChain {
-	std::vector<Texture2D*> input;
+	std::vector<Texture*> input;
 	Filter* output;
 	FilterChain(int width, int height, bool useFramebuffer, int precision, int component, int wrapMode = WRAP_CLAMP_TO_BORDER) {
 		input.clear(); 
@@ -44,10 +44,10 @@ struct FilterChain {
 		input.clear();
 		delete output;
 	}
-	void addInputTex(Texture2D* texIn) {
+	void addInputTex(Texture* texIn) {
 		input.push_back(texIn);
 	}
-	Texture2D* getOutputTex(int i) {
+	Texture* getOutputTex(int i) {
 		return output->getOutput(i);
 	}
 	FrameBuffer* getOutFrameBuffer() {
@@ -66,22 +66,22 @@ struct DualFilter {
 		delete filter1;
 		delete filter2;
 	}
-	void addInputTex(Texture2D* tex) {
+	void addInputTex(Texture* tex) {
 		filter1->addInputTex(tex);
 	}
-	std::vector<Texture2D*> getInput1() {
+	std::vector<Texture*> getInput1() {
 		return filter1->input;
 	}
 	Filter* getOutput1() {
 		return filter1->output;
 	}
-	std::vector<Texture2D*> getInput2() {
+	std::vector<Texture*> getInput2() {
 		return filter2->input;
 	}
 	Filter* getOutput2() {
 		return filter2->output;
 	}
-	Texture2D* getOutputTex() {
+	Texture* getOutputTex() {
 		return filter2->getOutputTex(0);
 	}
 };

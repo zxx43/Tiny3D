@@ -45,7 +45,7 @@ public:
 	ConfigArg* cfgs;
 	int depthPre;
 	HizGenerator* hiz;
-	Texture2D* hizDepth;
+	Texture* hizDepth;
 	Ibl* ibl;
 	Oit* oit;
 private:
@@ -94,22 +94,22 @@ public:
 	void renderScene(Render* render,Scene* scene);
 	void prepareTransparent(FrameBuffer* screen, bool hasNextEffect, const int outputPre);
 	void renderTransparent(Render* render, Scene* scene);
-	void blendTransparent(Render* render, Scene* scene, Texture2D* background);
+	void blendTransparent(Render* render, Scene* scene, Texture* background);
 	void renderWater(Render* render, Scene* scene);
 	void renderReflect(Render* render, Scene* scene);
 	void renderSkyTex(Render* render, Scene* scene);
 public:
 	void drawDeferred(Render* render, Scene* scene, FrameBuffer* screenBuff, Filter* filter);
-	void drawCombined(Render* render, Scene* scene, const std::vector<Texture2D*>& inputTextures, Filter* filter);
+	void drawCombined(Render* render, Scene* scene, const std::vector<Texture*>& inputTextures, Filter* filter);
 	void drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, FrameBuffer* inputBuff, Filter* filter);
-	void drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, Texture2D* inputTexture, Filter* filter);
-	void drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter);
+	void drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, Texture* inputTexture, Filter* filter);
+	void drawScreenFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture*>& inputTextures, Filter* filter);
 	void drawDualFilter(Render* render, Scene* scene, const char* shader1, const char* shader2, DualFilter* filter);
-	void drawSSRFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter);
-	void drawSSGFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture2D*>& inputTextures, Filter* filter);
+	void drawSSRFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture*>& inputTextures, Filter* filter);
+	void drawSSGFilter(Render* render, Scene* scene, const char* shaderStr, const std::vector<Texture*>& inputTextures, Filter* filter);
 	void drawTexture2Screen(Render* render, Scene* scene, u64 texhnd);
 	void drawDepth2Screen(Render* render, Scene* scene, int texid);
-	void genHiz(Render* render, Scene* scene, Texture2D* depth);
+	void genHiz(Render* render, Scene* scene, Texture* depth);
 	void drawHiz2Screen(Render* render, Scene* scene, int level);
 	void drawNoise3d(Render* render, Scene* scene, FrameBuffer* noiseBuf);
 	bool isWaterShow(Render* render, const Scene* scene);

@@ -26,13 +26,13 @@ public:
 	CubeMap* skyTexture;
 	CubeMap* envTexture;
 	CubeMap* noise3DTexture;
-	Texture2D* reflectTexture;
-	Texture2D* sceneTexture;
-	Texture2D* sceneDepth;
+	Texture* reflectTexture;
+	Texture* sceneTexture;
+	Texture* sceneDepth;
 	int distortionTex, noiseTex, roadTex;
 private:
-	Texture2D* heightTexture;
-	Texture2D* heightNormalTex;
+	Texture* heightTexture;
+	Texture* heightNormalTex;
 private:
 	AssetManager();
 	~AssetManager();
@@ -51,12 +51,12 @@ public:
 	CubeMap* getEnvTexture();
 	void setNoise3D(CubeMap* tex);
 	CubeMap* getNoise3D();
-	void setReflectTexture(const Texture2D* tex);
-	Texture2D* getReflectTexture();
-	void setSceneTexture(const Texture2D* tex);
-	Texture2D* getSceneTexture();
-	void setSceneDepth(const Texture2D* tex);
-	Texture2D* getSceneDepth();
+	void setReflectTexture(const Texture* tex);
+	Texture* getReflectTexture();
+	void setSceneTexture(const Texture* tex);
+	Texture* getSceneTexture();
+	void setSceneDepth(const Texture* tex);
+	Texture* getSceneDepth();
 	void addDistortionTex(const char* texName);
 	int getDistortionTex() { return distortionTex; }
 	u64 getDistortionHnd() { return texBld->getHnds()[distortionTex]; }
@@ -67,9 +67,9 @@ public:
 	int getRoadTex() { return roadTex; }
 	u64 getRoadHnd() { return texBld->getHnds()[roadTex]; }
 	void createHeightTex();
-	Texture2D* getHeightTex() { return heightTexture; }
+	Texture* getHeightTex() { return heightTexture; }
 	u64 getHeightHnd() { return heightTexture->hnd; }
-	Texture2D* getHeightNormal() { return heightNormalTex; }
+	Texture* getHeightNormal() { return heightNormalTex; }
 	u64 getHeightNormalHnd() { return heightNormalTex->hnd; }
 };
 

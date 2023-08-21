@@ -19,8 +19,8 @@ public:
 	HizGenerator();
 	~HizGenerator();
 public:
-	void genMipmap(Render* render, Shader* shader, Texture2D* texDepth);
-	void drawDebug(Camera* camera, Render* render, Shader* shader, Texture2D* texDepth, int level);
+	void genMipmap(Render* render, Shader* shader, Texture* texDepth);
+	void drawDebug(Camera* camera, Render* render, Shader* shader, Texture* texDepth, int level);
 	int getMaxLevel() { return numLevels - 1; }
 };
 

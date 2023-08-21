@@ -381,6 +381,9 @@
     <ClCompile Include="oit\oit.cpp">
       <Filter>Source Files\oit</Filter>
     </ClCompile>
+    <ClCompile Include="texture\texture.cpp">
+      <Filter>Source Files\texture</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="batch\batch.h">
@@ -676,6 +679,9 @@
     </ClInclude>
     <ClInclude Include="oit\oit.h">
       <Filter>Source Files\oit</Filter>
+    </ClInclude>
+    <ClInclude Include="texture\texture.h">
+      <Filter>Source Files\texture</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

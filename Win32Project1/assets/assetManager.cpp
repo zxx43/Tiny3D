@@ -118,27 +118,27 @@ CubeMap* AssetManager::getNoise3D() {
 	return noise3DTexture;
 }
 
-void AssetManager::setReflectTexture(const Texture2D* tex) {
-	reflectTexture = (Texture2D*)tex;
+void AssetManager::setReflectTexture(const Texture* tex) {
+	reflectTexture = (Texture*)tex;
 }
 
-Texture2D* AssetManager::getReflectTexture() {
+Texture* AssetManager::getReflectTexture() {
 	return reflectTexture;
 }
 
-void AssetManager::setSceneTexture(const Texture2D* tex) {
-	sceneTexture = (Texture2D*)tex;
+void AssetManager::setSceneTexture(const Texture* tex) {
+	sceneTexture = (Texture*)tex;
 }
 
-Texture2D* AssetManager::getSceneTexture() {
+Texture* AssetManager::getSceneTexture() {
 	return sceneTexture;
 }
 
-void AssetManager::setSceneDepth(const Texture2D* tex) {
-	sceneDepth = (Texture2D*)tex;
+void AssetManager::setSceneDepth(const Texture* tex) {
+	sceneDepth = (Texture*)tex;
 }
 
-Texture2D* AssetManager::getSceneDepth() {
+Texture* AssetManager::getSceneDepth() {
 	return sceneDepth;
 }
 

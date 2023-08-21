@@ -21,7 +21,7 @@ private:
 	bool brdfInited;
 	CubeMap* irradianceTex;
 	CubeMap* prefilteredTex;
-	Texture2D* brdfLut;
+	Texture* brdfLut;
 	mat4 matPosx, matNegx, matPosy, matNegy, matPosz, matNegz;
 public:
 	RenderState* state;
@@ -34,7 +34,7 @@ public:
 	void genBrdf(Render* render, Shader* shader);
 	CubeMap* getIrradianceTex() { return irradianceTex; }
 	CubeMap* getPrefilteredTex() { return prefilteredTex; }
-	Texture2D* getBrdf() { return brdfLut; }
+	Texture* getBrdf() { return brdfLut; }
 };
 
 #endif

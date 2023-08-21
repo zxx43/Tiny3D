@@ -3,10 +3,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-Texture2D::Texture2D(uint w, uint h, bool useMip, int t, int p, int c, int filter, int wrapMode, bool clearWhite, void* initData) {
-	width = w, height = h;
+Texture2D::Texture2D(uint w, uint h, bool useMip, int t, int p, int c, int filter, int wrapMode, bool clearWhite, void* initData): Texture(w, h, p, c) {
 	type = t;
-	precision = p;
 
 	if (type == TEXTURE_TYPE_DEPTH) channel = 1;
 	if (type == TEXTURE_TYPE_ANIME) channel = 4;
@@ -14,7 +12,6 @@ Texture2D::Texture2D(uint w, uint h, bool useMip, int t, int p, int c, int filte
 
 	if (type == TEXTURE_TYPE_DEPTH && precision == HALF_PRE) precision = FLOAT_PRE;
 
-	glGenTextures(1, &id);
 	glBindTexture(GL_TEXTURE_2D, id);
 
 	GLint filterParam = filter == LINEAR ? GL_LINEAR : GL_NEAREST;
@@ -31,7 +28,6 @@ Texture2D::Texture2D(uint w, uint h, bool useMip, int t, int p, int c, int filte
 	}
 	
 	GLenum color1, color2, color3, color4, depth1;
-	GLenum preColor, preDepth;
 
 	switch (precision) {
 		case LOW_PRE:
@@ -138,13 +134,7 @@ Texture2D::Texture2D(uint w, uint h, bool useMip, int t, int p, int c, int filte
 }
 
 Texture2D::~Texture2D() {
-	releaseBindless(hnd);
-	glDeleteTextures(1, &id);
-}
 
-void Texture2D::copyDataFrom(Texture2D* src) {
-	glCopyImageSubData(src->id, GL_TEXTURE_2D, 0, 0, 0, 0,
-		id, GL_TEXTURE_2D, 0, 0, 0, 0, width, height, 1);
 }
 
 void Texture2D::readData(int bitSize, void* ret) {
@@ -160,14 +150,4 @@ void Texture2D::readData(int bitSize, void* ret) {
 	}
 	int bufSize = width * height * channel * bitSize;
 	glGetTextureSubImage(id, 0, 0, 0, 0, width, height, 1, format, readType, bufSize, ret);
-}
-
-u64 Texture2D::genBindless() {
-	u64 texHnd = glGetTextureHandleARB(id);
-	glMakeTextureHandleResidentARB(texHnd);
-	return texHnd;
-}
-
-void Texture2D::releaseBindless(u64 texHnd) {
-	glMakeTextureHandleNonResidentARB(texHnd);
 }

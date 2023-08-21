@@ -6,7 +6,7 @@
 
 class FrameMgr {
 public:
-	std::vector<Texture2D*> frames;
+	std::vector<Texture*> frames;
 	std::map<std::string, int> frameIndex;
 	u64* datas;
 	uint animCount;

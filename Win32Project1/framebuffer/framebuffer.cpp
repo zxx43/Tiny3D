@@ -9,6 +9,7 @@ FrameBuffer::FrameBuffer(float width, float height, int precision, int component
 
 	colorBuffers.clear();
 	colorBufferCount = 0;
+	colorRefs.clear();
 
 	depthBuffer = NULL;
 	depthOnly = false;
@@ -25,6 +26,7 @@ FrameBuffer::FrameBuffer(float width, float height, int precision) :wrapMode(WRA
 
 	colorBuffers.clear();
 	colorBufferCount = 0;
+	colorRefs.clear();
 
 	depthBuffer = NULL;
 	depthOnly = true;
@@ -41,6 +43,7 @@ FrameBuffer::FrameBuffer(float width, float height) :wrapMode(WRAP_CLAMP_TO_BORD
 
 	colorBuffers.clear();
 	colorBufferCount = 0;
+	colorRefs.clear();
 
 	depthBuffer = NULL;
 	depthOnly = true;
@@ -53,6 +56,7 @@ FrameBuffer::FrameBuffer(const CubeMap* cube) :wrapMode(WRAP_CLAMP_TO_EDGE) {
 
 	colorBuffers.clear();
 	colorBufferCount = 0;
+	colorRefs.clear();
 
 	depthBuffer = NULL;
 	depthOnly = false;
@@ -65,9 +69,11 @@ FrameBuffer::FrameBuffer(const CubeMap* cube) :wrapMode(WRAP_CLAMP_TO_EDGE) {
 }
 
 FrameBuffer::~FrameBuffer() {
-	for (unsigned int i = 0; i < colorBuffers.size(); i++)
-		delete colorBuffers[i];
+	for (unsigned int i = 0; i < colorBuffers.size(); i++) {
+		if (!colorRefs[i]) delete colorBuffers[i];
+	}
 	colorBuffers.clear();
+	colorRefs.clear();
 
 	if (depthBuffer && !depthRef) delete depthBuffer;
 	depthBuffer = NULL;
@@ -89,7 +95,7 @@ void FrameBuffer::attachDepthBuffer(int precision, bool useMip) {
 	}
 }
 
-void FrameBuffer::setDepthBuffer(Texture2D* depthTex) {
+void FrameBuffer::setDepthBuffer(Texture* depthTex) {
 	depthBuffer = depthTex;
 	depthRef = true;
 	glNamedFramebufferTexture2DEXT(fboId, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthBuffer->id, 0);
@@ -99,22 +105,33 @@ void FrameBuffer::setDepthBuffer(Texture2D* depthTex) {
 	}
 }
 
-void FrameBuffer::addColorBuffer(int precision, int component, int filt) {
+void FrameBuffer::addColorRef(Texture* colorTex) {
 	depthOnly = false;
 	colorBufferCount++;
-	colorBuffers.push_back(new Texture2D((int)(width), (int)(height), false, TEXTURE_TYPE_COLOR, precision, component, filt, wrapMode));
+	colorBuffers.push_back(colorTex);
+	colorRefs.push_back(true);
 	glNamedFramebufferTexture2DEXT(fboId, GL_COLOR_ATTACHMENT0 + (colorBufferCount - 1), GL_TEXTURE_2D,
 		colorBuffers[colorBufferCount - 1]->id, 0);
 	glNamedFramebufferDrawBuffers(fboId, colorBufferCount, ColorAttachments);
 }
 
-Texture2D* FrameBuffer::getColorBuffer(int n) {
+void FrameBuffer::addColorBuffer(int precision, int component, int filt) {
+	depthOnly = false;
+	colorBufferCount++;
+	colorBuffers.push_back(new Texture2D((int)(width), (int)(height), false, TEXTURE_TYPE_COLOR, precision, component, filt, wrapMode));
+	colorRefs.push_back(false);
+	glNamedFramebufferTexture2DEXT(fboId, GL_COLOR_ATTACHMENT0 + (colorBufferCount - 1), GL_TEXTURE_2D,
+		colorBuffers[colorBufferCount - 1]->id, 0);
+	glNamedFramebufferDrawBuffers(fboId, colorBufferCount, ColorAttachments);
+}
+
+Texture* FrameBuffer::getColorBuffer(int n) {
 	if((int)colorBuffers.size()<n+1)
 		return NULL;
 	return colorBuffers[n];
 }
 
-Texture2D* FrameBuffer::getDepthBuffer() {
+Texture* FrameBuffer::getDepthBuffer() {
 	return depthBuffer;
 }
 
