@@ -109,7 +109,7 @@ void Oit::endRenderOit(Render* render) {
 }
 
 void Oit::beginBlendOit(Render* render, RenderState* state, Shader* shader, Texture* backgroundTex) {
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_ATOMIC_COUNTER_BARRIER_BIT);
+	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_SHADER_STORAGE_BARRIER_BIT | GL_ATOMIC_COUNTER_BARRIER_BIT);
 	if (blendInput.size() == 0) blendInput.push_back(backgroundTex);
 	render->useShader(shader);
 	useOitList(1);
