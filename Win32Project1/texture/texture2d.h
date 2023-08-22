@@ -26,7 +26,9 @@ public:
 	Texture2D(uint w,uint h, bool useMip,int t,int p,int c,int filter, int wrapMode, bool clearWhite = true, void* initData=NULL);
 	virtual ~Texture2D();
 public:
-	void readData(int bitSize, void* ret);
+	virtual void readData(int bitSize, void* ret);
+	virtual u64 genBindless();
+	virtual void releaseBindless(u64 texHnd);
 };
 
 #endif /* TEXTURE2D_H_ */

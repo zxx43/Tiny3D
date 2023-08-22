@@ -9,18 +9,7 @@ Texture::Texture(uint w, uint h, int p, int c) {
 }
 
 Texture::~Texture() {
-	releaseBindless(hnd);
 	glDeleteTextures(1, &id);
-}
-
-u64 Texture::genBindless() {
-	u64 texHnd = glGetTextureHandleARB(id);
-	glMakeTextureHandleResidentARB(texHnd);
-	return texHnd;
-}
-
-void Texture::releaseBindless(u64 texHnd) {
-	glMakeTextureHandleNonResidentARB(texHnd);
 }
 
 void Texture::copyDataFrom(Texture* src) {

@@ -17,8 +17,9 @@ public:
 	virtual ~Texture();
 public:
 	void copyDataFrom(Texture* src);
-	u64 genBindless();
-	void releaseBindless(u64 texHnd);
+	virtual void readData(int bitSize, void* ret) = 0;
+	virtual u64 genBindless() = 0;
+	virtual void releaseBindless(u64 texHnd) = 0;
 };
 
 #endif

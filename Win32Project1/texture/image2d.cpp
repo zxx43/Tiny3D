@@ -89,7 +89,17 @@ Image2D::Image2D(uint w, uint h, int p, int c, int layout, int filter, int wrapM
 }
 
 Image2D::~Image2D() {
+	releaseBindless(hnd);
+}
 
+u64 Image2D::genBindless() {
+	u64 texHnd = glGetImageHandleARB(id, 0, GL_FALSE, 0, preColor);
+	glMakeImageHandleResidentARB(texHnd, GL_READ_WRITE);
+	return texHnd;
+}
+
+void Image2D::releaseBindless(u64 texHnd) {
+	glMakeImageHandleNonResidentARB(texHnd);
 }
 
 void Image2D::setLayout(int layout) {

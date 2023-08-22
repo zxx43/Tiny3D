@@ -134,7 +134,17 @@ Texture2D::Texture2D(uint w, uint h, bool useMip, int t, int p, int c, int filte
 }
 
 Texture2D::~Texture2D() {
+	releaseBindless(hnd);
+}
 
+u64 Texture2D::genBindless() {
+	u64 texHnd = glGetTextureHandleARB(id);
+	glMakeTextureHandleResidentARB(texHnd);
+	return texHnd;
+}
+
+void Texture2D::releaseBindless(u64 texHnd) {
+	glMakeTextureHandleNonResidentARB(texHnd);
 }
 
 void Texture2D::readData(int bitSize, void* ret) {

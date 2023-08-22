@@ -10,7 +10,9 @@ public:
 public:
 	void setLayout(int layout);
 	void updateData(void* data);
-	void readData(int bitSize, void* ret);
+	virtual void readData(int bitSize, void* ret);
+	virtual u64 genBindless();
+	virtual void releaseBindless(u64 texHnd);
 };
 
 #endif
