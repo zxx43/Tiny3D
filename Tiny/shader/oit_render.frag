@@ -17,6 +17,9 @@ in vec2 vTexcoord;
 flat in ivec4 vTexid;
 in vec4 vWorldVertex;
 
+const vec3 KCool = vec3(0.15, 0.15, 0.35);
+const vec3 KWarm = vec3(0.9, 0.9, 0.25);
+
 void render(vec4 color) {
 	uint index = atomicCounterIncrement(indexDispenser);
 	uint newHead = index + 1;
@@ -39,6 +42,11 @@ void main() {
 	float depthView = length(vWorldVertex.xyz - eyePos);
 #ifdef USE_CARTOON
 	float fogFactor = -0.00000025;
+	float darkness = 1.0;
+	float threshold = 0.15;
+	float cwFactor = step(darkness, threshold);
+	vec3 kd = KCool * cwFactor + KWarm * (1.0 - cwFactor);
+	transColor.rgb *= kd;
 #else
 	float fogFactor = -0.00000075;
 #endif

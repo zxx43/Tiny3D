@@ -21,7 +21,6 @@ class FrameBuffer {
 private:
 	float width, height;
 	unsigned int fboId;
-	int colorBufferCount;
 	std::vector<bool> colorRefs;
 	bool depthOnly;
 	bool depthRef;
