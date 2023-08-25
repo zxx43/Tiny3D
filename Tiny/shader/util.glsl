@@ -1,4 +1,4 @@
-﻿#extension GL_ARB_bindless_texture : enable 
+#extension GL_ARB_bindless_texture : enable 
 
 const float PI = 3.1415926;
 const float INV_PI = 0.318309891613572;

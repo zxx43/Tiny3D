@@ -1,4 +1,4 @@
-﻿#include "shader/util.glsl"
+#include "shader/util.glsl"
 #include "shader/pbr.glsl"
 #include "shader/shadow.glsl"
 
