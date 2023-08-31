@@ -373,7 +373,7 @@
     <None Include="..\Tiny\shader\depth.frag" />
     <None Include="..\Tiny\shader\dof.frag" />
     <None Include="..\Tiny\shader\edge.frag" />
-    <None Include="..\Tiny\shader\fxaa.frag" />
+    <None Include="..\Tiny\shader\final.frag" />
     <None Include="..\Tiny\shader\gather.comp" />
     <None Include="..\Tiny\shader\gaussian.frag" />
     <None Include="..\Tiny\shader\grass.comp" />

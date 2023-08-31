@@ -22,7 +22,7 @@ using namespace std;
 #define WATER_FRAG "shader/water.frag"
 #define WATER_COMP "shader/water.comp"
 #define EDGE_FRAG "shader/edge.frag"
-#define FXAA_FRAG "shader/fxaa.frag"
+#define FINAL_FRAG "shader/final.frag"
 #define BLUR_FRAG "shader/blur.frag"
 #define MEAN_FRAG "shader/mean.frag"
 #define GAUSS_FRAG "shader/gaussian.frag"
@@ -208,9 +208,11 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	edgeNFG->setSlot("normalWaterBuffer", 1);
 	edgeNFG->setSlot("matBuffer", 2);
 
-	Shader* fxaa = shaders->addShader("fxaa", POST_VERT, FXAA_FRAG);
-	fxaa->attachDef("Shader", "fxaa");
-	fxaa->setSlot("colorBuffer", 0);
+	Shader* fin = shaders->addShader("fin", POST_VERT, FINAL_FRAG);
+	fin->attachDef("Shader", "final");
+	if (cfgs->fxaa) fin->attachDef("USE_FXAA", "1");
+	if (cfgs->graphQuality > 3) fin->attachDef("HIGH_QUALITY", "1");
+	fin->setSlot("colorBuffer", 0);
 
 	Shader* blur = shaders->addShader("blur", POST_VERT, BLUR_FRAG);
 	blur->attachDef("Shader", "blur");
@@ -339,8 +341,6 @@ void SetupShaders(ShaderManager* shaders, const ConfigArg* cfgs) {
 	Shader* oitBlend = shaders->addShader("oitBlend", POST_VERT, OIT_BLEND_FRAG);
 	oitBlend->attachDef("Shader", "oitBlend");
 	oitBlend->attachDef("MAX_LAYER", to_string(MAX_OIT_LAYER).data());
-	if (cfgs->graphQuality > 3)
-		oitBlend->attachDef("HIGH_QUALITY", "1");
 	oitBlend->setSlot("colorBuffer", 0);
 
 	shaders->compile();

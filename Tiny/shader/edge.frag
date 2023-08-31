@@ -25,6 +25,7 @@ vec4 GenColor(vec3 color, float depth) {
 	#else
 		res.rgb = color;
 	#endif
+	res.w = depth;
 	return res;
 }
 
@@ -126,7 +127,7 @@ void main() {
 	results = max(waterResulats, results);
 	float edgeWeight = dot(results, vec4(1.0)) * 0.25;
 	
-	if(edgeWeight > 0.25) {
+	if(edgeWeight > 0.15) {
 		#ifdef USE_CARTOON
 			finalColor = OUTLINE_COLOR;
 		#else

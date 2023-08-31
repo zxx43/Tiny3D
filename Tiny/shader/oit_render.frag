@@ -41,7 +41,7 @@ void main() {
 
 	float depthView = length(vWorldVertex.xyz - eyePos);
 #ifdef USE_CARTOON
-	float fogFactor = -0.00000025;
+	float fogFactor = -0.0000025;
 	float darkness = 1.0;
 	float threshold = 0.15;
 	float cwFactor = step(darkness, threshold);

@@ -13,7 +13,7 @@ SimpleApplication::SimpleApplication() : Application() {
 	sceneFilter = NULL;
 	combinedChain = NULL;
 	edgeFilter = NULL;
-	aaFilter = NULL;
+	finFilter = NULL;
 	dofBlurFilter = NULL;
 	dofFilter = NULL;
 	ssrChain = NULL;
@@ -22,7 +22,7 @@ SimpleApplication::SimpleApplication() : Application() {
 	ssgChain = NULL;
 	bloomChain = NULL;
 	edgeInput.clear();
-	aaInput.clear();
+	finInput.clear();
 	dofInput.clear();
 	noiseBuf = NULL;
 	firstFrame = true;
@@ -41,14 +41,14 @@ SimpleApplication::~SimpleApplication() {
 	if (dofBlurFilter) delete dofBlurFilter; dofBlurFilter = NULL;
 	if (dofFilter) delete dofFilter; dofFilter = NULL;
 	if (edgeFilter) delete edgeFilter; edgeFilter = NULL;
-	if (aaFilter) delete aaFilter; aaFilter = NULL;
+	if (finFilter) delete finFilter; finFilter = NULL;
 	if (ssrChain) delete ssrChain; ssrChain = NULL;
 	if (ssrBlurFilter) delete ssrBlurFilter; ssrBlurFilter = NULL;
 	if (rawScreenFilter) delete rawScreenFilter; rawScreenFilter = NULL;
 	if (ssgChain) delete ssgChain; ssgChain = NULL;
 	if (bloomChain) delete bloomChain; bloomChain = NULL;
 	edgeInput.clear();
-	aaInput.clear();
+	finInput.clear();
 	dofInput.clear();
 	if (noiseBuf) delete noiseBuf; noiseBuf = NULL;
 }
@@ -61,7 +61,7 @@ void SimpleApplication::resize(int width, int height) {
 	//const int hdrPre = cfgs->graphQuality > 7 ? FLOAT_PRE : precision;
 	const int hdrPre = precision;
 	const int matPre = LOW_PRE, waterPre = LOW_PRE;
-	const int aaPre = LOW_PRE, edgePre = LOW_PRE, dofPre = precision, rawPre = LOW_PRE;
+	const int finPre = LOW_PRE, edgePre = precision, dofPre = precision, rawPre = LOW_PRE;
 	const float bloomScale = 0.75, ssrScale = 0.75, dofScale = 0.5;
 
 	Application::resize(width, height);
@@ -82,26 +82,26 @@ void SimpleApplication::resize(int width, int height) {
 	sceneFilter->addOutput(matPre, 3, LINEAR); // FragNormal
 	sceneFilter->addOutput(hdrPre, 3, LINEAR); // FragBright
 
-	renderMgr->prepareTransparent(screen, cfgs->cartoon || cfgs->dof || cfgs->fxaa, hdrPre);
+	renderMgr->prepareTransparent(screen, true, hdrPre);
 
 	if (combinedChain) delete combinedChain;
 	{
 		combinedChain = new FilterChain(width, height, true, precision, 4);
 		if (cfgs->cartoon) {
 			if (edgeFilter) delete edgeFilter;
-			edgeFilter = new Filter(width, height, cfgs->fxaa, edgePre, 3, NEAREST, WRAP_REPEAT);
+			edgeFilter = new Filter(width, height, true, edgePre, 4, NEAREST, WRAP_REPEAT);
 			edgeInput.clear();
 		}
-		if (cfgs->fxaa) {
-			if (aaFilter) delete aaFilter;
-			aaFilter = new Filter(width, height, false, aaPre, 3, NEAREST, WRAP_REPEAT);
-			aaInput.clear();
-		}
+
+		if (finFilter) delete finFilter;
+		finFilter = new Filter(width, height, false, finPre, 3, NEAREST, WRAP_REPEAT);
+		finInput.clear();
+
 		if (cfgs->dof) {
 			if (dofBlurFilter) delete dofBlurFilter;
 			dofBlurFilter = new Filter(width * dofScale, height * dofScale, true, dofPre, 4, NEAREST, WRAP_REPEAT);
 			if (dofFilter) delete dofFilter;
-			dofFilter = new Filter(width, height, cfgs->cartoon || cfgs->fxaa, dofPre, 4, LINEAR, WRAP_CLAMP_TO_BORDER);
+			dofFilter = new Filter(width, height, true, dofPre, 4, LINEAR, WRAP_CLAMP_TO_BORDER);
 			dofInput.clear();
 		}
 		if (cfgs->ssr) {
@@ -110,11 +110,6 @@ void SimpleApplication::resize(int width, int height) {
 			ssrChain->addInputTex(combinedChain->getOutputTex(0)); // lightBuffer
 			ssrChain->addInputTex(waterFrame->getColorBuffer(1));  // normalBuffer
 			ssrChain->addInputTex(waterFrame->getDepthBuffer());   // depthBuffer
-
-			//if (!cfgs->cartoon && !cfgs->dof && !cfgs->fxaa) {
-			//	if (rawScreenFilter) delete rawScreenFilter;
-			//	rawScreenFilter = new Filter(width, height, false, rawPre, 4, NEAREST, WRAP_REPEAT);
-			//}
 
 			if (ssrBlurFilter) delete ssrBlurFilter;
 			ssrBlurFilter = new Filter(width * 0.5, height * 0.5, true, LOW_PRE, 4, LINEAR, WRAP_REPEAT);
@@ -234,7 +229,17 @@ void SimpleApplication::draw() {
 	}
 
 	Filter* lastFilter = combinedChain->output;
-	
+
+	if (cfgs->cartoon) {
+		if (edgeInput.size() == 0) {
+			edgeInput.push_back(lastFilter->getFrameBuffer()->getColorBuffer(0)); // colorBuffer
+			edgeInput.push_back(combinedChain->getOutputTex(1));				  // normalWaterBuffer
+			edgeInput.push_back(screen->getColorBuffer(1));						  // matBuffer
+		}
+		renderMgr->drawScreenFilter(render, scene, render->getFog() ? "edge" : "edge_nfg", edgeInput, edgeFilter);
+		lastFilter = edgeFilter;
+	}
+
 	// blend oit
 	renderMgr->blendTransparent(render, scene, lastFilter->getFrameBuffer()->getColorBuffer(0));
 	lastFilter = renderMgr->oit->blendFilter;
@@ -248,19 +253,9 @@ void SimpleApplication::draw() {
 		renderMgr->drawScreenFilter(render, scene, "dof", dofInput, dofFilter);
 		lastFilter = dofFilter;
 	}
-	if (cfgs->cartoon) {
-		if (edgeInput.size() == 0) {
-			edgeInput.push_back(lastFilter->getFrameBuffer()->getColorBuffer(0)); // colorBuffer
-			edgeInput.push_back(combinedChain->getOutputTex(1));				  // normalWaterBuffer
-			edgeInput.push_back(screen->getColorBuffer(1));						  // matBuffer
-		}
-		renderMgr->drawScreenFilter(render, scene, render->getFog() ? "edge" : "edge_nfg", edgeInput, edgeFilter);
-		lastFilter = edgeFilter;
-	}
-	if (cfgs->fxaa) {
-		if (aaInput.size() == 0) aaInput.push_back(lastFilter->getFrameBuffer()->getColorBuffer(0));
-		renderMgr->drawScreenFilter(render, scene, "fxaa", aaInput, aaFilter);
-	}
+	
+	if (finInput.size() == 0) finInput.push_back(lastFilter->getFrameBuffer()->getColorBuffer(0));
+	renderMgr->drawScreenFilter(render, scene, "fin", finInput, finFilter);
 
 	renderMgr->retrievePrev(scene);
 	renderMgr->genHiz(render, scene, screen->getDepthBuffer());

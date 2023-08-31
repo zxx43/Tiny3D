@@ -823,7 +823,7 @@
     <None Include="..\Tiny\shader\edge.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\Tiny\shader\fxaa.frag">
+    <None Include="..\Tiny\shader\final.frag">
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Tiny\shader\irradiance.frag">

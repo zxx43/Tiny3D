@@ -13,8 +13,8 @@ private:
 	FilterChain* combinedChain;
 	std::vector<Texture*> edgeInput;
 	Filter* edgeFilter;
-	std::vector<Texture*> aaInput;
-	Filter* aaFilter;
+	std::vector<Texture*> finInput;
+	Filter* finFilter;
 	Filter* dofBlurFilter;
 	std::vector<Texture*> dofInput;
 	Filter* dofFilter;

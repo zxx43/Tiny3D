@@ -35,10 +35,4 @@ vec4 blend(vec4 baseColor) {
 void main() {
 	vec4 baseColor = texture(colorBuffer, vTexcoord);
 	FragColor = blend(baseColor);
-
-	// gamma correction
-	#ifdef HIGH_QUALITY
-		FragColor.rgb = vec3(1.0) - exp(-FragColor.rgb * 2.5);
-	#endif
-	FragColor.rgb = pow(FragColor.rgb, INV_GAMMA);
 }

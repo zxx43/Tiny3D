@@ -38,5 +38,5 @@ void main() {
 	color = 1.0 - exp(-1.0 * color);
 
 	FragColor = vec4(color, 1.0);
-    //FragColor.rgb = pow(FragColor.rgb, INV_GAMMA);
+    FragColor.rgb = pow(FragColor.rgb, INV_GAMMA);
 }

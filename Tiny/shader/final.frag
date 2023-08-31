@@ -13,6 +13,7 @@ const float FXAA_SPAN_MAX = 8.0;
 const vec3 Luma = vec3(0.299, 0.587, 0.114);
 
 void main() {
+#ifdef USE_FXAA
 	float val = 1.0;
 	vec2 inverseVP = pixelSize;
 	vec3 rgbNW = texture(colorBuffer, vTexcoord + (vec2(-val, -val) * inverseVP)).rgb;
@@ -51,4 +52,13 @@ void main() {
 	}else{
 		FragColor.rgb = rgbB;
 	}
+#else
+	FragColor = vec4(texture(colorBuffer, vTexcoord).rgb, 1.0);
+#endif
+
+	// gamma correction
+	#ifdef HIGH_QUALITY
+		FragColor.rgb = vec3(1.0) - exp(-FragColor.rgb * 2.5);
+	#endif
+	FragColor.rgb = pow(FragColor.rgb, INV_GAMMA);
 }
