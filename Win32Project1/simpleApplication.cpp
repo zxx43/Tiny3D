@@ -99,9 +99,9 @@ void SimpleApplication::resize(int width, int height) {
 
 		if (cfgs->dof) {
 			if (dofBlurFilter) delete dofBlurFilter;
-			dofBlurFilter = new Filter(width * dofScale, height * dofScale, true, dofPre, 4, NEAREST, WRAP_REPEAT);
+			dofBlurFilter = new Filter(width * dofScale, height * dofScale, true, dofPre, 3, NEAREST, WRAP_REPEAT);
 			if (dofFilter) delete dofFilter;
-			dofFilter = new Filter(width, height, true, dofPre, 4, LINEAR, WRAP_CLAMP_TO_BORDER);
+			dofFilter = new Filter(width, height, true, dofPre, 3, LINEAR, WRAP_CLAMP_TO_BORDER);
 			dofInput.clear();
 		}
 		if (cfgs->ssr) {
