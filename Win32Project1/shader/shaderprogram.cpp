@@ -17,8 +17,8 @@ void printShaderInfoLog(GLuint obj, const char* shaderStr)
 	{
 		infoLog = (char *)malloc(infologLength);
 		glGetShaderInfoLog(obj, infologLength, &charsWritten, infoLog);
-		printf("printShaderInfoLog: %s\n", infoLog);
-		printf("%s\n", shaderStr);
+		printf("\n\033[0;40;31mprintShaderInfoLog: %s\n", infoLog);
+		printf("%s\033[0m\n\n", shaderStr);
 		free(infoLog);
 	}
 	else{
@@ -45,9 +45,9 @@ void printProgramInfoLog(GLuint obj, const char* vsStr, const char* fsStr)
 	{
 		infoLog = (char *)malloc(infologLength);
 		glGetProgramInfoLog(obj, infologLength, &charsWritten, infoLog);
-		printf("printProgramInfoLog: %s\n", infoLog);
+		printf("\033[0;40;33mprintProgramInfoLog: %s\n", infoLog);
 		if (vsStr && fsStr)
-			printf("%s\n%s\n", vsStr, fsStr);
+			printf("%s\n%s\033[0m\n\n", vsStr, fsStr);
 		free(infoLog);
 	}
 	else{
@@ -205,7 +205,7 @@ void ShaderProgram::compile(bool preload) {
 		if (vfile && ffile)
 			printf("%s, %s: ", vfile, ffile);
 		else if (pfile)
-			printf("%s", pfile);
+			printf("%s: ", pfile);
 		printProgramInfoLog(shaderProg, vv, ff);
 	}
 }
