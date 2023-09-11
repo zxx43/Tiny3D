@@ -28,7 +28,7 @@ void printShaderInfoLog(GLuint obj, const char* shaderStr)
 
 //Got this from http://www.lighthouse3d.com/opengl/glsl/index.php?oglinfo
 // it prints out shader info (debugging!)
-void printProgramInfoLog(GLuint obj, const char* vsStr, const char* fsStr)
+void printProgramInfoLog(GLuint obj, const string& vsStr, const string& fsStr, const string& cStr, const string& eStr, const string& gStr, const string& pStr)
 {
 	GLint isLinked = 0;
 	glGetProgramiv(obj, GL_LINK_STATUS, &isLinked);
@@ -45,9 +45,15 @@ void printProgramInfoLog(GLuint obj, const char* vsStr, const char* fsStr)
 	{
 		infoLog = (char *)malloc(infologLength);
 		glGetProgramInfoLog(obj, infologLength, &charsWritten, infoLog);
-		printf("\033[0;40;33mprintProgramInfoLog: %s\n", infoLog);
-		if (vsStr && fsStr)
-			printf("%s\n%s\033[0m\n\n", vsStr, fsStr);
+		printf("\033[0;40;33mprintProgramInfoLog: %s\033[0m\n", infoLog);
+		if (vsStr.length() > 0 && fsStr.length() > 0)
+			printf("\033[0;40;33mvs:%s\nfs:%s\033[0m\n\n", vsStr.data(), fsStr.data());
+		if (pStr.length() > 0)
+			printf("\033[0;40;33mcs:%s\033[0m\n\n", pStr.data());
+		if (gStr.length() > 0)
+			printf("\033[0;40;33mgs:%s\033[0m\n\n", gStr.data());
+		if (cStr.length() > 0 && eStr.length() > 0)
+			printf("\033[0;40;33mtcs:%s\ntes:%s\033[0m\n\n", cStr.data(), eStr.data());
 		free(infoLog);
 	}
 	else{
@@ -203,10 +209,15 @@ void ShaderProgram::compile(bool preload) {
 	glLinkProgram(shaderProg);
 	if (!preload) {
 		if (vfile && ffile)
-			printf("%s, %s: ", vfile, ffile);
-		else if (pfile)
-			printf("%s: ", pfile);
-		printProgramInfoLog(shaderProg, vv, ff);
+			printf("%s|%s", vfile, ffile);
+		if (pfile)
+			printf("%s", pfile);
+		if (gfile)
+			printf("|%s", gfile);
+		if (cfile && efile)
+			printf("|%s|%s", cfile, efile);
+		printf(": ");
+		printProgramInfoLog(shaderProg, vStr, fStr, cStr, eStr, gStr, pStr);
 	}
 }
 
