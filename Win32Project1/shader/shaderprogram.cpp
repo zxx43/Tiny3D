@@ -46,14 +46,14 @@ void printProgramInfoLog(GLuint obj, const string& vsStr, const string& fsStr, c
 		infoLog = (char *)malloc(infologLength);
 		glGetProgramInfoLog(obj, infologLength, &charsWritten, infoLog);
 		printf("\033[0;40;33mprintProgramInfoLog: %s\033[0m\n", infoLog);
-		if (vsStr.length() > 0 && fsStr.length() > 0)
-			printf("\033[0;40;33mvs:%s\nfs:%s\033[0m\n\n", vsStr.data(), fsStr.data());
-		if (pStr.length() > 0)
-			printf("\033[0;40;33mcs:%s\033[0m\n\n", pStr.data());
-		if (gStr.length() > 0)
-			printf("\033[0;40;33mgs:%s\033[0m\n\n", gStr.data());
-		if (cStr.length() > 0 && eStr.length() > 0)
-			printf("\033[0;40;33mtcs:%s\ntes:%s\033[0m\n\n", cStr.data(), eStr.data());
+		//if (vsStr.length() > 0 && fsStr.length() > 0)
+		//	printf("\033[0;40;33mvert: %s\nfrag: %s\033[0m\n\n", vsStr.data(), fsStr.data());
+		//if (pStr.length() > 0)
+		//	printf("\033[0;40;33mcomp: %s\033[0m\n\n", pStr.data());
+		//if (gStr.length() > 0)
+		//	printf("\033[0;40;33mgeom: %s\033[0m\n\n", gStr.data());
+		//if (cStr.length() > 0 && eStr.length() > 0)
+		//	printf("\033[0;40;33mtecs: %s\ntees: %s\033[0m\n\n", cStr.data(), eStr.data());
 		free(infoLog);
 	}
 	else{
