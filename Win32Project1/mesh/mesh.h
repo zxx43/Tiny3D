@@ -22,7 +22,7 @@ struct FaceBuf {
 
 struct BoxInfo;
 class Mesh {
-private:
+public:
 	virtual void initFaces()=0;
 private:
 	std::string name;

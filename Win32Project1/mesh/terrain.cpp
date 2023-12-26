@@ -5,18 +5,18 @@
 #include <string.h>
 
 Terrain::Terrain(const char* fileName):Mesh() {
-	heightMap=(unsigned char*)malloc(MAP_SIZE*MAP_SIZE*sizeof(unsigned char));
+	heightMap=(byte*)malloc(MAP_SIZE * MAP_SIZE * sizeof(byte));
 	loadHeightMap(fileName);
-	blockCount=(MAP_SIZE-STEP_SIZE)*(MAP_SIZE-STEP_SIZE)/(STEP_SIZE*STEP_SIZE);
-	vertexCount=MAP_SIZE*MAP_SIZE/(STEP_SIZE*STEP_SIZE);
-	indexCount=6*blockCount;
+	blockCount=(MAP_ROW * MAP_ROW) / (STEP_SIZE * STEP_SIZE);
+	vertexCount= MAP_SIZE * MAP_SIZE / (STEP_SIZE * STEP_SIZE);
+	indexCount=6 * blockCount;
 
-	vertices=new vec4[vertexCount];
-	normals=new vec3[vertexCount];
+	vertices = new vec4[vertexCount];
+	normals = new vec3[vertexCount];
 	tangents = new vec3[vertexCount];
-	texcoords=new vec2[vertexCount];
+	texcoords = new vec2[vertexCount];
 	materialids = NULL;
-	indices = (int*)malloc(indexCount*sizeof(int));
+	indices = (int*)malloc(indexCount * sizeof(int));
 
 	visualIndices = (uint*)malloc(indexCount * sizeof(uint));
 	memset(visualIndices, 0, indexCount * sizeof(uint));
@@ -33,14 +33,14 @@ Terrain::Terrain(const char* fileName):Mesh() {
 }
 
 void Terrain::loadHeightMap(const char* fileName) {
-	int nSize=MAP_SIZE*MAP_SIZE;
-	FILE* file=NULL;
-	file=fopen(fileName,"rb");
-	if(file==NULL)
+	int nSize = MAP_SIZE * MAP_SIZE;
+	FILE* file = fopen(fileName,"rb");
+	if(file == NULL) return;
+	fread(heightMap, sizeof(byte), nSize, file);
+	if (ferror(file)) {
+		printf("error terrain file!\n");
 		return;
-	fread(heightMap,1,nSize,file);
-	if(ferror(file))
-		return;
+	}
 	fclose(file);
 }
 
@@ -151,7 +151,7 @@ vec3 Terrain::getTangent(const vec3& normal) {
 
 void Terrain::createChunks() {
 	chunks.clear();
-	stepCount = (MAP_SIZE - STEP_SIZE) / STEP_SIZE;
+	stepCount = MAP_ROW / STEP_SIZE;
 	chunkStep = stepCount / CHUNK_SIZE;
 
 	for (int i = 0; i < chunkStep; ++i) {

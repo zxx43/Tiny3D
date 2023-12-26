@@ -11,7 +11,7 @@
 #include "mesh.h"
 
 class Box: public Mesh {
-private:
+public:
 	virtual void initFaces();
 public:
 	Box();

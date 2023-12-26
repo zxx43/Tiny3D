@@ -14,6 +14,7 @@ public:
 	WaterNode(const vec3& position);
 	virtual ~WaterNode();
 	virtual void addObject(Scene* scene, Object* object);
+	Object* getObject();
 	void moveWaterWithCamera(Scene* scene, const Camera* camera);
 	Water* getMesh() { return (Water*)(objects[0]->mesh); }
 };

@@ -14,7 +14,7 @@ class Board: public Mesh {
 private:
 	float baseX, baseY, baseZ;
 	float biasX, biasY;
-private:
+public:
 	virtual void initFaces();
 public:
 	Board();

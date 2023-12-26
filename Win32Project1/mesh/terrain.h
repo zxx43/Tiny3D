@@ -15,14 +15,15 @@
 #ifndef CHUNK_SIZE
 #define CHUNK_SIZE 8
 #define CHUNK_INDEX_COUNT (CHUNK_SIZE * CHUNK_SIZE * 6)
-#define MAP_SIZE 1028
+#define MAP_ROW 1024
 #define	STEP_SIZE 4
+#define MAP_SIZE (MAP_ROW + STEP_SIZE)
 #define LINE_CHUNKS ((MAP_SIZE - STEP_SIZE) / (STEP_SIZE * CHUNK_SIZE))
 #endif
 
 class Terrain: public Mesh {
 private:
-	unsigned char* heightMap;
+	byte* heightMap;
 	int chunkStep, stepCount;
 private:
 	void loadHeightMap(const char* fileName);
@@ -33,7 +34,6 @@ private:
 	vec3 getTerrainTangent(float x, float y, float z, float u, float v, float du, float dv);
 	vec3 getTangent(const vec3& normal);
 	void createChunks();
-	virtual void initFaces();
 public:
 	int blockCount;
 	std::map<uint, uint*> blockIndexMap;
@@ -46,6 +46,7 @@ public:
 	Terrain(const char* fileName);
 	virtual ~Terrain();
 public:
+	virtual void initFaces();
 	unsigned char* getHeightMap() { return heightMap; }
 	void initPoint(const vec3& p, const vec3& n, const vec4& t1, const vec4& t2, uint& index);
 };

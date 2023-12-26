@@ -20,6 +20,11 @@ void WaterNode::addObject(Scene* scene, Object* object) {
 	putCenter();
 }
 
+Object* WaterNode::getObject() {
+	if (objects.size() > 0) return objects[0];
+	else return NULL;
+}
+
 void WaterNode::moveWaterWithCamera(Scene* scene, const Camera* camera) {
 	float dx = camera->position.x;
 	float dz = camera->position.z;

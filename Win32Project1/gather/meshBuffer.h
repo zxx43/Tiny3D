@@ -15,6 +15,11 @@ public:
 	RenderBuffer* animVBs;
 private:
 	const MeshGather* meshDB;
+private:
+	void addGroupData();
+	void addBoardData();
+	void addAttriBuff(RenderBuffer* target, int attrInex, int slot, uint type, int vertexCount, int channel, void* data);
+	void addIndexBuff(RenderBuffer* target, int eboIndex, uint type, int indexCount, void* data);
 public:
 	MeshBuffer(const MeshGather* meshGather);
 	~MeshBuffer();

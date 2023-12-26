@@ -13,7 +13,7 @@
 class Quad: public Mesh {
 private:
 	float baseX, baseY, baseZ;
-private:
+public:
 	virtual void initFaces();
 public:
 	Quad();

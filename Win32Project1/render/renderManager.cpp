@@ -579,6 +579,10 @@ void RenderManager::renderWater(Render* render, Scene* scene) {
 	waterCullShader->setMatrix4("prevVPMatrix", prevCameraMat);
 	waterCullShader->setVector2("uSize", (float)render->viewWidth, (float)render->viewHeight);
 	waterCullShader->setVector2("uCamParam", camera->zNear, camera->zFar);
+
+	vec3 ref = ((camera->position - GetTranslate(scene->water->getObject()->transformMatrix)) / scene->water->getObject()->size) / WATER_CHUNK_SIZE;
+	waterCullShader->setIVector2("refChunk", floor(ref.x), floor(ref.z));
+	
 	state->shaderCompute = waterCullShader;
 	((WaterDrawcall*)(scene->water->drawcall))->update(camera, render, state);
 	state->shaderCompute = NULL;
