@@ -147,11 +147,13 @@ void Shadow::updateLightCamera(Camera* lightCamera, const vec4& center, float ra
 
 mat4 Shadow::genSnap(const mat4& projInit, Camera* lightCamera, float size) {
 	vec4 shadowOrigin = projInit * lightCamera->viewMatrix * vec4(0.0f, 0.0f, 0.0f, 1.0f);
-	shadowOrigin /= shadowOrigin.w;
+	float w = shadowOrigin.w;
+	shadowOrigin /= w; // divide w to NDC[-1,1]
 	shadowOrigin = (shadowOrigin + 1.0) * 0.5f * size; // NDC to [0,1] and than mul shadowmap size
 	vec3 roundedOrigin = vec3(roundf(shadowOrigin.x), roundf(shadowOrigin.y), roundf(shadowOrigin.z));
 	vec3 roundOffset = roundedOrigin - vec3(shadowOrigin.x, shadowOrigin.y, shadowOrigin.z);
-	roundOffset = roundOffset * 2.0f / size;
+	roundOffset = roundOffset * 2.0f / size; // scale to [-1,1]
+	roundOffset *= w; // mul w
 	mat4 snapMat = projInit;
 	snapMat.entries[12] += roundOffset.x;
 	snapMat.entries[13] += roundOffset.y;
