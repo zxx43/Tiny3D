@@ -66,7 +66,7 @@ RenderManager::RenderManager(ConfigArg* cfg, Scene* scene, float distance1, floa
 	lodParam.lodDist.x = distance1;
 	lodParam.lodDist.y = distance2;
 
-	clearRender = false, resetRender = false, resetGather = false;
+	clearRender = false, resetRender = false, reflushData = false;
 
 	oit = new Oit();
 }
@@ -165,9 +165,13 @@ void RenderManager::updateRenderQueues(Scene* scene) {
 
 void RenderManager::flushRenderQueueDatas(Scene* scene) {
 	if (scene->staticDatasShouldFlush()) {
-		if (queue1) ResetStaticQueueData(queue1->queues[QUEUE_STATIC], scene, scene->root);
-		if (queue2) ResetStaticQueueData(queue2->queues[QUEUE_STATIC], scene, scene->root);
+		if (queue1) queue1->toFlush = true;
+		if (queue2) queue2->toFlush = true;
 		scene->staticDatasFlushed();
+	}
+	if (renderData && renderData->toFlush) {
+		ResetStaticQueueData(renderData->queues[QUEUE_STATIC], scene, scene->root);
+		renderData->toFlush = false;
 	}
 }
 
@@ -208,59 +212,38 @@ void RenderManager::clearGatherDatas(Scene* scene) {
 
 void RenderManager::clearRenderDatas(Scene* scene) {
 	if (clearRender) {
-		if (queue1) {
-			queue1->queues[QUEUE_DYN_SNEAR]->clearRenderData();
-			queue1->queues[QUEUE_DYN_SMID]->clearRenderData();
-			queue1->queues[QUEUE_DYN_SFAR]->clearRenderData();
-			queue1->queues[QUEUE_DYN_MAIN]->clearRenderData();
-			queue1->queues[QUEUE_STATIC]->clearRenderData();
-			queue1->queues[QUEUE_DEBUG]->clearRenderData();
-		}
-		if (queue2) {
-			queue2->queues[QUEUE_DYN_SNEAR]->clearRenderData();
-			queue2->queues[QUEUE_DYN_SMID]->clearRenderData();
-			queue2->queues[QUEUE_DYN_SFAR]->clearRenderData();
-			queue2->queues[QUEUE_DYN_MAIN]->clearRenderData();
-			queue2->queues[QUEUE_STATIC]->clearRenderData();
-			queue2->queues[QUEUE_DEBUG]->clearRenderData();
-		}
+		if (queue1) queue1->toClearRenders = true;
+		if (queue2) queue2->toClearRenders = true;
 
 		scene->releaseMeshBuffer();
 		scene->releaseDebugBuffer();
 		clearRender = false;
-		resetGather = true;
-	}
-}
-
-void RenderManager::resetGatherDatas(Scene* scene) {
-	if (resetGather) {
-		scene->createMeshGather();
-		if (scene->boundingNodes.size() > 0) 
-			scene->createDebugGather();
-		resetGather = false;
 		resetRender = true;
+	}
+
+	if (currentQueue && currentQueue->toClearRenders) {
+		currentQueue->clearRenderDatas();
+		currentQueue->toClearRenders = false;
 	}
 }
 
 void RenderManager::resetRenderDatas(Scene* scene) {
 	if (resetRender) {
-		if (queue1) {
-			queue1->queues[QUEUE_DYN_SNEAR]->resetObjGatherFin();
-			queue1->queues[QUEUE_DYN_SMID]->resetObjGatherFin();
-			queue1->queues[QUEUE_DYN_SFAR]->resetObjGatherFin();
-			queue1->queues[QUEUE_DYN_MAIN]->resetObjGatherFin();
-			queue1->queues[QUEUE_STATIC]->resetObjGatherFin();
-			queue1->queues[QUEUE_DEBUG]->resetObjGatherFin();
-		}
-		if (queue2) {
-			queue2->queues[QUEUE_DYN_SNEAR]->resetObjGatherFin();
-			queue2->queues[QUEUE_DYN_SMID]->resetObjGatherFin();
-			queue2->queues[QUEUE_DYN_SFAR]->resetObjGatherFin();
-			queue2->queues[QUEUE_DYN_MAIN]->resetObjGatherFin();
-			queue2->queues[QUEUE_STATIC]->resetObjGatherFin();
-			queue2->queues[QUEUE_DEBUG]->resetObjGatherFin();
-		}
+		if (queue1) queue1->toResetRenders = true;
+		if (queue2) queue2->toResetRenders = true;
 		resetRender = false;
+		reflushData = true;
+	}
+
+	if (currentQueue && currentQueue->toResetRenders) {
+		currentQueue->resetRenderDatas();
+		currentQueue->toResetRenders = false;
+	}
+}
+
+void RenderManager::reflushScene(Render* render, Scene* scene) {
+	if (reflushData) {
+		reflushData = false;
 	}
 }
 
@@ -273,7 +256,7 @@ void RenderManager::updateDebugData(Scene* scene) {
 }
 
 void RenderManager::finishInit(Scene* scene) {
-	scene->createMeshGather();
+	// finish initailize resources & map
 }
 
 void RenderManager::renderShadow(Render* render, Scene* scene) {

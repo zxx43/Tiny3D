@@ -197,6 +197,10 @@ void SimpleApplication::draw() {
 	}
 	AssetManager::assetManager->setSceneTexture(sceneFilter->getOutput(0));
 	AssetManager::assetManager->setSceneDepth(screen->getDepthBuffer());
+
+	renderMgr->clearGatherDatas(scene);
+	renderMgr->clearRenderDatas(scene);
+	renderMgr->resetRenderDatas(scene);
 	
 	///*
 
@@ -265,9 +269,6 @@ void SimpleApplication::draw() {
 	//renderMgr->drawTexture2Screen(render, scene, sceneFilter->getOutput(1)->hnd);
 	//renderMgr->drawTexture2Screen(render, scene, screen->getColorBuffer(2)->hnd);
 	//*/
-
-	renderMgr->clearRenderDatas(scene);
-	renderMgr->resetRenderDatas(scene);
 
 	render->finishDraw();
 }
@@ -577,9 +578,6 @@ void SimpleApplication::act(long startTime, long currentTime, float dTime, float
 	updateMovement();
 
 	renderMgr->updateDebugData(scene);
-
-	renderMgr->clearGatherDatas(scene);
-	renderMgr->resetGatherDatas(scene);
 
 	//if (ninja) ninja->getObject()->playEffect("wang");
 	if (barker) barker->getObject()->playEffect("bark");

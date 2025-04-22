@@ -22,6 +22,7 @@ RenderQueue::RenderQueue(int type, float midDis, float lowDis, ConfigArg* cfg) {
 
 	forceUpdateInput = false;
 	objGatherPrepared = true;
+	firstProcess = true;
 }
 
 RenderQueue::~RenderQueue() {
@@ -48,7 +49,16 @@ void RenderQueue::flush(Scene* scene) {
 
 void RenderQueue::process(Scene* scene, Render* render, const RenderState* state, const LodParam& param) {
 	if (!objGatherPrepared) return;
+	doProcess(scene, render, state, param);
+	if (firstProcess) {
+		doProcess(scene, render, state, param);
+		firstProcess = false;
+	}
+}
+
+void RenderQueue::doProcess(Scene* scene, Render* render, const RenderState* state, const LodParam& param) {
 	if (!isDebugQueue()) {
+		if (!scene->meshGather) scene->createMeshGather();
 		if (!scene->meshBuffer && scene->meshGather) scene->createMeshBuffer();
 		if (!objectGather) {
 			if (scene->meshGather && scene->meshBuffer) objectGather = new ObjectGather(scene->meshMgr);
@@ -68,6 +78,7 @@ void RenderQueue::process(Scene* scene, Render* render, const RenderState* state
 			processor->gather(render);
 		}
 	} else {
+		if (!scene->debugMeshGather) scene->createDebugGather();
 		if (!scene->debugMeshBuffer && scene->debugMeshGather) scene->createDebugBuffer();
 		if (!debugGather) {
 			if (scene->debugMeshGather && scene->debugMeshBuffer) debugGather = new ObjectGather(scene->debugMeshMgr);
@@ -133,6 +144,7 @@ void RenderQueue::clearRenderData() {
 	if (objectGather) delete objectGather; objectGather = NULL;
 	if (debugGather) delete debugGather; debugGather = NULL;
 	needResetObjGather();
+	firstProcess = true;
 }
 
 bool RenderQueue::staticDataReady() { 

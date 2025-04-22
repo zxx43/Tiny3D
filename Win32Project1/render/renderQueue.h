@@ -88,6 +88,10 @@ public:
 	void needResetObjGather() { objGatherPrepared = false; }
 	void resetObjGatherFin() { objGatherPrepared = true; }
 	bool isObjGatherPrepared() { return objGatherPrepared; }
+private:
+	bool firstProcess;
+private:
+	void doProcess(Scene* scene, Render* render, const RenderState* state, const LodParam& param);
 };
 
 void ResetStaticQueueData(RenderQueue* queue, Scene* scene, Node* node);

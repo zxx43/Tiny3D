@@ -23,6 +23,8 @@ public:
 	virtual ~IndirectDrawcall();
 public:
 	virtual void draw(Render* render, RenderState* state, Shader* shader);
+private:
+	void doDraw(Render* render, RenderState* state, Shader* shader);
 };
 
 #endif

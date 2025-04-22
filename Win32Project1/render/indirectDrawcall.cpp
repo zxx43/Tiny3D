@@ -61,74 +61,85 @@ IndirectDrawcall::~IndirectDrawcall() {
 
 void IndirectDrawcall::draw(Render* render, RenderState* state, Shader* shader) {
 	if (!dataBuffer) return;
-	if (frame < state->delay) frame++;
-	else {
-		uint indirectCount, indirectIndex;
-		Shader* shaderToUse = shader;
-		switch (indirectType) {
-			case INDIRECT_SINGLE:
-				indirectCount = processor->indSingleCount;
-				indirectIndex = Processor::IndSingleIndex;
-				shaderToUse = state->shaderIns;
-				break;
-			case INDIRECT_BILLBD:
-				indirectCount = processor->indBillbdCount;
-				indirectIndex = Processor::IndBillbdIndex;
-				shaderToUse = state->shaderBill;
-				break;
-			case INDIRECT_ANIMAT:
-				indirectCount = processor->indAnimatCount;
-				indirectIndex = Processor::IndAnimatIndex;
-				shaderToUse = state->shaderBone;
-				break;
-			case INDIRECT_TRANSP:
-				indirectCount = processor->indTranspCount;
-				indirectIndex = Processor::IndTranspIndex;
-				shaderToUse = state->shaderTrans;
-				break;
-			default:
-				indirectCount = processor->indNormalCount;
-				indirectIndex = Processor::IndNormalIndex;
-				shaderToUse = state->shaderIns;
-				break;
+	//if (frame < state->delay) {
+	//	frame++;
+	//	GLenum error = glGetError();
+	//	if (error != GL_NO_ERROR)
+	//		printf("gl error! %d\n", error);
+	//} 
+	else doDraw(render, state, shader);
+}
+
+void IndirectDrawcall::doDraw(Render* render, RenderState* state, Shader* shader) {
+	uint indirectCount, indirectIndex;
+	Shader* shaderToUse = shader;
+	switch (indirectType) {
+	case INDIRECT_SINGLE:
+		indirectCount = processor->indSingleCount;
+		indirectIndex = Processor::IndSingleIndex;
+		shaderToUse = state->shaderIns;
+		break;
+	case INDIRECT_BILLBD:
+		indirectCount = processor->indBillbdCount;
+		indirectIndex = Processor::IndBillbdIndex;
+		shaderToUse = state->shaderBill;
+		break;
+	case INDIRECT_ANIMAT:
+		indirectCount = processor->indAnimatCount;
+		indirectIndex = Processor::IndAnimatIndex;
+		shaderToUse = state->shaderBone;
+		break;
+	case INDIRECT_TRANSP:
+		indirectCount = processor->indTranspCount;
+		indirectIndex = Processor::IndTranspIndex;
+		shaderToUse = state->shaderTrans;
+		break;
+	default:
+		indirectCount = processor->indNormalCount;
+		indirectIndex = Processor::IndNormalIndex;
+		shaderToUse = state->shaderIns;
+		break;
+	}
+
+	MaterialManager::materials->useMaterialBuffer(1);
+	dataBuffer->use();
+	render->useShader(shaderToUse);
+
+	if (indirectType == INDIRECT_NORMAL || indirectType == INDIRECT_ANIMAT) {
+		render->setCullState(true);
+		if (!state->isShadowPass()) render->setCullMode(CULL_BACK);
+		else {
+			render->setCullMode(CULL_FRONT);
+			render->setShaderFloat(shaderToUse, "uAlpha", 0.0);
 		}
-
-		MaterialManager::materials->useMaterialBuffer(1);
-		dataBuffer->use();
-		render->useShader(shaderToUse);
-
-		if (indirectType == INDIRECT_NORMAL || indirectType == INDIRECT_ANIMAT) {
+		if (indirectType == INDIRECT_ANIMAT && !shaderToUse->isTexBinded(AssetManager::assetManager->frames->datas, AssetManager::assetManager->frames->animCount)) {
+			shaderToUse->setHandle64v("boneTex", AssetManager::assetManager->frames->animCount, AssetManager::assetManager->frames->datas);
+		}
+	} else if (indirectType == INDIRECT_SINGLE) {
+		if (!state->isShadowPass()) render->setCullState(false);
+		else {
 			render->setCullMode(CULL_BACK);
 			render->setCullState(true);
-			if (state->isShadowPass()) render->setShaderFloat(shaderToUse, "uAlpha", 0.0);
-			if (indirectType == INDIRECT_ANIMAT && !shaderToUse->isTexBinded(AssetManager::assetManager->frames->datas, AssetManager::assetManager->frames->animCount)) {
-				shaderToUse->setHandle64v("boneTex", AssetManager::assetManager->frames->animCount, AssetManager::assetManager->frames->datas);
-			}
-		} else if (indirectType == INDIRECT_SINGLE) {
-			if (!state->isShadowPass()) render->setCullState(false);
-			else {
-				render->setCullMode(CULL_BACK);
-				render->setCullState(true);
-				render->setShaderFloat(shaderToUse, "uAlpha", 1.0);
-			}
-		} else if (indirectType == INDIRECT_TRANSP) {
-			render->setCullState(false);
-		} else if (indirectType == INDIRECT_BILLBD) {
-			if (!state->isShadowPass()) {
-				render->setCullMode(CULL_BACK);
-				render->setCullState(true);
-			} else {
-				render->setCullState(false);
-				render->setShaderFloat(shaderToUse, "uAlpha", 1.0);
-			}
+			render->setShaderFloat(shaderToUse, "uAlpha", 1.0);
 		}
-
-		if (state->debug) {
-			render->setCullState(false);
-			render->setDrawLine(true);
+	} else if (indirectType == INDIRECT_TRANSP) {
+		render->setCullState(false);
+	} else if (indirectType == INDIRECT_BILLBD) {
+		if (!state->isShadowPass()) {
+			render->setCullMode(CULL_BACK);
+			render->setCullState(true);
 		}
-
-		sbo->useAs(indirectIndex, GL_DRAW_INDIRECT_BUFFER);
-		glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, 0, indirectCount, 0);
+		else {
+			render->setCullState(false);
+			render->setShaderFloat(shaderToUse, "uAlpha", 1.0);
+		}
 	}
+
+	if (state->debug) {
+		render->setCullState(false);
+		render->setDrawLine(true);
+	}
+
+	sbo->useAs(indirectIndex, GL_DRAW_INDIRECT_BUFFER);
+	glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, 0, indirectCount, 0);
 }

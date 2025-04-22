@@ -18,6 +18,7 @@
 
 struct Renderable {
 	std::vector<RenderQueue*> queues;
+	bool toFlush, toClearRenders, toResetRenders;
 	Renderable(float midDis, float lowDis, ConfigArg* cfg) {
 		queues.clear();
 		for (uint i = 0; i < QUEUE_SIZE; i++) 
@@ -26,6 +27,8 @@ struct Renderable {
 		queues[QUEUE_DYN_SNEAR]->shadowLevel = 1;
 		queues[QUEUE_DYN_SMID]->shadowLevel = 2;
 		queues[QUEUE_DYN_SFAR]->shadowLevel = 3;
+
+		toFlush = false, toClearRenders = false, toResetRenders = false;
 	}
 	~Renderable() {
 		for (uint i = 0; i < queues.size(); i++)
@@ -34,6 +37,14 @@ struct Renderable {
 	void flush(Scene* scene) {
 		for (uint i = 0; i < queues.size(); i++)
 			queues[i]->flush(scene);
+	}
+	void clearRenderDatas() {
+		for (uint i = 0; i < queues.size(); i++)
+			queues[i]->clearRenderData();
+	}
+	void resetRenderDatas() {
+		for (uint i = 0; i < queues.size(); i++)
+			queues[i]->resetObjGatherFin();
 	}
 };
 
@@ -55,7 +66,7 @@ private:
 	mat4 prevCameraMat;
 	LodParam lodParam;
 private:
-	bool clearRender, resetRender, resetGather;
+	bool clearRender, resetRender, reflushData;
 public:
 	Renderable* renderData;
 	Renderable* queue1;
@@ -86,8 +97,8 @@ public:
 	void swapRenderQueues(Scene* scene, bool swapQueue);
 	void clearGatherDatas(Scene* sceen);
 	void clearRenderDatas(Scene* scene);
-	void resetGatherDatas(Scene* scene);
 	void resetRenderDatas(Scene* scene);
+	void reflushScene(Render* render, Scene* scene);
 	void prepareData(Scene* scene);
 	void updateDebugData(Scene* scene);
 	void renderShadow(Render* render,Scene* scene);
